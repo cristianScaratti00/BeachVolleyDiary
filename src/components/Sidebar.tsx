@@ -1,0 +1,59 @@
+import type { Screen } from '../lib/models'
+import { useAuth } from '../hooks/useAuth'
+
+interface NavEntry { key: Screen; icon: string; label: string }
+
+const NAV: NavEntry[] = [
+  { key: 'home', icon: '◧', label: 'Dashboard' },
+  { key: 'tornei', icon: '▤', label: 'Tornei' },
+  { key: 'compagni', icon: '◎', label: 'Compagni' },
+  { key: 'galleria', icon: '▦', label: 'Galleria' },
+]
+
+interface SidebarProps {
+  screen: Screen
+  onNavigate: (screen: Screen) => void
+  onNewPartita: () => void
+  onNewTorneo: () => void
+}
+
+export default function Sidebar({ screen, onNavigate, onNewPartita, onNewTorneo }: SidebarProps) {
+  const { session, logout } = useAuth()
+  const initial = session?.name?.[0]?.toUpperCase() || '?'
+  return (
+    <aside style={{ width: 230, flex: 'none', position: 'sticky', top: 0, height: '100vh', padding: '28px 16px', borderRight: '1px solid rgba(27,42,74,.09)', display: 'flex', flexDirection: 'column', gap: 2, background: '#FAF8F5' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '2px 12px 26px' }}>
+        <div style={{ width: 9, height: 9, borderRadius: '50%', background: '#FF6B35' }} />
+        <div style={{ font: "600 16px 'Space Grotesk'", letterSpacing: '-.2px' }}>Beach Diary</div>
+      </div>
+
+      {NAV.map((n) => {
+        const active = screen === n.key
+        return (
+          <div
+            key={n.key}
+            className="nav"
+            onClick={() => onNavigate(n.key)}
+            style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '11px 12px', borderRadius: 10, cursor: 'pointer', font: "700 14px 'Nunito Sans'", color: active ? '#1B2A4A' : 'rgba(27,42,74,.4)', borderLeft: `2px solid ${active ? '#FF6B35' : 'transparent'}` }}
+          >
+            <span style={{ fontSize: 16, opacity: .85 }}>{n.icon}</span>{n.label}
+          </div>
+        )
+      })}
+
+      <div style={{ flex: 1 }} />
+
+      <div className="chip" onClick={onNewPartita} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 12, borderRadius: 11, cursor: 'pointer', background: '#1B2A4A', color: '#fff', font: "700 13.5px 'Nunito Sans'" }}>＋ Nuova partita</div>
+      <div className="chip" onClick={onNewTorneo} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 12, borderRadius: 11, cursor: 'pointer', border: '1px solid rgba(27,42,74,.18)', color: '#1B2A4A', font: "700 13.5px 'Nunito Sans'", marginTop: 8 }}>＋ Nuovo torneo</div>
+
+      <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid rgba(27,42,74,.09)', display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#1B2A4A', display: 'flex', alignItems: 'center', justifyContent: 'center', font: "600 14px 'Space Grotesk'", color: '#fff', flex: 'none' }}>{initial}</div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ font: "700 12.5px 'Nunito Sans'", whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{session?.name}</div>
+          <div style={{ font: "600 10.5px 'Nunito Sans'", color: 'rgba(27,42,74,.45)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{session?.email}</div>
+        </div>
+        <div className="chip" onClick={logout} title="Esci" style={{ font: "700 11px 'Nunito Sans'", color: 'rgba(27,42,74,.55)', cursor: 'pointer', padding: '4px 6px', flex: 'none' }}>Esci</div>
+      </div>
+    </aside>
+  )
+}

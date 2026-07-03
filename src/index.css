@@ -1,0 +1,33 @@
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: #FAF8F5;
+  font-family: 'Nunito Sans', system-ui, sans-serif;
+  color: #1B2A4A;
+  -webkit-font-smoothing: antialiased;
+}
+#root { min-height: 100vh; }
+
+input, select, textarea, button { font-family: 'Nunito Sans', sans-serif; }
+input:focus, select:focus, textarea:focus { outline: none; border-color: #FF6B35 !important; }
+
+/* surfaces + interaction helpers ported from the design */
+.card { background: #fff; border: 1px solid rgba(27,42,74,.1); border-radius: 14px; }
+.lift { transition: border-color .16s ease, transform .16s ease; }
+.lift:hover { border-color: rgba(27,42,74,.28); transform: translateY(-2px); }
+.nav { transition: color .16s ease; }
+.row:hover { background: #FBFAF8; }
+.barwrap:hover .bar { opacity: 1; }
+.chip { transition: opacity .15s ease; }
+.chip:hover { opacity: .75; }
+
+::-webkit-scrollbar { width: 0; height: 0; }
+
+/* type utilities */
+.lbl { font: 700 11px 'Nunito Sans'; letter-spacing: 1.2px; text-transform: uppercase; color: rgba(27,42,74,.42); }
+.num { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-feature-settings: 'tnum'; }
+
+@keyframes dash { from { stroke-dashoffset: var(--len); } to { stroke-dashoffset: 0; } }
+@keyframes pop { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes overlay { from { opacity: 0; } to { opacity: 1; } }
+@keyframes sheet { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }

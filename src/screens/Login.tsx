@@ -1,0 +1,128 @@
+import { useState } from 'react'
+import type { CSSProperties, ChangeEvent, FormEvent } from 'react'
+import { useAuth } from '../hooks/useAuth'
+import { useIsWide } from '../hooks/useMedia'
+
+type Mode = 'login' | 'register'
+
+const inputStyle: CSSProperties = { width: '100%', border: '1px solid rgba(27,42,74,.16)', borderRadius: 11, padding: '12px 14px', font: "700 14px 'Nunito Sans'", background: '#fff' }
+
+const seg = (active: boolean): CSSProperties => ({
+  flex: 1, padding: '10px', borderRadius: 8, border: 'none', cursor: 'pointer',
+  font: "700 13px 'Nunito Sans'",
+  background: active ? '#fff' : 'transparent',
+  color: active ? '#1B2A4A' : 'rgba(27,42,74,.5)',
+  boxShadow: active ? '0 1px 3px rgba(27,42,74,.12)' : 'none',
+})
+
+const FEATURES = [
+  { icon: '◧', text: 'Statistiche di ogni stagione' },
+  { icon: '▤', text: 'Tornei, partite e set' },
+  { icon: '◎', text: 'Con chi giochi meglio' },
+]
+
+function Brand({ light = false }: { light?: boolean }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+      <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#FF6B35' }} />
+      <div style={{ font: "600 17px 'Space Grotesk'", letterSpacing: '-.2px', color: light ? '#fff' : '#1B2A4A' }}>Beach Diary</div>
+    </div>
+  )
+}
+
+export default function Login() {
+  const wide = useIsWide()
+  const { login, register } = useAuth()
+  const [mode, setMode] = useState<Mode>('login')
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+
+  const isRegister = mode === 'register'
+
+  const switchMode = (m: Mode) => { setMode(m); setError('') }
+
+  const submit = (e: FormEvent) => {
+    e.preventDefault()
+    const r = isRegister ? register(name, email, password) : login(email, password)
+    if (!r.ok) setError(r.error || 'Si è verificato un errore.')
+    // On success the AuthProvider updates the session and <Root/> swaps to the app.
+  }
+
+  return (
+    <div style={{ minHeight: '100vh', display: 'flex', background: '#FAF8F5' }}>
+      {/* left brand panel (desktop) */}
+      {wide && (
+        <div style={{ width: '44%', maxWidth: 520, background: '#1B2A4A', color: '#fff', padding: '48px 44px', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', inset: 0, backgroundImage: 'repeating-linear-gradient(45deg,rgba(255,255,255,.04) 0 10px,transparent 10px 20px)' }} />
+          <div style={{ position: 'relative' }}><Brand light /></div>
+          <div style={{ flex: 1 }} />
+          <div style={{ position: 'relative' }}>
+            <div className="num" style={{ fontSize: 34, fontWeight: 500, lineHeight: 1.12, letterSpacing: '-.8px' }}>Il tuo diario di<br />beach volley.</div>
+            <div style={{ font: "600 15px 'Nunito Sans'", color: 'rgba(255,255,255,.62)', marginTop: 14, maxWidth: 360 }}>Segna tornei e partite, tieni i punteggi set per set e scopri i tuoi numeri stagione dopo stagione.</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 30 }}>
+              {FEATURES.map((f) => (
+                <div key={f.text} style={{ display: 'flex', alignItems: 'center', gap: 12, font: "700 14px 'Nunito Sans'", color: 'rgba(255,255,255,.9)' }}>
+                  <span style={{ fontSize: 16, color: '#FF6B35' }}>{f.icon}</span>{f.text}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* form panel */}
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+        <div style={{ width: '100%', maxWidth: 380 }}>
+          {!wide && <div style={{ marginBottom: 22, display: 'flex', justifyContent: 'center' }}><Brand /></div>}
+
+          <div className="card" style={{ padding: '28px 26px' }}>
+            <div className="num" style={{ fontSize: 24, fontWeight: 500, letterSpacing: '-.4px' }}>{isRegister ? 'Crea il tuo diario' : 'Bentornato'}</div>
+            <div style={{ font: "600 13.5px 'Nunito Sans'", color: 'rgba(27,42,74,.55)', marginTop: 4 }}>{isRegister ? 'Registrati per iniziare a tracciare le partite.' : 'Accedi per continuare il tuo diario.'}</div>
+
+            {/* segmented toggle */}
+            <div style={{ display: 'flex', background: '#F2F0EC', borderRadius: 10, padding: 4, gap: 4, marginTop: 20 }}>
+              <button type="button" onClick={() => switchMode('login')} style={seg(!isRegister)}>Accedi</button>
+              <button type="button" onClick={() => switchMode('register')} style={seg(isRegister)}>Registrati</button>
+            </div>
+
+            <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 18 }}>
+              {isRegister && (
+                <div>
+                  <div className="lbl" style={{ marginBottom: 6 }}>Nome</div>
+                  <input value={name} onChange={(e: ChangeEvent<HTMLInputElement>) => setName(e.target.value)} placeholder="es. Marco" autoComplete="name" style={inputStyle} />
+                </div>
+              )}
+              <div>
+                <div className="lbl" style={{ marginBottom: 6 }}>Email</div>
+                <input type="email" value={email} onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} placeholder="tu@email.com" autoComplete="email" style={inputStyle} />
+              </div>
+              <div>
+                <div className="lbl" style={{ marginBottom: 6 }}>Password</div>
+                <input type="password" value={password} onChange={(e: ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)} placeholder={isRegister ? 'Almeno 6 caratteri' : '••••••••'} autoComplete={isRegister ? 'new-password' : 'current-password'} style={inputStyle} />
+              </div>
+
+              {error && <div style={{ font: "700 12.5px 'Nunito Sans'", color: '#FF477E', background: 'rgba(255,71,126,.08)', border: '1px solid rgba(255,71,126,.25)', borderRadius: 10, padding: '9px 12px' }}>{error}</div>}
+
+              <button type="submit" className="chip" style={{ width: '100%', padding: 13, borderRadius: 11, border: 'none', cursor: 'pointer', background: '#FF6B35', color: '#fff', font: "700 14.5px 'Nunito Sans'", marginTop: 2 }}>
+                {isRegister ? 'Crea account' : 'Entra'}
+              </button>
+            </form>
+
+            <div style={{ font: "600 13px 'Nunito Sans'", color: 'rgba(27,42,74,.55)', textAlign: 'center', marginTop: 16 }}>
+              {isRegister ? 'Hai già un account? ' : 'Non hai un account? '}
+              <span className="chip" onClick={() => switchMode(isRegister ? 'login' : 'register')} style={{ color: '#FF6B35', fontWeight: 700, cursor: 'pointer' }}>
+                {isRegister ? 'Accedi' : 'Registrati'}
+              </span>
+            </div>
+          </div>
+
+          <div style={{ font: "600 11.5px 'Nunito Sans'", color: 'rgba(27,42,74,.4)', textAlign: 'center', marginTop: 14 }}>
+            Demo — l'account e i dati restano su questo dispositivo.
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

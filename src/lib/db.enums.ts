@@ -1,0 +1,33 @@
+// ============================================================================
+// Valori ammessi dai CHECK dello schema — union types + costanti runtime.
+// Unica fonte di verità per i menu a tendina dei form e per la validazione.
+// (Nello schema sono colonne `text` con CHECK, non enum Postgres, quindi in
+//  database.types.ts risultano `string`: qui li restringiamo.)
+// ============================================================================
+import type { Tables } from './database.types'
+
+export const CATEGORIES = ['Amatoriale', 'Open', 'Serie', 'Pro'] as const
+export const FORMATS = ['2vs2', '3vs3', '4vs4'] as const
+export const SURFACES = ['Sabbia outdoor', 'Indoor', 'Erba'] as const
+export const PHASES = ['Girone', 'Ottavi', 'Quarti', 'Semifinale', 'Finale'] as const
+export const PLACEMENTS = ['1° 🏆', '2°', '3°', 'Quarti', 'Ottavi', 'Gironi', 'In corso'] as const
+
+export type Category = (typeof CATEGORIES)[number]
+export type Format = (typeof FORMATS)[number]
+export type Surface = (typeof SURFACES)[number]
+export type Phase = (typeof PHASES)[number]
+export type Placement = (typeof PLACEMENTS)[number]
+
+// Righe con i campi vincolati ristretti alle union (comode nei form).
+export type TournamentTyped = Omit<Tables<'tournaments'>, 'category' | 'format' | 'surface' | 'placement'> & {
+  category: Category
+  format: Format
+  surface: Surface
+  placement: Placement
+}
+export type MatchTyped = Omit<Tables<'matches'>, 'phase'> & { phase: Phase }
+
+// Forma "idratata" usata dall'app: una partita con i suoi set ordinati.
+export type MatchWithSets = MatchTyped & {
+  match_sets: Array<Pick<Tables<'match_sets'>, 'set_number' | 'us' | 'them'>>
+}
