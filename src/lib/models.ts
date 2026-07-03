@@ -30,6 +30,7 @@ export interface Tournament {
   placement: Placement
   color: string
   emoji: string
+  partnerId: string | null // compagno principale del torneo (con chi l'ho giocato)
 }
 
 export interface Match {
@@ -121,4 +122,4 @@ export interface Option {
 
 // Navigazione e modali a livello di App.
 export type Screen = 'home' | 'tornei' | 'torneo' | 'compagni' | 'compagno' | 'galleria'
-export type ModalKind = 'torneo' | 'partita' | 'foto' | 'socio' | null
+export type ModalKind = 'torneo' | 'torneoRapido' | 'partita' | 'foto' | 'socio' | null

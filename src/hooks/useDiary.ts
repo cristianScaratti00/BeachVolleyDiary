@@ -12,6 +12,7 @@ export interface UseDiary {
   error: string | null
   reload: () => Promise<void>
   saveTorneo: (f: AnyForm, editId: string | null) => Promise<boolean>
+  quickCreateTorneo: (f: AnyForm) => Promise<string | null>
   deleteTorneo: (editId: string | null) => Promise<boolean>
   savePartita: (f: AnyForm, editId: string | null) => Promise<boolean>
   deletePartita: (editId: string | null) => Promise<boolean>
@@ -34,7 +35,7 @@ async function fetchAll(): Promise<DiaryData> {
       .select('id, name, color')
       .order('created_at', { ascending: true }),
     supabase.from('tournaments')
-      .select('id, name, date, city, category, format, surface, placement, color, emoji')
+      .select('id, name, date, city, category, format, surface, placement, color, emoji, partner_id')
       .order('date', { ascending: false }),
     supabase.from('matches')
       .select('id, tournament_id, partner_id, opponents, phase, note, match_sets(set_number, us, them)')
@@ -59,6 +60,7 @@ async function fetchAll(): Promise<DiaryData> {
     placement: t.placement as Placement,
     color: t.color,
     emoji: t.emoji,
+    partnerId: t.partner_id,
   }))
 
   const matches: Match[] = (mRes.data ?? []).map((m) => ({
@@ -123,6 +125,22 @@ export function useDiary(): UseDiary {
 
   const saveTorneo = useCallback(async (f: AnyForm, editId: string | null) => {
     if (!f.name) return false
+
+    // "Con chi": '' → nessuno (null); 'new' + nome → crea il compagno; un id → quel compagno.
+    let partnerId: string | null = null
+    const sel = f.partnerId
+    if (sel === 'new') {
+      const name = (f.newPartnerName ?? '').trim()
+      if (name) {
+        const { data: ins, error } = await supabase
+          .from('partners').insert({ name, color: NEW_PARTNER_COLOR }).select('id').single()
+        if (error || !ins) return fail(error)
+        partnerId = ins.id
+      }
+    } else if (sel && sel !== 'all') {
+      partnerId = sel
+    }
+
     const row = {
       name: f.name,
       date: f.date ?? '',
@@ -133,13 +151,63 @@ export function useDiary(): UseDiary {
       placement: f.placement ?? 'Gironi',
       color: f.color ?? '#FF6B35',
       emoji: f.emoji ?? '🏖️',
+      partner_id: partnerId,
     }
-    const { error } = editId
-      ? await supabase.from('tournaments').update(row).eq('id', editId)
-      : await supabase.from('tournaments').insert(row)
-    if (error) return fail(error)
+
+    if (editId) {
+      const prev = data.tournaments.find((t) => t.id === editId)?.partnerId ?? null
+      const { error } = await supabase.from('tournaments').update(row).eq('id', editId)
+      if (error) return fail(error)
+      // Compagno del torneo cambiato (e valorizzato) → allinea tutte le sue partite.
+      if (partnerId && partnerId !== prev) {
+        const { error: mErr } = await supabase.from('matches').update({ partner_id: partnerId }).eq('tournament_id', editId)
+        if (mErr) return fail(mErr)
+      }
+    } else {
+      const { error } = await supabase.from('tournaments').insert(row)
+      if (error) return fail(error)
+    }
+
     await reload()
     return true
+  }, [reload, data.tournaments])
+
+  // Creazione rapida: nome + compagno + data + categoria + piazzamento.
+  // Formato/superficie fissi. Ritorna l'id del nuovo torneo (o null se fallisce).
+  const quickCreateTorneo = useCallback(async (f: AnyForm): Promise<string | null> => {
+    if (!f.name) return null
+
+    // Compagno: 'new' + nome → crealo; un id → usalo; altrimenti nessuno.
+    let partnerId: string | null = null
+    const sel = f.partnerId
+    if (sel === 'new') {
+      const name = (f.newPartnerName ?? '').trim()
+      if (name) {
+        const { data: ins, error } = await supabase
+          .from('partners').insert({ name, color: NEW_PARTNER_COLOR }).select('id').single()
+        if (error || !ins) { fail(error); return null }
+        partnerId = ins.id
+      }
+    } else if (sel && sel !== 'all') {
+      partnerId = sel
+    }
+
+    const row = {
+      name: f.name,
+      date: f.date ?? '',
+      city: '',
+      category: f.category ?? 'Amatoriale',
+      format: '2vs2',
+      surface: 'Sabbia outdoor',
+      placement: f.placement ?? 'In corso',
+      color: '#FF6B35',
+      emoji: '🏖️',
+      partner_id: partnerId,
+    }
+    const { data: ins, error } = await supabase.from('tournaments').insert(row).select('id').single()
+    if (error || !ins) { fail(error); return null }
+    await reload()
+    return ins.id
   }, [reload])
 
   const deleteTorneo = useCallback(async (editId: string | null) => {
@@ -236,5 +304,5 @@ export function useDiary(): UseDiary {
     return true
   }, [reload])
 
-  return { data, loading, error, reload, saveTorneo, deleteTorneo, savePartita, deletePartita, saveFoto, saveCompagno }
+  return { data, loading, error, reload, saveTorneo, quickCreateTorneo, deleteTorneo, savePartita, deletePartita, saveFoto, saveCompagno }
 }

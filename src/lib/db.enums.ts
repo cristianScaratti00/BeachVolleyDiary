@@ -6,11 +6,13 @@
 // ============================================================================
 import type { Tables } from './database.types'
 
-export const CATEGORIES = ['Amatoriale', 'Open', 'Serie', 'Pro'] as const
+// King/Queen = "king/queen of the beach": si cambia compagno ad ogni partita e
+// si vincono i set singolarmente.
+export const CATEGORIES = ['Amatoriale', 'Open', 'Serie', 'Pro', 'King', 'Queen'] as const
 export const FORMATS = ['2vs2', '3vs3', '4vs4'] as const
 export const SURFACES = ['Sabbia outdoor', 'Indoor', 'Erba'] as const
 export const PHASES = ['Girone', 'Ottavi', 'Quarti', 'Semifinale', 'Finale'] as const
-export const PLACEMENTS = ['1° 🏆', '2°', '3°', 'Quarti', 'Ottavi', 'Gironi', 'In corso'] as const
+export const PLACEMENTS = ['1° 🏆', '2°', '3°', 'Semifinale', 'Quarti', 'Ottavi', 'Gironi', 'In corso'] as const
 
 export type Category = (typeof CATEGORIES)[number]
 export type Format = (typeof FORMATS)[number]

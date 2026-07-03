@@ -17,7 +17,7 @@ export default function Compagni({ compagni, onOpenCompagno, onNewCompagno }: Co
         <div className="chip" onClick={onNewCompagno} style={{ display: 'flex', alignItems: 'center', gap: 7, background: '#1B2A4A', color: '#fff', padding: '11px 16px', borderRadius: 11, font: "700 13.5px 'Nunito Sans'", cursor: 'pointer' }}>＋ Nuovo compagno</div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(250px,1fr))', gap: 14, marginTop: 22 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(min(100%,250px),1fr))', gap: 14, marginTop: 22 }}>
         {compagni.map((p) => (
           <div key={p.id} className="card lift" onClick={() => onOpenCompagno(p.id)} style={{ padding: 22, cursor: 'pointer' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 13 }}>

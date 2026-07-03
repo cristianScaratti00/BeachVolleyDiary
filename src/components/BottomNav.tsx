@@ -1,19 +1,20 @@
 import type { Screen } from '../lib/models'
+import NavIcon from './NavIcons'
 
-interface NavEntry { key: Screen; icon: string; label: string }
+interface NavEntry { key: Screen; label: string }
 
 const NAV: NavEntry[] = [
-  { key: 'home', icon: '◧', label: 'Home' },
-  { key: 'tornei', icon: '▤', label: 'Tornei' },
-  { key: 'compagni', icon: '◎', label: 'Soci' },
-  { key: 'galleria', icon: '▦', label: 'Foto' },
+  { key: 'home', label: 'Home' },
+  { key: 'tornei', label: 'Tornei' },
+  { key: 'compagni', label: 'Soci' },
+  { key: 'galleria', label: 'Foto' },
 ]
 
 function Item({ n, screen, onNavigate }: { n: NavEntry; screen: Screen; onNavigate: (s: Screen) => void }) {
   const col = screen === n.key ? '#1B2A4A' : 'rgba(27,42,74,.4)'
   return (
     <div className="nav" onClick={() => onNavigate(n.key)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, color: col, cursor: 'pointer' }}>
-      <span style={{ fontSize: 17 }}>{n.icon}</span>
+      <NavIcon screen={n.key} size={22} />
       <span style={{ font: "700 10px 'Nunito Sans'" }}>{n.label}</span>
     </div>
   )

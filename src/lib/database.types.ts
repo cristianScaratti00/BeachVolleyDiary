@@ -67,6 +67,7 @@ export type Database = {
           placement: string
           color: string
           emoji: string
+          partner_id: string | null
           created_at: string
           updated_at: string
         }
@@ -82,6 +83,7 @@ export type Database = {
           placement?: string
           color?: string
           emoji?: string
+          partner_id?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -97,10 +99,18 @@ export type Database = {
           placement?: string
           color?: string
           emoji?: string
+          partner_id?: string | null
           created_at?: string
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: 'tournaments_partner_id_fkey'
+            columns: ['partner_id']
+            isOneToOne: false
+            referencedRelation: 'partners'
+            referencedColumns: ['id']
+          },
           {
             foreignKeyName: 'tournaments_user_id_fkey'
             columns: ['user_id']

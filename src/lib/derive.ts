@@ -1,14 +1,16 @@
-import { res, computeStats, streakOf, placementRank, fmtDate, monthIdx, yearOf, esitoStyle, setChips } from './stats'
+import { res, computeStats, streakOf, placementRank, fmtDate, yearOf, esitoStyle, setChips } from './stats'
 import type { SetChip } from './stats'
 import { MONTHS_SHORT } from './theme'
+import { PHASES, PLACEMENTS } from './db.enums'
 import type { DiaryData, Tournament, Partner, Match, Option } from './models'
 
 // ---------------------------------------------------------------------------
 // View-model types (le forme restituite dai selettori, consumate dagli screen)
 // ---------------------------------------------------------------------------
 export interface TrendPoint { x: number; y: number; label: string; pct: number }
-export interface ResultDistItem { label: string; count: number; color: string; h: string }
 export interface PartnerRow { id: string; name: string; initial: string; winPct: number; played: number; won: number; barW: string }
+export interface PhaseRow { phase: string; winPct: number; played: number; won: number; barW: string }
+export interface PlacementBar { label: string; count: number; barW: string; color: string }
 
 export interface DashboardStats {
   periodLabel: string
@@ -30,16 +32,17 @@ export interface DashboardStats {
   bestPlacement: string
   streak: number
   trendLine: string
+  trendArea: string
   trendPts: TrendPoint[]
+  trendHasData: boolean
   trendLabel: string
   trendColor: string
   donutDash: string
   barForW: string
   barAgW: string
-  resultDist: ResultDistItem[]
-  marginWin: number
-  marginLoss: number
   partnerRows: PartnerRow[]
+  phaseRows: PhaseRow[]
+  placementDist: PlacementBar[]
 }
 
 export interface TorneoCard {
@@ -158,7 +161,7 @@ function decorateTournament(data: DiaryData, t: Tournament): TorneoCard {
     badge: t.placement,
     badgeBg: podium ? '#FFF1EA' : '#F2F0EC',
     badgeColor: podium ? '#C4501E' : 'rgba(27,42,74,.5)',
-    meta: fmtDate(t.date) + ' · ' + t.city + ' · ' + t.format,
+    meta: fmtDate(t.date) + ' · ' + t.city + ' · ' + t.format + (t.partnerId ? ' · con ' + partnerName(data, t.partnerId) : ''),
     record: ts.won + '-' + ts.lost, winPct: ts.winPct, matchCount: ts.played,
   }
 }
@@ -176,23 +179,25 @@ export function deriveDashboard(data: DiaryData, fPartner: string, fYear: string
   const best = ranks.length ? Math.min(...ranks) : 9
   const bestLabel = PLACEMENT_LABELS[best] || '—'
 
-  // trend by month
-  const byMonth: Record<number, DatedMatch[]> = {}
-  fm.forEach((m) => { const k = monthIdx(m.date); (byMonth[k] = byMonth[k] || []).push(m) })
-  const monthsK = Object.keys(byMonth).map(Number).sort((a, b) => a - b)
-  const trend = monthsK.map((k) => {
+  // ---- Andamento: win rate per mese (chiave anno-mese, ordinato nel tempo) ----
+  const byMonth: Record<string, DatedMatch[]> = {}
+  fm.forEach((m) => { const k = m.date.slice(0, 7); (byMonth[k] = byMonth[k] || []).push(m) })
+  const monthKeys = Object.keys(byMonth).sort()
+  const trend = monthKeys.map((k) => {
     const arr = byMonth[k]
     const w = arr.filter((m) => res(m).won).length
-    return { label: MONTHS_SHORT[k - 1], pct: Math.round(w / arr.length * 100) }
+    return { label: MONTHS_SHORT[+k.slice(5, 7) - 1], pct: Math.round(w / arr.length * 100) }
   })
-  const left = 18, right = 322, top = 30, bot = 140
+  const left = 20, right = 320, top = 24, bot = 128
   const n = trend.length
+  const trendHasData = n >= 2
   const pts: TrendPoint[] = trend.map((t, i) => {
     const x = n > 1 ? left + (right - left) * i / (n - 1) : (left + right) / 2
     const y = bot - (t.pct / 100) * (bot - top)
     return { x: Math.round(x), y: Math.round(y), label: t.label, pct: t.pct }
   })
   const trendLine = pts.map((p) => p.x + ',' + p.y).join(' ')
+  const trendArea = pts.length ? pts[0].x + ',' + bot + ' ' + trendLine + ' ' + pts[pts.length - 1].x + ',' + bot : ''
   const last = pts[pts.length - 1], prev = pts[pts.length - 2]
   let trendLabel = '—', trendColor = 'rgba(27,42,74,.4)'
   if (last && prev) {
@@ -211,15 +216,23 @@ export function deriveDashboard(data: DiaryData, fPartner: string, fYear: string
   const barForW = Math.round(s.pf / maxP * 100) + '%'
   const barAgW = Math.round(s.pa / maxP * 100) + '%'
 
-  // result distribution
-  const dd = s.dist
-  const maxD = Math.max(dd['2-0'], dd['2-1'], dd['1-2'], dd['0-2'], 1)
-  const resultDist: ResultDistItem[] = [
-    { label: '2-0', count: dd['2-0'], color: '#FF6B35', h: Math.round(dd['2-0'] / maxD * 60) + 'px' },
-    { label: '2-1', count: dd['2-1'], color: '#F7A883', h: Math.round(dd['2-1'] / maxD * 60) + 'px' },
-    { label: '1-2', count: dd['1-2'], color: 'rgba(27,42,74,.35)', h: Math.round(dd['1-2'] / maxD * 60) + 'px' },
-    { label: '0-2', count: dd['0-2'], color: 'rgba(27,42,74,.2)', h: Math.round(dd['0-2'] / maxD * 60) + 'px' },
-  ]
+  // ---- Win rate per fase (Girone → Finale) ----
+  const phaseRows: PhaseRow[] = PHASES.map((ph) => {
+    const pm = fm.filter((m) => m.phase === ph)
+    const ps = computeStats(pm)
+    return { phase: ph, winPct: ps.winPct, played: ps.played, won: ps.won, barW: ps.winPct + '%' }
+  }).filter((p) => p.played > 0)
+
+  // ---- Distribuzione piazzamenti nei tornei (nel periodo selezionato) ----
+  const plCount: Record<string, number> = {}
+  yearT.forEach((t) => { plCount[t.placement] = (plCount[t.placement] || 0) + 1 })
+  const plMax = Math.max(1, ...Object.values(plCount))
+  const placementDist: PlacementBar[] = PLACEMENTS
+    .filter((l) => plCount[l])
+    .map((l) => {
+      const rank = placementRank(l)
+      return { label: l, count: plCount[l], barW: Math.round(plCount[l] / plMax * 100) + '%', color: rank === 1 ? '#FF6B35' : rank <= 3 ? '#F7A883' : 'rgba(27,42,74,.28)' }
+    })
 
   // per-partner win rate (bar sempre arancio nel nuovo design)
   const partnerRows: PartnerRow[] = data.partners.map((p) => {
@@ -244,9 +257,9 @@ export function deriveDashboard(data: DiaryData, fPartner: string, fYear: string
       diffStr: (s.diff >= 0 ? '+' : '') + s.diff, pf: s.pf, pa: s.pa, avgFor: s.avgFor, avgAg: s.avgAg,
       tWon, tPlayed: yearT.length, podi, bestPlacement: bestLabel,
       streak: streakOf(fm),
-      trendLine, trendPts: pts, trendLabel, trendColor,
-      donutDash, barForW, barAgW, resultDist, marginWin: s.marginWin, marginLoss: s.marginLoss,
-      partnerRows,
+      trendLine, trendArea, trendPts: pts, trendHasData, trendLabel, trendColor,
+      donutDash, barForW, barAgW,
+      partnerRows, phaseRows, placementDist,
     },
     recent,
   }
@@ -279,7 +292,7 @@ export function deriveTorneoDetail(data: DiaryData, id: string): TorneoDetailDat
     badge: t.placement,
     badgeBg: podium ? '#FFF1EA' : '#F2F0EC',
     badgeColor: podium ? '#C4501E' : 'rgba(27,42,74,.5)',
-    meta: fmtDate(t.date) + ' · ' + t.city + ' · ' + t.surface,
+    meta: fmtDate(t.date) + ' · ' + t.city + ' · ' + t.surface + (t.partnerId ? ' · con ' + partnerName(data, t.partnerId) : ''),
     record: ts.won + '-' + ts.lost, winPct: ts.winPct, setStr: ts.sw + '-' + ts.sl,
     diffStr: (ts.diff >= 0 ? '+' : '') + ts.diff,
     noMatches: tm.length === 0, hasPhotos: photos.length > 0,
@@ -335,4 +348,10 @@ export function tournamentOptions(data: DiaryData): Option[] {
 }
 export function partnerOptions(data: DiaryData): Option[] {
   return data.partners.map((p) => ({ id: p.id, name: p.name }))
+}
+
+// Anni disponibili (dai tornei) + "Sempre", per il filtro della dashboard.
+export function yearOptions(data: DiaryData): string[] {
+  const years = Array.from(new Set(data.tournaments.map((t) => yearOf(t.date)))).sort((a, b) => (a < b ? 1 : -1))
+  return [...years, 'Sempre']
 }

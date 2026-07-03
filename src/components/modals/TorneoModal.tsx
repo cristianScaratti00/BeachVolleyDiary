@@ -1,7 +1,7 @@
 import type { CSSProperties, ChangeEvent } from 'react'
 import { Sheet, Title, Label, inputStyle, selectStyle, Actions } from './Sheet'
 import { SWATCH_COLORS } from '../../lib/theme'
-import type { AnyForm, SetField, Category, Format, Surface, Placement } from '../../lib/models'
+import type { AnyForm, SetField, Option, Category, Format, Surface, Placement } from '../../lib/models'
 
 const fieldWrap: CSSProperties = { flex: 1, minWidth: 130 }
 const nameStyle: CSSProperties = { ...inputStyle, font: "700 15px 'Nunito Sans'" }
@@ -10,12 +10,13 @@ interface TorneoModalProps {
   form: AnyForm
   editId: string | null
   setField: SetField
+  partnerOptions: Option[]
   onClose: () => void
   onSave: () => void
   onDelete: () => void
 }
 
-export default function TorneoModal({ form, editId, setField, onClose, onSave, onDelete }: TorneoModalProps) {
+export default function TorneoModal({ form, editId, setField, partnerOptions, onClose, onSave, onDelete }: TorneoModalProps) {
   return (
     <Sheet onClose={onClose}>
       <Title>{editId ? 'Modifica torneo' : 'Nuovo torneo'}</Title>
@@ -23,6 +24,23 @@ export default function TorneoModal({ form, editId, setField, onClose, onSave, o
         <div>
           <Label>Nome torneo</Label>
           <input value={form.name || ''} onChange={(e: ChangeEvent<HTMLInputElement>) => setField('name', e.target.value)} placeholder="es. Summer Cup Rimini" style={nameStyle} />
+        </div>
+
+        <div>
+          <Label>Con chi lo hai fatto</Label>
+          <select value={form.partnerId || ''} onChange={(e: ChangeEvent<HTMLSelectElement>) => setField('partnerId', e.target.value)} style={selectStyle}>
+            <option value="">— Nessuno —</option>
+            {partnerOptions.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+            <option value="new">＋ Nuovo compagno</option>
+          </select>
+          {form.partnerId === 'new' && (
+            <input value={form.newPartnerName || ''} onChange={(e: ChangeEvent<HTMLInputElement>) => setField('newPartnerName', e.target.value)} placeholder="Nome nuovo compagno" style={{ ...inputStyle, marginTop: 8 }} />
+          )}
+          {editId && (
+            <div style={{ font: "600 11.5px 'Nunito Sans'", color: 'rgba(27,42,74,.5)', marginTop: 6 }}>
+              Cambiandolo, il compagno viene aggiornato su tutte le partite del torneo.
+            </div>
+          )}
         </div>
 
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
@@ -40,7 +58,7 @@ export default function TorneoModal({ form, editId, setField, onClose, onSave, o
           <div style={fieldWrap}>
             <Label>Categoria</Label>
             <select value={form.category || 'Amatoriale'} onChange={(e: ChangeEvent<HTMLSelectElement>) => setField('category', e.target.value as Category)} style={selectStyle}>
-              <option>Amatoriale</option><option>Open</option><option>Serie</option><option>Pro</option>
+              <option>Amatoriale</option><option>Open</option><option>Serie</option><option>Pro</option><option>King</option><option>Queen</option>
             </select>
           </div>
           <div style={fieldWrap}>
@@ -61,7 +79,7 @@ export default function TorneoModal({ form, editId, setField, onClose, onSave, o
           <div style={fieldWrap}>
             <Label>Piazzamento</Label>
             <select value={form.placement || 'Gironi'} onChange={(e: ChangeEvent<HTMLSelectElement>) => setField('placement', e.target.value as Placement)} style={selectStyle}>
-              <option>1° 🏆</option><option>2°</option><option>3°</option><option>Quarti</option><option>Ottavi</option><option>Gironi</option><option>In corso</option>
+              <option>1° 🏆</option><option>2°</option><option>3°</option><option>Semifinale</option><option>Quarti</option><option>Ottavi</option><option>Gironi</option><option>In corso</option>
             </select>
           </div>
         </div>

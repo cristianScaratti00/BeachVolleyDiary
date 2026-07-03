@@ -1,13 +1,14 @@
 import type { Screen } from '../lib/models'
 import { useAuth } from '../hooks/useAuth'
+import NavIcon from './NavIcons'
 
-interface NavEntry { key: Screen; icon: string; label: string }
+interface NavEntry { key: Screen; label: string }
 
 const NAV: NavEntry[] = [
-  { key: 'home', icon: '◧', label: 'Dashboard' },
-  { key: 'tornei', icon: '▤', label: 'Tornei' },
-  { key: 'compagni', icon: '◎', label: 'Compagni' },
-  { key: 'galleria', icon: '▦', label: 'Galleria' },
+  { key: 'home', label: 'Dashboard' },
+  { key: 'tornei', label: 'Tornei' },
+  { key: 'compagni', label: 'Compagni' },
+  { key: 'galleria', label: 'Galleria' },
 ]
 
 interface SidebarProps {
@@ -36,7 +37,7 @@ export default function Sidebar({ screen, onNavigate, onNewPartita, onNewTorneo 
             onClick={() => onNavigate(n.key)}
             style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '11px 12px', borderRadius: 10, cursor: 'pointer', font: "700 14px 'Nunito Sans'", color: active ? '#1B2A4A' : 'rgba(27,42,74,.4)', borderLeft: `2px solid ${active ? '#FF6B35' : 'transparent'}` }}
           >
-            <span style={{ fontSize: 16, opacity: .85 }}>{n.icon}</span>{n.label}
+            <NavIcon screen={n.key} size={19} />{n.label}
           </div>
         )
       })}

@@ -5,7 +5,7 @@ import { useAuth } from './hooks/useAuth'
 import {
   deriveDashboard, deriveTorneiList, deriveTorneoDetail,
   deriveCompagni, deriveCompagno, deriveGallery,
-  tournamentOptions, partnerOptions,
+  tournamentOptions, partnerOptions, yearOptions,
 } from './lib/derive'
 import type { Screen, ModalKind, AnyForm, SetField, SetsApi } from './lib/models'
 
@@ -22,13 +22,14 @@ import TorneoModal from './components/modals/TorneoModal'
 import PartitaModal from './components/modals/PartitaModal'
 import FotoModal from './components/modals/FotoModal'
 import CompagnoModal from './components/modals/CompagnoModal'
+import QuickTorneoModal from './components/modals/QuickTorneoModal'
 
 const scrollTop = () => { try { window.scrollTo(0, 0) } catch (e) { /* ignore */ } }
 
 export default function App() {
   const wide = useIsWide()
   const { session, logout } = useAuth()
-  const { data, loading: dataLoading, saveTorneo, deleteTorneo, savePartita, deletePartita, saveFoto, saveCompagno } = useDiary()
+  const { data, loading: dataLoading, saveTorneo, quickCreateTorneo, deleteTorneo, savePartita, deletePartita, saveFoto, saveCompagno } = useDiary()
 
   const [screen, setScreen] = useState<Screen>('home')
   const [selT, setSelT] = useState<string | null>(null)
@@ -37,7 +38,7 @@ export default function App() {
   const [editId, setEditId] = useState<string | null>(null)
   const [fabOpen, setFabOpen] = useState(false)
   const [fPartner, setFPartner] = useState('all')
-  const [fYear, setFYear] = useState('2025')
+  const [fYear, setFYear] = useState('Sempre')
   const [form, setForm] = useState<AnyForm>({})
 
   // ---------- navigation ----------
@@ -59,9 +60,10 @@ export default function App() {
   // ---------- modal openers ----------
   const openTorneo = (id: string | null) => {
     const t = id ? data.tournaments.find((x) => x.id === id) : null
+    const today = new Date().toISOString().slice(0, 10)
     setEditId(id || null)
     setFabOpen(false)
-    setForm(t ? { ...t } : { name: '', date: '2025-08-01', city: '', category: 'Amatoriale', format: '2vs2', surface: 'Sabbia outdoor', placement: 'Gironi', color: '#FF6B35', emoji: '🏖️' })
+    setForm(t ? { ...t, partnerId: t.partnerId ?? undefined, newPartnerName: '' } : { name: '', date: today, city: '', category: 'Amatoriale', format: '2vs2', surface: 'Sabbia outdoor', placement: 'Gironi', color: '#FF6B35', emoji: '🏖️', partnerId: '', newPartnerName: '' })
     setModal('torneo')
   }
   const openPartita = (tid: string | null) => {
@@ -92,6 +94,14 @@ export default function App() {
     setForm({ name: '' })
     setModal('socio')
   }
+  const openQuickTorneo = () => {
+    const P = data.partners
+    const today = new Date().toISOString().slice(0, 10)
+    setEditId(null)
+    setFabOpen(false)
+    setForm({ name: '', partnerId: (P[0] && P[0].id) || 'new', newPartnerName: '', date: today, category: 'Amatoriale', placement: 'In corso' })
+    setModal('torneoRapido')
+  }
 
   // ---------- save/delete actions (async: scrivono su Supabase) ----------
   const doSaveTorneo = async () => { if (await saveTorneo(form, editId)) closeModal() }
@@ -100,6 +110,10 @@ export default function App() {
   const doDeletePartita = async () => { await deletePartita(editId); closeModal() }
   const doSaveFoto = async () => { if (await saveFoto(form)) closeModal() }
   const doSaveCompagno = async () => { if (await saveCompagno(form)) closeModal() }
+  const doSaveQuickTorneo = async () => {
+    const id = await quickCreateTorneo(form)
+    if (id) { closeModal(); openTorneoDetail(id) }
+  }
 
   // Mostra lo splash mentre si caricano i dati iniziali dal DB.
   if (dataLoading) return <Splash />
@@ -112,9 +126,9 @@ export default function App() {
   const renderScreen = () => {
     switch (screen) {
       case 'tornei':
-        return <Tornei list={deriveTorneiList(data, fYear)} onOpenTorneo={openTorneoDetail} onNewTorneo={() => openTorneo(null)} />
+        return <Tornei list={deriveTorneiList(data, fYear)} onOpenTorneo={openTorneoDetail} onNewTorneo={() => openTorneo(null)} onQuickTorneo={openQuickTorneo} />
       case 'torneo':
-        if (!torneoData) return <Tornei list={deriveTorneiList(data, fYear)} onOpenTorneo={openTorneoDetail} onNewTorneo={() => openTorneo(null)} />
+        if (!torneoData) return <Tornei list={deriveTorneiList(data, fYear)} onOpenTorneo={openTorneoDetail} onNewTorneo={() => openTorneo(null)} onQuickTorneo={openQuickTorneo} />
         return <TorneoDetail t={torneoData} goBack={() => go('tornei')} onEdit={() => selT && openTorneo(selT)} onAddPartita={() => openPartita(selT)} onOpenMatch={openMatch} />
       case 'compagni':
         return <Compagni compagni={deriveCompagni(data)} onOpenCompagno={openCompagnoDetail} onNewCompagno={openCompagno} />
@@ -130,8 +144,9 @@ export default function App() {
           <Home
             s={dash.s}
             recent={dash.recent}
-            filters={{ fPartner, fYear, partnerOptions: partnerOptions(data), yearOptions: ['2025', 'Sempre'], setFPartner, setFYear }}
+            filters={{ fPartner, fYear, partnerOptions: partnerOptions(data), yearOptions: yearOptions(data), setFPartner, setFYear }}
             onOpenTorneo={openTorneoDetail}
+            onQuickTorneo={openQuickTorneo}
             goTornei={() => go('tornei')}
             goCompagni={() => go('compagni')}
           />
@@ -174,7 +189,7 @@ export default function App() {
       )}
 
       {modal === 'torneo' && (
-        <TorneoModal form={form} editId={editId} setField={setField} onClose={closeModal} onSave={doSaveTorneo} onDelete={doDeleteTorneo} />
+        <TorneoModal form={form} editId={editId} setField={setField} partnerOptions={partnerOptions(data)} onClose={closeModal} onSave={doSaveTorneo} onDelete={doDeleteTorneo} />
       )}
       {modal === 'partita' && (
         <PartitaModal form={form} editId={editId} setField={setField} tournOptions={tournamentOptions(data)} partnerOptions={partnerOptions(data)} sets={setRows} onClose={closeModal} onSave={doSavePartita} onDelete={doDeletePartita} />
@@ -184,6 +199,9 @@ export default function App() {
       )}
       {modal === 'socio' && (
         <CompagnoModal form={form} setField={setField} onClose={closeModal} onSave={doSaveCompagno} />
+      )}
+      {modal === 'torneoRapido' && (
+        <QuickTorneoModal form={form} setField={setField} partnerOptions={partnerOptions(data)} onClose={closeModal} onSave={doSaveQuickTorneo} />
       )}
     </div>
   )
