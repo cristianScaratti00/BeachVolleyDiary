@@ -38,15 +38,20 @@ export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [busy, setBusy] = useState(false)
 
   const isRegister = mode === 'register'
 
   const switchMode = (m: Mode) => { setMode(m); setError('') }
 
-  const submit = (e: FormEvent) => {
+  const submit = async (e: FormEvent) => {
     e.preventDefault()
-    const r = isRegister ? register(name, email, password) : login(email, password)
+    if (busy) return
+    setError('')
+    setBusy(true)
+    const r = isRegister ? await register(name, email, password) : await login(email, password)
     if (!r.ok) setError(r.error || 'Si è verificato un errore.')
+    setBusy(false)
     // On success the AuthProvider updates the session and <Root/> swaps to the app.
   }
 
@@ -105,8 +110,8 @@ export default function Login() {
 
               {error && <div style={{ font: "700 12.5px 'Nunito Sans'", color: '#FF477E', background: 'rgba(255,71,126,.08)', border: '1px solid rgba(255,71,126,.25)', borderRadius: 10, padding: '9px 12px' }}>{error}</div>}
 
-              <button type="submit" className="chip" style={{ width: '100%', padding: 13, borderRadius: 11, border: 'none', cursor: 'pointer', background: '#FF6B35', color: '#fff', font: "700 14.5px 'Nunito Sans'", marginTop: 2 }}>
-                {isRegister ? 'Crea account' : 'Entra'}
+              <button type="submit" disabled={busy} className="chip" style={{ width: '100%', padding: 13, borderRadius: 11, border: 'none', cursor: busy ? 'default' : 'pointer', background: '#FF6B35', color: '#fff', font: "700 14.5px 'Nunito Sans'", marginTop: 2, opacity: busy ? 0.7 : 1 }}>
+                {busy ? 'Attendere…' : isRegister ? 'Crea account' : 'Entra'}
               </button>
             </form>
 
@@ -119,7 +124,7 @@ export default function Login() {
           </div>
 
           <div style={{ font: "600 11.5px 'Nunito Sans'", color: 'rgba(27,42,74,.4)', textAlign: 'center', marginTop: 14 }}>
-            Demo — l'account e i dati restano su questo dispositivo.
+            I tuoi dati sono salvati in sicurezza sul cloud.
           </div>
         </div>
       </div>

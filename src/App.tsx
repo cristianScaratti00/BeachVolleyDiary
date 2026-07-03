@@ -11,6 +11,7 @@ import type { Screen, ModalKind, AnyForm, SetField, SetsApi } from './lib/models
 
 import Sidebar from './components/Sidebar'
 import BottomNav from './components/BottomNav'
+import Splash from './components/Splash'
 import Home from './screens/Home'
 import Tornei from './screens/Tornei'
 import TorneoDetail from './screens/TorneoDetail'
@@ -27,7 +28,7 @@ const scrollTop = () => { try { window.scrollTo(0, 0) } catch (e) { /* ignore */
 export default function App() {
   const wide = useIsWide()
   const { session, logout } = useAuth()
-  const { data, saveTorneo, deleteTorneo, savePartita, deletePartita, saveFoto, saveCompagno } = useDiary()
+  const { data, loading: dataLoading, saveTorneo, deleteTorneo, savePartita, deletePartita, saveFoto, saveCompagno } = useDiary()
 
   const [screen, setScreen] = useState<Screen>('home')
   const [selT, setSelT] = useState<string | null>(null)
@@ -92,13 +93,16 @@ export default function App() {
     setModal('socio')
   }
 
-  // ---------- save/delete actions ----------
-  const doSaveTorneo = () => { if (saveTorneo(form, editId)) closeModal() }
-  const doDeleteTorneo = () => { deleteTorneo(editId); setModal(null); setScreen('tornei') }
-  const doSavePartita = () => { savePartita(form, editId); closeModal() }
-  const doDeletePartita = () => { deletePartita(editId); closeModal() }
-  const doSaveFoto = () => { if (saveFoto(form)) closeModal() }
-  const doSaveCompagno = () => { if (saveCompagno(form)) closeModal() }
+  // ---------- save/delete actions (async: scrivono su Supabase) ----------
+  const doSaveTorneo = async () => { if (await saveTorneo(form, editId)) closeModal() }
+  const doDeleteTorneo = async () => { await deleteTorneo(editId); setModal(null); setScreen('tornei') }
+  const doSavePartita = async () => { if (await savePartita(form, editId)) closeModal() }
+  const doDeletePartita = async () => { await deletePartita(editId); closeModal() }
+  const doSaveFoto = async () => { if (await saveFoto(form)) closeModal() }
+  const doSaveCompagno = async () => { if (await saveCompagno(form)) closeModal() }
+
+  // Mostra lo splash mentre si caricano i dati iniziali dal DB.
+  if (dataLoading) return <Splash />
 
   // ---------- derived render data ----------
   const mainPad = wide ? '30px 34px 48px' : '20px 16px 120px'
