@@ -10,6 +10,7 @@ export interface UseDiary {
   data: DiaryData
   loading: boolean
   error: string | null
+  clearError: () => void
   reload: () => Promise<void>
   saveTorneo: (f: AnyForm, editId: string | null) => Promise<boolean>
   quickCreateTorneo: (f: AnyForm) => Promise<string | null>
@@ -104,6 +105,8 @@ export function useDiary(): UseDiary {
       console.error('[useDiary] reload', e)
     }
   }, [])
+
+  const clearError = useCallback(() => setError(null), [])
 
   useEffect(() => {
     let alive = true
@@ -304,5 +307,5 @@ export function useDiary(): UseDiary {
     return true
   }, [reload])
 
-  return { data, loading, error, reload, saveTorneo, quickCreateTorneo, deleteTorneo, savePartita, deletePartita, saveFoto, saveCompagno }
+  return { data, loading, error, clearError, reload, saveTorneo, quickCreateTorneo, deleteTorneo, savePartita, deletePartita, saveFoto, saveCompagno }
 }

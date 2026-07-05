@@ -1,15 +1,18 @@
 // ============================================================================
 // Auth — Supabase Auth (email + password).
 // La sessione (JWT) è gestita e persistita da supabase-js, con refresh
-// automatico. Il nome utente è salvato nei `user_metadata` alla registrazione.
-// La UI lavora su un tipo di dominio ridotto `Session = { email, name }`.
+// automatico. Ruolo e piano dell'utente vengono letti dalla tabella `profiles`
+// e inclusi nella sessione di dominio.
 // ============================================================================
 import type { User } from '@supabase/supabase-js'
 import { supabase } from './supabase'
+import type { Role, Plan } from './db.enums'
 
 export interface Session {
   email: string
   name: string
+  role: Role // admin | user
+  plan: Plan // base | premium
 }
 
 export interface AuthResult {
@@ -20,12 +23,22 @@ export interface AuthResult {
 
 export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-// Ricava la sessione di dominio { email, name } dallo user Supabase.
-export function sessionFromUser(user: User | null | undefined): Session | null {
+// Legge ruolo e piano dal profilo dell'utente (default prudenti se non c'è ancora).
+async function fetchProfile(userId: string): Promise<{ role: Role; plan: Plan }> {
+  const { data } = await supabase.from('profiles').select('role, plan').eq('id', userId).single()
+  return {
+    role: (data?.role as Role) ?? 'user',
+    plan: (data?.plan as Plan) ?? 'base',
+  }
+}
+
+// Costruisce la sessione di dominio { email, name, role, plan } dallo user Supabase.
+export async function sessionForUser(user: User | null | undefined): Promise<Session | null> {
   if (!user) return null
   const name = (user.user_metadata?.name as string | undefined)?.trim()
   const email = user.email ?? ''
-  return { email, name: name || email.split('@')[0] || 'Utente' }
+  const { role, plan } = await fetchProfile(user.id)
+  return { email, name: name || email.split('@')[0] || 'Utente', role, plan }
 }
 
 export async function registerUser(name: string, email: string, password: string): Promise<AuthResult> {
@@ -45,7 +58,7 @@ export async function registerUser(name: string, email: string, password: string
   if (!data.session) {
     return { ok: false, error: 'Registrazione avvenuta: controlla la tua email per confermare l’account.' }
   }
-  return { ok: true, session: sessionFromUser(data.user) ?? undefined }
+  return { ok: true }
 }
 
 export async function loginUser(email: string, password: string): Promise<AuthResult> {
@@ -53,9 +66,9 @@ export async function loginUser(email: string, password: string): Promise<AuthRe
   if (!EMAIL_RE.test(e)) return { ok: false, error: 'Email non valida.' }
   if (!password) return { ok: false, error: 'Inserisci la password.' }
 
-  const { data, error } = await supabase.auth.signInWithPassword({ email: e, password })
+  const { error } = await supabase.auth.signInWithPassword({ email: e, password })
   if (error) return { ok: false, error: translateAuthError(error.message) }
-  return { ok: true, session: sessionFromUser(data.user) ?? undefined }
+  return { ok: true }
 }
 
 export async function logoutUser(): Promise<void> {

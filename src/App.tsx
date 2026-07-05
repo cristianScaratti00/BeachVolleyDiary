@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useDiary } from './hooks/useDiary'
 import { useIsWide } from './hooks/useMedia'
 import { useAuth } from './hooks/useAuth'
@@ -8,6 +8,7 @@ import {
   tournamentOptions, partnerOptions, yearOptions,
 } from './lib/derive'
 import type { Screen, ModalKind, AnyForm, SetField, SetsApi } from './lib/models'
+import { tournamentLimit, partnerLimit, hasPremium } from './lib/limits'
 
 import Sidebar from './components/Sidebar'
 import BottomNav from './components/BottomNav'
@@ -18,18 +19,20 @@ import TorneoDetail from './screens/TorneoDetail'
 import Compagni from './screens/Compagni'
 import CompagnoDetail from './screens/CompagnoDetail'
 import Galleria from './screens/Galleria'
+import Profilo from './screens/Profilo'
 import TorneoModal from './components/modals/TorneoModal'
 import PartitaModal from './components/modals/PartitaModal'
 import FotoModal from './components/modals/FotoModal'
 import CompagnoModal from './components/modals/CompagnoModal'
 import QuickTorneoModal from './components/modals/QuickTorneoModal'
+import UpgradeSheet from './components/modals/UpgradeSheet'
 
 const scrollTop = () => { try { window.scrollTo(0, 0) } catch (e) { /* ignore */ } }
 
 export default function App() {
   const wide = useIsWide()
   const { session, logout } = useAuth()
-  const { data, loading: dataLoading, saveTorneo, quickCreateTorneo, deleteTorneo, savePartita, deletePartita, saveFoto, saveCompagno } = useDiary()
+  const { data, loading: dataLoading, error: diaryError, clearError, saveTorneo, quickCreateTorneo, deleteTorneo, savePartita, deletePartita, saveFoto, saveCompagno } = useDiary()
 
   const [screen, setScreen] = useState<Screen>('home')
   const [selT, setSelT] = useState<string | null>(null)
@@ -40,6 +43,27 @@ export default function App() {
   const [fPartner, setFPartner] = useState('all')
   const [fYear, setFYear] = useState('Sempre')
   const [form, setForm] = useState<AnyForm>({})
+  const [notice, setNotice] = useState<string | null>(null)
+  const [upgrade, setUpgrade] = useState<{ title?: string; message: string } | null>(null)
+
+  // ---------- plan limits ----------
+  const tLimit = tournamentLimit(session?.plan, session?.role)
+  const pLimit = partnerLimit(session?.plan, session?.role)
+  const canAddTorneo = data.tournaments.length < tLimit
+  const canAddPartner = data.partners.length < pLimit
+  const canFilter = hasPremium(session?.plan, session?.role)
+  const banner = notice
+  const dismissBanner = () => setNotice(null)
+  const onUpgrade = () => { setUpgrade(null); setNotice('Acquisto Premium in arrivo — l’integrazione dei pagamenti sarà disponibile a breve.') }
+
+  // Instrada gli errori del DB: i limiti di piano aprono la bottom-sheet di
+  // upgrade, gli altri errori restano nel toast in alto.
+  useEffect(() => {
+    if (!diaryError) return
+    if (diaryError.toLowerCase().includes('piano base')) setUpgrade({ message: diaryError })
+    else setNotice(diaryError)
+    clearError()
+  }, [diaryError, clearError])
 
   // ---------- navigation ----------
   const go = (s: Screen) => { setScreen(s); setFabOpen(false); scrollTop() }
@@ -59,6 +83,7 @@ export default function App() {
 
   // ---------- modal openers ----------
   const openTorneo = (id: string | null) => {
+    if (!id && !canAddTorneo) { setUpgrade({ message: `Piano base: hai raggiunto il limite di ${tLimit} tornei.` }); return }
     const t = id ? data.tournaments.find((x) => x.id === id) : null
     const today = new Date().toISOString().slice(0, 10)
     setEditId(id || null)
@@ -89,12 +114,14 @@ export default function App() {
     setModal('foto')
   }
   const openCompagno = () => {
+    if (!canAddPartner) { setUpgrade({ message: `Piano base: hai raggiunto il limite di ${pLimit} compagni.` }); return }
     setEditId(null)
     setFabOpen(false)
     setForm({ name: '' })
     setModal('socio')
   }
   const openQuickTorneo = () => {
+    if (!canAddTorneo) { setUpgrade({ message: `Piano base: hai raggiunto il limite di ${tLimit} tornei.` }); return }
     const P = data.partners
     const today = new Date().toISOString().slice(0, 10)
     setEditId(null)
@@ -137,14 +164,16 @@ export default function App() {
         return <CompagnoDetail cp={compagnoData} goBack={() => go('compagni')} onOpenMatch={openMatch} />
       case 'galleria':
         return <Galleria gallery={deriveGallery(data)} onNewFoto={openFoto} />
+      case 'profilo':
+        return <Profilo session={session!} onUpgrade={onUpgrade} onLogout={logout} />
       case 'home':
       default: {
-        const dash = deriveDashboard(data, fPartner, fYear)
+        const dash = deriveDashboard(data, canFilter ? fPartner : 'all', canFilter ? fYear : 'Sempre')
         return (
           <Home
             s={dash.s}
             recent={dash.recent}
-            filters={{ fPartner, fYear, partnerOptions: partnerOptions(data), yearOptions: yearOptions(data), setFPartner, setFYear }}
+            filters={{ fPartner, fYear, partnerOptions: partnerOptions(data), yearOptions: yearOptions(data), setFPartner, setFYear, canFilter, onLockedFilter: () => setUpgrade({ title: 'Funzione Premium', message: 'I filtri per compagno e anno sono disponibili con il piano Premium.' }) }}
             onOpenTorneo={openTorneoDetail}
             onQuickTorneo={openQuickTorneo}
             goTornei={() => go('tornei')}
@@ -157,6 +186,12 @@ export default function App() {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#FFF8F0' }}>
+      {banner && (
+        <div style={{ position: 'fixed', top: 14, left: '50%', transform: 'translateX(-50%)', zIndex: 80, maxWidth: 'min(92vw, 470px)', background: '#1B2A4A', color: '#fff', padding: '12px 16px', borderRadius: 12, boxShadow: '0 12px 30px -8px rgba(27,42,74,.55)', display: 'flex', alignItems: 'center', gap: 12, font: "700 13px 'Nunito Sans'" }}>
+          <span style={{ flex: 1, lineHeight: 1.35 }}>{banner}</span>
+          <span onClick={dismissBanner} style={{ cursor: 'pointer', opacity: .7, fontSize: 18, lineHeight: 1, flex: 'none' }}>×</span>
+        </div>
+      )}
       {wide && (
         <Sidebar screen={screen} onNavigate={go} onNewPartita={() => openPartita(null)} onNewTorneo={() => openTorneo(null)} />
       )}
@@ -168,8 +203,8 @@ export default function App() {
               <div style={{ width: 9, height: 9, borderRadius: '50%', background: '#FF6B35' }} />
               <div style={{ font: "600 15px 'Space Grotesk'", letterSpacing: '-.2px' }}>Beach Diary</div>
             </div>
-            <div className="chip" onClick={logout} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-              <span style={{ font: "700 12px 'Nunito Sans'", color: 'rgba(27,42,74,.55)' }}>Esci</span>
+            <div className="chip" onClick={() => go('profilo')} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+              <span style={{ font: "700 12px 'Nunito Sans'", color: 'rgba(27,42,74,.55)' }}>Profilo</span>
               <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#1B2A4A', display: 'flex', alignItems: 'center', justifyContent: 'center', font: "600 12px 'Space Grotesk'", color: '#fff' }}>{session?.name?.[0]?.toUpperCase() || '?'}</div>
             </div>
           </div>
@@ -202,6 +237,9 @@ export default function App() {
       )}
       {modal === 'torneoRapido' && (
         <QuickTorneoModal form={form} setField={setField} partnerOptions={partnerOptions(data)} onClose={closeModal} onSave={doSaveQuickTorneo} />
+      )}
+      {upgrade && (
+        <UpgradeSheet title={upgrade.title} message={upgrade.message} onUpgrade={onUpgrade} onSeePlans={() => { setUpgrade(null); go('profilo') }} onClose={() => setUpgrade(null)} />
       )}
     </div>
   )

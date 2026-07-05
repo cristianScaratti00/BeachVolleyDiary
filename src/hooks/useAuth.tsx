@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import type { ReactNode } from 'react'
 import { supabase } from '../lib/supabase'
-import { loginUser, registerUser, logoutUser, sessionFromUser } from '../lib/auth'
+import { loginUser, registerUser, logoutUser, sessionForUser } from '../lib/auth'
 import type { Session, AuthResult } from '../lib/auth'
 
 interface AuthContextValue {
@@ -20,14 +20,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     // Sessione iniziale (ripristinata da localStorage da supabase-js)...
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(sessionFromUser(data.session?.user))
+    supabase.auth.getSession().then(async ({ data }) => {
+      setSession(await sessionForUser(data.session?.user))
       setLoading(false)
     })
     // ...e sincronizzazione ad ogni cambiamento (login / logout / refresh token).
+    // Il callback resta sincrono (profilo caricato via .then) per evitare il
+    // deadlock noto quando si await-a supabase-js dentro onAuthStateChange.
     const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
-      setSession(sessionFromUser(s?.user))
-      setLoading(false)
+      sessionForUser(s?.user).then((sess) => { setSession(sess); setLoading(false) })
     })
     return () => sub.subscription.unsubscribe()
   }, [])

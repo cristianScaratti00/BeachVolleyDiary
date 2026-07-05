@@ -19,6 +19,8 @@ interface HomeFilters {
   yearOptions: string[]
   setFPartner: (v: string) => void
   setFYear: (v: string) => void
+  canFilter: boolean // filtri disponibili solo con Premium
+  onLockedFilter: () => void
 }
 
 interface HomeProps {
@@ -32,7 +34,7 @@ interface HomeProps {
 }
 
 export default function Home({ s, recent, filters, onOpenTorneo, onQuickTorneo, goTornei, goCompagni }: HomeProps) {
-  const { fPartner, fYear, partnerOptions, yearOptions, setFPartner, setFYear } = filters
+  const { fPartner, fYear, partnerOptions, yearOptions, setFPartner, setFYear, canFilter, onLockedFilter } = filters
   const selectStyle: CSSProperties = { border: '1px solid rgba(27,42,74,.16)', background: '#fff', borderRadius: 10, padding: '9px 12px', font: "700 13px 'Nunito Sans'", color: '#1B2A4A', cursor: 'pointer' }
   return (
     <div style={{ animation: 'pop .32s ease both' }}>
@@ -45,13 +47,22 @@ export default function Home({ s, recent, filters, onOpenTorneo, onQuickTorneo, 
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <button onClick={onQuickTorneo} className="chip" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#FF6B35', color: '#fff', border: 'none', padding: '9px 13px', borderRadius: 10, font: "700 13px 'Nunito Sans'", cursor: 'pointer' }}>⚡ Torneo rapido</button>
-          <select value={fPartner} onChange={(e: ChangeEvent<HTMLSelectElement>) => setFPartner(e.target.value)} style={selectStyle}>
-            <option value="all">Tutti i compagni</option>
-            {partnerOptions.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-          </select>
-          <select value={fYear} onChange={(e: ChangeEvent<HTMLSelectElement>) => setFYear(e.target.value)} style={selectStyle}>
-            {yearOptions.map((y) => <option key={y} value={y}>{y}</option>)}
-          </select>
+          {canFilter ? (
+            <>
+              <select value={fPartner} onChange={(e: ChangeEvent<HTMLSelectElement>) => setFPartner(e.target.value)} style={selectStyle}>
+                <option value="all">Tutti i compagni</option>
+                {partnerOptions.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+              </select>
+              <select value={fYear} onChange={(e: ChangeEvent<HTMLSelectElement>) => setFYear(e.target.value)} style={selectStyle}>
+                {yearOptions.map((y) => <option key={y} value={y}>{y}</option>)}
+              </select>
+            </>
+          ) : (
+            <div onClick={onLockedFilter} title="Disponibile con Premium" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer', border: '1px solid rgba(27,42,74,.16)', background: '#F2F0EC', borderRadius: 10, padding: '9px 12px' }}>
+              <span style={{ font: "700 13px 'Nunito Sans'", color: 'rgba(27,42,74,.5)' }}>🔒 Filtra compagno e anno</span>
+              <span style={{ font: "800 8.5px 'Nunito Sans'", letterSpacing: '.4px', textTransform: 'uppercase', padding: '2px 6px', borderRadius: 5, background: '#FF6B35', color: '#fff' }}>Premium</span>
+            </div>
+          )}
         </div>
       </div>
 

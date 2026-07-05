@@ -48,10 +48,15 @@ export default function Sidebar({ screen, onNavigate, onNewPartita, onNewTorneo 
       <div className="chip" onClick={onNewTorneo} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 12, borderRadius: 11, cursor: 'pointer', border: '1px solid rgba(27,42,74,.18)', color: '#1B2A4A', font: "700 13.5px 'Nunito Sans'", marginTop: 8 }}>＋ Nuovo torneo</div>
 
       <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid rgba(27,42,74,.09)', display: 'flex', alignItems: 'center', gap: 10 }}>
-        <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#1B2A4A', display: 'flex', alignItems: 'center', justifyContent: 'center', font: "600 14px 'Space Grotesk'", color: '#fff', flex: 'none' }}>{initial}</div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ font: "700 12.5px 'Nunito Sans'", whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{session?.name}</div>
-          <div style={{ font: "600 10.5px 'Nunito Sans'", color: 'rgba(27,42,74,.45)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{session?.email}</div>
+        <div onClick={() => onNavigate('profilo')} style={{ width: 32, height: 32, borderRadius: '50%', background: '#1B2A4A', display: 'flex', alignItems: 'center', justifyContent: 'center', font: "600 14px 'Space Grotesk'", color: '#fff', flex: 'none', cursor: 'pointer' }}>{initial}</div>
+        <div onClick={() => onNavigate('profilo')} title="Profilo" style={{ flex: 1, minWidth: 0, cursor: 'pointer' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div style={{ font: "700 12.5px 'Nunito Sans'", whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{session?.name}</div>
+            {session?.plan && (
+              <span style={{ flex: 'none', font: "800 8.5px 'Nunito Sans'", letterSpacing: '.4px', textTransform: 'uppercase', padding: '2px 6px', borderRadius: 5, background: session.plan === 'premium' ? '#FF6B35' : '#F2F0EC', color: session.plan === 'premium' ? '#fff' : 'rgba(27,42,74,.55)' }}>{session.plan}</span>
+            )}
+          </div>
+          <div style={{ font: "600 10.5px 'Nunito Sans'", color: 'rgba(27,42,74,.45)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{session?.role === 'admin' ? 'Admin · ' : ''}{session?.email}</div>
         </div>
         <div className="chip" onClick={logout} title="Esci" style={{ font: "700 11px 'Nunito Sans'", color: 'rgba(27,42,74,.55)', cursor: 'pointer', padding: '4px 6px', flex: 'none' }}>Esci</div>
       </div>

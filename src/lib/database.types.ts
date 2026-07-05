@@ -19,6 +19,44 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      profiles: {
+        Row: {
+          id: string
+          email: string | null
+          full_name: string | null
+          role: string
+          plan: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          email?: string | null
+          full_name?: string | null
+          role?: string
+          plan?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          email?: string | null
+          full_name?: string | null
+          role?: string
+          plan?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'profiles_id_fkey'
+            columns: ['id']
+            isOneToOne: true
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       partners: {
         Row: {
           id: string
@@ -332,6 +370,7 @@ export type TablesUpdate<T extends keyof PublicSchema['Tables']> = PublicSchema[
 export type Views<T extends keyof PublicSchema['Views']> = PublicSchema['Views'][T]['Row']
 
 // Alias comodi per il dominio
+export type Profile = Tables<'profiles'>
 export type Partner = Tables<'partners'>
 export type Tournament = Tables<'tournaments'>
 export type Match = Tables<'matches'>

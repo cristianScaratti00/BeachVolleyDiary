@@ -14,11 +14,17 @@ export const SURFACES = ['Sabbia outdoor', 'Indoor', 'Erba'] as const
 export const PHASES = ['Girone', 'Ottavi', 'Quarti', 'Semifinale', 'Finale'] as const
 export const PLACEMENTS = ['1° 🏆', '2°', '3°', 'Semifinale', 'Quarti', 'Ottavi', 'Gironi', 'In corso'] as const
 
+// Ruoli utente e piani di abbonamento (colonne profiles.role / profiles.plan).
+export const ROLES = ['admin', 'user'] as const
+export const PLANS = ['base', 'premium'] as const
+
 export type Category = (typeof CATEGORIES)[number]
 export type Format = (typeof FORMATS)[number]
 export type Surface = (typeof SURFACES)[number]
 export type Phase = (typeof PHASES)[number]
 export type Placement = (typeof PLACEMENTS)[number]
+export type Role = (typeof ROLES)[number]
+export type Plan = (typeof PLANS)[number]
 
 // Righe con i campi vincolati ristretti alle union (comode nei form).
 export type TournamentTyped = Omit<Tables<'tournaments'>, 'category' | 'format' | 'surface' | 'placement'> & {
