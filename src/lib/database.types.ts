@@ -341,6 +341,34 @@ export type Database = {
       }
     }
     Functions: {
+      dashboard_stats: {
+        Args: { p_partner?: string | null; p_year?: string | null }
+        Returns: Json
+      }
+      tornei_list: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      compagni_list: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      gallery: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      torneo_detail: {
+        Args: { p_id: string }
+        Returns: Json
+      }
+      compagno_detail: {
+        Args: { p_id: string }
+        Returns: Json
+      }
+      placement_rank: {
+        Args: { l: string }
+        Returns: number
+      }
       seed_demo: {
         Args: { p_user?: string }
         Returns: undefined

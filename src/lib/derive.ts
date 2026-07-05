@@ -3,6 +3,8 @@ import type { SetChip } from './stats'
 import { MONTHS_SHORT } from './theme'
 import { PHASES, PLACEMENTS } from './db.enums'
 import type { DiaryData, Tournament, Partner, Match, Option } from './models'
+import type { ServerDashboard, ServerPhaseRow } from './dashboard'
+import type { SvTorneiList, SvCompagno, SvGalleryItem, SvTorneoDetail, SvCompagnoDetail } from './serverviews'
 
 // ---------------------------------------------------------------------------
 // View-model types (le forme restituite dai selettori, consumate dagli screen)
@@ -135,10 +137,8 @@ const partnerObj = (data: DiaryData, id: string): Partner | undefined => data.pa
 const partnerName = (data: DiaryData, id: string): string => partnerObj(data, id)?.name || '—'
 
 // Placement-driven accent dot (replaces the old emoji tile).
-const dotFor = (t: Tournament): string => {
-  const r = placementRank(t.placement)
-  return r === 1 ? '#FF6B35' : r <= 3 ? '#F7A883' : 'rgba(27,42,74,.25)'
-}
+const dotForRank = (r: number): string => (r === 1 ? '#FF6B35' : r <= 3 ? '#F7A883' : 'rgba(27,42,74,.25)')
+const dotFor = (t: Tournament): string => dotForRank(placementRank(t.placement))
 
 export function matchesWithDates(data: DiaryData): DatedMatch[] {
   return data.matches.map((m) => ({ ...m, date: tournObj(data, m.tournamentId)?.date || '2025-01-01' }))
@@ -265,6 +265,84 @@ export function deriveDashboard(data: DiaryData, fPartner: string, fYear: string
   }
 }
 
+// ---- Dashboard da dati server (RPC gated per piano) ----
+// Mappa il JSON di public.dashboard_stats sul view-model DashboardStats.
+// Gli "ultimi tornei" (non filtrati) restano calcolati dai dati locali.
+export function deriveDashboardServer(sv: ServerDashboard, data: DiaryData, fPartner: string, fYear: string): DashboardData {
+  // trend (stessi calcoli di deriveDashboard)
+  const left = 20, right = 320, top = 24, bot = 128
+  const n = sv.trend.length
+  const trendHasData = n >= 2
+  const pts: TrendPoint[] = sv.trend.map((t, i) => {
+    const x = n > 1 ? left + (right - left) * i / (n - 1) : (left + right) / 2
+    const y = bot - (t.pct / 100) * (bot - top)
+    return { x: Math.round(x), y: Math.round(y), label: MONTHS_SHORT[+t.ym.slice(5, 7) - 1], pct: t.pct }
+  })
+  const trendLine = pts.map((p) => p.x + ',' + p.y).join(' ')
+  const trendArea = pts.length ? pts[0].x + ',' + bot + ' ' + trendLine + ' ' + pts[pts.length - 1].x + ',' + bot : ''
+  const last = pts[pts.length - 1], prev = pts[pts.length - 2]
+  let trendLabel = '—', trendColor = 'rgba(27,42,74,.4)'
+  if (last && prev) {
+    const dlt = last.pct - prev.pct
+    trendLabel = (dlt >= 0 ? '▲ +' : '▼ ') + Math.abs(dlt) + '% sul mese scorso'
+    trendColor = dlt >= 0 ? '#FF6B35' : 'rgba(27,42,74,.45)'
+  }
+
+  // donut + bars
+  const circ = 2 * Math.PI * 50
+  const arc = (sv.win_pct / 100) * circ
+  const donutDash = arc.toFixed(1) + ' ' + (circ - arc).toFixed(1)
+  const maxP = Math.max(sv.points_for, sv.points_against, 1)
+  const barForW = Math.round(sv.points_for / maxP * 100) + '%'
+  const barAgW = Math.round(sv.points_against / maxP * 100) + '%'
+
+  const partnerRows: PartnerRow[] = sv.partners.map((p) => ({
+    id: p.id, name: p.name, initial: (p.name[0] || '?').toUpperCase(),
+    winPct: p.win_pct, played: p.played, won: p.won, barW: p.win_pct + '%',
+  }))
+
+  const phaseMap = new Map(sv.phases.map((ph) => [ph.phase, ph]))
+  const phaseRows: PhaseRow[] = PHASES
+    .map((ph) => phaseMap.get(ph))
+    .filter((x): x is ServerPhaseRow => !!x)
+    .map((ph) => ({ phase: ph.phase, winPct: ph.win_pct, played: ph.played, won: ph.won, barW: ph.win_pct + '%' }))
+
+  const plMap = new Map(sv.placements.map((pl) => [pl.placement, pl.count]))
+  const plMax = Math.max(1, ...sv.placements.map((pl) => pl.count))
+  const placementDist: PlacementBar[] = PLACEMENTS
+    .filter((l) => plMap.has(l))
+    .map((l) => {
+      const count = plMap.get(l) as number
+      const rank = placementRank(l)
+      return { label: l, count, barW: Math.round(count / plMax * 100) + '%', color: rank === 1 ? '#FF6B35' : rank <= 3 ? '#F7A883' : 'rgba(27,42,74,.28)' }
+    })
+
+  const bestPlacement = PLACEMENT_LABELS[sv.best_rank] || '—'
+  const winPct = sv.win_pct, played = sv.played, won = sv.won, diff = sv.point_diff
+  const headline = winPct >= 60 ? 'Stai vincendo più di prima.' : played ? 'La tua stagione, in numeri.' : 'Inizia il tuo diario.'
+  const subline = played
+    ? (winPct + '% delle partite' + (fPartner !== 'all' ? (' con ' + partnerName(data, fPartner)) : '') + ' — ' + won + ' vinte su ' + played + ', differenziale ' + (diff >= 0 ? '+' : '') + diff + '.')
+    : 'Aggiungi il primo torneo e le prime partite per vedere le statistiche.'
+
+  const tSorted = [...data.tournaments].sort((a, b) => (a.date < b.date ? 1 : -1))
+  const recent = tSorted.slice(0, 4).map((t) => decorateTournament(data, t))
+
+  return {
+    s: {
+      periodLabel: fYear === 'Sempre' ? 'Sempre' : ('Stagione ' + fYear),
+      headline, subline,
+      winPct, won, lost: sv.lost, played, setPct: sv.set_pct,
+      diffStr: (diff >= 0 ? '+' : '') + diff, pf: sv.points_for, pa: sv.points_against, avgFor: sv.avg_for, avgAg: sv.avg_against,
+      tWon: sv.t_won, tPlayed: sv.t_played, podi: sv.podi, bestPlacement,
+      streak: sv.streak,
+      trendLine, trendArea, trendPts: pts, trendHasData, trendLabel, trendColor,
+      donutDash, barForW, barAgW,
+      partnerRows, phaseRows, placementDist,
+    },
+    recent,
+  }
+}
+
 // ---- Tornei list ----
 export function deriveTorneiList(data: DiaryData, fYear: string): TorneiListData {
   const yearT = data.tournaments.filter((t) => !fYear || fYear === 'Sempre' || yearOf(t.date) === fYear)
@@ -341,6 +419,69 @@ export function deriveCompagno(data: DiaryData, id: string): CompagnoDetailData 
 // ---- Galleria ----
 export function deriveGallery(data: DiaryData): GalleryItem[] {
   return data.photos.map((p) => ({ color: p.color, caption: p.caption, tag: tournObj(data, p.tournamentId)?.name || '' }))
+}
+
+// ---- Mapper da RPC server → view-model (presentazione lato client) ----
+
+export function deriveTorneiListServer(sv: SvTorneiList): TorneiListData {
+  const tornei: TorneoCard[] = sv.tornei.map((c) => {
+    const podium = c.rank <= 3
+    return {
+      id: c.id, name: c.name, category: c.category, dot: dotForRank(c.rank),
+      badge: c.placement,
+      badgeBg: podium ? '#FFF1EA' : '#F2F0EC',
+      badgeColor: podium ? '#C4501E' : 'rgba(27,42,74,.5)',
+      meta: fmtDate(c.date) + ' · ' + c.city + ' · ' + c.format + (c.partner ? ' · con ' + c.partner : ''),
+      record: c.won + '-' + c.lost, winPct: c.win_pct, matchCount: c.match_count,
+    }
+  })
+  return { tornei, tPlayed: sv.t_played, podi: sv.podi, bestPlacement: PLACEMENT_LABELS[sv.best_rank] || '—' }
+}
+
+export function deriveCompagniServer(sv: SvCompagno[]): CompagnoCard[] {
+  return sv.map((c) => ({ id: c.id, name: c.name, initial: (c.name[0] || '?').toUpperCase(), played: c.played, won: c.won, lost: c.lost, winPct: c.win_pct }))
+}
+
+export function deriveGalleryServer(sv: SvGalleryItem[]): GalleryItem[] {
+  return sv.map((g) => ({ color: g.color, caption: g.caption, tag: g.tag }))
+}
+
+export function deriveTorneoDetailServer(sv: SvTorneoDetail): TorneoDetailData {
+  const podium = sv.rank <= 3
+  return {
+    id: sv.id, name: sv.name, category: sv.category, dot: dotForRank(sv.rank),
+    badge: sv.placement,
+    badgeBg: podium ? '#FFF1EA' : '#F2F0EC',
+    badgeColor: podium ? '#C4501E' : 'rgba(27,42,74,.5)',
+    meta: fmtDate(sv.date) + ' · ' + sv.city + ' · ' + sv.surface + (sv.partner ? ' · con ' + sv.partner : ''),
+    record: sv.won + '-' + sv.lost, winPct: sv.win_pct, setStr: sv.sets_won + '-' + sv.sets_lost,
+    diffStr: (sv.point_diff >= 0 ? '+' : '') + sv.point_diff,
+    noMatches: sv.matches.length === 0, hasPhotos: sv.photos.length > 0,
+    photos: sv.photos.map((p) => ({ color: p.color, caption: p.caption })),
+    matches: sv.matches.map((m) => {
+      const es = esitoStyle(m.won)
+      return {
+        id: m.id, phase: m.phase, opponents: m.opponents, partnerName: m.partner_name,
+        esitoColor: es.color, esitoShort: es.short,
+        setChips: setChips({ sets: m.sets }), hasNote: !!m.note, note: m.note,
+      }
+    }),
+  }
+}
+
+export function deriveCompagnoDetailServer(sv: SvCompagnoDetail): CompagnoDetailData {
+  return {
+    name: sv.name, initial: (sv.name[0] || '?').toUpperCase(),
+    played: sv.played, won: sv.won, winPct: sv.win_pct, setPct: sv.set_pct,
+    diffStr: (sv.point_diff >= 0 ? '+' : '') + sv.point_diff, streak: sv.streak,
+    matches: sv.matches.map((m) => {
+      const es = esitoStyle(m.won)
+      return {
+        id: m.id, tournamentName: m.tournament_name, phase: m.phase, opponents: m.opponents,
+        esitoColor: es.color, esitoShort: es.short, setChips: setChips({ sets: m.sets }),
+      }
+    }),
+  }
 }
 
 export function tournamentOptions(data: DiaryData): Option[] {
