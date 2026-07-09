@@ -1,10 +1,10 @@
 import { res, computeStats, streakOf, placementRank, fmtDate, yearOf, esitoStyle, setChips } from './stats'
 import type { SetChip } from './stats'
-import { MONTHS_SHORT } from './theme'
+import { MONTHS_SHORT, MONTHS_FULL } from './theme'
 import { PHASES, PLACEMENTS } from './db.enums'
 import type { DiaryData, Tournament, Partner, Match, Option } from './models'
 import type { ServerDashboard, ServerPhaseRow } from './dashboard'
-import type { SvTorneiList, SvCompagno, SvGalleryItem, SvTorneoDetail, SvCompagnoDetail } from './serverviews'
+import type { SvTorneiList, SvCompagno, SvTorneoDetail, SvCompagnoDetail } from './serverviews'
 
 // ---------------------------------------------------------------------------
 // View-model types (le forme restituite dai selettori, consumate dagli screen)
@@ -75,7 +75,7 @@ export interface TorneoMatchRow {
   hasNote: boolean
   note: string
 }
-export interface TorneoPhoto { color: string; caption: string }
+export interface TorneoPhoto { color: string; caption: string; url: string | null }
 export interface TorneoDetailData {
   id: string
   name: string
@@ -126,7 +126,40 @@ export interface CompagnoDetailData {
   matches: CompagnoMatchRow[]
 }
 
-export interface GalleryItem { color: string; caption: string; tag: string }
+export interface DiaryPhotoThumb { color: string; caption: string; url: string | null }
+
+// Dati per l'immagine-storia Instagram (card stats 1080×1920). La palette è
+// applicata lato componente (StoryModal), qui restano solo i valori.
+export interface StoryData {
+  year: string
+  name: string
+  resultLabel: string
+  meta: string
+  winPct: number
+  record: string        // "3–1"
+  setStr: string        // "6–2"
+  diffStr: string       // "+14"
+  diffPositive: boolean
+  partner: string
+  slug: string          // base del nome file scaricato
+  coverUrl: string | null // foto di copertina (URL firmato) se il torneo ne ha una
+  emoji: string           // emoji del torneo, per il visual quando non c'è foto
+}
+export interface DiaryEntry {
+  id: string
+  day: string    // giorno del mese, es. '20'
+  month: string  // mese abbreviato IT, es. 'Giu'
+  year: string   // '2025'
+  emoji: string
+  title: string  // nome del torneo
+  desc: string   // recap "da diario"
+  accent: string // colore accento (piazzamento)
+  badge: string
+  badgeBg: string
+  badgeColor: string
+  photos: DiaryPhotoThumb[] // massimo 4 thumbnail
+  morePhotos: number        // foto oltre le prime 4
+}
 
 type DatedMatch = Match & { date: string }
 
@@ -374,7 +407,7 @@ export function deriveTorneoDetail(data: DiaryData, id: string): TorneoDetailDat
     record: ts.won + '-' + ts.lost, winPct: ts.winPct, setStr: ts.sw + '-' + ts.sl,
     diffStr: (ts.diff >= 0 ? '+' : '') + ts.diff,
     noMatches: tm.length === 0, hasPhotos: photos.length > 0,
-    photos: photos.map((p) => ({ color: p.color, caption: p.caption })),
+    photos: photos.map((p) => ({ color: p.color, caption: p.caption, url: p.url })),
     matches: tm.map((m) => {
       const r = res(m); const es = esitoStyle(r.won)
       return {
@@ -416,9 +449,98 @@ export function deriveCompagno(data: DiaryData, id: string): CompagnoDetailData 
   }
 }
 
-// ---- Galleria ----
-export function deriveGallery(data: DiaryData): GalleryItem[] {
-  return data.photos.map((p) => ({ color: p.color, caption: p.caption, tag: tournObj(data, p.tournamentId)?.name || '' }))
+// ---- Diario (Premium) ----
+// Ogni torneo diventa una voce di diario: data + emoji + titolo + recap + foto.
+// Ordinati dal più recente (come il resto dell'app).
+export function deriveDiary(data: DiaryData): DiaryEntry[] {
+  const tSorted = [...data.tournaments].sort((a, b) => (a.date < b.date ? 1 : -1))
+  return tSorted.map((t) => {
+    const tm = data.matches.filter((m) => m.tournamentId === t.id)
+    const ts = computeStats(tm)
+    const photos = data.photos.filter((p) => p.tournamentId === t.id)
+    const rank = placementRank(t.placement)
+    const podium = rank <= 3
+
+    // recap in stile diario: piazzamento/luogo + esito partite
+    const parts: string[] = []
+    if (podium) parts.push(`Chiuso al ${t.placement}${t.city ? ' a ' + t.city : ''}`)
+    else if (t.city) parts.push(`Tappa ${t.category} a ${t.city}`)
+    else parts.push(t.category)
+    parts.push(ts.played ? `${ts.won} ${ts.won === 1 ? 'vittoria' : 'vittorie'} su ${ts.played} — ${ts.winPct}% W` : 'Nessuna partita ancora')
+
+    const d = t.date || '2025-01-01'
+    return {
+      id: t.id,
+      day: d.slice(8, 10) || '—',
+      month: MONTHS_SHORT[+d.slice(5, 7) - 1] || '',
+      year: d.slice(0, 4),
+      emoji: t.emoji || '🏖️',
+      title: t.name,
+      desc: parts.join(' · '),
+      accent: dotForRank(rank),
+      badge: t.placement,
+      badgeBg: podium ? '#FFF1EA' : '#F2F0EC',
+      badgeColor: podium ? '#C4501E' : 'rgba(27,42,74,.5)',
+      photos: photos.slice(0, 4).map((p) => ({ color: p.color, caption: p.caption, url: p.url })),
+      morePhotos: Math.max(0, photos.length - 4),
+    }
+  })
+}
+
+// ---- Story Instagram (Premium) ----
+function fmtDateFull(d: string): string {
+  const [y, mo, da] = (d || '2025-01-01').split('-')
+  return (+da) + ' ' + (MONTHS_FULL[(+mo) - 1] || '') + ' ' + y
+}
+
+// Mappa il piazzamento in un'etichetta "da story".
+export function resultLabelOf(placement: string): string {
+  if (!placement) return 'TORNEO'
+  if (placement.startsWith('1°')) return 'CAMPIONI'
+  if (placement.startsWith('2°')) return 'FINALISTI'
+  if (placement.startsWith('3°')) return 'SUL PODIO'
+  if (placement === 'Semifinale') return 'IN SEMIFINALE'
+  if (placement === 'Quarti') return 'QUARTI DI FINALE'
+  if (placement === 'Ottavi') return 'OTTAVI DI FINALE'
+  if (placement === 'Gironi') return 'FASE A GIRONI'
+  if (placement === 'In corso') return 'IN CORSO'
+  return 'TORNEO'
+}
+
+export function deriveStory(data: DiaryData, id: string): StoryData | null {
+  const t = tournObj(data, id)
+  if (!t) return null
+  const tm = data.matches.filter((m) => m.tournamentId === t.id)
+  const ts = computeStats(tm)
+
+  // Compagno principale: quello con più partite nel torneo, poi il compagno del torneo.
+  const counts: Record<string, number> = {}
+  tm.forEach((m) => { counts[m.partnerId] = (counts[m.partnerId] || 0) + 1 })
+  let bpId: string | null = null, bn = 0
+  Object.keys(counts).forEach((k) => { if (counts[k] > bn) { bn = counts[k]; bpId = k } })
+  bpId = bpId ?? t.partnerId
+  const partner = bpId ? (partnerObj(data, bpId)?.name || '—') : '—'
+
+  const d = t.date || '2025-01-01'
+  const meta = [fmtDateFull(d), t.city, t.category].filter(Boolean).join('  ·  ')
+  const slug = (t.name || 'torneo').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'torneo'
+  const cover = data.photos.find((p) => p.tournamentId === t.id && p.url)
+
+  return {
+    year: yearOf(d),
+    name: t.name,
+    resultLabel: resultLabelOf(t.placement),
+    meta,
+    winPct: ts.winPct,
+    record: ts.won + '–' + ts.lost,
+    setStr: ts.sw + '–' + ts.sl,
+    diffStr: (ts.diff >= 0 ? '+' : '') + ts.diff,
+    diffPositive: ts.diff >= 0,
+    partner,
+    slug,
+    coverUrl: cover?.url ?? null,
+    emoji: t.emoji || '🏐',
+  }
 }
 
 // ---- Mapper da RPC server → view-model (presentazione lato client) ----
@@ -442,12 +564,11 @@ export function deriveCompagniServer(sv: SvCompagno[]): CompagnoCard[] {
   return sv.map((c) => ({ id: c.id, name: c.name, initial: (c.name[0] || '?').toUpperCase(), played: c.played, won: c.won, lost: c.lost, winPct: c.win_pct }))
 }
 
-export function deriveGalleryServer(sv: SvGalleryItem[]): GalleryItem[] {
-  return sv.map((g) => ({ color: g.color, caption: g.caption, tag: g.tag }))
-}
-
-export function deriveTorneoDetailServer(sv: SvTorneoDetail): TorneoDetailData {
+// Le foto vengono prese dai dati client (che hanno gli URL firmati), non dal
+// payload RPC: le statistiche restano server-side, le immagini restano coerenti.
+export function deriveTorneoDetailServer(sv: SvTorneoDetail, data: DiaryData): TorneoDetailData {
   const podium = sv.rank <= 3
+  const photos = data.photos.filter((p) => p.tournamentId === sv.id)
   return {
     id: sv.id, name: sv.name, category: sv.category, dot: dotForRank(sv.rank),
     badge: sv.placement,
@@ -456,8 +577,8 @@ export function deriveTorneoDetailServer(sv: SvTorneoDetail): TorneoDetailData {
     meta: fmtDate(sv.date) + ' · ' + sv.city + ' · ' + sv.surface + (sv.partner ? ' · con ' + sv.partner : ''),
     record: sv.won + '-' + sv.lost, winPct: sv.win_pct, setStr: sv.sets_won + '-' + sv.sets_lost,
     diffStr: (sv.point_diff >= 0 ? '+' : '') + sv.point_diff,
-    noMatches: sv.matches.length === 0, hasPhotos: sv.photos.length > 0,
-    photos: sv.photos.map((p) => ({ color: p.color, caption: p.caption })),
+    noMatches: sv.matches.length === 0, hasPhotos: photos.length > 0,
+    photos: photos.map((p) => ({ color: p.color, caption: p.caption, url: p.url })),
     matches: sv.matches.map((m) => {
       const es = esitoStyle(m.won)
       return {

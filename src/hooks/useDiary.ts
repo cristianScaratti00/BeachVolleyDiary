@@ -17,11 +17,15 @@ export interface UseDiary {
   deleteTorneo: (editId: string | null) => Promise<boolean>
   savePartita: (f: AnyForm, editId: string | null) => Promise<boolean>
   deletePartita: (editId: string | null) => Promise<boolean>
-  saveFoto: (f: AnyForm) => Promise<boolean>
+  saveFoto: (f: AnyForm, file: File | null) => Promise<boolean>
   saveCompagno: (f: AnyForm) => Promise<boolean>
 }
 
 const EMPTY: DiaryData = { tournaments: [], matches: [], partners: [], photos: [] }
+
+// Bucket privato delle foto dei tornei (vedi migration tournament_photos_storage).
+const PHOTO_BUCKET = 'tournament-photos'
+const SIGNED_URL_TTL = 60 * 60 * 8 // 8h
 
 function errMsg(e: unknown): string {
   if (e && typeof e === 'object' && 'message' in e) return String((e as { message: unknown }).message)
@@ -42,7 +46,7 @@ async function fetchAll(): Promise<DiaryData> {
       .select('id, tournament_id, partner_id, opponents, phase, note, match_sets(set_number, us, them)')
       .order('created_at', { ascending: true }),
     supabase.from('photos')
-      .select('id, tournament_id, color, caption')
+      .select('id, tournament_id, color, caption, storage_path')
       .order('created_at', { ascending: false }),
   ])
   const failed = pRes.error || tRes.error || mRes.error || fRes.error
@@ -76,11 +80,21 @@ async function fetchAll(): Promise<DiaryData> {
       .map((s) => ({ us: s.us, them: s.them })),
   }))
 
-  const photos: Photo[] = (fRes.data ?? []).map((f) => ({
+  // Firma gli URL delle foto reali (bucket privato) in un'unica chiamata batch.
+  const photoRows = fRes.data ?? []
+  const paths = photoRows.map((f) => f.storage_path).filter((p): p is string => !!p)
+  const signed = new Map<string, string>()
+  if (paths.length) {
+    const { data: urls } = await supabase.storage.from(PHOTO_BUCKET).createSignedUrls(paths, SIGNED_URL_TTL)
+    urls?.forEach((u) => { if (u.path && u.signedUrl) signed.set(u.path, u.signedUrl) })
+  }
+
+  const photos: Photo[] = photoRows.map((f) => ({
     id: f.id,
     tournamentId: f.tournament_id ?? '',
     color: f.color,
     caption: f.caption,
+    url: f.storage_path ? (signed.get(f.storage_path) ?? null) : null,
   }))
 
   return { tournaments, matches, partners, photos }
@@ -285,14 +299,34 @@ export function useDiary(): UseDiary {
     return true
   }, [reload])
 
-  const saveFoto = useCallback(async (f: AnyForm) => {
-    if (!f.caption) return false
+  // Carica un'immagine dal dispositivo su Storage e la collega a un torneo.
+  const saveFoto = useCallback(async (f: AnyForm, file: File | null) => {
+    const tournamentId = f.tournamentId
+    if (!tournamentId) return false
+    if (!file) return false // serve un'immagine dal dispositivo
+
+    const { data: auth } = await supabase.auth.getUser()
+    const uid = auth.user?.id
+    if (!uid) return fail(new Error('Sessione non valida.'))
+
+    // Path RLS: {uid}/{torneo}/{uuid}.{ext} — la policy consente solo la propria cartella.
+    const ext = (file.name.split('.').pop() || '').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg'
+    const path = `${uid}/${tournamentId}/${crypto.randomUUID()}.${ext}`
+
+    const { error: upErr } = await supabase.storage.from(PHOTO_BUCKET)
+      .upload(path, file, { contentType: file.type || 'image/jpeg', upsert: false })
+    if (upErr) return fail(upErr)
+
     const { error } = await supabase.from('photos').insert({
-      tournament_id: f.tournamentId || null,
+      tournament_id: tournamentId,
       color: f.color ?? '#FF6B35',
-      caption: f.caption,
+      caption: f.caption ?? '',
+      storage_path: path,
     })
-    if (error) return fail(error)
+    if (error) {
+      await supabase.storage.from(PHOTO_BUCKET).remove([path]) // rollback best-effort del file
+      return fail(error)
+    }
     await reload()
     return true
   }, [reload])

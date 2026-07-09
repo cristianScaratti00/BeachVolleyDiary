@@ -43,12 +43,13 @@ export default function NavIcon({ screen, size = 20 }: { screen: Screen; size?: 
           <path d="M17.5 14.6c1.9.5 3.5 1.9 3.5 4.9" />
         </Svg>
       )
-    case 'galleria': // immagine / foto
+    case 'diario': // quaderno / diario
       return (
         <Svg size={size}>
-          <rect x="3" y="5" width="18" height="14" rx="2.5" />
-          <circle cx="8.5" cy="10" r="1.6" />
-          <path d="M21 15.5 16.5 11 7 20.5" />
+          <path d="M6.5 4H18a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H6.5A2.5 2.5 0 0 1 4 17.5v-11A2.5 2.5 0 0 1 6.5 4Z" />
+          <path d="M4 17.5A2.5 2.5 0 0 1 6.5 15H19" />
+          <path d="M9 8h6" />
+          <path d="M9 11h4" />
         </Svg>
       )
     case 'home':

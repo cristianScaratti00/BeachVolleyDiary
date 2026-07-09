@@ -16,3 +16,5 @@ export const NEW_PARTNER_COLOR = '#FF6B35'
 export const SWATCH_COLORS: string[] = ['#FF6B35', '#00B4D8', '#FFD23F', '#FF477E', '#1B2A4A']
 
 export const MONTHS_SHORT: string[] = ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu', 'Lug', 'Ago', 'Set', 'Ott', 'Nov', 'Dic']
+
+export const MONTHS_FULL: string[] = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre']

@@ -262,6 +262,7 @@ export type Database = {
           tournament_id: string | null
           caption: string
           color: string
+          storage_path: string | null
           created_at: string
           updated_at: string
         }
@@ -271,6 +272,7 @@ export type Database = {
           tournament_id?: string | null
           caption?: string
           color?: string
+          storage_path?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -280,6 +282,7 @@ export type Database = {
           tournament_id?: string | null
           caption?: string
           color?: string
+          storage_path?: string | null
           created_at?: string
           updated_at?: string
         }

@@ -19,11 +19,11 @@ interface PlanCard {
 const PLANS: PlanCard[] = [
   {
     key: 'base', name: 'Base', price: 'Gratis', accent: 'rgba(27,42,74,.5)',
-    features: [`Fino a ${BASE_LIMITS.tournaments} tornei`, `Fino a ${BASE_LIMITS.partners} compagni`, 'Statistiche complete', 'Galleria foto'],
+    features: [`Fino a ${BASE_LIMITS.tournaments} tornei`, `Fino a ${BASE_LIMITS.partners} compagni`, 'Statistiche complete'],
   },
   {
     key: 'premium', name: 'Premium', price: '€5', period: '/mese', accent: '#FF6B35',
-    features: ['Tornei illimitati', 'Compagni illimitati', 'Statistiche complete', 'Tutto del piano Base'],
+    features: ['Tornei e compagni illimitati', 'Diario dei tornei con foto', 'Filtri avanzati dashboard', 'Tutto del piano Base'],
   },
 ]
 

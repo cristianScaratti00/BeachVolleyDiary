@@ -17,8 +17,6 @@ export interface SvTorneiList { tornei: SvTorneoCard[]; t_played: number; podi: 
 
 export interface SvCompagno { id: string; name: string; played: number; won: number; lost: number; win_pct: number }
 
-export interface SvGalleryItem { color: string; caption: string; tag: string }
-
 export interface SvTorneoMatch {
   id: string; phase: string; opponents: string; note: string
   partner_name: string; won: boolean; sets: SvSet[]
@@ -55,10 +53,6 @@ export async function getTorneiList(): Promise<SvTorneiList | null> {
 export async function getCompagniList(): Promise<SvCompagno[] | null> {
   const { data, error } = await supabase.rpc('compagni_list')
   return ok<SvCompagno[]>(data, error)
-}
-export async function getGallery(): Promise<SvGalleryItem[] | null> {
-  const { data, error } = await supabase.rpc('gallery')
-  return ok<SvGalleryItem[]>(data, error)
 }
 export async function getTorneoDetail(id: string): Promise<SvTorneoDetail | null> {
   const { data, error } = await supabase.rpc('torneo_detail', { p_id: id })

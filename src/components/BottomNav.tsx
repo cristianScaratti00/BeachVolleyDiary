@@ -7,7 +7,7 @@ const NAV: NavEntry[] = [
   { key: 'home', label: 'Home' },
   { key: 'tornei', label: 'Tornei' },
   { key: 'compagni', label: 'Soci' },
-  { key: 'galleria', label: 'Foto' },
+  { key: 'diario', label: 'Diario' },
 ]
 
 function Item({ n, screen, onNavigate }: { n: NavEntry; screen: Screen; onNavigate: (s: Screen) => void }) {

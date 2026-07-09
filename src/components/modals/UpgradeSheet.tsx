@@ -8,7 +8,7 @@ interface UpgradeSheetProps {
   onClose: () => void
 }
 
-const PREMIUM_FEATURES = ['Tornei illimitati', 'Compagni illimitati', 'Tutte le statistiche', 'Galleria senza limiti']
+const PREMIUM_FEATURES = ['Tornei e compagni illimitati', 'Diario dei tornei con foto', 'Storia Instagram dei tornei', 'Filtri avanzati nella dashboard']
 
 // Bottom-sheet mostrato quando un utente base raggiunge un limite o tocca una
 // funzione Premium: spiega il motivo e mostra l'anteprima del piano acquistabile.

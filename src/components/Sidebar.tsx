@@ -8,7 +8,7 @@ const NAV: NavEntry[] = [
   { key: 'home', label: 'Dashboard' },
   { key: 'tornei', label: 'Tornei' },
   { key: 'compagni', label: 'Compagni' },
-  { key: 'galleria', label: 'Galleria' },
+  { key: 'diario', label: 'Diario' },
 ]
 
 interface SidebarProps {
