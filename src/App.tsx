@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense, lazy } from "react";
 import { useDiary } from "./hooks/useDiary";
 import { useIsWide } from "./hooks/useMedia";
 import { useAuth } from "./hooks/useAuth";
@@ -52,16 +52,18 @@ import Tornei from "./screens/Tornei";
 import TorneoDetail from "./screens/TorneoDetail";
 import Compagni from "./screens/Compagni";
 import CompagnoDetail from "./screens/CompagnoDetail";
-import Diario from "./screens/Diario";
 import Profilo from "./screens/Profilo";
-import CreaChat from "./screens/CreaChat";
+// Lazy: schermate/modali pesanti caricate solo quando servono (code-splitting).
+// CreaChat = wizard AI; StoryModal trascina `html-to-image`; Diario è Premium.
+const Diario = lazy(() => import("./screens/Diario"));
+const CreaChat = lazy(() => import("./screens/CreaChat"));
 import TorneoModal from "./components/modals/TorneoModal";
 import PartitaModal from "./components/modals/PartitaModal";
 import FotoModal from "./components/modals/FotoModal";
 import CompagnoModal from "./components/modals/CompagnoModal";
 import QuickTorneoModal from "./components/modals/QuickTorneoModal";
 import UpgradeSheet from "./components/modals/UpgradeSheet";
-import StoryModal from "./components/modals/StoryModal";
+const StoryModal = lazy(() => import("./components/modals/StoryModal"));
 
 export default function App() {
   const wide = useIsWide();
@@ -807,7 +809,9 @@ export default function App() {
             </div>
           </div>
         )}
-        {renderScreen()}
+        <Suspense fallback={<div style={{ padding: 24 }} />}>
+          {renderScreen()}
+        </Suspense>
       </main>
 
       {!wide && !isCrea && (
@@ -878,11 +882,13 @@ export default function App() {
         />
       )}
       {modal === "story" && storyData && (
-        <StoryModal
-          story={storyData}
-          onClose={closeModal}
-          onNotice={setNotice}
-        />
+        <Suspense fallback={null}>
+          <StoryModal
+            story={storyData}
+            onClose={closeModal}
+            onNotice={setNotice}
+          />
+        </Suspense>
       )}
       {upgrade && (
         <UpgradeSheet

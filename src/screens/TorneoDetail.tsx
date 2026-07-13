@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import type { TorneoDetailData } from '../lib/derive'
 import { BackLink, Badge, StatGrid, StatTile, SectionTitle, MatchRow, EmptyCard, InlineLink, MUTED } from '../components/ui'
+import PhotoLightbox, { type Shot } from '../components/PhotoLightbox'
 
 // Glifo Instagram (line-icon, eredita currentColor).
 function IgGlyph({ size = 14 }: { size?: number }) {
@@ -29,6 +31,14 @@ interface TorneoDetailProps {
 export default function TorneoDetail({ t, goBack, onEdit, onAddPartita, onOpenMatch, onAddFoto, onDeleteFoto, canAddFoto, onShareStory, canShareStory, readOnly }: TorneoDetailProps) {
   const removeFoto = (id: string) => {
     if (window.confirm('Vuoi eliminare questa foto? L’operazione non è reversibile.')) onDeleteFoto(id)
+  }
+  // Lightbox: solo le foto con una URL reale sono visualizzabili/scaricabili.
+  const [viewIdx, setViewIdx] = useState<number | null>(null)
+  const shots: Shot[] = t.photos.filter((p) => p.url).map((p) => ({ url: p.url as string, caption: p.caption }))
+  const nameBase = t.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'foto'
+  const openViewer = (url?: string | null) => {
+    const idx = url ? shots.findIndex((s) => s.url === url) : -1
+    if (idx >= 0) setViewIdx(idx)
   }
   return (
     <div style={{ animation: 'pop .32s ease both' }}>
@@ -101,7 +111,7 @@ export default function TorneoDetail({ t, goBack, onEdit, onAddPartita, onOpenMa
       {t.hasPhotos ? (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(130px,1fr))', gap: 12 }}>
           {t.photos.map((ph, i) => (
-            <div key={ph.id || i} style={{ aspectRatio: '1', borderRadius: 12, background: ph.color, position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'flex-end', padding: 11 }}>
+            <div key={ph.id || i} onClick={() => openViewer(ph.url)} style={{ aspectRatio: '1', borderRadius: 12, background: ph.color, position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'flex-end', padding: 11, cursor: ph.url ? 'zoom-in' : 'default' }}>
               {ph.url ? (
                 <img src={ph.url} alt={ph.caption} loading="lazy" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
@@ -125,6 +135,10 @@ export default function TorneoDetail({ t, goBack, onEdit, onAddPartita, onOpenMa
         <EmptyCard pad={24}>
           Nessuna foto per questo torneo.{!readOnly && <> <InlineLink onClick={onAddFoto}>Aggiungine una →</InlineLink></>}
         </EmptyCard>
+      )}
+
+      {viewIdx !== null && (
+        <PhotoLightbox photos={shots} startIndex={viewIdx} nameBase={nameBase} onClose={() => setViewIdx(null)} />
       )}
     </div>
   )
