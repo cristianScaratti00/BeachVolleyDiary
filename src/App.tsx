@@ -70,6 +70,7 @@ export default function App() {
     loading: dataLoading,
     error: diaryError,
     clearError,
+    reload,
     saveTorneo,
     quickCreateTorneo,
     createGuidedTorneo,
@@ -79,6 +80,7 @@ export default function App() {
     saveFoto,
     deleteFoto,
     saveCompagno,
+    deleteCompagno,
     searchUsers,
     linkPartner,
     unlinkPartner,
@@ -120,6 +122,14 @@ export default function App() {
       title: v.title,
       message: v.message ?? "Funzione non disponibile con il tuo piano.",
     });
+  // Un torneo condiviso da un altro utente è di sola lettura: modificabile solo
+  // dal creatore (il DB blocca comunque ogni scrittura via RLS).
+  const isSharedTorneo = (id: string | null | undefined) =>
+    !!id && !!data.tournaments.find((t) => t.id === id)?.shared;
+  const denySharedEdit = () =>
+    setNotice(
+      "Questo torneo è condiviso da un altro utente: solo chi l'ha creato può modificarlo.",
+    );
   const banner = notice;
   const dismissBanner = () => setNotice(null);
   const onUpgrade = () => {
@@ -150,6 +160,24 @@ export default function App() {
     else setNotice(diaryError);
     clearError();
   }, [diaryError, clearError]);
+
+  // I dati client (useDiary) si aggiornano solo dopo una mutazione: qui li
+  // ricarichiamo ad ogni cambio schermata e al ritorno sulla tab, così le liste
+  // non restano "in cache" quando i dati cambiano (es. tornei condivisi da altri).
+  useEffect(() => {
+    reload();
+  }, [screen, reload]);
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === "visible") reload();
+    };
+    window.addEventListener("focus", reload);
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      window.removeEventListener("focus", reload);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [reload]);
 
   // Dashboard aggregata dal server (gating per piano autoritativo).
   // Fallback al calcolo client mentre carica / in caso di errore.
@@ -273,6 +301,10 @@ export default function App() {
 
   // ---------- modal openers ----------
   const openTorneo = (id: string | null) => {
+    if (isSharedTorneo(id)) {
+      denySharedEdit();
+      return;
+    }
     if (!id) {
       const v = perm.check("createTournament");
       if (!v.allowed) {
@@ -304,14 +336,15 @@ export default function App() {
     setModal("torneo");
   };
   const openPartita = (tid: string | null) => {
-    const T = data.tournaments,
-      P = data.partners;
+    if (isSharedTorneo(tid)) {
+      denySharedEdit();
+      return;
+    }
+    const own = data.tournaments.filter((t) => !t.shared);
     setEditId(null);
     setFabOpen(false);
     setForm({
-      tournamentId: tid || (T[0] && T[0].id) || "",
-      partnerId: (P[0] && P[0].id) || "new",
-      newPartnerName: "",
+      tournamentId: tid || own[0]?.id || "",
       opponents: "",
       phase: "Girone",
       sets: [
@@ -325,12 +358,14 @@ export default function App() {
   const openMatch = (id: string) => {
     const m = data.matches.find((x) => x.id === id);
     if (!m) return;
+    if (isSharedTorneo(m.tournamentId)) {
+      denySharedEdit();
+      return;
+    }
     setEditId(id);
     setFabOpen(false);
     setForm({
       tournamentId: m.tournamentId,
-      partnerId: m.partnerId,
-      newPartnerName: "",
       opponents: m.opponents,
       phase: m.phase,
       sets: m.sets.map((s) => ({ us: s.us, them: s.them })),
@@ -340,6 +375,10 @@ export default function App() {
   };
   // Aggiunge una foto legata a uno specifico torneo (funzione Premium).
   const openFotoForTorneo = (tid: string) => {
+    if (isSharedTorneo(tid)) {
+      denySharedEdit();
+      return;
+    }
     const v = perm.check("uploadPhoto");
     if (!v.allowed) {
       denyByPlan(v);
@@ -425,6 +464,9 @@ export default function App() {
   const doLinkPartner = (userId: string) => linkPartner(selP as string, userId);
   const doUnlinkPartner = async () => {
     if (selP) await unlinkPartner(selP);
+  };
+  const doDeleteCompagno = async () => {
+    if (selP && (await deleteCompagno(selP))) go("compagni");
   };
   const doSaveCompagno = async () => {
     if (await saveCompagno(form)) closeModal();
@@ -542,6 +584,7 @@ export default function App() {
             onSearchUsers={searchUsers}
             onLink={doLinkPartner}
             onUnlink={doUnlinkPartner}
+            onDelete={doDeleteCompagno}
           />
         );
       case "diario":
@@ -766,8 +809,6 @@ export default function App() {
           editId={editId}
           setField={setField}
           tournOptions={tournamentOptions(data)}
-          partnerOptions={partnerOptions(data)}
-          canAddPartner={perm.canCreatePartner}
           sets={setRows}
           onClose={closeModal}
           onSave={doSavePartita}

@@ -180,9 +180,10 @@ interface MatchRowProps {
   setChips: SetChip[]
   note?: string
   size?: 'md' | 'sm'
+  readOnly?: boolean // torneo condiviso: riga non cliccabile (non modificabile)
 }
 
-export function MatchRow({ onClick, esitoShort, esitoColor, primary, secondary, setChips, note, size = 'md' }: MatchRowProps) {
+export function MatchRow({ onClick, esitoShort, esitoColor, primary, secondary, setChips, note, size = 'md', readOnly = false }: MatchRowProps) {
   const md = size === 'md'
   const pad = md ? '15px 18px' : '14px 16px'
   const dot = md ? 26 : 24
@@ -193,7 +194,7 @@ export function MatchRow({ onClick, esitoShort, esitoColor, primary, secondary, 
   const chipPad = md ? '5px 10px' : '5px 9px'
   const chipRadius = md ? 8 : 7
   return (
-    <div className="card lift" onClick={onClick} style={{ padding: pad, cursor: 'pointer' }}>
+    <div className={readOnly ? 'card' : 'card lift'} onClick={readOnly ? undefined : onClick} style={{ padding: pad, cursor: readOnly ? 'default' : 'pointer' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: md ? 13 : 12 }}>
           <div style={{ width: dot, height: dot, borderRadius: '50%', border: `2px solid ${esitoColor}`, display: 'flex', alignItems: 'center', justifyContent: 'center', font: `700 ${dotFont}px 'Space Grotesk'`, color: esitoColor, flex: 'none' }}>{esitoShort}</div>

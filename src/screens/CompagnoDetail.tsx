@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { CompagnoDetailData } from '../lib/derive'
 import type { AppUser } from '../lib/models'
-import { BackLink, Avatar, StatGrid, StatTile, SectionTitle, MatchRow, MUTED } from '../components/ui'
+import { BackLink, Avatar, StatGrid, StatTile, SectionTitle, MatchRow, EmptyCard, MUTED } from '../components/ui'
 
 interface CompagnoDetailProps {
   cp: CompagnoDetailData
@@ -11,11 +11,15 @@ interface CompagnoDetailProps {
   onSearchUsers: (query: string) => Promise<AppUser[]>
   onLink: (userId: string) => Promise<{ ok: boolean; error?: string }>
   onUnlink: () => void
+  onDelete: () => void
 }
 
 const searchInput = { width: '100%', border: '1px solid rgba(27,42,74,.16)', borderRadius: 10, padding: '11px 13px', font: "600 14px 'Nunito Sans'", background: '#fff' } as const
 
-export default function CompagnoDetail({ cp, goBack, onOpenMatch, linked, onSearchUsers, onLink, onUnlink }: CompagnoDetailProps) {
+export default function CompagnoDetail({ cp, goBack, onOpenMatch, linked, onSearchUsers, onLink, onUnlink, onDelete }: CompagnoDetailProps) {
+  const removeCompagno = () => {
+    if (window.confirm(`Eliminare «${cp.name}»? Nei tornei e nelle partite resterà segnato come "nessuno" e non conterà più nelle sue statistiche. L'operazione non è reversibile.`)) onDelete()
+  }
   const [open, setOpen] = useState(false)
   const [users, setUsers] = useState<AppUser[] | null>(null)
   const [q, setQ] = useState('')
@@ -109,6 +113,9 @@ export default function CompagnoDetail({ cp, goBack, onOpenMatch, linked, onSear
       </StatGrid>
 
       <SectionTitle>Partite insieme</SectionTitle>
+      {cp.matches.length === 0 ? (
+        <EmptyCard>Ancora nessuna partita insieme.</EmptyCard>
+      ) : (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {cp.matches.map((m) => (
           <MatchRow
@@ -123,6 +130,9 @@ export default function CompagnoDetail({ cp, goBack, onOpenMatch, linked, onSear
           />
         ))}
       </div>
+      )}
+
+      <div className="chip" onClick={removeCompagno} style={{ display: 'inline-flex', marginTop: 26, padding: '11px 18px', borderRadius: 11, border: '1px solid rgba(255,71,126,.4)', color: '#FF477E', cursor: 'pointer', font: "700 13.5px 'Nunito Sans'" }}>Elimina socio</div>
     </div>
   )
 }

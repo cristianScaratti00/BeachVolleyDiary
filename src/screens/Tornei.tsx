@@ -1,5 +1,5 @@
 import type { TorneiListData } from '../lib/derive'
-import { PageHeader, Button, Badge, StatFooter, MUTED } from '../components/ui'
+import { PageHeader, Button, Badge, StatFooter, EmptyCard, InlineLink, MUTED } from '../components/ui'
 
 interface TorneiProps {
   list: TorneiListData
@@ -29,6 +29,11 @@ export default function Tornei({ list, onOpenTorneo, onNewTorneo, onQuickTorneo,
         }
       />
 
+      {tornei.length === 0 ? (
+        <div style={{ marginTop: 22 }}>
+          <EmptyCard>Nessun torneo ancora. <InlineLink onClick={onNewTorneo}>Crea il primo torneo →</InlineLink></EmptyCard>
+        </div>
+      ) : (
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(min(100%,300px),1fr))', gap: 14, marginTop: 22 }}>
         {tornei.map((t) => (
           <div key={t.id} className="card lift" onClick={() => onOpenTorneo(t.id)} style={{ padding: 20, cursor: 'pointer' }}>
@@ -54,6 +59,7 @@ export default function Tornei({ list, onOpenTorneo, onNewTorneo, onQuickTorneo,
           </div>
         ))}
       </div>
+      )}
     </div>
   )
 }

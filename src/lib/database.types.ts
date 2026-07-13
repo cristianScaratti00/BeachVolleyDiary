@@ -166,7 +166,7 @@ export type Database = {
           id: string
           user_id: string
           tournament_id: string
-          partner_id: string
+          partner_id: string | null
           opponents: string
           phase: string
           note: string
@@ -177,7 +177,7 @@ export type Database = {
           id?: string
           user_id?: string
           tournament_id: string
-          partner_id: string
+          partner_id?: string | null
           opponents?: string
           phase?: string
           note?: string
@@ -188,7 +188,7 @@ export type Database = {
           id?: string
           user_id?: string
           tournament_id?: string
-          partner_id?: string
+          partner_id?: string | null
           opponents?: string
           phase?: string
           note?: string

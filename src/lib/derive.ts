@@ -171,7 +171,7 @@ const PLACEMENT_LABELS: Record<number, string> = { 1: '1° 🏆', 2: '2°', 3: '
 
 const tournObj = (data: DiaryData, id: string): Tournament | undefined => data.tournaments.find((x) => x.id === id)
 const partnerObj = (data: DiaryData, id: string): Partner | undefined => data.partners.find((x) => x.id === id)
-const partnerName = (data: DiaryData, id: string): string => partnerObj(data, id)?.name || '—'
+const partnerName = (data: DiaryData, id: string | null): string => (id ? partnerObj(data, id)?.name || 'Nessuno' : 'Nessuno')
 
 // Placement-driven accent dot (replaces the old emoji tile).
 const dotForRank = (r: number): string => (r === 1 ? '#FF6B35' : r <= 3 ? '#F7A883' : 'rgba(27,42,74,.25)')
@@ -533,7 +533,7 @@ export function deriveStory(data: DiaryData, id: string): StoryData | null {
 
   // Compagno principale: quello con più partite nel torneo, poi il compagno del torneo.
   const counts: Record<string, number> = {}
-  tm.forEach((m) => { counts[m.partnerId] = (counts[m.partnerId] || 0) + 1 })
+  tm.forEach((m) => { if (m.partnerId) counts[m.partnerId] = (counts[m.partnerId] || 0) + 1 })
   let bpId: string | null = null, bn = 0
   Object.keys(counts).forEach((k) => { if (counts[k] > bn) { bn = counts[k]; bpId = k } })
   bpId = bpId ?? t.partnerId
@@ -626,7 +626,8 @@ export function deriveCompagnoDetailServer(sv: SvCompagnoDetail): CompagnoDetail
 }
 
 export function tournamentOptions(data: DiaryData): Option[] {
-  return data.tournaments.map((t) => ({ id: t.id, name: t.name }))
+  // Solo i propri tornei: non si possono aggiungere partite/foto a un condiviso.
+  return data.tournaments.filter((t) => !t.shared).map((t) => ({ id: t.id, name: t.name }))
 }
 export function partnerOptions(data: DiaryData): Option[] {
   return data.partners.map((p) => ({ id: p.id, name: p.name }))

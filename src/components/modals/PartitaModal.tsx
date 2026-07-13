@@ -3,7 +3,6 @@ import { Sheet, Title, Label, inputStyle, selectStyle, Actions } from './Sheet'
 import type { AnyForm, SetField, SetsApi, Option, Phase } from '../../lib/models'
 
 const setInput: CSSProperties = { flex: 1, minWidth: 0, border: '1px solid rgba(27,42,74,.16)', borderRadius: 10, padding: 11, font: "600 16px 'Space Grotesk'", textAlign: 'center', background: '#fff' }
-const fieldWrap: CSSProperties = { flex: 1, minWidth: 130 }
 const noteStyle: CSSProperties = { ...inputStyle, font: "600 14px 'Nunito Sans'", minHeight: 60, resize: 'vertical' }
 
 interface PartitaModalProps {
@@ -11,17 +10,14 @@ interface PartitaModalProps {
   editId: string | null
   setField: SetField
   tournOptions: Option[]
-  partnerOptions: Option[]
-  canAddPartner: boolean
   sets: SetsApi
   onClose: () => void
   onSave: () => void
   onDelete: () => void
 }
 
-export default function PartitaModal({ form, editId, setField, tournOptions, partnerOptions, canAddPartner, sets, onClose, onSave, onDelete }: PartitaModalProps) {
+export default function PartitaModal({ form, editId, setField, tournOptions, sets, onClose, onSave, onDelete }: PartitaModalProps) {
   const { rows, canAdd, addSet, updateSet, removeSet } = sets
-  const isNewPartner = form.partnerId === 'new'
   return (
     <Sheet onClose={onClose}>
       <Title>{editId ? 'Modifica partita' : 'Nuova partita'}</Title>
@@ -33,28 +29,13 @@ export default function PartitaModal({ form, editId, setField, tournOptions, par
           </select>
         </div>
 
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-          <div style={fieldWrap}>
-            <Label>Compagno</Label>
-            <select value={form.partnerId || ''} onChange={(e: ChangeEvent<HTMLSelectElement>) => setField('partnerId', e.target.value)} style={selectStyle}>
-              {partnerOptions.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-              {(canAddPartner || form.partnerId === 'new') && <option value="new">＋ Nuovo compagno</option>}
-            </select>
-          </div>
-          <div style={fieldWrap}>
-            <Label>Fase</Label>
-            <select value={form.phase || 'Girone'} onChange={(e: ChangeEvent<HTMLSelectElement>) => setField('phase', e.target.value as Phase)} style={selectStyle}>
-              <option>Girone</option><option>Ottavi</option><option>Quarti</option><option>Semifinale</option><option>Finale</option>
-            </select>
-          </div>
+        <div>
+          <Label>Fase</Label>
+          <select value={form.phase || 'Girone'} onChange={(e: ChangeEvent<HTMLSelectElement>) => setField('phase', e.target.value as Phase)} style={selectStyle}>
+            <option>Girone</option><option>Ottavi</option><option>Quarti</option><option>Semifinale</option><option>Finale</option>
+          </select>
+          <div style={{ font: "600 12px 'Nunito Sans'", color: 'rgba(27,42,74,.5)', marginTop: 6 }}>Il compagno è quello del torneo.</div>
         </div>
-
-        {isNewPartner && (
-          <div>
-            <Label>Nome nuovo compagno</Label>
-            <input value={form.newPartnerName || ''} onChange={(e: ChangeEvent<HTMLInputElement>) => setField('newPartnerName', e.target.value)} placeholder="es. Giulia" style={inputStyle} />
-          </div>
-        )}
 
         <div>
           <Label>Avversari (coppia)</Label>

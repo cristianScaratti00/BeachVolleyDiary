@@ -76,6 +76,7 @@ export default function TorneoDetail({ t, goBack, onEdit, onAddPartita, onOpenMa
             secondary={`con ${m.partnerName}`}
             setChips={m.setChips}
             note={m.hasNote ? m.note : undefined}
+            readOnly={readOnly}
           />
         ))}
         {t.noMatches && (

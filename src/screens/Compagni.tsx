@@ -1,5 +1,5 @@
 import type { CompagnoCard } from '../lib/derive'
-import { PageHeader, Button, Avatar, StatFooter, MUTED } from '../components/ui'
+import { PageHeader, Button, Avatar, StatFooter, EmptyCard, InlineLink, MUTED } from '../components/ui'
 
 interface CompagniProps {
   compagni: CompagnoCard[]
@@ -16,6 +16,11 @@ export default function Compagni({ compagni, onOpenCompagno, onNewCompagno }: Co
         actions={<Button variant="dark" onClick={onNewCompagno}>＋ Nuovo compagno</Button>}
       />
 
+      {compagni.length === 0 ? (
+        <div style={{ marginTop: 22 }}>
+          <EmptyCard>Nessun compagno ancora. <InlineLink onClick={onNewCompagno}>Aggiungi un compagno →</InlineLink></EmptyCard>
+        </div>
+      ) : (
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(min(100%,250px),1fr))', gap: 14, marginTop: 22 }}>
         {compagni.map((p) => (
           <div key={p.id} className="card lift" onClick={() => onOpenCompagno(p.id)} style={{ padding: 22, cursor: 'pointer' }}>
@@ -38,6 +43,7 @@ export default function Compagni({ compagni, onOpenCompagno, onNewCompagno }: Co
           </div>
         ))}
       </div>
+      )}
     </div>
   )
 }

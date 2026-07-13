@@ -46,7 +46,7 @@ export interface Tournament {
 export interface Match {
   id: string
   tournamentId: string
-  partnerId: string
+  partnerId: string | null // ereditato dal torneo; null = nessuno (socio eliminato)
   opponents: string
   phase: Phase
   note: string

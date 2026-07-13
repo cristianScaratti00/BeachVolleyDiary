@@ -21,6 +21,7 @@ export interface UseDiary {
   saveFoto: (f: AnyForm, file: File | null) => Promise<boolean>
   deleteFoto: (photoId: string) => Promise<boolean>
   saveCompagno: (f: AnyForm) => Promise<boolean>
+  deleteCompagno: (id: string) => Promise<boolean>
   searchUsers: (query: string) => Promise<AppUser[]>
   linkPartner: (partnerId: string, userId: string) => Promise<{ ok: boolean; error?: string }>
   unlinkPartner: (partnerId: string) => Promise<boolean>
@@ -280,13 +281,12 @@ export function useDiary(): UseDiary {
     if (tErr || !tIns) { fail(tErr); return null }
     const tournamentId: string = tIns.id
 
-    // Le partite ereditano il compagno del torneo (o il primo socio disponibile).
-    const matchPartner = partnerId ?? data.partners[0]?.id ?? null
-    if (matches.length && matchPartner) {
+    // Le partite ereditano il compagno del torneo (può essere null = nessuno).
+    if (matches.length) {
       for (const m of matches) {
         const { data: mIns, error: mErr } = await supabase.from('matches').insert({
           tournament_id: tournamentId,
-          partner_id: matchPartner,
+          partner_id: partnerId,
           opponents: m.opponents || 'Avversari',
           phase: m.phase ?? 'Girone',
           note: '',
@@ -316,23 +316,12 @@ export function useDiary(): UseDiary {
   }, [reload])
 
   const savePartita = useCallback(async (f: AnyForm, editId: string | null) => {
-    // Risolvi il compagno: 'new' + nome → crealo; altrimenti usa l'id scelto.
-    let pid = f.partnerId ?? ''
-    if (pid === 'new') {
-      const name = (f.newPartnerName ?? '').trim()
-      if (name) {
-        const { data: ins, error } = await supabase
-          .from('partners').insert({ name, color: NEW_PARTNER_COLOR }).select('id').single()
-        if (error || !ins) return fail(error)
-        pid = ins.id
-      } else {
-        pid = data.partners[0]?.id ?? '' // nessun nome: ripiega sul primo socio
-      }
-    }
-    if (!pid) return false
-
     const tournamentId = f.tournamentId ?? ''
     if (!tournamentId) return false
+    const torneo = data.tournaments.find((t) => t.id === tournamentId)
+    if (torneo?.shared) return false // torneo condiviso da altri: sola lettura
+    // Il compagno è quello del torneo (ereditato): può essere null = nessuno.
+    const pid = torneo?.partnerId ?? null
 
     const sets = (f.sets ?? [])
       .filter((s) => s.us !== '' && s.them !== '')
@@ -367,7 +356,7 @@ export function useDiary(): UseDiary {
 
     await reload()
     return true
-  }, [reload, data.partners])
+  }, [reload, data.tournaments])
 
   const deletePartita = useCallback(async (editId: string | null) => {
     if (!editId) return false
@@ -452,6 +441,16 @@ export function useDiary(): UseDiary {
     return true
   }, [reload])
 
+  // Elimina un socio: torneo e partite collegate restano segnati come "nessuno"
+  // (FK ON DELETE SET NULL) e non contano più nelle statistiche per-compagno.
+  const deleteCompagno = useCallback(async (id: string) => {
+    if (!id) return false
+    const { error } = await supabase.from('partners').delete().eq('id', id)
+    if (error) return fail(error)
+    await reload()
+    return true
+  }, [reload])
+
   // Aggiunge un compagno "generico", indipendente da qualsiasi partita.
   const saveCompagno = useCallback(async (f: AnyForm) => {
     const name = (f.name ?? '').trim()
@@ -462,5 +461,5 @@ export function useDiary(): UseDiary {
     return true
   }, [reload])
 
-  return { data, loading, error, clearError, reload, saveTorneo, quickCreateTorneo, createGuidedTorneo, deleteTorneo, savePartita, deletePartita, saveFoto, deleteFoto, saveCompagno, searchUsers, linkPartner, unlinkPartner }
+  return { data, loading, error, clearError, reload, saveTorneo, quickCreateTorneo, createGuidedTorneo, deleteTorneo, savePartita, deletePartita, saveFoto, deleteFoto, saveCompagno, deleteCompagno, searchUsers, linkPartner, unlinkPartner }
 }

@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { CSSProperties, ChangeEvent, FormEvent } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useIsWide } from "../hooks/useMedia";
+import { BrandLockup } from "../components/Logo";
 
 type Mode = "login" | "register";
 
@@ -31,30 +32,6 @@ const FEATURES = [
   { icon: "▤", text: "Tornei, partite e set" },
   { icon: "◎", text: "Con chi giochi meglio" },
 ];
-
-function Brand({ light = false }: { light?: boolean }) {
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-      <div
-        style={{
-          width: 10,
-          height: 10,
-          borderRadius: "50%",
-          background: "#FF6B35",
-        }}
-      />
-      <div
-        style={{
-          font: "600 17px 'Space Grotesk'",
-          letterSpacing: "-.2px",
-          color: light ? "#fff" : "#1B2A4A",
-        }}
-      >
-        Beach Diary
-      </div>
-    </div>
-  );
-}
 
 export default function Login() {
   const wide = useIsWide();
@@ -112,7 +89,7 @@ export default function Login() {
             }}
           />
           <div style={{ position: "relative" }}>
-            <Brand light />
+            <BrandLockup light bare size={34} textSize={18} gap={11} />
           </div>
           <div style={{ flex: 1 }} />
           <div style={{ position: "relative" }}>
@@ -189,7 +166,7 @@ export default function Login() {
                 justifyContent: "center",
               }}
             >
-              <Brand />
+              <BrandLockup size={34} textSize={17} gap={11} />
             </div>
           )}
 

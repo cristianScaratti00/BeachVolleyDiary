@@ -1,5 +1,5 @@
 import type { TorneoCard } from '../../lib/derive'
-import { SectionTitle } from '../ui'
+import { SectionTitle, EmptyCard, InlineLink } from '../ui'
 
 // Lista "Ultimi tornei" con link "Vedi tutti".
 export function RecentTornei({ recent, onOpenTorneo, goTornei }: { recent: TorneoCard[]; onOpenTorneo: (id: string) => void; goTornei: () => void }) {
@@ -11,6 +11,9 @@ export function RecentTornei({ recent, onOpenTorneo, goTornei }: { recent: Torne
       >
         Ultimi tornei
       </SectionTitle>
+      {recent.length === 0 ? (
+        <EmptyCard>Ancora nessun torneo. <InlineLink onClick={goTornei}>Vai ai tornei →</InlineLink></EmptyCard>
+      ) : (
       <div style={{ display: 'flex', flexDirection: 'column', border: '1px solid rgba(27,42,74,.1)', borderRadius: 14, overflow: 'hidden', background: '#fff' }}>
         {recent.map((t) => (
           <div key={t.id} className="row" onClick={() => onOpenTorneo(t.id)} style={{ display: 'flex', gap: 14, alignItems: 'center', padding: '16px 18px', cursor: 'pointer', borderBottom: '1px solid rgba(27,42,74,.07)' }}>
@@ -24,6 +27,7 @@ export function RecentTornei({ recent, onOpenTorneo, goTornei }: { recent: Torne
           </div>
         ))}
       </div>
+      )}
     </>
   )
 }
