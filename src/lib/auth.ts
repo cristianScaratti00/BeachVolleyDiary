@@ -54,6 +54,17 @@ export async function registerUser(name: string, email: string, password: string
   if (!EMAIL_RE.test(e)) return { ok: false, error: 'Email non valida.' }
   if (password.length < 6) return { ok: false, error: 'La password deve avere almeno 6 caratteri.' }
 
+  // Verifica che il nome non sia già usato da un altro utente (Edge Function).
+  // Fail-open: se la function non risponde non blocchiamo la registrazione.
+  try {
+    const { data: check } = await supabase.functions.invoke('check-name', { body: { name: n } })
+    if (check && check.available === false) {
+      return { ok: false, error: check.error || 'Questo nome è già in uso, scegline un altro.' }
+    }
+  } catch {
+    /* rete/funzione non disponibile: si prosegue con la registrazione */
+  }
+
   const { data, error } = await supabase.auth.signUp({
     email: e,
     password,
