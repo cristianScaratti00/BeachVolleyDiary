@@ -1,14 +1,15 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import type { ReactNode } from 'react'
 import { supabase } from '../lib/supabase'
-import { loginUser, registerUser, logoutUser, sessionForUser } from '../lib/auth'
-import type { Session, AuthResult } from '../lib/auth'
+import { loginUser, registerUser, logoutUser, sessionForUser, signInWithProvider } from '../lib/auth'
+import type { Session, AuthResult, OAuthProvider } from '../lib/auth'
 
 interface AuthContextValue {
   session: Session | null
   loading: boolean // true finché non si conosce lo stato iniziale della sessione
   login: (email: string, password: string) => Promise<AuthResult>
   register: (name: string, email: string, password: string) => Promise<AuthResult>
+  loginWithProvider: (provider: OAuthProvider) => Promise<AuthResult>
   logout: () => Promise<void>
 }
 
@@ -38,10 +39,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     (name: string, email: string, password: string) => registerUser(name, email, password),
     [],
   )
+  const loginWithProvider = useCallback((provider: OAuthProvider) => signInWithProvider(provider), [])
   const logout = useCallback(() => logoutUser(), [])
 
   return (
-    <AuthContext.Provider value={{ session, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ session, loading, login, register, loginWithProvider, logout }}>
       {children}
     </AuthContext.Provider>
   )

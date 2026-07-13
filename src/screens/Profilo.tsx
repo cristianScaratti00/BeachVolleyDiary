@@ -23,7 +23,7 @@ const PLANS: PlanCard[] = [
   },
   {
     key: 'premium', name: 'Premium', price: '€5', period: '/mese', accent: '#FF6B35',
-    features: ['Tornei e compagni illimitati', 'Diario dei tornei con foto', 'Filtri avanzati dashboard', 'Tutto del piano Base'],
+    features: ['Assistente AI per creare i tornei', 'Tornei e compagni illimitati', 'Diario dei tornei con foto', 'Filtri avanzati dashboard', 'Tutto del piano Base'],
   },
 ]
 
@@ -77,7 +77,7 @@ export default function Profilo({ session, onUpgrade, onLogout }: ProfiloProps) 
       </div>
 
       <div style={{ font: "600 12px 'Nunito Sans'", color: 'rgba(27,42,74,.45)', marginTop: 14 }}>
-        Con il piano Base puoi creare fino a {BASE_LIMITS.tournaments} tornei e {BASE_LIMITS.partners} compagni. Con Premium sono illimitati.
+        Con il piano Base puoi creare fino a {BASE_LIMITS.tournaments} tornei e {BASE_LIMITS.partners} compagni. Con Premium sono illimitati e sblocchi l’assistente AI che crea i tornei per te.
       </div>
 
       <div className="chip" onClick={onLogout} style={{ display: 'inline-flex', marginTop: 26, padding: '11px 18px', borderRadius: 11, border: '1px solid rgba(255,71,126,.4)', color: '#FF477E', cursor: 'pointer', font: "700 13.5px 'Nunito Sans'" }}>Esci</div>

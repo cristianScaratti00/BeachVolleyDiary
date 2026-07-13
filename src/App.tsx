@@ -52,6 +52,7 @@ import Compagni from "./screens/Compagni";
 import CompagnoDetail from "./screens/CompagnoDetail";
 import Diario from "./screens/Diario";
 import Profilo from "./screens/Profilo";
+import CreaChat from "./screens/CreaChat";
 import TorneoModal from "./components/modals/TorneoModal";
 import PartitaModal from "./components/modals/PartitaModal";
 import FotoModal from "./components/modals/FotoModal";
@@ -70,10 +71,12 @@ export default function App() {
     clearError,
     saveTorneo,
     quickCreateTorneo,
+    createGuidedTorneo,
     deleteTorneo,
     savePartita,
     deletePartita,
     saveFoto,
+    deleteFoto,
     saveCompagno,
   } = useDiary();
 
@@ -372,6 +375,28 @@ export default function App() {
     });
     setModal("torneoRapido");
   };
+  // Apre l'assistente guidato in stile chat (creazione conversazionale del torneo).
+  // Funzione Premium: i piani base vedono la bottom-sheet di upgrade.
+  const openCrea = () => {
+    if (!ent.aiCreate) {
+      setUpgrade({
+        title: "Funzione Premium",
+        message:
+          "L’assistente AI che crea i tornei al posto tuo è disponibile con il piano Premium.",
+      });
+      return;
+    }
+    if (!canAddTorneo) {
+      setUpgrade({
+        message: `Piano base: hai raggiunto il limite di ${tLimit} tornei.`,
+      });
+      return;
+    }
+    setFabOpen(false);
+    setModal(null);
+    setScreen("crea");
+    scrollTop();
+  };
 
   // ---------- save/delete actions (async: scrivono su Supabase) ----------
   const doSaveTorneo = async () => {
@@ -392,6 +417,9 @@ export default function App() {
   const doSaveFoto = async (file: File | null) => {
     if (await saveFoto(form, file)) closeModal();
   };
+  const doDeleteFoto = async (photoId: string) => {
+    await deleteFoto(photoId);
+  };
   const doSaveCompagno = async () => {
     if (await saveCompagno(form)) closeModal();
   };
@@ -408,6 +436,9 @@ export default function App() {
 
   // ---------- derived render data ----------
   const mainPad = wide ? "30px 34px 48px" : "20px 16px 120px";
+  // L'assistente chat occupa tutto lo schermo con scroll interno: niente
+  // padding/top-bar/bottom-nav e pagina bloccata (scorre solo la chat).
+  const isCrea = screen === "crea";
   const torneiList = srvTornei
     ? deriveTorneiListServer(srvTornei)
     : deriveTorneiList(data, fYear);
@@ -442,6 +473,8 @@ export default function App() {
             onOpenTorneo={openTorneoDetail}
             onNewTorneo={() => openTorneo(null)}
             onQuickTorneo={openQuickTorneo}
+            onAssistant={openCrea}
+            canAssistant={ent.aiCreate}
           />
         );
       case "torneo":
@@ -452,6 +485,8 @@ export default function App() {
               onOpenTorneo={openTorneoDetail}
               onNewTorneo={() => openTorneo(null)}
               onQuickTorneo={openQuickTorneo}
+              onAssistant={openCrea}
+              canAssistant={ent.aiCreate}
             />
           );
         return (
@@ -462,6 +497,7 @@ export default function App() {
             onAddPartita={() => openPartita(selT)}
             onOpenMatch={openMatch}
             onAddFoto={() => selT && openFotoForTorneo(selT)}
+            onDeleteFoto={doDeleteFoto}
             canAddFoto={ent.tournamentPhotos}
             onShareStory={() => selT && openStory(selT)}
             canShareStory={ent.diary}
@@ -506,6 +542,16 @@ export default function App() {
         return (
           <Profilo session={session!} onUpgrade={onUpgrade} onLogout={logout} />
         );
+      case "crea":
+        return (
+          <CreaChat
+            wide={wide}
+            partners={partnerOptions(data)}
+            onCreate={createGuidedTorneo}
+            onDone={openTorneoDetail}
+            onExit={() => go("tornei")}
+          />
+        );
       case "home":
       default: {
         const dash = serverDash
@@ -541,6 +587,8 @@ export default function App() {
             }}
             onOpenTorneo={openTorneoDetail}
             onQuickTorneo={openQuickTorneo}
+            onAiCreate={openCrea}
+            canAiCreate={ent.aiCreate}
             goTornei={() => go("tornei")}
             goCompagni={() => go("compagni")}
           />
@@ -553,9 +601,9 @@ export default function App() {
     <div
       style={{
         display: "flex",
-        height: wide ? "100vh" : undefined,
-        minHeight: wide ? undefined : "100vh",
-        overflow: wide ? "hidden" : undefined,
+        height: isCrea ? "100dvh" : wide ? "100vh" : undefined,
+        minHeight: isCrea ? undefined : wide ? undefined : "100vh",
+        overflow: isCrea || wide ? "hidden" : undefined,
         background: "#FFF8F0",
       }}
     >
@@ -600,6 +648,8 @@ export default function App() {
           onNavigate={go}
           onNewPartita={() => openPartita(null)}
           onNewTorneo={() => openTorneo(null)}
+          onAssistant={openCrea}
+          canAssistant={ent.aiCreate}
         />
       )}
 
@@ -608,15 +658,17 @@ export default function App() {
         style={{
           flex: 1,
           minWidth: 0,
-          padding: mainPad,
-          maxWidth: 1120,
-          margin: "0 auto",
+          padding: isCrea ? 0 : mainPad,
+          maxWidth: isCrea ? "none" : 1120,
+          margin: isCrea ? 0 : "0 auto",
           width: "100%",
-          height: wide ? "100vh" : undefined,
-          overflowY: wide ? "auto" : undefined,
+          height: wide ? "100vh" : isCrea ? "100dvh" : undefined,
+          overflowY: isCrea ? "hidden" : wide ? "auto" : undefined,
+          display: isCrea ? "flex" : undefined,
+          flexDirection: isCrea ? "column" : undefined,
         }}
       >
-        {!wide && (
+        {!wide && !isCrea && (
           <div
             style={{
               display: "flex",
@@ -682,7 +734,7 @@ export default function App() {
         {renderScreen()}
       </main>
 
-      {!wide && (
+      {!wide && !isCrea && (
         <BottomNav
           screen={screen}
           onNavigate={go}
@@ -690,6 +742,8 @@ export default function App() {
           onToggleFab={() => setFabOpen((v) => !v)}
           onNewTorneo={() => openTorneo(null)}
           onNewPartita={() => openPartita(null)}
+          onAssistant={openCrea}
+          canAssistant={ent.aiCreate}
         />
       )}
 

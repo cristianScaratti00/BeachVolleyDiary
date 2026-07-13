@@ -15,6 +15,7 @@ export interface Entitlements {
   dashboardFilters: boolean // filtri per compagno/anno nella dashboard
   diary: boolean            // sezione "Diario" dei tornei
   tournamentPhotos: boolean // foto collegate al singolo torneo
+  aiCreate: boolean         // assistente AI (chat guidata) per creare i tornei
 }
 
 // Tabella piano → capacità. Per decidere cosa dà il Premium, guarda questa mappa.
@@ -25,6 +26,7 @@ export const ENTITLEMENTS: Record<Plan, Entitlements> = {
     dashboardFilters: false,
     diary: false,
     tournamentPhotos: false,
+    aiCreate: false,
   },
   premium: {
     tournaments: Infinity,
@@ -32,6 +34,7 @@ export const ENTITLEMENTS: Record<Plan, Entitlements> = {
     dashboardFilters: true,
     diary: true,
     tournamentPhotos: true,
+    aiCreate: true,
   },
 }
 

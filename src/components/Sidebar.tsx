@@ -16,9 +16,11 @@ interface SidebarProps {
   onNavigate: (screen: Screen) => void
   onNewPartita: () => void
   onNewTorneo: () => void
+  onAssistant: () => void
+  canAssistant: boolean
 }
 
-export default function Sidebar({ screen, onNavigate, onNewPartita, onNewTorneo }: SidebarProps) {
+export default function Sidebar({ screen, onNavigate, onNewPartita, onNewTorneo, onAssistant, canAssistant }: SidebarProps) {
   const { session, logout } = useAuth()
   const initial = session?.name?.[0]?.toUpperCase() || '?'
   return (
@@ -44,7 +46,11 @@ export default function Sidebar({ screen, onNavigate, onNewPartita, onNewTorneo 
 
       <div style={{ flex: 1 }} />
 
-      <div className="chip" onClick={onNewPartita} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 12, borderRadius: 11, cursor: 'pointer', background: '#1B2A4A', color: '#fff', font: "700 13.5px 'Nunito Sans'" }}>＋ Nuova partita</div>
+      <div className="chip" onClick={onAssistant} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 12, borderRadius: 11, cursor: 'pointer', background: 'linear-gradient(135deg,#FF6B35,#FF9558)', color: '#fff', font: "700 13.5px 'Nunito Sans'", boxShadow: '0 8px 20px -10px rgba(255,107,53,.8)' }}>
+        ✨ Crea con l’assistente
+        {!canAssistant && <span style={{ font: "800 8px 'Nunito Sans'", letterSpacing: '.4px', textTransform: 'uppercase', padding: '2px 5px', borderRadius: 4, background: 'rgba(255,255,255,.28)', color: '#fff' }}>Premium</span>}
+      </div>
+      <div className="chip" onClick={onNewPartita} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 12, borderRadius: 11, cursor: 'pointer', background: '#1B2A4A', color: '#fff', font: "700 13.5px 'Nunito Sans'", marginTop: 8 }}>＋ Nuova partita</div>
       <div className="chip" onClick={onNewTorneo} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 12, borderRadius: 11, cursor: 'pointer', border: '1px solid rgba(27,42,74,.18)', color: '#1B2A4A', font: "700 13.5px 'Nunito Sans'", marginTop: 8 }}>＋ Nuovo torneo</div>
 
       <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid rgba(27,42,74,.09)', display: 'flex', alignItems: 'center', gap: 10 }}>

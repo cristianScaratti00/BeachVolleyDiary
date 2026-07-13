@@ -5,9 +5,11 @@ interface TorneiProps {
   onOpenTorneo: (id: string) => void
   onNewTorneo: () => void
   onQuickTorneo: () => void
+  onAssistant: () => void
+  canAssistant: boolean
 }
 
-export default function Tornei({ list, onOpenTorneo, onNewTorneo, onQuickTorneo }: TorneiProps) {
+export default function Tornei({ list, onOpenTorneo, onNewTorneo, onQuickTorneo, onAssistant, canAssistant }: TorneiProps) {
   const { tornei, tPlayed, podi, bestPlacement } = list
   return (
     <div style={{ animation: 'pop .32s ease both' }}>
@@ -17,7 +19,11 @@ export default function Tornei({ list, onOpenTorneo, onNewTorneo, onQuickTorneo 
           <div style={{ font: "600 14px 'Nunito Sans'", color: 'rgba(27,42,74,.55)', marginTop: 4 }}>{tPlayed} tornei · {podi} podi · miglior piazzamento {bestPlacement}</div>
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <div className="chip" onClick={onQuickTorneo} style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#FF6B35', color: '#fff', padding: '11px 15px', borderRadius: 11, font: "700 13.5px 'Nunito Sans'", cursor: 'pointer' }}>⚡ Rapido</div>
+          <div className="chip" onClick={onAssistant} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'linear-gradient(135deg,#FF6B35,#FF9558)', color: '#fff', padding: '11px 15px', borderRadius: 11, font: "700 13.5px 'Nunito Sans'", cursor: 'pointer', boxShadow: '0 6px 16px -8px rgba(255,107,53,.7)' }}>
+            ✨ Assistente
+            {!canAssistant && <span style={{ font: "800 8px 'Nunito Sans'", letterSpacing: '.4px', textTransform: 'uppercase', padding: '2px 5px', borderRadius: 4, background: 'rgba(255,255,255,.28)', color: '#fff' }}>Premium</span>}
+          </div>
+          <div className="chip" onClick={onQuickTorneo} style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#F2F0EC', color: '#1B2A4A', padding: '11px 15px', borderRadius: 11, font: "700 13.5px 'Nunito Sans'", cursor: 'pointer' }}>⚡ Rapido</div>
           <div className="chip" onClick={onNewTorneo} style={{ display: 'flex', alignItems: 'center', gap: 7, background: '#1B2A4A', color: '#fff', padding: '11px 16px', borderRadius: 11, font: "700 13.5px 'Nunito Sans'", cursor: 'pointer' }}>＋ Nuovo torneo</div>
         </div>
       </div>

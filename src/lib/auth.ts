@@ -21,6 +21,9 @@ export interface AuthResult {
   session?: Session
 }
 
+// Provider social supportati per l'accesso OAuth.
+export type OAuthProvider = 'google' | 'apple'
+
 export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 // Legge ruolo e piano dal profilo dell'utente (default prudenti se non c'è ancora).
@@ -35,7 +38,9 @@ async function fetchProfile(userId: string): Promise<{ role: Role; plan: Plan }>
 // Costruisce la sessione di dominio { email, name, role, plan } dallo user Supabase.
 export async function sessionForUser(user: User | null | undefined): Promise<Session | null> {
   if (!user) return null
-  const name = (user.user_metadata?.name as string | undefined)?.trim()
+  // Email+password salva `name`; Google/Apple usano `full_name`/`name` — prendi il primo.
+  const meta = user.user_metadata ?? {}
+  const name = ((meta.name ?? meta.full_name ?? meta.user_name) as string | undefined)?.trim()
   const email = user.email ?? ''
   const { role, plan } = await fetchProfile(user.id)
   return { email, name: name || email.split('@')[0] || 'Utente', role, plan }
@@ -71,6 +76,23 @@ export async function loginUser(email: string, password: string): Promise<AuthRe
   return { ok: true }
 }
 
+// Accesso/registrazione con un provider social (Google / Apple).
+// Il metodo reindirizza il browser al provider; al ritorno supabase-js rileva la
+// sessione dall'URL e `onAuthStateChange` (in useAuth) aggiorna lo stato.
+// Il profilo viene creato automaticamente dal trigger `on_auth_user_created`.
+export async function signInWithProvider(provider: OAuthProvider): Promise<AuthResult> {
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider,
+    options: {
+      redirectTo: window.location.origin,
+      // Google: mostra il selettore account invece di entrare subito con l'ultimo.
+      queryParams: provider === 'google' ? { prompt: 'select_account' } : undefined,
+    },
+  })
+  if (error) return { ok: false, error: translateAuthError(error.message) }
+  return { ok: true } // in pratica il browser sta già reindirizzando
+}
+
 export async function logoutUser(): Promise<void> {
   await supabase.auth.signOut()
 }
@@ -85,6 +107,10 @@ function translateAuthError(msg: string): string {
   if (m.includes('email not confirmed')) return 'Email non confermata: controlla la tua casella di posta.'
   if (m.includes('password')) return 'Password non valida (minimo 6 caratteri).'
   if (m.includes('rate limit') || m.includes('too many')) return 'Troppi tentativi, riprova tra poco.'
+  if (m.includes('provider is not enabled') || m.includes('unsupported provider')) {
+    return 'Accesso con questo provider non ancora disponibile. Riprova più tardi.'
+  }
+  if (m.includes('popup') || m.includes('cancel')) return 'Accesso annullato.'
   if (m.includes('email')) return 'Email non valida.'
   return msg
 }

@@ -28,12 +28,16 @@ interface TorneoDetailProps {
   onAddPartita: () => void
   onOpenMatch: (id: string) => void
   onAddFoto: () => void
+  onDeleteFoto: (photoId: string) => void
   canAddFoto: boolean
   onShareStory: () => void
   canShareStory: boolean
 }
 
-export default function TorneoDetail({ t, goBack, onEdit, onAddPartita, onOpenMatch, onAddFoto, canAddFoto, onShareStory, canShareStory }: TorneoDetailProps) {
+export default function TorneoDetail({ t, goBack, onEdit, onAddPartita, onOpenMatch, onAddFoto, onDeleteFoto, canAddFoto, onShareStory, canShareStory }: TorneoDetailProps) {
+  const removeFoto = (id: string) => {
+    if (window.confirm('Vuoi eliminare questa foto? L’operazione non è reversibile.')) onDeleteFoto(id)
+  }
   return (
     <div style={{ animation: 'pop .32s ease both' }}>
       <div className="chip" onClick={goBack} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, font: "700 13px 'Nunito Sans'", color: 'rgba(27,42,74,.55)', cursor: 'pointer', marginBottom: 18 }}>← Tornei</div>
@@ -103,12 +107,20 @@ export default function TorneoDetail({ t, goBack, onEdit, onAddPartita, onOpenMa
       {t.hasPhotos ? (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(130px,1fr))', gap: 12 }}>
           {t.photos.map((ph, i) => (
-            <div key={i} style={{ aspectRatio: '1', borderRadius: 12, background: ph.color, position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'flex-end', padding: 11 }}>
+            <div key={ph.id || i} style={{ aspectRatio: '1', borderRadius: 12, background: ph.color, position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'flex-end', padding: 11 }}>
               {ph.url ? (
                 <img src={ph.url} alt={ph.caption} loading="lazy" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
                 <div style={{ position: 'absolute', inset: 0, backgroundImage: 'repeating-linear-gradient(45deg,rgba(255,255,255,.1) 0 8px,transparent 8px 16px)' }} />
               )}
+              <div
+                className="chip"
+                onClick={(e) => { e.stopPropagation(); removeFoto(ph.id) }}
+                title="Elimina foto"
+                style={{ position: 'absolute', top: 8, right: 8, width: 28, height: 28, borderRadius: 8, background: 'rgba(27,42,74,.62)', backdropFilter: 'blur(2px)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13" /></svg>
+              </div>
               {ph.caption && <div style={{ position: 'relative', font: "700 11px 'Nunito Sans'", color: '#fff', textShadow: '0 1px 5px rgba(0,0,0,.6)' }}>{ph.caption}</div>}
             </div>
           ))}

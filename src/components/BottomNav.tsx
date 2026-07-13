@@ -27,9 +27,11 @@ interface BottomNavProps {
   onToggleFab: () => void
   onNewTorneo: () => void
   onNewPartita: () => void
+  onAssistant: () => void
+  canAssistant: boolean
 }
 
-export default function BottomNav({ screen, onNavigate, fabOpen, onToggleFab, onNewTorneo, onNewPartita }: BottomNavProps) {
+export default function BottomNav({ screen, onNavigate, fabOpen, onToggleFab, onNewTorneo, onNewPartita, onAssistant, canAssistant }: BottomNavProps) {
   return (
     <>
       <div style={{ position: 'fixed', left: 0, right: 0, bottom: 0, height: 70, background: '#fff', borderTop: '1px solid rgba(27,42,74,.1)', display: 'flex', alignItems: 'center', justifyContent: 'space-around', padding: '0 8px 10px', zIndex: 40 }}>
@@ -45,6 +47,10 @@ export default function BottomNav({ screen, onNavigate, fabOpen, onToggleFab, on
       {fabOpen && (
         <div onClick={onToggleFab} style={{ position: 'fixed', inset: 0, zIndex: 42, animation: 'overlay .2s ease' }}>
           <div style={{ position: 'absolute', left: '50%', bottom: 112, transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'center' }}>
+            <div className="chip" onClick={onAssistant} style={{ display: 'flex', alignItems: 'center', gap: 7, background: 'linear-gradient(135deg,#FF6B35,#FF9558)', color: '#fff', font: "700 13.5px 'Nunito Sans'", padding: '12px 20px', borderRadius: 12, boxShadow: '0 8px 22px -8px rgba(255,107,53,.7)', cursor: 'pointer' }}>
+              ✨ Crea con l’assistente
+              {!canAssistant && <span style={{ font: "800 8px 'Nunito Sans'", letterSpacing: '.4px', textTransform: 'uppercase', padding: '2px 5px', borderRadius: 4, background: 'rgba(255,255,255,.28)', color: '#fff' }}>Premium</span>}
+            </div>
             <div className="chip" onClick={onNewTorneo} style={{ background: '#fff', color: '#1B2A4A', font: "700 13.5px 'Nunito Sans'", padding: '12px 20px', borderRadius: 12, boxShadow: '0 8px 22px -8px rgba(27,42,74,.4)', cursor: 'pointer' }}>Nuovo torneo</div>
             <div className="chip" onClick={onNewPartita} style={{ background: '#1B2A4A', color: '#fff', font: "700 13.5px 'Nunito Sans'", padding: '12px 20px', borderRadius: 12, boxShadow: '0 8px 22px -8px rgba(27,42,74,.4)', cursor: 'pointer' }}>Nuova partita</div>
           </div>

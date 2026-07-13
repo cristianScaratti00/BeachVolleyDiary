@@ -43,6 +43,14 @@ export interface Match {
   sets: SetScore[]
 }
 
+// Bozza di partita raccolta dall'assistente guidato (chat): il compagno è
+// quello del torneo, quindi qui servono solo avversari, fase e punteggi.
+export interface GuidedMatch {
+  opponents: string
+  phase: Phase
+  sets: SetScore[]
+}
+
 export interface Photo {
   id: string
   tournamentId: string
@@ -122,5 +130,5 @@ export interface Option {
 }
 
 // Navigazione e modali a livello di App.
-export type Screen = 'home' | 'tornei' | 'torneo' | 'compagni' | 'compagno' | 'diario' | 'profilo'
+export type Screen = 'home' | 'tornei' | 'torneo' | 'compagni' | 'compagno' | 'diario' | 'profilo' | 'crea'
 export type ModalKind = 'torneo' | 'torneoRapido' | 'partita' | 'foto' | 'socio' | 'story' | null

@@ -75,7 +75,7 @@ export interface TorneoMatchRow {
   hasNote: boolean
   note: string
 }
-export interface TorneoPhoto { color: string; caption: string; url: string | null }
+export interface TorneoPhoto { id: string; color: string; caption: string; url: string | null }
 export interface TorneoDetailData {
   id: string
   name: string
@@ -407,7 +407,7 @@ export function deriveTorneoDetail(data: DiaryData, id: string): TorneoDetailDat
     record: ts.won + '-' + ts.lost, winPct: ts.winPct, setStr: ts.sw + '-' + ts.sl,
     diffStr: (ts.diff >= 0 ? '+' : '') + ts.diff,
     noMatches: tm.length === 0, hasPhotos: photos.length > 0,
-    photos: photos.map((p) => ({ color: p.color, caption: p.caption, url: p.url })),
+    photos: photos.map((p) => ({ id: p.id, color: p.color, caption: p.caption, url: p.url })),
     matches: tm.map((m) => {
       const r = res(m); const es = esitoStyle(r.won)
       return {
@@ -578,7 +578,7 @@ export function deriveTorneoDetailServer(sv: SvTorneoDetail, data: DiaryData): T
     record: sv.won + '-' + sv.lost, winPct: sv.win_pct, setStr: sv.sets_won + '-' + sv.sets_lost,
     diffStr: (sv.point_diff >= 0 ? '+' : '') + sv.point_diff,
     noMatches: sv.matches.length === 0, hasPhotos: photos.length > 0,
-    photos: photos.map((p) => ({ color: p.color, caption: p.caption, url: p.url })),
+    photos: photos.map((p) => ({ id: p.id, color: p.color, caption: p.caption, url: p.url })),
     matches: sv.matches.map((m) => {
       const es = esitoStyle(m.won)
       return {

@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { NEW_PARTNER_COLOR } from '../lib/theme'
 import type {
-  DiaryData, Tournament, Match, Photo, Partner, AnyForm,
+  DiaryData, Tournament, Match, Photo, Partner, AnyForm, GuidedMatch,
   Category, Format, Surface, Phase, Placement,
 } from '../lib/models'
 
@@ -14,10 +14,12 @@ export interface UseDiary {
   reload: () => Promise<void>
   saveTorneo: (f: AnyForm, editId: string | null) => Promise<boolean>
   quickCreateTorneo: (f: AnyForm) => Promise<string | null>
+  createGuidedTorneo: (f: AnyForm, matches: GuidedMatch[]) => Promise<string | null>
   deleteTorneo: (editId: string | null) => Promise<boolean>
   savePartita: (f: AnyForm, editId: string | null) => Promise<boolean>
   deletePartita: (editId: string | null) => Promise<boolean>
   saveFoto: (f: AnyForm, file: File | null) => Promise<boolean>
+  deleteFoto: (photoId: string) => Promise<boolean>
   saveCompagno: (f: AnyForm) => Promise<boolean>
 }
 
@@ -227,6 +229,71 @@ export function useDiary(): UseDiary {
     return ins.id
   }, [reload])
 
+  // Creazione guidata (assistente chat): crea il torneo con tutti i campi e, in
+  // un'unica passata, le partite raccolte durante la conversazione. Il compagno
+  // delle partite è quello del torneo (fallback: primo socio esistente).
+  // Ritorna l'id del torneo creato (il torneo resta creato anche se una partita
+  // fallisce: l'errore viene segnalato e l'utente completa a mano dal dettaglio).
+  const createGuidedTorneo = useCallback(async (f: AnyForm, matches: GuidedMatch[]): Promise<string | null> => {
+    if (!f.name) return null
+
+    // Compagno del torneo: 'new' + nome → crealo; un id → usalo; altrimenti nessuno.
+    let partnerId: string | null = null
+    const sel = f.partnerId
+    if (sel === 'new') {
+      const name = (f.newPartnerName ?? '').trim()
+      if (name) {
+        const { data: ins, error } = await supabase
+          .from('partners').insert({ name, color: NEW_PARTNER_COLOR }).select('id').single()
+        if (error || !ins) { fail(error); return null }
+        partnerId = ins.id
+      }
+    } else if (sel && sel !== 'all') {
+      partnerId = sel
+    }
+
+    const row = {
+      name: f.name,
+      date: f.date ?? '',
+      city: f.city ?? '',
+      category: f.category ?? 'Amatoriale',
+      format: f.format ?? '2vs2',
+      surface: f.surface ?? 'Sabbia outdoor',
+      placement: f.placement ?? 'In corso',
+      color: f.color ?? '#FF6B35',
+      emoji: f.emoji ?? '🏖️',
+      partner_id: partnerId,
+    }
+    const { data: tIns, error: tErr } = await supabase.from('tournaments').insert(row).select('id').single()
+    if (tErr || !tIns) { fail(tErr); return null }
+    const tournamentId: string = tIns.id
+
+    // Le partite ereditano il compagno del torneo (o il primo socio disponibile).
+    const matchPartner = partnerId ?? data.partners[0]?.id ?? null
+    if (matches.length && matchPartner) {
+      for (const m of matches) {
+        const { data: mIns, error: mErr } = await supabase.from('matches').insert({
+          tournament_id: tournamentId,
+          partner_id: matchPartner,
+          opponents: m.opponents || 'Avversari',
+          phase: m.phase ?? 'Girone',
+          note: '',
+        }).select('id').single()
+        if (mErr || !mIns) { fail(mErr); break } // torneo già creato: interrompi ma non annullare
+        const sets = m.sets
+          .filter((s) => Number.isFinite(s.us) && Number.isFinite(s.them))
+          .map((s, i) => ({ match_id: mIns.id as string, set_number: i + 1, us: s.us, them: s.them }))
+        if (sets.length) {
+          const { error: sErr } = await supabase.from('match_sets').insert(sets)
+          if (sErr) { fail(sErr); break }
+        }
+      }
+    }
+
+    await reload()
+    return tournamentId
+  }, [reload, data.partners])
+
   const deleteTorneo = useCallback(async (editId: string | null) => {
     if (!editId) return false
     // Cascata DB: elimina anche partite, set e foto collegate.
@@ -331,6 +398,19 @@ export function useDiary(): UseDiary {
     return true
   }, [reload])
 
+  // Elimina una foto: rimuove la riga e (best-effort) il file dallo Storage.
+  const deleteFoto = useCallback(async (photoId: string) => {
+    if (!photoId) return false
+    // Recupera il path prima di cancellare la riga, così posso ripulire il file.
+    const { data: row } = await supabase.from('photos').select('storage_path').eq('id', photoId).single()
+    const { error } = await supabase.from('photos').delete().eq('id', photoId)
+    if (error) return fail(error)
+    const path = row?.storage_path
+    if (path) await supabase.storage.from(PHOTO_BUCKET).remove([path]) // best-effort
+    await reload()
+    return true
+  }, [reload])
+
   // Aggiunge un compagno "generico", indipendente da qualsiasi partita.
   const saveCompagno = useCallback(async (f: AnyForm) => {
     const name = (f.name ?? '').trim()
@@ -341,5 +421,5 @@ export function useDiary(): UseDiary {
     return true
   }, [reload])
 
-  return { data, loading, error, clearError, reload, saveTorneo, quickCreateTorneo, deleteTorneo, savePartita, deletePartita, saveFoto, saveCompagno }
+  return { data, loading, error, clearError, reload, saveTorneo, quickCreateTorneo, createGuidedTorneo, deleteTorneo, savePartita, deletePartita, saveFoto, deleteFoto, saveCompagno }
 }
