@@ -7,6 +7,7 @@ interface QuickTorneoModalProps {
   form: AnyForm
   setField: SetField
   partnerOptions: Option[]
+  canAddPartner: boolean
   onClose: () => void
   onSave: () => void
 }
@@ -14,7 +15,7 @@ interface QuickTorneoModalProps {
 // Creazione rapida: solo i campi essenziali (nome, compagno, data, categoria,
 // piazzamento). Formato 2vs2 e superficie "Sabbia outdoor" sono i default più
 // comuni, quindi fissi e non richiesti — si cambiano poi da "Modifica".
-export default function QuickTorneoModal({ form, setField, partnerOptions, onClose, onSave }: QuickTorneoModalProps) {
+export default function QuickTorneoModal({ form, setField, partnerOptions, canAddPartner, onClose, onSave }: QuickTorneoModalProps) {
   const isNewPartner = form.partnerId === 'new'
   return (
     <Sheet onClose={onClose} maxWidth={460}>
@@ -29,7 +30,7 @@ export default function QuickTorneoModal({ form, setField, partnerOptions, onClo
           <Label>Con chi lo hai fatto</Label>
           <select value={form.partnerId || ''} onChange={(e: ChangeEvent<HTMLSelectElement>) => setField('partnerId', e.target.value)} style={selectStyle}>
             {partnerOptions.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-            <option value="new">＋ Nuovo compagno</option>
+            {(canAddPartner || form.partnerId === 'new') && <option value="new">＋ Nuovo compagno</option>}
           </select>
         </div>
         {isNewPartner && (

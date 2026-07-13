@@ -34,6 +34,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => sub.subscription.unsubscribe()
   }, [])
 
+  // Riallinea piano/ruolo rileggendo il profilo (senza rete sulla sessione: usa
+  // quella locale). Serve perché un cambio piano lato admin non emette eventi
+  // auth: senza questo, un utente declassato resterebbe "Premium" in memoria
+  // finché non ricarica la pagina.
+  const refresh = useCallback(async () => {
+    const { data } = await supabase.auth.getSession()
+    if (!data.session?.user) return // non loggato: non toccare lo stato
+    setSession(await sessionForUser(data.session.user))
+  }, [])
+
+  // Ricontrolla quando la tab torna attiva (o riprende il focus).
+  useEffect(() => {
+    const onVisible = () => { if (document.visibilityState === 'visible') refresh() }
+    window.addEventListener('focus', refresh)
+    document.addEventListener('visibilitychange', onVisible)
+    return () => {
+      window.removeEventListener('focus', refresh)
+      document.removeEventListener('visibilitychange', onVisible)
+    }
+  }, [refresh])
+
   const login = useCallback((email: string, password: string) => loginUser(email, password), [])
   const register = useCallback(
     (name: string, email: string, password: string) => registerUser(name, email, password),

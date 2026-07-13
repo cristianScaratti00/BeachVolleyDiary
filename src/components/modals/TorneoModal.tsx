@@ -11,12 +11,13 @@ interface TorneoModalProps {
   editId: string | null
   setField: SetField
   partnerOptions: Option[]
+  canAddPartner: boolean
   onClose: () => void
   onSave: () => void
   onDelete: () => void
 }
 
-export default function TorneoModal({ form, editId, setField, partnerOptions, onClose, onSave, onDelete }: TorneoModalProps) {
+export default function TorneoModal({ form, editId, setField, partnerOptions, canAddPartner, onClose, onSave, onDelete }: TorneoModalProps) {
   return (
     <Sheet onClose={onClose}>
       <Title>{editId ? 'Modifica torneo' : 'Nuovo torneo'}</Title>
@@ -31,7 +32,7 @@ export default function TorneoModal({ form, editId, setField, partnerOptions, on
           <select value={form.partnerId || ''} onChange={(e: ChangeEvent<HTMLSelectElement>) => setField('partnerId', e.target.value)} style={selectStyle}>
             <option value="">— Nessuno —</option>
             {partnerOptions.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-            <option value="new">＋ Nuovo compagno</option>
+            {(canAddPartner || form.partnerId === 'new') && <option value="new">＋ Nuovo compagno</option>}
           </select>
           {form.partnerId === 'new' && (
             <input value={form.newPartnerName || ''} onChange={(e: ChangeEvent<HTMLInputElement>) => setField('newPartnerName', e.target.value)} placeholder="Nome nuovo compagno" style={{ ...inputStyle, marginTop: 8 }} />

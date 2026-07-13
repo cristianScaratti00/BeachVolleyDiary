@@ -26,7 +26,7 @@ import type {
   SetField,
   SetsApi,
 } from "./lib/models";
-import { entitlements } from "./lib/limits";
+import { permissionsFor } from "./lib/permissions";
 import { getDashboardStats } from "./lib/dashboard";
 import type { ServerDashboard } from "./lib/dashboard";
 import {
@@ -101,13 +101,20 @@ export default function App() {
   const [srvTorneo, setSrvTorneo] = useState<SvTorneoDetail | null>(null);
   const [srvCompagno, setSrvCompagno] = useState<SvCompagnoDetail | null>(null);
 
-  // ---------- plan entitlements ----------
-  const ent = entitlements(session?.plan, session?.role);
-  const tLimit = ent.tournaments;
-  const pLimit = ent.partners;
-  const canAddTorneo = data.tournaments.length < tLimit;
-  const canAddPartner = data.partners.length < pLimit;
-  const canFilter = ent.dashboardFilters;
+  // ---------- permessi in base al piano + conteggi correnti ----------
+  // Ricalcolati ad ogni render dai dati freschi: se l'utente viene declassato a
+  // Base ed è oltre i limiti, le azioni di creazione tornano bloccate.
+  const perm = permissionsFor(session?.plan, session?.role, {
+    tournaments: data.tournaments.length,
+    partners: data.partners.length,
+  });
+  const canFilter = perm.canUseFilters;
+  // Azione non consentita dal piano → apre la bottom-sheet di upgrade col messaggio.
+  const denyByPlan = (v: { title?: string; message?: string }) =>
+    setUpgrade({
+      title: v.title,
+      message: v.message ?? "Funzione non disponibile con il tuo piano.",
+    });
   const banner = notice;
   const dismissBanner = () => setNotice(null);
   const onUpgrade = () => {
@@ -119,12 +126,9 @@ export default function App() {
   // Apre la storia Instagram di un torneo — genera un'immagine 1080×1920 scaricabile
   // (funzione Premium).
   const openStory = (id: string) => {
-    if (!ent.diary) {
-      setUpgrade({
-        title: "Funzione Premium",
-        message:
-          "La condivisione della storia è disponibile con il piano Premium.",
-      });
+    const v = perm.check("shareStory");
+    if (!v.allowed) {
+      denyByPlan(v);
       return;
     }
     setStoryT(id);
@@ -264,11 +268,12 @@ export default function App() {
 
   // ---------- modal openers ----------
   const openTorneo = (id: string | null) => {
-    if (!id && !canAddTorneo) {
-      setUpgrade({
-        message: `Piano base: hai raggiunto il limite di ${tLimit} tornei.`,
-      });
-      return;
+    if (!id) {
+      const v = perm.check("createTournament");
+      if (!v.allowed) {
+        denyByPlan(v);
+        return;
+      }
     }
     const t = id ? data.tournaments.find((x) => x.id === id) : null;
     const today = new Date().toISOString().slice(0, 10);
@@ -330,11 +335,9 @@ export default function App() {
   };
   // Aggiunge una foto legata a uno specifico torneo (funzione Premium).
   const openFotoForTorneo = (tid: string) => {
-    if (!ent.tournamentPhotos) {
-      setUpgrade({
-        title: "Funzione Premium",
-        message: "Le foto nei tornei sono disponibili con il piano Premium.",
-      });
+    const v = perm.check("uploadPhoto");
+    if (!v.allowed) {
+      denyByPlan(v);
       return;
     }
     setEditId(null);
@@ -343,10 +346,9 @@ export default function App() {
     setModal("foto");
   };
   const openCompagno = () => {
-    if (!canAddPartner) {
-      setUpgrade({
-        message: `Piano base: hai raggiunto il limite di ${pLimit} compagni.`,
-      });
+    const v = perm.check("createPartner");
+    if (!v.allowed) {
+      denyByPlan(v);
       return;
     }
     setEditId(null);
@@ -355,10 +357,9 @@ export default function App() {
     setModal("socio");
   };
   const openQuickTorneo = () => {
-    if (!canAddTorneo) {
-      setUpgrade({
-        message: `Piano base: hai raggiunto il limite di ${tLimit} tornei.`,
-      });
+    const t = perm.check("createTournament");
+    if (!t.allowed) {
+      denyByPlan(t);
       return;
     }
     const P = data.partners;
@@ -378,18 +379,14 @@ export default function App() {
   // Apre l'assistente guidato in stile chat (creazione conversazionale del torneo).
   // Funzione Premium: i piani base vedono la bottom-sheet di upgrade.
   const openCrea = () => {
-    if (!ent.aiCreate) {
-      setUpgrade({
-        title: "Funzione Premium",
-        message:
-          "L’assistente AI che crea i tornei al posto tuo è disponibile con il piano Premium.",
-      });
+    const ai = perm.check("useAiAssistant");
+    if (!ai.allowed) {
+      denyByPlan(ai);
       return;
     }
-    if (!canAddTorneo) {
-      setUpgrade({
-        message: `Piano base: hai raggiunto il limite di ${tLimit} tornei.`,
-      });
+    const t = perm.check("createTournament");
+    if (!t.allowed) {
+      denyByPlan(t);
       return;
     }
     setFabOpen(false);
@@ -474,7 +471,7 @@ export default function App() {
             onNewTorneo={() => openTorneo(null)}
             onQuickTorneo={openQuickTorneo}
             onAssistant={openCrea}
-            canAssistant={ent.aiCreate}
+            canAssistant={perm.canUseAi}
           />
         );
       case "torneo":
@@ -486,7 +483,7 @@ export default function App() {
               onNewTorneo={() => openTorneo(null)}
               onQuickTorneo={openQuickTorneo}
               onAssistant={openCrea}
-              canAssistant={ent.aiCreate}
+              canAssistant={perm.canUseAi}
             />
           );
         return (
@@ -498,9 +495,9 @@ export default function App() {
             onOpenMatch={openMatch}
             onAddFoto={() => selT && openFotoForTorneo(selT)}
             onDeleteFoto={doDeleteFoto}
-            canAddFoto={ent.tournamentPhotos}
+            canAddFoto={perm.canUploadPhoto}
             onShareStory={() => selT && openStory(selT)}
-            canShareStory={ent.diary}
+            canShareStory={perm.canShareStory}
           />
         );
       case "compagni":
@@ -531,7 +528,7 @@ export default function App() {
         return (
           <Diario
             entries={deriveDiary(data)}
-            locked={!ent.diary}
+            locked={!perm.canUseDiary}
             onOpenTorneo={openTorneoDetail}
             onInstagramStory={openStory}
             onUpgrade={onUpgrade}
@@ -588,7 +585,7 @@ export default function App() {
             onOpenTorneo={openTorneoDetail}
             onQuickTorneo={openQuickTorneo}
             onAiCreate={openCrea}
-            canAiCreate={ent.aiCreate}
+            canAiCreate={perm.canUseAi}
             goTornei={() => go("tornei")}
             goCompagni={() => go("compagni")}
           />
@@ -649,7 +646,7 @@ export default function App() {
           onNewPartita={() => openPartita(null)}
           onNewTorneo={() => openTorneo(null)}
           onAssistant={openCrea}
-          canAssistant={ent.aiCreate}
+          canAssistant={perm.canUseAi}
         />
       )}
 
@@ -743,7 +740,7 @@ export default function App() {
           onNewTorneo={() => openTorneo(null)}
           onNewPartita={() => openPartita(null)}
           onAssistant={openCrea}
-          canAssistant={ent.aiCreate}
+          canAssistant={perm.canUseAi}
         />
       )}
 
@@ -753,6 +750,7 @@ export default function App() {
           editId={editId}
           setField={setField}
           partnerOptions={partnerOptions(data)}
+          canAddPartner={perm.canCreatePartner}
           onClose={closeModal}
           onSave={doSaveTorneo}
           onDelete={doDeleteTorneo}
@@ -765,6 +763,7 @@ export default function App() {
           setField={setField}
           tournOptions={tournamentOptions(data)}
           partnerOptions={partnerOptions(data)}
+          canAddPartner={perm.canCreatePartner}
           sets={setRows}
           onClose={closeModal}
           onSave={doSavePartita}
@@ -796,6 +795,7 @@ export default function App() {
           form={form}
           setField={setField}
           partnerOptions={partnerOptions(data)}
+          canAddPartner={perm.canCreatePartner}
           onClose={closeModal}
           onSave={doSaveQuickTorneo}
         />

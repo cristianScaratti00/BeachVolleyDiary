@@ -12,13 +12,14 @@ interface PartitaModalProps {
   setField: SetField
   tournOptions: Option[]
   partnerOptions: Option[]
+  canAddPartner: boolean
   sets: SetsApi
   onClose: () => void
   onSave: () => void
   onDelete: () => void
 }
 
-export default function PartitaModal({ form, editId, setField, tournOptions, partnerOptions, sets, onClose, onSave, onDelete }: PartitaModalProps) {
+export default function PartitaModal({ form, editId, setField, tournOptions, partnerOptions, canAddPartner, sets, onClose, onSave, onDelete }: PartitaModalProps) {
   const { rows, canAdd, addSet, updateSet, removeSet } = sets
   const isNewPartner = form.partnerId === 'new'
   return (
@@ -37,7 +38,7 @@ export default function PartitaModal({ form, editId, setField, tournOptions, par
             <Label>Compagno</Label>
             <select value={form.partnerId || ''} onChange={(e: ChangeEvent<HTMLSelectElement>) => setField('partnerId', e.target.value)} style={selectStyle}>
               {partnerOptions.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-              <option value="new">＋ Nuovo compagno</option>
+              {(canAddPartner || form.partnerId === 'new') && <option value="new">＋ Nuovo compagno</option>}
             </select>
           </div>
           <div style={fieldWrap}>
