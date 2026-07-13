@@ -59,6 +59,7 @@ export interface TorneoCard {
   record: string
   winPct: number
   matchCount: number
+  shared: boolean
 }
 
 export interface DashboardData { s: DashboardStats; recent: TorneoCard[] }
@@ -91,6 +92,7 @@ export interface TorneoDetailData {
   diffStr: string
   noMatches: boolean
   hasPhotos: boolean
+  shared: boolean
   photos: TorneoPhoto[]
   matches: TorneoMatchRow[]
 }
@@ -196,6 +198,7 @@ function decorateTournament(data: DiaryData, t: Tournament): TorneoCard {
     badgeColor: podium ? '#C4501E' : 'rgba(27,42,74,.5)',
     meta: fmtDate(t.date) + ' · ' + t.city + ' · ' + t.format + (t.partnerId ? ' · con ' + partnerName(data, t.partnerId) : ''),
     record: ts.won + '-' + ts.lost, winPct: ts.winPct, matchCount: ts.played,
+    shared: t.shared,
   }
 }
 
@@ -406,7 +409,7 @@ export function deriveTorneoDetail(data: DiaryData, id: string): TorneoDetailDat
     meta: fmtDate(t.date) + ' · ' + t.city + ' · ' + t.surface + (t.partnerId ? ' · con ' + partnerName(data, t.partnerId) : ''),
     record: ts.won + '-' + ts.lost, winPct: ts.winPct, setStr: ts.sw + '-' + ts.sl,
     diffStr: (ts.diff >= 0 ? '+' : '') + ts.diff,
-    noMatches: tm.length === 0, hasPhotos: photos.length > 0,
+    noMatches: tm.length === 0, hasPhotos: photos.length > 0, shared: t.shared,
     photos: photos.map((p) => ({ id: p.id, color: p.color, caption: p.caption, url: p.url })),
     matches: tm.map((m) => {
       const r = res(m); const es = esitoStyle(r.won)
@@ -421,7 +424,7 @@ export function deriveTorneoDetail(data: DiaryData, id: string): TorneoDetailDat
 
 // ---- Compagni list ----
 export function deriveCompagni(data: DiaryData): CompagnoCard[] {
-  return data.partners.map((p) => {
+  return data.partners.filter((p) => !p.shared).map((p) => {
     const pm = data.matches.filter((m) => m.partnerId === p.id)
     const ps = computeStats(pm)
     return { id: p.id, name: p.name, initial: p.name[0].toUpperCase(), played: ps.played, won: ps.won, lost: ps.lost, winPct: ps.winPct }
@@ -555,6 +558,7 @@ export function deriveTorneiListServer(sv: SvTorneiList): TorneiListData {
       badgeColor: podium ? '#C4501E' : 'rgba(27,42,74,.5)',
       meta: fmtDate(c.date) + ' · ' + c.city + ' · ' + c.format + (c.partner ? ' · con ' + c.partner : ''),
       record: c.won + '-' + c.lost, winPct: c.win_pct, matchCount: c.match_count,
+      shared: false,
     }
   })
   return { tornei, tPlayed: sv.t_played, podi: sv.podi, bestPlacement: PLACEMENT_LABELS[sv.best_rank] || '—' }
@@ -577,7 +581,7 @@ export function deriveTorneoDetailServer(sv: SvTorneoDetail, data: DiaryData): T
     meta: fmtDate(sv.date) + ' · ' + sv.city + ' · ' + sv.surface + (sv.partner ? ' · con ' + sv.partner : ''),
     record: sv.won + '-' + sv.lost, winPct: sv.win_pct, setStr: sv.sets_won + '-' + sv.sets_lost,
     diffStr: (sv.point_diff >= 0 ? '+' : '') + sv.point_diff,
-    noMatches: sv.matches.length === 0, hasPhotos: photos.length > 0,
+    noMatches: sv.matches.length === 0, hasPhotos: photos.length > 0, shared: false,
     photos: photos.map((p) => ({ id: p.id, color: p.color, caption: p.caption, url: p.url })),
     matches: sv.matches.map((m) => {
       const es = esitoStyle(m.won)

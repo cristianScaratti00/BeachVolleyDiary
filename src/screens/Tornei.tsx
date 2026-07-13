@@ -33,9 +33,10 @@ export default function Tornei({ list, onOpenTorneo, onNewTorneo, onQuickTorneo,
         {tornei.map((t) => (
           <div key={t.id} className="card lift" onClick={() => onOpenTorneo(t.id)} style={{ padding: 20, cursor: 'pointer' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 9, flexWrap: 'wrap' }}>
                 <div style={{ width: 8, height: 8, borderRadius: '50%', background: t.dot }} />
                 <div className="lbl" style={{ letterSpacing: '1px' }}>{t.category}</div>
+                {t.shared && <Badge tone="dark" size="sm">Condiviso</Badge>}
               </div>
               <span style={{ font: "700 12px 'Nunito Sans'", padding: '5px 11px', borderRadius: 8, background: t.badgeBg, color: t.badgeColor }}>{t.badge}</span>
             </div>

@@ -12,6 +12,15 @@ export interface Partner {
   id: string
   name: string
   color: string
+  linkedUserId: string | null // utente app collegato a questo socio (condivisione)
+  shared: boolean             // true = socio di un altro utente, visibile in sola lettura
+}
+
+// Utente dell'app selezionabile per collegare un socio (dalla ricerca DB).
+export interface AppUser {
+  id: string
+  name: string
+  email: string
 }
 
 export interface SetScore {
@@ -31,6 +40,7 @@ export interface Tournament {
   color: string
   emoji: string
   partnerId: string | null // compagno principale del torneo (con chi l'ho giocato)
+  shared: boolean          // true = torneo di un altro utente condiviso con me (sola lettura)
 }
 
 export interface Match {

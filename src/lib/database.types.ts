@@ -63,6 +63,7 @@ export type Database = {
           user_id: string
           name: string
           color: string
+          linked_user_id: string | null
           created_at: string
           updated_at: string
         }
@@ -71,6 +72,7 @@ export type Database = {
           user_id?: string
           name: string
           color?: string
+          linked_user_id?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -79,6 +81,7 @@ export type Database = {
           user_id?: string
           name?: string
           color?: string
+          linked_user_id?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -347,6 +350,10 @@ export type Database = {
       dashboard_stats: {
         Args: { p_partner?: string | null; p_year?: string | null }
         Returns: Json
+      }
+      search_users: {
+        Args: { p_query?: string }
+        Returns: { id: string; name: string; email: string }[]
       }
       tornei_list: {
         Args: Record<PropertyKey, never>

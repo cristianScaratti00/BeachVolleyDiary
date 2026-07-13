@@ -78,6 +78,9 @@ export default function App() {
     saveFoto,
     deleteFoto,
     saveCompagno,
+    searchUsers,
+    linkPartner,
+    unlinkPartner,
   } = useDiary();
 
   const [screen, setScreen] = useState<Screen>("home");
@@ -104,9 +107,10 @@ export default function App() {
   // ---------- permessi in base al piano + conteggi correnti ----------
   // Ricalcolati ad ogni render dai dati freschi: se l'utente viene declassato a
   // Base ed è oltre i limiti, le azioni di creazione tornano bloccate.
+  // Conteggi per i limiti: solo i propri (i tornei/soci CONDIVISI non contano).
   const perm = permissionsFor(session?.plan, session?.role, {
-    tournaments: data.tournaments.length,
-    partners: data.partners.length,
+    tournaments: data.tournaments.filter((t) => !t.shared).length,
+    partners: data.partners.filter((p) => !p.shared).length,
   });
   const canFilter = perm.canUseFilters;
   // Azione non consentita dal piano → apre la bottom-sheet di upgrade col messaggio.
@@ -417,6 +421,10 @@ export default function App() {
   const doDeleteFoto = async (photoId: string) => {
     await deleteFoto(photoId);
   };
+  const doLinkPartner = (userId: string) => linkPartner(selP as string, userId);
+  const doUnlinkPartner = async () => {
+    if (selP) await unlinkPartner(selP);
+  };
   const doSaveCompagno = async () => {
     if (await saveCompagno(form)) closeModal();
   };
@@ -436,9 +444,13 @@ export default function App() {
   // L'assistente chat occupa tutto lo schermo con scroll interno: niente
   // padding/top-bar/bottom-nav e pagina bloccata (scorre solo la chat).
   const isCrea = screen === "crea";
-  const torneiList = srvTornei
-    ? deriveTorneiListServer(srvTornei)
-    : deriveTorneiList(data, fYear);
+  // Con tornei condivisi presenti, usiamo il calcolo client (che li include);
+  // le RPC server restano scoped al proprio user_id.
+  const hasShared = data.tournaments.some((t) => t.shared);
+  const torneiList =
+    srvTornei && !hasShared
+      ? deriveTorneiListServer(srvTornei)
+      : deriveTorneiList(data, fYear);
   const compagniList = srvCompagni
     ? deriveCompagniServer(srvCompagni)
     : deriveCompagni(data);
@@ -498,6 +510,7 @@ export default function App() {
             canAddFoto={perm.canUploadPhoto}
             onShareStory={() => selT && openStory(selT)}
             canShareStory={perm.canShareStory}
+            readOnly={torneoData.shared}
           />
         );
       case "compagni":
@@ -522,6 +535,12 @@ export default function App() {
             cp={compagnoData}
             goBack={() => go("compagni")}
             onOpenMatch={openMatch}
+            linked={
+              data.partners.find((p) => p.id === selP)?.linkedUserId != null
+            }
+            onSearchUsers={searchUsers}
+            onLink={doLinkPartner}
+            onUnlink={doUnlinkPartner}
           />
         );
       case "diario":
@@ -551,18 +570,19 @@ export default function App() {
         );
       case "home":
       default: {
-        const dash = serverDash
-          ? deriveDashboardServer(
-              serverDash,
-              data,
-              canFilter ? fPartner : "all",
-              canFilter ? fYear : "Sempre",
-            )
-          : deriveDashboard(
-              data,
-              canFilter ? fPartner : "all",
-              canFilter ? fYear : "Sempre",
-            );
+        const dash =
+          serverDash && !hasShared
+            ? deriveDashboardServer(
+                serverDash,
+                data,
+                canFilter ? fPartner : "all",
+                canFilter ? fYear : "Sempre",
+              )
+            : deriveDashboard(
+                data,
+                canFilter ? fPartner : "all",
+                canFilter ? fYear : "Sempre",
+              );
         return (
           <Home
             s={dash.s}

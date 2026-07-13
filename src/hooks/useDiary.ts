@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { NEW_PARTNER_COLOR } from '../lib/theme'
 import type {
-  DiaryData, Tournament, Match, Photo, Partner, AnyForm, GuidedMatch,
+  DiaryData, Tournament, Match, Photo, Partner, AnyForm, GuidedMatch, AppUser,
   Category, Format, Surface, Phase, Placement,
 } from '../lib/models'
 
@@ -21,6 +21,9 @@ export interface UseDiary {
   saveFoto: (f: AnyForm, file: File | null) => Promise<boolean>
   deleteFoto: (photoId: string) => Promise<boolean>
   saveCompagno: (f: AnyForm) => Promise<boolean>
+  searchUsers: (query: string) => Promise<AppUser[]>
+  linkPartner: (partnerId: string, userId: string) => Promise<{ ok: boolean; error?: string }>
+  unlinkPartner: (partnerId: string) => Promise<boolean>
 }
 
 const EMPTY: DiaryData = { tournaments: [], matches: [], partners: [], photos: [] }
@@ -37,12 +40,16 @@ function errMsg(e: unknown): string {
 // Scarica tutto il diario dell'utente loggato e lo rimappa nel modello di dominio
 // (snake_case → camelCase; righe match_sets → array `sets` inline).
 async function fetchAll(): Promise<DiaryData> {
+  // Utente corrente: serve a distinguere dati propri da quelli condivisi (di altri
+  // utenti, resi leggibili dalla RLS quando un socio è collegato al mio account).
+  const { data: authData } = await supabase.auth.getSession()
+  const uid = authData.session?.user?.id ?? ''
   const [pRes, tRes, mRes, fRes] = await Promise.all([
     supabase.from('partners')
-      .select('id, name, color')
+      .select('id, name, color, user_id, linked_user_id')
       .order('created_at', { ascending: true }),
     supabase.from('tournaments')
-      .select('id, name, date, city, category, format, surface, placement, color, emoji, partner_id')
+      .select('id, name, date, city, category, format, surface, placement, color, emoji, partner_id, user_id')
       .order('date', { ascending: false }),
     supabase.from('matches')
       .select('id, tournament_id, partner_id, opponents, phase, note, match_sets(set_number, us, them)')
@@ -54,7 +61,11 @@ async function fetchAll(): Promise<DiaryData> {
   const failed = pRes.error || tRes.error || mRes.error || fRes.error
   if (failed) throw failed
 
-  const partners: Partner[] = (pRes.data ?? []).map((p) => ({ id: p.id, name: p.name, color: p.color }))
+  const partners: Partner[] = (pRes.data ?? []).map((p) => ({
+    id: p.id, name: p.name, color: p.color,
+    linkedUserId: p.linked_user_id ?? null,
+    shared: p.user_id !== uid,
+  }))
 
   const tournaments: Tournament[] = (tRes.data ?? []).map((t) => ({
     id: t.id,
@@ -68,6 +79,7 @@ async function fetchAll(): Promise<DiaryData> {
     color: t.color,
     emoji: t.emoji,
     partnerId: t.partner_id,
+    shared: t.user_id !== uid,
   }))
 
   const matches: Match[] = (mRes.data ?? []).map((m) => ({
@@ -411,6 +423,35 @@ export function useDiary(): UseDiary {
     return true
   }, [reload])
 
+  // Elenco/ricerca degli utenti dell'app a cui collegare un socio (per nome).
+  const searchUsers = useCallback(async (query: string): Promise<AppUser[]> => {
+    const { data, error } = await supabase.rpc('search_users', { p_query: query })
+    if (error) {
+      // eslint-disable-next-line no-console
+      console.error('[useDiary] searchUsers', error)
+      return []
+    }
+    return (data ?? []).map((u) => ({ id: u.id, name: u.name, email: u.email }))
+  }, [])
+
+  // Collega un socio all'utente scelto: da quel momento quell'utente vede in sola
+  // lettura i tornei giocati con questo socio.
+  const linkPartner = useCallback(async (partnerId: string, userId: string): Promise<{ ok: boolean; error?: string }> => {
+    if (!userId) return { ok: false, error: 'Seleziona un utente.' }
+    const { error } = await supabase.from('partners').update({ linked_user_id: userId }).eq('id', partnerId)
+    if (error) { fail(error); return { ok: false, error: 'Impossibile collegare il socio.' } }
+    await reload()
+    return { ok: true }
+  }, [reload])
+
+  // Scollega il socio dall'account: la condivisione dei tornei si interrompe.
+  const unlinkPartner = useCallback(async (partnerId: string) => {
+    const { error } = await supabase.from('partners').update({ linked_user_id: null }).eq('id', partnerId)
+    if (error) return fail(error)
+    await reload()
+    return true
+  }, [reload])
+
   // Aggiunge un compagno "generico", indipendente da qualsiasi partita.
   const saveCompagno = useCallback(async (f: AnyForm) => {
     const name = (f.name ?? '').trim()
@@ -421,5 +462,5 @@ export function useDiary(): UseDiary {
     return true
   }, [reload])
 
-  return { data, loading, error, clearError, reload, saveTorneo, quickCreateTorneo, createGuidedTorneo, deleteTorneo, savePartita, deletePartita, saveFoto, deleteFoto, saveCompagno }
+  return { data, loading, error, clearError, reload, saveTorneo, quickCreateTorneo, createGuidedTorneo, deleteTorneo, savePartita, deletePartita, saveFoto, deleteFoto, saveCompagno, searchUsers, linkPartner, unlinkPartner }
 }
