@@ -140,24 +140,16 @@ export default function StoryModal({ story, onClose, onNotice }: StoryModalProps
             <div style={{ font: "700 38px 'Nunito Sans'", color: pal.fg }}>in coppia con <span style={{ color: pal.accent }}>{partnerLabel}</span></div>
           </div>
 
-          {/* media: foto di copertina, oppure visual con emoji */}
+          {/* media: mostra la foto di copertina solo se presente; senza immagini
+              non si mostra nulla (nessun segnaposto con emoji). */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 34 }}>
-            <div style={{ width: '100%', height: 360, borderRadius: 30, overflow: 'hidden', position: 'relative', background: pal.accent }}>
-              {cover ? (
-                <>
-                  <img src={cover} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
-                  <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(0,0,0,.02) 40%, rgba(0,0,0,.42))' }} />
-                  <div style={{ position: 'absolute', left: 34, bottom: 30, font: "800 26px 'Nunito Sans'", letterSpacing: 3, color: '#fff', textTransform: 'uppercase', textShadow: '0 2px 12px rgba(0,0,0,.5)' }}>{story.year} · {story.name}</div>
-                </>
-              ) : (
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(140deg, rgba(255,255,255,.16), rgba(0,0,0,.34))', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-                  <div style={{ position: 'absolute', inset: 0, backgroundImage: 'repeating-linear-gradient(45deg, rgba(255,255,255,.09) 0 26px, transparent 26px 52px)' }} />
-                  <div style={{ position: 'absolute', width: 260, height: 260, borderRadius: '50%', border: '3px solid rgba(255,255,255,.22)', top: -80, right: -50 }} />
-                  <div style={{ position: 'absolute', width: 140, height: 140, borderRadius: '50%', background: 'rgba(255,255,255,.12)', bottom: -34, left: 70 }} />
-                  <div style={{ position: 'relative', fontSize: 190, lineHeight: 1 }}>{story.emoji}</div>
-                </div>
-              )}
-            </div>
+            {cover && (
+              <div style={{ width: '100%', height: 360, borderRadius: 30, overflow: 'hidden', position: 'relative', background: pal.accent }}>
+                <img src={cover} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(0,0,0,.02) 40%, rgba(0,0,0,.42))' }} />
+                <div style={{ position: 'absolute', left: 34, bottom: 30, font: "800 26px 'Nunito Sans'", letterSpacing: 3, color: '#fff', textTransform: 'uppercase', textShadow: '0 2px 12px rgba(0,0,0,.5)' }}>{story.year} · {story.name}</div>
+              </div>
+            )}
             <div style={{ font: "700 28px 'Nunito Sans'", letterSpacing: 4, color: pal.muted }}>IL MIO DIARIO · BEACH VOLLEY</div>
           </div>
         </div>

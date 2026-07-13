@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react'
 import type { DiaryEntry } from '../lib/derive'
+import { PageHeader, Button, EmptyCard, InlineLink } from '../components/ui'
 
 interface DiarioProps {
   entries: DiaryEntry[]
@@ -96,17 +97,11 @@ const fadedPreview: CSSProperties = { filter: 'blur(3px)', opacity: 0.5, pointer
 export default function Diario({ entries, locked, onOpenTorneo, onInstagramStory, onUpgrade, onNewTorneo }: DiarioProps) {
   return (
     <div style={{ animation: 'pop .32s ease both' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 12, paddingBottom: 22, borderBottom: '1px solid rgba(27,42,74,.1)' }}>
-        <div>
-          <div className="num" style={{ fontSize: 'clamp(26px,4vw,34px)', fontWeight: 500, letterSpacing: '-.5px' }}>Diario</div>
-          <div style={{ font: "600 14px 'Nunito Sans'", color: 'rgba(27,42,74,.55)', marginTop: 4 }}>
-            {locked ? 'Funzione Premium' : `${entries.length} ${entries.length === 1 ? 'torneo' : 'tornei'} nel diario`}
-          </div>
-        </div>
-        {!locked && (
-          <div className="chip" onClick={onNewTorneo} style={{ display: 'flex', alignItems: 'center', gap: 7, background: '#1B2A4A', color: '#fff', padding: '11px 16px', borderRadius: 11, font: "700 13.5px 'Nunito Sans'", cursor: 'pointer' }}>＋ Nuovo torneo</div>
-        )}
-      </div>
+      <PageHeader
+        title="Diario"
+        subtitle={locked ? 'Funzione Premium' : `${entries.length} ${entries.length === 1 ? 'torneo' : 'tornei'} nel diario`}
+        actions={!locked ? <Button variant="dark" onClick={onNewTorneo}>＋ Nuovo torneo</Button> : undefined}
+      />
 
       {locked ? (
         <div style={{ marginTop: 22 }}>
@@ -120,8 +115,10 @@ export default function Diario({ entries, locked, onOpenTorneo, onInstagramStory
           )}
         </div>
       ) : entries.length === 0 ? (
-        <div className="card" style={{ marginTop: 22, padding: 30, textAlign: 'center', color: 'rgba(27,42,74,.5)', font: "700 14px 'Nunito Sans'" }}>
-          Il tuo diario è vuoto. <span className="chip" style={{ color: '#FF6B35', cursor: 'pointer' }} onClick={onNewTorneo}>Crea il primo torneo →</span>
+        <div style={{ marginTop: 22 }}>
+          <EmptyCard pad={30}>
+            Il tuo diario è vuoto. <InlineLink onClick={onNewTorneo}>Crea il primo torneo →</InlineLink>
+          </EmptyCard>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 22 }}>
