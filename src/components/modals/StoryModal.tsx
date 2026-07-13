@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ChangeEvent } from 'react'
 import { toPng } from 'html-to-image'
+import { track } from '@vercel/analytics'
 import type { StoryData } from '../../lib/derive'
 
 type PaletteKey = 'navy' | 'sand' | 'orange'
@@ -97,6 +98,7 @@ export default function StoryModal({ story, onClose, onNotice }: StoryModalProps
       a.href = url
       a.download = `${story.slug}-story.png`
       a.click()
+      track('storia_scaricata')
     } catch (e) {
       // eslint-disable-next-line no-console
       console.error('[story] toPng', e)

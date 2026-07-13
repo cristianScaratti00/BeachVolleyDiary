@@ -5,6 +5,7 @@
 // e inclusi nella sessione di dominio.
 // ============================================================================
 import type { User } from '@supabase/supabase-js'
+import { track } from '@vercel/analytics'
 import { supabase } from './supabase'
 import type { Role, Plan } from './db.enums'
 
@@ -56,9 +57,16 @@ export async function registerUser(name: string, email: string, password: string
   const { data, error } = await supabase.auth.signUp({
     email: e,
     password,
-    options: { data: { name: n } },
+    options: {
+      data: { name: n },
+      // La mail di conferma reindirizza all'app da cui ci si registra
+      // (dev: localhost, prod: dominio), non al solo "Site URL" del progetto.
+      // NB: l'URL dev'essere in Supabase → Auth → URL Configuration → Redirect URLs.
+      emailRedirectTo: window.location.origin,
+    },
   })
   if (error) return { ok: false, error: translateAuthError(error.message) }
+  track('registrazione')
   // Se la conferma email è attiva, signUp non restituisce una sessione.
   if (!data.session) {
     return { ok: false, error: 'Registrazione avvenuta: controlla la tua email per confermare l’account.' }
@@ -73,6 +81,7 @@ export async function loginUser(email: string, password: string): Promise<AuthRe
 
   const { error } = await supabase.auth.signInWithPassword({ email: e, password })
   if (error) return { ok: false, error: translateAuthError(error.message) }
+  track('login')
   return { ok: true }
 }
 
@@ -94,6 +103,7 @@ export async function signInWithProvider(provider: OAuthProvider): Promise<AuthR
 }
 
 export async function logoutUser(): Promise<void> {
+  track('logout')
   await supabase.auth.signOut()
 }
 

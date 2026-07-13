@@ -46,6 +46,7 @@ import Sidebar from "./components/Sidebar";
 import BottomNav from "./components/BottomNav";
 import Splash from "./components/Splash";
 import { BrandLockup } from "./components/Logo";
+import { track } from "@vercel/analytics";
 import Home from "./screens/Home";
 import Tornei from "./screens/Tornei";
 import TorneoDetail from "./screens/TorneoDetail";
@@ -133,6 +134,7 @@ export default function App() {
   const banner = notice;
   const dismissBanner = () => setNotice(null);
   const onUpgrade = () => {
+    track("upgrade_click");
     setUpgrade(null);
     setNotice(
       "Acquisto Premium in arrivo — l’integrazione dei pagamenti sarà disponibile a breve.",
@@ -146,6 +148,7 @@ export default function App() {
       denyByPlan(v);
       return;
     }
+    track("storia_aperta");
     setStoryT(id);
     setFabOpen(false);
     setModal("story");
@@ -441,39 +444,61 @@ export default function App() {
 
   // ---------- save/delete actions (async: scrivono su Supabase) ----------
   const doSaveTorneo = async () => {
-    if (await saveTorneo(form, editId)) closeModal();
+    if (await saveTorneo(form, editId)) {
+      if (editId) track("torneo_modificato");
+      else track("torneo_creato", { via: "completo" });
+      closeModal();
+    }
   };
   const doDeleteTorneo = async () => {
-    await deleteTorneo(editId);
+    if (await deleteTorneo(editId)) track("torneo_eliminato");
     setModal(null);
     setScreen("tornei");
   };
   const doSavePartita = async () => {
-    if (await savePartita(form, editId)) closeModal();
+    if (await savePartita(form, editId)) {
+      if (editId) track("partita_modificata");
+      else track("partita_aggiunta");
+      closeModal();
+    }
   };
   const doDeletePartita = async () => {
-    await deletePartita(editId);
+    if (await deletePartita(editId)) track("partita_eliminata");
     closeModal();
   };
   const doSaveFoto = async (file: File | null) => {
-    if (await saveFoto(form, file)) closeModal();
+    if (await saveFoto(form, file)) {
+      track("foto_aggiunta");
+      closeModal();
+    }
   };
   const doDeleteFoto = async (photoId: string) => {
-    await deleteFoto(photoId);
+    if (await deleteFoto(photoId)) track("foto_eliminata");
   };
-  const doLinkPartner = (userId: string) => linkPartner(selP as string, userId);
+  const doLinkPartner = async (userId: string) => {
+    const r = await linkPartner(selP as string, userId);
+    if (r.ok) track("socio_collegato");
+    return r;
+  };
   const doUnlinkPartner = async () => {
-    if (selP) await unlinkPartner(selP);
+    if (selP && (await unlinkPartner(selP))) track("socio_scollegato");
   };
   const doDeleteCompagno = async () => {
-    if (selP && (await deleteCompagno(selP))) go("compagni");
+    if (selP && (await deleteCompagno(selP))) {
+      track("socio_eliminato");
+      go("compagni");
+    }
   };
   const doSaveCompagno = async () => {
-    if (await saveCompagno(form)) closeModal();
+    if (await saveCompagno(form)) {
+      track("socio_creato");
+      closeModal();
+    }
   };
   const doSaveQuickTorneo = async () => {
     const id = await quickCreateTorneo(form);
     if (id) {
+      track("torneo_creato", { via: "rapido" });
       closeModal();
       openTorneoDetail(id);
     }
@@ -607,7 +632,14 @@ export default function App() {
           <CreaChat
             wide={wide}
             partners={partnerOptions(data)}
-            onCreate={createGuidedTorneo}
+            onCreate={async (f, matches) => {
+              const id = await createGuidedTorneo(f, matches);
+              if (id) {
+                track("assistente_ai_usato");
+                track("torneo_creato", { via: "assistente" });
+              }
+              return id;
+            }}
             onDone={openTorneoDetail}
             onExit={() => go("tornei")}
           />
