@@ -1,6 +1,7 @@
 import type { Screen } from '../lib/models'
 import { useAuth } from '../hooks/useAuth'
 import NavIcon from './NavIcons'
+import { BrandLockup } from './Logo'
 
 interface NavEntry { key: Screen; label: string }
 
@@ -25,9 +26,8 @@ export default function Sidebar({ screen, onNavigate, onNewPartita, onNewTorneo,
   const initial = session?.name?.[0]?.toUpperCase() || '?'
   return (
     <aside style={{ width: 230, flex: 'none', height: '100vh', overflowY: 'auto', padding: '28px 16px', borderRight: '1px solid rgba(27,42,74,.09)', display: 'flex', flexDirection: 'column', gap: 2, background: '#FAF8F5' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '2px 12px 26px' }}>
-        <div style={{ width: 9, height: 9, borderRadius: '50%', background: '#FF6B35' }} />
-        <div style={{ font: "600 16px 'Space Grotesk'", letterSpacing: '-.2px' }}>Beach Diary</div>
+      <div style={{ padding: '2px 12px 26px' }}>
+        <BrandLockup size={34} textSize={17} gap={11} />
       </div>
 
       {NAV.map((n) => {

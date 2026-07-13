@@ -45,6 +45,7 @@ import type {
 import Sidebar from "./components/Sidebar";
 import BottomNav from "./components/BottomNav";
 import Splash from "./components/Splash";
+import { BrandLockup } from "./components/Logo";
 import Home from "./screens/Home";
 import Tornei from "./screens/Tornei";
 import TorneoDetail from "./screens/TorneoDetail";
@@ -694,24 +695,7 @@ export default function App() {
               marginBottom: 18,
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
-              <div
-                style={{
-                  width: 9,
-                  height: 9,
-                  borderRadius: "50%",
-                  background: "#FF6B35",
-                }}
-              />
-              <div
-                style={{
-                  font: "600 15px 'Space Grotesk'",
-                  letterSpacing: "-.2px",
-                }}
-              >
-                Beach Diary
-              </div>
-            </div>
+            <BrandLockup size={30} textSize={15} gap={9} />
             <div
               className="chip"
               onClick={() => go("profilo")}

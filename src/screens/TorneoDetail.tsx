@@ -34,35 +34,33 @@ export default function TorneoDetail({ t, goBack, onEdit, onAddPartita, onOpenMa
     <div style={{ animation: 'pop .32s ease both' }}>
       <BackLink onClick={goBack}>← Tornei</BackLink>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap', paddingBottom: 22, borderBottom: '1px solid rgba(27,42,74,.1)' }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-            <div style={{ width: 9, height: 9, borderRadius: '50%', background: t.dot }} />
-            <div className="lbl" style={{ letterSpacing: '1px' }}>{t.category}</div>
-            {readOnly && <Badge tone="dark" size="sm">Condiviso con te</Badge>}
-          </div>
-          <div className="num" style={{ fontSize: 'clamp(24px,4vw,34px)', fontWeight: 500, letterSpacing: '-.5px', marginTop: 8 }}>{t.name}</div>
-          <div style={{ font: "600 13.5px 'Nunito Sans'", color: MUTED, marginTop: 4 }}>{t.meta}</div>
+      <div style={{ paddingBottom: 22, borderBottom: '1px solid rgba(27,42,74,.1)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 9, flexWrap: 'wrap' }}>
+          <div style={{ width: 9, height: 9, borderRadius: '50%', background: t.dot }} />
+          <div className="lbl" style={{ letterSpacing: '1px' }}>{t.category}</div>
+          <span style={{ font: "800 11px 'Nunito Sans'", letterSpacing: '.3px', padding: '3px 9px', borderRadius: 7, background: t.badgeBg, color: t.badgeColor }}>{t.badge}</span>
+          {readOnly && <Badge tone="dark" size="sm">Condiviso con te</Badge>}
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'flex-end' }}>
-          <div style={{ font: "700 13px 'Nunito Sans'", padding: '8px 15px', borderRadius: 10, background: t.badgeBg, color: t.badgeColor }}>{t.badge}</div>
-          {!readOnly && (
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-              <div className="chip" onClick={onShareStory} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, font: "700 12px 'Nunito Sans'", padding: '8px 14px', borderRadius: 9, color: '#fff', cursor: 'pointer', background: 'linear-gradient(45deg,#F58529,#DD2A7B 55%,#8134AF)', boxShadow: '0 4px 14px -5px rgba(221,42,123,.55)' }}>
-                <IgGlyph /> Storia
-                {!canShareStory && <Badge tone="onColor" size="sm">Premium</Badge>}
-              </div>
-              <div className="chip" onClick={onEdit} style={{ font: "700 12px 'Nunito Sans'", padding: '8px 13px', borderRadius: 9, border: '1px solid rgba(27,42,74,.18)', color: '#1B2A4A', cursor: 'pointer' }}>Modifica</div>
-              <div className="chip" onClick={onAddPartita} style={{ font: "700 12px 'Nunito Sans'", padding: '8px 13px', borderRadius: 9, background: '#1B2A4A', color: '#fff', cursor: 'pointer' }}>＋ Partita</div>
+        <div className="num" style={{ fontSize: 'clamp(24px,4vw,34px)', fontWeight: 500, letterSpacing: '-.5px', marginTop: 8 }}>{t.name}</div>
+        <div style={{ font: "600 13.5px 'Nunito Sans'", color: MUTED, marginTop: 4 }}>{t.meta}</div>
+        {!readOnly && (
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 16 }}>
+            <div className="chip" onClick={onShareStory} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, font: "700 12.5px 'Nunito Sans'", padding: '9px 15px', borderRadius: 10, color: '#fff', cursor: 'pointer', background: 'linear-gradient(45deg,#F58529,#DD2A7B 55%,#8134AF)', boxShadow: '0 4px 14px -5px rgba(221,42,123,.55)' }}>
+              <IgGlyph /> Storia
+              {!canShareStory && <Badge tone="onColor" size="sm">Premium</Badge>}
             </div>
-          )}
-        </div>
+            <div className="chip" onClick={onEdit} style={{ display: 'inline-flex', alignItems: 'center', font: "700 12.5px 'Nunito Sans'", padding: '9px 15px', borderRadius: 10, border: '1px solid rgba(27,42,74,.18)', color: '#1B2A4A', cursor: 'pointer' }}>Modifica</div>
+            <div className="chip" onClick={onAddPartita} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, font: "700 12.5px 'Nunito Sans'", padding: '9px 15px', borderRadius: 10, background: '#1B2A4A', color: '#fff', cursor: 'pointer' }}>＋ Partita</div>
+          </div>
+        )}
       </div>
 
-      <StatGrid min={120}>
+      <StatGrid min={110}>
         <StatTile value={t.record} label="record" color="#FF6B35" valueSize={24} pad="16px 18px" />
         <StatTile value={t.winPct + '%'} label="vittorie" valueSize={24} pad="16px 18px" />
+        <StatTile value={t.played} label="partite" valueSize={24} pad="16px 18px" />
         <StatTile value={t.setStr} label="set" valueSize={24} pad="16px 18px" />
+        <StatTile value={t.setPct + '%'} label="set vinti" valueSize={24} pad="16px 18px" />
         <StatTile value={t.diffStr} label="differenziale" valueSize={24} pad="16px 18px" />
       </StatGrid>
 

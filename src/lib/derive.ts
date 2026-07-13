@@ -88,7 +88,9 @@ export interface TorneoDetailData {
   meta: string
   record: string
   winPct: number
+  played: number
   setStr: string
+  setPct: number
   diffStr: string
   noMatches: boolean
   hasPhotos: boolean
@@ -380,13 +382,26 @@ export function deriveDashboardServer(sv: ServerDashboard, data: DiaryData, fPar
 }
 
 // ---- Tornei list ----
+// Ordine "agenda" della lista tornei: prima gli imminenti/futuri (data >= oggi)
+// dal più vicino, poi i passati dal più recente.
+function byAgendaDate<T extends { date: string }>(list: T[]): T[] {
+  const today = new Date().toISOString().slice(0, 10)
+  return [...list].sort((a, b) => {
+    const aUp = a.date >= today
+    const bUp = b.date >= today
+    if (aUp !== bUp) return aUp ? -1 : 1 // imminenti/futuri prima dei passati
+    if (aUp) return a.date < b.date ? -1 : 1 // futuri: prima i più vicini
+    return a.date < b.date ? 1 : -1 // passati: prima i più recenti
+  })
+}
+
 export function deriveTorneiList(data: DiaryData, fYear: string): TorneiListData {
   const yearT = data.tournaments.filter((t) => !fYear || fYear === 'Sempre' || yearOf(t.date) === fYear)
   const ranks = yearT.map((t) => placementRank(t.placement))
   const podi = ranks.filter((r) => r <= 3).length
   const best = ranks.length ? Math.min(...ranks) : 9
   const bestPlacement = PLACEMENT_LABELS[best] || '—'
-  const tSorted = [...data.tournaments].sort((a, b) => (a.date < b.date ? 1 : -1))
+  const tSorted = byAgendaDate(data.tournaments)
   return {
     tornei: tSorted.map((t) => decorateTournament(data, t)),
     tPlayed: yearT.length, podi, bestPlacement,
@@ -407,7 +422,7 @@ export function deriveTorneoDetail(data: DiaryData, id: string): TorneoDetailDat
     badgeBg: podium ? '#FFF1EA' : '#F2F0EC',
     badgeColor: podium ? '#C4501E' : 'rgba(27,42,74,.5)',
     meta: fmtDate(t.date) + ' · ' + t.city + ' · ' + t.surface + (t.partnerId ? ' · con ' + partnerName(data, t.partnerId) : ''),
-    record: ts.won + '-' + ts.lost, winPct: ts.winPct, setStr: ts.sw + '-' + ts.sl,
+    record: ts.won + '-' + ts.lost, winPct: ts.winPct, played: ts.played, setStr: ts.sw + '-' + ts.sl, setPct: ts.setPct,
     diffStr: (ts.diff >= 0 ? '+' : '') + ts.diff,
     noMatches: tm.length === 0, hasPhotos: photos.length > 0, shared: t.shared,
     photos: photos.map((p) => ({ id: p.id, color: p.color, caption: p.caption, url: p.url })),
@@ -549,7 +564,7 @@ export function deriveStory(data: DiaryData, id: string): StoryData | null {
 // ---- Mapper da RPC server → view-model (presentazione lato client) ----
 
 export function deriveTorneiListServer(sv: SvTorneiList): TorneiListData {
-  const tornei: TorneoCard[] = sv.tornei.map((c) => {
+  const tornei: TorneoCard[] = byAgendaDate(sv.tornei).map((c) => {
     const podium = c.rank <= 3
     return {
       id: c.id, name: c.name, category: c.category, dot: dotForRank(c.rank),
@@ -579,7 +594,8 @@ export function deriveTorneoDetailServer(sv: SvTorneoDetail, data: DiaryData): T
     badgeBg: podium ? '#FFF1EA' : '#F2F0EC',
     badgeColor: podium ? '#C4501E' : 'rgba(27,42,74,.5)',
     meta: fmtDate(sv.date) + ' · ' + sv.city + ' · ' + sv.surface + (sv.partner ? ' · con ' + sv.partner : ''),
-    record: sv.won + '-' + sv.lost, winPct: sv.win_pct, setStr: sv.sets_won + '-' + sv.sets_lost,
+    record: sv.won + '-' + sv.lost, winPct: sv.win_pct, played: sv.played, setStr: sv.sets_won + '-' + sv.sets_lost,
+    setPct: sv.sets_won + sv.sets_lost > 0 ? Math.round((100 * sv.sets_won) / (sv.sets_won + sv.sets_lost)) : 0,
     diffStr: (sv.point_diff >= 0 ? '+' : '') + sv.point_diff,
     noMatches: sv.matches.length === 0, hasPhotos: photos.length > 0, shared: false,
     photos: photos.map((p) => ({ id: p.id, color: p.color, caption: p.caption, url: p.url })),
