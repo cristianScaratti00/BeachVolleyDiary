@@ -13,7 +13,6 @@ const SLOTS: Slot[] = [
 ];
 
 const NAVY = "#1B2A4A";
-const ORANGE = "#FF6B35";
 
 interface BottomNavProps {
   screen: Screen;
