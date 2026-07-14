@@ -147,6 +147,7 @@ export interface StoryData {
   partner: string
   slug: string          // base del nome file scaricato
   coverUrl: string | null // foto di copertina (URL firmato) se il torneo ne ha una
+  photoUrls: string[]     // fino a 3 foto del torneo, per la striscia in fondo
   emoji: string           // emoji del torneo, per il visual quando non c'è foto
 }
 export interface DiaryEntry {
@@ -542,7 +543,8 @@ export function deriveStory(data: DiaryData, id: string): StoryData | null {
   const d = t.date || '2025-01-01'
   const meta = [fmtDateFull(d), t.city, t.category].filter(Boolean).join('  ·  ')
   const slug = (t.name || 'torneo').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'torneo'
-  const cover = data.photos.find((p) => p.tournamentId === t.id && p.url)
+  const withUrl = data.photos.filter((p) => p.tournamentId === t.id && p.url)
+  const cover = withUrl[0]
 
   return {
     year: yearOf(d),
@@ -557,6 +559,7 @@ export function deriveStory(data: DiaryData, id: string): StoryData | null {
     partner,
     slug,
     coverUrl: cover?.url ?? null,
+    photoUrls: withUrl.slice(0, 3).map((p) => p.url as string),
     emoji: t.emoji || '🏐',
   }
 }

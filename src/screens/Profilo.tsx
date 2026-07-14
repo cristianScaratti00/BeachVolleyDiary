@@ -1,5 +1,10 @@
+import { useRef, useState } from 'react'
+import type { ChangeEvent } from 'react'
 import type { Session } from '../lib/auth'
 import { BASE_LIMITS } from '../lib/limits'
+import { supabase } from '../lib/supabase'
+import { useAuth } from '../hooks/useAuth'
+import { Avatar } from '../components/ui'
 
 interface ProfiloProps {
   session: Session
@@ -29,13 +34,56 @@ const PLANS: PlanCard[] = [
 
 export default function Profilo({ session, onUpgrade, onLogout }: ProfiloProps) {
   const initial = session.name?.[0]?.toUpperCase() || '?'
+  const { refresh } = useAuth()
+  const [busy, setBusy] = useState(false)
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  // Cambia foto profilo: upload sul bucket pubblico `avatars`, poi RPC set_avatar
+  // e refresh della sessione. Pulisce i vecchi avatar (best-effort).
+  const onPickAvatar = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = '' // reset: permette di riselezionare lo stesso file
+    if (!file || busy) return
+    setBusy(true)
+    try {
+      const { data: auth } = await supabase.auth.getUser()
+      const uid = auth.user?.id
+      if (!uid) throw new Error('Sessione non valida.')
+      const ext = (file.name.split('.').pop() || 'jpg').replace(/[^a-z0-9]/gi, '').toLowerCase() || 'jpg'
+      const newPath = `${uid}/${crypto.randomUUID()}.${ext}`
+      const { error: upErr } = await supabase.storage.from('avatars').upload(newPath, file, { contentType: file.type || 'image/jpeg', upsert: false })
+      if (upErr) throw upErr
+      const { data: pub } = supabase.storage.from('avatars').getPublicUrl(newPath)
+      const { error: rpcErr } = await supabase.rpc('set_avatar', { p_url: pub.publicUrl })
+      if (rpcErr) throw rpcErr
+      try {
+        const { data: existing } = await supabase.storage.from('avatars').list(uid)
+        const stale = (existing ?? []).map((f) => `${uid}/${f.name}`).filter((p) => p !== newPath)
+        if (stale.length) await supabase.storage.from('avatars').remove(stale)
+      } catch { /* ignore cleanup errors */ }
+      await refresh()
+    } catch (err) {
+      alert('Impossibile aggiornare la foto: ' + (err instanceof Error ? err.message : String(err)))
+    } finally {
+      setBusy(false)
+    }
+  }
+
   return (
     <div style={{ animation: 'pop .32s ease both' }}>
       <div className="num" style={{ fontSize: 'clamp(26px,4vw,34px)', fontWeight: 500, letterSpacing: '-.5px' }}>Profilo</div>
 
       {/* utente */}
       <div className="card" style={{ padding: 22, marginTop: 20, display: 'flex', alignItems: 'center', gap: 14 }}>
-        <div style={{ width: 54, height: 54, borderRadius: '50%', background: '#1B2A4A', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', font: "600 22px 'Space Grotesk'", flex: 'none' }}>{initial}</div>
+        <div
+          onClick={() => { if (!busy) fileRef.current?.click() }}
+          title="Cambia foto profilo"
+          style={{ position: 'relative', flex: 'none', cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.6 : 1 }}
+        >
+          <Avatar initial={initial} size={54} font={22} uri={session.avatarUrl} />
+          <div style={{ position: 'absolute', right: -2, bottom: -2, width: 22, height: 22, borderRadius: '50%', background: '#FF6B35', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #fff', fontSize: 10 }}>📷</div>
+          <input ref={fileRef} type="file" accept="image/*" onChange={onPickAvatar} style={{ display: 'none' }} />
+        </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <div style={{ font: "700 17px 'Nunito Sans'" }}>{session.name}</div>

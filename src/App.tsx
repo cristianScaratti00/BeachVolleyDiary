@@ -46,6 +46,7 @@ import Sidebar from "./components/Sidebar";
 import BottomNav from "./components/BottomNav";
 import Splash from "./components/Splash";
 import { BrandLockup } from "./components/Logo";
+import { Avatar } from "./components/ui";
 import { track } from "@vercel/analytics";
 import Home from "./screens/Home";
 import Tornei from "./screens/Tornei";
@@ -791,21 +792,12 @@ export default function App() {
               >
                 Profilo
               </span>
-              <div
-                style={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: "50%",
-                  background: "#1B2A4A",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  font: "600 12px 'Space Grotesk'",
-                  color: "#fff",
-                }}
-              >
-                {session?.name?.[0]?.toUpperCase() || "?"}
-              </div>
+              <Avatar
+                initial={session?.name?.[0]?.toUpperCase() || "?"}
+                size={28}
+                font={12}
+                uri={session?.avatarUrl}
+              />
             </div>
           </div>
         )}

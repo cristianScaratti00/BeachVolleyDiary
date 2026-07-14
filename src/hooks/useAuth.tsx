@@ -11,6 +11,7 @@ interface AuthContextValue {
   register: (name: string, email: string, password: string) => Promise<AuthResult>
   loginWithProvider: (provider: OAuthProvider) => Promise<AuthResult>
   logout: () => Promise<void>
+  refresh: () => Promise<void> // rilegge il profilo (es. dopo cambio avatar/piano)
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -64,7 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(() => logoutUser(), [])
 
   return (
-    <AuthContext.Provider value={{ session, loading, login, register, loginWithProvider, logout }}>
+    <AuthContext.Provider value={{ session, loading, login, register, loginWithProvider, logout, refresh }}>
       {children}
     </AuthContext.Provider>
   )

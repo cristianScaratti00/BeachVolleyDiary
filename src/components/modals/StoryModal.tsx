@@ -42,7 +42,7 @@ export default function StoryModal({ story, onClose, onNotice }: StoryModalProps
   const [variant, setVariant] = useState<PaletteKey>('navy')
   const [busy, setBusy] = useState(false)
   const [vh, setVh] = useState(() => (typeof window !== 'undefined' ? window.innerHeight : 900))
-  const [cover, setCover] = useState<string | null>(null)
+  const [covers, setCovers] = useState<string[]>([])
   const [handle, setHandle] = useState('')
   const cardRef = useRef<HTMLDivElement>(null)
   const pal = PALETTES[variant]
@@ -63,24 +63,30 @@ export default function StoryModal({ story, onClose, onNotice }: StoryModalProps
     try { localStorage.setItem(igKey(story.partner), h) } catch { /* ignore */ }
   }
 
-  // Copertina: scarica la foto firmata e la inline come data URL (così html-to-image
-  // la incorpora nel PNG senza problemi di canvas "tainted").
+  // Foto (fino a 3): scarica le foto firmate e le inline come data URL (così
+  // html-to-image le incorpora nel PNG senza problemi di canvas "tainted").
+  const photoKey = story.photoUrls.join('|')
   useEffect(() => {
     let alive = true
-    setCover(null)
-    if (!story.coverUrl) return
-    fetch(story.coverUrl, { mode: 'cors' })
-      .then((r) => (r.ok ? r.blob() : Promise.reject(new Error('http ' + r.status))))
-      .then((blob) => new Promise<string>((res, rej) => {
-        const fr = new FileReader()
-        fr.onload = () => res(fr.result as string)
-        fr.onerror = rej
-        fr.readAsDataURL(blob)
-      }))
-      .then((durl) => { if (alive) setCover(durl) })
-      .catch((e) => { /* fallback al visual con emoji */ console.warn('[story] cover', e) })
+    setCovers([])
+    const urls = story.photoUrls
+    if (!urls.length) return
+    const toDataUrl = (u: string) =>
+      fetch(u, { mode: 'cors' })
+        .then((r) => (r.ok ? r.blob() : Promise.reject(new Error('http ' + r.status))))
+        .then((blob) => new Promise<string>((res, rej) => {
+          const fr = new FileReader()
+          fr.onload = () => res(fr.result as string)
+          fr.onerror = rej
+          fr.readAsDataURL(blob)
+        }))
+        .catch((e) => { console.warn('[story] foto', e); return null })
+    Promise.all(urls.map(toDataUrl)).then((arr) => {
+      if (alive) setCovers(arr.filter((x): x is string => !!x))
+    })
     return () => { alive = false }
-  }, [story.coverUrl])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [photoKey])
 
   const scale = Math.max(0.26, Math.min(0.5, (vh - 300) / 1920))
   const boxW = Math.round(1080 * scale)
@@ -142,14 +148,16 @@ export default function StoryModal({ story, onClose, onNotice }: StoryModalProps
             <div style={{ font: "700 38px 'Nunito Sans'", color: pal.fg }}>in coppia con <span style={{ color: pal.accent }}>{partnerLabel}</span></div>
           </div>
 
-          {/* media: mostra la foto di copertina solo se presente; senza immagini
-              non si mostra nulla (nessun segnaposto con emoji). */}
+          {/* media: striscia di fino a 3 foto del torneo; senza foto non si
+              mostra nulla (nessun segnaposto con emoji). */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 34 }}>
-            {cover && (
-              <div style={{ width: '100%', height: 360, borderRadius: 30, overflow: 'hidden', position: 'relative', background: pal.accent }}>
-                <img src={cover} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(0,0,0,.02) 40%, rgba(0,0,0,.42))' }} />
-                <div style={{ position: 'absolute', left: 34, bottom: 30, font: "800 26px 'Nunito Sans'", letterSpacing: 3, color: '#fff', textTransform: 'uppercase', textShadow: '0 2px 12px rgba(0,0,0,.5)' }}>{story.year} · {story.name}</div>
+            {covers.length > 0 && (
+              <div style={{ display: 'flex', gap: 16 }}>
+                {covers.map((src, i) => (
+                  <div key={i} style={{ flex: 1, height: 320, borderRadius: 26, overflow: 'hidden', background: pal.accent }}>
+                    <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </div>
+                ))}
               </div>
             )}
             <div style={{ font: "700 28px 'Nunito Sans'", letterSpacing: 4, color: pal.muted }}>IL MIO DIARIO · BEACH VOLLEY</div>

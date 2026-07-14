@@ -26,6 +26,7 @@ export type Database = {
           full_name: string | null
           role: string
           plan: string
+          avatar_url: string | null
           created_at: string
           updated_at: string
         }
@@ -35,6 +36,7 @@ export type Database = {
           full_name?: string | null
           role?: string
           plan?: string
+          avatar_url?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -44,6 +46,7 @@ export type Database = {
           full_name?: string | null
           role?: string
           plan?: string
+          avatar_url?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -354,6 +357,10 @@ export type Database = {
       search_users: {
         Args: { p_query?: string }
         Returns: { id: string; name: string; email: string }[]
+      }
+      set_avatar: {
+        Args: { p_url: string }
+        Returns: undefined
       }
       tornei_list: {
         Args: Record<PropertyKey, never>

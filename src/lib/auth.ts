@@ -14,6 +14,7 @@ export interface Session {
   name: string
   role: Role // admin | user
   plan: Plan // base | premium
+  avatarUrl: string | null // foto profilo (bucket avatars)
 }
 
 export interface AuthResult {
@@ -28,11 +29,12 @@ export type OAuthProvider = 'google' | 'apple'
 export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 // Legge ruolo e piano dal profilo dell'utente (default prudenti se non c'è ancora).
-async function fetchProfile(userId: string): Promise<{ role: Role; plan: Plan }> {
-  const { data } = await supabase.from('profiles').select('role, plan').eq('id', userId).single()
+async function fetchProfile(userId: string): Promise<{ role: Role; plan: Plan; avatarUrl: string | null }> {
+  const { data } = await supabase.from('profiles').select('role, plan, avatar_url').eq('id', userId).single()
   return {
     role: (data?.role as Role) ?? 'user',
     plan: (data?.plan as Plan) ?? 'base',
+    avatarUrl: data?.avatar_url ?? null,
   }
 }
 
@@ -43,8 +45,8 @@ export async function sessionForUser(user: User | null | undefined): Promise<Ses
   const meta = user.user_metadata ?? {}
   const name = ((meta.name ?? meta.full_name ?? meta.user_name) as string | undefined)?.trim()
   const email = user.email ?? ''
-  const { role, plan } = await fetchProfile(user.id)
-  return { email, name: name || email.split('@')[0] || 'Utente', role, plan }
+  const { role, plan, avatarUrl } = await fetchProfile(user.id)
+  return { email, name: name || email.split('@')[0] || 'Utente', role, plan, avatarUrl }
 }
 
 export async function registerUser(name: string, email: string, password: string): Promise<AuthResult> {

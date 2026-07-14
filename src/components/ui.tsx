@@ -159,7 +159,10 @@ export function MeterRow({ label, pct, barW, sub }: { label: string; pct: number
 
 // ---------------------------------------------------------------- Avatar
 // Cerchio con iniziale (compagni).
-export function Avatar({ initial, size = 48, font = 20 }: { initial: string; size?: number; font?: number }) {
+export function Avatar({ initial, size = 48, font = 20, uri }: { initial: string; size?: number; font?: number; uri?: string | null }) {
+  if (uri) {
+    return <img src={uri} alt="" style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover', background: INK, flex: 'none', display: 'block' }} />
+  }
   return (
     <div style={{ width: size, height: size, borderRadius: '50%', background: INK, display: 'flex', alignItems: 'center', justifyContent: 'center', font: `600 ${font}px 'Space Grotesk'`, color: '#fff', flex: 'none' }}>
       {initial}
