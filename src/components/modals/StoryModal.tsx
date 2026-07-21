@@ -153,9 +153,14 @@ export default function StoryModal({ story, onClose, onNotice }: StoryModalProps
           <div style={{ display: 'flex', flexDirection: 'column', gap: 34 }}>
             {covers.length > 0 && (
               <div style={{ display: 'flex', gap: 16 }}>
+                {/* Il radius sta sull'<img>, non sul contenitore, e dietro non
+                    c'è nessun colore: clippando con `overflow` su uno sfondo
+                    accent l'antialiasing lasciava trapelare un filo arancione
+                    lungo la curva, invisibile nell'anteprima scalata ma ben
+                    visibile nel PNG a 1080px. */}
                 {covers.map((src, i) => (
-                  <div key={i} style={{ flex: 1, height: 320, borderRadius: 26, overflow: 'hidden', background: pal.accent }}>
-                    <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <div key={i} style={{ flex: 1, height: 320 }}>
+                    <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 26, display: 'block' }} />
                   </div>
                 ))}
               </div>

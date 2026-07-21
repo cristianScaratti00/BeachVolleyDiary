@@ -1,3 +1,9 @@
+// ============================================================================
+// DORMIENTE — piani sospesi (src/lib/limits.ts → PLANS_ENABLED = false).
+// Nessuno monta più questo componente: è conservato pronto all'uso per quando
+// arriverà l'integrazione dei pagamenti. Vedi anche la migration
+// supabase/migrations/20260721120000_disable_plans_all_premium.sql.
+// ============================================================================
 import { Sheet, Title } from './Sheet'
 
 interface UpgradeSheetProps {

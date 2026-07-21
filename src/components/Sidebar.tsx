@@ -61,9 +61,6 @@ export default function Sidebar({ screen, onNavigate, onNewPartita, onNewTorneo,
         <div onClick={() => onNavigate('profilo')} title="Profilo" style={{ flex: 1, minWidth: 0, cursor: 'pointer' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <div style={{ font: "700 12.5px 'Nunito Sans'", whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{session?.name}</div>
-            {session?.plan && (
-              <span style={{ flex: 'none', font: "800 8.5px 'Nunito Sans'", letterSpacing: '.4px', textTransform: 'uppercase', padding: '2px 6px', borderRadius: 5, background: session.plan === 'premium' ? '#FF6B35' : '#F2F0EC', color: session.plan === 'premium' ? '#fff' : 'rgba(27,42,74,.55)' }}>{session.plan}</span>
-            )}
           </div>
           <div style={{ font: "600 10.5px 'Nunito Sans'", color: 'rgba(27,42,74,.45)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{session?.role === 'admin' ? 'Admin · ' : ''}{session?.email}</div>
         </div>

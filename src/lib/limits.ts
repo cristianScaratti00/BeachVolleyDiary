@@ -7,6 +7,12 @@
 // ============================================================================
 import type { Plan, Role } from './db.enums'
 
+// PIANI SOSPESI: in attesa dell'integrazione dei pagamenti ogni utente ha tutto
+// sbloccato, qualunque sia il suo `plan`. La tabella qui sotto resta intatta:
+// per riattivare il freemium rimetti `true` e ripristina il trigger DB
+// (vedi supabase/migrations/20260721120000_disable_plans_all_premium.sql).
+export const PLANS_ENABLED = false
+
 export const BASE_LIMITS = { tournaments: 5, partners: 2 } as const
 
 export interface Entitlements {
@@ -39,8 +45,9 @@ export const ENTITLEMENTS: Record<Plan, Entitlements> = {
 }
 
 // Entitlements effettivi dell'utente. Admin = tutto sbloccato (come Premium).
+// Con i piani sospesi (PLANS_ENABLED = false) vale per tutti.
 export function entitlements(plan: Plan | undefined, role: Role | undefined): Entitlements {
-  if (role === 'admin') return ENTITLEMENTS.premium
+  if (!PLANS_ENABLED || role === 'admin') return ENTITLEMENTS.premium
   return ENTITLEMENTS[plan ?? 'base']
 }
 
@@ -50,7 +57,7 @@ export function isUnlimited(plan: Plan | undefined, role: Role | undefined): boo
 
 // Accesso alle funzioni Premium (filtri dashboard, diario, foto nei tornei...).
 export function hasPremium(plan: Plan | undefined, role: Role | undefined): boolean {
-  return plan === 'premium' || role === 'admin'
+  return !PLANS_ENABLED || plan === 'premium' || role === 'admin'
 }
 
 export function tournamentLimit(plan: Plan | undefined, role: Role | undefined): number {

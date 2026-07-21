@@ -1,13 +1,10 @@
-import type { CSSProperties } from 'react'
 import type { DiaryEntry } from '../lib/derive'
 import { PageHeader, Button, EmptyCard, InlineLink } from '../components/ui'
 
 interface DiarioProps {
   entries: DiaryEntry[]
-  locked: boolean
   onOpenTorneo: (id: string) => void
   onInstagramStory: (id: string) => void
-  onUpgrade: () => void
   onNewTorneo: () => void
 }
 
@@ -78,43 +75,16 @@ function EntryCard({ e, onOpen, onStory }: { e: DiaryEntry; onOpen: () => void; 
   )
 }
 
-// Card paywall mostrata agli utenti Base.
-function PremiumGate({ onUpgrade }: { onUpgrade: () => void }) {
-  return (
-    <div className="card" style={{ padding: 26, textAlign: 'center', border: '2px solid #FF6B35' }}>
-      <div style={{ width: 48, height: 48, borderRadius: 14, background: '#FFF1EA', color: '#FF6B35', display: 'flex', alignItems: 'center', justifyContent: 'center', font: "700 22px 'Space Grotesk'", margin: '0 auto 12px' }}>★</div>
-      <div className="num" style={{ fontSize: 20, fontWeight: 600 }}>Il Diario è Premium</div>
-      <div style={{ font: "600 13px 'Nunito Sans'", color: 'rgba(27,42,74,.6)', margin: '8px auto 0', maxWidth: 380, lineHeight: 1.45 }}>
-        Rivivi i tuoi tornei in un diario con foto e condividili come storia su Instagram. Passa a Premium per sbloccarlo.
-      </div>
-      <button onClick={onUpgrade} className="chip" style={{ marginTop: 18, padding: '12px 22px', borderRadius: 11, border: 'none', cursor: 'pointer', background: '#FF6B35', color: '#fff', font: "700 14px 'Nunito Sans'" }}>Passa a Premium · €5</button>
-    </div>
-  )
-}
-
-const fadedPreview: CSSProperties = { filter: 'blur(3px)', opacity: 0.5, pointerEvents: 'none', userSelect: 'none' }
-
-export default function Diario({ entries, locked, onOpenTorneo, onInstagramStory, onUpgrade, onNewTorneo }: DiarioProps) {
+export default function Diario({ entries, onOpenTorneo, onInstagramStory, onNewTorneo }: DiarioProps) {
   return (
     <div style={{ animation: 'pop .32s ease both' }}>
       <PageHeader
         title="Diario"
-        subtitle={locked ? 'Funzione Premium' : `${entries.length} ${entries.length === 1 ? 'torneo' : 'tornei'} nel diario`}
-        actions={!locked ? <Button variant="dark" onClick={onNewTorneo}>＋ Nuovo torneo</Button> : undefined}
+        subtitle={`${entries.length} ${entries.length === 1 ? 'torneo' : 'tornei'} nel diario`}
+        actions={<Button variant="dark" onClick={onNewTorneo}>＋ Nuovo torneo</Button>}
       />
 
-      {locked ? (
-        <div style={{ marginTop: 22 }}>
-          <PremiumGate onUpgrade={onUpgrade} />
-          {entries.length > 0 && (
-            <div style={{ ...fadedPreview, display: 'flex', flexDirection: 'column', gap: 12, marginTop: 18 }} aria-hidden="true">
-              {entries.slice(0, 3).map((e) => (
-                <EntryCard key={e.id} e={e} onOpen={() => {}} onStory={() => {}} />
-              ))}
-            </div>
-          )}
-        </div>
-      ) : entries.length === 0 ? (
+      {entries.length === 0 ? (
         <div style={{ marginTop: 22 }}>
           <EmptyCard pad={30}>
             Il tuo diario è vuoto. <InlineLink onClick={onNewTorneo}>Crea il primo torneo →</InlineLink>

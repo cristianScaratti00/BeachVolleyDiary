@@ -44,6 +44,7 @@ import type {
 
 import Sidebar from "./components/Sidebar";
 import BottomNav from "./components/BottomNav";
+import ConnectionSnackbar from "./components/ConnectionSnackbar";
 import Splash from "./components/Splash";
 import { BrandLockup } from "./components/Logo";
 import { Avatar } from "./components/ui";
@@ -55,7 +56,7 @@ import Compagni from "./screens/Compagni";
 import CompagnoDetail from "./screens/CompagnoDetail";
 import Profilo from "./screens/Profilo";
 // Lazy: schermate/modali pesanti caricate solo quando servono (code-splitting).
-// CreaChat = wizard AI; StoryModal trascina `html-to-image`; Diario è Premium.
+// CreaChat = wizard AI; StoryModal trascina `html-to-image`.
 const Diario = lazy(() => import("./screens/Diario"));
 const CreaChat = lazy(() => import("./screens/CreaChat"));
 import TorneoModal from "./components/modals/TorneoModal";
@@ -63,7 +64,6 @@ import PartitaModal from "./components/modals/PartitaModal";
 import FotoModal from "./components/modals/FotoModal";
 import CompagnoModal from "./components/modals/CompagnoModal";
 import QuickTorneoModal from "./components/modals/QuickTorneoModal";
-import UpgradeSheet from "./components/modals/UpgradeSheet";
 const StoryModal = lazy(() => import("./components/modals/StoryModal"));
 
 export default function App() {
@@ -101,10 +101,6 @@ export default function App() {
   const [fYear, setFYear] = useState("Sempre");
   const [form, setForm] = useState<AnyForm>({});
   const [notice, setNotice] = useState<string | null>(null);
-  const [upgrade, setUpgrade] = useState<{
-    title?: string;
-    message: string;
-  } | null>(null);
   const [serverDash, setServerDash] = useState<ServerDashboard | null>(null);
   const [srvTornei, setSrvTornei] = useState<SvTorneiList | null>(null);
   const [srvCompagni, setSrvCompagni] = useState<SvCompagno[] | null>(null);
@@ -112,20 +108,17 @@ export default function App() {
   const [srvCompagno, setSrvCompagno] = useState<SvCompagnoDetail | null>(null);
 
   // ---------- permessi in base al piano + conteggi correnti ----------
-  // Ricalcolati ad ogni render dai dati freschi: se l'utente viene declassato a
-  // Base ed è oltre i limiti, le azioni di creazione tornano bloccate.
+  // Piani sospesi (limits.PLANS_ENABLED = false): oggi ogni check passa. La
+  // struttura resta in piedi per quando torneranno i piani a pagamento.
   // Conteggi per i limiti: solo i propri (i tornei/soci CONDIVISI non contano).
   const perm = permissionsFor(session?.plan, session?.role, {
     tournaments: data.tournaments.filter((t) => !t.shared).length,
     partners: data.partners.filter((p) => !p.shared).length,
   });
   const canFilter = perm.canUseFilters;
-  // Azione non consentita dal piano → apre la bottom-sheet di upgrade col messaggio.
+  // Azione non consentita dal piano → messaggio in cima (nessun paywall attivo).
   const denyByPlan = (v: { title?: string; message?: string }) =>
-    setUpgrade({
-      title: v.title,
-      message: v.message ?? "Funzione non disponibile con il tuo piano.",
-    });
+    setNotice(v.message ?? "Funzione non disponibile con il tuo piano.");
   // Un torneo condiviso da un altro utente è di sola lettura: modificabile solo
   // dal creatore (il DB blocca comunque ogni scrittura via RLS).
   const isSharedTorneo = (id: string | null | undefined) =>
@@ -136,15 +129,7 @@ export default function App() {
     );
   const banner = notice;
   const dismissBanner = () => setNotice(null);
-  const onUpgrade = () => {
-    track("upgrade_click");
-    setUpgrade(null);
-    setNotice(
-      "Acquisto Premium in arrivo — l’integrazione dei pagamenti sarà disponibile a breve.",
-    );
-  };
-  // Apre la storia Instagram di un torneo — genera un'immagine 1080×1920 scaricabile
-  // (funzione Premium).
+  // Apre la storia Instagram di un torneo — genera un'immagine 1080×1920 scaricabile.
   const openStory = (id: string) => {
     const v = perm.check("shareStory");
     if (!v.allowed) {
@@ -157,13 +142,10 @@ export default function App() {
     setModal("story");
   };
 
-  // Instrada gli errori del DB: i limiti di piano aprono la bottom-sheet di
-  // upgrade, gli altri errori restano nel toast in alto.
+  // Gli errori del DB finiscono nel toast in alto.
   useEffect(() => {
     if (!diaryError) return;
-    if (diaryError.toLowerCase().includes("piano base"))
-      setUpgrade({ message: diaryError });
-    else setNotice(diaryError);
+    setNotice(diaryError);
     clearError();
   }, [diaryError, clearError]);
 
@@ -619,17 +601,13 @@ export default function App() {
         return (
           <Diario
             entries={deriveDiary(data)}
-            locked={!perm.canUseDiary}
             onOpenTorneo={openTorneoDetail}
             onInstagramStory={openStory}
-            onUpgrade={onUpgrade}
             onNewTorneo={() => openTorneo(null)}
           />
         );
       case "profilo":
-        return (
-          <Profilo session={session!} onUpgrade={onUpgrade} onLogout={logout} />
-        );
+        return <Profilo session={session!} onLogout={logout} />;
       case "crea":
         return (
           <CreaChat
@@ -675,10 +653,9 @@ export default function App() {
               setFYear,
               canFilter,
               onLockedFilter: () =>
-                setUpgrade({
-                  title: "Funzione Premium",
+                denyByPlan({
                   message:
-                    "I filtri per compagno e anno sono disponibili con il piano Premium.",
+                    "I filtri per compagno e anno non sono disponibili con il tuo piano.",
                 }),
             }}
             onOpenTorneo={openTorneoDetail}
@@ -882,18 +859,8 @@ export default function App() {
           />
         </Suspense>
       )}
-      {upgrade && (
-        <UpgradeSheet
-          title={upgrade.title}
-          message={upgrade.message}
-          onUpgrade={onUpgrade}
-          onSeePlans={() => {
-            setUpgrade(null);
-            go("profilo");
-          }}
-          onClose={() => setUpgrade(null)}
-        />
-      )}
+      {/* Avviso momentaneo quando la connessione internet non è ottimale. */}
+      <ConnectionSnackbar />
     </div>
   );
 }

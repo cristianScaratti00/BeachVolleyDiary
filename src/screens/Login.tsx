@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { CSSProperties, ChangeEvent, FormEvent } from "react";
 import { useAuth } from "../hooks/useAuth";
+import { checkNameAvailable } from "../lib/auth";
 import { useIsWide } from "../hooks/useMedia";
 import { BrandLockup } from "../components/Logo";
 
@@ -41,26 +42,74 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
+  const [nameStatus, setNameStatus] = useState<
+    "idle" | "checking" | "available" | "taken"
+  >("idle");
+  const [nameMsg, setNameMsg] = useState("");
 
   const isRegister = mode === "register";
+
+  // Check live del nickname sotto l'input del nome (solo in registrazione),
+  // con debounce per non chiamare la Edge Function ad ogni tasto.
+  useEffect(() => {
+    if (!isRegister) {
+      setNameStatus("idle");
+      return;
+    }
+    const n = name.trim();
+    if (n.length < 2) {
+      setNameStatus("idle");
+      return;
+    }
+    setNameStatus("checking");
+    let alive = true;
+    const t = setTimeout(async () => {
+      const res = await checkNameAvailable(n);
+      if (!alive) return;
+      if (res.status === "available") {
+        setNameStatus("available");
+        setNameMsg("Nome disponibile");
+      } else if (res.status === "taken") {
+        setNameStatus("taken");
+        setNameMsg(res.error || "Nome già in uso");
+      } else {
+        setNameStatus("idle");
+        setNameMsg("");
+      }
+    }, 450);
+    return () => {
+      alive = false;
+      clearTimeout(t);
+    };
+  }, [name, isRegister]);
 
   const switchMode = (m: Mode) => {
     setMode(m);
     setError("");
+    setNotice("");
   };
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     if (busy) return;
     setError("");
+    setNotice("");
     setBusy(true);
     const r = isRegister
       ? await register(name, email, password)
       : await login(email, password);
-    if (!r.ok) setError(r.error || "Si è verificato un errore.");
+    if (!r.ok) {
+      setError(r.error || "Si è verificato un errore.");
+    } else if (r.notice) {
+      // Registrazione con conferma email: resta sul login e mostra l'avviso verde.
+      setNotice(r.notice);
+      setMode("login");
+      setPassword("");
+    }
     setBusy(false);
-    // On success the AuthProvider updates the session and <Root/> swaps to the app.
+    // On login success the AuthProvider updates the session and <Root/> swaps to the app.
   };
 
   return (
@@ -239,6 +288,34 @@ export default function Login() {
                     autoComplete="name"
                     style={inputStyle}
                   />
+                  {name.trim().length >= 2 && nameStatus !== "idle" && (
+                    <div
+                      style={{
+                        marginTop: 6,
+                        font: "700 12px 'Nunito Sans'",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 5,
+                        color:
+                          nameStatus === "taken"
+                            ? "#FF477E"
+                            : nameStatus === "available"
+                              ? "#17B26A"
+                              : "rgba(27,42,74,.5)",
+                      }}
+                    >
+                      {nameStatus === "checking" ? (
+                        "Verifico disponibilità…"
+                      ) : (
+                        <>
+                          <span>
+                            {nameStatus === "available" ? "✓" : "✕"}
+                          </span>
+                          {nameMsg}
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
               <div>
@@ -273,6 +350,21 @@ export default function Login() {
                   style={inputStyle}
                 />
               </div>
+
+              {notice && (
+                <div
+                  style={{
+                    font: "700 12.5px 'Nunito Sans'",
+                    color: "#17B26A",
+                    background: "rgba(23,178,106,.08)",
+                    border: "1px solid rgba(23,178,106,.28)",
+                    borderRadius: 10,
+                    padding: "9px 12px",
+                  }}
+                >
+                  {notice}
+                </div>
+              )}
 
               {error && (
                 <div
