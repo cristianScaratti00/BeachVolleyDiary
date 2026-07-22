@@ -22,5 +22,9 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"]
+  /* I test stanno accanto al codice ma fuori dalla build: hanno bisogno dei
+     globals di vitest, che l'app non deve vedere. Li typechecka
+     tsconfig.test.json (`npm run typecheck:test`). */
+  "include": ["src"],
+  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx", "src/test"]
 }
