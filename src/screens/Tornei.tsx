@@ -1,5 +1,7 @@
-import type { TorneiListData } from '../lib/derive'
-import { PageHeader, Button, Badge, StatFooter, EmptyCard, InlineLink, MUTED } from '../components/ui'
+import { useState } from 'react'
+import { deriveTorneiSections, TORNEI_FILTER_ALL } from '../lib/derive'
+import type { TorneiListData, TorneoCard } from '../lib/derive'
+import { PageHeader, SectionTitle, FilterChips, Button, Badge, StatFooter, EmptyCard, InlineLink, MUTED } from '../components/ui'
 
 interface TorneiProps {
   list: TorneiListData
@@ -12,6 +14,11 @@ interface TorneiProps {
 
 export default function Tornei({ list, onOpenTorneo, onNewTorneo, onQuickTorneo, onAssistant, canAssistant }: TorneiProps) {
   const { tornei, tPlayed, podi, bestPlacement } = list
+  // Il filtro è puramente di presentazione: vive qui, non risale ad App. Quale
+  // valore sia lecito e cosa mostrare di conseguenza lo decide `derive`.
+  const [format, setFormat] = useState<string>(TORNEI_FILTER_ALL)
+  const { active, options, upcoming, groups } = deriveTorneiSections(tornei, format)
+
   return (
     <div style={{ animation: 'pop .32s ease both' }}>
       <PageHeader
@@ -34,32 +41,118 @@ export default function Tornei({ list, onOpenTorneo, onNewTorneo, onQuickTorneo,
           <EmptyCard>Nessun torneo ancora. <InlineLink onClick={onNewTorneo}>Crea il primo torneo →</InlineLink></EmptyCard>
         </div>
       ) : (
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(min(100%,300px),1fr))', gap: 14, marginTop: 22 }}>
-        {tornei.map((t) => (
-          <div key={t.id} className="card lift" onClick={() => onOpenTorneo(t.id)} style={{ padding: 20, cursor: 'pointer' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 9, flexWrap: 'wrap' }}>
-                <div style={{ width: 8, height: 8, borderRadius: '50%', background: t.dot }} />
-                <div className="lbl" style={{ letterSpacing: '1px' }}>{t.category}</div>
-                {t.shared && <Badge tone="dark" size="sm">Condiviso</Badge>}
-              </div>
-              <span style={{ font: "700 12px 'Nunito Sans'", padding: '5px 11px', borderRadius: 8, background: t.badgeBg, color: t.badgeColor }}>{t.badge}</span>
-            </div>
-            <div className="num" style={{ fontSize: 19, fontWeight: 500, marginTop: 14, letterSpacing: '-.3px' }}>{t.name}</div>
-            <div style={{ font: "600 12.5px 'Nunito Sans'", color: MUTED, marginTop: 3 }}>{t.meta}</div>
-            <StatFooter
-              gap={22}
-              valueSize={17}
-              items={[
-                { value: t.record, label: 'record', color: '#FF6B35' },
-                { value: t.winPct + '%', label: 'vittorie' },
-                { value: t.matchCount, label: 'partite' },
-              ]}
+        <>
+          {options.length > 0 && (
+            <FilterChips
+              label="Filtra i tornei per formato"
+              value={active}
+              onChange={setFormat}
+              options={[{ value: TORNEI_FILTER_ALL, label: 'Tutti' }, ...options.map((f) => ({ value: f, label: f }))]}
             />
-          </div>
-        ))}
-      </div>
+          )}
+
+          {upcoming.length > 0 && (
+            <TorneiSection title="Prossimi tornei" tornei={upcoming} onOpenTorneo={onOpenTorneo} accent />
+          )}
+
+          {groups.map((g) => (
+            <TorneiSection key={g.key} title={g.label} tornei={g.tornei} onOpenTorneo={onOpenTorneo} />
+          ))}
+        </>
       )}
+    </div>
+  )
+}
+
+// Intestazione + contatore + griglia. Il contatore sta accanto al titolo, non
+// nello slot `action` di SectionTitle: quello allinea a destra (giusto per
+// un'azione tipo "Vedi tutti"), e a 1120px staccherebbe il numero dal titolo che
+// descrive. Stando dentro all'h2 finisce anche nel nome annunciato dagli
+// screen reader ("2vs2, 4 tornei").
+function TorneiSection({ title, tornei, onOpenTorneo, accent = false }: {
+  title: string
+  tornei: TorneoCard[]
+  onOpenTorneo: (id: string) => void
+  accent?: boolean
+}) {
+  return (
+    <>
+      <SectionTitle size={17}>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          {title}
+          <SectionCount n={tornei.length} accent={accent} />
+        </span>
+      </SectionTitle>
+      <TorneiGrid tornei={tornei} onOpenTorneo={onOpenTorneo} />
+    </>
+  )
+}
+
+// `accent` riprende i colori del badge da podio per dare risalto ai tornei
+// ancora da giocare.
+function SectionCount({ n, accent = false }: { n: number; accent?: boolean }) {
+  return (
+    <span style={{
+      flex: 'none',
+      font: "700 12px 'Nunito Sans'",
+      padding: '4px 10px',
+      borderRadius: 8,
+      background: accent ? '#FFF1EA' : '#F2F0EC',
+      color: accent ? '#C4501E' : MUTED,
+    }}>
+      {n === 1 ? '1 torneo' : `${n} tornei`}
+    </span>
+  )
+}
+
+// Griglia responsive, riusata da ogni sezione. Le colonne scendono a una sola
+// sotto i 300px + gutter, quindi su mobile non c'è mai scroll orizzontale.
+// Niente marginTop: i 12px sotto a SectionTitle sono già la distanza voluta.
+function TorneiGrid({ tornei, onOpenTorneo }: { tornei: TorneoCard[]; onOpenTorneo: (id: string) => void }) {
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(min(100%,300px),1fr))', gap: 14 }}>
+      {tornei.map((t) => (
+        <TorneoCardView key={t.id} t={t} onOpen={() => onOpenTorneo(t.id)} />
+      ))}
+    </div>
+  )
+}
+
+// Card torneo: pallino categoria, badge piazzamento, nome, meta e footer stats.
+function TorneoCardView({ t, onOpen }: { t: TorneoCard; onOpen: () => void }) {
+  return (
+    <div
+      className="card lift"
+      role="button"
+      tabIndex={0}
+      aria-label={`Apri il torneo ${t.name}`}
+      onClick={onOpen}
+      onKeyDown={(e) => {
+        // Una card non è un `button`: Invio e Spazio vanno gestiti a mano,
+        // altrimenti da tastiera la pagina si attraversa senza poterla aprire.
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onOpen() }
+      }}
+      style={{ padding: 20, cursor: 'pointer' }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 9, flexWrap: 'wrap' }}>
+          <div style={{ width: 8, height: 8, borderRadius: '50%', background: t.dot }} />
+          <div className="lbl" style={{ letterSpacing: '1px' }}>{t.category}</div>
+          {t.shared && <Badge tone="dark" size="sm">Condiviso</Badge>}
+        </div>
+        <span style={{ font: "700 12px 'Nunito Sans'", padding: '5px 11px', borderRadius: 8, background: t.badgeBg, color: t.badgeColor }}>{t.badge}</span>
+      </div>
+      <div className="num" style={{ fontSize: 19, fontWeight: 500, marginTop: 14, letterSpacing: '-.3px' }}>{t.name}</div>
+      <div style={{ font: "600 12.5px 'Nunito Sans'", color: MUTED, marginTop: 3 }}>{t.meta}</div>
+      <StatFooter
+        gap={22}
+        valueSize={17}
+        items={[
+          { value: t.record, label: 'record', color: '#FF6B35' },
+          { value: t.winPct + '%', label: 'vittorie' },
+          { value: t.matchCount, label: 'partite' },
+        ]}
+      />
     </div>
   )
 }

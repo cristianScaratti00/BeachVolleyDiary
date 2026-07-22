@@ -29,6 +29,11 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: #FF6B35
 .chip { transition: opacity .15s ease; }
 .chip:hover { opacity: .75; }
 
+/* Focus da tastiera: :focus-visible non scatta con mouse/touch, quindi il
+   contorno appare solo a chi naviga con Tab. Navy invece dell'arancione per
+   avere contrasto sufficiente sia sul fondo crema sia sui chip pieni. */
+.chip:focus-visible, .lift:focus-visible { outline: 2px solid #1B2A4A; outline-offset: 2px; }
+
 ::-webkit-scrollbar { width: 0; height: 0; }
 
 /* type utilities */

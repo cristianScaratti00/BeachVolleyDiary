@@ -1,7 +1,7 @@
 import { res, computeStats, streakOf, placementRank, fmtDate, yearOf, esitoStyle, setChips } from './stats'
 import type { SetChip } from './stats'
 import { MONTHS_SHORT, MONTHS_FULL } from './theme'
-import { PHASES, PLACEMENTS } from './db.enums'
+import { FORMATS, PHASES, PLACEMENTS } from './db.enums'
 import type { DiaryData, Tournament, Partner, Match, Option } from './models'
 import type { ServerDashboard, ServerPhaseRow } from './dashboard'
 import type { SvTorneiList, SvCompagno, SvTorneoDetail, SvCompagnoDetail } from './serverviews'
@@ -51,6 +51,12 @@ export interface TorneoCard {
   id: string
   name: string
   category: string
+  // `format` e `date` restano `string` come `category`, che è la convenzione dei
+  // view-model qui. Il path RPC li riceve già come `string`, e un cast alla union
+  // mentirebbe se il CHECK a DB venisse allargato. Sono obbligatori di proposito:
+  // dimenticare un punto di costruzione rompe il typecheck.
+  format: string // '2vs2' | '3vs3' | '4vs4' — raggruppa e filtra la lista tornei
+  date: string // ISO 'YYYY-MM-DD' — separa gli imminenti dai passati
   dot: string
   badge: string
   badgeBg: string
@@ -64,6 +70,18 @@ export interface TorneoCard {
 
 export interface DashboardData { s: DashboardStats; recent: TorneoCard[] }
 export interface TorneiListData { tornei: TorneoCard[]; tPlayed: number; podi: number; bestPlacement: string }
+// Una sezione della lista tornei: `key` identifica il gruppo, `label` è ciò che
+// si legge nell'intestazione.
+export interface TorneoGroup { key: string; label: string; tornei: TorneoCard[] }
+// Tutto ciò che serve a disegnare la lista tornei con filtro e sezioni. Lo
+// screen si limita a renderizzarlo: le regole (quali chip mostrare, cosa fare di
+// un filtro non più valido, dove finiscono gli imminenti) stanno in `derive`.
+export interface TorneiSections {
+  active: string // filtro in vigore: TORNEI_FILTER_ALL oppure uno di `options`
+  options: string[] // formati selezionabili; vuoto quando filtrare non separerebbe nulla
+  upcoming: TorneoCard[] // imminenti/futuri, non raggruppati
+  groups: TorneoGroup[] // i passati, per formato
+}
 
 export interface TorneoMatchRow {
   id: string
@@ -195,10 +213,13 @@ function decorateTournament(data: DiaryData, t: Tournament): TorneoCard {
   const ts = computeStats(tm)
   const podium = placementRank(t.placement) <= 3
   return {
-    id: t.id, name: t.name, category: t.category, dot: dotFor(t),
+    id: t.id, name: t.name, category: t.category, format: t.format, date: t.date, dot: dotFor(t),
     badge: t.placement,
     badgeBg: podium ? '#FFF1EA' : '#F2F0EC',
     badgeColor: podium ? '#C4501E' : 'rgba(27,42,74,.5)',
+    // Il formato resta anche qui: `meta` è condivisa con le card "Ultimi tornei"
+    // della dashboard, dove non c'è raggruppamento, e il dettaglio torneo mostra
+    // `surface` non `format`. Toglierlo lo farebbe sparire dal resto dell'app.
     meta: fmtDate(t.date) + ' · ' + t.city + ' · ' + t.format + (t.partnerId ? ' · con ' + partnerName(data, t.partnerId) : ''),
     record: ts.won + '-' + ts.lost, winPct: ts.winPct, matchCount: ts.played,
     shared: t.shared,
@@ -383,10 +404,16 @@ export function deriveDashboardServer(sv: ServerDashboard, data: DiaryData, fPar
 }
 
 // ---- Tornei list ----
+// "Oggi" in ISO. Unica definizione del confine imminente/passato: l'ordinamento
+// agenda e la sezione "Prossimi tornei" non devono mai dissentire su dov'è.
+function todayISO(): string {
+  return new Date().toISOString().slice(0, 10)
+}
+
 // Ordine "agenda" della lista tornei: prima gli imminenti/futuri (data >= oggi)
 // dal più vicino, poi i passati dal più recente.
 function byAgendaDate<T extends { date: string }>(list: T[]): T[] {
-  const today = new Date().toISOString().slice(0, 10)
+  const today = todayISO()
   return [...list].sort((a, b) => {
     const aUp = a.date >= today
     const bUp = b.date >= today
@@ -394,6 +421,61 @@ function byAgendaDate<T extends { date: string }>(list: T[]): T[] {
     if (aUp) return a.date < b.date ? -1 : 1 // futuri: prima i più vicini
     return a.date < b.date ? 1 : -1 // passati: prima i più recenti
   })
+}
+
+// Separa gli imminenti/futuri dai passati preservando l'ordine in ingresso (già
+// "agenda"). `today` è iniettabile per tenere gli helper puri e testabili.
+export function splitUpcoming(tornei: TorneoCard[], today = todayISO()): { upcoming: TorneoCard[]; past: TorneoCard[] } {
+  return {
+    upcoming: tornei.filter((t) => t.date >= today),
+    past: tornei.filter((t) => t.date < today),
+  }
+}
+
+// Formati effettivamente presenti, nell'ordine fisso di FORMATS — non per
+// conteggio né per recency: così la pagina non si rimescola ogni volta che si
+// aggiunge un torneo. Alimenta sia i gruppi sia il filtro a chip, che non deve
+// offrire scelte che non portano da nessuna parte.
+// Un formato fuori da FORMATS (oggi impossibile: c'è un CHECK a DB) finisce in
+// coda, nell'ordine in cui compare, invece di sparire dalla pagina.
+export function torneiFormats(tornei: TorneoCard[]): string[] {
+  const present = new Set(tornei.map((t) => t.format))
+  const known: string[] = FORMATS.filter((f) => present.has(f))
+  const unknown = [...present].filter((f) => !known.includes(f))
+  return [...known, ...unknown]
+}
+
+// Raggruppa per formato. Dentro il gruppo resta l'ordine in ingresso (già
+// "agenda"); i gruppi vuoti non esistono, perché le chiavi vengono dai dati.
+export function groupTorneiByFormat(tornei: TorneoCard[]): TorneoGroup[] {
+  return torneiFormats(tornei).map((key) => ({
+    key, label: key, tornei: tornei.filter((t) => t.format === key),
+  }))
+}
+
+// Valore del filtro "nessun filtro". Non è un formato, quindi non può collidere
+// con quelli di FORMATS.
+export const TORNEI_FILTER_ALL = 'all'
+
+// Selettore unico della schermata Tornei: dal filtro scelto alle sezioni da
+// renderizzare. Puro (`today` iniettabile) e senza dipendenze da React, così le
+// regole restano verificabili senza montare nulla.
+export function deriveTorneiSections(
+  tornei: TorneoCard[],
+  filter: string = TORNEI_FILTER_ALL,
+  today = todayISO(),
+): TorneiSections {
+  const formats = torneiFormats(tornei)
+  // Con un formato solo il filtro non separerebbe niente: nessuna opzione.
+  const options = formats.length > 1 ? formats : []
+  // Filtro non più valido (es. cancellato l'ultimo torneo di quel formato): si
+  // ricade su "Tutti" invece di mostrare una pagina vuota.
+  const active = options.includes(filter) ? filter : TORNEI_FILTER_ALL
+  const visible = active === TORNEI_FILTER_ALL ? tornei : tornei.filter((t) => t.format === active)
+  // Gli imminenti restano in cima e non raggruppati: raggruppando e basta, un
+  // torneo di domani finirebbe sepolto sotto decine di passati del suo formato.
+  const { upcoming, past } = splitUpcoming(visible, today)
+  return { active, options, upcoming, groups: groupTorneiByFormat(past) }
 }
 
 export function deriveTorneiList(data: DiaryData, fYear: string): TorneiListData {
@@ -570,7 +652,7 @@ export function deriveTorneiListServer(sv: SvTorneiList): TorneiListData {
   const tornei: TorneoCard[] = byAgendaDate(sv.tornei).map((c) => {
     const podium = c.rank <= 3
     return {
-      id: c.id, name: c.name, category: c.category, dot: dotForRank(c.rank),
+      id: c.id, name: c.name, category: c.category, format: c.format, date: c.date, dot: dotForRank(c.rank),
       badge: c.placement,
       badgeBg: podium ? '#FFF1EA' : '#F2F0EC',
       badgeColor: podium ? '#C4501E' : 'rgba(27,42,74,.5)',

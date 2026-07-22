@@ -59,10 +59,54 @@ export function PageHeader({ title, subtitle, actions }: { title: ReactNode; sub
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 12, paddingBottom: 22, borderBottom: `1px solid ${LINE}` }}>
       <div>
-        <div className="num" style={{ fontSize: 'clamp(26px,4vw,34px)', fontWeight: 500, letterSpacing: '-.5px' }}>{title}</div>
+        {/* `margin: 0` annulla il default del browser: la resa è identica a prima. */}
+        <h1 className="num" style={{ fontSize: 'clamp(26px,4vw,34px)', fontWeight: 500, letterSpacing: '-.5px', margin: 0 }}>{title}</h1>
         {subtitle != null && <div style={{ font: "600 14px 'Nunito Sans'", color: MUTED, marginTop: 4 }}>{subtitle}</div>}
       </div>
       {actions && <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>{actions}</div>}
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------- FilterChips
+// Filtro a scelta singola ("Tutti · 2vs2 · 3vs3…"). Sono `button` veri, quindi
+// raggiungibili da tastiera e annunciati come premuti/non premuti; l'attivo usa
+// il navy pieno, lo stesso linguaggio dello stato selezionato della bottom nav.
+// Il bordo c'è in entrambi gli stati: cambiare filtro non muove nulla.
+export interface FilterOption { value: string; label: ReactNode }
+
+export function FilterChips({ options, value, onChange, label, mt = 20 }: {
+  options: FilterOption[]
+  value: string
+  onChange: (value: string) => void
+  label: string // etichetta del gruppo per gli screen reader
+  mt?: number
+}) {
+  return (
+    <div role="group" aria-label={label} style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: mt }}>
+      {options.map((o) => {
+        const on = o.value === value
+        return (
+          <button
+            key={o.value}
+            type="button"
+            className="chip"
+            aria-pressed={on}
+            onClick={() => onChange(o.value)}
+            style={{
+              padding: '10px 15px', borderRadius: 11, cursor: 'pointer',
+              font: "700 13px 'Nunito Sans'",
+              background: on ? INK : '#fff',
+              color: on ? '#fff' : INK,
+              border: `1px solid ${on ? INK : 'rgba(27,42,74,.16)'}`,
+              // `.chip` anima l'opacità in hover: va ripetuta, l'inline vince sulla classe.
+              transition: 'background .18s ease, color .18s ease, border-color .18s ease, opacity .15s ease',
+            }}
+          >
+            {o.label}
+          </button>
+        )
+      })}
     </div>
   )
 }
@@ -81,7 +125,7 @@ export function BackLink({ children, onClick }: { children: ReactNode; onClick: 
 export function SectionTitle({ children, action, size = 18 }: { children: ReactNode; action?: ReactNode; size?: number }) {
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12, margin: '26px 0 12px' }}>
-      <div className="num" style={{ fontSize: size, fontWeight: 500 }}>{children}</div>
+      <h2 className="num" style={{ fontSize: size, fontWeight: 500, margin: 0 }}>{children}</h2>
       {action}
     </div>
   )
