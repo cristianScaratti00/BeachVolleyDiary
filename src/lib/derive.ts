@@ -73,6 +73,15 @@ export interface TorneiListData { tornei: TorneoCard[]; tPlayed: number; podi: n
 // Una sezione della lista tornei: `key` identifica il gruppo, `label` è ciò che
 // si legge nell'intestazione.
 export interface TorneoGroup { key: string; label: string; tornei: TorneoCard[] }
+// Tutto ciò che serve a disegnare la lista tornei con filtro e sezioni. Lo
+// screen si limita a renderizzarlo: le regole (quali chip mostrare, cosa fare di
+// un filtro non più valido, dove finiscono gli imminenti) stanno in `derive`.
+export interface TorneiSections {
+  active: string // filtro in vigore: TORNEI_FILTER_ALL oppure uno di `options`
+  options: string[] // formati selezionabili; vuoto quando filtrare non separerebbe nulla
+  upcoming: TorneoCard[] // imminenti/futuri, non raggruppati
+  groups: TorneoGroup[] // i passati, per formato
+}
 
 export interface TorneoMatchRow {
   id: string
@@ -423,23 +432,50 @@ export function splitUpcoming(tornei: TorneoCard[], today = todayISO()): { upcom
   }
 }
 
-// Raggruppa per formato nell'ordine fisso di FORMATS — non per conteggio né per
-// recency: così la pagina non si rimescola ogni volta che si aggiunge un torneo.
-// Dentro il gruppo resta l'ordine in ingresso; i gruppi vuoti sono omessi.
+// Formati effettivamente presenti, nell'ordine fisso di FORMATS — non per
+// conteggio né per recency: così la pagina non si rimescola ogni volta che si
+// aggiunge un torneo. Alimenta sia i gruppi sia il filtro a chip, che non deve
+// offrire scelte che non portano da nessuna parte.
 // Un formato fuori da FORMATS (oggi impossibile: c'è un CHECK a DB) finisce in
-// coda con il proprio nome, invece di sparire dalla pagina.
-export function groupTorneiByFormat(tornei: TorneoCard[]): TorneoGroup[] {
-  const keys: string[] = [...FORMATS]
-  tornei.forEach((t) => { if (!keys.includes(t.format)) keys.push(t.format) })
-  return keys
-    .map((key) => ({ key, label: key, tornei: tornei.filter((t) => t.format === key) }))
-    .filter((g) => g.tornei.length > 0)
+// coda, nell'ordine in cui compare, invece di sparire dalla pagina.
+export function torneiFormats(tornei: TorneoCard[]): string[] {
+  const present = new Set(tornei.map((t) => t.format))
+  const known: string[] = FORMATS.filter((f) => present.has(f))
+  const unknown = [...present].filter((f) => !known.includes(f))
+  return [...known, ...unknown]
 }
 
-// Formati effettivamente presenti, nello stesso ordine dei gruppi: alimenta il
-// filtro a chip, che non deve offrire scelte che non portano da nessuna parte.
-export function torneiFormats(tornei: TorneoCard[]): string[] {
-  return groupTorneiByFormat(tornei).map((g) => g.key)
+// Raggruppa per formato. Dentro il gruppo resta l'ordine in ingresso (già
+// "agenda"); i gruppi vuoti non esistono, perché le chiavi vengono dai dati.
+export function groupTorneiByFormat(tornei: TorneoCard[]): TorneoGroup[] {
+  return torneiFormats(tornei).map((key) => ({
+    key, label: key, tornei: tornei.filter((t) => t.format === key),
+  }))
+}
+
+// Valore del filtro "nessun filtro". Non è un formato, quindi non può collidere
+// con quelli di FORMATS.
+export const TORNEI_FILTER_ALL = 'all'
+
+// Selettore unico della schermata Tornei: dal filtro scelto alle sezioni da
+// renderizzare. Puro (`today` iniettabile) e senza dipendenze da React, così le
+// regole restano verificabili senza montare nulla.
+export function deriveTorneiSections(
+  tornei: TorneoCard[],
+  filter: string = TORNEI_FILTER_ALL,
+  today = todayISO(),
+): TorneiSections {
+  const formats = torneiFormats(tornei)
+  // Con un formato solo il filtro non separerebbe niente: nessuna opzione.
+  const options = formats.length > 1 ? formats : []
+  // Filtro non più valido (es. cancellato l'ultimo torneo di quel formato): si
+  // ricade su "Tutti" invece di mostrare una pagina vuota.
+  const active = options.includes(filter) ? filter : TORNEI_FILTER_ALL
+  const visible = active === TORNEI_FILTER_ALL ? tornei : tornei.filter((t) => t.format === active)
+  // Gli imminenti restano in cima e non raggruppati: raggruppando e basta, un
+  // torneo di domani finirebbe sepolto sotto decine di passati del suo formato.
+  const { upcoming, past } = splitUpcoming(visible, today)
+  return { active, options, upcoming, groups: groupTorneiByFormat(past) }
 }
 
 export function deriveTorneiList(data: DiaryData, fYear: string): TorneiListData {

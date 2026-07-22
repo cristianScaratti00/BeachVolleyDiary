@@ -1,11 +1,7 @@
 import { useState } from 'react'
-import { groupTorneiByFormat, splitUpcoming, torneiFormats } from '../lib/derive'
+import { deriveTorneiSections, TORNEI_FILTER_ALL } from '../lib/derive'
 import type { TorneiListData, TorneoCard } from '../lib/derive'
 import { PageHeader, SectionTitle, FilterChips, Button, Badge, StatFooter, EmptyCard, InlineLink, MUTED } from '../components/ui'
-
-// Valore del filtro "nessun filtro". Non è un formato, quindi non può collidere
-// con quelli di FORMATS.
-const ALL = 'all'
 
 interface TorneiProps {
   list: TorneiListData
@@ -18,20 +14,10 @@ interface TorneiProps {
 
 export default function Tornei({ list, onOpenTorneo, onNewTorneo, onQuickTorneo, onAssistant, canAssistant }: TorneiProps) {
   const { tornei, tPlayed, podi, bestPlacement } = list
-  // Il filtro è puramente di presentazione: vive qui, non risale ad App.
-  const [format, setFormat] = useState<string>(ALL)
-
-  const formats = torneiFormats(tornei)
-  // Con un formato solo il filtro non separerebbe niente: la riga sparisce.
-  const showFilter = formats.length > 1
-  // Se il formato scelto non esiste più (ultimo torneo di quel formato cancellato)
-  // si ricade su "Tutti" invece di mostrare una pagina vuota.
-  const active = showFilter && formats.includes(format) ? format : ALL
-  const visible = active === ALL ? tornei : tornei.filter((t) => t.format === active)
-  // Gli imminenti restano in cima e non raggruppati: raggruppando e basta, un
-  // torneo di domani finirebbe sepolto sotto decine di passati del suo formato.
-  const { upcoming, past } = splitUpcoming(visible)
-  const groups = groupTorneiByFormat(past)
+  // Il filtro è puramente di presentazione: vive qui, non risale ad App. Quale
+  // valore sia lecito e cosa mostrare di conseguenza lo decide `derive`.
+  const [format, setFormat] = useState<string>(TORNEI_FILTER_ALL)
+  const { active, options, upcoming, groups } = deriveTorneiSections(tornei, format)
 
   return (
     <div style={{ animation: 'pop .32s ease both' }}>
@@ -56,12 +42,12 @@ export default function Tornei({ list, onOpenTorneo, onNewTorneo, onQuickTorneo,
         </div>
       ) : (
         <>
-          {showFilter && (
+          {options.length > 0 && (
             <FilterChips
               label="Filtra i tornei per formato"
               value={active}
               onChange={setFormat}
-              options={[{ value: ALL, label: 'Tutti' }, ...formats.map((f) => ({ value: f, label: f }))]}
+              options={[{ value: TORNEI_FILTER_ALL, label: 'Tutti' }, ...options.map((f) => ({ value: f, label: f }))]}
             />
           )}
 
