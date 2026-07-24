@@ -227,7 +227,9 @@ export function useDiary(): UseDiary {
     const row = {
       name: f.name,
       date: f.date ?? '',
-      city: '',
+      // Il form rapido ora chiede la città: senza, ogni torneo creato al volo
+      // restava fuori dalla mappa delle conquiste. Resta facoltativa.
+      city: (f.city ?? '').trim(),
       category: f.category ?? 'Amatoriale',
       format: '2vs2',
       surface: 'Sabbia outdoor',

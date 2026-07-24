@@ -22,6 +22,10 @@ import {
   partnerOptions,
   yearOptions,
 } from "./lib/derive";
+// Mappa delle conquiste: selettore in un modulo suo (si porta dietro il
+// gazetteer e il tracciato dell'Italia, ~17 KB grezzi). Vive dentro la
+// schermata Tornei come seconda vista, quindi viaggia con lei.
+import { deriveMappa } from "./lib/derive.mappa";
 import type {
   Screen,
   ModalKind,
@@ -441,6 +445,7 @@ export default function App() {
     setFabOpen(false);
     setForm({
       name: "",
+      city: "",
       partnerId: (P[0] && P[0].id) || "new",
       newPartnerName: "",
       date: today,
@@ -545,6 +550,10 @@ export default function App() {
     srvTornei && !hasShared
       ? deriveTorneiListServer(srvTornei)
       : deriveTorneiList(data, fYear);
+  // La mappa lavora sui dati client grezzi: le servono `city` (che i view-model
+  // appiattiscono dentro `meta`) e i tornei condivisi, che le RPC escludono.
+  // Segue lo stesso filtro stagione della lista, senza aggiungere stato.
+  const mappaData = deriveMappa(data, canFilter ? fYear : "Sempre");
   const compagniList = srvCompagni
     ? deriveCompagniServer(srvCompagni)
     : deriveCompagni(data);
@@ -577,6 +586,7 @@ export default function App() {
         return (
           <Tornei
             list={torneiList}
+            mappa={mappaData}
             onOpenTorneo={openTorneoDetail}
             onNewTorneo={() => openTorneo(null)}
             onQuickTorneo={openQuickTorneo}
@@ -589,6 +599,7 @@ export default function App() {
           return (
             <Tornei
               list={torneiList}
+              mappa={mappaData}
               onOpenTorneo={openTorneoDetail}
               onNewTorneo={() => openTorneo(null)}
               onQuickTorneo={openQuickTorneo}

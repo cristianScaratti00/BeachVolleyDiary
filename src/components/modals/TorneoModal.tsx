@@ -1,5 +1,5 @@
 import type { CSSProperties, ChangeEvent } from 'react'
-import { Sheet, Title, Label, inputStyle, selectStyle, Actions } from './Sheet'
+import { Sheet, Title, Label, CityInput, inputStyle, selectStyle, Actions } from './Sheet'
 import { SWATCH_COLORS } from '../../lib/theme'
 import type { AnyForm, SetField, Option, Category, Format, Surface, Placement } from '../../lib/models'
 
@@ -51,7 +51,7 @@ export default function TorneoModal({ form, editId, setField, partnerOptions, ca
           </div>
           <div style={fieldWrap}>
             <Label>Città</Label>
-            <input value={form.city || ''} onChange={(e: ChangeEvent<HTMLInputElement>) => setField('city', e.target.value)} placeholder="es. Rimini" style={inputStyle} />
+            <CityInput value={form.city || ''} onChange={(v) => setField('city', v)} />
           </div>
         </div>
 

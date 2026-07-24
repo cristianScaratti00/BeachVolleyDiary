@@ -2,9 +2,19 @@ import { useState } from 'react'
 import { deriveTorneiSections, TORNEI_FILTER_ALL } from '../lib/derive'
 import type { TorneiListData, TorneoCard } from '../lib/derive'
 import { PageHeader, SectionTitle, FilterChips, Button, Badge, StatFooter, EmptyCard, InlineLink, MUTED } from '../components/ui'
+import Mappa from './Mappa'
+import type { MappaData } from '../lib/derive.mappa'
+
+// Le due viste della schermata. Non è una voce di navigazione in più: la bottom
+// nav è una pill di 6 slot da 46px (6·46 + 5·6 + 14 = 320px, che sta in un
+// viewport da 360) — un settimo slot la porterebbe a 372px e sforerebbe su
+// iPhone SE/mini. La mappa vive quindi dentro Tornei, dove i suoi dati stanno
+// già di casa.
+type Vista = 'lista' | 'mappa'
 
 interface TorneiProps {
   list: TorneiListData
+  mappa: MappaData
   onOpenTorneo: (id: string) => void
   onNewTorneo: () => void
   onQuickTorneo: () => void
@@ -12,11 +22,12 @@ interface TorneiProps {
   canAssistant: boolean
 }
 
-export default function Tornei({ list, onOpenTorneo, onNewTorneo, onQuickTorneo, onAssistant, canAssistant }: TorneiProps) {
+export default function Tornei({ list, mappa, onOpenTorneo, onNewTorneo, onQuickTorneo, onAssistant, canAssistant }: TorneiProps) {
   const { tornei, tPlayed, podi, bestPlacement } = list
   // Il filtro è puramente di presentazione: vive qui, non risale ad App. Quale
   // valore sia lecito e cosa mostrare di conseguenza lo decide `derive`.
   const [format, setFormat] = useState<string>(TORNEI_FILTER_ALL)
+  const [vista, setVista] = useState<Vista>('lista')
   const { active, options, upcoming, groups } = deriveTorneiSections(tornei, format)
 
   return (
@@ -42,22 +53,41 @@ export default function Tornei({ list, onOpenTorneo, onNewTorneo, onQuickTorneo,
         </div>
       ) : (
         <>
-          {options.length > 0 && (
-            <FilterChips
-              label="Filtra i tornei per formato"
-              value={active}
-              onChange={setFormat}
-              options={[{ value: TORNEI_FILTER_ALL, label: 'Tutti' }, ...options.map((f) => ({ value: f, label: f }))]}
-            />
-          )}
+          {/* Lista o mappa: stesso insieme di tornei, due modi di leggerlo.
+              `FilterChips` perché sono `button` veri con `aria-pressed`, lo
+              stesso linguaggio del filtro per formato qui sotto. */}
+          <FilterChips
+            label="Come vedere i tornei"
+            value={vista}
+            onChange={(v) => setVista(v as Vista)}
+            options={[
+              { value: 'lista', label: 'Lista' },
+              { value: 'mappa', label: `Mappa${mappa.citta ? ` · ${mappa.citta}` : ''}` },
+            ]}
+          />
 
-          {upcoming.length > 0 && (
-            <TorneiSection title="Prossimi tornei" tornei={upcoming} onOpenTorneo={onOpenTorneo} accent />
-          )}
+          {vista === 'mappa' ? (
+            <Mappa m={mappa} onOpenTorneo={onOpenTorneo} onNewTorneo={onNewTorneo} />
+          ) : (
+            <>
+              {options.length > 0 && (
+                <FilterChips
+                  label="Filtra i tornei per formato"
+                  value={active}
+                  onChange={setFormat}
+                  options={[{ value: TORNEI_FILTER_ALL, label: 'Tutti' }, ...options.map((f) => ({ value: f, label: f }))]}
+                />
+              )}
 
-          {groups.map((g) => (
-            <TorneiSection key={g.key} title={g.label} tornei={g.tornei} onOpenTorneo={onOpenTorneo} />
-          ))}
+              {upcoming.length > 0 && (
+                <TorneiSection title="Prossimi tornei" tornei={upcoming} onOpenTorneo={onOpenTorneo} accent />
+              )}
+
+              {groups.map((g) => (
+                <TorneiSection key={g.key} title={g.label} tornei={g.tornei} onOpenTorneo={onOpenTorneo} />
+              ))}
+            </>
+          )}
         </>
       )}
     </div>
