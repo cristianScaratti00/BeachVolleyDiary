@@ -5,8 +5,8 @@
     "semantic_hash": ""
   },
   "src/App.tsx": {
-    "mtime": 1784921231.3254519,
-    "ast_hash": "5753be499d389dee9866d44cf5d28d5f",
+    "mtime": 1784922438.2404258,
+    "ast_hash": "6757f4d58346dc563c0e54824fda9450",
     "semantic_hash": ""
   },
   "src/Root.tsx": {
@@ -170,8 +170,8 @@
     "semantic_hash": ""
   },
   "src/hooks/useDiary.ts": {
-    "mtime": 1784921231.3264232,
-    "ast_hash": "a322f102b5c4f71146b927c35a546c11",
+    "mtime": 1784922469.7295551,
+    "ast_hash": "f40395647ba229458e56ce2b6525e65c",
     "semantic_hash": ""
   },
   "src/hooks/useMedia.ts": {
@@ -265,8 +265,8 @@
     "semantic_hash": ""
   },
   "src/screens/CreaChat.tsx": {
-    "mtime": 1784918143.1117585,
-    "ast_hash": "a765069b044fa3bd33c5d8dad5c42c24",
+    "mtime": 1784922514.2100437,
+    "ast_hash": "8ed3a105c9afe168357b013aeb98afda",
     "semantic_hash": ""
   },
   "src/screens/Diario.tsx": {
@@ -290,13 +290,13 @@
     "semantic_hash": ""
   },
   "src/screens/Tornei.test.tsx": {
-    "mtime": 1784921231.32707,
-    "ast_hash": "b9331f2bbff973c196b9347505366a20",
+    "mtime": 1784922580.2476814,
+    "ast_hash": "1125482f07c82d6bc1f0224b3e6f0421",
     "semantic_hash": ""
   },
   "src/screens/Tornei.tsx": {
-    "mtime": 1784921231.3273814,
-    "ast_hash": "33182717bf7bec4fd33900f8137ece80",
+    "mtime": 1784922372.5082145,
+    "ast_hash": "b037db0c10c5c831f2d1fe655a7f2ff5",
     "semantic_hash": ""
   },
   "src/screens/TorneoDetail.tsx": {
@@ -475,13 +475,13 @@
     "semantic_hash": ""
   },
   "src/lib/derive.mappa.test.ts": {
-    "mtime": 1784921601.215162,
-    "ast_hash": "4f4a328bbbcd9d461a1f9ee066b5c8b0",
+    "mtime": 1784922596.045418,
+    "ast_hash": "35e694d385a4788b21e87e09893d5fae",
     "semantic_hash": ""
   },
   "src/lib/derive.mappa.ts": {
-    "mtime": 1784921601.2147245,
-    "ast_hash": "dace5077ba7dfe0677a25b4e3f13ef30",
+    "mtime": 1784922348.858867,
+    "ast_hash": "2b523bb4a25b43e1053648c53338a816",
     "semantic_hash": ""
   },
   "src/lib/geo.test.ts": {
@@ -510,13 +510,13 @@
     "semantic_hash": ""
   },
   "src/screens/Mappa.test.tsx": {
-    "mtime": 1784921231.3395138,
-    "ast_hash": "f5851d1071ac8dc88e271bbbdca8f327",
+    "mtime": 1784922616.1066508,
+    "ast_hash": "a63f76748435f00fb49df8aa6d4bd458",
     "semantic_hash": ""
   },
   "src/screens/Mappa.tsx": {
-    "mtime": 1784921231.3396287,
-    "ast_hash": "ab86f1fb55308edb47d88e8cf6a61452",
+    "mtime": 1784922484.0059319,
+    "ast_hash": "caa476906cf8285520ea2636d97aa803",
     "semantic_hash": ""
   },
   "supabase/migrations/20260724120000_checkins_who_is_here.sql": {
@@ -530,8 +530,8 @@
     "semantic_hash": ""
   },
   "docs/QA-mappa-conquiste.md": {
-    "mtime": 1784921912.9522712,
-    "ast_hash": "03c0ea13ab26cc964b19508768ec41cb",
+    "mtime": 1784922896.9034784,
+    "ast_hash": "0fe7eecf3aaa7ec78f948dbd51c8c57a",
     "semantic_hash": ""
   }
 }

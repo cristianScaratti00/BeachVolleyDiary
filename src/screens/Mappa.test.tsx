@@ -49,6 +49,15 @@ describe('Mappa — stato vuoto', () => {
     })
     expect(screen.getByText('Non ancora sulla mappa')).toBeInTheDocument()
   })
+
+  it('se i tornei sono tutti da giocare lo dice, invece di chiedere una città che c’è già', () => {
+    // Il bucket `nonGiocati` è l'unico rimasto da raccontare: senza questo ramo
+    // spariva insieme al resto della pagina, e l'invito suonava come un rimprovero
+    // per un dato che l'utente aveva già inserito.
+    renderMappa({ nonGiocati: 2 })
+    expect(screen.getByText(/ancora in corso o in programma/)).toBeInTheDocument()
+    expect(screen.queryByText(/Crea un torneo/)).not.toBeInTheDocument()
+  })
 })
 
 // ---------------------------------------------------------------- l'SVG

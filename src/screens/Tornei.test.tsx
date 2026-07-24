@@ -7,19 +7,32 @@
 // Si falsifica solo `Date`, non `setTimeout`, così user-event resta normale.
 // ============================================================================
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { useState } from 'react'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import Tornei from './Tornei'
+import type { TorneiVista } from './Tornei'
 import { makeTorneo, makeList, makeMappaData, makeMappaPin, TODAY } from '../test/factories'
 import { expectNoA11yViolations } from '../test/axe'
 
 const noop = () => {}
 
-function renderTornei(tornei = [makeTorneo()], over: Partial<Parameters<typeof Tornei>[0]> = {}) {
+// La vista Lista/Mappa è controllata da App, perché deve sopravvivere all'andata
+// e ritorno sul dettaglio torneo (che smonta questa schermata). Nei test la
+// tiene questo guscio minimo, così il selettore si clicca come farebbe un utente.
+type TorneiProps = Parameters<typeof Tornei>[0]
+type HarnessProps = Omit<TorneiProps, 'vista' | 'onVista'> & { vistaIniziale?: TorneiVista }
+
+function TorneiConVista({ vistaIniziale = 'lista', ...rest }: HarnessProps) {
+  const [vista, setVista] = useState<TorneiVista>(vistaIniziale)
+  return <Tornei {...rest} vista={vista} onVista={setVista} />
+}
+
+function renderTornei(tornei = [makeTorneo()], over: Partial<HarnessProps> = {}) {
   const onOpenTorneo = vi.fn()
   const onNewTorneo = vi.fn()
   const view = render(
-    <Tornei
+    <TorneiConVista
       list={makeList(tornei)}
       mappa={makeMappaData()}
       onOpenTorneo={onOpenTorneo}
@@ -90,6 +103,40 @@ describe('Tornei — selettore di vista Lista/Mappa', () => {
   it('senza tornei il selettore non compare: non c\'è niente da mappare', () => {
     renderTornei([], conMappa)
     expect(screen.queryByRole('group', { name: 'Come vedere i tornei' })).not.toBeInTheDocument()
+  })
+
+  // ---- vista controllata da App -------------------------------------------
+  // Aprire un torneo dalla mappa porta su `screen === 'torneo'`, che smonta
+  // questa schermata: se la vista fosse stata locale, tornare indietro avrebbe
+  // riportato sulla lista chi era partito dalla mappa. Questi due test tengono
+  // fermo il contratto che lo impedisce.
+  it('montata su "mappa" apre già sulla mappa (è così che si torna dal dettaglio)', () => {
+    renderTornei([makeTorneo({ name: 'Rimini Open' })], { ...conMappa, vistaIniziale: 'mappa' })
+    expect(screen.getByRole('img')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /^Mappa/ })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.queryByRole('button', { name: 'Apri il torneo Rimini Open' })).not.toBeInTheDocument()
+  })
+
+  it('la vista non cambia da sé: il click la chiede e basta', async () => {
+    const user = userEvent.setup()
+    const onVista = vi.fn()
+    render(
+      <Tornei
+        list={makeList([makeTorneo({ name: 'Rimini Open' })])}
+        {...conMappa}
+        vista="lista"
+        onVista={onVista}
+        onOpenTorneo={noop}
+        onNewTorneo={noop}
+        onQuickTorneo={noop}
+        onAssistant={noop}
+        canAssistant
+      />,
+    )
+    await user.click(screen.getByRole('button', { name: /^Mappa/ }))
+    expect(onVista).toHaveBeenCalledExactlyOnceWith('mappa')
+    // Nessuno stato interno: finché App non aggiorna la prop, resta la lista.
+    expect(screen.getByRole('button', { name: 'Apri il torneo Rimini Open' })).toBeInTheDocument()
   })
 })
 
@@ -295,8 +342,10 @@ describe('Tornei — filtro a chip', () => {
     await user.click(screen.getByRole('button', { name: '4vs4' }))
     expect(sectionTitles()).toEqual(['Prossimi tornei1 torneo'])
 
+    // Stesso componente, prop diverse: il filtro per formato è stato locale e
+    // deve sopravvivere al rerender, o il test non proverebbe niente.
     rerender(
-      <Tornei
+      <TorneiConVista
         list={makeList(dati.filter((t) => t.format !== '4vs4'))}
         mappa={makeMappaData()}
         onOpenTorneo={onOpenTorneo}
@@ -500,7 +549,7 @@ describe('Tornei — difetti noti (vedi docs/QA-tornei-formati.md)', () => {
     const { rerender, onOpenTorneo } = renderTornei(dati)
     const render4vs4 = (tornei: typeof dati) =>
       rerender(
-        <Tornei
+        <TorneiConVista
           list={makeList(tornei)}
           mappa={makeMappaData()}
           onOpenTorneo={onOpenTorneo}

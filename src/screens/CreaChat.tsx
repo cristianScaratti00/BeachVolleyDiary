@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties, ReactNode, ChangeEvent, FormEvent } from 'react'
 import { CATEGORIES, FORMATS, SURFACES, PHASES } from '../lib/db.enums'
 import { MONTHS_SHORT } from '../lib/theme'
+import { CITTA_SUGGERITE } from '../lib/geo'
 import type {
   AnyForm, Option, GuidedMatch,
   Category, Format, Surface, Phase, Placement,
@@ -704,7 +705,10 @@ function Dock(props: DockProps) {
       )
 
     case 'city':
-      return <TextDock value={text} setValue={setText} placeholder="es. Rimini" skipLabel="Salta" onSkip={() => h.submitCity('')} onSubmit={() => h.submitCity(text)} />
+      // Stessi suggerimenti dei due form: è la terza porta da cui entra una
+      // città, e un refuso qui costa quanto altrove — il torneo finisce in "Non
+      // ancora sulla mappa" invece che sulla costa giusta.
+      return <TextDock value={text} setValue={setText} placeholder="es. Rimini" suggerimenti={CITTA_SUGGERITE} skipLabel="Salta" onSkip={() => h.submitCity('')} onSubmit={() => h.submitCity(text)} />
 
     case 'category':
       return (
@@ -804,13 +808,19 @@ const fieldStyle: CSSProperties = {
   background: '#fff',
 }
 
-function TextDock({ value, setValue, placeholder, onSubmit, onSkip, skipLabel }: {
+// Id del `<datalist>` dei suggerimenti. Fisso perché nella chat c'è un solo
+// input alla volta: lo step corrente decide cosa montare, quindi due liste non
+// possono coesistere.
+const SUGGERIMENTI_ID = 'crea-suggerimenti'
+
+function TextDock({ value, setValue, placeholder, onSubmit, onSkip, skipLabel, suggerimenti }: {
   value: string
   setValue: (v: string) => void
   placeholder: string
   onSubmit: () => void
   onSkip?: () => void
   skipLabel?: string
+  suggerimenti?: readonly string[]
 }) {
   const submit = (e: FormEvent) => {
     e.preventDefault()
@@ -824,7 +834,22 @@ function TextDock({ value, setValue, placeholder, onSubmit, onSkip, skipLabel }:
         </ChipsDock>
       )}
       <form onSubmit={submit} style={{ display: 'flex', gap: 8 }}>
-        <input autoFocus value={value} onChange={(e: ChangeEvent<HTMLInputElement>) => setValue(e.target.value)} placeholder={placeholder} style={{ ...fieldStyle, flex: 1 }} />
+        <input
+          autoFocus
+          value={value}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => setValue(e.target.value)}
+          placeholder={placeholder}
+          // Suggerisce senza vincolare: il campo resta testo libero, come lo
+          // schema (`tournaments.city` è `text` senza CHECK).
+          list={suggerimenti ? SUGGERIMENTI_ID : undefined}
+          autoComplete="off"
+          style={{ ...fieldStyle, flex: 1 }}
+        />
+        {suggerimenti && (
+          <datalist id={SUGGERIMENTI_ID}>
+            {suggerimenti.map((s) => <option key={s} value={s} />)}
+          </datalist>
+        )}
         <SendBtn onClick={onSubmit} disabled={!value.trim() && !onSkip} />
       </form>
     </div>

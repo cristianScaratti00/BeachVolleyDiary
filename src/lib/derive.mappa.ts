@@ -212,7 +212,11 @@ function cittaFuoriMappa(g: Gruppo): MappaCitta {
 // `deriveTorneiSections`), nessun `Math.random()`, l'input non viene mai mutato.
 export function deriveMappa(data: DiaryData, fYear: string, today = todayISO()): MappaData {
   const giocati = data.tournaments.filter((t) => giaGiocato(t, today))
-  const nonGiocati = data.tournaments.length - giocati.length
+  // I "non giocati" sono quelli DELLA STAGIONE SELEZIONATA, come ogni altro
+  // numero di questa mappa. Contarli su tutto l'archivio faceva scrivere in
+  // fondo alla pagina "2 tornei sono ancora in programma" mentre si guarda il
+  // 2025 — un conteggio vero ma di un altro anno, cioè un numero sbagliato.
+  const nonGiocati = data.tournaments.filter((t) => !giaGiocato(t, today) && nelPeriodo(t, fYear)).length
 
   // ---- Posizioni: calcolate su TUTTE le città mai giocate, non solo quelle
   // dell'anno selezionato. È il motivo per cui cambiare filtro non fa saltare i

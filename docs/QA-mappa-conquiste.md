@@ -6,9 +6,9 @@ A colpo d'occhio: *dove gioco davvero bene?*
 
 | | |
 |---|---|
-| Ambito | `src/lib/italy.ts` (tracciato), `src/lib/geo.ts` (proiezione + gazetteer + declustering), `src/lib/derive.mappa.ts` (`deriveMappa`), `src/screens/Mappa.tsx` (presentazionale), `src/screens/Tornei.tsx` (selettore di vista), `src/lib/derive.ts` (`dotForRank` esportata), `src/components/modals/Sheet.tsx` (`CityInput`), `src/components/modals/TorneoModal.tsx`, `src/components/modals/QuickTorneoModal.tsx` (campo Città), `src/hooks/useDiary.ts` (`quickCreateTorneo` salva la città), `src/App.tsx`, `src/test/factories.ts`, `src/test/contrast.test.ts` |
+| Ambito | `src/lib/italy.ts` (tracciato), `src/lib/geo.ts` (proiezione + gazetteer + declustering), `src/lib/derive.mappa.ts` (`deriveMappa`), `src/screens/Mappa.tsx` (presentazionale), `src/screens/Tornei.tsx` (selettore di vista), `src/lib/derive.ts` (`dotForRank` esportata), `src/components/modals/Sheet.tsx` (`CityInput`), `src/components/modals/TorneoModal.tsx`, `src/components/modals/QuickTorneoModal.tsx` (campo Città), `src/screens/CreaChat.tsx` (suggerimenti città), `src/hooks/useDiary.ts` (città normalizzata su tutte e tre le porte di scrittura), `src/App.tsx` (selettore memoizzato + vista controllata), `src/test/factories.ts`, `src/test/contrast.test.ts` |
 | Ambiente | Node 22 · Vitest 3.2.7 · jsdom 26 · Testing Library React 16 · axe-core 4.12 |
-| Suite | 297 test: 293 verdi + 4 `skip` preesistenti (difetti noti di Tornei). **+178 nuovi**: `geo.test.ts` (48), `derive.mappa.test.ts` (41), `Mappa.test.tsx` (35), `Tornei.test.tsx` (+8 sul selettore di vista), `contrast.test.ts` (+3), più i test preesistenti adeguati |
+| Suite | 302 test: 298 verdi + 4 `skip` preesistenti (difetti noti di Tornei). **+183 nuovi**: `geo.test.ts` (48), `derive.mappa.test.ts` (43), `Mappa.test.tsx` (36), `Tornei.test.tsx` (+10 sul selettore di vista), `contrast.test.ts` (+3), più i test preesistenti adeguati |
 | Comandi | `npm test` · `npm run typecheck` · `npm run typecheck:test` · `npm run build` |
 
 Tutti e quattro i comandi passano. **Nessuna migration**: la feature è interamente client-side.
@@ -187,10 +187,54 @@ e i pin non si toccano comunque (raggio max 6,5 = 13/2).
   di tornei**, win% nella riga di lista e nel tooltip del pin.
 - **Tornei condivisi inclusi**, con contorno tratteggiato e badge "Condiviso":
   erano eventi a cui c'eravate entrambi.
-- **Peso**: il chunk principale passa da **39,5 a 51,4 KB gzippati** (+11,9 KB).
+- **Peso**: il chunk principale passa da **39,5 a 51,6 KB gzippati** (+12,1 KB).
   È il prezzo della vista dentro Tornei: dietro un toggle a un click, un chunk
   lazy comprerebbe soprattutto uno spinner. `derive.mappa.ts` resta comunque il
   punto di taglio pronto, se un domani la mappa diventasse una schermata a sé.
+
+---
+
+## Cablaggio al data layer
+
+Il giro di integrazione, cioè come la mappa si aggancia ai dati veri e alla
+navigazione. Quattro cose, tutte per la stessa ragione: la mappa deve dire il
+vero e non deve costare quando non la si guarda.
+
+**La vista Lista/Mappa è stata portata in `App`** (`vista` + `onVista`, la
+schermata resta presentazionale). Aprire un torneo dalla mappa porta su
+`screen === 'torneo'`, che **smonta `Tornei`**: con lo stato locale si tornava
+indietro sempre sulla lista, buttando via la vista da cui si era partiti. Ora la
+vista sopravvive all'andata e ritorno. Nella stessa passata il doppio
+`<Tornei …>` di `renderScreen` (schermata + fallback del dettaglio) è diventato
+un elemento solo, così le due strade non possono divergere nei prop. `track('mappa_aperta')`
+scatta solo sul passaggio *verso* la mappa, come `wrapped_aperto`.
+
+**`deriveMappa` è memoizzata** (`useMemo` su `[data, canFilter, fYear]`) e sta
+sopra il return anticipato dello splash, perché è un hook. Il motivo non è
+l'eleganza: `App` tiene lo stato dei form, quindi **si ri-renderizza a ogni tasto
+battuto in un modale**, e la mappa è l'unica derivata cara (geocodifica,
+declustering, e le partite scorse città per città). Le altre restano com'erano.
+
+**`nonGiocati` ora segue il filtro anno**, come ogni altro numero della pagina.
+Prima era `tournaments.length - giocati.length` su tutto l'archivio: guardando il
+2025 la pagina poteva scrivere *"1 torneo è ancora in programma"* riferendosi a
+un torneo del 2026. Vero, ma di un altro anno — cioè un numero sbagliato.
+
+**La città si normalizza in scrittura, in un punto solo** (`cleanCity` in
+`useDiary.ts`), uguale per le tre porte: form completo, form rapido e assistente
+guidato. Toglie spazi ai bordi e spazi doppi, e **niente altro**: maiuscole e
+accenti restano quelli scritti dall'utente, perché sono la grafia che si legge poi
+sulla mappa e nelle card. A confrontare pensano `geoKey` (mappa) e `city_key` del
+DB (`lower(btrim(city))`, la stanza di "Chi c'è oggi") — ma **nessuno dei due
+ripulisce gli spazi in mezzo**, ed è lì che `"Bellaria  Igea Marina"` diventava
+una stanza diversa da `"Bellaria Igea Marina"`. Nello stesso spirito il passo
+città dell'assistente guidato ha ora gli stessi suggerimenti dei due form: è la
+terza porta da cui entra una città, e un refuso lì costa quanto altrove.
+
+Un ramo in più nello stato vuoto: se **tutti** i tornei sono ancora in corso o in
+programma, la mappa lo dice invece di chiedere di aggiungere una città che c'è
+già. Il return anticipato saltava l'unica riga che restava da scrivere, e il
+bucket `nonGiocati` spariva insieme al resto della pagina.
 
 ---
 
@@ -267,8 +311,15 @@ Con i dati demo (`select public.seed_demo();`), aprire **Tornei → Mappa**:
   e l'Italia non si rimpicciolisce.
 - A 360 px la mappa scala e la bottom nav resta a 6 slot.
 - Tab attraverso le righe città; Invio espande; Invio su un torneo apre il dettaglio.
-- Nel form torneo (completo e rapido), digitare "Cer" nel campo Città e verificare
-  che compaiano i suggerimenti.
+- **Andata e ritorno**: dalla mappa aprire un torneo, poi tornare indietro — si
+  deve riaprire la **mappa**, non la lista.
+- Cambiare il filtro stagione dalla Home e tornare su Tornei → Mappa: i pin
+  superstiti restano dove erano e i conteggi in fondo (senza città / in corso)
+  parlano solo di quell'anno.
+- Nel form torneo (completo, rapido e assistente guidato), digitare "Cer" nel
+  campo Città e verificare che compaiano i suggerimenti; salvare con spazi
+  davanti e in mezzo (`"  Bellaria   Igea Marina "`) e riaprire il torneo: la
+  città deve essere salvata pulita.
 
 **Nessuna migration da applicare.** Se in futuro ne servisse una: via SQL Editor o
 MCP `apply_migration`, **non** `supabase db push` (cronologia remota disallineata

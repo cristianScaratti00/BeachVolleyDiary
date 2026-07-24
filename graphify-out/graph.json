@@ -313,7 +313,7 @@
       "label": "Diario",
       "file_type": "code",
       "source_file": "src/App.tsx",
-      "source_location": "L70",
+      "source_location": "L71",
       "id": "src_app_diario",
       "community": 12,
       "norm_label": "diario"
@@ -322,7 +322,7 @@
       "label": "CreaChat",
       "file_type": "code",
       "source_file": "src/App.tsx",
-      "source_location": "L71",
+      "source_location": "L72",
       "id": "src_app_creachat",
       "community": 12,
       "norm_label": "creachat"
@@ -331,7 +331,7 @@
       "label": "StoryModal",
       "file_type": "code",
       "source_file": "src/App.tsx",
-      "source_location": "L77",
+      "source_location": "L78",
       "id": "src_app_storymodal",
       "community": 12,
       "norm_label": "storymodal"
@@ -340,7 +340,7 @@
       "label": "WrappedModal",
       "file_type": "code",
       "source_file": "src/App.tsx",
-      "source_location": "L80",
+      "source_location": "L81",
       "id": "src_app_wrappedmodal",
       "community": 12,
       "norm_label": "wrappedmodal"
@@ -349,7 +349,7 @@
       "label": "App()",
       "file_type": "code",
       "source_file": "src/App.tsx",
-      "source_location": "L82",
+      "source_location": "L83",
       "id": "src_app_app",
       "community": 12,
       "norm_label": "app()"
@@ -360,7 +360,7 @@
       "source_file": "src/Root.tsx",
       "source_location": "L1",
       "id": "src_root",
-      "community": 1,
+      "community": 38,
       "norm_label": "root.tsx"
     },
     {
@@ -369,7 +369,7 @@
       "source_file": "src/Root.tsx",
       "source_location": "L8",
       "id": "src_root_root",
-      "community": 1,
+      "community": 38,
       "norm_label": "root()"
     },
     {
@@ -441,7 +441,7 @@
       "source_file": "src/components/Logo.tsx",
       "source_location": "L1",
       "id": "components_logo",
-      "community": 12,
+      "community": 2,
       "norm_label": "logo.tsx"
     },
     {
@@ -450,7 +450,7 @@
       "source_file": "src/components/Logo.tsx",
       "source_location": "L13",
       "id": "components_logo_brandmark",
-      "community": 12,
+      "community": 2,
       "norm_label": "brandmark()"
     },
     {
@@ -459,7 +459,7 @@
       "source_file": "src/components/Logo.tsx",
       "source_location": "L59",
       "id": "components_logo_brandlockup",
-      "community": 12,
+      "community": 2,
       "norm_label": "brandlockup()"
     },
     {
@@ -576,7 +576,7 @@
       "source_file": "src/components/Sidebar.tsx",
       "source_location": "L26",
       "id": "components_sidebar_sidebar",
-      "community": 1,
+      "community": 38,
       "norm_label": "sidebar()"
     },
     {
@@ -585,7 +585,7 @@
       "source_file": "src/components/Splash.tsx",
       "source_location": "L1",
       "id": "components_splash",
-      "community": 12,
+      "community": 2,
       "norm_label": "splash.tsx"
     },
     {
@@ -594,7 +594,7 @@
       "source_file": "src/components/Splash.tsx",
       "source_location": "L5",
       "id": "components_splash_splash",
-      "community": 12,
+      "community": 2,
       "norm_label": "splash()"
     },
     {
@@ -1539,7 +1539,7 @@
       "source_file": "src/hooks/useAuth.tsx",
       "source_location": "L1",
       "id": "hooks_useauth",
-      "community": 1,
+      "community": 47,
       "norm_label": "useauth.tsx"
     },
     {
@@ -1548,7 +1548,7 @@
       "source_file": "src/hooks/useAuth.tsx",
       "source_location": "L7",
       "id": "hooks_useauth_authcontextvalue",
-      "community": 1,
+      "community": 47,
       "norm_label": "authcontextvalue"
     },
     {
@@ -1557,7 +1557,7 @@
       "source_file": "src/hooks/useAuth.tsx",
       "source_location": "L17",
       "id": "hooks_useauth_authcontext",
-      "community": 1,
+      "community": 47,
       "norm_label": "authcontext"
     },
     {
@@ -1566,7 +1566,7 @@
       "source_file": "src/hooks/useAuth.tsx",
       "source_location": "L19",
       "id": "hooks_useauth_authprovider",
-      "community": 1,
+      "community": 47,
       "norm_label": "authprovider()"
     },
     {
@@ -1575,7 +1575,7 @@
       "source_file": "src/hooks/useAuth.tsx",
       "source_location": "L74",
       "id": "hooks_useauth_useauth",
-      "community": 1,
+      "community": 38,
       "norm_label": "useauth()"
     },
     {
@@ -1708,7 +1708,7 @@
       "label": "useDiary",
       "file_type": "code",
       "source_file": "src/hooks/useDiary.ts",
-      "source_location": "L121",
+      "source_location": "L133",
       "id": "hooks_usediary_usediary",
       "community": 0,
       "norm_label": "usediary"
@@ -1732,10 +1732,19 @@
       "norm_label": "errmsg()"
     },
     {
+      "label": "cleanCity()",
+      "file_type": "code",
+      "source_file": "src/hooks/useDiary.ts",
+      "source_location": "L51",
+      "id": "hooks_usediary_cleancity",
+      "community": 0,
+      "norm_label": "cleancity()"
+    },
+    {
       "label": "fetchAll()",
       "file_type": "code",
       "source_file": "src/hooks/useDiary.ts",
-      "source_location": "L43",
+      "source_location": "L55",
       "id": "hooks_usediary_fetchall",
       "community": 0,
       "norm_label": "fetchall()"
@@ -1773,7 +1782,7 @@
       "source_file": "src/lib/auth.ts",
       "source_location": "L1",
       "id": "lib_auth",
-      "community": 1,
+      "community": 5,
       "norm_label": "auth.ts"
     },
     {
@@ -1791,7 +1800,7 @@
       "source_file": "src/lib/auth.ts",
       "source_location": "L22",
       "id": "lib_auth_authresult",
-      "community": 1,
+      "community": 47,
       "norm_label": "authresult"
     },
     {
@@ -1800,7 +1809,7 @@
       "source_file": "src/lib/auth.ts",
       "source_location": "L31",
       "id": "lib_auth_namecheck",
-      "community": 1,
+      "community": 5,
       "norm_label": "namecheck"
     },
     {
@@ -1809,7 +1818,7 @@
       "source_file": "src/lib/auth.ts",
       "source_location": "L34",
       "id": "lib_auth_checknameavailable",
-      "community": 1,
+      "community": 5,
       "norm_label": "checknameavailable()"
     },
     {
@@ -1818,7 +1827,7 @@
       "source_file": "src/lib/auth.ts",
       "source_location": "L50",
       "id": "lib_auth_oauthprovider",
-      "community": 1,
+      "community": 47,
       "norm_label": "oauthprovider"
     },
     {
@@ -1836,7 +1845,7 @@
       "source_file": "src/lib/auth.ts",
       "source_location": "L57",
       "id": "lib_auth_fetchprofile",
-      "community": 1,
+      "community": 5,
       "norm_label": "fetchprofile()"
     },
     {
@@ -1845,7 +1854,7 @@
       "source_file": "src/lib/auth.ts",
       "source_location": "L69",
       "id": "lib_auth_haspasswordidentity",
-      "community": 1,
+      "community": 5,
       "norm_label": "haspasswordidentity()"
     },
     {
@@ -1854,7 +1863,7 @@
       "source_file": "src/lib/auth.ts",
       "source_location": "L82",
       "id": "lib_auth_sessionforuser",
-      "community": 1,
+      "community": 5,
       "norm_label": "sessionforuser()"
     },
     {
@@ -1863,7 +1872,7 @@
       "source_file": "src/lib/auth.ts",
       "source_location": "L100",
       "id": "lib_auth_updatedisplayname",
-      "community": 1,
+      "community": 5,
       "norm_label": "updatedisplayname()"
     },
     {
@@ -1872,7 +1881,7 @@
       "source_file": "src/lib/auth.ts",
       "source_location": "L126",
       "id": "lib_auth_updatepassword",
-      "community": 1,
+      "community": 5,
       "norm_label": "updatepassword()"
     },
     {
@@ -1881,7 +1890,7 @@
       "source_file": "src/lib/auth.ts",
       "source_location": "L136",
       "id": "lib_auth_registeruser",
-      "community": 1,
+      "community": 5,
       "norm_label": "registeruser()"
     },
     {
@@ -1890,7 +1899,7 @@
       "source_file": "src/lib/auth.ts",
       "source_location": "L175",
       "id": "lib_auth_loginuser",
-      "community": 1,
+      "community": 5,
       "norm_label": "loginuser()"
     },
     {
@@ -1899,7 +1908,7 @@
       "source_file": "src/lib/auth.ts",
       "source_location": "L190",
       "id": "lib_auth_signinwithprovider",
-      "community": 1,
+      "community": 5,
       "norm_label": "signinwithprovider()"
     },
     {
@@ -1908,7 +1917,7 @@
       "source_file": "src/lib/auth.ts",
       "source_location": "L203",
       "id": "lib_auth_logoutuser",
-      "community": 1,
+      "community": 47,
       "norm_label": "logoutuser()"
     },
     {
@@ -1917,7 +1926,7 @@
       "source_file": "src/lib/auth.ts",
       "source_location": "L209",
       "id": "lib_auth_translateautherror",
-      "community": 1,
+      "community": 5,
       "norm_label": "translateautherror()"
     },
     {
@@ -1926,7 +1935,7 @@
       "source_file": "src/lib/dashboard.ts",
       "source_location": "L1",
       "id": "lib_dashboard",
-      "community": 44,
+      "community": 12,
       "norm_label": "dashboard.ts"
     },
     {
@@ -1935,7 +1944,7 @@
       "source_file": "src/lib/dashboard.ts",
       "source_location": "L10",
       "id": "lib_dashboard_servertrendpoint",
-      "community": 44,
+      "community": 12,
       "norm_label": "servertrendpoint"
     },
     {
@@ -1944,7 +1953,7 @@
       "source_file": "src/lib/dashboard.ts",
       "source_location": "L11",
       "id": "lib_dashboard_serverpartnerrow",
-      "community": 44,
+      "community": 12,
       "norm_label": "serverpartnerrow"
     },
     {
@@ -1953,7 +1962,7 @@
       "source_file": "src/lib/dashboard.ts",
       "source_location": "L12",
       "id": "lib_dashboard_serverphaserow",
-      "community": 44,
+      "community": 12,
       "norm_label": "serverphaserow"
     },
     {
@@ -1962,7 +1971,7 @@
       "source_file": "src/lib/dashboard.ts",
       "source_location": "L13",
       "id": "lib_dashboard_serverplacement",
-      "community": 44,
+      "community": 12,
       "norm_label": "serverplacement"
     },
     {
@@ -1971,7 +1980,7 @@
       "source_file": "src/lib/dashboard.ts",
       "source_location": "L15",
       "id": "lib_dashboard_serverdashboard",
-      "community": 44,
+      "community": 12,
       "norm_label": "serverdashboard"
     },
     {
@@ -1980,7 +1989,7 @@
       "source_file": "src/lib/dashboard.ts",
       "source_location": "L44",
       "id": "lib_dashboard_getdashboardstats",
-      "community": 44,
+      "community": 12,
       "norm_label": "getdashboardstats()"
     },
     {
@@ -2007,7 +2016,7 @@
       "source_file": "src/lib/database.types.ts",
       "source_location": "L19",
       "id": "lib_database_types_database",
-      "community": 14,
+      "community": 46,
       "norm_label": "database"
     },
     {
@@ -2286,7 +2295,7 @@
       "source_file": "src/lib/derive.checkins.test.ts",
       "source_location": "L1",
       "id": "lib_derive_checkins_test",
-      "community": 16,
+      "community": 10,
       "norm_label": "derive.checkins.test.ts"
     },
     {
@@ -2295,7 +2304,7 @@
       "source_file": "src/lib/derive.checkins.test.ts",
       "source_location": "L11",
       "id": "lib_derive_checkins_test_ids",
-      "community": 16,
+      "community": 10,
       "norm_label": "ids()"
     },
     {
@@ -2304,7 +2313,7 @@
       "source_file": "src/lib/derive.checkins.test.ts",
       "source_location": "L14",
       "id": "lib_derive_checkins_test_row",
-      "community": 16,
+      "community": 10,
       "norm_label": "row()"
     },
     {
@@ -2313,7 +2322,7 @@
       "source_file": "src/lib/derive.mappa.test.ts",
       "source_location": "L1",
       "id": "lib_derive_mappa_test",
-      "community": 24,
+      "community": 36,
       "norm_label": "derive.mappa.test.ts"
     },
     {
@@ -2322,7 +2331,7 @@
       "source_file": "src/lib/derive.mappa.test.ts",
       "source_location": "L12",
       "id": "lib_derive_mappa_test_mappa",
-      "community": 24,
+      "community": 36,
       "norm_label": "mappa()"
     },
     {
@@ -2439,7 +2448,7 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L151",
       "id": "lib_derive_mappa_nelperiodo",
-      "community": 17,
+      "community": 24,
       "norm_label": "nelperiodo()"
     },
     {
@@ -2448,7 +2457,7 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L154",
       "id": "lib_derive_mappa_torneorow",
-      "community": 15,
+      "community": 44,
       "norm_label": "torneorow()"
     },
     {
@@ -2509,7 +2518,7 @@
       "label": "mappaSubtitle()",
       "file_type": "code",
       "source_file": "src/lib/derive.mappa.ts",
-      "source_location": "L344",
+      "source_location": "L348",
       "id": "lib_derive_mappa_mappasubtitle",
       "community": 24,
       "norm_label": "mappasubtitle()"
@@ -2754,7 +2763,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L193",
       "id": "lib_derive_partnername",
-      "community": 15,
+      "community": 44,
       "norm_label": "partnername()"
     },
     {
@@ -2763,7 +2772,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L198",
       "id": "lib_derive_dotforrank",
-      "community": 24,
+      "community": 44,
       "norm_label": "dotforrank()"
     },
     {
@@ -2772,7 +2781,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L199",
       "id": "lib_derive_dotfor",
-      "community": 15,
+      "community": 44,
       "norm_label": "dotfor()"
     },
     {
@@ -2799,7 +2808,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L213",
       "id": "lib_derive_decoratetournament",
-      "community": 15,
+      "community": 44,
       "norm_label": "decoratetournament()"
     },
     {
@@ -2817,7 +2826,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L333",
       "id": "lib_derive_derivedashboardserver",
-      "community": 15,
+      "community": 44,
       "norm_label": "derivedashboardserver()"
     },
     {
@@ -2889,7 +2898,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L499",
       "id": "lib_derive_derivetorneodetail",
-      "community": 15,
+      "community": 44,
       "norm_label": "derivetorneodetail()"
     },
     {
@@ -2961,7 +2970,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L664",
       "id": "lib_derive_wrappedslidekind",
-      "community": 5,
+      "community": 36,
       "norm_label": "wrappedslidekind"
     },
     {
@@ -3060,7 +3069,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L910",
       "id": "lib_derive_derivetorneodetailserver",
-      "community": 12,
+      "community": 44,
       "norm_label": "derivetorneodetailserver()"
     },
     {
@@ -3105,7 +3114,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L968",
       "id": "lib_derive_normalizecity",
-      "community": 38,
+      "community": 10,
       "norm_label": "normalizecity()"
     },
     {
@@ -3114,7 +3123,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L975",
       "id": "lib_derive_derivewhoishere",
-      "community": 29,
+      "community": 10,
       "norm_label": "derivewhoishere()"
     },
     {
@@ -3123,7 +3132,7 @@
       "source_file": "src/lib/derive.wrapped.test.ts",
       "source_location": "L1",
       "id": "lib_derive_wrapped_test",
-      "community": 5,
+      "community": 36,
       "norm_label": "derive.wrapped.test.ts"
     },
     {
@@ -3132,7 +3141,7 @@
       "source_file": "src/lib/derive.wrapped.test.ts",
       "source_location": "L33",
       "id": "lib_derive_wrapped_test_full_year",
-      "community": 5,
+      "community": 36,
       "norm_label": "full_year"
     },
     {
@@ -3141,7 +3150,7 @@
       "source_file": "src/lib/derive.wrapped.test.ts",
       "source_location": "L35",
       "id": "lib_derive_wrapped_test_kinds",
-      "community": 5,
+      "community": 36,
       "norm_label": "kinds()"
     },
     {
@@ -3150,7 +3159,7 @@
       "source_file": "src/lib/derive.wrapped.test.ts",
       "source_location": "L36",
       "id": "lib_derive_wrapped_test_slideof",
-      "community": 5,
+      "community": 36,
       "norm_label": "slideof()"
     },
     {
@@ -3159,7 +3168,7 @@
       "source_file": "src/lib/derive.wrapped.test.ts",
       "source_location": "L43",
       "id": "lib_derive_wrapped_test_seasonwith",
-      "community": 5,
+      "community": 36,
       "norm_label": "seasonwith()"
     },
     {
@@ -3168,7 +3177,7 @@
       "source_file": "src/lib/derive.wrapped.test.ts",
       "source_location": "L52",
       "id": "lib_derive_wrapped_test_seasonrich",
-      "community": 5,
+      "community": 36,
       "norm_label": "seasonrich()"
     },
     {
@@ -3177,7 +3186,7 @@
       "source_file": "src/lib/geo.test.ts",
       "source_location": "L1",
       "id": "lib_geo_test",
-      "community": 38,
+      "community": 24,
       "norm_label": "geo.test.ts"
     },
     {
@@ -3186,7 +3195,7 @@
       "source_file": "src/lib/geo.test.ts",
       "source_location": "L27",
       "id": "lib_geo_test_rings",
-      "community": 38,
+      "community": 24,
       "norm_label": "rings"
     },
     {
@@ -3195,7 +3204,7 @@
       "source_file": "src/lib/geo.test.ts",
       "source_location": "L36",
       "id": "lib_geo_test_inring",
-      "community": 38,
+      "community": 24,
       "norm_label": "inring()"
     },
     {
@@ -3204,7 +3213,7 @@
       "source_file": "src/lib/geo.test.ts",
       "source_location": "L46",
       "id": "lib_geo_test_distseg",
-      "community": 38,
+      "community": 24,
       "norm_label": "distseg()"
     },
     {
@@ -3213,7 +3222,7 @@
       "source_file": "src/lib/geo.test.ts",
       "source_location": "L56",
       "id": "lib_geo_test_distanzadallasagoma",
-      "community": 38,
+      "community": 24,
       "norm_label": "distanzadallasagoma()"
     },
     {
@@ -3222,7 +3231,7 @@
       "source_file": "src/lib/geo.test.ts",
       "source_location": "L69",
       "id": "lib_geo_test_isole_minori",
-      "community": 38,
+      "community": 24,
       "norm_label": "isole_minori"
     },
     {
@@ -3231,7 +3240,7 @@
       "source_file": "src/lib/geo.test.ts",
       "source_location": "L75",
       "id": "lib_geo_test_estere",
-      "community": 38,
+      "community": 24,
       "norm_label": "estere"
     },
     {
@@ -3240,7 +3249,7 @@
       "source_file": "src/lib/geo.test.ts",
       "source_location": "L80",
       "id": "lib_geo_test_fuori_sagoma",
-      "community": 38,
+      "community": 24,
       "norm_label": "fuori_sagoma"
     },
     {
@@ -3258,7 +3267,7 @@
       "source_file": "src/lib/geo.ts",
       "source_location": "L1",
       "id": "lib_geo",
-      "community": 38,
+      "community": 24,
       "norm_label": "geo.ts"
     },
     {
@@ -3267,7 +3276,7 @@
       "source_file": "src/lib/geo.ts",
       "source_location": "L10",
       "id": "lib_geo_geopoint",
-      "community": 38,
+      "community": 24,
       "norm_label": "geopoint"
     },
     {
@@ -3276,7 +3285,7 @@
       "source_file": "src/lib/geo.ts",
       "source_location": "L15",
       "id": "lib_geo_projectedpoint",
-      "community": 38,
+      "community": 24,
       "norm_label": "projectedpoint"
     },
     {
@@ -3312,7 +3321,7 @@
       "source_file": "src/lib/geo.ts",
       "source_location": "L82",
       "id": "lib_geo_gazetteer",
-      "community": 38,
+      "community": 24,
       "norm_label": "gazetteer"
     },
     {
@@ -3321,7 +3330,7 @@
       "source_file": "src/lib/geo.ts",
       "source_location": "L505",
       "id": "lib_geo_aliases",
-      "community": 38,
+      "community": 24,
       "norm_label": "aliases"
     },
     {
@@ -3330,7 +3339,7 @@
       "source_file": "src/lib/geo.ts",
       "source_location": "L562",
       "id": "lib_geo_prefissi",
-      "community": 38,
+      "community": 24,
       "norm_label": "prefissi"
     },
     {
@@ -3348,7 +3357,7 @@
       "source_file": "src/lib/geo.ts",
       "source_location": "L606",
       "id": "lib_geo_ring_slots",
-      "community": 38,
+      "community": 24,
       "norm_label": "ring_slots"
     },
     {
@@ -3357,7 +3366,7 @@
       "source_file": "src/lib/geo.ts",
       "source_location": "L615",
       "id": "lib_geo_pinseed",
-      "community": 38,
+      "community": 24,
       "norm_label": "pinseed"
     },
     {
@@ -3366,7 +3375,7 @@
       "source_file": "src/lib/geo.ts",
       "source_location": "L621",
       "id": "lib_geo_placedpin",
-      "community": 38,
+      "community": 24,
       "norm_label": "placedpin"
     },
     {
@@ -3375,7 +3384,7 @@
       "source_file": "src/lib/geo.ts",
       "source_location": "L630",
       "id": "lib_geo_dist2",
-      "community": 38,
+      "community": 24,
       "norm_label": "dist2()"
     },
     {
@@ -3393,7 +3402,7 @@
       "source_file": "src/lib/geo.ts",
       "source_location": "L697",
       "id": "lib_geo_citta_suggerite",
-      "community": 38,
+      "community": 24,
       "norm_label": "citta_suggerite"
     },
     {
@@ -3528,7 +3537,7 @@
       "source_file": "src/lib/models.ts",
       "source_location": "L61",
       "id": "lib_models_setscore",
-      "community": 5,
+      "community": 36,
       "norm_label": "setscore"
     },
     {
@@ -3816,7 +3825,7 @@
       "source_file": "src/lib/serverviews.ts",
       "source_location": "L41",
       "id": "lib_serverviews_svpresentuser",
-      "community": 16,
+      "community": 10,
       "norm_label": "svpresentuser"
     },
     {
@@ -3951,7 +3960,7 @@
       "source_file": "src/lib/stats.ts",
       "source_location": "L60",
       "id": "lib_stats_placementrank",
-      "community": 15,
+      "community": 44,
       "norm_label": "placementrank()"
     },
     {
@@ -3969,7 +3978,7 @@
       "source_file": "src/lib/stats.ts",
       "source_location": "L86",
       "id": "lib_stats_fmtdate",
-      "community": 15,
+      "community": 44,
       "norm_label": "fmtdate()"
     },
     {
@@ -3987,7 +3996,7 @@
       "source_file": "src/lib/stats.ts",
       "source_location": "L92",
       "id": "lib_stats_yearof",
-      "community": 17,
+      "community": 24,
       "norm_label": "yearof()"
     },
     {
@@ -4014,7 +4023,7 @@
       "source_file": "src/lib/supabase.ts",
       "source_location": "L1",
       "id": "lib_supabase",
-      "community": 1,
+      "community": 46,
       "norm_label": "supabase.ts"
     },
     {
@@ -4023,7 +4032,7 @@
       "source_file": "src/lib/supabase.ts",
       "source_location": "L19",
       "id": "lib_supabase_supabase",
-      "community": 1,
+      "community": 46,
       "norm_label": "supabase"
     },
     {
@@ -4077,7 +4086,7 @@
       "source_file": "src/main.tsx",
       "source_location": "L1",
       "id": "src_main",
-      "community": 1,
+      "community": 47,
       "norm_label": "main.tsx"
     },
     {
@@ -4336,7 +4345,7 @@
       "label": "LABEL_COLORS",
       "file_type": "code",
       "source_file": "src/screens/CreaChat.tsx",
-      "source_location": "L22",
+      "source_location": "L23",
       "id": "screens_creachat_label_colors",
       "community": 0,
       "norm_label": "label_colors"
@@ -4345,7 +4354,7 @@
       "label": "Step",
       "file_type": "code",
       "source_file": "src/screens/CreaChat.tsx",
-      "source_location": "L24",
+      "source_location": "L25",
       "id": "screens_creachat_step",
       "community": 0,
       "norm_label": "step"
@@ -4354,7 +4363,7 @@
       "label": "Draft",
       "file_type": "code",
       "source_file": "src/screens/CreaChat.tsx",
-      "source_location": "L47",
+      "source_location": "L48",
       "id": "screens_creachat_draft",
       "community": 0,
       "norm_label": "draft"
@@ -4363,7 +4372,7 @@
       "label": "Msg",
       "file_type": "code",
       "source_file": "src/screens/CreaChat.tsx",
-      "source_location": "L62",
+      "source_location": "L63",
       "id": "screens_creachat_msg",
       "community": 0,
       "norm_label": "msg"
@@ -4372,7 +4381,7 @@
       "label": "CreaChatProps",
       "file_type": "code",
       "source_file": "src/screens/CreaChat.tsx",
-      "source_location": "L69",
+      "source_location": "L70",
       "id": "screens_creachat_creachatprops",
       "community": 0,
       "norm_label": "creachatprops"
@@ -4381,7 +4390,7 @@
       "label": "wait()",
       "file_type": "code",
       "source_file": "src/screens/CreaChat.tsx",
-      "source_location": "L77",
+      "source_location": "L78",
       "id": "screens_creachat_wait",
       "community": 0,
       "norm_label": "wait()"
@@ -4390,7 +4399,7 @@
       "label": "todayISO()",
       "file_type": "code",
       "source_file": "src/screens/CreaChat.tsx",
-      "source_location": "L78",
+      "source_location": "L79",
       "id": "screens_creachat_todayiso",
       "community": 0,
       "norm_label": "todayiso()"
@@ -4399,7 +4408,7 @@
       "label": "shiftISO()",
       "file_type": "code",
       "source_file": "src/screens/CreaChat.tsx",
-      "source_location": "L79",
+      "source_location": "L80",
       "id": "screens_creachat_shiftiso",
       "community": 0,
       "norm_label": "shiftiso()"
@@ -4408,7 +4417,7 @@
       "label": "fmtDate()",
       "file_type": "code",
       "source_file": "src/screens/CreaChat.tsx",
-      "source_location": "L84",
+      "source_location": "L85",
       "id": "screens_creachat_fmtdate",
       "community": 0,
       "norm_label": "fmtdate()"
@@ -4417,7 +4426,7 @@
       "label": "fmtSets()",
       "file_type": "code",
       "source_file": "src/screens/CreaChat.tsx",
-      "source_location": "L90",
+      "source_location": "L91",
       "id": "screens_creachat_fmtsets",
       "community": 0,
       "norm_label": "fmtsets()"
@@ -4426,7 +4435,7 @@
       "label": "initialDraft()",
       "file_type": "code",
       "source_file": "src/screens/CreaChat.tsx",
-      "source_location": "L93",
+      "source_location": "L94",
       "id": "screens_creachat_initialdraft",
       "community": 0,
       "norm_label": "initialdraft()"
@@ -4435,7 +4444,7 @@
       "label": "CreaChat()",
       "file_type": "code",
       "source_file": "src/screens/CreaChat.tsx",
-      "source_location": "L108",
+      "source_location": "L109",
       "id": "screens_creachat_creachat",
       "community": 0,
       "norm_label": "creachat()"
@@ -4444,7 +4453,7 @@
       "label": "Bubble()",
       "file_type": "code",
       "source_file": "src/screens/CreaChat.tsx",
-      "source_location": "L529",
+      "source_location": "L530",
       "id": "screens_creachat_bubble",
       "community": 0,
       "norm_label": "bubble()"
@@ -4453,7 +4462,7 @@
       "label": "Typing()",
       "file_type": "code",
       "source_file": "src/screens/CreaChat.tsx",
-      "source_location": "L556",
+      "source_location": "L557",
       "id": "screens_creachat_typing",
       "community": 0,
       "norm_label": "typing()"
@@ -4462,7 +4471,7 @@
       "label": "Recap()",
       "file_type": "code",
       "source_file": "src/screens/CreaChat.tsx",
-      "source_location": "L569",
+      "source_location": "L570",
       "id": "screens_creachat_recap",
       "community": 0,
       "norm_label": "recap()"
@@ -4471,7 +4480,7 @@
       "label": "Handlers",
       "file_type": "code",
       "source_file": "src/screens/CreaChat.tsx",
-      "source_location": "L616",
+      "source_location": "L617",
       "id": "screens_creachat_handlers",
       "community": 0,
       "norm_label": "handlers"
@@ -4480,7 +4489,7 @@
       "label": "DockProps",
       "file_type": "code",
       "source_file": "src/screens/CreaChat.tsx",
-      "source_location": "L640",
+      "source_location": "L641",
       "id": "screens_creachat_dockprops",
       "community": 0,
       "norm_label": "dockprops"
@@ -4489,7 +4498,7 @@
       "label": "FINISHED_PLACEMENTS",
       "file_type": "code",
       "source_file": "src/screens/CreaChat.tsx",
-      "source_location": "L654",
+      "source_location": "L655",
       "id": "screens_creachat_finished_placements",
       "community": 0,
       "norm_label": "finished_placements"
@@ -4498,7 +4507,7 @@
       "label": "Dock()",
       "file_type": "code",
       "source_file": "src/screens/CreaChat.tsx",
-      "source_location": "L656",
+      "source_location": "L657",
       "id": "screens_creachat_dock",
       "community": 0,
       "norm_label": "dock()"
@@ -4507,7 +4516,7 @@
       "label": "fieldStyle",
       "file_type": "code",
       "source_file": "src/screens/CreaChat.tsx",
-      "source_location": "L798",
+      "source_location": "L802",
       "id": "screens_creachat_fieldstyle",
       "community": 0,
       "norm_label": "fieldstyle"
@@ -4516,7 +4525,7 @@
       "label": "TextDock()",
       "file_type": "code",
       "source_file": "src/screens/CreaChat.tsx",
-      "source_location": "L807",
+      "source_location": "L816",
       "id": "screens_creachat_textdock",
       "community": 0,
       "norm_label": "textdock()"
@@ -4525,7 +4534,7 @@
       "label": "SendBtn()",
       "file_type": "code",
       "source_file": "src/screens/CreaChat.tsx",
-      "source_location": "L834",
+      "source_location": "L859",
       "id": "screens_creachat_sendbtn",
       "community": 0,
       "norm_label": "sendbtn()"
@@ -4534,7 +4543,7 @@
       "label": "ChipsDock()",
       "file_type": "code",
       "source_file": "src/screens/CreaChat.tsx",
-      "source_location": "L863",
+      "source_location": "L888",
       "id": "screens_creachat_chipsdock",
       "community": 0,
       "norm_label": "chipsdock()"
@@ -4543,7 +4552,7 @@
       "label": "Chip()",
       "file_type": "code",
       "source_file": "src/screens/CreaChat.tsx",
-      "source_location": "L867",
+      "source_location": "L892",
       "id": "screens_creachat_chip",
       "community": 6,
       "norm_label": "chip()"
@@ -4552,7 +4561,7 @@
       "label": "ScoreDock()",
       "file_type": "code",
       "source_file": "src/screens/CreaChat.tsx",
-      "source_location": "L880",
+      "source_location": "L905",
       "id": "screens_creachat_scoredock",
       "community": 0,
       "norm_label": "scoredock()"
@@ -4644,7 +4653,7 @@
       "source_file": "src/screens/Login.tsx",
       "source_location": "L1",
       "id": "screens_login",
-      "community": 1,
+      "community": 38,
       "norm_label": "login.tsx"
     },
     {
@@ -4653,7 +4662,7 @@
       "source_file": "src/screens/Login.tsx",
       "source_location": "L8",
       "id": "screens_login_mode",
-      "community": 1,
+      "community": 38,
       "norm_label": "mode"
     },
     {
@@ -4662,7 +4671,7 @@
       "source_file": "src/screens/Login.tsx",
       "source_location": "L10",
       "id": "screens_login_inputstyle",
-      "community": 1,
+      "community": 38,
       "norm_label": "inputstyle"
     },
     {
@@ -4671,7 +4680,7 @@
       "source_file": "src/screens/Login.tsx",
       "source_location": "L19",
       "id": "screens_login_seg",
-      "community": 1,
+      "community": 38,
       "norm_label": "seg()"
     },
     {
@@ -4680,7 +4689,7 @@
       "source_file": "src/screens/Login.tsx",
       "source_location": "L31",
       "id": "screens_login_features",
-      "community": 1,
+      "community": 38,
       "norm_label": "features"
     },
     {
@@ -4689,7 +4698,7 @@
       "source_file": "src/screens/Login.tsx",
       "source_location": "L37",
       "id": "screens_login_login",
-      "community": 1,
+      "community": 38,
       "norm_label": "login()"
     },
     {
@@ -4768,7 +4777,7 @@
       "label": "Pin()",
       "file_type": "code",
       "source_file": "src/screens/Mappa.tsx",
-      "source_location": "L197",
+      "source_location": "L211",
       "id": "screens_mappa_pin",
       "community": 35,
       "norm_label": "pin()"
@@ -4777,7 +4786,7 @@
       "label": "Legenda()",
       "file_type": "code",
       "source_file": "src/screens/Mappa.tsx",
-      "source_location": "L234",
+      "source_location": "L248",
       "id": "screens_mappa_legenda",
       "community": 35,
       "norm_label": "legenda()"
@@ -4786,7 +4795,7 @@
       "label": "GlifoTier()",
       "file_type": "code",
       "source_file": "src/screens/Mappa.tsx",
-      "source_location": "L255",
+      "source_location": "L269",
       "id": "screens_mappa_glifotier",
       "community": 35,
       "norm_label": "glifotier()"
@@ -4795,7 +4804,7 @@
       "label": "CittaRow()",
       "file_type": "code",
       "source_file": "src/screens/Mappa.tsx",
-      "source_location": "L268",
+      "source_location": "L282",
       "id": "screens_mappa_cittarow",
       "community": 35,
       "norm_label": "cittarow()"
@@ -4804,7 +4813,7 @@
       "label": "TorneoRow()",
       "file_type": "code",
       "source_file": "src/screens/Mappa.tsx",
-      "source_location": "L322",
+      "source_location": "L336",
       "id": "screens_mappa_torneorow",
       "community": 35,
       "norm_label": "torneorow()"
@@ -4813,7 +4822,7 @@
       "label": "FuoriMappa()",
       "file_type": "code",
       "source_file": "src/screens/Mappa.tsx",
-      "source_location": "L349",
+      "source_location": "L363",
       "id": "screens_mappa_fuorimappa",
       "community": 35,
       "norm_label": "fuorimappa()"
@@ -4824,7 +4833,7 @@
       "source_file": "src/screens/Profilo.tsx",
       "source_location": "L1",
       "id": "screens_profilo",
-      "community": 1,
+      "community": 46,
       "norm_label": "profilo.tsx"
     },
     {
@@ -4842,7 +4851,7 @@
       "source_file": "src/screens/Profilo.tsx",
       "source_location": "L16",
       "id": "screens_profilo_msg",
-      "community": 1,
+      "community": 46,
       "norm_label": "msg"
     },
     {
@@ -4851,7 +4860,7 @@
       "source_file": "src/screens/Profilo.tsx",
       "source_location": "L18",
       "id": "screens_profilo_feedback",
-      "community": 1,
+      "community": 46,
       "norm_label": "feedback()"
     },
     {
@@ -4860,7 +4869,7 @@
       "source_file": "src/screens/Profilo.tsx",
       "source_location": "L27",
       "id": "screens_profilo_hintstyle",
-      "community": 1,
+      "community": 46,
       "norm_label": "hintstyle"
     },
     {
@@ -4869,7 +4878,7 @@
       "source_file": "src/screens/Profilo.tsx",
       "source_location": "L28",
       "id": "screens_profilo_readonlystyle",
-      "community": 1,
+      "community": 46,
       "norm_label": "readonlystyle"
     },
     {
@@ -4878,7 +4887,7 @@
       "source_file": "src/screens/Profilo.tsx",
       "source_location": "L30",
       "id": "screens_profilo_savebutton",
-      "community": 1,
+      "community": 46,
       "norm_label": "savebutton()"
     },
     {
@@ -4887,7 +4896,7 @@
       "source_file": "src/screens/Profilo.tsx",
       "source_location": "L47",
       "id": "screens_profilo_profilo",
-      "community": 1,
+      "community": 38,
       "norm_label": "profilo()"
     },
     {
@@ -4903,16 +4912,43 @@
       "label": "noop()",
       "file_type": "code",
       "source_file": "src/screens/Tornei.test.tsx",
-      "source_location": "L16",
+      "source_location": "L18",
       "id": "screens_tornei_test_noop",
       "community": 36,
       "norm_label": "noop()"
     },
     {
+      "label": "TorneiProps",
+      "file_type": "code",
+      "source_file": "src/screens/Tornei.test.tsx",
+      "source_location": "L23",
+      "id": "screens_tornei_test_torneiprops",
+      "community": 36,
+      "norm_label": "torneiprops"
+    },
+    {
+      "label": "HarnessProps",
+      "file_type": "code",
+      "source_file": "src/screens/Tornei.test.tsx",
+      "source_location": "L24",
+      "id": "screens_tornei_test_harnessprops",
+      "community": 36,
+      "norm_label": "harnessprops"
+    },
+    {
+      "label": "TorneiConVista()",
+      "file_type": "code",
+      "source_file": "src/screens/Tornei.test.tsx",
+      "source_location": "L26",
+      "id": "screens_tornei_test_torneiconvista",
+      "community": 36,
+      "norm_label": "torneiconvista()"
+    },
+    {
       "label": "renderTornei()",
       "file_type": "code",
       "source_file": "src/screens/Tornei.test.tsx",
-      "source_location": "L18",
+      "source_location": "L31",
       "id": "screens_tornei_test_rendertornei",
       "community": 36,
       "norm_label": "rendertornei()"
@@ -4921,7 +4957,7 @@
       "label": "sectionTitles()",
       "file_type": "code",
       "source_file": "src/screens/Tornei.test.tsx",
-      "source_location": "L97",
+      "source_location": "L144",
       "id": "screens_tornei_test_sectiontitles",
       "community": 36,
       "norm_label": "sectiontitles()"
@@ -4930,7 +4966,7 @@
       "label": "gridUnder()",
       "file_type": "code",
       "source_file": "src/screens/Tornei.test.tsx",
-      "source_location": "L101",
+      "source_location": "L148",
       "id": "screens_tornei_test_gridunder",
       "community": 36,
       "norm_label": "gridunder()"
@@ -4939,7 +4975,7 @@
       "label": "cardNames()",
       "file_type": "code",
       "source_file": "src/screens/Tornei.test.tsx",
-      "source_location": "L108",
+      "source_location": "L155",
       "id": "screens_tornei_test_cardnames",
       "community": 36,
       "norm_label": "cardnames()"
@@ -4954,13 +4990,13 @@
       "norm_label": "tornei.tsx"
     },
     {
-      "label": "Vista",
+      "label": "TorneiVista",
       "file_type": "code",
       "source_file": "src/screens/Tornei.tsx",
       "source_location": "L13",
-      "id": "screens_tornei_vista",
-      "community": 35,
-      "norm_label": "vista"
+      "id": "screens_tornei_torneivista",
+      "community": 36,
+      "norm_label": "torneivista"
     },
     {
       "label": "TorneiProps",
@@ -4975,7 +5011,7 @@
       "label": "Tornei()",
       "file_type": "code",
       "source_file": "src/screens/Tornei.tsx",
-      "source_location": "L25",
+      "source_location": "L32",
       "id": "screens_tornei_tornei",
       "community": 22,
       "norm_label": "tornei()"
@@ -4984,7 +5020,7 @@
       "label": "TorneiSection()",
       "file_type": "code",
       "source_file": "src/screens/Tornei.tsx",
-      "source_location": "L102",
+      "source_location": "L108",
       "id": "screens_tornei_torneisection",
       "community": 35,
       "norm_label": "torneisection()"
@@ -4993,7 +5029,7 @@
       "label": "SectionCount()",
       "file_type": "code",
       "source_file": "src/screens/Tornei.tsx",
-      "source_location": "L123",
+      "source_location": "L129",
       "id": "screens_tornei_sectioncount",
       "community": 35,
       "norm_label": "sectioncount()"
@@ -5002,7 +5038,7 @@
       "label": "TorneiGrid()",
       "file_type": "code",
       "source_file": "src/screens/Tornei.tsx",
-      "source_location": "L141",
+      "source_location": "L147",
       "id": "screens_tornei_torneigrid",
       "community": 35,
       "norm_label": "torneigrid()"
@@ -5011,7 +5047,7 @@
       "label": "TorneoCardView()",
       "file_type": "code",
       "source_file": "src/screens/Tornei.tsx",
-      "source_location": "L152",
+      "source_location": "L158",
       "id": "screens_tornei_torneocardview",
       "community": 35,
       "norm_label": "torneocardview()"
@@ -5130,7 +5166,7 @@
       "source_file": "src/test/factories.ts",
       "source_location": "L1",
       "id": "test_factories",
-      "community": 5,
+      "community": 36,
       "norm_label": "factories.ts"
     },
     {
@@ -5157,7 +5193,7 @@
       "source_file": "src/test/factories.ts",
       "source_location": "L68",
       "id": "test_factories_winsets",
-      "community": 5,
+      "community": 36,
       "norm_label": "winsets()"
     },
     {
@@ -5166,7 +5202,7 @@
       "source_file": "src/test/factories.ts",
       "source_location": "L72",
       "id": "test_factories_losssets",
-      "community": 5,
+      "community": 36,
       "norm_label": "losssets()"
     },
     {
@@ -5175,7 +5211,7 @@
       "source_file": "src/test/factories.ts",
       "source_location": "L77",
       "id": "test_factories_makepartner",
-      "community": 5,
+      "community": 36,
       "norm_label": "makepartner()"
     },
     {
@@ -5184,7 +5220,7 @@
       "source_file": "src/test/factories.ts",
       "source_location": "L90",
       "id": "test_factories_maketournament",
-      "community": 5,
+      "community": 36,
       "norm_label": "maketournament()"
     },
     {
@@ -5193,7 +5229,7 @@
       "source_file": "src/test/factories.ts",
       "source_location": "L110",
       "id": "test_factories_makematch",
-      "community": 5,
+      "community": 36,
       "norm_label": "makematch()"
     },
     {
@@ -5202,7 +5238,7 @@
       "source_file": "src/test/factories.ts",
       "source_location": "L125",
       "id": "test_factories_makephoto",
-      "community": 5,
+      "community": 36,
       "norm_label": "makephoto()"
     },
     {
@@ -5211,7 +5247,7 @@
       "source_file": "src/test/factories.ts",
       "source_location": "L139",
       "id": "test_factories_makedata",
-      "community": 5,
+      "community": 36,
       "norm_label": "makedata()"
     },
     {
@@ -6070,10 +6106,19 @@
       "norm_label": "decisioni e assunzioni"
     },
     {
-      "label": "Accessibilit\u00e0 \u2014 perch\u00e9 il contorno dei pin non \u00e8 una rifinitura",
+      "label": "Cablaggio al data layer",
       "file_type": "document",
       "source_file": "docs/QA-mappa-conquiste.md",
       "source_location": "L197",
+      "id": "docs_qa_mappa_conquiste_cablaggio_al_data_layer",
+      "community": 40,
+      "norm_label": "cablaggio al data layer"
+    },
+    {
+      "label": "Accessibilit\u00e0 \u2014 perch\u00e9 il contorno dei pin non \u00e8 una rifinitura",
+      "file_type": "document",
+      "source_file": "docs/QA-mappa-conquiste.md",
+      "source_location": "L241",
       "id": "docs_qa_mappa_conquiste_accessibilit\u00e0_perch\u00e9_il_contorno_dei_pin_non_\u00e8_una_rifinitura",
       "community": 40,
       "norm_label": "accessibilita \u2014 perche il contorno dei pin non e una rifinitura"
@@ -6082,7 +6127,7 @@
       "label": "Difetti noti (preesistenti, ereditati e resi visibili)",
       "file_type": "document",
       "source_file": "docs/QA-mappa-conquiste.md",
-      "source_location": "L226",
+      "source_location": "L270",
       "id": "docs_qa_mappa_conquiste_difetti_noti_preesistenti_ereditati_e_resi_visibili",
       "community": 40,
       "norm_label": "difetti noti (preesistenti, ereditati e resi visibili)"
@@ -6091,7 +6136,7 @@
       "label": "Cosa resta fuori",
       "file_type": "document",
       "source_file": "docs/QA-mappa-conquiste.md",
-      "source_location": "L246",
+      "source_location": "L290",
       "id": "docs_qa_mappa_conquiste_cosa_resta_fuori",
       "community": 40,
       "norm_label": "cosa resta fuori"
@@ -6100,7 +6145,7 @@
       "label": "Prove manuali consigliate (`npm run dev`)",
       "file_type": "document",
       "source_file": "docs/QA-mappa-conquiste.md",
-      "source_location": "L256",
+      "source_location": "L300",
       "id": "docs_qa_mappa_conquiste_prove_manuali_consigliate_npm_run_dev",
       "community": 40,
       "norm_label": "prove manuali consigliate (`npm run dev`)"
@@ -6311,6 +6356,15 @@
       "id": "supabase_readme_prossimi_passi",
       "community": 21,
       "norm_label": "prossimi passi"
+    },
+    {
+      "label": "Vista",
+      "file_type": "code",
+      "source_file": "src/screens/Tornei.tsx",
+      "source_location": "L13",
+      "community": 35,
+      "norm_label": "vista",
+      "id": "screens_tornei_vista"
     },
     {
       "label": "package.json",
@@ -7094,9 +7148,9 @@
       "source_file": "package.json",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_package_json",
-      "target": "beachvolleydiary_package_dependencies",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_package_dependencies"
     },
     {
       "relation": "contains",
@@ -7104,9 +7158,9 @@
       "source_file": "package.json",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_package_json",
-      "target": "beachvolleydiary_package_devdependencies",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_package_devdependencies"
     },
     {
       "relation": "contains",
@@ -7114,9 +7168,9 @@
       "source_file": "package.json",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_package_json",
-      "target": "beachvolleydiary_package_name",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_package_name"
     },
     {
       "relation": "contains",
@@ -7124,9 +7178,9 @@
       "source_file": "package.json",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_package_json",
-      "target": "beachvolleydiary_package_private",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_package_private"
     },
     {
       "relation": "contains",
@@ -7134,9 +7188,9 @@
       "source_file": "package.json",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_package_json",
-      "target": "beachvolleydiary_package_scripts",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_package_scripts"
     },
     {
       "relation": "contains",
@@ -7144,9 +7198,9 @@
       "source_file": "package.json",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_package_json",
-      "target": "beachvolleydiary_package_type",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_package_type"
     },
     {
       "relation": "contains",
@@ -7154,9 +7208,9 @@
       "source_file": "package.json",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_package_json",
-      "target": "beachvolleydiary_package_version",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_package_version"
     },
     {
       "relation": "contains",
@@ -7164,9 +7218,9 @@
       "source_file": "package.json",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_package_scripts",
-      "target": "beachvolleydiary_package_scripts_build",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_package_scripts_build"
     },
     {
       "relation": "contains",
@@ -7174,9 +7228,9 @@
       "source_file": "package.json",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_package_scripts",
-      "target": "beachvolleydiary_package_scripts_dev",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_package_scripts_dev"
     },
     {
       "relation": "contains",
@@ -7184,9 +7238,9 @@
       "source_file": "package.json",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_package_scripts",
-      "target": "beachvolleydiary_package_scripts_preview",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_package_scripts_preview"
     },
     {
       "relation": "contains",
@@ -7194,9 +7248,9 @@
       "source_file": "package.json",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_package_scripts",
-      "target": "beachvolleydiary_package_scripts_test",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_package_scripts_test"
     },
     {
       "relation": "contains",
@@ -7204,9 +7258,9 @@
       "source_file": "package.json",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_package_scripts",
-      "target": "beachvolleydiary_package_scripts_test_watch",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_package_scripts_test_watch"
     },
     {
       "relation": "contains",
@@ -7214,9 +7268,9 @@
       "source_file": "package.json",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_package_scripts",
-      "target": "beachvolleydiary_package_scripts_typecheck",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_package_scripts_typecheck"
     },
     {
       "relation": "contains",
@@ -7224,9 +7278,9 @@
       "source_file": "package.json",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_package_scripts",
-      "target": "beachvolleydiary_package_scripts_typecheck_test",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_package_scripts_typecheck_test"
     },
     {
       "relation": "contains",
@@ -7234,9 +7288,9 @@
       "source_file": "package.json",
       "source_location": "L19",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_package_dependencies",
-      "target": "beachvolleydiary_package_dependencies_html_to_image",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_package_dependencies_html_to_image"
     },
     {
       "relation": "contains",
@@ -7244,9 +7298,9 @@
       "source_file": "package.json",
       "source_location": "L20",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_package_dependencies",
-      "target": "beachvolleydiary_package_dependencies_react",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_package_dependencies_react"
     },
     {
       "relation": "contains",
@@ -7254,9 +7308,9 @@
       "source_file": "package.json",
       "source_location": "L21",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_package_dependencies",
-      "target": "beachvolleydiary_package_dependencies_react_dom",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_package_dependencies_react_dom"
     },
     {
       "relation": "contains",
@@ -7264,9 +7318,9 @@
       "source_file": "package.json",
       "source_location": "L16",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_package_dependencies",
-      "target": "beachvolleydiary_package_dependencies_supabase_supabase_js",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_package_dependencies_supabase_supabase_js"
     },
     {
       "relation": "contains",
@@ -7274,9 +7328,9 @@
       "source_file": "package.json",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_package_dependencies",
-      "target": "beachvolleydiary_package_dependencies_vercel_analytics",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_package_dependencies_vercel_analytics"
     },
     {
       "relation": "contains",
@@ -7284,9 +7338,9 @@
       "source_file": "package.json",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_package_dependencies",
-      "target": "beachvolleydiary_package_dependencies_vercel_speed_insights",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_package_dependencies_vercel_speed_insights"
     },
     {
       "relation": "contains",
@@ -7294,9 +7348,9 @@
       "source_file": "package.json",
       "source_location": "L31",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_package_devdependencies",
-      "target": "beachvolleydiary_package_devdependencies_axe_core",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_package_devdependencies_axe_core"
     },
     {
       "relation": "contains",
@@ -7304,9 +7358,9 @@
       "source_file": "package.json",
       "source_location": "L32",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_package_devdependencies",
-      "target": "beachvolleydiary_package_devdependencies_jsdom",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_package_devdependencies_jsdom"
     },
     {
       "relation": "contains",
@@ -7314,9 +7368,9 @@
       "source_file": "package.json",
       "source_location": "L24",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_package_devdependencies",
-      "target": "beachvolleydiary_package_devdependencies_testing_library_dom",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_package_devdependencies_testing_library_dom"
     },
     {
       "relation": "contains",
@@ -7324,9 +7378,9 @@
       "source_file": "package.json",
       "source_location": "L25",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_package_devdependencies",
-      "target": "beachvolleydiary_package_devdependencies_testing_library_jest_dom",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_package_devdependencies_testing_library_jest_dom"
     },
     {
       "relation": "contains",
@@ -7334,9 +7388,9 @@
       "source_file": "package.json",
       "source_location": "L26",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_package_devdependencies",
-      "target": "beachvolleydiary_package_devdependencies_testing_library_react",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_package_devdependencies_testing_library_react"
     },
     {
       "relation": "contains",
@@ -7344,9 +7398,9 @@
       "source_file": "package.json",
       "source_location": "L27",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_package_devdependencies",
-      "target": "beachvolleydiary_package_devdependencies_testing_library_user_event",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_package_devdependencies_testing_library_user_event"
     },
     {
       "relation": "contains",
@@ -7354,9 +7408,9 @@
       "source_file": "package.json",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_package_devdependencies",
-      "target": "beachvolleydiary_package_devdependencies_types_react",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_package_devdependencies_types_react"
     },
     {
       "relation": "contains",
@@ -7364,9 +7418,9 @@
       "source_file": "package.json",
       "source_location": "L29",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_package_devdependencies",
-      "target": "beachvolleydiary_package_devdependencies_types_react_dom",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_package_devdependencies_types_react_dom"
     },
     {
       "relation": "contains",
@@ -7374,9 +7428,9 @@
       "source_file": "package.json",
       "source_location": "L33",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_package_devdependencies",
-      "target": "beachvolleydiary_package_devdependencies_typescript",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_package_devdependencies_typescript"
     },
     {
       "relation": "contains",
@@ -7384,9 +7438,9 @@
       "source_file": "package.json",
       "source_location": "L34",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_package_devdependencies",
-      "target": "beachvolleydiary_package_devdependencies_vite",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_package_devdependencies_vite"
     },
     {
       "relation": "contains",
@@ -7394,9 +7448,9 @@
       "source_file": "package.json",
       "source_location": "L30",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_package_devdependencies",
-      "target": "beachvolleydiary_package_devdependencies_vitejs_plugin_react",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_package_devdependencies_vitejs_plugin_react"
     },
     {
       "relation": "contains",
@@ -7404,9 +7458,9 @@
       "source_file": "package.json",
       "source_location": "L35",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_package_devdependencies",
-      "target": "beachvolleydiary_package_devdependencies_vitest",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_package_devdependencies_vitest"
     },
     {
       "relation": "imports_from",
@@ -7525,9 +7579,9 @@
       "source_file": "src/App.tsx",
       "source_location": "L67",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_app",
-      "target": "hooks_usecheckin",
-      "confidence_score": 1.0
+      "target": "hooks_usecheckin"
     },
     {
       "relation": "imports",
@@ -7536,9 +7590,9 @@
       "source_file": "src/App.tsx",
       "source_location": "L67",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_app",
-      "target": "hooks_usecheckin_usecheckin",
-      "confidence_score": 1.0
+      "target": "hooks_usecheckin_usecheckin"
     },
     {
       "relation": "imports_from",
@@ -7789,9 +7843,9 @@
       "source_file": "src/App.tsx",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_app",
-      "target": "lib_derive_mappa",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa"
     },
     {
       "relation": "imports",
@@ -7800,9 +7854,9 @@
       "source_file": "src/App.tsx",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_app",
-      "target": "lib_derive_mappa_derivemappa",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa_derivemappa"
     },
     {
       "relation": "imports",
@@ -8108,9 +8162,9 @@
       "source_file": "src/App.tsx",
       "source_location": "L66",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_app",
-      "target": "screens_chiceoggi",
-      "confidence_score": 1.0
+      "target": "screens_chiceoggi"
     },
     {
       "relation": "imports_from",
@@ -8166,6 +8220,17 @@
       "confidence_score": 1.0,
       "source": "src_app",
       "target": "screens_tornei"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.tsx",
+      "source_location": "L62",
+      "weight": 1.0,
+      "source": "src_app",
+      "target": "screens_tornei_torneivista",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -10419,9 +10484,9 @@
       "source_file": "src/components/modals/QuickTorneoModal.tsx",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "modals_quicktorneomodal",
-      "target": "modals_sheet_cityinput",
-      "confidence_score": 1.0
+      "target": "modals_sheet_cityinput"
     },
     {
       "relation": "imports",
@@ -10518,9 +10583,9 @@
       "source_file": "src/components/modals/Sheet.tsx",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "modals_sheet",
-      "target": "lib_geo",
-      "confidence_score": 1.0
+      "target": "lib_geo"
     },
     {
       "relation": "imports",
@@ -10529,9 +10594,9 @@
       "source_file": "src/components/modals/Sheet.tsx",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "modals_sheet",
-      "target": "lib_geo_citta_suggerite",
-      "confidence_score": 1.0
+      "target": "lib_geo_citta_suggerite"
     },
     {
       "relation": "contains",
@@ -10559,9 +10624,9 @@
       "source_file": "src/components/modals/Sheet.tsx",
       "source_location": "L49",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "modals_sheet",
-      "target": "modals_sheet_cityinput",
-      "confidence_score": 1.0
+      "target": "modals_sheet_cityinput"
     },
     {
       "relation": "contains",
@@ -10762,9 +10827,9 @@
       "source_file": "src/components/modals/TorneoModal.tsx",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "modals_torneomodal",
-      "target": "modals_sheet_cityinput",
-      "confidence_score": 1.0
+      "target": "modals_sheet_cityinput"
     },
     {
       "relation": "imports",
@@ -11350,9 +11415,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "components_ui",
-      "confidence_score": 1.0
+      "target": "components_ui"
     },
     {
       "relation": "imports_from",
@@ -11405,9 +11470,9 @@
       "source_file": "src/screens/Mappa.tsx",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_mappa",
-      "target": "components_ui",
-      "confidence_score": 1.0
+      "target": "components_ui"
     },
     {
       "relation": "imports_from",
@@ -11460,9 +11525,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "components_ui_badge",
-      "confidence_score": 1.0
+      "target": "components_ui_badge"
     },
     {
       "relation": "imports",
@@ -11482,9 +11547,9 @@
       "source_file": "src/screens/Mappa.tsx",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_mappa",
-      "target": "components_ui_badge",
-      "confidence_score": 1.0
+      "target": "components_ui_badge"
     },
     {
       "relation": "imports",
@@ -11559,9 +11624,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "components_ui_pageheader",
-      "confidence_score": 1.0
+      "target": "components_ui_pageheader"
     },
     {
       "relation": "imports",
@@ -11603,9 +11668,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "components_ui_filterchips",
-      "confidence_score": 1.0
+      "target": "components_ui_filterchips"
     },
     {
       "relation": "imports",
@@ -11614,9 +11679,9 @@
       "source_file": "src/screens/Mappa.tsx",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_mappa",
-      "target": "components_ui_filterchips",
-      "confidence_score": 1.0
+      "target": "components_ui_filterchips"
     },
     {
       "relation": "imports",
@@ -11658,9 +11723,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "components_ui_sectiontitle",
-      "confidence_score": 1.0
+      "target": "components_ui_sectiontitle"
     },
     {
       "relation": "imports",
@@ -11680,9 +11745,9 @@
       "source_file": "src/screens/Mappa.tsx",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_mappa",
-      "target": "components_ui_sectiontitle",
-      "confidence_score": 1.0
+      "target": "components_ui_sectiontitle"
     },
     {
       "relation": "imports",
@@ -11713,9 +11778,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "components_ui_emptycard",
-      "confidence_score": 1.0
+      "target": "components_ui_emptycard"
     },
     {
       "relation": "imports",
@@ -11757,9 +11822,9 @@
       "source_file": "src/screens/Mappa.tsx",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_mappa",
-      "target": "components_ui_emptycard",
-      "confidence_score": 1.0
+      "target": "components_ui_emptycard"
     },
     {
       "relation": "imports",
@@ -11812,9 +11877,9 @@
       "source_file": "src/screens/Mappa.tsx",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_mappa",
-      "target": "components_ui_inlinelink",
-      "confidence_score": 1.0
+      "target": "components_ui_inlinelink"
     },
     {
       "relation": "imports",
@@ -11856,9 +11921,9 @@
       "source_file": "src/screens/Mappa.tsx",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_mappa",
-      "target": "components_ui_statgrid",
-      "confidence_score": 1.0
+      "target": "components_ui_statgrid"
     },
     {
       "relation": "imports",
@@ -11889,9 +11954,9 @@
       "source_file": "src/screens/Mappa.tsx",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_mappa",
-      "target": "components_ui_stattile",
-      "confidence_score": 1.0
+      "target": "components_ui_stattile"
     },
     {
       "relation": "imports",
@@ -11933,9 +11998,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "components_ui_avatar",
-      "confidence_score": 1.0
+      "target": "components_ui_avatar"
     },
     {
       "relation": "imports",
@@ -12650,9 +12715,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L66",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin",
-      "target": "hooks_usecheckin_currentuid",
-      "confidence_score": 1.0
+      "target": "hooks_usecheckin_currentuid"
     },
     {
       "relation": "contains",
@@ -12660,9 +12725,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L74",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin",
-      "target": "hooks_usecheckin_fetchowncheckin",
-      "confidence_score": 1.0
+      "target": "hooks_usecheckin_fetchowncheckin"
     },
     {
       "relation": "contains",
@@ -12670,9 +12735,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L54",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin",
-      "target": "hooks_usecheckin_mapown",
-      "confidence_score": 1.0
+      "target": "hooks_usecheckin_mapown"
     },
     {
       "relation": "contains",
@@ -12680,9 +12745,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L46",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin",
-      "target": "hooks_usecheckin_ownrow",
-      "confidence_score": 1.0
+      "target": "hooks_usecheckin_ownrow"
     },
     {
       "relation": "contains",
@@ -12690,9 +12755,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L86",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin",
-      "target": "hooks_usecheckin_usecheckin",
-      "confidence_score": 1.0
+      "target": "hooks_usecheckin_usecheckin"
     },
     {
       "relation": "contains",
@@ -12700,9 +12765,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L27",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin",
-      "target": "hooks_usecheckin_usecheckindeps",
-      "confidence_score": 1.0
+      "target": "hooks_usecheckin_usecheckindeps"
     },
     {
       "relation": "imports_from",
@@ -12711,9 +12776,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L22",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin",
-      "target": "lib_derive",
-      "confidence_score": 1.0
+      "target": "lib_derive"
     },
     {
       "relation": "imports",
@@ -12722,9 +12787,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L22",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin",
-      "target": "lib_derive_derivewhoishere",
-      "confidence_score": 1.0
+      "target": "lib_derive_derivewhoishere"
     },
     {
       "relation": "imports",
@@ -12733,9 +12798,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L22",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin",
-      "target": "lib_derive_normalizecity",
-      "confidence_score": 1.0
+      "target": "lib_derive_normalizecity"
     },
     {
       "relation": "imports",
@@ -12744,9 +12809,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L22",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin",
-      "target": "lib_derive_todayiso",
-      "confidence_score": 1.0
+      "target": "lib_derive_todayiso"
     },
     {
       "relation": "imports_from",
@@ -12755,9 +12820,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin",
-      "target": "lib_models",
-      "confidence_score": 1.0
+      "target": "lib_models"
     },
     {
       "relation": "imports",
@@ -12766,9 +12831,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin",
-      "target": "lib_models_anyform",
-      "confidence_score": 1.0
+      "target": "lib_models_anyform"
     },
     {
       "relation": "imports",
@@ -12777,9 +12842,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin",
-      "target": "lib_models_checkin",
-      "confidence_score": 1.0
+      "target": "lib_models_checkin"
     },
     {
       "relation": "imports",
@@ -12788,9 +12853,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin",
-      "target": "lib_models_checkininput",
-      "confidence_score": 1.0
+      "target": "lib_models_checkininput"
     },
     {
       "relation": "imports",
@@ -12799,9 +12864,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin",
-      "target": "lib_models_presentuser",
-      "confidence_score": 1.0
+      "target": "lib_models_presentuser"
     },
     {
       "relation": "imports",
@@ -12810,9 +12875,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin",
-      "target": "lib_models_tournament",
-      "confidence_score": 1.0
+      "target": "lib_models_tournament"
     },
     {
       "relation": "imports_from",
@@ -12821,9 +12886,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L21",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin",
-      "target": "lib_serverviews",
-      "confidence_score": 1.0
+      "target": "lib_serverviews"
     },
     {
       "relation": "imports",
@@ -12832,9 +12897,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L21",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin",
-      "target": "lib_serverviews_getwhoishere",
-      "confidence_score": 1.0
+      "target": "lib_serverviews_getwhoishere"
     },
     {
       "relation": "imports_from",
@@ -12843,9 +12908,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L20",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin",
-      "target": "lib_supabase",
-      "confidence_score": 1.0
+      "target": "lib_supabase"
     },
     {
       "relation": "imports",
@@ -12854,9 +12919,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L20",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin",
-      "target": "lib_supabase_supabase",
-      "confidence_score": 1.0
+      "target": "lib_supabase_supabase"
     },
     {
       "relation": "references",
@@ -12865,9 +12930,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L29",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin_usecheckindeps",
-      "target": "lib_models_anyform",
-      "confidence_score": 1.0
+      "target": "lib_models_anyform"
     },
     {
       "relation": "references",
@@ -12876,9 +12941,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin_usecheckindeps",
-      "target": "lib_models_tournament",
-      "confidence_score": 1.0
+      "target": "lib_models_tournament"
     },
     {
       "relation": "references",
@@ -12887,9 +12952,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L34",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin_usecheckin",
-      "target": "lib_models_checkin",
-      "confidence_score": 1.0
+      "target": "lib_models_checkin"
     },
     {
       "relation": "references",
@@ -12898,9 +12963,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L38",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin_usecheckin",
-      "target": "lib_models_checkininput",
-      "confidence_score": 1.0
+      "target": "lib_models_checkininput"
     },
     {
       "relation": "references",
@@ -12909,9 +12974,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L35",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin_usecheckin",
-      "target": "lib_models_presentuser",
-      "confidence_score": 1.0
+      "target": "lib_models_presentuser"
     },
     {
       "relation": "calls",
@@ -12920,9 +12985,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L83",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin_fetchowncheckin",
-      "target": "hooks_usecheckin_mapown",
-      "confidence_score": 1.0
+      "target": "hooks_usecheckin_mapown"
     },
     {
       "relation": "calls",
@@ -12931,9 +12996,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L78",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin_fetchowncheckin",
-      "target": "lib_derive_todayiso",
-      "confidence_score": 1.0
+      "target": "lib_derive_todayiso"
     },
     {
       "relation": "contains",
@@ -13006,6 +13071,16 @@
       "confidence_score": 1.0,
       "source": "hooks_useconnection_subscribe",
       "target": "hooks_useconnection_getconnection"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/hooks/useDiary.ts",
+      "source_location": "L51",
+      "weight": 1.0,
+      "source": "hooks_usediary",
+      "target": "hooks_usediary_cleancity",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -14693,9 +14768,9 @@
       "source_file": "src/lib/derive.checkins.test.ts",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_checkins_test",
-      "target": "lib_derive",
-      "confidence_score": 1.0
+      "target": "lib_derive"
     },
     {
       "relation": "contains",
@@ -14703,9 +14778,9 @@
       "source_file": "src/lib/derive.checkins.test.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_checkins_test",
-      "target": "lib_derive_checkins_test_ids",
-      "confidence_score": 1.0
+      "target": "lib_derive_checkins_test_ids"
     },
     {
       "relation": "contains",
@@ -14713,9 +14788,9 @@
       "source_file": "src/lib/derive.checkins.test.ts",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_checkins_test",
-      "target": "lib_derive_checkins_test_row",
-      "confidence_score": 1.0
+      "target": "lib_derive_checkins_test_row"
     },
     {
       "relation": "imports",
@@ -14724,9 +14799,9 @@
       "source_file": "src/lib/derive.checkins.test.ts",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_checkins_test",
-      "target": "lib_derive_derivewhoishere",
-      "confidence_score": 1.0
+      "target": "lib_derive_derivewhoishere"
     },
     {
       "relation": "imports",
@@ -14735,9 +14810,9 @@
       "source_file": "src/lib/derive.checkins.test.ts",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_checkins_test",
-      "target": "lib_derive_normalizecity",
-      "confidence_score": 1.0
+      "target": "lib_derive_normalizecity"
     },
     {
       "relation": "imports_from",
@@ -14746,9 +14821,9 @@
       "source_file": "src/lib/derive.checkins.test.ts",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_checkins_test",
-      "target": "lib_serverviews",
-      "confidence_score": 1.0
+      "target": "lib_serverviews"
     },
     {
       "relation": "imports",
@@ -14757,9 +14832,9 @@
       "source_file": "src/lib/derive.checkins.test.ts",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_checkins_test",
-      "target": "lib_serverviews_svpresentuser",
-      "confidence_score": 1.0
+      "target": "lib_serverviews_svpresentuser"
     },
     {
       "relation": "imports_from",
@@ -14768,9 +14843,9 @@
       "source_file": "src/lib/derive.mappa.test.ts",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa_test",
-      "target": "lib_derive_mappa",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa"
     },
     {
       "relation": "imports",
@@ -14779,9 +14854,9 @@
       "source_file": "src/lib/derive.mappa.test.ts",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa_test",
-      "target": "lib_derive_mappa_derivemappa",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa_derivemappa"
     },
     {
       "relation": "imports",
@@ -14790,9 +14865,9 @@
       "source_file": "src/lib/derive.mappa.test.ts",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa_test",
-      "target": "lib_derive_mappa_mappasubtitle",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa_mappasubtitle"
     },
     {
       "relation": "contains",
@@ -14800,9 +14875,9 @@
       "source_file": "src/lib/derive.mappa.test.ts",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa_test",
-      "target": "lib_derive_mappa_test_mappa",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa_test_mappa"
     },
     {
       "relation": "contains",
@@ -14810,9 +14885,9 @@
       "source_file": "src/lib/derive.mappa.test.ts",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa_test",
-      "target": "lib_derive_mappa_test_pindi",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa_test_pindi"
     },
     {
       "relation": "imports_from",
@@ -14821,9 +14896,9 @@
       "source_file": "src/lib/derive.mappa.test.ts",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa_test",
-      "target": "lib_geo",
-      "confidence_score": 1.0
+      "target": "lib_geo"
     },
     {
       "relation": "imports",
@@ -14832,9 +14907,9 @@
       "source_file": "src/lib/derive.mappa.test.ts",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa_test",
-      "target": "lib_geo_geocodecity",
-      "confidence_score": 1.0
+      "target": "lib_geo_geocodecity"
     },
     {
       "relation": "imports",
@@ -14843,9 +14918,9 @@
       "source_file": "src/lib/derive.mappa.test.ts",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa_test",
-      "target": "lib_geo_geokey",
-      "confidence_score": 1.0
+      "target": "lib_geo_geokey"
     },
     {
       "relation": "imports",
@@ -14854,9 +14929,9 @@
       "source_file": "src/lib/derive.mappa.test.ts",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa_test",
-      "target": "lib_geo_map_view",
-      "confidence_score": 1.0
+      "target": "lib_geo_map_view"
     },
     {
       "relation": "imports",
@@ -14865,9 +14940,9 @@
       "source_file": "src/lib/derive.mappa.test.ts",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa_test",
-      "target": "lib_geo_project",
-      "confidence_score": 1.0
+      "target": "lib_geo_project"
     },
     {
       "relation": "imports_from",
@@ -14876,9 +14951,9 @@
       "source_file": "src/lib/derive.mappa.test.ts",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa_test",
-      "target": "lib_models",
-      "confidence_score": 1.0
+      "target": "lib_models"
     },
     {
       "relation": "imports",
@@ -14887,9 +14962,9 @@
       "source_file": "src/lib/derive.mappa.test.ts",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa_test",
-      "target": "lib_models_tournament",
-      "confidence_score": 1.0
+      "target": "lib_models_tournament"
     },
     {
       "relation": "imports_from",
@@ -14898,9 +14973,9 @@
       "source_file": "src/lib/derive.mappa.test.ts",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa_test",
-      "target": "test_factories",
-      "confidence_score": 1.0
+      "target": "test_factories"
     },
     {
       "relation": "imports",
@@ -14909,9 +14984,9 @@
       "source_file": "src/lib/derive.mappa.test.ts",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa_test",
-      "target": "test_factories_losssets",
-      "confidence_score": 1.0
+      "target": "test_factories_losssets"
     },
     {
       "relation": "imports",
@@ -14920,9 +14995,9 @@
       "source_file": "src/lib/derive.mappa.test.ts",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa_test",
-      "target": "test_factories_makedata",
-      "confidence_score": 1.0
+      "target": "test_factories_makedata"
     },
     {
       "relation": "imports",
@@ -14931,9 +15006,9 @@
       "source_file": "src/lib/derive.mappa.test.ts",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa_test",
-      "target": "test_factories_makematch",
-      "confidence_score": 1.0
+      "target": "test_factories_makematch"
     },
     {
       "relation": "imports",
@@ -14942,9 +15017,9 @@
       "source_file": "src/lib/derive.mappa.test.ts",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa_test",
-      "target": "test_factories_maketournament",
-      "confidence_score": 1.0
+      "target": "test_factories_maketournament"
     },
     {
       "relation": "imports",
@@ -14953,9 +15028,9 @@
       "source_file": "src/lib/derive.mappa.test.ts",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa_test",
-      "target": "test_factories_winsets",
-      "confidence_score": 1.0
+      "target": "test_factories_winsets"
     },
     {
       "relation": "calls",
@@ -14964,9 +15039,9 @@
       "source_file": "src/lib/derive.mappa.test.ts",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa_test_mappa",
-      "target": "lib_derive_mappa_derivemappa",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa_derivemappa"
     },
     {
       "relation": "calls",
@@ -14975,9 +15050,9 @@
       "source_file": "src/lib/derive.mappa.test.ts",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa_test_mappa",
-      "target": "test_factories_makedata",
-      "confidence_score": 1.0
+      "target": "test_factories_makedata"
     },
     {
       "relation": "calls",
@@ -14986,9 +15061,9 @@
       "source_file": "src/lib/derive.mappa.test.ts",
       "source_location": "L16",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa_test_pindi",
-      "target": "lib_geo_geokey",
-      "confidence_score": 1.0
+      "target": "lib_geo_geokey"
     },
     {
       "relation": "imports_from",
@@ -14997,9 +15072,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L24",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa",
-      "target": "lib_derive",
-      "confidence_score": 1.0
+      "target": "lib_derive"
     },
     {
       "relation": "imports",
@@ -15008,9 +15083,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L24",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa",
-      "target": "lib_derive_dotforrank",
-      "confidence_score": 1.0
+      "target": "lib_derive_dotforrank"
     },
     {
       "relation": "contains",
@@ -15018,9 +15093,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L199",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa",
-      "target": "lib_derive_mappa_cittafuorimappa",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa_cittafuorimappa"
     },
     {
       "relation": "contains",
@@ -15028,9 +15103,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L213",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa",
-      "target": "lib_derive_mappa_derivemappa",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa_derivemappa"
     },
     {
       "relation": "contains",
@@ -15038,9 +15113,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L116",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa",
-      "target": "lib_derive_mappa_formadelpin",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa_formadelpin"
     },
     {
       "relation": "contains",
@@ -15048,9 +15123,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L147",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa",
-      "target": "lib_derive_mappa_giagiocato",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa_giagiocato"
     },
     {
       "relation": "contains",
@@ -15058,9 +15133,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L195",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa",
-      "target": "lib_derive_mappa_grafiapiurecente",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa_grafiapiurecente"
     },
     {
       "relation": "contains",
@@ -15068,9 +15143,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L170",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa",
-      "target": "lib_derive_mappa_gruppo",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa_gruppo"
     },
     {
       "relation": "contains",
@@ -15078,9 +15153,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L73",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa",
-      "target": "lib_derive_mappa_mappacitta",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa_mappacitta"
     },
     {
       "relation": "contains",
@@ -15088,9 +15163,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L86",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa",
-      "target": "lib_derive_mappa_mappadata",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa_mappadata"
     },
     {
       "relation": "contains",
@@ -15098,9 +15173,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L80",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa",
-      "target": "lib_derive_mappa_mappalegendarow",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa_mappalegendarow"
     },
     {
       "relation": "contains",
@@ -15108,9 +15183,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L46",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa",
-      "target": "lib_derive_mappa_mappapin",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa_mappapin"
     },
     {
       "relation": "contains",
@@ -15118,9 +15193,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L344",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa",
-      "target": "lib_derive_mappa_mappasubtitle",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa_mappasubtitle"
     },
     {
       "relation": "contains",
@@ -15128,9 +15203,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L33",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa",
-      "target": "lib_derive_mappa_mappatier",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa_mappatier"
     },
     {
       "relation": "contains",
@@ -15138,9 +15213,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L35",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa",
-      "target": "lib_derive_mappa_mappatorneorow",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa_mappatorneorow"
     },
     {
       "relation": "contains",
@@ -15148,9 +15223,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L151",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa",
-      "target": "lib_derive_mappa_nelperiodo",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa_nelperiodo"
     },
     {
       "relation": "contains",
@@ -15158,9 +15233,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L168",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa",
-      "target": "lib_derive_mappa_perdatadesc",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa_perdatadesc"
     },
     {
       "relation": "contains",
@@ -15168,9 +15243,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L178",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa",
-      "target": "lib_derive_mappa_raggruppapercitta",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa_raggruppapercitta"
     },
     {
       "relation": "contains",
@@ -15178,9 +15253,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L133",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa",
-      "target": "lib_derive_mappa_tier_label",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa_tier_label"
     },
     {
       "relation": "contains",
@@ -15188,9 +15263,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L131",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa",
-      "target": "lib_derive_mappa_tierof",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa_tierof"
     },
     {
       "relation": "contains",
@@ -15198,9 +15273,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L154",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa",
-      "target": "lib_derive_mappa_torneorow",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa_torneorow"
     },
     {
       "relation": "imports",
@@ -15209,9 +15284,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L24",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa",
-      "target": "lib_derive_todayiso",
-      "confidence_score": 1.0
+      "target": "lib_derive_todayiso"
     },
     {
       "relation": "imports_from",
@@ -15220,9 +15295,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L26",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa",
-      "target": "lib_geo",
-      "confidence_score": 1.0
+      "target": "lib_geo"
     },
     {
       "relation": "imports",
@@ -15231,9 +15306,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L26",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa",
-      "target": "lib_geo_geocodecity",
-      "confidence_score": 1.0
+      "target": "lib_geo_geocodecity"
     },
     {
       "relation": "imports",
@@ -15242,9 +15317,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L26",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa",
-      "target": "lib_geo_geokey",
-      "confidence_score": 1.0
+      "target": "lib_geo_geokey"
     },
     {
       "relation": "imports",
@@ -15253,9 +15328,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L26",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa",
-      "target": "lib_geo_map_view",
-      "confidence_score": 1.0
+      "target": "lib_geo_map_view"
     },
     {
       "relation": "imports",
@@ -15264,9 +15339,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L26",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa",
-      "target": "lib_geo_project",
-      "confidence_score": 1.0
+      "target": "lib_geo_project"
     },
     {
       "relation": "imports",
@@ -15275,9 +15350,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L26",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa",
-      "target": "lib_geo_spreadpins",
-      "confidence_score": 1.0
+      "target": "lib_geo_spreadpins"
     },
     {
       "relation": "imports_from",
@@ -15286,9 +15361,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L27",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa",
-      "target": "lib_italy",
-      "confidence_score": 1.0
+      "target": "lib_italy"
     },
     {
       "relation": "imports_from",
@@ -15297,9 +15372,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L25",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa",
-      "target": "lib_models",
-      "confidence_score": 1.0
+      "target": "lib_models"
     },
     {
       "relation": "imports",
@@ -15308,9 +15383,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L25",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa",
-      "target": "lib_models_diarydata",
-      "confidence_score": 1.0
+      "target": "lib_models_diarydata"
     },
     {
       "relation": "imports",
@@ -15319,9 +15394,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L25",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa",
-      "target": "lib_models_tournament",
-      "confidence_score": 1.0
+      "target": "lib_models_tournament"
     },
     {
       "relation": "imports_from",
@@ -15330,9 +15405,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa",
-      "target": "lib_stats",
-      "confidence_score": 1.0
+      "target": "lib_stats"
     },
     {
       "relation": "imports",
@@ -15341,9 +15416,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa",
-      "target": "lib_stats_computestats",
-      "confidence_score": 1.0
+      "target": "lib_stats_computestats"
     },
     {
       "relation": "imports",
@@ -15352,9 +15427,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa",
-      "target": "lib_stats_fmtdate",
-      "confidence_score": 1.0
+      "target": "lib_stats_fmtdate"
     },
     {
       "relation": "imports",
@@ -15363,9 +15438,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa",
-      "target": "lib_stats_placementrank",
-      "confidence_score": 1.0
+      "target": "lib_stats_placementrank"
     },
     {
       "relation": "imports",
@@ -15374,9 +15449,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa",
-      "target": "lib_stats_yearof",
-      "confidence_score": 1.0
+      "target": "lib_stats_yearof"
     },
     {
       "relation": "imports_from",
@@ -15385,9 +15460,9 @@
       "source_file": "src/screens/Mappa.tsx",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_mappa",
-      "target": "lib_derive_mappa",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa"
     },
     {
       "relation": "imports_from",
@@ -15396,9 +15471,9 @@
       "source_file": "src/screens/Mappa.test.tsx",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_mappa_test",
-      "target": "lib_derive_mappa",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa"
     },
     {
       "relation": "imports_from",
@@ -15407,9 +15482,9 @@
       "source_file": "src/screens/Tornei.tsx",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_tornei",
-      "target": "lib_derive_mappa",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa"
     },
     {
       "relation": "imports_from",
@@ -15418,9 +15493,9 @@
       "source_file": "src/test/factories.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "test_factories",
-      "target": "lib_derive_mappa",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa"
     },
     {
       "relation": "imports",
@@ -15429,9 +15504,9 @@
       "source_file": "src/screens/Mappa.tsx",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_mappa",
-      "target": "lib_derive_mappa_mappatier",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa_mappatier"
     },
     {
       "relation": "imports",
@@ -15440,9 +15515,9 @@
       "source_file": "src/screens/Mappa.tsx",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_mappa",
-      "target": "lib_derive_mappa_mappatorneorow",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa_mappatorneorow"
     },
     {
       "relation": "imports",
@@ -15451,9 +15526,9 @@
       "source_file": "src/test/factories.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "test_factories",
-      "target": "lib_derive_mappa_mappatorneorow",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa_mappatorneorow"
     },
     {
       "relation": "imports",
@@ -15462,9 +15537,9 @@
       "source_file": "src/screens/Mappa.tsx",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_mappa",
-      "target": "lib_derive_mappa_mappapin",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa_mappapin"
     },
     {
       "relation": "imports",
@@ -15473,9 +15548,9 @@
       "source_file": "src/test/factories.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "test_factories",
-      "target": "lib_derive_mappa_mappapin",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa_mappapin"
     },
     {
       "relation": "imports",
@@ -15484,9 +15559,9 @@
       "source_file": "src/screens/Mappa.tsx",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_mappa",
-      "target": "lib_derive_mappa_mappacitta",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa_mappacitta"
     },
     {
       "relation": "imports",
@@ -15495,9 +15570,9 @@
       "source_file": "src/screens/Mappa.tsx",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_mappa",
-      "target": "lib_derive_mappa_mappadata",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa_mappadata"
     },
     {
       "relation": "references",
@@ -15506,9 +15581,9 @@
       "source_file": "src/screens/Mappa.tsx",
       "source_location": "L34",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_mappa_mappaprops",
-      "target": "lib_derive_mappa_mappadata",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa_mappadata"
     },
     {
       "relation": "imports",
@@ -15517,9 +15592,9 @@
       "source_file": "src/screens/Mappa.test.tsx",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_mappa_test",
-      "target": "lib_derive_mappa_mappadata",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa_mappadata"
     },
     {
       "relation": "imports",
@@ -15528,9 +15603,9 @@
       "source_file": "src/screens/Tornei.tsx",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_tornei",
-      "target": "lib_derive_mappa_mappadata",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa_mappadata"
     },
     {
       "relation": "references",
@@ -15539,9 +15614,9 @@
       "source_file": "src/screens/Tornei.tsx",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_tornei_torneiprops",
-      "target": "lib_derive_mappa_mappadata",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa_mappadata"
     },
     {
       "relation": "imports",
@@ -15550,9 +15625,9 @@
       "source_file": "src/test/factories.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "test_factories",
-      "target": "lib_derive_mappa_mappadata",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa_mappadata"
     },
     {
       "relation": "calls",
@@ -15561,9 +15636,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L266",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa_derivemappa",
-      "target": "lib_derive_mappa_formadelpin",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa_formadelpin"
     },
     {
       "relation": "calls",
@@ -15572,9 +15647,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L255",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa_derivemappa",
-      "target": "lib_derive_mappa_tierof",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa_tierof"
     },
     {
       "relation": "calls",
@@ -15583,9 +15658,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L152",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa_nelperiodo",
-      "target": "lib_stats_yearof",
-      "confidence_score": 1.0
+      "target": "lib_stats_yearof"
     },
     {
       "relation": "calls",
@@ -15594,9 +15669,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L160",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa_torneorow",
-      "target": "lib_stats_fmtdate",
-      "confidence_score": 1.0
+      "target": "lib_stats_fmtdate"
     },
     {
       "relation": "calls",
@@ -15605,9 +15680,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L155",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa_torneorow",
-      "target": "lib_stats_placementrank",
-      "confidence_score": 1.0
+      "target": "lib_stats_placementrank"
     },
     {
       "relation": "references",
@@ -15616,9 +15691,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L172",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa_gruppo",
-      "target": "lib_models_tournament",
-      "confidence_score": 1.0
+      "target": "lib_models_tournament"
     },
     {
       "relation": "calls",
@@ -15627,9 +15702,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L221",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa_derivemappa",
-      "target": "lib_derive_mappa_raggruppapercitta",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa_raggruppapercitta"
     },
     {
       "relation": "calls",
@@ -15638,9 +15713,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L181",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa_raggruppapercitta",
-      "target": "lib_geo_geokey",
-      "confidence_score": 1.0
+      "target": "lib_geo_geokey"
     },
     {
       "relation": "calls",
@@ -15649,9 +15724,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L202",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa_cittafuorimappa",
-      "target": "lib_derive_mappa_grafiapiurecente",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa_grafiapiurecente"
     },
     {
       "relation": "calls",
@@ -15660,9 +15735,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L265",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa_derivemappa",
-      "target": "lib_derive_mappa_grafiapiurecente",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa_grafiapiurecente"
     },
     {
       "relation": "calls",
@@ -15671,9 +15746,9 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L241",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_mappa_derivemappa",
-      "target": "lib_derive_mappa_cittafuorimappa",
-      "confidence_score": 1.0
+      "target": "lib_derive_mappa_cittafuorimappa"
     },
     {
       "relation": "calls",
@@ -16022,9 +16097,9 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L975",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive",
-      "target": "lib_derive_derivewhoishere",
-      "confidence_score": 1.0
+      "target": "lib_derive_derivewhoishere"
     },
     {
       "relation": "contains",
@@ -16132,9 +16207,9 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L968",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive",
-      "target": "lib_derive_normalizecity",
-      "confidence_score": 1.0
+      "target": "lib_derive_normalizecity"
     },
     {
       "relation": "contains",
@@ -16508,9 +16583,9 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive",
-      "target": "lib_models_presentuser",
-      "confidence_score": 1.0
+      "target": "lib_models_presentuser"
     },
     {
       "relation": "imports",
@@ -16563,9 +16638,9 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive",
-      "target": "lib_serverviews_svpresentuser",
-      "confidence_score": 1.0
+      "target": "lib_serverviews_svpresentuser"
     },
     {
       "relation": "imports",
@@ -16750,9 +16825,9 @@
       "source_file": "src/lib/geo.test.ts",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_geo_test",
-      "target": "lib_derive",
-      "confidence_score": 1.0
+      "target": "lib_derive"
     },
     {
       "relation": "imports_from",
@@ -17608,9 +17683,9 @@
       "source_file": "src/lib/geo.test.ts",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_geo_test",
-      "target": "lib_derive_normalizecity",
-      "confidence_score": 1.0
+      "target": "lib_derive_normalizecity"
     },
     {
       "relation": "contains",
@@ -17900,9 +17975,9 @@
       "source_file": "src/lib/geo.test.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_geo_test",
-      "target": "lib_geo",
-      "confidence_score": 1.0
+      "target": "lib_geo"
     },
     {
       "relation": "imports",
@@ -17911,9 +17986,9 @@
       "source_file": "src/lib/geo.test.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_geo_test",
-      "target": "lib_geo_aliases",
-      "confidence_score": 1.0
+      "target": "lib_geo_aliases"
     },
     {
       "relation": "imports",
@@ -17922,9 +17997,9 @@
       "source_file": "src/lib/geo.test.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_geo_test",
-      "target": "lib_geo_citta_suggerite",
-      "confidence_score": 1.0
+      "target": "lib_geo_citta_suggerite"
     },
     {
       "relation": "imports",
@@ -17933,9 +18008,9 @@
       "source_file": "src/lib/geo.test.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_geo_test",
-      "target": "lib_geo_gazetteer",
-      "confidence_score": 1.0
+      "target": "lib_geo_gazetteer"
     },
     {
       "relation": "imports",
@@ -17944,9 +18019,9 @@
       "source_file": "src/lib/geo.test.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_geo_test",
-      "target": "lib_geo_geocodecity",
-      "confidence_score": 1.0
+      "target": "lib_geo_geocodecity"
     },
     {
       "relation": "imports",
@@ -17955,9 +18030,9 @@
       "source_file": "src/lib/geo.test.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_geo_test",
-      "target": "lib_geo_geokey",
-      "confidence_score": 1.0
+      "target": "lib_geo_geokey"
     },
     {
       "relation": "imports",
@@ -17966,9 +18041,9 @@
       "source_file": "src/lib/geo.test.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_geo_test",
-      "target": "lib_geo_map_view",
-      "confidence_score": 1.0
+      "target": "lib_geo_map_view"
     },
     {
       "relation": "imports",
@@ -17977,9 +18052,9 @@
       "source_file": "src/lib/geo.test.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_geo_test",
-      "target": "lib_geo_project",
-      "confidence_score": 1.0
+      "target": "lib_geo_project"
     },
     {
       "relation": "imports",
@@ -17988,9 +18063,9 @@
       "source_file": "src/lib/geo.test.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_geo_test",
-      "target": "lib_geo_spreadpins",
-      "confidence_score": 1.0
+      "target": "lib_geo_spreadpins"
     },
     {
       "relation": "contains",
@@ -17998,9 +18073,9 @@
       "source_file": "src/lib/geo.test.ts",
       "source_location": "L56",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_geo_test",
-      "target": "lib_geo_test_distanzadallasagoma",
-      "confidence_score": 1.0
+      "target": "lib_geo_test_distanzadallasagoma"
     },
     {
       "relation": "contains",
@@ -18008,9 +18083,9 @@
       "source_file": "src/lib/geo.test.ts",
       "source_location": "L46",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_geo_test",
-      "target": "lib_geo_test_distseg",
-      "confidence_score": 1.0
+      "target": "lib_geo_test_distseg"
     },
     {
       "relation": "contains",
@@ -18018,9 +18093,9 @@
       "source_file": "src/lib/geo.test.ts",
       "source_location": "L75",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_geo_test",
-      "target": "lib_geo_test_estere",
-      "confidence_score": 1.0
+      "target": "lib_geo_test_estere"
     },
     {
       "relation": "contains",
@@ -18028,9 +18103,9 @@
       "source_file": "src/lib/geo.test.ts",
       "source_location": "L80",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_geo_test",
-      "target": "lib_geo_test_fuori_sagoma",
-      "confidence_score": 1.0
+      "target": "lib_geo_test_fuori_sagoma"
     },
     {
       "relation": "contains",
@@ -18038,9 +18113,9 @@
       "source_file": "src/lib/geo.test.ts",
       "source_location": "L36",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_geo_test",
-      "target": "lib_geo_test_inring",
-      "confidence_score": 1.0
+      "target": "lib_geo_test_inring"
     },
     {
       "relation": "contains",
@@ -18048,9 +18123,9 @@
       "source_file": "src/lib/geo.test.ts",
       "source_location": "L69",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_geo_test",
-      "target": "lib_geo_test_isole_minori",
-      "confidence_score": 1.0
+      "target": "lib_geo_test_isole_minori"
     },
     {
       "relation": "contains",
@@ -18058,9 +18133,9 @@
       "source_file": "src/lib/geo.test.ts",
       "source_location": "L27",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_geo_test",
-      "target": "lib_geo_test_rings",
-      "confidence_score": 1.0
+      "target": "lib_geo_test_rings"
     },
     {
       "relation": "contains",
@@ -18068,9 +18143,9 @@
       "source_file": "src/lib/geo.test.ts",
       "source_location": "L354",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_geo_test",
-      "target": "lib_geo_test_seed",
-      "confidence_score": 1.0
+      "target": "lib_geo_test_seed"
     },
     {
       "relation": "imports_from",
@@ -18079,9 +18154,9 @@
       "source_file": "src/lib/geo.test.ts",
       "source_location": "L22",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_geo_test",
-      "target": "lib_italy",
-      "confidence_score": 1.0
+      "target": "lib_italy"
     },
     {
       "relation": "calls",
@@ -18090,9 +18165,9 @@
       "source_file": "src/lib/geo.test.ts",
       "source_location": "L355",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_geo_test_seed",
-      "target": "lib_geo_geocodecity",
-      "confidence_score": 1.0
+      "target": "lib_geo_geocodecity"
     },
     {
       "relation": "calls",
@@ -18101,9 +18176,9 @@
       "source_file": "src/lib/geo.test.ts",
       "source_location": "L357",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_geo_test_seed",
-      "target": "lib_geo_geokey",
-      "confidence_score": 1.0
+      "target": "lib_geo_geokey"
     },
     {
       "relation": "contains",
@@ -18111,9 +18186,9 @@
       "source_file": "src/lib/geo.ts",
       "source_location": "L505",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_geo",
-      "target": "lib_geo_aliases",
-      "confidence_score": 1.0
+      "target": "lib_geo_aliases"
     },
     {
       "relation": "contains",
@@ -18121,9 +18196,9 @@
       "source_file": "src/lib/geo.ts",
       "source_location": "L697",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_geo",
-      "target": "lib_geo_citta_suggerite",
-      "confidence_score": 1.0
+      "target": "lib_geo_citta_suggerite"
     },
     {
       "relation": "contains",
@@ -18131,9 +18206,9 @@
       "source_file": "src/lib/geo.ts",
       "source_location": "L630",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_geo",
-      "target": "lib_geo_dist2",
-      "confidence_score": 1.0
+      "target": "lib_geo_dist2"
     },
     {
       "relation": "contains",
@@ -18141,9 +18216,9 @@
       "source_file": "src/lib/geo.ts",
       "source_location": "L82",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_geo",
-      "target": "lib_geo_gazetteer",
-      "confidence_score": 1.0
+      "target": "lib_geo_gazetteer"
     },
     {
       "relation": "contains",
@@ -18151,9 +18226,9 @@
       "source_file": "src/lib/geo.ts",
       "source_location": "L568",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_geo",
-      "target": "lib_geo_geocodecity",
-      "confidence_score": 1.0
+      "target": "lib_geo_geocodecity"
     },
     {
       "relation": "contains",
@@ -18161,9 +18236,9 @@
       "source_file": "src/lib/geo.ts",
       "source_location": "L61",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_geo",
-      "target": "lib_geo_geokey",
-      "confidence_score": 1.0
+      "target": "lib_geo_geokey"
     },
     {
       "relation": "contains",
@@ -18171,9 +18246,9 @@
       "source_file": "src/lib/geo.ts",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_geo",
-      "target": "lib_geo_geopoint",
-      "confidence_score": 1.0
+      "target": "lib_geo_geopoint"
     },
     {
       "relation": "contains",
@@ -18181,9 +18256,9 @@
       "source_file": "src/lib/geo.ts",
       "source_location": "L33",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_geo",
-      "target": "lib_geo_map_view",
-      "confidence_score": 1.0
+      "target": "lib_geo_map_view"
     },
     {
       "relation": "contains",
@@ -18191,9 +18266,9 @@
       "source_file": "src/lib/geo.ts",
       "source_location": "L615",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_geo",
-      "target": "lib_geo_pinseed",
-      "confidence_score": 1.0
+      "target": "lib_geo_pinseed"
     },
     {
       "relation": "contains",
@@ -18201,9 +18276,9 @@
       "source_file": "src/lib/geo.ts",
       "source_location": "L621",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_geo",
-      "target": "lib_geo_placedpin",
-      "confidence_score": 1.0
+      "target": "lib_geo_placedpin"
     },
     {
       "relation": "contains",
@@ -18211,9 +18286,9 @@
       "source_file": "src/lib/geo.ts",
       "source_location": "L562",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_geo",
-      "target": "lib_geo_prefissi",
-      "confidence_score": 1.0
+      "target": "lib_geo_prefissi"
     },
     {
       "relation": "contains",
@@ -18221,9 +18296,9 @@
       "source_file": "src/lib/geo.ts",
       "source_location": "L44",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_geo",
-      "target": "lib_geo_project",
-      "confidence_score": 1.0
+      "target": "lib_geo_project"
     },
     {
       "relation": "contains",
@@ -18231,9 +18306,9 @@
       "source_file": "src/lib/geo.ts",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_geo",
-      "target": "lib_geo_projectedpoint",
-      "confidence_score": 1.0
+      "target": "lib_geo_projectedpoint"
     },
     {
       "relation": "contains",
@@ -18241,9 +18316,9 @@
       "source_file": "src/lib/geo.ts",
       "source_location": "L606",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_geo",
-      "target": "lib_geo_ring_slots",
-      "confidence_score": 1.0
+      "target": "lib_geo_ring_slots"
     },
     {
       "relation": "contains",
@@ -18251,8 +18326,19 @@
       "source_file": "src/lib/geo.ts",
       "source_location": "L640",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_geo",
-      "target": "lib_geo_spreadpins",
+      "target": "lib_geo_spreadpins"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/screens/CreaChat.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "screens_creachat",
+      "target": "lib_geo",
       "confidence_score": 1.0
     },
     {
@@ -18262,8 +18348,19 @@
       "source_file": "src/lib/geo.ts",
       "source_location": "L569",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_geo_geocodecity",
-      "target": "lib_geo_geokey",
+      "target": "lib_geo_geokey"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/screens/CreaChat.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "screens_creachat",
+      "target": "lib_geo_citta_suggerite",
       "confidence_score": 1.0
     },
     {
@@ -18374,9 +18471,9 @@
       "source_file": "src/lib/models.ts",
       "source_location": "L33",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_models",
-      "target": "lib_models_checkin",
-      "confidence_score": 1.0
+      "target": "lib_models_checkin"
     },
     {
       "relation": "contains",
@@ -18384,9 +18481,9 @@
       "source_file": "src/lib/models.ts",
       "source_location": "L44",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_models",
-      "target": "lib_models_checkininput",
-      "confidence_score": 1.0
+      "target": "lib_models_checkininput"
     },
     {
       "relation": "contains",
@@ -18504,9 +18601,9 @@
       "source_file": "src/lib/models.ts",
       "source_location": "L53",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_models",
-      "target": "lib_models_presentuser",
-      "confidence_score": 1.0
+      "target": "lib_models_presentuser"
     },
     {
       "relation": "contains",
@@ -18586,9 +18683,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "lib_models",
-      "confidence_score": 1.0
+      "target": "lib_models"
     },
     {
       "relation": "imports_from",
@@ -18597,9 +18694,9 @@
       "source_file": "src/screens/ChiCeOggi.test.tsx",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi_test",
-      "target": "lib_models",
-      "confidence_score": 1.0
+      "target": "lib_models"
     },
     {
       "relation": "imports_from",
@@ -18685,9 +18782,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "lib_models_checkin",
-      "confidence_score": 1.0
+      "target": "lib_models_checkin"
     },
     {
       "relation": "references",
@@ -18696,9 +18793,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L69",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi_chiceoggiprops",
-      "target": "lib_models_checkin",
-      "confidence_score": 1.0
+      "target": "lib_models_checkin"
     },
     {
       "relation": "imports",
@@ -18707,9 +18804,9 @@
       "source_file": "src/screens/ChiCeOggi.test.tsx",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi_test",
-      "target": "lib_models_checkin",
-      "confidence_score": 1.0
+      "target": "lib_models_checkin"
     },
     {
       "relation": "imports",
@@ -18718,9 +18815,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "lib_models_checkininput",
-      "confidence_score": 1.0
+      "target": "lib_models_checkininput"
     },
     {
       "relation": "references",
@@ -18729,9 +18826,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L73",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi_chiceoggiprops",
-      "target": "lib_models_checkininput",
-      "confidence_score": 1.0
+      "target": "lib_models_checkininput"
     },
     {
       "relation": "imports",
@@ -18740,9 +18837,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "lib_models_presentuser",
-      "confidence_score": 1.0
+      "target": "lib_models_presentuser"
     },
     {
       "relation": "references",
@@ -18751,9 +18848,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L70",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi_chiceoggiprops",
-      "target": "lib_models_presentuser",
-      "confidence_score": 1.0
+      "target": "lib_models_presentuser"
     },
     {
       "relation": "imports",
@@ -18762,9 +18859,9 @@
       "source_file": "src/test/factories.ts",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "test_factories",
-      "target": "lib_models_presentuser",
-      "confidence_score": 1.0
+      "target": "lib_models_presentuser"
     },
     {
       "relation": "imports",
@@ -19027,9 +19124,9 @@
       "source_file": "src/lib/serverviews.ts",
       "source_location": "L77",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_serverviews",
-      "target": "lib_serverviews_getwhoishere",
-      "confidence_score": 1.0
+      "target": "lib_serverviews_getwhoishere"
     },
     {
       "relation": "contains",
@@ -19077,9 +19174,9 @@
       "source_file": "src/lib/serverviews.ts",
       "source_location": "L41",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_serverviews",
-      "target": "lib_serverviews_svpresentuser",
-      "confidence_score": 1.0
+      "target": "lib_serverviews_svpresentuser"
     },
     {
       "relation": "contains",
@@ -19204,9 +19301,9 @@
       "source_file": "src/lib/serverviews.ts",
       "source_location": "L79",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_serverviews_getwhoishere",
-      "target": "lib_serverviews_ok",
-      "confidence_score": 1.0
+      "target": "lib_serverviews_ok"
     },
     {
       "relation": "contains",
@@ -19471,9 +19568,9 @@
       "source_file": "src/screens/ChiCeOggi.test.tsx",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi_test",
-      "target": "screens_chiceoggi",
-      "confidence_score": 1.0
+      "target": "screens_chiceoggi"
     },
     {
       "relation": "contains",
@@ -19481,9 +19578,9 @@
       "source_file": "src/screens/ChiCeOggi.test.tsx",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi_test",
-      "target": "screens_chiceoggi_test_makeown",
-      "confidence_score": 1.0
+      "target": "screens_chiceoggi_test_makeown"
     },
     {
       "relation": "contains",
@@ -19491,9 +19588,9 @@
       "source_file": "src/screens/ChiCeOggi.test.tsx",
       "source_location": "L27",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi_test",
-      "target": "screens_chiceoggi_test_props",
-      "confidence_score": 1.0
+      "target": "screens_chiceoggi_test_props"
     },
     {
       "relation": "contains",
@@ -19501,9 +19598,9 @@
       "source_file": "src/screens/ChiCeOggi.test.tsx",
       "source_location": "L29",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi_test",
-      "target": "screens_chiceoggi_test_renderscreen",
-      "confidence_score": 1.0
+      "target": "screens_chiceoggi_test_renderscreen"
     },
     {
       "relation": "imports_from",
@@ -19512,9 +19609,9 @@
       "source_file": "src/screens/ChiCeOggi.test.tsx",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi_test",
-      "target": "test_axe",
-      "confidence_score": 1.0
+      "target": "test_axe"
     },
     {
       "relation": "imports",
@@ -19523,9 +19620,9 @@
       "source_file": "src/screens/ChiCeOggi.test.tsx",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi_test",
-      "target": "test_axe_expectnoa11yviolations",
-      "confidence_score": 1.0
+      "target": "test_axe_expectnoa11yviolations"
     },
     {
       "relation": "imports_from",
@@ -19534,9 +19631,9 @@
       "source_file": "src/screens/ChiCeOggi.test.tsx",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi_test",
-      "target": "test_factories",
-      "confidence_score": 1.0
+      "target": "test_factories"
     },
     {
       "relation": "imports",
@@ -19545,9 +19642,9 @@
       "source_file": "src/screens/ChiCeOggi.test.tsx",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi_test",
-      "target": "test_factories_makepresentuser",
-      "confidence_score": 1.0
+      "target": "test_factories_makepresentuser"
     },
     {
       "relation": "contains",
@@ -19555,9 +19652,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L46",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "screens_chiceoggi_btnbase",
-      "confidence_score": 1.0
+      "target": "screens_chiceoggi_btnbase"
     },
     {
       "relation": "contains",
@@ -19565,9 +19662,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L164",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "screens_chiceoggi_checkedincard",
-      "confidence_score": 1.0
+      "target": "screens_chiceoggi_checkedincard"
     },
     {
       "relation": "contains",
@@ -19575,9 +19672,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L96",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "screens_chiceoggi_checkinform",
-      "confidence_score": 1.0
+      "target": "screens_chiceoggi_checkinform"
     },
     {
       "relation": "contains",
@@ -19585,9 +19682,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L79",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "screens_chiceoggi_chiceoggi",
-      "confidence_score": 1.0
+      "target": "screens_chiceoggi_chiceoggi"
     },
     {
       "relation": "contains",
@@ -19595,9 +19692,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L68",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "screens_chiceoggi_chiceoggiprops",
-      "confidence_score": 1.0
+      "target": "screens_chiceoggi_chiceoggiprops"
     },
     {
       "relation": "contains",
@@ -19605,9 +19702,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L59",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "screens_chiceoggi_dangerbtn",
-      "confidence_score": 1.0
+      "target": "screens_chiceoggi_dangerbtn"
     },
     {
       "relation": "contains",
@@ -19615,9 +19712,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L58",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "screens_chiceoggi_darkbtn",
-      "confidence_score": 1.0
+      "target": "screens_chiceoggi_darkbtn"
     },
     {
       "relation": "contains",
@@ -19625,9 +19722,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L30",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "screens_chiceoggi_fieldstyle",
-      "confidence_score": 1.0
+      "target": "screens_chiceoggi_fieldstyle"
     },
     {
       "relation": "contains",
@@ -19635,9 +19732,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L354",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "screens_chiceoggi_ghostbutton",
-      "confidence_score": 1.0
+      "target": "screens_chiceoggi_ghostbutton"
     },
     {
       "relation": "contains",
@@ -19645,9 +19742,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L39",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "screens_chiceoggi_labelstyle",
-      "confidence_score": 1.0
+      "target": "screens_chiceoggi_labelstyle"
     },
     {
       "relation": "contains",
@@ -19655,9 +19752,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L267",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "screens_chiceoggi_presentcard",
-      "confidence_score": 1.0
+      "target": "screens_chiceoggi_presentcard"
     },
     {
       "relation": "contains",
@@ -19665,9 +19762,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L57",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "screens_chiceoggi_primarybtn",
-      "confidence_score": 1.0
+      "target": "screens_chiceoggi_primarybtn"
     },
     {
       "relation": "contains",
@@ -19675,9 +19772,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L326",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "screens_chiceoggi_roomcount",
-      "confidence_score": 1.0
+      "target": "screens_chiceoggi_roomcount"
     },
     {
       "relation": "contains",
@@ -19685,9 +19782,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L196",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "screens_chiceoggi_roomsection",
-      "confidence_score": 1.0
+      "target": "screens_chiceoggi_roomsection"
     },
     {
       "relation": "contains",
@@ -19695,9 +19792,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L336",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "screens_chiceoggi_switch",
-      "confidence_score": 1.0
+      "target": "screens_chiceoggi_switch"
     },
     {
       "relation": "contains",
@@ -20181,9 +20278,9 @@
       "source_file": "src/screens/Mappa.test.tsx",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_mappa_test",
-      "target": "screens_mappa",
-      "confidence_score": 1.0
+      "target": "screens_mappa"
     },
     {
       "relation": "contains",
@@ -20191,9 +20288,9 @@
       "source_file": "src/screens/Mappa.test.tsx",
       "source_location": "L27",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_mappa_test",
-      "target": "screens_mappa_test_cervia",
-      "confidence_score": 1.0
+      "target": "screens_mappa_test_cervia"
     },
     {
       "relation": "contains",
@@ -20201,9 +20298,9 @@
       "source_file": "src/screens/Mappa.test.tsx",
       "source_location": "L29",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_mappa_test",
-      "target": "screens_mappa_test_jesolo",
-      "confidence_score": 1.0
+      "target": "screens_mappa_test_jesolo"
     },
     {
       "relation": "contains",
@@ -20211,9 +20308,9 @@
       "source_file": "src/screens/Mappa.test.tsx",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_mappa_test",
-      "target": "screens_mappa_test_rendermappa",
-      "confidence_score": 1.0
+      "target": "screens_mappa_test_rendermappa"
     },
     {
       "relation": "contains",
@@ -20221,9 +20318,9 @@
       "source_file": "src/screens/Mappa.test.tsx",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_mappa_test",
-      "target": "screens_mappa_test_rimini",
-      "confidence_score": 1.0
+      "target": "screens_mappa_test_rimini"
     },
     {
       "relation": "imports_from",
@@ -20232,9 +20329,9 @@
       "source_file": "src/screens/Mappa.test.tsx",
       "source_location": "L16",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_mappa_test",
-      "target": "test_axe",
-      "confidence_score": 1.0
+      "target": "test_axe"
     },
     {
       "relation": "imports",
@@ -20243,9 +20340,9 @@
       "source_file": "src/screens/Mappa.test.tsx",
       "source_location": "L16",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_mappa_test",
-      "target": "test_axe_expectnoa11yviolations",
-      "confidence_score": 1.0
+      "target": "test_axe_expectnoa11yviolations"
     },
     {
       "relation": "imports_from",
@@ -20254,9 +20351,9 @@
       "source_file": "src/screens/Mappa.test.tsx",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_mappa_test",
-      "target": "test_factories",
-      "confidence_score": 1.0
+      "target": "test_factories"
     },
     {
       "relation": "imports",
@@ -20265,9 +20362,9 @@
       "source_file": "src/screens/Mappa.test.tsx",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_mappa_test",
-      "target": "test_factories_makemappadata",
-      "confidence_score": 1.0
+      "target": "test_factories_makemappadata"
     },
     {
       "relation": "imports",
@@ -20276,9 +20373,9 @@
       "source_file": "src/screens/Mappa.test.tsx",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_mappa_test",
-      "target": "test_factories_makemappapin",
-      "confidence_score": 1.0
+      "target": "test_factories_makemappapin"
     },
     {
       "relation": "imports",
@@ -20287,9 +20384,9 @@
       "source_file": "src/screens/Mappa.test.tsx",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_mappa_test",
-      "target": "test_factories_makemappatorneorow",
-      "confidence_score": 1.0
+      "target": "test_factories_makemappatorneorow"
     },
     {
       "relation": "calls",
@@ -20308,9 +20405,9 @@
       "source_file": "src/screens/Mappa.tsx",
       "source_location": "L268",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_mappa",
-      "target": "screens_mappa_cittarow",
-      "confidence_score": 1.0
+      "target": "screens_mappa_cittarow"
     },
     {
       "relation": "contains",
@@ -20318,9 +20415,9 @@
       "source_file": "src/screens/Mappa.tsx",
       "source_location": "L349",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_mappa",
-      "target": "screens_mappa_fuorimappa",
-      "confidence_score": 1.0
+      "target": "screens_mappa_fuorimappa"
     },
     {
       "relation": "contains",
@@ -20328,9 +20425,9 @@
       "source_file": "src/screens/Mappa.tsx",
       "source_location": "L255",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_mappa",
-      "target": "screens_mappa_glifotier",
-      "confidence_score": 1.0
+      "target": "screens_mappa_glifotier"
     },
     {
       "relation": "contains",
@@ -20338,9 +20435,9 @@
       "source_file": "src/screens/Mappa.tsx",
       "source_location": "L234",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_mappa",
-      "target": "screens_mappa_legenda",
-      "confidence_score": 1.0
+      "target": "screens_mappa_legenda"
     },
     {
       "relation": "contains",
@@ -20348,9 +20445,9 @@
       "source_file": "src/screens/Mappa.tsx",
       "source_location": "L39",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_mappa",
-      "target": "screens_mappa_mappa",
-      "confidence_score": 1.0
+      "target": "screens_mappa_mappa"
     },
     {
       "relation": "contains",
@@ -20358,9 +20455,9 @@
       "source_file": "src/screens/Mappa.tsx",
       "source_location": "L33",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_mappa",
-      "target": "screens_mappa_mappaprops",
-      "confidence_score": 1.0
+      "target": "screens_mappa_mappaprops"
     },
     {
       "relation": "contains",
@@ -20368,9 +20465,9 @@
       "source_file": "src/screens/Mappa.tsx",
       "source_location": "L197",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_mappa",
-      "target": "screens_mappa_pin",
-      "confidence_score": 1.0
+      "target": "screens_mappa_pin"
     },
     {
       "relation": "contains",
@@ -20378,9 +20475,9 @@
       "source_file": "src/screens/Mappa.tsx",
       "source_location": "L322",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_mappa",
-      "target": "screens_mappa_torneorow",
-      "confidence_score": 1.0
+      "target": "screens_mappa_torneorow"
     },
     {
       "relation": "imports_from",
@@ -20389,9 +20486,9 @@
       "source_file": "src/screens/Tornei.tsx",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_tornei",
-      "target": "screens_mappa",
-      "confidence_score": 1.0
+      "target": "screens_mappa"
     },
     {
       "relation": "contains",
@@ -20498,6 +20595,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/screens/Tornei.test.tsx",
+      "source_location": "L24",
+      "weight": 1.0,
+      "source": "screens_tornei_test",
+      "target": "screens_tornei_test_harnessprops",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/screens/Tornei.test.tsx",
       "source_location": "L16",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -20523,6 +20630,37 @@
       "confidence_score": 1.0,
       "source": "screens_tornei_test",
       "target": "screens_tornei_test_sectiontitles"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/screens/Tornei.test.tsx",
+      "source_location": "L26",
+      "weight": 1.0,
+      "source": "screens_tornei_test",
+      "target": "screens_tornei_test_torneiconvista",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/screens/Tornei.test.tsx",
+      "source_location": "L23",
+      "weight": 1.0,
+      "source": "screens_tornei_test",
+      "target": "screens_tornei_test_torneiprops",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/screens/Tornei.test.tsx",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "screens_tornei_test",
+      "target": "screens_tornei_torneivista",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -20575,9 +20713,9 @@
       "source_file": "src/screens/Tornei.test.tsx",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_tornei_test",
-      "target": "test_factories_makemappadata",
-      "confidence_score": 1.0
+      "target": "test_factories_makemappadata"
     },
     {
       "relation": "imports",
@@ -20586,9 +20724,9 @@
       "source_file": "src/screens/Tornei.test.tsx",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_tornei_test",
-      "target": "test_factories_makemappapin",
-      "confidence_score": 1.0
+      "target": "test_factories_makemappapin"
     },
     {
       "relation": "imports",
@@ -20677,6 +20815,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/screens/Tornei.tsx",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "screens_tornei",
+      "target": "screens_tornei_torneivista",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/screens/Tornei.tsx",
       "source_location": "L122",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -20689,9 +20837,9 @@
       "source_file": "src/screens/Tornei.tsx",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_tornei",
-      "target": "screens_tornei_vista",
-      "confidence_score": 1.0
+      "target": "screens_tornei_vista"
     },
     {
       "relation": "contains",
@@ -20852,9 +21000,9 @@
       "source_file": "src/test/factories.ts",
       "source_location": "L220",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "test_factories",
-      "target": "test_factories_makemappadata",
-      "confidence_score": 1.0
+      "target": "test_factories_makemappadata"
     },
     {
       "relation": "contains",
@@ -20862,9 +21010,9 @@
       "source_file": "src/test/factories.ts",
       "source_location": "L182",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "test_factories",
-      "target": "test_factories_makemappapin",
-      "confidence_score": 1.0
+      "target": "test_factories_makemappapin"
     },
     {
       "relation": "contains",
@@ -20872,9 +21020,9 @@
       "source_file": "src/test/factories.ts",
       "source_location": "L164",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "test_factories",
-      "target": "test_factories_makemappatorneorow",
-      "confidence_score": 1.0
+      "target": "test_factories_makemappatorneorow"
     },
     {
       "relation": "contains",
@@ -20912,9 +21060,9 @@
       "source_file": "src/test/factories.ts",
       "source_location": "L144",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "test_factories",
-      "target": "test_factories_makepresentuser",
-      "confidence_score": 1.0
+      "target": "test_factories_makepresentuser"
     },
     {
       "relation": "contains",
@@ -20964,9 +21112,9 @@
       "source_file": "src/test/factories.ts",
       "source_location": "L213",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "test_factories_makemappapin",
-      "target": "test_factories_makemappatorneorow",
-      "confidence_score": 1.0
+      "target": "test_factories_makemappatorneorow"
     },
     {
       "relation": "contains",
@@ -20994,9 +21142,9 @@
       "source_file": "supabase/.temp/linked-project.json",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_supabase_temp_linked_project_json",
-      "target": "temp_linked_project_name",
-      "confidence_score": 1.0
+      "target": "temp_linked_project_name"
     },
     {
       "relation": "contains",
@@ -21004,9 +21152,9 @@
       "source_file": "supabase/.temp/linked-project.json",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_supabase_temp_linked_project_json",
-      "target": "temp_linked_project_organization_id",
-      "confidence_score": 1.0
+      "target": "temp_linked_project_organization_id"
     },
     {
       "relation": "contains",
@@ -21014,9 +21162,9 @@
       "source_file": "supabase/.temp/linked-project.json",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_supabase_temp_linked_project_json",
-      "target": "temp_linked_project_organization_slug",
-      "confidence_score": 1.0
+      "target": "temp_linked_project_organization_slug"
     },
     {
       "relation": "contains",
@@ -21024,9 +21172,9 @@
       "source_file": "supabase/.temp/linked-project.json",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_supabase_temp_linked_project_json",
-      "target": "temp_linked_project_ref",
-      "confidence_score": 1.0
+      "target": "temp_linked_project_ref"
     },
     {
       "relation": "contains",
@@ -21094,9 +21242,9 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_tsconfig_app_json",
-      "target": "beachvolleydiary_tsconfig_app_compileroptions",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_app_compileroptions"
     },
     {
       "relation": "contains",
@@ -21104,9 +21252,9 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L29",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_tsconfig_app_json",
-      "target": "beachvolleydiary_tsconfig_app_exclude",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_app_exclude"
     },
     {
       "relation": "contains",
@@ -21114,9 +21262,9 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_tsconfig_app_json",
-      "target": "beachvolleydiary_tsconfig_app_include",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_app_include"
     },
     {
       "relation": "contains",
@@ -21124,9 +21272,9 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_app_compileroptions",
-      "target": "beachvolleydiary_tsconfig_app_compileroptions_composite",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_app_compileroptions_composite"
     },
     {
       "relation": "contains",
@@ -21134,9 +21282,9 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_app_compileroptions",
-      "target": "beachvolleydiary_tsconfig_app_compileroptions_isolatedmodules",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_app_compileroptions_isolatedmodules"
     },
     {
       "relation": "contains",
@@ -21144,9 +21292,9 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_app_compileroptions",
-      "target": "beachvolleydiary_tsconfig_app_compileroptions_jsx",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_app_compileroptions_jsx"
     },
     {
       "relation": "contains",
@@ -21154,9 +21302,9 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_app_compileroptions",
-      "target": "beachvolleydiary_tsconfig_app_compileroptions_lib",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_app_compileroptions_lib"
     },
     {
       "relation": "contains",
@@ -21164,9 +21312,9 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_app_compileroptions",
-      "target": "beachvolleydiary_tsconfig_app_compileroptions_module",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_app_compileroptions_module"
     },
     {
       "relation": "contains",
@@ -21174,9 +21322,9 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_app_compileroptions",
-      "target": "beachvolleydiary_tsconfig_app_compileroptions_moduledetection",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_app_compileroptions_moduledetection"
     },
     {
       "relation": "contains",
@@ -21184,9 +21332,9 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_app_compileroptions",
-      "target": "beachvolleydiary_tsconfig_app_compileroptions_moduleresolution",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_app_compileroptions_moduleresolution"
     },
     {
       "relation": "contains",
@@ -21194,9 +21342,9 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L16",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_app_compileroptions",
-      "target": "beachvolleydiary_tsconfig_app_compileroptions_noemit",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_app_compileroptions_noemit"
     },
     {
       "relation": "contains",
@@ -21204,9 +21352,9 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_app_compileroptions",
-      "target": "beachvolleydiary_tsconfig_app_compileroptions_nofallthroughcasesinswitch",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_app_compileroptions_nofallthroughcasesinswitch"
     },
     {
       "relation": "contains",
@@ -21214,9 +21362,9 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L21",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_app_compileroptions",
-      "target": "beachvolleydiary_tsconfig_app_compileroptions_nounusedlocals",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_app_compileroptions_nounusedlocals"
     },
     {
       "relation": "contains",
@@ -21224,9 +21372,9 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L22",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_app_compileroptions",
-      "target": "beachvolleydiary_tsconfig_app_compileroptions_nounusedparameters",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_app_compileroptions_nounusedparameters"
     },
     {
       "relation": "contains",
@@ -21234,9 +21382,9 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_app_compileroptions",
-      "target": "beachvolleydiary_tsconfig_app_compileroptions_resolvejsonmodule",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_app_compileroptions_resolvejsonmodule"
     },
     {
       "relation": "contains",
@@ -21244,9 +21392,9 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_app_compileroptions",
-      "target": "beachvolleydiary_tsconfig_app_compileroptions_skiplibcheck",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_app_compileroptions_skiplibcheck"
     },
     {
       "relation": "contains",
@@ -21254,9 +21402,9 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L20",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_app_compileroptions",
-      "target": "beachvolleydiary_tsconfig_app_compileroptions_strict",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_app_compileroptions_strict"
     },
     {
       "relation": "contains",
@@ -21264,9 +21412,9 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_app_compileroptions",
-      "target": "beachvolleydiary_tsconfig_app_compileroptions_target",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_app_compileroptions_target"
     },
     {
       "relation": "contains",
@@ -21274,9 +21422,9 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_app_compileroptions",
-      "target": "beachvolleydiary_tsconfig_app_compileroptions_tsbuildinfofile",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_app_compileroptions_tsbuildinfofile"
     },
     {
       "relation": "contains",
@@ -21284,9 +21432,9 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_app_compileroptions",
-      "target": "beachvolleydiary_tsconfig_app_compileroptions_usedefineforclassfields",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_app_compileroptions_usedefineforclassfields"
     },
     {
       "relation": "contains",
@@ -21294,9 +21442,9 @@
       "source_file": "tsconfig.json",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_tsconfig_json",
-      "target": "beachvolleydiary_tsconfig_files",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_files"
     },
     {
       "relation": "contains",
@@ -21304,9 +21452,9 @@
       "source_file": "tsconfig.json",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_tsconfig_json",
-      "target": "beachvolleydiary_tsconfig_references",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_references"
     },
     {
       "relation": "contains",
@@ -21314,9 +21462,9 @@
       "source_file": "tsconfig.node.json",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_tsconfig_node_json",
-      "target": "beachvolleydiary_tsconfig_node_compileroptions",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_node_compileroptions"
     },
     {
       "relation": "contains",
@@ -21324,9 +21472,9 @@
       "source_file": "tsconfig.node.json",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_tsconfig_node_json",
-      "target": "beachvolleydiary_tsconfig_node_include",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_node_include"
     },
     {
       "relation": "contains",
@@ -21334,9 +21482,9 @@
       "source_file": "tsconfig.node.json",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_node_compileroptions",
-      "target": "beachvolleydiary_tsconfig_node_compileroptions_composite",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_node_compileroptions_composite"
     },
     {
       "relation": "contains",
@@ -21344,9 +21492,9 @@
       "source_file": "tsconfig.node.json",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_node_compileroptions",
-      "target": "beachvolleydiary_tsconfig_node_compileroptions_isolatedmodules",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_node_compileroptions_isolatedmodules"
     },
     {
       "relation": "contains",
@@ -21354,9 +21502,9 @@
       "source_file": "tsconfig.node.json",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_node_compileroptions",
-      "target": "beachvolleydiary_tsconfig_node_compileroptions_lib",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_node_compileroptions_lib"
     },
     {
       "relation": "contains",
@@ -21364,9 +21512,9 @@
       "source_file": "tsconfig.node.json",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_node_compileroptions",
-      "target": "beachvolleydiary_tsconfig_node_compileroptions_module",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_node_compileroptions_module"
     },
     {
       "relation": "contains",
@@ -21374,9 +21522,9 @@
       "source_file": "tsconfig.node.json",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_node_compileroptions",
-      "target": "beachvolleydiary_tsconfig_node_compileroptions_moduledetection",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_node_compileroptions_moduledetection"
     },
     {
       "relation": "contains",
@@ -21384,9 +21532,9 @@
       "source_file": "tsconfig.node.json",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_node_compileroptions",
-      "target": "beachvolleydiary_tsconfig_node_compileroptions_moduleresolution",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_node_compileroptions_moduleresolution"
     },
     {
       "relation": "contains",
@@ -21394,9 +21542,9 @@
       "source_file": "tsconfig.node.json",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_node_compileroptions",
-      "target": "beachvolleydiary_tsconfig_node_compileroptions_noemit",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_node_compileroptions_noemit"
     },
     {
       "relation": "contains",
@@ -21404,9 +21552,9 @@
       "source_file": "tsconfig.node.json",
       "source_location": "L21",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_node_compileroptions",
-      "target": "beachvolleydiary_tsconfig_node_compileroptions_nofallthroughcasesinswitch",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_node_compileroptions_nofallthroughcasesinswitch"
     },
     {
       "relation": "contains",
@@ -21414,9 +21562,9 @@
       "source_file": "tsconfig.node.json",
       "source_location": "L19",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_node_compileroptions",
-      "target": "beachvolleydiary_tsconfig_node_compileroptions_nounusedlocals",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_node_compileroptions_nounusedlocals"
     },
     {
       "relation": "contains",
@@ -21424,9 +21572,9 @@
       "source_file": "tsconfig.node.json",
       "source_location": "L20",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_node_compileroptions",
-      "target": "beachvolleydiary_tsconfig_node_compileroptions_nounusedparameters",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_node_compileroptions_nounusedparameters"
     },
     {
       "relation": "contains",
@@ -21434,9 +21582,9 @@
       "source_file": "tsconfig.node.json",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_node_compileroptions",
-      "target": "beachvolleydiary_tsconfig_node_compileroptions_resolvejsonmodule",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_node_compileroptions_resolvejsonmodule"
     },
     {
       "relation": "contains",
@@ -21444,9 +21592,9 @@
       "source_file": "tsconfig.node.json",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_node_compileroptions",
-      "target": "beachvolleydiary_tsconfig_node_compileroptions_skiplibcheck",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_node_compileroptions_skiplibcheck"
     },
     {
       "relation": "contains",
@@ -21454,9 +21602,9 @@
       "source_file": "tsconfig.node.json",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_node_compileroptions",
-      "target": "beachvolleydiary_tsconfig_node_compileroptions_strict",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_node_compileroptions_strict"
     },
     {
       "relation": "contains",
@@ -21464,9 +21612,9 @@
       "source_file": "tsconfig.node.json",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_node_compileroptions",
-      "target": "beachvolleydiary_tsconfig_node_compileroptions_target",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_node_compileroptions_target"
     },
     {
       "relation": "contains",
@@ -21474,9 +21622,9 @@
       "source_file": "tsconfig.node.json",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_node_compileroptions",
-      "target": "beachvolleydiary_tsconfig_node_compileroptions_tsbuildinfofile",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_node_compileroptions_tsbuildinfofile"
     },
     {
       "relation": "contains",
@@ -21484,9 +21632,9 @@
       "source_file": "tsconfig.test.json",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_tsconfig_test_json",
-      "target": "beachvolleydiary_tsconfig_test_compileroptions",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_test_compileroptions"
     },
     {
       "relation": "contains",
@@ -21494,9 +21642,9 @@
       "source_file": "tsconfig.test.json",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_tsconfig_test_json",
-      "target": "beachvolleydiary_tsconfig_test_exclude",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_test_exclude"
     },
     {
       "relation": "contains",
@@ -21504,9 +21652,9 @@
       "source_file": "tsconfig.test.json",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_tsconfig_test_json",
-      "target": "beachvolleydiary_tsconfig_test_extends",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_test_extends"
     },
     {
       "relation": "contains",
@@ -21514,9 +21662,9 @@
       "source_file": "tsconfig.test.json",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_tsconfig_test_json",
-      "target": "beachvolleydiary_tsconfig_test_include",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_test_include"
     },
     {
       "relation": "contains",
@@ -21524,9 +21672,9 @@
       "source_file": "tsconfig.test.json",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_test_compileroptions",
-      "target": "beachvolleydiary_tsconfig_test_compileroptions_composite",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_test_compileroptions_composite"
     },
     {
       "relation": "contains",
@@ -21534,9 +21682,9 @@
       "source_file": "tsconfig.test.json",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_test_compileroptions",
-      "target": "beachvolleydiary_tsconfig_test_compileroptions_noemit",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_test_compileroptions_noemit"
     },
     {
       "relation": "contains",
@@ -21544,9 +21692,9 @@
       "source_file": "tsconfig.test.json",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_test_compileroptions",
-      "target": "beachvolleydiary_tsconfig_test_compileroptions_types",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_test_compileroptions_types"
     },
     {
       "relation": "contains",
@@ -21614,9 +21762,9 @@
       "source_file": "README.md",
       "source_location": "L83",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "readme_beach_volley_diary",
-      "target": "readme_test",
-      "confidence_score": 1.0
+      "target": "readme_test"
     },
     {
       "relation": "contains",
@@ -21624,9 +21772,9 @@
       "source_file": "docs/QA-chi-ce-oggi.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_qa_chi_ce_oggi",
-      "target": "docs_qa_chi_ce_oggi_qa_chi_c_\u00e8_oggi_check_in_stanza_reciproca",
-      "confidence_score": 1.0
+      "target": "docs_qa_chi_ce_oggi_qa_chi_c_\u00e8_oggi_check_in_stanza_reciproca"
     },
     {
       "relation": "contains",
@@ -21634,9 +21782,9 @@
       "source_file": "docs/QA-chi-ce-oggi.md",
       "source_location": "L128",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_qa_chi_ce_oggi_qa_chi_c_\u00e8_oggi_check_in_stanza_reciproca",
-      "target": "docs_qa_chi_ce_oggi_come_far_girare_la_suite",
-      "confidence_score": 1.0
+      "target": "docs_qa_chi_ce_oggi_come_far_girare_la_suite"
     },
     {
       "relation": "contains",
@@ -21644,9 +21792,9 @@
       "source_file": "docs/QA-chi-ce-oggi.md",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_qa_chi_ce_oggi_qa_chi_c_\u00e8_oggi_check_in_stanza_reciproca",
-      "target": "docs_qa_chi_ce_oggi_cosa_\u00e8_stato_verificato_automatico",
-      "confidence_score": 1.0
+      "target": "docs_qa_chi_ce_oggi_cosa_\u00e8_stato_verificato_automatico"
     },
     {
       "relation": "contains",
@@ -21654,9 +21802,9 @@
       "source_file": "docs/QA-chi-ce-oggi.md",
       "source_location": "L80",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_qa_chi_ce_oggi_qa_chi_c_\u00e8_oggi_check_in_stanza_reciproca",
-      "target": "docs_qa_chi_ce_oggi_da_applicare_verificare_a_mano_fuori_dalla_portata_di_jsdom",
-      "confidence_score": 1.0
+      "target": "docs_qa_chi_ce_oggi_da_applicare_verificare_a_mano_fuori_dalla_portata_di_jsdom"
     },
     {
       "relation": "contains",
@@ -21664,9 +21812,9 @@
       "source_file": "docs/QA-chi-ce-oggi.md",
       "source_location": "L50",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_qa_chi_ce_oggi_qa_chi_c_\u00e8_oggi_check_in_stanza_reciproca",
-      "target": "docs_qa_chi_ce_oggi_decisioni_e_assunzioni_documentate",
-      "confidence_score": 1.0
+      "target": "docs_qa_chi_ce_oggi_decisioni_e_assunzioni_documentate"
     },
     {
       "relation": "contains",
@@ -21674,9 +21822,9 @@
       "source_file": "docs/QA-chi-ce-oggi.md",
       "source_location": "L118",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_qa_chi_ce_oggi_qa_chi_c_\u00e8_oggi_check_in_stanza_reciproca",
-      "target": "docs_qa_chi_ce_oggi_follow_up_fuori_scope_come_da_piano",
-      "confidence_score": 1.0
+      "target": "docs_qa_chi_ce_oggi_follow_up_fuori_scope_come_da_piano"
     },
     {
       "relation": "contains",
@@ -21684,9 +21832,9 @@
       "source_file": "docs/QA-chi-ce-oggi.md",
       "source_location": "L102",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_qa_chi_ce_oggi_qa_chi_c_\u00e8_oggi_check_in_stanza_reciproca",
-      "target": "docs_qa_chi_ce_oggi_limitazioni_note",
-      "confidence_score": 1.0
+      "target": "docs_qa_chi_ce_oggi_limitazioni_note"
     },
     {
       "relation": "contains",
@@ -21694,9 +21842,19 @@
       "source_file": "docs/QA-mappa-conquiste.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_qa_mappa_conquiste",
-      "target": "docs_qa_mappa_conquiste_qa_la_mappa_delle_conquiste_livello_presentazionale_selettori",
-      "confidence_score": 1.0
+      "target": "docs_qa_mappa_conquiste_qa_la_mappa_delle_conquiste_livello_presentazionale_selettori"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/QA-mappa-conquiste.md",
+      "source_location": "L197",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "docs_qa_mappa_conquiste_qa_la_mappa_delle_conquiste_livello_presentazionale_selettori",
+      "target": "docs_qa_mappa_conquiste_accessibilit\u00e0_perch\u00e9_il_contorno_dei_pin_non_\u00e8_una_rifinitura"
     },
     {
       "relation": "contains",
@@ -21705,7 +21863,7 @@
       "source_location": "L197",
       "weight": 1.0,
       "source": "docs_qa_mappa_conquiste_qa_la_mappa_delle_conquiste_livello_presentazionale_selettori",
-      "target": "docs_qa_mappa_conquiste_accessibilit\u00e0_perch\u00e9_il_contorno_dei_pin_non_\u00e8_una_rifinitura",
+      "target": "docs_qa_mappa_conquiste_cablaggio_al_data_layer",
       "confidence_score": 1.0
     },
     {
@@ -21714,9 +21872,9 @@
       "source_file": "docs/QA-mappa-conquiste.md",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_qa_mappa_conquiste_qa_la_mappa_delle_conquiste_livello_presentazionale_selettori",
-      "target": "docs_qa_mappa_conquiste_come_\u00e8_nato_il_tracciato_dell_italia",
-      "confidence_score": 1.0
+      "target": "docs_qa_mappa_conquiste_come_\u00e8_nato_il_tracciato_dell_italia"
     },
     {
       "relation": "contains",
@@ -21724,9 +21882,9 @@
       "source_file": "docs/QA-mappa-conquiste.md",
       "source_location": "L246",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_qa_mappa_conquiste_qa_la_mappa_delle_conquiste_livello_presentazionale_selettori",
-      "target": "docs_qa_mappa_conquiste_cosa_resta_fuori",
-      "confidence_score": 1.0
+      "target": "docs_qa_mappa_conquiste_cosa_resta_fuori"
     },
     {
       "relation": "contains",
@@ -21734,9 +21892,9 @@
       "source_file": "docs/QA-mappa-conquiste.md",
       "source_location": "L80",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_qa_mappa_conquiste_qa_la_mappa_delle_conquiste_livello_presentazionale_selettori",
-      "target": "docs_qa_mappa_conquiste_cosa_\u00e8_stato_verificato_automatico",
-      "confidence_score": 1.0
+      "target": "docs_qa_mappa_conquiste_cosa_\u00e8_stato_verificato_automatico"
     },
     {
       "relation": "contains",
@@ -21744,9 +21902,9 @@
       "source_file": "docs/QA-mappa-conquiste.md",
       "source_location": "L168",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_qa_mappa_conquiste_qa_la_mappa_delle_conquiste_livello_presentazionale_selettori",
-      "target": "docs_qa_mappa_conquiste_decisioni_e_assunzioni",
-      "confidence_score": 1.0
+      "target": "docs_qa_mappa_conquiste_decisioni_e_assunzioni"
     },
     {
       "relation": "contains",
@@ -21754,9 +21912,9 @@
       "source_file": "docs/QA-mappa-conquiste.md",
       "source_location": "L226",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_qa_mappa_conquiste_qa_la_mappa_delle_conquiste_livello_presentazionale_selettori",
-      "target": "docs_qa_mappa_conquiste_difetti_noti_preesistenti_ereditati_e_resi_visibili",
-      "confidence_score": 1.0
+      "target": "docs_qa_mappa_conquiste_difetti_noti_preesistenti_ereditati_e_resi_visibili"
     },
     {
       "relation": "contains",
@@ -21764,9 +21922,9 @@
       "source_file": "docs/QA-mappa-conquiste.md",
       "source_location": "L256",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_qa_mappa_conquiste_qa_la_mappa_delle_conquiste_livello_presentazionale_selettori",
-      "target": "docs_qa_mappa_conquiste_prove_manuali_consigliate_npm_run_dev",
-      "confidence_score": 1.0
+      "target": "docs_qa_mappa_conquiste_prove_manuali_consigliate_npm_run_dev"
     },
     {
       "relation": "contains",
@@ -21774,9 +21932,9 @@
       "source_file": "docs/QA-mappa-conquiste.md",
       "source_location": "L53",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_qa_mappa_conquiste_come_\u00e8_nato_il_tracciato_dell_italia",
-      "target": "docs_qa_mappa_conquiste_due_scelte_da_non_disfare_per_sbaglio",
-      "confidence_score": 1.0
+      "target": "docs_qa_mappa_conquiste_due_scelte_da_non_disfare_per_sbaglio"
     },
     {
       "relation": "contains",
@@ -21784,9 +21942,9 @@
       "source_file": "docs/QA-mappa-conquiste.md",
       "source_location": "L69",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_qa_mappa_conquiste_come_\u00e8_nato_il_tracciato_dell_italia",
-      "target": "docs_qa_mappa_conquiste_il_modo_silenzioso_in_cui_questa_feature_si_rompe",
-      "confidence_score": 1.0
+      "target": "docs_qa_mappa_conquiste_il_modo_silenzioso_in_cui_questa_feature_si_rompe"
     },
     {
       "relation": "contains",
@@ -21794,9 +21952,9 @@
       "source_file": "docs/QA-mappa-conquiste.md",
       "source_location": "L119",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_qa_mappa_conquiste_cosa_\u00e8_stato_verificato_automatico",
-      "target": "docs_qa_mappa_conquiste_src_lib_derive_mappa_test_ts_41_test_puro_today_iniettato",
-      "confidence_score": 1.0
+      "target": "docs_qa_mappa_conquiste_src_lib_derive_mappa_test_ts_41_test_puro_today_iniettato"
     },
     {
       "relation": "contains",
@@ -21804,9 +21962,9 @@
       "source_file": "docs/QA-mappa-conquiste.md",
       "source_location": "L82",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_qa_mappa_conquiste_cosa_\u00e8_stato_verificato_automatico",
-      "target": "docs_qa_mappa_conquiste_src_lib_geo_test_ts_48_test_puro",
-      "confidence_score": 1.0
+      "target": "docs_qa_mappa_conquiste_src_lib_geo_test_ts_48_test_puro"
     },
     {
       "relation": "contains",
@@ -21814,9 +21972,9 @@
       "source_file": "docs/QA-mappa-conquiste.md",
       "source_location": "L139",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_qa_mappa_conquiste_cosa_\u00e8_stato_verificato_automatico",
-      "target": "docs_qa_mappa_conquiste_src_screens_mappa_test_tsx_35_test",
-      "confidence_score": 1.0
+      "target": "docs_qa_mappa_conquiste_src_screens_mappa_test_tsx_35_test"
     },
     {
       "relation": "contains",
@@ -21824,9 +21982,9 @@
       "source_file": "docs/QA-mappa-conquiste.md",
       "source_location": "L158",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_qa_mappa_conquiste_cosa_\u00e8_stato_verificato_automatico",
-      "target": "docs_qa_mappa_conquiste_verifica_visiva_jsdom_non_fa_layout",
-      "confidence_score": 1.0
+      "target": "docs_qa_mappa_conquiste_verifica_visiva_jsdom_non_fa_layout"
     },
     {
       "relation": "contains",
@@ -21834,9 +21992,9 @@
       "source_file": "docs/QA-tornei-formati.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_docs_qa_tornei_formati_md",
-      "target": "docs_qa_tornei_formati_qa_suddivisione_tornei_per_formato",
-      "confidence_score": 1.0
+      "target": "docs_qa_tornei_formati_qa_suddivisione_tornei_per_formato"
     },
     {
       "relation": "contains",
@@ -21954,9 +22112,9 @@
       "source_file": "supabase/README.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_supabase_readme_md",
-      "target": "supabase_readme_supabase_beach_volley_diary",
-      "confidence_score": 1.0
+      "target": "supabase_readme_supabase_beach_volley_diary"
     },
     {
       "relation": "contains",
@@ -22840,5 +22998,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "5db3cdfdf939a9fe48d77c73ebf2311a7ed983a4"
+  "built_at_commit": "f03c3edf55b3f47b395b082b84a8e31fcd633238"
 }

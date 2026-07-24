@@ -178,6 +178,27 @@ describe('deriveMappa — solo tornei già giocati', () => {
     expect(m.pins).toHaveLength(1)
     expect(m.nonGiocati).toBe(0)
   })
+
+  it('il conteggio dei non giocati segue il filtro anno, come tutti gli altri', () => {
+    // Contarli su tutto l'archivio faceva scrivere "1 torneo è ancora in
+    // programma" mentre si guarda il 2025: vero, ma di un altro anno.
+    const tornei: Partial<Tournament>[] = [
+      { city: 'Rimini', date: '2025-06-01', placement: 'Gironi' },
+      { city: 'Cervia', date: '2026-09-01' }, // futuro (dopo TODAY)
+    ]
+    expect(mappa(tornei, '2025').nonGiocati).toBe(0)
+    expect(mappa(tornei, '2026').nonGiocati).toBe(1)
+    expect(mappa(tornei, 'Sempre').nonGiocati).toBe(1)
+  })
+
+  it('un torneo "In corso" è contato nell’anno della sua data', () => {
+    const tornei: Partial<Tournament>[] = [
+      { city: 'Rimini', date: '2026-06-01', placement: 'In corso' },
+      { city: 'Cervia', date: '2025-06-01', placement: 'In corso' },
+    ]
+    expect(mappa(tornei, '2026').nonGiocati).toBe(1)
+    expect(mappa(tornei, 'Sempre').nonGiocati).toBe(2)
+  })
 })
 
 // ---------------------------------------------------------------- bucket

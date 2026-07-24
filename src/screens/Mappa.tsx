@@ -47,8 +47,22 @@ export default function Mappa({ m, onOpenTorneo, onNewTorneo }: MappaProps) {
     return (
       <div style={{ marginTop: 22 }}>
         <EmptyCard>
-          Nessuna città sulla mappa: aggiungi un torneo con la sua città e comincia a
-          riempire il passaporto. <InlineLink onClick={onNewTorneo}>Crea un torneo →</InlineLink>
+          {/* Con dei tornei ancora da giocare la mappa è vuota per un motivo
+              preciso, e dirlo è diverso dal chiedere di aggiungere una città che
+              c'è già: qui il bucket `nonGiocati` è l'unica cosa da raccontare,
+              altrimenti sparirebbe insieme al resto della pagina. */}
+          {m.nonGiocati > 0 ? (
+            <>
+              {m.nonGiocati === 1 ? 'Il tuo unico torneo è' : 'I tuoi tornei sono'} ancora in
+              corso o in programma: la mappa racconta solo quello che hai già giocato.
+              Segna il piazzamento e la città comparirà qui.
+            </>
+          ) : (
+            <>
+              Nessuna città sulla mappa: aggiungi un torneo con la sua città e comincia a
+              riempire il passaporto. <InlineLink onClick={onNewTorneo}>Crea un torneo →</InlineLink>
+            </>
+          )}
         </EmptyCard>
       </div>
     )

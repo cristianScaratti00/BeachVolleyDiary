@@ -10,11 +10,18 @@ import type { MappaData } from '../lib/derive.mappa'
 // viewport da 360) — un settimo slot la porterebbe a 372px e sforerebbe su
 // iPhone SE/mini. La mappa vive quindi dentro Tornei, dove i suoi dati stanno
 // già di casa.
-type Vista = 'lista' | 'mappa'
+export type TorneiVista = 'lista' | 'mappa'
 
 interface TorneiProps {
   list: TorneiListData
   mappa: MappaData
+  // Vista controllata da App, unica eccezione al "lo stato di presentazione
+  // resta qui": aprire un torneo dalla mappa porta su `screen === 'torneo'`, che
+  // smonta questa schermata. Con lo stato locale si tornava indietro sulla lista
+  // dopo essere partiti dalla mappa — la navigazione perdeva il punto di
+  // partenza. Vive dove sopravvive al viaggio di andata e ritorno.
+  vista: TorneiVista
+  onVista: (v: TorneiVista) => void
   onOpenTorneo: (id: string) => void
   onNewTorneo: () => void
   onQuickTorneo: () => void
@@ -22,12 +29,11 @@ interface TorneiProps {
   canAssistant: boolean
 }
 
-export default function Tornei({ list, mappa, onOpenTorneo, onNewTorneo, onQuickTorneo, onAssistant, canAssistant }: TorneiProps) {
+export default function Tornei({ list, mappa, vista, onVista, onOpenTorneo, onNewTorneo, onQuickTorneo, onAssistant, canAssistant }: TorneiProps) {
   const { tornei, tPlayed, podi, bestPlacement } = list
   // Il filtro è puramente di presentazione: vive qui, non risale ad App. Quale
   // valore sia lecito e cosa mostrare di conseguenza lo decide `derive`.
   const [format, setFormat] = useState<string>(TORNEI_FILTER_ALL)
-  const [vista, setVista] = useState<Vista>('lista')
   const { active, options, upcoming, groups } = deriveTorneiSections(tornei, format)
 
   return (
@@ -59,7 +65,7 @@ export default function Tornei({ list, mappa, onOpenTorneo, onNewTorneo, onQuick
           <FilterChips
             label="Come vedere i tornei"
             value={vista}
-            onChange={(v) => setVista(v as Vista)}
+            onChange={(v) => onVista(v as TorneiVista)}
             options={[
               { value: 'lista', label: 'Lista' },
               { value: 'mappa', label: `Mappa${mappa.citta ? ` · ${mappa.citta}` : ''}` },
