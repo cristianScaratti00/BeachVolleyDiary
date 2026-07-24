@@ -170,8 +170,8 @@
     "semantic_hash": ""
   },
   "src/hooks/useDiary.ts": {
-    "mtime": 1784919217.3555858,
-    "ast_hash": "1e1597de3712dad85593ade26d6521a1",
+    "mtime": 1784920788.4805114,
+    "ast_hash": "35ca881b8db56556ba871c5976ab22d5",
     "semantic_hash": ""
   },
   "src/hooks/useMedia.ts": {
@@ -190,8 +190,8 @@
     "semantic_hash": ""
   },
   "src/lib/database.types.ts": {
-    "mtime": 1784918157.6814904,
-    "ast_hash": "1292f7586dd72672b17fdf04d7c47bfe",
+    "mtime": 1784920648.999096,
+    "ast_hash": "17527e3417d380d0f2f53d85dee7d241",
     "semantic_hash": ""
   },
   "src/lib/db.enums.ts": {
@@ -445,8 +445,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1784920004.3145752,
-    "ast_hash": "bb29edadd30fb8e66e2fa94435767eb0",
+    "mtime": 1784920992.395111,
+    "ast_hash": "fda0c0490868729c9cb667350670b643",
     "semantic_hash": ""
   },
   "docs/QA-tornei-formati.md": {
@@ -460,8 +460,8 @@
     "semantic_hash": ""
   },
   "supabase/README.md": {
-    "mtime": 1784918157.6869843,
-    "ast_hash": "f4c39b17b618e00e5a761f5e1e0597f5",
+    "mtime": 1784921037.8478296,
+    "ast_hash": "1a62d83321036d176aef9fd470d888e8",
     "semantic_hash": ""
   },
   "src/components/VenueMap.tsx": {
@@ -507,6 +507,21 @@
   "docs/QA-chi-ce-oggi.md": {
     "mtime": 1784918157.6713698,
     "ast_hash": "8fc627131dd2d48ae8cd314220bc63ac",
+    "semantic_hash": ""
+  },
+  "src/lib/derive.venues.server.test.ts": {
+    "mtime": 1784920886.959314,
+    "ast_hash": "860eae227cf1f77155bc78909919505a",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20260725120000_venues.sql": {
+    "mtime": 1784920469.7521558,
+    "ast_hash": "1937d16b898ec24bb9894bfdb2858b16",
+    "semantic_hash": ""
+  },
+  "docs/QA-venues.md": {
+    "mtime": 1784920967.4584486,
+    "ast_hash": "e7dea0831a1ffee4c1551181aa6ddf70",
     "semantic_hash": ""
   }
 }

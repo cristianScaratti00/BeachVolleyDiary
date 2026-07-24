@@ -369,7 +369,7 @@
       "source_file": "src/App.tsx",
       "source_location": "L79",
       "id": "src_app_app",
-      "community": 2,
+      "community": 44,
       "norm_label": "app()"
     },
     {
@@ -378,7 +378,7 @@
       "source_file": "src/Root.tsx",
       "source_location": "L1",
       "id": "src_root",
-      "community": 1,
+      "community": 43,
       "norm_label": "root.tsx"
     },
     {
@@ -387,7 +387,7 @@
       "source_file": "src/Root.tsx",
       "source_location": "L8",
       "id": "src_root_root",
-      "community": 1,
+      "community": 43,
       "norm_label": "root()"
     },
     {
@@ -441,7 +441,7 @@
       "source_file": "src/components/ConnectionSnackbar.tsx",
       "source_location": "L1",
       "id": "components_connectionsnackbar",
-      "community": 1,
+      "community": 42,
       "norm_label": "connectionsnackbar.tsx"
     },
     {
@@ -450,7 +450,7 @@
       "source_file": "src/components/ConnectionSnackbar.tsx",
       "source_location": "L10",
       "id": "components_connectionsnackbar_connectionsnackbar",
-      "community": 1,
+      "community": 42,
       "norm_label": "connectionsnackbar()"
     },
     {
@@ -738,7 +738,7 @@
       "source_file": "src/components/dashboard/RecentTornei.tsx",
       "source_location": "L1",
       "id": "dashboard_recenttornei",
-      "community": 7,
+      "community": 40,
       "norm_label": "recenttornei.tsx"
     },
     {
@@ -747,7 +747,7 @@
       "source_file": "src/components/dashboard/RecentTornei.tsx",
       "source_location": "L5",
       "id": "dashboard_recenttornei_recenttornei",
-      "community": 7,
+      "community": 40,
       "norm_label": "recenttornei()"
     },
     {
@@ -819,7 +819,7 @@
       "source_file": "src/components/modals/CompagnoModal.tsx",
       "source_location": "L5",
       "id": "modals_compagnomodal_compagnomodalprops",
-      "community": 22,
+      "community": 3,
       "norm_label": "compagnomodalprops"
     },
     {
@@ -846,7 +846,7 @@
       "source_file": "src/components/modals/FotoModal.tsx",
       "source_location": "L6",
       "id": "modals_fotomodal_fotomodalprops",
-      "community": 22,
+      "community": 3,
       "norm_label": "fotomodalprops"
     },
     {
@@ -864,7 +864,7 @@
       "source_file": "src/components/modals/PartitaModal.tsx",
       "source_location": "L1",
       "id": "modals_partitamodal",
-      "community": 22,
+      "community": 3,
       "norm_label": "partitamodal.tsx"
     },
     {
@@ -873,7 +873,7 @@
       "source_file": "src/components/modals/PartitaModal.tsx",
       "source_location": "L5",
       "id": "modals_partitamodal_setinput",
-      "community": 22,
+      "community": 3,
       "norm_label": "setinput"
     },
     {
@@ -882,7 +882,7 @@
       "source_file": "src/components/modals/PartitaModal.tsx",
       "source_location": "L6",
       "id": "modals_partitamodal_notestyle",
-      "community": 22,
+      "community": 3,
       "norm_label": "notestyle"
     },
     {
@@ -891,7 +891,7 @@
       "source_file": "src/components/modals/PartitaModal.tsx",
       "source_location": "L8",
       "id": "modals_partitamodal_partitamodalprops",
-      "community": 22,
+      "community": 3,
       "norm_label": "partitamodalprops"
     },
     {
@@ -900,7 +900,7 @@
       "source_file": "src/components/modals/PartitaModal.tsx",
       "source_location": "L19",
       "id": "modals_partitamodal_partitamodal",
-      "community": 22,
+      "community": 3,
       "norm_label": "partitamodal()"
     },
     {
@@ -909,7 +909,7 @@
       "source_file": "src/components/modals/QuickTorneoModal.tsx",
       "source_location": "L1",
       "id": "modals_quicktorneomodal",
-      "community": 24,
+      "community": 3,
       "norm_label": "quicktorneomodal.tsx"
     },
     {
@@ -918,7 +918,7 @@
       "source_file": "src/components/modals/QuickTorneoModal.tsx",
       "source_location": "L7",
       "id": "modals_quicktorneomodal_quicktorneomodalprops",
-      "community": 22,
+      "community": 3,
       "norm_label": "quicktorneomodalprops"
     },
     {
@@ -927,7 +927,7 @@
       "source_file": "src/components/modals/QuickTorneoModal.tsx",
       "source_location": "L22",
       "id": "modals_quicktorneomodal_quicktorneomodal",
-      "community": 24,
+      "community": 3,
       "norm_label": "quicktorneomodal()"
     },
     {
@@ -1134,7 +1134,7 @@
       "source_file": "src/components/modals/TorneoModal.tsx",
       "source_location": "L10",
       "id": "modals_torneomodal_torneomodalprops",
-      "community": 22,
+      "community": 3,
       "norm_label": "torneomodalprops"
     },
     {
@@ -1188,7 +1188,7 @@
       "source_file": "src/components/modals/VenuePicker.tsx",
       "source_location": "L1",
       "id": "modals_venuepicker",
-      "community": 29,
+      "community": 3,
       "norm_label": "venuepicker.tsx"
     },
     {
@@ -1197,7 +1197,7 @@
       "source_file": "src/components/modals/VenuePicker.tsx",
       "source_location": "L26",
       "id": "modals_venuepicker_fieldlabel",
-      "community": 29,
+      "community": 3,
       "norm_label": "fieldlabel()"
     },
     {
@@ -1206,7 +1206,7 @@
       "source_file": "src/components/modals/VenuePicker.tsx",
       "source_location": "L32",
       "id": "modals_venuepicker_panelstyle",
-      "community": 29,
+      "community": 3,
       "norm_label": "panelstyle"
     },
     {
@@ -1215,7 +1215,7 @@
       "source_file": "src/components/modals/VenuePicker.tsx",
       "source_location": "L41",
       "id": "modals_venuepicker_hintstyle",
-      "community": 29,
+      "community": 3,
       "norm_label": "hintstyle"
     },
     {
@@ -1224,7 +1224,7 @@
       "source_file": "src/components/modals/VenuePicker.tsx",
       "source_location": "L42",
       "id": "modals_venuepicker_minibtn",
-      "community": 29,
+      "community": 3,
       "norm_label": "minibtn"
     },
     {
@@ -1233,7 +1233,7 @@
       "source_file": "src/components/modals/VenuePicker.tsx",
       "source_location": "L54",
       "id": "modals_venuepicker_venuepickerprops",
-      "community": 22,
+      "community": 3,
       "norm_label": "venuepickerprops"
     },
     {
@@ -1242,7 +1242,7 @@
       "source_file": "src/components/modals/VenuePicker.tsx",
       "source_location": "L64",
       "id": "modals_venuepicker_venuepicker",
-      "community": 29,
+      "community": 3,
       "norm_label": "venuepicker()"
     },
     {
@@ -1260,7 +1260,7 @@
       "source_file": "src/components/modals/VenuePicker.tsx",
       "source_location": "L191",
       "id": "modals_venuepicker_selectedvenuenote",
-      "community": 10,
+      "community": 29,
       "norm_label": "selectedvenuenote()"
     },
     {
@@ -1350,7 +1350,7 @@
       "source_file": "src/components/ui.tsx",
       "source_location": "L78",
       "id": "components_ui_filterchips",
-      "community": 7,
+      "community": 40,
       "norm_label": "filterchips()"
     },
     {
@@ -1368,7 +1368,7 @@
       "source_file": "src/components/ui.tsx",
       "source_location": "L125",
       "id": "components_ui_sectiontitle",
-      "community": 7,
+      "community": 40,
       "norm_label": "sectiontitle()"
     },
     {
@@ -1395,7 +1395,7 @@
       "source_file": "src/components/ui.tsx",
       "source_location": "L146",
       "id": "components_ui_inlinelink",
-      "community": 7,
+      "community": 40,
       "norm_label": "inlinelink()"
     },
     {
@@ -1692,7 +1692,7 @@
       "source_file": "src/hooks/useAuth.tsx",
       "source_location": "L74",
       "id": "hooks_useauth_useauth",
-      "community": 1,
+      "community": 43,
       "norm_label": "useauth()"
     },
     {
@@ -1710,7 +1710,7 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L27",
       "id": "hooks_usecheckin_usecheckindeps",
-      "community": 22,
+      "community": 3,
       "norm_label": "usecheckindeps"
     },
     {
@@ -1764,7 +1764,7 @@
       "source_file": "src/hooks/useConnection.ts",
       "source_location": "L1",
       "id": "hooks_useconnection",
-      "community": 1,
+      "community": 42,
       "norm_label": "useconnection.ts"
     },
     {
@@ -1773,7 +1773,7 @@
       "source_file": "src/hooks/useConnection.ts",
       "source_location": "L6",
       "id": "hooks_useconnection_networkinformation",
-      "community": 1,
+      "community": 42,
       "norm_label": "networkinformation"
     },
     {
@@ -1782,7 +1782,7 @@
       "source_file": "src/hooks/useConnection.ts",
       "source_location": "L13",
       "id": "hooks_useconnection_getconnection",
-      "community": 1,
+      "community": 42,
       "norm_label": "getconnection()"
     },
     {
@@ -1791,7 +1791,7 @@
       "source_file": "src/hooks/useConnection.ts",
       "source_location": "L24",
       "id": "hooks_useconnection_computeslow",
-      "community": 1,
+      "community": 42,
       "norm_label": "computeslow()"
     },
     {
@@ -1800,7 +1800,7 @@
       "source_file": "src/hooks/useConnection.ts",
       "source_location": "L35",
       "id": "hooks_useconnection_subscribe",
-      "community": 1,
+      "community": 42,
       "norm_label": "subscribe()"
     },
     {
@@ -1809,7 +1809,7 @@
       "source_file": "src/hooks/useConnection.ts",
       "source_location": "L48",
       "id": "hooks_useconnection_useslowconnection",
-      "community": 1,
+      "community": 42,
       "norm_label": "useslowconnection()"
     },
     {
@@ -1818,52 +1818,70 @@
       "source_file": "src/hooks/useDiary.ts",
       "source_location": "L1",
       "id": "hooks_usediary",
-      "community": 16,
+      "community": 0,
       "norm_label": "usediary.ts"
     },
     {
       "label": "useDiary",
       "file_type": "code",
       "source_file": "src/hooks/useDiary.ts",
-      "source_location": "L145",
+      "source_location": "L220",
       "id": "hooks_usediary_usediary",
-      "community": 16,
+      "community": 0,
       "norm_label": "usediary"
     },
     {
       "label": "EMPTY",
       "file_type": "code",
       "source_file": "src/hooks/useDiary.ts",
-      "source_location": "L35",
+      "source_location": "L36",
       "id": "hooks_usediary_empty",
-      "community": 16,
+      "community": 0,
       "norm_label": "empty"
     },
     {
       "label": "citySnapshot()",
       "file_type": "code",
       "source_file": "src/hooks/useDiary.ts",
-      "source_location": "L41",
+      "source_location": "L42",
       "id": "hooks_usediary_citysnapshot",
-      "community": 16,
+      "community": 0,
       "norm_label": "citysnapshot()"
+    },
+    {
+      "label": "ResolvedVenue",
+      "file_type": "code",
+      "source_file": "src/hooks/useDiary.ts",
+      "source_location": "L64",
+      "id": "hooks_usediary_resolvedvenue",
+      "community": 0,
+      "norm_label": "resolvedvenue"
+    },
+    {
+      "label": "resolveVenue()",
+      "file_type": "code",
+      "source_file": "src/hooks/useDiary.ts",
+      "source_location": "L66",
+      "id": "hooks_usediary_resolvevenue",
+      "community": 29,
+      "norm_label": "resolvevenue()"
     },
     {
       "label": "errMsg()",
       "file_type": "code",
       "source_file": "src/hooks/useDiary.ts",
-      "source_location": "L52",
+      "source_location": "L116",
       "id": "hooks_usediary_errmsg",
-      "community": 16,
+      "community": 0,
       "norm_label": "errmsg()"
     },
     {
       "label": "fetchAll()",
       "file_type": "code",
       "source_file": "src/hooks/useDiary.ts",
-      "source_location": "L59",
+      "source_location": "L123",
       "id": "hooks_usediary_fetchall",
-      "community": 16,
+      "community": 0,
       "norm_label": "fetchall()"
     },
     {
@@ -1872,7 +1890,7 @@
       "source_file": "src/hooks/useMedia.ts",
       "source_location": "L1",
       "id": "hooks_usemedia",
-      "community": 1,
+      "community": 42,
       "norm_label": "usemedia.ts"
     },
     {
@@ -1881,7 +1899,7 @@
       "source_file": "src/hooks/useMedia.ts",
       "source_location": "L6",
       "id": "hooks_usemedia_subscribe",
-      "community": 1,
+      "community": 42,
       "norm_label": "subscribe()"
     },
     {
@@ -1890,7 +1908,7 @@
       "source_file": "src/hooks/useMedia.ts",
       "source_location": "L12",
       "id": "hooks_usemedia_useiswide",
-      "community": 1,
+      "community": 42,
       "norm_label": "useiswide()"
     },
     {
@@ -1908,7 +1926,7 @@
       "source_file": "src/lib/auth.ts",
       "source_location": "L13",
       "id": "lib_auth_session",
-      "community": 1,
+      "community": 16,
       "norm_label": "session"
     },
     {
@@ -1935,7 +1953,7 @@
       "source_file": "src/lib/auth.ts",
       "source_location": "L34",
       "id": "lib_auth_checknameavailable",
-      "community": 1,
+      "community": 45,
       "norm_label": "checknameavailable()"
     },
     {
@@ -1953,7 +1971,7 @@
       "source_file": "src/lib/auth.ts",
       "source_location": "L56",
       "id": "lib_auth_profilerow",
-      "community": 1,
+      "community": 16,
       "norm_label": "profilerow"
     },
     {
@@ -1989,7 +2007,7 @@
       "source_file": "src/lib/auth.ts",
       "source_location": "L100",
       "id": "lib_auth_updatedisplayname",
-      "community": 1,
+      "community": 45,
       "norm_label": "updatedisplayname()"
     },
     {
@@ -2140,7 +2158,7 @@
       "label": "PublicSchema",
       "file_type": "code",
       "source_file": "src/lib/database.types.ts",
-      "source_location": "L474",
+      "source_location": "L540",
       "id": "lib_database_types_publicschema",
       "community": 14,
       "norm_label": "publicschema"
@@ -2149,7 +2167,7 @@
       "label": "Tables",
       "file_type": "code",
       "source_file": "src/lib/database.types.ts",
-      "source_location": "L476",
+      "source_location": "L542",
       "id": "lib_database_types_tables",
       "community": 14,
       "norm_label": "tables"
@@ -2158,7 +2176,7 @@
       "label": "TablesInsert",
       "file_type": "code",
       "source_file": "src/lib/database.types.ts",
-      "source_location": "L477",
+      "source_location": "L543",
       "id": "lib_database_types_tablesinsert",
       "community": 14,
       "norm_label": "tablesinsert"
@@ -2167,7 +2185,7 @@
       "label": "TablesUpdate",
       "file_type": "code",
       "source_file": "src/lib/database.types.ts",
-      "source_location": "L478",
+      "source_location": "L544",
       "id": "lib_database_types_tablesupdate",
       "community": 14,
       "norm_label": "tablesupdate"
@@ -2176,7 +2194,7 @@
       "label": "Views",
       "file_type": "code",
       "source_file": "src/lib/database.types.ts",
-      "source_location": "L479",
+      "source_location": "L545",
       "id": "lib_database_types_views",
       "community": 14,
       "norm_label": "views"
@@ -2185,7 +2203,7 @@
       "label": "Profile",
       "file_type": "code",
       "source_file": "src/lib/database.types.ts",
-      "source_location": "L482",
+      "source_location": "L548",
       "id": "lib_database_types_profile",
       "community": 14,
       "norm_label": "profile"
@@ -2194,7 +2212,7 @@
       "label": "Partner",
       "file_type": "code",
       "source_file": "src/lib/database.types.ts",
-      "source_location": "L483",
+      "source_location": "L549",
       "id": "lib_database_types_partner",
       "community": 14,
       "norm_label": "partner"
@@ -2203,7 +2221,7 @@
       "label": "Tournament",
       "file_type": "code",
       "source_file": "src/lib/database.types.ts",
-      "source_location": "L484",
+      "source_location": "L550",
       "id": "lib_database_types_tournament",
       "community": 14,
       "norm_label": "tournament"
@@ -2212,7 +2230,7 @@
       "label": "Match",
       "file_type": "code",
       "source_file": "src/lib/database.types.ts",
-      "source_location": "L485",
+      "source_location": "L551",
       "id": "lib_database_types_match",
       "community": 14,
       "norm_label": "match"
@@ -2221,7 +2239,7 @@
       "label": "MatchSet",
       "file_type": "code",
       "source_file": "src/lib/database.types.ts",
-      "source_location": "L486",
+      "source_location": "L552",
       "id": "lib_database_types_matchset",
       "community": 14,
       "norm_label": "matchset"
@@ -2230,16 +2248,25 @@
       "label": "Photo",
       "file_type": "code",
       "source_file": "src/lib/database.types.ts",
-      "source_location": "L487",
+      "source_location": "L553",
       "id": "lib_database_types_photo",
       "community": 14,
       "norm_label": "photo"
     },
     {
+      "label": "Venue",
+      "file_type": "code",
+      "source_file": "src/lib/database.types.ts",
+      "source_location": "L554",
+      "id": "lib_database_types_venue",
+      "community": 14,
+      "norm_label": "venue"
+    },
+    {
       "label": "MatchScore",
       "file_type": "code",
       "source_file": "src/lib/database.types.ts",
-      "source_location": "L488",
+      "source_location": "L555",
       "id": "lib_database_types_matchscore",
       "community": 14,
       "norm_label": "matchscore"
@@ -2250,7 +2277,7 @@
       "source_file": "src/lib/db.enums.ts",
       "source_location": "L1",
       "id": "lib_db_enums",
-      "community": 24,
+      "community": 0,
       "norm_label": "db.enums.ts"
     },
     {
@@ -2259,7 +2286,7 @@
       "source_file": "src/lib/db.enums.ts",
       "source_location": "L11",
       "id": "lib_db_enums_categories",
-      "community": 24,
+      "community": 0,
       "norm_label": "categories"
     },
     {
@@ -2295,7 +2322,7 @@
       "source_file": "src/lib/db.enums.ts",
       "source_location": "L15",
       "id": "lib_db_enums_placements",
-      "community": 24,
+      "community": 0,
       "norm_label": "placements"
     },
     {
@@ -2304,7 +2331,7 @@
       "source_file": "src/lib/db.enums.ts",
       "source_location": "L18",
       "id": "lib_db_enums_roles",
-      "community": 24,
+      "community": 0,
       "norm_label": "roles"
     },
     {
@@ -2313,7 +2340,7 @@
       "source_file": "src/lib/db.enums.ts",
       "source_location": "L19",
       "id": "lib_db_enums_plans",
-      "community": 24,
+      "community": 0,
       "norm_label": "plans"
     },
     {
@@ -2322,7 +2349,7 @@
       "source_file": "src/lib/db.enums.ts",
       "source_location": "L21",
       "id": "lib_db_enums_category",
-      "community": 24,
+      "community": 0,
       "norm_label": "category"
     },
     {
@@ -2331,7 +2358,7 @@
       "source_file": "src/lib/db.enums.ts",
       "source_location": "L22",
       "id": "lib_db_enums_format",
-      "community": 24,
+      "community": 0,
       "norm_label": "format"
     },
     {
@@ -2340,7 +2367,7 @@
       "source_file": "src/lib/db.enums.ts",
       "source_location": "L23",
       "id": "lib_db_enums_surface",
-      "community": 24,
+      "community": 0,
       "norm_label": "surface"
     },
     {
@@ -2349,7 +2376,7 @@
       "source_file": "src/lib/db.enums.ts",
       "source_location": "L24",
       "id": "lib_db_enums_phase",
-      "community": 16,
+      "community": 0,
       "norm_label": "phase"
     },
     {
@@ -2358,7 +2385,7 @@
       "source_file": "src/lib/db.enums.ts",
       "source_location": "L25",
       "id": "lib_db_enums_placement",
-      "community": 24,
+      "community": 0,
       "norm_label": "placement"
     },
     {
@@ -2367,7 +2394,7 @@
       "source_file": "src/lib/db.enums.ts",
       "source_location": "L26",
       "id": "lib_db_enums_role",
-      "community": 1,
+      "community": 16,
       "norm_label": "role"
     },
     {
@@ -2376,7 +2403,7 @@
       "source_file": "src/lib/db.enums.ts",
       "source_location": "L27",
       "id": "lib_db_enums_plan",
-      "community": 1,
+      "community": 16,
       "norm_label": "plan"
     },
     {
@@ -2385,7 +2412,7 @@
       "source_file": "src/lib/db.enums.ts",
       "source_location": "L30",
       "id": "lib_db_enums_tournamenttyped",
-      "community": 24,
+      "community": 0,
       "norm_label": "tournamenttyped"
     },
     {
@@ -2394,7 +2421,7 @@
       "source_file": "src/lib/db.enums.ts",
       "source_location": "L36",
       "id": "lib_db_enums_matchtyped",
-      "community": 24,
+      "community": 0,
       "norm_label": "matchtyped"
     },
     {
@@ -2403,7 +2430,7 @@
       "source_file": "src/lib/db.enums.ts",
       "source_location": "L39",
       "id": "lib_db_enums_matchwithsets",
-      "community": 24,
+      "community": 0,
       "norm_label": "matchwithsets"
     },
     {
@@ -2412,7 +2439,7 @@
       "source_file": "src/lib/derive.checkins.test.ts",
       "source_location": "L1",
       "id": "lib_derive_checkins_test",
-      "community": 10,
+      "community": 29,
       "norm_label": "derive.checkins.test.ts"
     },
     {
@@ -2421,7 +2448,7 @@
       "source_file": "src/lib/derive.checkins.test.ts",
       "source_location": "L11",
       "id": "lib_derive_checkins_test_ids",
-      "community": 10,
+      "community": 29,
       "norm_label": "ids()"
     },
     {
@@ -2430,7 +2457,7 @@
       "source_file": "src/lib/derive.checkins.test.ts",
       "source_location": "L14",
       "id": "lib_derive_checkins_test_row",
-      "community": 10,
+      "community": 29,
       "norm_label": "row()"
     },
     {
@@ -2529,7 +2556,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L72",
       "id": "lib_derive_torneilistdata",
-      "community": 7,
+      "community": 40,
       "norm_label": "torneilistdata"
     },
     {
@@ -2601,7 +2628,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L146",
       "id": "lib_derive_compagnodetaildata",
-      "community": 16,
+      "community": 0,
       "norm_label": "compagnodetaildata"
     },
     {
@@ -2655,7 +2682,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L198",
       "id": "lib_derive_tournobj",
-      "community": 10,
+      "community": 39,
       "norm_label": "tournobj()"
     },
     {
@@ -2664,7 +2691,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L199",
       "id": "lib_derive_partnerobj",
-      "community": 10,
+      "community": 39,
       "norm_label": "partnerobj()"
     },
     {
@@ -2673,7 +2700,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L200",
       "id": "lib_derive_partnername",
-      "community": 10,
+      "community": 39,
       "norm_label": "partnername()"
     },
     {
@@ -2682,7 +2709,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L203",
       "id": "lib_derive_dotforrank",
-      "community": 10,
+      "community": 46,
       "norm_label": "dotforrank()"
     },
     {
@@ -2691,7 +2718,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L204",
       "id": "lib_derive_dotfor",
-      "community": 10,
+      "community": 46,
       "norm_label": "dotfor()"
     },
     {
@@ -2700,7 +2727,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L215",
       "id": "lib_derive_venueof",
-      "community": 10,
+      "community": 22,
       "norm_label": "venueof()"
     },
     {
@@ -2709,7 +2736,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L223",
       "id": "lib_derive_venuelabel",
-      "community": 10,
+      "community": 29,
       "norm_label": "venuelabel()"
     },
     {
@@ -2718,7 +2745,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L233",
       "id": "lib_derive_venuedisplay",
-      "community": 10,
+      "community": 22,
       "norm_label": "venuedisplay()"
     },
     {
@@ -2727,7 +2754,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L238",
       "id": "lib_derive_venueplace",
-      "community": 10,
+      "community": 22,
       "norm_label": "venueplace()"
     },
     {
@@ -2736,7 +2763,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L247",
       "id": "lib_derive_venuekeyof",
-      "community": 10,
+      "community": 22,
       "norm_label": "venuekeyof()"
     },
     {
@@ -2745,7 +2772,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L267",
       "id": "lib_derive_venuehistory",
-      "community": 10,
+      "community": 22,
       "norm_label": "venuehistory"
     },
     {
@@ -2754,7 +2781,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L278",
       "id": "lib_derive_venuehistorylabel",
-      "community": 10,
+      "community": 22,
       "norm_label": "venuehistorylabel()"
     },
     {
@@ -2781,7 +2808,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L302",
       "id": "lib_derive_formatlatlng",
-      "community": 29,
+      "community": 22,
       "norm_label": "formatlatlng()"
     },
     {
@@ -2790,7 +2817,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L308",
       "id": "lib_derive_mapurl",
-      "community": 10,
+      "community": 22,
       "norm_label": "mapurl()"
     },
     {
@@ -2799,7 +2826,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L315",
       "id": "lib_derive_venueoptions",
-      "community": 10,
+      "community": 22,
       "norm_label": "venueoptions()"
     },
     {
@@ -2808,7 +2835,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L321",
       "id": "lib_derive_matcheswithdates",
-      "community": 10,
+      "community": 39,
       "norm_label": "matcheswithdates()"
     },
     {
@@ -2817,7 +2844,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L325",
       "id": "lib_derive_filteredmatches",
-      "community": 10,
+      "community": 39,
       "norm_label": "filteredmatches()"
     },
     {
@@ -2826,7 +2853,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L333",
       "id": "lib_derive_decoratetournament",
-      "community": 10,
+      "community": 46,
       "norm_label": "decoratetournament()"
     },
     {
@@ -2835,7 +2862,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L355",
       "id": "lib_derive_derivedashboard",
-      "community": 10,
+      "community": 39,
       "norm_label": "derivedashboard()"
     },
     {
@@ -2844,7 +2871,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L456",
       "id": "lib_derive_derivedashboardserver",
-      "community": 10,
+      "community": 39,
       "norm_label": "derivedashboardserver()"
     },
     {
@@ -2862,7 +2889,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L542",
       "id": "lib_derive_byagendadate",
-      "community": 2,
+      "community": 44,
       "norm_label": "byagendadate()"
     },
     {
@@ -2907,7 +2934,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L608",
       "id": "lib_derive_derivetorneilist",
-      "community": 2,
+      "community": 44,
       "norm_label": "derivetorneilist()"
     },
     {
@@ -2916,7 +2943,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L622",
       "id": "lib_derive_derivetorneodetail",
-      "community": 10,
+      "community": 22,
       "norm_label": "derivetorneodetail()"
     },
     {
@@ -2925,7 +2952,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L660",
       "id": "lib_derive_derivecompagni",
-      "community": 2,
+      "community": 44,
       "norm_label": "derivecompagni()"
     },
     {
@@ -2934,7 +2961,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L669",
       "id": "lib_derive_derivecompagno",
-      "community": 10,
+      "community": 39,
       "norm_label": "derivecompagno()"
     },
     {
@@ -2943,7 +2970,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L692",
       "id": "lib_derive_derivediary",
-      "community": 10,
+      "community": 22,
       "norm_label": "derivediary()"
     },
     {
@@ -2952,7 +2979,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L730",
       "id": "lib_derive_fmtdatefull",
-      "community": 10,
+      "community": 39,
       "norm_label": "fmtdatefull()"
     },
     {
@@ -2961,7 +2988,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L736",
       "id": "lib_derive_resultlabelof",
-      "community": 10,
+      "community": 39,
       "norm_label": "resultlabelof()"
     },
     {
@@ -2970,7 +2997,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L749",
       "id": "lib_derive_derivestory",
-      "community": 10,
+      "community": 39,
       "norm_label": "derivestory()"
     },
     {
@@ -3060,7 +3087,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L858",
       "id": "lib_derive_derivewrapped",
-      "community": 10,
+      "community": 39,
       "norm_label": "derivewrapped()"
     },
     {
@@ -3069,7 +3096,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L1025",
       "id": "lib_derive_derivetorneilistserver",
-      "community": 2,
+      "community": 44,
       "norm_label": "derivetorneilistserver()"
     },
     {
@@ -3078,7 +3105,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L1042",
       "id": "lib_derive_derivecompagniserver",
-      "community": 2,
+      "community": 44,
       "norm_label": "derivecompagniserver()"
     },
     {
@@ -3087,7 +3114,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L1048",
       "id": "lib_derive_derivetorneodetailserver",
-      "community": 10,
+      "community": 22,
       "norm_label": "derivetorneodetailserver()"
     },
     {
@@ -3096,7 +3123,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L1085",
       "id": "lib_derive_derivecompagnodetailserver",
-      "community": 2,
+      "community": 44,
       "norm_label": "derivecompagnodetailserver()"
     },
     {
@@ -3105,7 +3132,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L1100",
       "id": "lib_derive_tournamentoptions",
-      "community": 2,
+      "community": 44,
       "norm_label": "tournamentoptions()"
     },
     {
@@ -3114,7 +3141,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L1104",
       "id": "lib_derive_partneroptions",
-      "community": 2,
+      "community": 44,
       "norm_label": "partneroptions()"
     },
     {
@@ -3132,7 +3159,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L1118",
       "id": "lib_derive_normalizecity",
-      "community": 10,
+      "community": 29,
       "norm_label": "normalizecity()"
     },
     {
@@ -3141,8 +3168,44 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L1125",
       "id": "lib_derive_derivewhoishere",
-      "community": 10,
+      "community": 29,
       "norm_label": "derivewhoishere()"
+    },
+    {
+      "label": "derive.venues.server.test.ts",
+      "file_type": "code",
+      "source_file": "src/lib/derive.venues.server.test.ts",
+      "source_location": "L1",
+      "id": "lib_derive_venues_server_test",
+      "community": 2,
+      "norm_label": "derive.venues.server.test.ts"
+    },
+    {
+      "label": "svCard()",
+      "file_type": "code",
+      "source_file": "src/lib/derive.venues.server.test.ts",
+      "source_location": "L25",
+      "id": "lib_derive_venues_server_test_svcard",
+      "community": 2,
+      "norm_label": "svcard()"
+    },
+    {
+      "label": "svList()",
+      "file_type": "code",
+      "source_file": "src/lib/derive.venues.server.test.ts",
+      "source_location": "L34",
+      "id": "lib_derive_venues_server_test_svlist",
+      "community": 2,
+      "norm_label": "svlist()"
+    },
+    {
+      "label": "svDetail()",
+      "file_type": "code",
+      "source_file": "src/lib/derive.venues.server.test.ts",
+      "source_location": "L38",
+      "id": "lib_derive_venues_server_test_svdetail",
+      "community": 2,
+      "norm_label": "svdetail()"
     },
     {
       "label": "derive.venues.test.ts",
@@ -3150,7 +3213,7 @@
       "source_file": "src/lib/derive.venues.test.ts",
       "source_location": "L1",
       "id": "lib_derive_venues_test",
-      "community": 10,
+      "community": 22,
       "norm_label": "derive.venues.test.ts"
     },
     {
@@ -3159,7 +3222,7 @@
       "source_file": "src/lib/derive.venues.test.ts",
       "source_location": "L30",
       "id": "lib_derive_venues_test_full_year",
-      "community": 10,
+      "community": 22,
       "norm_label": "full_year"
     },
     {
@@ -3168,7 +3231,7 @@
       "source_file": "src/lib/derive.venues.test.ts",
       "source_location": "L32",
       "id": "lib_derive_venues_test_statof",
-      "community": 10,
+      "community": 22,
       "norm_label": "statof()"
     },
     {
@@ -3231,7 +3294,7 @@
       "source_file": "src/lib/limits.ts",
       "source_location": "L1",
       "id": "lib_limits",
-      "community": 1,
+      "community": 16,
       "norm_label": "limits.ts"
     },
     {
@@ -3240,7 +3303,7 @@
       "source_file": "src/lib/limits.ts",
       "source_location": "L16",
       "id": "lib_limits_base_limits",
-      "community": 1,
+      "community": 16,
       "norm_label": "base_limits"
     },
     {
@@ -3249,7 +3312,7 @@
       "source_file": "src/lib/limits.ts",
       "source_location": "L49",
       "id": "lib_limits_entitlements",
-      "community": 1,
+      "community": 16,
       "norm_label": "entitlements"
     },
     {
@@ -3258,7 +3321,7 @@
       "source_file": "src/lib/limits.ts",
       "source_location": "L54",
       "id": "lib_limits_isunlimited",
-      "community": 1,
+      "community": 16,
       "norm_label": "isunlimited()"
     },
     {
@@ -3267,7 +3330,7 @@
       "source_file": "src/lib/limits.ts",
       "source_location": "L59",
       "id": "lib_limits_haspremium",
-      "community": 1,
+      "community": 16,
       "norm_label": "haspremium()"
     },
     {
@@ -3276,7 +3339,7 @@
       "source_file": "src/lib/limits.ts",
       "source_location": "L63",
       "id": "lib_limits_tournamentlimit",
-      "community": 1,
+      "community": 16,
       "norm_label": "tournamentlimit()"
     },
     {
@@ -3285,7 +3348,7 @@
       "source_file": "src/lib/limits.ts",
       "source_location": "L67",
       "id": "lib_limits_partnerlimit",
-      "community": 1,
+      "community": 16,
       "norm_label": "partnerlimit()"
     },
     {
@@ -3294,7 +3357,7 @@
       "source_file": "src/lib/models.ts",
       "source_location": "L1",
       "id": "lib_models",
-      "community": 16,
+      "community": 0,
       "norm_label": "models.ts"
     },
     {
@@ -3303,7 +3366,7 @@
       "source_file": "src/lib/models.ts",
       "source_location": "L11",
       "id": "lib_models_partner",
-      "community": 16,
+      "community": 0,
       "norm_label": "partner"
     },
     {
@@ -3312,7 +3375,7 @@
       "source_file": "src/lib/models.ts",
       "source_location": "L20",
       "id": "lib_models_appuser",
-      "community": 16,
+      "community": 0,
       "norm_label": "appuser"
     },
     {
@@ -3321,7 +3384,7 @@
       "source_file": "src/lib/models.ts",
       "source_location": "L39",
       "id": "lib_models_venue",
-      "community": 22,
+      "community": 3,
       "norm_label": "venue"
     },
     {
@@ -3366,7 +3429,7 @@
       "source_file": "src/lib/models.ts",
       "source_location": "L89",
       "id": "lib_models_tournament",
-      "community": 24,
+      "community": 0,
       "norm_label": "tournament"
     },
     {
@@ -3375,7 +3438,7 @@
       "source_file": "src/lib/models.ts",
       "source_location": "L105",
       "id": "lib_models_match",
-      "community": 16,
+      "community": 0,
       "norm_label": "match"
     },
     {
@@ -3384,7 +3447,7 @@
       "source_file": "src/lib/models.ts",
       "source_location": "L117",
       "id": "lib_models_guidedmatch",
-      "community": 16,
+      "community": 0,
       "norm_label": "guidedmatch"
     },
     {
@@ -3393,7 +3456,7 @@
       "source_file": "src/lib/models.ts",
       "source_location": "L123",
       "id": "lib_models_photo",
-      "community": 16,
+      "community": 0,
       "norm_label": "photo"
     },
     {
@@ -3411,7 +3474,7 @@
       "source_file": "src/lib/models.ts",
       "source_location": "L143",
       "id": "lib_models_formset",
-      "community": 16,
+      "community": 0,
       "norm_label": "formset"
     },
     {
@@ -3420,7 +3483,7 @@
       "source_file": "src/lib/models.ts",
       "source_location": "L148",
       "id": "lib_models_torneoform",
-      "community": 24,
+      "community": 0,
       "norm_label": "torneoform"
     },
     {
@@ -3429,7 +3492,7 @@
       "source_file": "src/lib/models.ts",
       "source_location": "L166",
       "id": "lib_models_partitaform",
-      "community": 16,
+      "community": 0,
       "norm_label": "partitaform"
     },
     {
@@ -3438,7 +3501,7 @@
       "source_file": "src/lib/models.ts",
       "source_location": "L176",
       "id": "lib_models_fotoform",
-      "community": 16,
+      "community": 0,
       "norm_label": "fotoform"
     },
     {
@@ -3447,7 +3510,7 @@
       "source_file": "src/lib/models.ts",
       "source_location": "L182",
       "id": "lib_models_compagnoform",
-      "community": 16,
+      "community": 0,
       "norm_label": "compagnoform"
     },
     {
@@ -3456,7 +3519,7 @@
       "source_file": "src/lib/models.ts",
       "source_location": "L188",
       "id": "lib_models_anyform",
-      "community": 22,
+      "community": 3,
       "norm_label": "anyform"
     },
     {
@@ -3465,7 +3528,7 @@
       "source_file": "src/lib/models.ts",
       "source_location": "L193",
       "id": "lib_models_setfield",
-      "community": 22,
+      "community": 3,
       "norm_label": "setfield"
     },
     {
@@ -3474,7 +3537,7 @@
       "source_file": "src/lib/models.ts",
       "source_location": "L199",
       "id": "lib_models_setsapi",
-      "community": 22,
+      "community": 3,
       "norm_label": "setsapi"
     },
     {
@@ -3483,7 +3546,7 @@
       "source_file": "src/lib/models.ts",
       "source_location": "L208",
       "id": "lib_models_option",
-      "community": 22,
+      "community": 3,
       "norm_label": "option"
     },
     {
@@ -3492,7 +3555,7 @@
       "source_file": "src/lib/models.ts",
       "source_location": "L214",
       "id": "lib_models_modalkind",
-      "community": 2,
+      "community": 0,
       "norm_label": "modalkind"
     },
     {
@@ -3510,7 +3573,7 @@
       "source_file": "src/lib/permissions.ts",
       "source_location": "L1",
       "id": "lib_permissions",
-      "community": 1,
+      "community": 16,
       "norm_label": "permissions.ts"
     },
     {
@@ -3519,7 +3582,7 @@
       "source_file": "src/lib/permissions.ts",
       "source_location": "L14",
       "id": "lib_permissions_permissionaction",
-      "community": 1,
+      "community": 16,
       "norm_label": "permissionaction"
     },
     {
@@ -3528,7 +3591,7 @@
       "source_file": "src/lib/permissions.ts",
       "source_location": "L23",
       "id": "lib_permissions_usage",
-      "community": 1,
+      "community": 16,
       "norm_label": "usage"
     },
     {
@@ -3537,7 +3600,7 @@
       "source_file": "src/lib/permissions.ts",
       "source_location": "L29",
       "id": "lib_permissions_permissioncheck",
-      "community": 1,
+      "community": 16,
       "norm_label": "permissioncheck"
     },
     {
@@ -3546,7 +3609,7 @@
       "source_file": "src/lib/permissions.ts",
       "source_location": "L39",
       "id": "lib_permissions_permissions",
-      "community": 1,
+      "community": 16,
       "norm_label": "permissions"
     },
     {
@@ -3555,7 +3618,7 @@
       "source_file": "src/lib/permissions.ts",
       "source_location": "L51",
       "id": "lib_permissions_permissionsfor",
-      "community": 1,
+      "community": 16,
       "norm_label": "permissionsfor()"
     },
     {
@@ -3654,7 +3717,7 @@
       "source_file": "src/lib/serverviews.ts",
       "source_location": "L51",
       "id": "lib_serverviews_svpresentuser",
-      "community": 10,
+      "community": 29,
       "norm_label": "svpresentuser"
     },
     {
@@ -3717,7 +3780,7 @@
       "source_file": "src/lib/stats.ts",
       "source_location": "L1",
       "id": "lib_stats",
-      "community": 10,
+      "community": 24,
       "norm_label": "stats.ts"
     },
     {
@@ -3726,7 +3789,7 @@
       "source_file": "src/lib/stats.ts",
       "source_location": "L4",
       "id": "lib_stats_matchresult",
-      "community": 10,
+      "community": 24,
       "norm_label": "matchresult"
     },
     {
@@ -3744,7 +3807,7 @@
       "source_file": "src/lib/stats.ts",
       "source_location": "L71",
       "id": "lib_stats_esitostyle",
-      "community": 10,
+      "community": 24,
       "norm_label": "esitostyle"
     },
     {
@@ -3753,7 +3816,7 @@
       "source_file": "src/lib/stats.ts",
       "source_location": "L24",
       "id": "lib_stats_resultkey",
-      "community": 10,
+      "community": 24,
       "norm_label": "resultkey"
     },
     {
@@ -3762,7 +3825,7 @@
       "source_file": "src/lib/stats.ts",
       "source_location": "L26",
       "id": "lib_stats_stats",
-      "community": 10,
+      "community": 24,
       "norm_label": "stats"
     },
     {
@@ -3771,7 +3834,7 @@
       "source_file": "src/lib/stats.ts",
       "source_location": "L45",
       "id": "lib_stats_withsets",
-      "community": 10,
+      "community": 24,
       "norm_label": "withsets"
     },
     {
@@ -3780,7 +3843,7 @@
       "source_file": "src/lib/stats.ts",
       "source_location": "L48",
       "id": "lib_stats_res",
-      "community": 10,
+      "community": 24,
       "norm_label": "res()"
     },
     {
@@ -3789,7 +3852,7 @@
       "source_file": "src/lib/stats.ts",
       "source_location": "L60",
       "id": "lib_stats_placementrank",
-      "community": 10,
+      "community": 46,
       "norm_label": "placementrank()"
     },
     {
@@ -3798,7 +3861,7 @@
       "source_file": "src/lib/stats.ts",
       "source_location": "L78",
       "id": "lib_stats_setchips",
-      "community": 10,
+      "community": 24,
       "norm_label": "setchips()"
     },
     {
@@ -3807,7 +3870,7 @@
       "source_file": "src/lib/stats.ts",
       "source_location": "L86",
       "id": "lib_stats_fmtdate",
-      "community": 10,
+      "community": 46,
       "norm_label": "fmtdate()"
     },
     {
@@ -3816,7 +3879,7 @@
       "source_file": "src/lib/stats.ts",
       "source_location": "L91",
       "id": "lib_stats_monthidx",
-      "community": 10,
+      "community": 24,
       "norm_label": "monthidx()"
     },
     {
@@ -3825,7 +3888,7 @@
       "source_file": "src/lib/stats.ts",
       "source_location": "L92",
       "id": "lib_stats_yearof",
-      "community": 10,
+      "community": 24,
       "norm_label": "yearof()"
     },
     {
@@ -3834,7 +3897,7 @@
       "source_file": "src/lib/stats.ts",
       "source_location": "L95",
       "id": "lib_stats_computestats",
-      "community": 10,
+      "community": 39,
       "norm_label": "computestats()"
     },
     {
@@ -3843,7 +3906,7 @@
       "source_file": "src/lib/stats.ts",
       "source_location": "L125",
       "id": "lib_stats_streakof",
-      "community": 10,
+      "community": 39,
       "norm_label": "streakof()"
     },
     {
@@ -3870,7 +3933,7 @@
       "source_file": "src/lib/theme.ts",
       "source_location": "L1",
       "id": "lib_theme",
-      "community": 0,
+      "community": 24,
       "norm_label": "theme.ts"
     },
     {
@@ -3879,7 +3942,7 @@
       "source_file": "src/lib/theme.ts",
       "source_location": "L2",
       "id": "lib_theme_c",
-      "community": 0,
+      "community": 24,
       "norm_label": "c"
     },
     {
@@ -3888,7 +3951,7 @@
       "source_file": "src/lib/theme.ts",
       "source_location": "L16",
       "id": "lib_theme_swatch_colors",
-      "community": 0,
+      "community": 24,
       "norm_label": "swatch_colors"
     },
     {
@@ -3897,7 +3960,7 @@
       "source_file": "src/lib/theme.ts",
       "source_location": "L18",
       "id": "lib_theme_months_short",
-      "community": 0,
+      "community": 24,
       "norm_label": "months_short"
     },
     {
@@ -3906,7 +3969,7 @@
       "source_file": "src/lib/theme.ts",
       "source_location": "L20",
       "id": "lib_theme_months_full",
-      "community": 0,
+      "community": 24,
       "norm_label": "months_full"
     },
     {
@@ -3951,7 +4014,7 @@
       "source_file": "src/screens/ChiCeOggi.test.tsx",
       "source_location": "L29",
       "id": "screens_chiceoggi_test_renderscreen",
-      "community": 2,
+      "community": 5,
       "norm_label": "renderscreen()"
     },
     {
@@ -4140,7 +4203,7 @@
       "source_file": "src/screens/CompagnoDetail.tsx",
       "source_location": "L6",
       "id": "screens_compagnodetail_compagnodetailprops",
-      "community": 16,
+      "community": 0,
       "norm_label": "compagnodetailprops"
     },
     {
@@ -4194,7 +4257,7 @@
       "source_file": "src/screens/CreaChat.tsx",
       "source_location": "L48",
       "id": "screens_creachat_draft",
-      "community": 24,
+      "community": 0,
       "norm_label": "draft"
     },
     {
@@ -4212,7 +4275,7 @@
       "source_file": "src/screens/CreaChat.tsx",
       "source_location": "L72",
       "id": "screens_creachat_creachatprops",
-      "community": 22,
+      "community": 3,
       "norm_label": "creachatprops"
     },
     {
@@ -4455,7 +4518,7 @@
       "source_file": "src/screens/Home.tsx",
       "source_location": "L17",
       "id": "screens_home_homefilters",
-      "community": 22,
+      "community": 8,
       "norm_label": "homefilters"
     },
     {
@@ -4482,7 +4545,7 @@
       "source_file": "src/screens/Login.tsx",
       "source_location": "L1",
       "id": "screens_login",
-      "community": 1,
+      "community": 43,
       "norm_label": "login.tsx"
     },
     {
@@ -4491,7 +4554,7 @@
       "source_file": "src/screens/Login.tsx",
       "source_location": "L8",
       "id": "screens_login_mode",
-      "community": 1,
+      "community": 43,
       "norm_label": "mode"
     },
     {
@@ -4500,7 +4563,7 @@
       "source_file": "src/screens/Login.tsx",
       "source_location": "L10",
       "id": "screens_login_inputstyle",
-      "community": 1,
+      "community": 43,
       "norm_label": "inputstyle"
     },
     {
@@ -4509,7 +4572,7 @@
       "source_file": "src/screens/Login.tsx",
       "source_location": "L19",
       "id": "screens_login_seg",
-      "community": 1,
+      "community": 43,
       "norm_label": "seg()"
     },
     {
@@ -4518,7 +4581,7 @@
       "source_file": "src/screens/Login.tsx",
       "source_location": "L31",
       "id": "screens_login_features",
-      "community": 1,
+      "community": 43,
       "norm_label": "features"
     },
     {
@@ -4527,7 +4590,7 @@
       "source_file": "src/screens/Login.tsx",
       "source_location": "L37",
       "id": "screens_login_login",
-      "community": 1,
+      "community": 43,
       "norm_label": "login()"
     },
     {
@@ -4536,7 +4599,7 @@
       "source_file": "src/screens/Profilo.tsx",
       "source_location": "L1",
       "id": "screens_profilo",
-      "community": 1,
+      "community": 45,
       "norm_label": "profilo.tsx"
     },
     {
@@ -4545,7 +4608,7 @@
       "source_file": "src/screens/Profilo.tsx",
       "source_location": "L10",
       "id": "screens_profilo_profiloprops",
-      "community": 1,
+      "community": 16,
       "norm_label": "profiloprops"
     },
     {
@@ -4554,7 +4617,7 @@
       "source_file": "src/screens/Profilo.tsx",
       "source_location": "L16",
       "id": "screens_profilo_msg",
-      "community": 1,
+      "community": 45,
       "norm_label": "msg"
     },
     {
@@ -4563,7 +4626,7 @@
       "source_file": "src/screens/Profilo.tsx",
       "source_location": "L18",
       "id": "screens_profilo_feedback",
-      "community": 1,
+      "community": 45,
       "norm_label": "feedback()"
     },
     {
@@ -4572,7 +4635,7 @@
       "source_file": "src/screens/Profilo.tsx",
       "source_location": "L27",
       "id": "screens_profilo_hintstyle",
-      "community": 1,
+      "community": 45,
       "norm_label": "hintstyle"
     },
     {
@@ -4581,7 +4644,7 @@
       "source_file": "src/screens/Profilo.tsx",
       "source_location": "L28",
       "id": "screens_profilo_readonlystyle",
-      "community": 1,
+      "community": 45,
       "norm_label": "readonlystyle"
     },
     {
@@ -4590,7 +4653,7 @@
       "source_file": "src/screens/Profilo.tsx",
       "source_location": "L30",
       "id": "screens_profilo_savebutton",
-      "community": 1,
+      "community": 45,
       "norm_label": "savebutton()"
     },
     {
@@ -4599,7 +4662,7 @@
       "source_file": "src/screens/Profilo.tsx",
       "source_location": "L47",
       "id": "screens_profilo_profilo",
-      "community": 1,
+      "community": 43,
       "norm_label": "profilo()"
     },
     {
@@ -4662,7 +4725,7 @@
       "source_file": "src/screens/Tornei.tsx",
       "source_location": "L1",
       "id": "screens_tornei",
-      "community": 7,
+      "community": 40,
       "norm_label": "tornei.tsx"
     },
     {
@@ -4671,7 +4734,7 @@
       "source_file": "src/screens/Tornei.tsx",
       "source_location": "L6",
       "id": "screens_tornei_torneiprops",
-      "community": 7,
+      "community": 40,
       "norm_label": "torneiprops"
     },
     {
@@ -4680,7 +4743,7 @@
       "source_file": "src/screens/Tornei.tsx",
       "source_location": "L15",
       "id": "screens_tornei_tornei",
-      "community": 7,
+      "community": 40,
       "norm_label": "tornei()"
     },
     {
@@ -4689,7 +4752,7 @@
       "source_file": "src/screens/Tornei.tsx",
       "source_location": "L72",
       "id": "screens_tornei_torneisection",
-      "community": 7,
+      "community": 40,
       "norm_label": "torneisection()"
     },
     {
@@ -4698,7 +4761,7 @@
       "source_file": "src/screens/Tornei.tsx",
       "source_location": "L93",
       "id": "screens_tornei_sectioncount",
-      "community": 7,
+      "community": 40,
       "norm_label": "sectioncount()"
     },
     {
@@ -4707,7 +4770,7 @@
       "source_file": "src/screens/Tornei.tsx",
       "source_location": "L111",
       "id": "screens_tornei_torneigrid",
-      "community": 7,
+      "community": 40,
       "norm_label": "torneigrid()"
     },
     {
@@ -4716,7 +4779,7 @@
       "source_file": "src/screens/Tornei.tsx",
       "source_location": "L122",
       "id": "screens_tornei_torneocardview",
-      "community": 7,
+      "community": 40,
       "norm_label": "torneocardview()"
     },
     {
@@ -4923,7 +4986,7 @@
       "source_file": "src/test/factories.ts",
       "source_location": "L138",
       "id": "test_factories_makevenue",
-      "community": 10,
+      "community": 2,
       "norm_label": "makevenue()"
     },
     {
@@ -5569,7 +5632,7 @@
       "label": "Struttura",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L33",
+      "source_location": "L36",
       "id": "readme_struttura",
       "community": 25,
       "norm_label": "struttura"
@@ -5578,7 +5641,7 @@
       "label": "Design tokens",
       "file_type": "document",
       "source_file": "README.md",
-      "source_location": "L59",
+      "source_location": "L62",
       "id": "readme_design_tokens",
       "community": 25,
       "norm_label": "design tokens"
@@ -5764,11 +5827,119 @@
       "norm_label": "come far girare la suite"
     },
     {
+      "label": "QA-venues.md",
+      "file_type": "document",
+      "source_file": "docs/QA-venues.md",
+      "source_location": "L1",
+      "id": "docs_qa_venues",
+      "community": 41,
+      "norm_label": "qa-venues.md"
+    },
+    {
+      "label": "QA \u2014 Luoghi (venues): la citt\u00e0 diventa un posto vero",
+      "file_type": "document",
+      "source_file": "docs/QA-venues.md",
+      "source_location": "L1",
+      "id": "docs_qa_venues_qa_luoghi_venues_la_citt\u00e0_diventa_un_posto_vero",
+      "community": 41,
+      "norm_label": "qa \u2014 luoghi (venues): la citta diventa un posto vero"
+    },
+    {
+      "label": "La decisione che cambia la forma dello schema",
+      "file_type": "document",
+      "source_file": "docs/QA-venues.md",
+      "source_location": "L19",
+      "id": "docs_qa_venues_la_decisione_che_cambia_la_forma_dello_schema",
+      "community": 41,
+      "norm_label": "la decisione che cambia la forma dello schema"
+    },
+    {
+      "label": "Cosa \u00e8 stato verificato",
+      "file_type": "document",
+      "source_file": "docs/QA-venues.md",
+      "source_location": "L40",
+      "id": "docs_qa_venues_cosa_\u00e8_stato_verificato",
+      "community": 41,
+      "norm_label": "cosa e stato verificato"
+    },
+    {
+      "label": "Sul DB (query di sola lettura sul progetto reale)",
+      "file_type": "document",
+      "source_file": "docs/QA-venues.md",
+      "source_location": "L42",
+      "id": "docs_qa_venues_sul_db_query_di_sola_lettura_sul_progetto_reale",
+      "community": 41,
+      "norm_label": "sul db (query di sola lettura sul progetto reale)"
+    },
+    {
+      "label": "Automatico (`src/lib/derive.venues.server.test.ts`, 11 test)",
+      "file_type": "document",
+      "source_file": "docs/QA-venues.md",
+      "source_location": "L66",
+      "id": "docs_qa_venues_automatico_src_lib_derive_venues_server_test_ts_11_test",
+      "community": 41,
+      "norm_label": "automatico (`src/lib/derive.venues.server.test.ts`, 11 test)"
+    },
+    {
+      "label": "Decisioni e assunzioni (documentate)",
+      "file_type": "document",
+      "source_file": "docs/QA-venues.md",
+      "source_location": "L82",
+      "id": "docs_qa_venues_decisioni_e_assunzioni_documentate",
+      "community": 41,
+      "norm_label": "decisioni e assunzioni (documentate)"
+    },
+    {
+      "label": "\u26a0\ufe0f Limitazione nota: il merge di un luogo condiviso",
+      "file_type": "document",
+      "source_file": "docs/QA-venues.md",
+      "source_location": "L119",
+      "id": "docs_qa_venues_limitazione_nota_il_merge_di_un_luogo_condiviso",
+      "community": 41,
+      "norm_label": "\u26a0\ufe0f limitazione nota: il merge di un luogo condiviso"
+    },
+    {
+      "label": "Non fatto, di proposito",
+      "file_type": "document",
+      "source_file": "docs/QA-venues.md",
+      "source_location": "L138",
+      "id": "docs_qa_venues_non_fatto_di_proposito",
+      "community": 41,
+      "norm_label": "non fatto, di proposito"
+    },
+    {
+      "label": "Da verificare a mano (fuori dalla portata di jsdom)",
+      "file_type": "document",
+      "source_file": "docs/QA-venues.md",
+      "source_location": "L150",
+      "id": "docs_qa_venues_da_verificare_a_mano_fuori_dalla_portata_di_jsdom",
+      "community": 41,
+      "norm_label": "da verificare a mano (fuori dalla portata di jsdom)"
+    },
+    {
+      "label": "Follow-up",
+      "file_type": "document",
+      "source_file": "docs/QA-venues.md",
+      "source_location": "L170",
+      "id": "docs_qa_venues_follow_up",
+      "community": 41,
+      "norm_label": "follow-up"
+    },
+    {
+      "label": "Come far girare la suite",
+      "file_type": "document",
+      "source_file": "docs/QA-venues.md",
+      "source_location": "L180",
+      "id": "docs_qa_venues_come_far_girare_la_suite",
+      "community": 41,
+      "norm_label": "come far girare la suite"
+    },
+    {
       "label": "README.md",
       "file_type": "document",
       "source_file": "supabase/README.md",
       "source_location": "L1",
-      "id": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_supabase_readme_md",
+      "id": "supabase_readme",
       "community": 21,
       "norm_label": "readme.md"
     },
@@ -5785,16 +5956,25 @@
       "label": "Struttura",
       "file_type": "document",
       "source_file": "supabase/README.md",
-      "source_location": "L6",
+      "source_location": "L7",
       "id": "supabase_readme_struttura",
       "community": 21,
       "norm_label": "struttura"
     },
     {
+      "label": "`venues` \u2014 l'eccezione alla regola owner-only",
+      "file_type": "document",
+      "source_file": "supabase/README.md",
+      "source_location": "L34",
+      "id": "supabase_readme_venues_l_eccezione_alla_regola_owner_only",
+      "community": 21,
+      "norm_label": "`venues` \u2014 l'eccezione alla regola owner-only"
+    },
+    {
       "label": "Vincoli principali",
       "file_type": "document",
       "source_file": "supabase/README.md",
-      "source_location": "L32",
+      "source_location": "L50",
       "id": "supabase_readme_vincoli_principali",
       "community": 21,
       "norm_label": "vincoli principali"
@@ -5803,25 +5983,25 @@
       "label": "Come applicare",
       "file_type": "document",
       "source_file": "supabase/README.md",
-      "source_location": "L41",
+      "source_location": "L64",
       "id": "supabase_readme_come_applicare",
       "community": 21,
       "norm_label": "come applicare"
     },
     {
-      "label": "1) Supabase CLI (consigliato)",
+      "label": "1) Supabase CLI (solo per uno stack locale nuovo)",
       "file_type": "document",
       "source_file": "supabase/README.md",
-      "source_location": "L45",
-      "id": "supabase_readme_1_supabase_cli_consigliato",
+      "source_location": "L72",
+      "id": "supabase_readme_1_supabase_cli_solo_per_uno_stack_locale_nuovo",
       "community": 21,
-      "norm_label": "1) supabase cli (consigliato)"
+      "norm_label": "1) supabase cli (solo per uno stack locale nuovo)"
     },
     {
       "label": "2) Dashboard \u2192 SQL Editor",
       "file_type": "document",
       "source_file": "supabase/README.md",
-      "source_location": "L56",
+      "source_location": "L82",
       "id": "supabase_readme_2_dashboard_sql_editor",
       "community": 21,
       "norm_label": "2) dashboard \u2192 sql editor"
@@ -5830,7 +6010,7 @@
       "label": "3) Claude + Supabase MCP",
       "file_type": "document",
       "source_file": "supabase/README.md",
-      "source_location": "L61",
+      "source_location": "L87",
       "id": "supabase_readme_3_claude_supabase_mcp",
       "community": 21,
       "norm_label": "3) claude + supabase mcp"
@@ -5839,7 +6019,7 @@
       "label": "Dati demo (opzionale)",
       "file_type": "document",
       "source_file": "supabase/README.md",
-      "source_location": "L65",
+      "source_location": "L91",
       "id": "supabase_readme_dati_demo_opzionale",
       "community": 21,
       "norm_label": "dati demo (opzionale)"
@@ -5848,7 +6028,7 @@
       "label": "Tipi TypeScript",
       "file_type": "document",
       "source_file": "supabase/README.md",
-      "source_location": "L71",
+      "source_location": "L97",
       "id": "supabase_readme_tipi_typescript",
       "community": 21,
       "norm_label": "tipi typescript"
@@ -5857,10 +6037,28 @@
       "label": "Prossimi passi",
       "file_type": "document",
       "source_file": "supabase/README.md",
-      "source_location": "L93",
+      "source_location": "L121",
       "id": "supabase_readme_prossimi_passi",
       "community": 21,
       "norm_label": "prossimi passi"
+    },
+    {
+      "label": "README.md",
+      "file_type": "document",
+      "source_file": "supabase/README.md",
+      "source_location": "L1",
+      "community": 21,
+      "norm_label": "readme.md",
+      "id": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_supabase_readme_md"
+    },
+    {
+      "label": "1) Supabase CLI (consigliato)",
+      "file_type": "document",
+      "source_file": "supabase/README.md",
+      "source_location": "L45",
+      "community": 21,
+      "norm_label": "1) supabase cli (consigliato)",
+      "id": "supabase_readme_1_supabase_cli_consigliato"
     },
     {
       "label": "linked-project.json",
@@ -6329,15 +6527,6 @@
       "community": 19,
       "norm_label": "qa-tornei-formati.md",
       "id": "docs_qa_tornei_formati"
-    },
-    {
-      "label": "README.md",
-      "file_type": "document",
-      "source_file": "supabase/README.md",
-      "source_location": "L1",
-      "community": 21,
-      "norm_label": "readme.md",
-      "id": "supabase_readme"
     }
   ],
   "links": [
@@ -6497,9 +6686,9 @@
       "source_file": "package.json",
       "source_location": "L20",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "package_dependencies",
-      "target": "package_dependencies_leaflet",
-      "confidence_score": 1.0
+      "target": "package_dependencies_leaflet"
     },
     {
       "relation": "contains",
@@ -6617,9 +6806,9 @@
       "source_file": "package.json",
       "source_location": "L29",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "package_devdependencies",
-      "target": "package_devdependencies_types_leaflet",
-      "confidence_score": 1.0
+      "target": "package_devdependencies_types_leaflet"
     },
     {
       "relation": "contains",
@@ -6798,9 +6987,9 @@
       "source_file": "src/App.tsx",
       "source_location": "L64",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_app",
-      "target": "hooks_usecheckin",
-      "confidence_score": 1.0
+      "target": "hooks_usecheckin"
     },
     {
       "relation": "imports",
@@ -6809,9 +6998,9 @@
       "source_file": "src/App.tsx",
       "source_location": "L64",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_app",
-      "target": "hooks_usecheckin_usecheckin",
-      "confidence_score": 1.0
+      "target": "hooks_usecheckin_usecheckin"
     },
     {
       "relation": "imports_from",
@@ -7084,9 +7273,9 @@
       "source_file": "src/App.tsx",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_app",
-      "target": "lib_derive_venueoptions",
-      "confidence_score": 1.0
+      "target": "lib_derive_venueoptions"
     },
     {
       "relation": "imports",
@@ -7370,9 +7559,9 @@
       "source_file": "src/App.tsx",
       "source_location": "L63",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "src_app",
-      "target": "screens_chiceoggi",
-      "confidence_score": 1.0
+      "target": "screens_chiceoggi"
     },
     {
       "relation": "imports_from",
@@ -8269,9 +8458,9 @@
       "source_file": "src/components/VenueMap.tsx",
       "source_location": "L35",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_venuemap",
-      "target": "components_venuemap_venuemap",
-      "confidence_score": 1.0
+      "target": "components_venuemap_venuemap"
     },
     {
       "relation": "contains",
@@ -8279,9 +8468,9 @@
       "source_file": "src/components/VenueMap.tsx",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_venuemap",
-      "target": "components_venuemap_venuemapprops",
-      "confidence_score": 1.0
+      "target": "components_venuemap_venuemapprops"
     },
     {
       "relation": "re_exports",
@@ -9648,9 +9837,9 @@
       "source_file": "src/components/modals/QuickTorneoModal.tsx",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "modals_quicktorneomodal",
-      "target": "lib_models_venue",
-      "confidence_score": 1.0
+      "target": "lib_models_venue"
     },
     {
       "relation": "contains",
@@ -9756,9 +9945,9 @@
       "source_file": "src/components/modals/QuickTorneoModal.tsx",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "modals_quicktorneomodal",
-      "target": "modals_venuepicker",
-      "confidence_score": 1.0
+      "target": "modals_venuepicker"
     },
     {
       "relation": "references",
@@ -9800,9 +9989,9 @@
       "source_file": "src/components/modals/QuickTorneoModal.tsx",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "modals_quicktorneomodal_quicktorneomodalprops",
-      "target": "lib_models_venue",
-      "confidence_score": 1.0
+      "target": "lib_models_venue"
     },
     {
       "relation": "contains",
@@ -9913,9 +10102,9 @@
       "source_file": "src/components/modals/VenuePicker.tsx",
       "source_location": "L16",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "modals_venuepicker",
-      "target": "modals_sheet",
-      "confidence_score": 1.0
+      "target": "modals_sheet"
     },
     {
       "relation": "imports_from",
@@ -10012,9 +10201,9 @@
       "source_file": "src/components/modals/VenuePicker.tsx",
       "source_location": "L16",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "modals_venuepicker",
-      "target": "modals_sheet_inputstyle",
-      "confidence_score": 1.0
+      "target": "modals_sheet_inputstyle"
     },
     {
       "relation": "imports",
@@ -10045,9 +10234,9 @@
       "source_file": "src/components/modals/VenuePicker.tsx",
       "source_location": "L16",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "modals_venuepicker",
-      "target": "modals_sheet_selectstyle",
-      "confidence_score": 1.0
+      "target": "modals_sheet_selectstyle"
     },
     {
       "relation": "imports",
@@ -10278,9 +10467,9 @@
       "source_file": "src/components/modals/TorneoModal.tsx",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "modals_torneomodal",
-      "target": "lib_models_venue",
-      "confidence_score": 1.0
+      "target": "lib_models_venue"
     },
     {
       "relation": "imports_from",
@@ -10351,9 +10540,9 @@
       "source_file": "src/components/modals/TorneoModal.tsx",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "modals_torneomodal",
-      "target": "modals_venuepicker",
-      "confidence_score": 1.0
+      "target": "modals_venuepicker"
     },
     {
       "relation": "references",
@@ -10395,9 +10584,9 @@
       "source_file": "src/components/modals/TorneoModal.tsx",
       "source_location": "L16",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "modals_torneomodal_torneomodalprops",
-      "target": "lib_models_venue",
-      "confidence_score": 1.0
+      "target": "lib_models_venue"
     },
     {
       "relation": "contains",
@@ -10436,9 +10625,9 @@
       "source_file": "src/components/modals/VenuePicker.tsx",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "modals_venuepicker",
-      "target": "lib_derive",
-      "confidence_score": 1.0
+      "target": "lib_derive"
     },
     {
       "relation": "imports",
@@ -10447,9 +10636,9 @@
       "source_file": "src/components/modals/VenuePicker.tsx",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "modals_venuepicker",
-      "target": "lib_derive_formatlatlng",
-      "confidence_score": 1.0
+      "target": "lib_derive_formatlatlng"
     },
     {
       "relation": "imports",
@@ -10458,9 +10647,9 @@
       "source_file": "src/components/modals/VenuePicker.tsx",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "modals_venuepicker",
-      "target": "lib_derive_parselatlng",
-      "confidence_score": 1.0
+      "target": "lib_derive_parselatlng"
     },
     {
       "relation": "imports",
@@ -10469,9 +10658,9 @@
       "source_file": "src/components/modals/VenuePicker.tsx",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "modals_venuepicker",
-      "target": "lib_derive_venuelabel",
-      "confidence_score": 1.0
+      "target": "lib_derive_venuelabel"
     },
     {
       "relation": "imports_from",
@@ -10480,9 +10669,9 @@
       "source_file": "src/components/modals/VenuePicker.tsx",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "modals_venuepicker",
-      "target": "lib_models",
-      "confidence_score": 1.0
+      "target": "lib_models"
     },
     {
       "relation": "imports",
@@ -10491,9 +10680,9 @@
       "source_file": "src/components/modals/VenuePicker.tsx",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "modals_venuepicker",
-      "target": "lib_models_anyform",
-      "confidence_score": 1.0
+      "target": "lib_models_anyform"
     },
     {
       "relation": "imports",
@@ -10502,9 +10691,9 @@
       "source_file": "src/components/modals/VenuePicker.tsx",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "modals_venuepicker",
-      "target": "lib_models_setfield",
-      "confidence_score": 1.0
+      "target": "lib_models_setfield"
     },
     {
       "relation": "imports",
@@ -10513,9 +10702,9 @@
       "source_file": "src/components/modals/VenuePicker.tsx",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "modals_venuepicker",
-      "target": "lib_models_venue",
-      "confidence_score": 1.0
+      "target": "lib_models_venue"
     },
     {
       "relation": "contains",
@@ -10523,9 +10712,9 @@
       "source_file": "src/components/modals/VenuePicker.tsx",
       "source_location": "L26",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "modals_venuepicker",
-      "target": "modals_venuepicker_fieldlabel",
-      "confidence_score": 1.0
+      "target": "modals_venuepicker_fieldlabel"
     },
     {
       "relation": "contains",
@@ -10533,9 +10722,9 @@
       "source_file": "src/components/modals/VenuePicker.tsx",
       "source_location": "L41",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "modals_venuepicker",
-      "target": "modals_venuepicker_hintstyle",
-      "confidence_score": 1.0
+      "target": "modals_venuepicker_hintstyle"
     },
     {
       "relation": "contains",
@@ -10543,9 +10732,9 @@
       "source_file": "src/components/modals/VenuePicker.tsx",
       "source_location": "L42",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "modals_venuepicker",
-      "target": "modals_venuepicker_minibtn",
-      "confidence_score": 1.0
+      "target": "modals_venuepicker_minibtn"
     },
     {
       "relation": "contains",
@@ -10553,9 +10742,9 @@
       "source_file": "src/components/modals/VenuePicker.tsx",
       "source_location": "L102",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "modals_venuepicker",
-      "target": "modals_venuepicker_newvenuefields",
-      "confidence_score": 1.0
+      "target": "modals_venuepicker_newvenuefields"
     },
     {
       "relation": "contains",
@@ -10563,9 +10752,9 @@
       "source_file": "src/components/modals/VenuePicker.tsx",
       "source_location": "L32",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "modals_venuepicker",
-      "target": "modals_venuepicker_panelstyle",
-      "confidence_score": 1.0
+      "target": "modals_venuepicker_panelstyle"
     },
     {
       "relation": "contains",
@@ -10573,9 +10762,9 @@
       "source_file": "src/components/modals/VenuePicker.tsx",
       "source_location": "L191",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "modals_venuepicker",
-      "target": "modals_venuepicker_selectedvenuenote",
-      "confidence_score": 1.0
+      "target": "modals_venuepicker_selectedvenuenote"
     },
     {
       "relation": "contains",
@@ -10583,9 +10772,9 @@
       "source_file": "src/components/modals/VenuePicker.tsx",
       "source_location": "L64",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "modals_venuepicker",
-      "target": "modals_venuepicker_venuepicker",
-      "confidence_score": 1.0
+      "target": "modals_venuepicker_venuepicker"
     },
     {
       "relation": "contains",
@@ -10593,9 +10782,9 @@
       "source_file": "src/components/modals/VenuePicker.tsx",
       "source_location": "L54",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "modals_venuepicker",
-      "target": "modals_venuepicker_venuepickerprops",
-      "confidence_score": 1.0
+      "target": "modals_venuepicker_venuepickerprops"
     },
     {
       "relation": "references",
@@ -10604,9 +10793,9 @@
       "source_file": "src/components/modals/VenuePicker.tsx",
       "source_location": "L55",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "modals_venuepicker_venuepickerprops",
-      "target": "lib_models_anyform",
-      "confidence_score": 1.0
+      "target": "lib_models_anyform"
     },
     {
       "relation": "references",
@@ -10615,9 +10804,9 @@
       "source_file": "src/components/modals/VenuePicker.tsx",
       "source_location": "L56",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "modals_venuepicker_venuepickerprops",
-      "target": "lib_models_setfield",
-      "confidence_score": 1.0
+      "target": "lib_models_setfield"
     },
     {
       "relation": "references",
@@ -10626,9 +10815,9 @@
       "source_file": "src/components/modals/VenuePicker.tsx",
       "source_location": "L57",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "modals_venuepicker_venuepickerprops",
-      "target": "lib_models_venue",
-      "confidence_score": 1.0
+      "target": "lib_models_venue"
     },
     {
       "relation": "calls",
@@ -10889,9 +11078,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "components_ui",
-      "confidence_score": 1.0
+      "target": "components_ui"
     },
     {
       "relation": "imports_from",
@@ -10988,9 +11177,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "components_ui_badge",
-      "confidence_score": 1.0
+      "target": "components_ui_badge"
     },
     {
       "relation": "imports",
@@ -11076,9 +11265,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "components_ui_pageheader",
-      "confidence_score": 1.0
+      "target": "components_ui_pageheader"
     },
     {
       "relation": "imports",
@@ -11120,9 +11309,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "components_ui_filterchips",
-      "confidence_score": 1.0
+      "target": "components_ui_filterchips"
     },
     {
       "relation": "imports",
@@ -11164,9 +11353,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "components_ui_sectiontitle",
-      "confidence_score": 1.0
+      "target": "components_ui_sectiontitle"
     },
     {
       "relation": "imports",
@@ -11208,9 +11397,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "components_ui_emptycard",
-      "confidence_score": 1.0
+      "target": "components_ui_emptycard"
     },
     {
       "relation": "imports",
@@ -11384,9 +11573,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "components_ui_avatar",
-      "confidence_score": 1.0
+      "target": "components_ui_avatar"
     },
     {
       "relation": "imports",
@@ -12101,9 +12290,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L67",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin",
-      "target": "hooks_usecheckin_currentuid",
-      "confidence_score": 1.0
+      "target": "hooks_usecheckin_currentuid"
     },
     {
       "relation": "contains",
@@ -12111,9 +12300,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L75",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin",
-      "target": "hooks_usecheckin_fetchowncheckin",
-      "confidence_score": 1.0
+      "target": "hooks_usecheckin_fetchowncheckin"
     },
     {
       "relation": "contains",
@@ -12121,9 +12310,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L55",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin",
-      "target": "hooks_usecheckin_mapown",
-      "confidence_score": 1.0
+      "target": "hooks_usecheckin_mapown"
     },
     {
       "relation": "contains",
@@ -12131,9 +12320,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L47",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin",
-      "target": "hooks_usecheckin_ownrow",
-      "confidence_score": 1.0
+      "target": "hooks_usecheckin_ownrow"
     },
     {
       "relation": "contains",
@@ -12141,9 +12330,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L87",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin",
-      "target": "hooks_usecheckin_usecheckin",
-      "confidence_score": 1.0
+      "target": "hooks_usecheckin_usecheckin"
     },
     {
       "relation": "contains",
@@ -12151,9 +12340,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L27",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin",
-      "target": "hooks_usecheckin_usecheckindeps",
-      "confidence_score": 1.0
+      "target": "hooks_usecheckin_usecheckindeps"
     },
     {
       "relation": "imports_from",
@@ -12162,9 +12351,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L22",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin",
-      "target": "lib_derive",
-      "confidence_score": 1.0
+      "target": "lib_derive"
     },
     {
       "relation": "imports",
@@ -12173,9 +12362,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L22",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin",
-      "target": "lib_derive_derivewhoishere",
-      "confidence_score": 1.0
+      "target": "lib_derive_derivewhoishere"
     },
     {
       "relation": "imports",
@@ -12184,9 +12373,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L22",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin",
-      "target": "lib_derive_normalizecity",
-      "confidence_score": 1.0
+      "target": "lib_derive_normalizecity"
     },
     {
       "relation": "imports",
@@ -12195,9 +12384,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L22",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin",
-      "target": "lib_derive_todayiso",
-      "confidence_score": 1.0
+      "target": "lib_derive_todayiso"
     },
     {
       "relation": "imports_from",
@@ -12206,9 +12395,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin",
-      "target": "lib_models",
-      "confidence_score": 1.0
+      "target": "lib_models"
     },
     {
       "relation": "imports",
@@ -12217,9 +12406,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin",
-      "target": "lib_models_anyform",
-      "confidence_score": 1.0
+      "target": "lib_models_anyform"
     },
     {
       "relation": "imports",
@@ -12228,9 +12417,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin",
-      "target": "lib_models_checkin",
-      "confidence_score": 1.0
+      "target": "lib_models_checkin"
     },
     {
       "relation": "imports",
@@ -12239,9 +12428,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin",
-      "target": "lib_models_checkininput",
-      "confidence_score": 1.0
+      "target": "lib_models_checkininput"
     },
     {
       "relation": "imports",
@@ -12250,9 +12439,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin",
-      "target": "lib_models_presentuser",
-      "confidence_score": 1.0
+      "target": "lib_models_presentuser"
     },
     {
       "relation": "imports",
@@ -12261,9 +12450,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin",
-      "target": "lib_models_tournament",
-      "confidence_score": 1.0
+      "target": "lib_models_tournament"
     },
     {
       "relation": "imports",
@@ -12272,9 +12461,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin",
-      "target": "lib_models_venue",
-      "confidence_score": 1.0
+      "target": "lib_models_venue"
     },
     {
       "relation": "imports_from",
@@ -12283,9 +12472,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L21",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin",
-      "target": "lib_serverviews",
-      "confidence_score": 1.0
+      "target": "lib_serverviews"
     },
     {
       "relation": "imports",
@@ -12294,9 +12483,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L21",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin",
-      "target": "lib_serverviews_getwhoishere",
-      "confidence_score": 1.0
+      "target": "lib_serverviews_getwhoishere"
     },
     {
       "relation": "imports_from",
@@ -12305,9 +12494,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L20",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin",
-      "target": "lib_supabase",
-      "confidence_score": 1.0
+      "target": "lib_supabase"
     },
     {
       "relation": "imports",
@@ -12316,9 +12505,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L20",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin",
-      "target": "lib_supabase_supabase",
-      "confidence_score": 1.0
+      "target": "lib_supabase_supabase"
     },
     {
       "relation": "references",
@@ -12327,9 +12516,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L30",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin_usecheckindeps",
-      "target": "lib_models_anyform",
-      "confidence_score": 1.0
+      "target": "lib_models_anyform"
     },
     {
       "relation": "references",
@@ -12338,9 +12527,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin_usecheckindeps",
-      "target": "lib_models_tournament",
-      "confidence_score": 1.0
+      "target": "lib_models_tournament"
     },
     {
       "relation": "references",
@@ -12349,9 +12538,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L29",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin_usecheckindeps",
-      "target": "lib_models_venue",
-      "confidence_score": 1.0
+      "target": "lib_models_venue"
     },
     {
       "relation": "references",
@@ -12360,9 +12549,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L35",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin_usecheckin",
-      "target": "lib_models_checkin",
-      "confidence_score": 1.0
+      "target": "lib_models_checkin"
     },
     {
       "relation": "references",
@@ -12371,9 +12560,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L39",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin_usecheckin",
-      "target": "lib_models_checkininput",
-      "confidence_score": 1.0
+      "target": "lib_models_checkininput"
     },
     {
       "relation": "references",
@@ -12382,9 +12571,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L36",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin_usecheckin",
-      "target": "lib_models_presentuser",
-      "confidence_score": 1.0
+      "target": "lib_models_presentuser"
     },
     {
       "relation": "calls",
@@ -12393,9 +12582,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L84",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin_fetchowncheckin",
-      "target": "hooks_usecheckin_mapown",
-      "confidence_score": 1.0
+      "target": "hooks_usecheckin_mapown"
     },
     {
       "relation": "calls",
@@ -12404,9 +12593,9 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L79",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usecheckin_fetchowncheckin",
-      "target": "lib_derive_todayiso",
-      "confidence_score": 1.0
+      "target": "lib_derive_todayiso"
     },
     {
       "relation": "contains",
@@ -12486,9 +12675,9 @@
       "source_file": "src/hooks/useDiary.ts",
       "source_location": "L41",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usediary",
-      "target": "hooks_usediary_citysnapshot",
-      "confidence_score": 1.0
+      "target": "hooks_usediary_citysnapshot"
     },
     {
       "relation": "contains",
@@ -12519,6 +12708,26 @@
       "confidence_score": 1.0,
       "source": "hooks_usediary",
       "target": "hooks_usediary_fetchall"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/hooks/useDiary.ts",
+      "source_location": "L64",
+      "weight": 1.0,
+      "source": "hooks_usediary",
+      "target": "hooks_usediary_resolvedvenue",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/hooks/useDiary.ts",
+      "source_location": "L66",
+      "weight": 1.0,
+      "source": "hooks_usediary",
+      "target": "hooks_usediary_resolvevenue",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -12584,6 +12793,39 @@
       "confidence_score": 1.0,
       "source": "hooks_usediary",
       "target": "lib_db_enums_surface"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/hooks/useDiary.ts",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "hooks_usediary",
+      "target": "lib_derive",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/hooks/useDiary.ts",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "hooks_usediary",
+      "target": "lib_derive_normalizecity",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/hooks/useDiary.ts",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "hooks_usediary",
+      "target": "lib_derive_parselatlng",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -12691,9 +12933,9 @@
       "source_file": "src/hooks/useDiary.ts",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "hooks_usediary",
-      "target": "lib_models_venue",
-      "confidence_score": 1.0
+      "target": "lib_models_venue"
     },
     {
       "relation": "imports_from",
@@ -12771,6 +13013,28 @@
       "confidence_score": 1.0,
       "source": "hooks_usediary_usediary",
       "target": "lib_models_guidedmatch"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/hooks/useDiary.ts",
+      "source_location": "L103",
+      "weight": 1.0,
+      "source": "hooks_usediary_resolvevenue",
+      "target": "lib_derive_normalizecity",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/hooks/useDiary.ts",
+      "source_location": "L79",
+      "weight": 1.0,
+      "source": "hooks_usediary_resolvevenue",
+      "target": "lib_derive_parselatlng",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -13487,6 +13751,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/database.types.ts",
+      "source_location": "L554",
+      "weight": 1.0,
+      "source": "lib_database_types",
+      "target": "lib_database_types_venue",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/database.types.ts",
       "source_location": "L415",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -14011,9 +14285,9 @@
       "source_file": "src/lib/models.ts",
       "source_location": "L45",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_models_venue",
-      "target": "lib_db_enums_surface",
-      "confidence_score": 1.0
+      "target": "lib_db_enums_surface"
     },
     {
       "relation": "imports",
@@ -14198,9 +14472,9 @@
       "source_file": "src/lib/derive.checkins.test.ts",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_checkins_test",
-      "target": "lib_derive",
-      "confidence_score": 1.0
+      "target": "lib_derive"
     },
     {
       "relation": "contains",
@@ -14208,9 +14482,9 @@
       "source_file": "src/lib/derive.checkins.test.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_checkins_test",
-      "target": "lib_derive_checkins_test_ids",
-      "confidence_score": 1.0
+      "target": "lib_derive_checkins_test_ids"
     },
     {
       "relation": "contains",
@@ -14218,9 +14492,9 @@
       "source_file": "src/lib/derive.checkins.test.ts",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_checkins_test",
-      "target": "lib_derive_checkins_test_row",
-      "confidence_score": 1.0
+      "target": "lib_derive_checkins_test_row"
     },
     {
       "relation": "imports",
@@ -14229,9 +14503,9 @@
       "source_file": "src/lib/derive.checkins.test.ts",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_checkins_test",
-      "target": "lib_derive_derivewhoishere",
-      "confidence_score": 1.0
+      "target": "lib_derive_derivewhoishere"
     },
     {
       "relation": "imports",
@@ -14240,9 +14514,9 @@
       "source_file": "src/lib/derive.checkins.test.ts",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_checkins_test",
-      "target": "lib_derive_normalizecity",
-      "confidence_score": 1.0
+      "target": "lib_derive_normalizecity"
     },
     {
       "relation": "imports_from",
@@ -14251,9 +14525,9 @@
       "source_file": "src/lib/derive.checkins.test.ts",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_checkins_test",
-      "target": "lib_serverviews",
-      "confidence_score": 1.0
+      "target": "lib_serverviews"
     },
     {
       "relation": "imports",
@@ -14262,9 +14536,9 @@
       "source_file": "src/lib/derive.checkins.test.ts",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_checkins_test",
-      "target": "lib_serverviews_svpresentuser",
-      "confidence_score": 1.0
+      "target": "lib_serverviews_svpresentuser"
     },
     {
       "relation": "imports_from",
@@ -14569,9 +14843,9 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L1125",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive",
-      "target": "lib_derive_derivewhoishere",
-      "confidence_score": 1.0
+      "target": "lib_derive_derivewhoishere"
     },
     {
       "relation": "contains",
@@ -14649,9 +14923,9 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L302",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive",
-      "target": "lib_derive_formatlatlng",
-      "confidence_score": 1.0
+      "target": "lib_derive_formatlatlng"
     },
     {
       "relation": "contains",
@@ -14669,9 +14943,9 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L285",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive",
-      "target": "lib_derive_latlng",
-      "confidence_score": 1.0
+      "target": "lib_derive_latlng"
     },
     {
       "relation": "contains",
@@ -14689,9 +14963,9 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L308",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive",
-      "target": "lib_derive_mapurl",
-      "confidence_score": 1.0
+      "target": "lib_derive_mapurl"
     },
     {
       "relation": "contains",
@@ -14709,9 +14983,9 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L1118",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive",
-      "target": "lib_derive_normalizecity",
-      "confidence_score": 1.0
+      "target": "lib_derive_normalizecity"
     },
     {
       "relation": "contains",
@@ -14719,9 +14993,9 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L290",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive",
-      "target": "lib_derive_parselatlng",
-      "confidence_score": 1.0
+      "target": "lib_derive_parselatlng"
     },
     {
       "relation": "contains",
@@ -14949,9 +15223,9 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L233",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive",
-      "target": "lib_derive_venuedisplay",
-      "confidence_score": 1.0
+      "target": "lib_derive_venuedisplay"
     },
     {
       "relation": "contains",
@@ -14959,9 +15233,9 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L267",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive",
-      "target": "lib_derive_venuehistory",
-      "confidence_score": 1.0
+      "target": "lib_derive_venuehistory"
     },
     {
       "relation": "contains",
@@ -14969,9 +15243,9 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L278",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive",
-      "target": "lib_derive_venuehistorylabel",
-      "confidence_score": 1.0
+      "target": "lib_derive_venuehistorylabel"
     },
     {
       "relation": "contains",
@@ -14979,9 +15253,9 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L247",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive",
-      "target": "lib_derive_venuekeyof",
-      "confidence_score": 1.0
+      "target": "lib_derive_venuekeyof"
     },
     {
       "relation": "contains",
@@ -14989,9 +15263,9 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L223",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive",
-      "target": "lib_derive_venuelabel",
-      "confidence_score": 1.0
+      "target": "lib_derive_venuelabel"
     },
     {
       "relation": "contains",
@@ -14999,9 +15273,9 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L215",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive",
-      "target": "lib_derive_venueof",
-      "confidence_score": 1.0
+      "target": "lib_derive_venueof"
     },
     {
       "relation": "contains",
@@ -15009,9 +15283,9 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L315",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive",
-      "target": "lib_derive_venueoptions",
-      "confidence_score": 1.0
+      "target": "lib_derive_venueoptions"
     },
     {
       "relation": "contains",
@@ -15019,9 +15293,9 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L238",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive",
-      "target": "lib_derive_venueplace",
-      "confidence_score": 1.0
+      "target": "lib_derive_venueplace"
     },
     {
       "relation": "contains",
@@ -15175,9 +15449,9 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive",
-      "target": "lib_models_presentuser",
-      "confidence_score": 1.0
+      "target": "lib_models_presentuser"
     },
     {
       "relation": "imports",
@@ -15197,9 +15471,9 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive",
-      "target": "lib_models_venue",
-      "confidence_score": 1.0
+      "target": "lib_models_venue"
     },
     {
       "relation": "imports_from",
@@ -15241,9 +15515,9 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive",
-      "target": "lib_serverviews_svpresentuser",
-      "confidence_score": 1.0
+      "target": "lib_serverviews_svpresentuser"
     },
     {
       "relation": "imports",
@@ -15414,12 +15688,23 @@
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "src/lib/derive.venues.server.test.ts",
+      "source_location": "L19",
+      "weight": 1.0,
+      "source": "lib_derive_venues_server_test",
+      "target": "lib_derive",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "src/lib/derive.venues.test.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_venues_test",
-      "target": "lib_derive",
-      "confidence_score": 1.0
+      "target": "lib_derive"
     },
     {
       "relation": "imports_from",
@@ -15879,9 +16164,9 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L629",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_derivetorneodetail",
-      "target": "lib_derive_venueof",
-      "confidence_score": 1.0
+      "target": "lib_derive_venueof"
     },
     {
       "relation": "calls",
@@ -15890,9 +16175,9 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L234",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_venuedisplay",
-      "target": "lib_derive_venueof",
-      "confidence_score": 1.0
+      "target": "lib_derive_venueof"
     },
     {
       "relation": "calls",
@@ -15901,9 +16186,9 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L239",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_venueplace",
-      "target": "lib_derive_venueof",
-      "confidence_score": 1.0
+      "target": "lib_derive_venueof"
     },
     {
       "relation": "imports",
@@ -15912,9 +16197,9 @@
       "source_file": "src/lib/derive.venues.test.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_venues_test",
-      "target": "lib_derive_venueof",
-      "confidence_score": 1.0
+      "target": "lib_derive_venueof"
     },
     {
       "relation": "calls",
@@ -15923,9 +16208,9 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L227",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_venuelabel",
-      "target": "lib_derive_normalizecity",
-      "confidence_score": 1.0
+      "target": "lib_derive_normalizecity"
     },
     {
       "relation": "imports",
@@ -15934,9 +16219,9 @@
       "source_file": "src/lib/derive.venues.test.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_venues_test",
-      "target": "lib_derive_venuelabel",
-      "confidence_score": 1.0
+      "target": "lib_derive_venuelabel"
     },
     {
       "relation": "calls",
@@ -15945,9 +16230,9 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L347",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_decoratetournament",
-      "target": "lib_derive_venuedisplay",
-      "confidence_score": 1.0
+      "target": "lib_derive_venuedisplay"
     },
     {
       "relation": "calls",
@@ -15956,9 +16241,9 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L764",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_derivestory",
-      "target": "lib_derive_venuedisplay",
-      "confidence_score": 1.0
+      "target": "lib_derive_venuedisplay"
     },
     {
       "relation": "calls",
@@ -15967,9 +16252,9 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L637",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_derivetorneodetail",
-      "target": "lib_derive_venuedisplay",
-      "confidence_score": 1.0
+      "target": "lib_derive_venuedisplay"
     },
     {
       "relation": "calls",
@@ -15978,9 +16263,9 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L971",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_derivewrapped",
-      "target": "lib_derive_venuedisplay",
-      "confidence_score": 1.0
+      "target": "lib_derive_venuedisplay"
     },
     {
       "relation": "imports",
@@ -15989,9 +16274,9 @@
       "source_file": "src/lib/derive.venues.test.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_venues_test",
-      "target": "lib_derive_venuedisplay",
-      "confidence_score": 1.0
+      "target": "lib_derive_venuedisplay"
     },
     {
       "relation": "calls",
@@ -16000,9 +16285,9 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L643",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_derivetorneodetail",
-      "target": "lib_derive_venueplace",
-      "confidence_score": 1.0
+      "target": "lib_derive_venueplace"
     },
     {
       "relation": "imports",
@@ -16011,9 +16296,9 @@
       "source_file": "src/lib/derive.venues.test.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_venues_test",
-      "target": "lib_derive_venueplace",
-      "confidence_score": 1.0
+      "target": "lib_derive_venueplace"
     },
     {
       "relation": "calls",
@@ -16022,9 +16307,9 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L646",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_derivetorneodetail",
-      "target": "lib_derive_venuekeyof",
-      "confidence_score": 1.0
+      "target": "lib_derive_venuekeyof"
     },
     {
       "relation": "calls",
@@ -16033,9 +16318,9 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L1072",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_derivetorneodetailserver",
-      "target": "lib_derive_venuekeyof",
-      "confidence_score": 1.0
+      "target": "lib_derive_venuekeyof"
     },
     {
       "relation": "calls",
@@ -16044,9 +16329,9 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L249",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_venuekeyof",
-      "target": "lib_derive_normalizecity",
-      "confidence_score": 1.0
+      "target": "lib_derive_normalizecity"
     },
     {
       "relation": "imports",
@@ -16055,9 +16340,9 @@
       "source_file": "src/lib/derive.venues.test.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_venues_test",
-      "target": "lib_derive_venuekeyof",
-      "confidence_score": 1.0
+      "target": "lib_derive_venuekeyof"
     },
     {
       "relation": "imports",
@@ -16066,9 +16351,9 @@
       "source_file": "src/lib/derive.venues.test.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_venues_test",
-      "target": "lib_derive_venuehistory",
-      "confidence_score": 1.0
+      "target": "lib_derive_venuehistory"
     },
     {
       "relation": "calls",
@@ -16077,9 +16362,9 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L646",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_derivetorneodetail",
-      "target": "lib_derive_venuehistorylabel",
-      "confidence_score": 1.0
+      "target": "lib_derive_venuehistorylabel"
     },
     {
       "relation": "calls",
@@ -16088,9 +16373,9 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L1072",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_derivetorneodetailserver",
-      "target": "lib_derive_venuehistorylabel",
-      "confidence_score": 1.0
+      "target": "lib_derive_venuehistorylabel"
     },
     {
       "relation": "imports",
@@ -16099,9 +16384,9 @@
       "source_file": "src/lib/derive.venues.test.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_venues_test",
-      "target": "lib_derive_venuehistorylabel",
-      "confidence_score": 1.0
+      "target": "lib_derive_venuehistorylabel"
     },
     {
       "relation": "imports",
@@ -16110,9 +16395,9 @@
       "source_file": "src/lib/derive.venues.test.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_venues_test",
-      "target": "lib_derive_parselatlng",
-      "confidence_score": 1.0
+      "target": "lib_derive_parselatlng"
     },
     {
       "relation": "imports",
@@ -16121,9 +16406,9 @@
       "source_file": "src/lib/derive.venues.test.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_venues_test",
-      "target": "lib_derive_formatlatlng",
-      "confidence_score": 1.0
+      "target": "lib_derive_formatlatlng"
     },
     {
       "relation": "calls",
@@ -16132,9 +16417,9 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L645",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_derivetorneodetail",
-      "target": "lib_derive_mapurl",
-      "confidence_score": 1.0
+      "target": "lib_derive_mapurl"
     },
     {
       "relation": "calls",
@@ -16143,9 +16428,9 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L1071",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_derivetorneodetailserver",
-      "target": "lib_derive_mapurl",
-      "confidence_score": 1.0
+      "target": "lib_derive_mapurl"
     },
     {
       "relation": "imports",
@@ -16154,9 +16439,9 @@
       "source_file": "src/lib/derive.venues.test.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_venues_test",
-      "target": "lib_derive_mapurl",
-      "confidence_score": 1.0
+      "target": "lib_derive_mapurl"
     },
     {
       "relation": "imports",
@@ -16165,9 +16450,9 @@
       "source_file": "src/lib/derive.venues.test.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_venues_test",
-      "target": "lib_derive_venueoptions",
-      "confidence_score": 1.0
+      "target": "lib_derive_venueoptions"
     },
     {
       "relation": "calls",
@@ -16385,9 +16670,9 @@
       "source_file": "src/lib/derive.venues.test.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_venues_test",
-      "target": "lib_derive_derivetorneodetail",
-      "confidence_score": 1.0
+      "target": "lib_derive_derivetorneodetail"
     },
     {
       "relation": "calls",
@@ -16418,9 +16703,9 @@
       "source_file": "src/lib/derive.venues.test.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_venues_test",
-      "target": "lib_derive_derivediary",
-      "confidence_score": 1.0
+      "target": "lib_derive_derivediary"
     },
     {
       "relation": "calls",
@@ -16550,9 +16835,9 @@
       "source_file": "src/lib/derive.venues.test.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_venues_test",
-      "target": "lib_derive_makewrappedrange",
-      "confidence_score": 1.0
+      "target": "lib_derive_makewrappedrange"
     },
     {
       "relation": "imports",
@@ -16605,9 +16890,9 @@
       "source_file": "src/lib/derive.venues.test.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_venues_test",
-      "target": "lib_derive_derivewrapped",
-      "confidence_score": 1.0
+      "target": "lib_derive_derivewrapped"
     },
     {
       "relation": "imports",
@@ -16621,14 +16906,154 @@
       "target": "lib_derive_derivewrapped"
     },
     {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/derive.venues.server.test.ts",
+      "source_location": "L19",
+      "weight": 1.0,
+      "source": "lib_derive_venues_server_test",
+      "target": "lib_derive_derivetorneilistserver",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/derive.venues.server.test.ts",
+      "source_location": "L19",
+      "weight": 1.0,
+      "source": "lib_derive_venues_server_test",
+      "target": "lib_derive_derivetorneodetailserver",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/derive.venues.server.test.ts",
+      "source_location": "L25",
+      "weight": 1.0,
+      "source": "lib_derive_venues_server_test",
+      "target": "lib_derive_venues_server_test_svcard",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/derive.venues.server.test.ts",
+      "source_location": "L38",
+      "weight": 1.0,
+      "source": "lib_derive_venues_server_test",
+      "target": "lib_derive_venues_server_test_svdetail",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/derive.venues.server.test.ts",
+      "source_location": "L34",
+      "weight": 1.0,
+      "source": "lib_derive_venues_server_test",
+      "target": "lib_derive_venues_server_test_svlist",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/derive.venues.server.test.ts",
+      "source_location": "L20",
+      "weight": 1.0,
+      "source": "lib_derive_venues_server_test",
+      "target": "lib_serverviews",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/derive.venues.server.test.ts",
+      "source_location": "L20",
+      "weight": 1.0,
+      "source": "lib_derive_venues_server_test",
+      "target": "lib_serverviews_svtorneilist",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/derive.venues.server.test.ts",
+      "source_location": "L20",
+      "weight": 1.0,
+      "source": "lib_derive_venues_server_test",
+      "target": "lib_serverviews_svtorneocard",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/derive.venues.server.test.ts",
+      "source_location": "L20",
+      "weight": 1.0,
+      "source": "lib_derive_venues_server_test",
+      "target": "lib_serverviews_svtorneodetail",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/derive.venues.server.test.ts",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "lib_derive_venues_server_test",
+      "target": "test_factories",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/derive.venues.server.test.ts",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "lib_derive_venues_server_test",
+      "target": "test_factories_makedata",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/derive.venues.server.test.ts",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "lib_derive_venues_server_test",
+      "target": "test_factories_maketournament",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/derive.venues.server.test.ts",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "lib_derive_venues_server_test",
+      "target": "test_factories_makevenue",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/derive.venues.test.ts",
       "source_location": "L30",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_venues_test",
-      "target": "lib_derive_venues_test_full_year",
-      "confidence_score": 1.0
+      "target": "lib_derive_venues_test_full_year"
     },
     {
       "relation": "contains",
@@ -16636,9 +17061,9 @@
       "source_file": "src/lib/derive.venues.test.ts",
       "source_location": "L32",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_venues_test",
-      "target": "lib_derive_venues_test_statof",
-      "confidence_score": 1.0
+      "target": "lib_derive_venues_test_statof"
     },
     {
       "relation": "imports_from",
@@ -16647,9 +17072,9 @@
       "source_file": "src/lib/derive.venues.test.ts",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_venues_test",
-      "target": "test_factories",
-      "confidence_score": 1.0
+      "target": "test_factories"
     },
     {
       "relation": "imports",
@@ -16658,9 +17083,9 @@
       "source_file": "src/lib/derive.venues.test.ts",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_venues_test",
-      "target": "test_factories_makedata",
-      "confidence_score": 1.0
+      "target": "test_factories_makedata"
     },
     {
       "relation": "imports",
@@ -16669,9 +17094,9 @@
       "source_file": "src/lib/derive.venues.test.ts",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_venues_test",
-      "target": "test_factories_makematch",
-      "confidence_score": 1.0
+      "target": "test_factories_makematch"
     },
     {
       "relation": "imports",
@@ -16680,9 +17105,9 @@
       "source_file": "src/lib/derive.venues.test.ts",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_venues_test",
-      "target": "test_factories_maketournament",
-      "confidence_score": 1.0
+      "target": "test_factories_maketournament"
     },
     {
       "relation": "imports",
@@ -16691,9 +17116,9 @@
       "source_file": "src/lib/derive.venues.test.ts",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_venues_test",
-      "target": "test_factories_makevenue",
-      "confidence_score": 1.0
+      "target": "test_factories_makevenue"
     },
     {
       "relation": "imports",
@@ -16702,9 +17127,9 @@
       "source_file": "src/lib/derive.venues.test.ts",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_derive_venues_test",
-      "target": "test_factories_winsets",
-      "confidence_score": 1.0
+      "target": "test_factories_winsets"
     },
     {
       "relation": "contains",
@@ -17095,9 +17520,9 @@
       "source_file": "src/lib/models.ts",
       "source_location": "L56",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_models",
-      "target": "lib_models_checkin",
-      "confidence_score": 1.0
+      "target": "lib_models_checkin"
     },
     {
       "relation": "contains",
@@ -17105,9 +17530,9 @@
       "source_file": "src/lib/models.ts",
       "source_location": "L67",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_models",
-      "target": "lib_models_checkininput",
-      "confidence_score": 1.0
+      "target": "lib_models_checkininput"
     },
     {
       "relation": "contains",
@@ -17225,9 +17650,9 @@
       "source_file": "src/lib/models.ts",
       "source_location": "L76",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_models",
-      "target": "lib_models_presentuser",
-      "confidence_score": 1.0
+      "target": "lib_models_presentuser"
     },
     {
       "relation": "contains",
@@ -17295,9 +17720,9 @@
       "source_file": "src/lib/models.ts",
       "source_location": "L39",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_models",
-      "target": "lib_models_venue",
-      "confidence_score": 1.0
+      "target": "lib_models_venue"
     },
     {
       "relation": "imports_from",
@@ -17317,9 +17742,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "lib_models",
-      "confidence_score": 1.0
+      "target": "lib_models"
     },
     {
       "relation": "imports_from",
@@ -17328,9 +17753,9 @@
       "source_file": "src/screens/ChiCeOggi.test.tsx",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi_test",
-      "target": "lib_models",
-      "confidence_score": 1.0
+      "target": "lib_models"
     },
     {
       "relation": "imports_from",
@@ -17416,9 +17841,9 @@
       "source_file": "src/test/factories.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "test_factories",
-      "target": "lib_models_venue",
-      "confidence_score": 1.0
+      "target": "lib_models_venue"
     },
     {
       "relation": "imports",
@@ -17427,9 +17852,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "lib_models_checkin",
-      "confidence_score": 1.0
+      "target": "lib_models_checkin"
     },
     {
       "relation": "references",
@@ -17438,9 +17863,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L69",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi_chiceoggiprops",
-      "target": "lib_models_checkin",
-      "confidence_score": 1.0
+      "target": "lib_models_checkin"
     },
     {
       "relation": "imports",
@@ -17449,9 +17874,9 @@
       "source_file": "src/screens/ChiCeOggi.test.tsx",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi_test",
-      "target": "lib_models_checkin",
-      "confidence_score": 1.0
+      "target": "lib_models_checkin"
     },
     {
       "relation": "imports",
@@ -17460,9 +17885,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "lib_models_checkininput",
-      "confidence_score": 1.0
+      "target": "lib_models_checkininput"
     },
     {
       "relation": "references",
@@ -17471,9 +17896,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L73",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi_chiceoggiprops",
-      "target": "lib_models_checkininput",
-      "confidence_score": 1.0
+      "target": "lib_models_checkininput"
     },
     {
       "relation": "imports",
@@ -17482,9 +17907,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "lib_models_presentuser",
-      "confidence_score": 1.0
+      "target": "lib_models_presentuser"
     },
     {
       "relation": "references",
@@ -17493,9 +17918,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L70",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi_chiceoggiprops",
-      "target": "lib_models_presentuser",
-      "confidence_score": 1.0
+      "target": "lib_models_presentuser"
     },
     {
       "relation": "imports",
@@ -17504,9 +17929,9 @@
       "source_file": "src/test/factories.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "test_factories",
-      "target": "lib_models_presentuser",
-      "confidence_score": 1.0
+      "target": "lib_models_presentuser"
     },
     {
       "relation": "imports",
@@ -17769,9 +18194,9 @@
       "source_file": "src/lib/serverviews.ts",
       "source_location": "L87",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_serverviews",
-      "target": "lib_serverviews_getwhoishere",
-      "confidence_score": 1.0
+      "target": "lib_serverviews_getwhoishere"
     },
     {
       "relation": "contains",
@@ -17819,9 +18244,9 @@
       "source_file": "src/lib/serverviews.ts",
       "source_location": "L51",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_serverviews",
-      "target": "lib_serverviews_svpresentuser",
-      "confidence_score": 1.0
+      "target": "lib_serverviews_svpresentuser"
     },
     {
       "relation": "contains",
@@ -17879,9 +18304,9 @@
       "source_file": "src/lib/serverviews.ts",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_serverviews",
-      "target": "lib_serverviews_svvenue",
-      "confidence_score": 1.0
+      "target": "lib_serverviews_svvenue"
     },
     {
       "relation": "imports_from",
@@ -17956,9 +18381,9 @@
       "source_file": "src/lib/serverviews.ts",
       "source_location": "L89",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_serverviews_getwhoishere",
-      "target": "lib_serverviews_ok",
-      "confidence_score": 1.0
+      "target": "lib_serverviews_ok"
     },
     {
       "relation": "contains",
@@ -18223,9 +18648,9 @@
       "source_file": "src/screens/ChiCeOggi.test.tsx",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi_test",
-      "target": "screens_chiceoggi",
-      "confidence_score": 1.0
+      "target": "screens_chiceoggi"
     },
     {
       "relation": "contains",
@@ -18233,9 +18658,9 @@
       "source_file": "src/screens/ChiCeOggi.test.tsx",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi_test",
-      "target": "screens_chiceoggi_test_makeown",
-      "confidence_score": 1.0
+      "target": "screens_chiceoggi_test_makeown"
     },
     {
       "relation": "contains",
@@ -18243,9 +18668,9 @@
       "source_file": "src/screens/ChiCeOggi.test.tsx",
       "source_location": "L27",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi_test",
-      "target": "screens_chiceoggi_test_props",
-      "confidence_score": 1.0
+      "target": "screens_chiceoggi_test_props"
     },
     {
       "relation": "contains",
@@ -18253,9 +18678,9 @@
       "source_file": "src/screens/ChiCeOggi.test.tsx",
       "source_location": "L29",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi_test",
-      "target": "screens_chiceoggi_test_renderscreen",
-      "confidence_score": 1.0
+      "target": "screens_chiceoggi_test_renderscreen"
     },
     {
       "relation": "imports_from",
@@ -18264,9 +18689,9 @@
       "source_file": "src/screens/ChiCeOggi.test.tsx",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi_test",
-      "target": "test_axe",
-      "confidence_score": 1.0
+      "target": "test_axe"
     },
     {
       "relation": "imports",
@@ -18275,9 +18700,9 @@
       "source_file": "src/screens/ChiCeOggi.test.tsx",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi_test",
-      "target": "test_axe_expectnoa11yviolations",
-      "confidence_score": 1.0
+      "target": "test_axe_expectnoa11yviolations"
     },
     {
       "relation": "imports_from",
@@ -18286,9 +18711,9 @@
       "source_file": "src/screens/ChiCeOggi.test.tsx",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi_test",
-      "target": "test_factories",
-      "confidence_score": 1.0
+      "target": "test_factories"
     },
     {
       "relation": "imports",
@@ -18297,9 +18722,9 @@
       "source_file": "src/screens/ChiCeOggi.test.tsx",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi_test",
-      "target": "test_factories_makepresentuser",
-      "confidence_score": 1.0
+      "target": "test_factories_makepresentuser"
     },
     {
       "relation": "contains",
@@ -18307,9 +18732,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L46",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "screens_chiceoggi_btnbase",
-      "confidence_score": 1.0
+      "target": "screens_chiceoggi_btnbase"
     },
     {
       "relation": "contains",
@@ -18317,9 +18742,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L164",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "screens_chiceoggi_checkedincard",
-      "confidence_score": 1.0
+      "target": "screens_chiceoggi_checkedincard"
     },
     {
       "relation": "contains",
@@ -18327,9 +18752,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L96",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "screens_chiceoggi_checkinform",
-      "confidence_score": 1.0
+      "target": "screens_chiceoggi_checkinform"
     },
     {
       "relation": "contains",
@@ -18337,9 +18762,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L79",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "screens_chiceoggi_chiceoggi",
-      "confidence_score": 1.0
+      "target": "screens_chiceoggi_chiceoggi"
     },
     {
       "relation": "contains",
@@ -18347,9 +18772,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L68",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "screens_chiceoggi_chiceoggiprops",
-      "confidence_score": 1.0
+      "target": "screens_chiceoggi_chiceoggiprops"
     },
     {
       "relation": "contains",
@@ -18357,9 +18782,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L59",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "screens_chiceoggi_dangerbtn",
-      "confidence_score": 1.0
+      "target": "screens_chiceoggi_dangerbtn"
     },
     {
       "relation": "contains",
@@ -18367,9 +18792,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L58",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "screens_chiceoggi_darkbtn",
-      "confidence_score": 1.0
+      "target": "screens_chiceoggi_darkbtn"
     },
     {
       "relation": "contains",
@@ -18377,9 +18802,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L30",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "screens_chiceoggi_fieldstyle",
-      "confidence_score": 1.0
+      "target": "screens_chiceoggi_fieldstyle"
     },
     {
       "relation": "contains",
@@ -18387,9 +18812,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L354",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "screens_chiceoggi_ghostbutton",
-      "confidence_score": 1.0
+      "target": "screens_chiceoggi_ghostbutton"
     },
     {
       "relation": "contains",
@@ -18397,9 +18822,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L39",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "screens_chiceoggi_labelstyle",
-      "confidence_score": 1.0
+      "target": "screens_chiceoggi_labelstyle"
     },
     {
       "relation": "contains",
@@ -18407,9 +18832,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L267",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "screens_chiceoggi_presentcard",
-      "confidence_score": 1.0
+      "target": "screens_chiceoggi_presentcard"
     },
     {
       "relation": "contains",
@@ -18417,9 +18842,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L57",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "screens_chiceoggi_primarybtn",
-      "confidence_score": 1.0
+      "target": "screens_chiceoggi_primarybtn"
     },
     {
       "relation": "contains",
@@ -18427,9 +18852,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L326",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "screens_chiceoggi_roomcount",
-      "confidence_score": 1.0
+      "target": "screens_chiceoggi_roomcount"
     },
     {
       "relation": "contains",
@@ -18437,9 +18862,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L196",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "screens_chiceoggi_roomsection",
-      "confidence_score": 1.0
+      "target": "screens_chiceoggi_roomsection"
     },
     {
       "relation": "contains",
@@ -18447,9 +18872,9 @@
       "source_file": "src/screens/ChiCeOggi.tsx",
       "source_location": "L336",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_chiceoggi",
-      "target": "screens_chiceoggi_switch",
-      "confidence_score": 1.0
+      "target": "screens_chiceoggi_switch"
     },
     {
       "relation": "contains",
@@ -19219,9 +19644,9 @@
       "source_file": "src/screens/TorneoDetail.tsx",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "screens_torneodetail",
-      "target": "screens_torneodetail_venuemap",
-      "confidence_score": 1.0
+      "target": "screens_torneodetail_venuemap"
     },
     {
       "relation": "contains",
@@ -19382,9 +19807,9 @@
       "source_file": "src/test/factories.ts",
       "source_location": "L166",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "test_factories",
-      "target": "test_factories_makepresentuser",
-      "confidence_score": 1.0
+      "target": "test_factories_makepresentuser"
     },
     {
       "relation": "contains",
@@ -19412,9 +19837,9 @@
       "source_file": "src/test/factories.ts",
       "source_location": "L138",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "test_factories",
-      "target": "test_factories_makevenue",
-      "confidence_score": 1.0
+      "target": "test_factories_makevenue"
     },
     {
       "relation": "contains",
@@ -19463,9 +19888,9 @@
       "source_file": "supabase/.temp/linked-project.json",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_supabase_temp_linked_project_json",
-      "target": "temp_linked_project_name",
-      "confidence_score": 1.0
+      "target": "temp_linked_project_name"
     },
     {
       "relation": "contains",
@@ -19473,9 +19898,9 @@
       "source_file": "supabase/.temp/linked-project.json",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_supabase_temp_linked_project_json",
-      "target": "temp_linked_project_organization_id",
-      "confidence_score": 1.0
+      "target": "temp_linked_project_organization_id"
     },
     {
       "relation": "contains",
@@ -19483,9 +19908,9 @@
       "source_file": "supabase/.temp/linked-project.json",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_supabase_temp_linked_project_json",
-      "target": "temp_linked_project_organization_slug",
-      "confidence_score": 1.0
+      "target": "temp_linked_project_organization_slug"
     },
     {
       "relation": "contains",
@@ -19493,9 +19918,9 @@
       "source_file": "supabase/.temp/linked-project.json",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_supabase_temp_linked_project_json",
-      "target": "temp_linked_project_ref",
-      "confidence_score": 1.0
+      "target": "temp_linked_project_ref"
     },
     {
       "relation": "contains",
@@ -19563,9 +19988,9 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_tsconfig_app_json",
-      "target": "beachvolleydiary_tsconfig_app_compileroptions",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_app_compileroptions"
     },
     {
       "relation": "contains",
@@ -19573,9 +19998,9 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L29",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_tsconfig_app_json",
-      "target": "beachvolleydiary_tsconfig_app_exclude",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_app_exclude"
     },
     {
       "relation": "contains",
@@ -19583,9 +20008,9 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_tsconfig_app_json",
-      "target": "beachvolleydiary_tsconfig_app_include",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_app_include"
     },
     {
       "relation": "contains",
@@ -19593,9 +20018,9 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_app_compileroptions",
-      "target": "beachvolleydiary_tsconfig_app_compileroptions_composite",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_app_compileroptions_composite"
     },
     {
       "relation": "contains",
@@ -19603,9 +20028,9 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_app_compileroptions",
-      "target": "beachvolleydiary_tsconfig_app_compileroptions_isolatedmodules",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_app_compileroptions_isolatedmodules"
     },
     {
       "relation": "contains",
@@ -19613,9 +20038,9 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_app_compileroptions",
-      "target": "beachvolleydiary_tsconfig_app_compileroptions_jsx",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_app_compileroptions_jsx"
     },
     {
       "relation": "contains",
@@ -19623,9 +20048,9 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_app_compileroptions",
-      "target": "beachvolleydiary_tsconfig_app_compileroptions_lib",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_app_compileroptions_lib"
     },
     {
       "relation": "contains",
@@ -19633,9 +20058,9 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_app_compileroptions",
-      "target": "beachvolleydiary_tsconfig_app_compileroptions_module",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_app_compileroptions_module"
     },
     {
       "relation": "contains",
@@ -19643,9 +20068,9 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_app_compileroptions",
-      "target": "beachvolleydiary_tsconfig_app_compileroptions_moduledetection",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_app_compileroptions_moduledetection"
     },
     {
       "relation": "contains",
@@ -19653,9 +20078,9 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_app_compileroptions",
-      "target": "beachvolleydiary_tsconfig_app_compileroptions_moduleresolution",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_app_compileroptions_moduleresolution"
     },
     {
       "relation": "contains",
@@ -19663,9 +20088,9 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L16",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_app_compileroptions",
-      "target": "beachvolleydiary_tsconfig_app_compileroptions_noemit",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_app_compileroptions_noemit"
     },
     {
       "relation": "contains",
@@ -19673,9 +20098,9 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_app_compileroptions",
-      "target": "beachvolleydiary_tsconfig_app_compileroptions_nofallthroughcasesinswitch",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_app_compileroptions_nofallthroughcasesinswitch"
     },
     {
       "relation": "contains",
@@ -19683,9 +20108,9 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L21",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_app_compileroptions",
-      "target": "beachvolleydiary_tsconfig_app_compileroptions_nounusedlocals",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_app_compileroptions_nounusedlocals"
     },
     {
       "relation": "contains",
@@ -19693,9 +20118,9 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L22",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_app_compileroptions",
-      "target": "beachvolleydiary_tsconfig_app_compileroptions_nounusedparameters",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_app_compileroptions_nounusedparameters"
     },
     {
       "relation": "contains",
@@ -19703,9 +20128,9 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_app_compileroptions",
-      "target": "beachvolleydiary_tsconfig_app_compileroptions_resolvejsonmodule",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_app_compileroptions_resolvejsonmodule"
     },
     {
       "relation": "contains",
@@ -19713,9 +20138,9 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_app_compileroptions",
-      "target": "beachvolleydiary_tsconfig_app_compileroptions_skiplibcheck",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_app_compileroptions_skiplibcheck"
     },
     {
       "relation": "contains",
@@ -19723,9 +20148,9 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L20",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_app_compileroptions",
-      "target": "beachvolleydiary_tsconfig_app_compileroptions_strict",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_app_compileroptions_strict"
     },
     {
       "relation": "contains",
@@ -19733,9 +20158,9 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_app_compileroptions",
-      "target": "beachvolleydiary_tsconfig_app_compileroptions_target",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_app_compileroptions_target"
     },
     {
       "relation": "contains",
@@ -19743,9 +20168,9 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_app_compileroptions",
-      "target": "beachvolleydiary_tsconfig_app_compileroptions_tsbuildinfofile",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_app_compileroptions_tsbuildinfofile"
     },
     {
       "relation": "contains",
@@ -19753,9 +20178,9 @@
       "source_file": "tsconfig.app.json",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_app_compileroptions",
-      "target": "beachvolleydiary_tsconfig_app_compileroptions_usedefineforclassfields",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_app_compileroptions_usedefineforclassfields"
     },
     {
       "relation": "contains",
@@ -19763,9 +20188,9 @@
       "source_file": "tsconfig.json",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_tsconfig_json",
-      "target": "beachvolleydiary_tsconfig_files",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_files"
     },
     {
       "relation": "contains",
@@ -19773,9 +20198,9 @@
       "source_file": "tsconfig.json",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_tsconfig_json",
-      "target": "beachvolleydiary_tsconfig_references",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_references"
     },
     {
       "relation": "contains",
@@ -19783,9 +20208,9 @@
       "source_file": "tsconfig.node.json",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_tsconfig_node_json",
-      "target": "beachvolleydiary_tsconfig_node_compileroptions",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_node_compileroptions"
     },
     {
       "relation": "contains",
@@ -19793,9 +20218,9 @@
       "source_file": "tsconfig.node.json",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_tsconfig_node_json",
-      "target": "beachvolleydiary_tsconfig_node_include",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_node_include"
     },
     {
       "relation": "contains",
@@ -19803,9 +20228,9 @@
       "source_file": "tsconfig.node.json",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_node_compileroptions",
-      "target": "beachvolleydiary_tsconfig_node_compileroptions_composite",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_node_compileroptions_composite"
     },
     {
       "relation": "contains",
@@ -19813,9 +20238,9 @@
       "source_file": "tsconfig.node.json",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_node_compileroptions",
-      "target": "beachvolleydiary_tsconfig_node_compileroptions_isolatedmodules",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_node_compileroptions_isolatedmodules"
     },
     {
       "relation": "contains",
@@ -19823,9 +20248,9 @@
       "source_file": "tsconfig.node.json",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_node_compileroptions",
-      "target": "beachvolleydiary_tsconfig_node_compileroptions_lib",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_node_compileroptions_lib"
     },
     {
       "relation": "contains",
@@ -19833,9 +20258,9 @@
       "source_file": "tsconfig.node.json",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_node_compileroptions",
-      "target": "beachvolleydiary_tsconfig_node_compileroptions_module",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_node_compileroptions_module"
     },
     {
       "relation": "contains",
@@ -19843,9 +20268,9 @@
       "source_file": "tsconfig.node.json",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_node_compileroptions",
-      "target": "beachvolleydiary_tsconfig_node_compileroptions_moduledetection",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_node_compileroptions_moduledetection"
     },
     {
       "relation": "contains",
@@ -19853,9 +20278,9 @@
       "source_file": "tsconfig.node.json",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_node_compileroptions",
-      "target": "beachvolleydiary_tsconfig_node_compileroptions_moduleresolution",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_node_compileroptions_moduleresolution"
     },
     {
       "relation": "contains",
@@ -19863,9 +20288,9 @@
       "source_file": "tsconfig.node.json",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_node_compileroptions",
-      "target": "beachvolleydiary_tsconfig_node_compileroptions_noemit",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_node_compileroptions_noemit"
     },
     {
       "relation": "contains",
@@ -19873,9 +20298,9 @@
       "source_file": "tsconfig.node.json",
       "source_location": "L21",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_node_compileroptions",
-      "target": "beachvolleydiary_tsconfig_node_compileroptions_nofallthroughcasesinswitch",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_node_compileroptions_nofallthroughcasesinswitch"
     },
     {
       "relation": "contains",
@@ -19883,9 +20308,9 @@
       "source_file": "tsconfig.node.json",
       "source_location": "L19",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_node_compileroptions",
-      "target": "beachvolleydiary_tsconfig_node_compileroptions_nounusedlocals",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_node_compileroptions_nounusedlocals"
     },
     {
       "relation": "contains",
@@ -19893,9 +20318,9 @@
       "source_file": "tsconfig.node.json",
       "source_location": "L20",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_node_compileroptions",
-      "target": "beachvolleydiary_tsconfig_node_compileroptions_nounusedparameters",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_node_compileroptions_nounusedparameters"
     },
     {
       "relation": "contains",
@@ -19903,9 +20328,9 @@
       "source_file": "tsconfig.node.json",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_node_compileroptions",
-      "target": "beachvolleydiary_tsconfig_node_compileroptions_resolvejsonmodule",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_node_compileroptions_resolvejsonmodule"
     },
     {
       "relation": "contains",
@@ -19913,9 +20338,9 @@
       "source_file": "tsconfig.node.json",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_node_compileroptions",
-      "target": "beachvolleydiary_tsconfig_node_compileroptions_skiplibcheck",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_node_compileroptions_skiplibcheck"
     },
     {
       "relation": "contains",
@@ -19923,9 +20348,9 @@
       "source_file": "tsconfig.node.json",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_node_compileroptions",
-      "target": "beachvolleydiary_tsconfig_node_compileroptions_strict",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_node_compileroptions_strict"
     },
     {
       "relation": "contains",
@@ -19933,9 +20358,9 @@
       "source_file": "tsconfig.node.json",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_node_compileroptions",
-      "target": "beachvolleydiary_tsconfig_node_compileroptions_target",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_node_compileroptions_target"
     },
     {
       "relation": "contains",
@@ -19943,9 +20368,9 @@
       "source_file": "tsconfig.node.json",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_node_compileroptions",
-      "target": "beachvolleydiary_tsconfig_node_compileroptions_tsbuildinfofile",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_node_compileroptions_tsbuildinfofile"
     },
     {
       "relation": "contains",
@@ -19953,9 +20378,9 @@
       "source_file": "tsconfig.test.json",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_tsconfig_test_json",
-      "target": "beachvolleydiary_tsconfig_test_compileroptions",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_test_compileroptions"
     },
     {
       "relation": "contains",
@@ -19963,9 +20388,9 @@
       "source_file": "tsconfig.test.json",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_tsconfig_test_json",
-      "target": "beachvolleydiary_tsconfig_test_exclude",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_test_exclude"
     },
     {
       "relation": "contains",
@@ -19973,9 +20398,9 @@
       "source_file": "tsconfig.test.json",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_tsconfig_test_json",
-      "target": "beachvolleydiary_tsconfig_test_extends",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_test_extends"
     },
     {
       "relation": "contains",
@@ -19983,9 +20408,9 @@
       "source_file": "tsconfig.test.json",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_tsconfig_test_json",
-      "target": "beachvolleydiary_tsconfig_test_include",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_test_include"
     },
     {
       "relation": "contains",
@@ -19993,9 +20418,9 @@
       "source_file": "tsconfig.test.json",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_test_compileroptions",
-      "target": "beachvolleydiary_tsconfig_test_compileroptions_composite",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_test_compileroptions_composite"
     },
     {
       "relation": "contains",
@@ -20003,9 +20428,9 @@
       "source_file": "tsconfig.test.json",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_test_compileroptions",
-      "target": "beachvolleydiary_tsconfig_test_compileroptions_noemit",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_test_compileroptions_noemit"
     },
     {
       "relation": "contains",
@@ -20013,9 +20438,9 @@
       "source_file": "tsconfig.test.json",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_tsconfig_test_compileroptions",
-      "target": "beachvolleydiary_tsconfig_test_compileroptions_types",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_tsconfig_test_compileroptions_types"
     },
     {
       "relation": "contains",
@@ -20083,9 +20508,9 @@
       "source_file": "docs/QA-chi-ce-oggi.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_qa_chi_ce_oggi",
-      "target": "docs_qa_chi_ce_oggi_qa_chi_c_\u00e8_oggi_check_in_stanza_reciproca",
-      "confidence_score": 1.0
+      "target": "docs_qa_chi_ce_oggi_qa_chi_c_\u00e8_oggi_check_in_stanza_reciproca"
     },
     {
       "relation": "contains",
@@ -20093,9 +20518,9 @@
       "source_file": "docs/QA-chi-ce-oggi.md",
       "source_location": "L128",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_qa_chi_ce_oggi_qa_chi_c_\u00e8_oggi_check_in_stanza_reciproca",
-      "target": "docs_qa_chi_ce_oggi_come_far_girare_la_suite",
-      "confidence_score": 1.0
+      "target": "docs_qa_chi_ce_oggi_come_far_girare_la_suite"
     },
     {
       "relation": "contains",
@@ -20103,9 +20528,9 @@
       "source_file": "docs/QA-chi-ce-oggi.md",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_qa_chi_ce_oggi_qa_chi_c_\u00e8_oggi_check_in_stanza_reciproca",
-      "target": "docs_qa_chi_ce_oggi_cosa_\u00e8_stato_verificato_automatico",
-      "confidence_score": 1.0
+      "target": "docs_qa_chi_ce_oggi_cosa_\u00e8_stato_verificato_automatico"
     },
     {
       "relation": "contains",
@@ -20113,9 +20538,9 @@
       "source_file": "docs/QA-chi-ce-oggi.md",
       "source_location": "L80",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_qa_chi_ce_oggi_qa_chi_c_\u00e8_oggi_check_in_stanza_reciproca",
-      "target": "docs_qa_chi_ce_oggi_da_applicare_verificare_a_mano_fuori_dalla_portata_di_jsdom",
-      "confidence_score": 1.0
+      "target": "docs_qa_chi_ce_oggi_da_applicare_verificare_a_mano_fuori_dalla_portata_di_jsdom"
     },
     {
       "relation": "contains",
@@ -20123,9 +20548,9 @@
       "source_file": "docs/QA-chi-ce-oggi.md",
       "source_location": "L50",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_qa_chi_ce_oggi_qa_chi_c_\u00e8_oggi_check_in_stanza_reciproca",
-      "target": "docs_qa_chi_ce_oggi_decisioni_e_assunzioni_documentate",
-      "confidence_score": 1.0
+      "target": "docs_qa_chi_ce_oggi_decisioni_e_assunzioni_documentate"
     },
     {
       "relation": "contains",
@@ -20133,9 +20558,9 @@
       "source_file": "docs/QA-chi-ce-oggi.md",
       "source_location": "L118",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_qa_chi_ce_oggi_qa_chi_c_\u00e8_oggi_check_in_stanza_reciproca",
-      "target": "docs_qa_chi_ce_oggi_follow_up_fuori_scope_come_da_piano",
-      "confidence_score": 1.0
+      "target": "docs_qa_chi_ce_oggi_follow_up_fuori_scope_come_da_piano"
     },
     {
       "relation": "contains",
@@ -20143,9 +20568,9 @@
       "source_file": "docs/QA-chi-ce-oggi.md",
       "source_location": "L102",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "docs_qa_chi_ce_oggi_qa_chi_c_\u00e8_oggi_check_in_stanza_reciproca",
-      "target": "docs_qa_chi_ce_oggi_limitazioni_note",
-      "confidence_score": 1.0
+      "target": "docs_qa_chi_ce_oggi_limitazioni_note"
     },
     {
       "relation": "contains",
@@ -20153,9 +20578,9 @@
       "source_file": "docs/QA-tornei-formati.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_docs_qa_tornei_formati_md",
-      "target": "docs_qa_tornei_formati_qa_suddivisione_tornei_per_formato",
-      "confidence_score": 1.0
+      "target": "docs_qa_tornei_formati_qa_suddivisione_tornei_per_formato"
     },
     {
       "relation": "contains",
@@ -20270,11 +20695,111 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "supabase/README.md",
+      "source_file": "docs/QA-venues.md",
       "source_location": "L1",
       "weight": 1.0,
-      "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_supabase_readme_md",
-      "target": "supabase_readme_supabase_beach_volley_diary",
+      "source": "docs_qa_venues",
+      "target": "docs_qa_venues_qa_luoghi_venues_la_citt\u00e0_diventa_un_posto_vero",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/QA-venues.md",
+      "source_location": "L180",
+      "weight": 1.0,
+      "source": "docs_qa_venues_qa_luoghi_venues_la_citt\u00e0_diventa_un_posto_vero",
+      "target": "docs_qa_venues_come_far_girare_la_suite",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/QA-venues.md",
+      "source_location": "L40",
+      "weight": 1.0,
+      "source": "docs_qa_venues_qa_luoghi_venues_la_citt\u00e0_diventa_un_posto_vero",
+      "target": "docs_qa_venues_cosa_\u00e8_stato_verificato",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/QA-venues.md",
+      "source_location": "L150",
+      "weight": 1.0,
+      "source": "docs_qa_venues_qa_luoghi_venues_la_citt\u00e0_diventa_un_posto_vero",
+      "target": "docs_qa_venues_da_verificare_a_mano_fuori_dalla_portata_di_jsdom",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/QA-venues.md",
+      "source_location": "L82",
+      "weight": 1.0,
+      "source": "docs_qa_venues_qa_luoghi_venues_la_citt\u00e0_diventa_un_posto_vero",
+      "target": "docs_qa_venues_decisioni_e_assunzioni_documentate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/QA-venues.md",
+      "source_location": "L170",
+      "weight": 1.0,
+      "source": "docs_qa_venues_qa_luoghi_venues_la_citt\u00e0_diventa_un_posto_vero",
+      "target": "docs_qa_venues_follow_up",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/QA-venues.md",
+      "source_location": "L19",
+      "weight": 1.0,
+      "source": "docs_qa_venues_qa_luoghi_venues_la_citt\u00e0_diventa_un_posto_vero",
+      "target": "docs_qa_venues_la_decisione_che_cambia_la_forma_dello_schema",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/QA-venues.md",
+      "source_location": "L119",
+      "weight": 1.0,
+      "source": "docs_qa_venues_qa_luoghi_venues_la_citt\u00e0_diventa_un_posto_vero",
+      "target": "docs_qa_venues_limitazione_nota_il_merge_di_un_luogo_condiviso",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/QA-venues.md",
+      "source_location": "L138",
+      "weight": 1.0,
+      "source": "docs_qa_venues_qa_luoghi_venues_la_citt\u00e0_diventa_un_posto_vero",
+      "target": "docs_qa_venues_non_fatto_di_proposito",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/QA-venues.md",
+      "source_location": "L66",
+      "weight": 1.0,
+      "source": "docs_qa_venues_cosa_\u00e8_stato_verificato",
+      "target": "docs_qa_venues_automatico_src_lib_derive_venues_server_test_ts_11_test",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/QA-venues.md",
+      "source_location": "L42",
+      "weight": 1.0,
+      "source": "docs_qa_venues_cosa_\u00e8_stato_verificato",
+      "target": "docs_qa_venues_sul_db_query_di_sola_lettura_sul_progetto_reale",
       "confidence_score": 1.0
     },
     {
@@ -20341,6 +20866,26 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "supabase/README.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_supabase_readme_md",
+      "target": "supabase_readme_supabase_beach_volley_diary"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "supabase/README.md",
+      "source_location": "L34",
+      "weight": 1.0,
+      "source": "supabase_readme_struttura",
+      "target": "supabase_readme_venues_l_eccezione_alla_regola_owner_only",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "supabase/README.md",
       "source_location": "L32",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -20356,6 +20901,16 @@
       "confidence_score": 1.0,
       "source": "supabase_readme_come_applicare",
       "target": "supabase_readme_1_supabase_cli_consigliato"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "supabase/README.md",
+      "source_location": "L72",
+      "weight": 1.0,
+      "source": "supabase_readme_come_applicare",
+      "target": "supabase_readme_1_supabase_cli_solo_per_uno_stack_locale_nuovo",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -20839,5 +21394,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "686bf2cbb3b6afcf3a0d136b1a0b3908c5e39319"
+  "built_at_commit": "a8abd8b38b0211917b849db622df6580df37f717"
 }
