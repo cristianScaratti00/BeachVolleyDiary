@@ -3,6 +3,7 @@ import type {
   Match,
   Partner,
   Photo,
+  Venue,
   DiaryData,
   SetScore,
 } from "../lib/models";
@@ -95,6 +96,10 @@ export function makeTournament(over: Partial<Tournament> = {}): Tournament {
     name: `Torneo ${id}`,
     date: "2026-06-15",
     city: "Rimini",
+    // Nessun luogo per default: è la forma dei tornei esistenti (e di quelli
+    // creati da un client che non conosce i venue). Chi testa i luoghi passa
+    // `venueId` esplicitamente.
+    venueId: null,
     category: "Open",
     format: "2vs2",
     surface: "Sabbia outdoor",
@@ -135,9 +140,31 @@ export function makePhoto(over: Partial<Photo> = {}): Photo {
   };
 }
 
+export function makeVenue(over: Partial<Venue> = {}): Venue {
+  seq += 1;
+  const id = over.id ?? `v${seq}`;
+  return {
+    id,
+    name: `Luogo ${id}`,
+    city: "Rimini",
+    lat: null,
+    lng: null,
+    surface: null,
+    shared: false,
+    ...over,
+  };
+}
+
 // DiaryData vuoto per default: ogni test aggiunge solo le collezioni che usa.
 export function makeData(over: Partial<DiaryData> = {}): DiaryData {
-  return { tournaments: [], matches: [], partners: [], photos: [], ...over };
+  return {
+    tournaments: [],
+    matches: [],
+    partners: [],
+    photos: [],
+    venues: [],
+    ...over,
+  };
 }
 // Un utente presente nella stanza di "Chi c'è oggi" (già mappato/ordinato).
 let presentSeq = 0;

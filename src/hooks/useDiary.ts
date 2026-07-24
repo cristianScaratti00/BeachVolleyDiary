@@ -1,8 +1,9 @@
 import { useState, useCallback, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { NEW_PARTNER_COLOR } from '../lib/theme'
+import { normalizeCity, parseLatLng } from '../lib/derive'
 import type {
-  DiaryData, Tournament, Match, Photo, Partner, AnyForm, GuidedMatch, AppUser,
+  DiaryData, Tournament, Match, Photo, Partner, Venue, AnyForm, GuidedMatch, AppUser,
   Category, Format, Surface, Phase, Placement,
 } from '../lib/models'
 
@@ -25,9 +26,88 @@ export interface UseDiary {
   searchUsers: (query: string) => Promise<AppUser[]>
   linkPartner: (partnerId: string, userId: string) => Promise<{ ok: boolean; error?: string }>
   unlinkPartner: (partnerId: string) => Promise<boolean>
+  // ---- luoghi ----
+  // Unisce due luoghi duplicati ("Riccione" e "Riccione (RN)"): ripunta i tornei
+  // del primo sul secondo ed elimina il primo. Il backfill sa fondere solo le
+  // varianti di maiuscole/spazi, il resto richiede l'occhio di chi c'era.
+  mergeVenues: (fromId: string, toId: string) => Promise<boolean>
 }
 
-const EMPTY: DiaryData = { tournaments: [], matches: [], partners: [], photos: [] }
+const EMPTY: DiaryData = { tournaments: [], matches: [], partners: [], photos: [], venues: [] }
+
+// Snapshot testuale del luogo, scritto sempre su `tournaments.city` accanto a
+// `venue_id`: i client che non conoscono i venue (e i tornei importati) devono
+// continuare a leggere un luogo. Legge il venue scelto, o i campi del luogo
+// nuovo, e ricade sul `city` del form per i chiamanti che non passano un venue.
+function citySnapshot(f: AnyForm, venues: Venue[]): string {
+  if (f.venueId === 'new') return (f.newVenueCity ?? '').trim() || (f.newVenueName ?? '').trim()
+  const v = f.venueId ? venues.find((x) => x.id === f.venueId) : undefined
+  if (v) return v.city.trim() || v.name.trim()
+  return (f.city ?? '').trim()
+}
+
+// ---------------------------------------------------------------------------
+// Risolve il campo "Dove hai giocato" del form in un id di `venues`:
+//   ''    → nessun luogo (null)
+//   id    → quel luogo
+//   'new' → crea la voce di catalogo, o RIUSA quella che esiste già
+// Stessa forma del blocco compagno in `saveTorneo`, con una differenza che
+// viene dallo schema: il catalogo dei luoghi è globale e unico su
+// (city_key, name_key), quindi due utenti che scrivono lo stesso posto devono
+// finire sulla STESSA riga. Il duplicato non è un errore da mostrare: è
+// esattamente la riga a cui volevamo agganciarci.
+//
+// L'esito è esplicito (`ok`) invece di un `string | null`, altrimenti "nessun
+// luogo" e "il salvataggio è fallito" sarebbero lo stesso valore e l'errore
+// finirebbe ingoiato.
+// ---------------------------------------------------------------------------
+type ResolvedVenue = { ok: true; id: string | null } | { ok: false; error: unknown }
+
+async function resolveVenue(f: AnyForm): Promise<ResolvedVenue> {
+  const sel = f.venueId
+  if (!sel) return { ok: true, id: null }
+  if (sel !== 'new') return { ok: true, id: sel }
+
+  const name = (f.newVenueName ?? '').trim()
+  // "＋ Nuovo luogo" senza nome: non c'è niente da creare. Il torneo si salva
+  // senza luogo (con la sua `city`) invece di bloccarsi su un campo vuoto.
+  if (!name) return { ok: true, id: null }
+  const city = (f.newVenueCity ?? '').trim()
+  // Coordinate malformate → nessuna coordinata (il vincolo DB le vuole in
+  // coppia). Il picker segnala già l'errore mentre si digita: meglio salvare il
+  // torneo senza mappa che rifiutare tutto per una virgola.
+  const coords = parseLatLng(f.newVenueCoords ?? '')
+
+  const { data: ins, error } = await supabase
+    .from('venues')
+    .insert({
+      name,
+      city,
+      lat: coords?.lat ?? null,
+      lng: coords?.lng ?? null,
+      // Superficie tipica del posto: la eredita dal torneo che lo inaugura,
+      // ed è ciò che il form suggerirà ai tornei successivi.
+      surface: f.surface ?? null,
+    })
+    .select('id')
+    .single()
+  if (ins) return { ok: true, id: ins.id }
+
+  // 23505 = unique_violation su (city_key, name_key): il posto è già in
+  // catalogo (creato da un altro utente, o da un'altra scheda). Riusa la riga.
+  if (error && error.code === '23505') {
+    const { data: found, error: selErr } = await supabase
+      .from('venues').select('id')
+      // Le due chiavi sono generate dal DB come lower(btrim(...)): `normalizeCity`
+      // applica lato client la stessa espressione.
+      .eq('city_key', normalizeCity(city))
+      .eq('name_key', normalizeCity(name))
+      .maybeSingle()
+    if (found) return { ok: true, id: found.id }
+    return { ok: false, error: selErr ?? error }
+  }
+  return { ok: false, error }
+}
 
 // Bucket privato delle foto dei tornei (vedi migration tournament_photos_storage).
 const PHOTO_BUCKET = 'tournament-photos'
@@ -57,12 +137,12 @@ async function fetchAll(): Promise<DiaryData> {
   // utenti, resi leggibili dalla RLS quando un socio è collegato al mio account).
   const { data: authData } = await supabase.auth.getSession()
   const uid = authData.session?.user?.id ?? ''
-  const [pRes, tRes, mRes, fRes] = await Promise.all([
+  const [pRes, tRes, mRes, fRes, vRes] = await Promise.all([
     supabase.from('partners')
       .select('id, name, color, user_id, linked_user_id')
       .order('created_at', { ascending: true }),
     supabase.from('tournaments')
-      .select('id, name, date, city, category, format, surface, placement, color, emoji, partner_id, user_id')
+      .select('id, name, date, city, venue_id, category, format, surface, placement, color, emoji, partner_id, user_id')
       .order('date', { ascending: false }),
     supabase.from('matches')
       .select('id, tournament_id, partner_id, opponents, phase, note, match_sets(set_number, us, them)')
@@ -70,8 +150,14 @@ async function fetchAll(): Promise<DiaryData> {
     supabase.from('photos')
       .select('id, tournament_id, color, caption, storage_path')
       .order('created_at', { ascending: false }),
+    // Catalogo dei luoghi: a differenza delle altre query NON è filtrato per
+    // utente — la RLS lo rende leggibile a tutti gli autenticati, perché
+    // "Bagno 26 · Riccione" è lo stesso posto per chiunque ci giochi.
+    supabase.from('venues')
+      .select('id, name, city, lat, lng, surface, user_id')
+      .order('name', { ascending: true }),
   ])
-  const failed = pRes.error || tRes.error || mRes.error || fRes.error
+  const failed = pRes.error || tRes.error || mRes.error || fRes.error || vRes.error
   if (failed) throw failed
 
   const partners: Partner[] = (pRes.data ?? []).map((p) => ({
@@ -80,11 +166,24 @@ async function fetchAll(): Promise<DiaryData> {
     shared: p.user_id !== uid,
   }))
 
+  // `shared` = riga di un altro (o di un account cancellato, `user_id` null):
+  // resta selezionabile da tutti, ma solo chi l'ha creata può correggerla.
+  const venues: Venue[] = (vRes.data ?? []).map((v) => ({
+    id: v.id,
+    name: v.name,
+    city: v.city,
+    lat: v.lat,
+    lng: v.lng,
+    surface: v.surface as Surface | null,
+    shared: v.user_id !== uid,
+  }))
+
   const tournaments: Tournament[] = (tRes.data ?? []).map((t) => ({
     id: t.id,
     name: t.name,
     date: t.date,
     city: t.city,
+    venueId: t.venue_id,
     category: t.category as Category,
     format: t.format as Format,
     surface: t.surface as Surface,
@@ -124,7 +223,7 @@ async function fetchAll(): Promise<DiaryData> {
     url: f.storage_path ? (signed.get(f.storage_path) ?? null) : null,
   }))
 
-  return { tournaments, matches, partners, photos }
+  return { tournaments, matches, partners, photos, venues }
 }
 
 // Owns the persisted diary data (Supabase) and exposes async mutations.
@@ -185,10 +284,21 @@ export function useDiary(): UseDiary {
       partnerId = sel
     }
 
+    // "Dove": stesso blocco del compagno qui sopra. La città resta scritta
+    // sempre accanto a `venue_id` (dual-write): è lo snapshot che leggono i
+    // client che non conoscono i luoghi.
+    const venue = await resolveVenue(f)
+    if (!venue.ok) return fail(venue.error)
+
     const row = {
       name: f.name,
       date: f.date ?? '',
+<<<<<<< HEAD
       city: cleanCity(f.city),
+=======
+      city: citySnapshot(f, data.venues),
+      venue_id: venue.id,
+>>>>>>> queuer/turn-the-free-text-city-into-a-real-venu-66f05c98
       category: f.category ?? 'Amatoriale',
       format: f.format ?? '2vs2',
       surface: f.surface ?? 'Sabbia outdoor',
@@ -214,9 +324,9 @@ export function useDiary(): UseDiary {
 
     await reload()
     return true
-  }, [reload, data.tournaments])
+  }, [reload, data.tournaments, data.venues])
 
-  // Creazione rapida: nome + compagno + data + categoria + piazzamento.
+  // Creazione rapida: nome + compagno + luogo + data + categoria + piazzamento.
   // Formato/superficie fissi. Ritorna l'id del nuovo torneo (o null se fallisce).
   const quickCreateTorneo = useCallback(async (f: AnyForm): Promise<string | null> => {
     if (!f.name) return null
@@ -236,12 +346,22 @@ export function useDiary(): UseDiary {
       partnerId = sel
     }
 
+    // Il torneo rapido non nasce più senza luogo: arriva dal selettore (prima
+    // era hardcoded a '', quindi ogni torneo rapido era place-less).
+    const venue = await resolveVenue(f)
+    if (!venue.ok) { fail(venue.error); return null }
+
     const row = {
       name: f.name,
       date: f.date ?? '',
+<<<<<<< HEAD
       // Il form rapido ora chiede la città: senza, ogni torneo creato al volo
       // restava fuori dalla mappa delle conquiste. Resta facoltativa.
       city: cleanCity(f.city),
+=======
+      city: citySnapshot(f, data.venues),
+      venue_id: venue.id,
+>>>>>>> queuer/turn-the-free-text-city-into-a-real-venu-66f05c98
       category: f.category ?? 'Amatoriale',
       format: '2vs2',
       surface: 'Sabbia outdoor',
@@ -254,7 +374,7 @@ export function useDiary(): UseDiary {
     if (error || !ins) { fail(error); return null }
     await reload()
     return ins.id
-  }, [reload])
+  }, [reload, data.venues])
 
   // Creazione guidata (assistente chat): crea il torneo con tutti i campi e, in
   // un'unica passata, le partite raccolte durante la conversazione. Il compagno
@@ -279,10 +399,18 @@ export function useDiary(): UseDiary {
       partnerId = sel
     }
 
+    const venue = await resolveVenue(f)
+    if (!venue.ok) { fail(venue.error); return null }
+
     const row = {
       name: f.name,
       date: f.date ?? '',
+<<<<<<< HEAD
       city: cleanCity(f.city),
+=======
+      city: citySnapshot(f, data.venues),
+      venue_id: venue.id,
+>>>>>>> queuer/turn-the-free-text-city-into-a-real-venu-66f05c98
       category: f.category ?? 'Amatoriale',
       format: f.format ?? '2vs2',
       surface: f.surface ?? 'Sabbia outdoor',
@@ -318,7 +446,7 @@ export function useDiary(): UseDiary {
 
     await reload()
     return tournamentId
-  }, [reload, data.partners])
+  }, [reload, data.partners, data.venues])
 
   const deleteTorneo = useCallback(async (editId: string | null) => {
     if (!editId) return false
@@ -478,5 +606,23 @@ export function useDiary(): UseDiary {
     return ins.id
   }, [reload])
 
-  return { data, loading, error, clearError, reload, saveTorneo, quickCreateTorneo, createGuidedTorneo, deleteTorneo, savePartita, deletePartita, saveFoto, deleteFoto, saveCompagno, deleteCompagno, searchUsers, linkPartner, unlinkPartner }
+  // Unisce due luoghi duplicati ("cormano" e "cormank"). Nessuna SQL nuova:
+  // ripuntare i tornei e cancellare la riga sono due scritture che la RLS già
+  // consente a chi ha creato il luogo (la UI offre "Unisci a…" solo lì).
+  //
+  // Ordine obbligato: prima si spostano i tornei, poi si elimina il doppione.
+  // All'inverso la FK `on delete set null` azzererebbe i `venue_id` un istante
+  // prima di poterli spostare, e i tornei resterebbero senza luogo.
+  const mergeVenues = useCallback(async (fromId: string, toId: string): Promise<boolean> => {
+    if (!fromId || !toId || fromId === toId) return false
+    const { error: upErr } = await supabase
+      .from('tournaments').update({ venue_id: toId }).eq('venue_id', fromId)
+    if (upErr) return fail(upErr)
+    const { error: delErr } = await supabase.from('venues').delete().eq('id', fromId)
+    if (delErr) return fail(delErr)
+    await reload()
+    return true
+  }, [reload])
+
+  return { data, loading, error, clearError, reload, saveTorneo, quickCreateTorneo, createGuidedTorneo, deleteTorneo, savePartita, deletePartita, saveFoto, deleteFoto, saveCompagno, deleteCompagno, searchUsers, linkPartner, unlinkPartner, mergeVenues }
 }

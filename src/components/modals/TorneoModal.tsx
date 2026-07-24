@@ -1,7 +1,12 @@
 import type { CSSProperties, ChangeEvent } from 'react'
+<<<<<<< HEAD
 import { Sheet, Title, Label, CityInput, inputStyle, selectStyle, Actions } from './Sheet'
+=======
+import { Sheet, Title, Label, inputStyle, selectStyle, Actions } from './Sheet'
+import VenuePicker from './VenuePicker'
+>>>>>>> queuer/turn-the-free-text-city-into-a-real-venu-66f05c98
 import { SWATCH_COLORS } from '../../lib/theme'
-import type { AnyForm, SetField, Option, Category, Format, Surface, Placement } from '../../lib/models'
+import type { AnyForm, SetField, Option, Venue, Category, Format, Surface, Placement } from '../../lib/models'
 
 const fieldWrap: CSSProperties = { flex: 1, minWidth: 130 }
 const nameStyle: CSSProperties = { ...inputStyle, font: "700 15px 'Nunito Sans'" }
@@ -12,12 +17,14 @@ interface TorneoModalProps {
   setField: SetField
   partnerOptions: Option[]
   canAddPartner: boolean
+  venues: Venue[]
+  onMergeVenues: (fromId: string, toId: string) => Promise<boolean>
   onClose: () => void
   onSave: () => void
   onDelete: () => void
 }
 
-export default function TorneoModal({ form, editId, setField, partnerOptions, canAddPartner, onClose, onSave, onDelete }: TorneoModalProps) {
+export default function TorneoModal({ form, editId, setField, partnerOptions, canAddPartner, venues, onMergeVenues, onClose, onSave, onDelete }: TorneoModalProps) {
   return (
     <Sheet onClose={onClose}>
       <Title>{editId ? 'Modifica torneo' : 'Nuovo torneo'}</Title>
@@ -44,12 +51,19 @@ export default function TorneoModal({ form, editId, setField, partnerOptions, ca
           )}
         </div>
 
+        {/* Il luogo prende il posto del vecchio campo "Città" a testo libero e
+            sta a tutta larghezza sotto al compagno: due select gemelli, stesso
+            ritmo. Il pannello del luogo nuovo si apre qui sotto, non stretto in
+            mezza colonna. */}
+        <VenuePicker form={form} setField={setField} venues={venues} suggestSurface onMerge={onMergeVenues} />
+
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           <div style={fieldWrap}>
             <Label>Data</Label>
             <input type="date" value={form.date || ''} onChange={(e: ChangeEvent<HTMLInputElement>) => setField('date', e.target.value)} style={inputStyle} />
           </div>
           <div style={fieldWrap}>
+<<<<<<< HEAD
             <Label>Città</Label>
             <CityInput value={form.city || ''} onChange={(v) => setField('city', v)} />
           </div>
@@ -57,32 +71,35 @@ export default function TorneoModal({ form, editId, setField, partnerOptions, ca
 
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           <div style={fieldWrap}>
+=======
+>>>>>>> queuer/turn-the-free-text-city-into-a-real-venu-66f05c98
             <Label>Categoria</Label>
             <select value={form.category || 'Amatoriale'} onChange={(e: ChangeEvent<HTMLSelectElement>) => setField('category', e.target.value as Category)} style={selectStyle}>
               <option>Amatoriale</option><option>Open</option><option>Serie</option><option>Pro</option><option>King</option><option>Queen</option>
-            </select>
-          </div>
-          <div style={fieldWrap}>
-            <Label>Formato</Label>
-            <select value={form.format || '2vs2'} onChange={(e: ChangeEvent<HTMLSelectElement>) => setField('format', e.target.value as Format)} style={selectStyle}>
-              <option>2vs2</option><option>3vs3</option><option>4vs4</option>
             </select>
           </div>
         </div>
 
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           <div style={fieldWrap}>
+            <Label>Formato</Label>
+            <select value={form.format || '2vs2'} onChange={(e: ChangeEvent<HTMLSelectElement>) => setField('format', e.target.value as Format)} style={selectStyle}>
+              <option>2vs2</option><option>3vs3</option><option>4vs4</option>
+            </select>
+          </div>
+          <div style={fieldWrap}>
             <Label>Superficie</Label>
             <select value={form.surface || 'Sabbia outdoor'} onChange={(e: ChangeEvent<HTMLSelectElement>) => setField('surface', e.target.value as Surface)} style={selectStyle}>
               <option>Sabbia outdoor</option><option>Indoor</option><option>Erba</option>
             </select>
           </div>
-          <div style={fieldWrap}>
-            <Label>Piazzamento</Label>
-            <select value={form.placement || 'Gironi'} onChange={(e: ChangeEvent<HTMLSelectElement>) => setField('placement', e.target.value as Placement)} style={selectStyle}>
-              <option>1° 🏆</option><option>2°</option><option>3°</option><option>Semifinale</option><option>Quarti</option><option>Ottavi</option><option>Gironi</option><option>In corso</option>
-            </select>
-          </div>
+        </div>
+
+        <div>
+          <Label>Piazzamento</Label>
+          <select value={form.placement || 'Gironi'} onChange={(e: ChangeEvent<HTMLSelectElement>) => setField('placement', e.target.value as Placement)} style={selectStyle}>
+            <option>1° 🏆</option><option>2°</option><option>3°</option><option>Semifinale</option><option>Quarti</option><option>Ottavi</option><option>Gironi</option><option>In corso</option>
+          </select>
         </div>
 
         <div>

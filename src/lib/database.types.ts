@@ -98,6 +98,56 @@ export type Database = {
           },
         ]
       }
+      venues: {
+        Row: {
+          id: string
+          // Chi ha creato la voce del catalogo. Nullable: la FK è
+          // ON DELETE SET NULL, il luogo sopravvive al suo autore.
+          user_id: string | null
+          name: string
+          // Colonne generate (lower(btrim(...))): presenti in lettura, non
+          // scrivibili — assenti da Insert/Update.
+          name_key: string
+          city: string
+          city_key: string
+          lat: number | null
+          lng: number | null
+          surface: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          name: string
+          city?: string
+          lat?: number | null
+          lng?: number | null
+          surface?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          name?: string
+          city?: string
+          lat?: number | null
+          lng?: number | null
+          surface?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'venues_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       tournaments: {
         Row: {
           id: string
@@ -105,6 +155,7 @@ export type Database = {
           name: string
           date: string
           city: string
+          venue_id: string | null
           category: string
           format: string
           surface: string
@@ -121,6 +172,7 @@ export type Database = {
           name: string
           date: string
           city?: string
+          venue_id?: string | null
           category?: string
           format?: string
           surface?: string
@@ -137,6 +189,7 @@ export type Database = {
           name?: string
           date?: string
           city?: string
+          venue_id?: string | null
           category?: string
           format?: string
           surface?: string
@@ -153,6 +206,13 @@ export type Database = {
             columns: ['partner_id']
             isOneToOne: false
             referencedRelation: 'partners'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'tournaments_venue_id_fkey'
+            columns: ['venue_id']
+            isOneToOne: false
+            referencedRelation: 'venues'
             referencedColumns: ['id']
           },
           {
@@ -458,6 +518,12 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: unknown
       }
+      // Funzione-trigger su venues (EXECUTE revocata a public): propaga la
+      // rinomina di un luogo sullo snapshot tournaments.city.
+      sync_tournament_city: {
+        Args: Record<PropertyKey, never>
+        Returns: unknown
+      }
     }
     Enums: {
       [_ in never]: never
@@ -485,4 +551,5 @@ export type Tournament = Tables<'tournaments'>
 export type Match = Tables<'matches'>
 export type MatchSet = Tables<'match_sets'>
 export type Photo = Tables<'photos'>
+export type Venue = Tables<'venues'>
 export type MatchScore = Views<'match_scores'>

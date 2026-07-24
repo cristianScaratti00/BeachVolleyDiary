@@ -20,6 +20,7 @@ import {
   deriveCompagnoDetailServer,
   tournamentOptions,
   partnerOptions,
+  venueOptions,
   yearOptions,
 } from "./lib/derive";
 // Mappa delle conquiste: selettore in un modulo suo (si porta dietro il
@@ -102,12 +103,14 @@ export default function App() {
     searchUsers,
     linkPartner,
     unlinkPartner,
+    mergeVenues,
   } = useDiary();
 
   // "Chi c'è oggi?": stato del check-in di giornata + stanza live. Tiene i dati
   // transitori fuori da useDiary; il link-up riusa saveCompagno + linkPartner.
   const check = useCheckIn({
     tournaments: data.tournaments,
+    venues: data.venues,
     saveCompagno,
     linkPartner,
   });
@@ -380,11 +383,23 @@ export default function App() {
     setFabOpen(false);
     setForm(
       t
-        ? { ...t, partnerId: t.partnerId ?? undefined, newPartnerName: "" }
+        ? {
+            ...t,
+            partnerId: t.partnerId ?? undefined,
+            newPartnerName: "",
+            venueId: t.venueId ?? "",
+            newVenueName: "",
+            newVenueCity: "",
+            newVenueCoords: "",
+          }
         : {
             name: "",
             date: today,
             city: "",
+            venueId: "",
+            newVenueName: "",
+            newVenueCity: "",
+            newVenueCoords: "",
             category: "Amatoriale",
             format: "2vs2",
             surface: "Sabbia outdoor",
@@ -477,6 +492,10 @@ export default function App() {
       city: "",
       partnerId: (P[0] && P[0].id) || "new",
       newPartnerName: "",
+      venueId: "",
+      newVenueName: "",
+      newVenueCity: "",
+      newVenueCoords: "",
       date: today,
       category: "Amatoriale",
       placement: "In corso",
@@ -703,6 +722,7 @@ export default function App() {
           <CreaChat
             wide={wide}
             partners={partnerOptions(data)}
+            venues={venueOptions(data)}
             onCreate={async (f, matches) => {
               const id = await createGuidedTorneo(f, matches);
               if (id) {
@@ -894,6 +914,8 @@ export default function App() {
           setField={setField}
           partnerOptions={partnerOptions(data)}
           canAddPartner={perm.canCreatePartner}
+          venues={data.venues}
+          onMergeVenues={mergeVenues}
           onClose={closeModal}
           onSave={doSaveTorneo}
           onDelete={doDeleteTorneo}
@@ -937,6 +959,7 @@ export default function App() {
           setField={setField}
           partnerOptions={partnerOptions(data)}
           canAddPartner={perm.canCreatePartner}
+          venues={data.venues}
           onClose={closeModal}
           onSave={doSaveQuickTorneo}
         />

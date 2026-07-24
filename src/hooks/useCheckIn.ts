@@ -20,12 +20,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { getWhoIsHere } from '../lib/serverviews'
 import { deriveWhoIsHere, normalizeCity, todayISO } from '../lib/derive'
-import type { AnyForm, CheckIn, CheckInInput, PresentUser, Tournament } from '../lib/models'
+import type { AnyForm, CheckIn, CheckInInput, PresentUser, Tournament, Venue } from '../lib/models'
 
-// Dipendenze passate da App: la lista tornei (per il prefill città) e il
-// plumbing di collegamento socio riusato da useDiary.
+// Dipendenze passate da App: la lista tornei e i luoghi (per il prefill città) e
+// il plumbing di collegamento socio riusato da useDiary.
 export interface UseCheckInDeps {
   tournaments: Tournament[]
+  venues: Venue[]
   saveCompagno: (f: AnyForm) => Promise<string | null>
   linkPartner: (partnerId: string, userId: string) => Promise<{ ok: boolean; error?: string }>
 }
@@ -84,7 +85,7 @@ async function fetchOwnCheckIn(): Promise<CheckIn | null> {
 }
 
 export function useCheckIn(deps: UseCheckInDeps): UseCheckIn {
-  const { tournaments, saveCompagno, linkPartner } = deps
+  const { tournaments, venues, saveCompagno, linkPartner } = deps
   const [own, setOwn] = useState<CheckIn | null>(null)
   const [room, setRoom] = useState<PresentUser[]>([])
   const [loading, setLoading] = useState(false)
@@ -94,15 +95,22 @@ export function useCheckIn(deps: UseCheckInDeps): UseCheckIn {
   const reqRef = useRef(0)
 
   // Città suggerita nel form: se hai un torneo OGGI, quella città; altrimenti la
-  // città del torneo più recente (default di presentazione).
+  // città del torneo più recente (default di presentazione). La città viene dal
+  // luogo collegato quando c'è — è quella normalizzata dal picker, quindi due
+  // giocatori sulla stessa spiaggia finiscono nella stessa stanza anche se uno
+  // scriveva "riccione" e l'altro "Riccione ".
   const cityPrefill = useMemo(() => {
+    const cityOf = (t: Tournament): string => {
+      const v = t.venueId ? venues.find((x) => x.id === t.venueId) : undefined
+      return (v?.city.trim() || v?.name.trim() || t.city.trim())
+    }
     const today = todayISO()
-    const withCity = tournaments.filter((t) => t.city.trim())
+    const withCity = tournaments.filter((t) => cityOf(t))
     const todays = withCity.find((t) => t.date === today)
-    if (todays) return todays.city
+    if (todays) return cityOf(todays)
     const latest = [...withCity].sort((a, b) => (a.date < b.date ? 1 : -1))[0]
-    return latest?.city ?? ''
-  }, [tournaments])
+    return latest ? cityOf(latest) : ''
+  }, [tournaments, venues])
 
   // Carica la stanza per una città (oggi). Race-safe via reqRef.
   const loadRoom = useCallback(async (city: string) => {
