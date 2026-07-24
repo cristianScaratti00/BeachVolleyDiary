@@ -205,7 +205,7 @@
     "semantic_hash": ""
   },
   "src/lib/derive.ts": {
-    "mtime": 1784919795.5003133,
+    "mtime": 1784920097.3402812,
     "ast_hash": "63b5b4e0d06810fa8c517b013689b319",
     "semantic_hash": ""
   },
@@ -235,7 +235,7 @@
     "semantic_hash": ""
   },
   "src/lib/stats.ts": {
-    "mtime": 1784919795.500543,
+    "mtime": 1784920097.3377192,
     "ast_hash": "f04f70e10a9490ad9dfd22dd0bc29118",
     "semantic_hash": ""
   },
@@ -502,6 +502,11 @@
   "docs/QA-chi-ce-oggi.md": {
     "mtime": 1784918860.1585436,
     "ast_hash": "8fc627131dd2d48ae8cd314220bc63ac",
+    "semantic_hash": ""
+  },
+  "src/lib/derive.dashboard.test.ts": {
+    "mtime": 1784920110.840406,
+    "ast_hash": "3b10165e7342175dd930cbc1c960f6d0",
     "semantic_hash": ""
   }
 }
