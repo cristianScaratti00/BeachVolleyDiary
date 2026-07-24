@@ -55,6 +55,8 @@ import TorneoDetail from "./screens/TorneoDetail";
 import Compagni from "./screens/Compagni";
 import CompagnoDetail from "./screens/CompagnoDetail";
 import Profilo from "./screens/Profilo";
+import ChiCeOggi from "./screens/ChiCeOggi";
+import { useCheckIn } from "./hooks/useCheckIn";
 // Lazy: schermate/modali pesanti caricate solo quando servono (code-splitting).
 // CreaChat = wizard AI; StoryModal trascina `html-to-image`.
 const Diario = lazy(() => import("./screens/Diario"));
@@ -89,6 +91,14 @@ export default function App() {
     linkPartner,
     unlinkPartner,
   } = useDiary();
+
+  // "Chi c'è oggi?": stato del check-in di giornata + stanza live. Tiene i dati
+  // transitori fuori da useDiary; il link-up riusa saveCompagno + linkPartner.
+  const check = useCheckIn({
+    tournaments: data.tournaments,
+    saveCompagno,
+    linkPartner,
+  });
 
   const [screen, setScreen] = useState<Screen>("home");
   const [selT, setSelT] = useState<string | null>(null);
@@ -604,6 +614,19 @@ export default function App() {
             onOpenTorneo={openTorneoDetail}
             onInstagramStory={openStory}
             onNewTorneo={() => openTorneo(null)}
+          />
+        );
+      case "oggi":
+        return (
+          <ChiCeOggi
+            own={check.own}
+            room={check.room}
+            loading={check.loading}
+            cityPrefill={check.cityPrefill}
+            onCheckIn={check.checkIn}
+            onCheckOut={check.checkOut}
+            onRefresh={check.refresh}
+            onAddPartner={check.addAsPartner}
           />
         );
       case "profilo":

@@ -9,6 +9,7 @@ interface NavEntry { key: Screen; label: string }
 const NAV: NavEntry[] = [
   { key: 'home', label: 'Dashboard' },
   { key: 'tornei', label: 'Tornei' },
+  { key: 'oggi', label: "Chi c'è oggi" },
   { key: 'compagni', label: 'Compagni' },
   { key: 'diario', label: 'Diario' },
 ]

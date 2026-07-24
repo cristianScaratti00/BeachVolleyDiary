@@ -23,6 +23,41 @@ export interface AppUser {
   email: string
 }
 
+// ---------------------------------------------------------------------------
+// "Chi c'è oggi?" — check-in di giornata + stanza live.
+// Dati transitori (per giorno), fuori dal DiaryData persistente: vivono nel
+// proprio hook (useCheckIn), non in useDiary.
+// ---------------------------------------------------------------------------
+
+// Il proprio check-in di oggi: una riga per utente/città/giorno (null = fuori).
+export interface CheckIn {
+  id: string
+  city: string
+  date: string                // ISO yyyy-mm-dd (sempre oggi)
+  lookingForPartner: boolean  // "cerco compagno"
+  note: string
+  tournamentId: string | null // eventuale torneo collegato (prefill / deep-link)
+}
+
+// Payload di check-in. La data è sempre "oggi" (default lato DB), quindi non
+// compare qui.
+export interface CheckInInput {
+  city: string
+  lookingForPartner: boolean
+  note: string
+  tournamentId?: string | null
+}
+
+// Un altro utente presente nella stessa città oggi. Esposizione minima (Q3):
+// nome + avatar + nota, niente email.
+export interface PresentUser {
+  id: string                 // id utente app (per collegarlo come socio)
+  name: string
+  avatarUrl: string | null
+  lookingForPartner: boolean
+  note: string
+}
+
 export interface SetScore {
   us: number
   them: number
@@ -140,5 +175,5 @@ export interface Option {
 }
 
 // Navigazione e modali a livello di App.
-export type Screen = 'home' | 'tornei' | 'torneo' | 'compagni' | 'compagno' | 'diario' | 'profilo' | 'crea'
+export type Screen = 'home' | 'tornei' | 'torneo' | 'compagni' | 'compagno' | 'diario' | 'profilo' | 'crea' | 'oggi'
 export type ModalKind = 'torneo' | 'torneoRapido' | 'partita' | 'foto' | 'socio' | 'story' | null
