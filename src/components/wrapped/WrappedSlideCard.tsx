@@ -1,0 +1,115 @@
+import type { WrappedSlide } from '../../lib/derive'
+import type { WrappedPalette } from './palette'
+
+// ============================================================================
+// Card di una singola slide del Beach Wrapped: nodo fisso 1080×1920 catturato
+// da html-to-image (come StoryModal). Puramente presentazionale — riceve la
+// slide già pronta da deriveWrapped, la palette (ruotata per indice) e, per le
+// slide con copertina, la foto già inlinata come data-URL dal modale.
+//
+// Misure in px "veri" a 1080px: il modale scala l'intero nodo per l'anteprima,
+// quindi qui NON si usano rem/vw — solo px, così l'export a 1080 è pixel-perfect.
+// ============================================================================
+
+// Dimensione dell'headline: base per lunghezza del testo, così un nome o
+// un'etichetta lunga ("QUARTI DI FINALE") non esce dalla card a larghezza fissa.
+function headlineSize(text: string): number {
+  const len = text.trim().length
+  if (len <= 3) return 300
+  if (len <= 6) return 236
+  if (len <= 10) return 176
+  if (len <= 16) return 130
+  if (len <= 24) return 96
+  return 76
+}
+
+function StatCell({ stat, pal }: { stat: { value: string; label: string }; pal: WrappedPalette }) {
+  return (
+    <div style={{ background: pal.bg, padding: '44px 48px' }}>
+      <div className="num" style={{ fontSize: 84, lineHeight: 1, color: pal.fg }}>{stat.value}</div>
+      <div style={{ font: "700 24px 'Nunito Sans'", letterSpacing: 2, textTransform: 'uppercase', color: pal.muted, marginTop: 14 }}>{stat.label}</div>
+    </div>
+  )
+}
+
+interface WrappedSlideCardProps {
+  slide: WrappedSlide
+  pal: WrappedPalette
+  index: number
+  total: number
+  photoSrc?: string | null // foto già inlinata (data-URL); assente → visual emoji
+}
+
+export default function WrappedSlideCard({ slide, pal, index, total, photoSrc }: WrappedSlideCardProps) {
+  const centered = slide.kind === 'intro' || slide.kind === 'outro'
+  const hasStats = slide.stats.length > 0
+  const cols = slide.stats.length === 4 ? 2 : slide.stats.length
+  const num = (n: number) => String(n).padStart(2, '0')
+
+  return (
+    <div
+      style={{
+        position: 'absolute', top: 0, left: 0, width: 1080, height: 1920,
+        background: pal.bg, color: pal.fg,
+        display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+        padding: '96px 92px', fontFamily: "'Nunito Sans',sans-serif",
+      }}
+    >
+      {/* header: marchio a sinistra, contatore slide a destra */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flex: 'none' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
+          <div style={{ width: 20, height: 20, borderRadius: '50%', background: pal.accent }} />
+          <div style={{ font: "600 34px 'Space Grotesk'", letterSpacing: 2 }}>BEACH DIARY</div>
+        </div>
+        <div className="num" style={{ fontSize: 32, color: pal.muted, letterSpacing: 2 }}>{num(index + 1)} / {num(total)}</div>
+      </div>
+
+      {/* hero */}
+      <div
+        style={{
+          flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center',
+          gap: 30, padding: '48px 0',
+          alignItems: centered ? 'center' : 'flex-start',
+          textAlign: centered ? 'center' : 'left',
+        }}
+      >
+        {photoSrc ? (
+          <div style={{ width: '100%', height: 560 }}>
+            <img src={photoSrc} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 40, display: 'block' }} />
+          </div>
+        ) : (
+          <div style={{ fontSize: 150, lineHeight: 1 }}>{slide.emoji}</div>
+        )}
+
+        <div style={{ font: "700 34px 'Nunito Sans'", letterSpacing: 6, textTransform: 'uppercase', color: pal.accent }}>{slide.eyebrow}</div>
+
+        <div
+          className="num"
+          style={{ fontSize: headlineSize(slide.headline), fontWeight: 500, lineHeight: 0.98, letterSpacing: -2, color: pal.fg, overflowWrap: 'anywhere' }}
+        >
+          {slide.headline}
+        </div>
+
+        {slide.title && <div style={{ font: "600 42px 'Nunito Sans'", color: pal.fg, overflowWrap: 'anywhere' }}>{slide.title}</div>}
+        {slide.caption && <div style={{ font: "600 32px 'Nunito Sans'", color: pal.muted, overflowWrap: 'anywhere' }}>{slide.caption}</div>}
+
+        {hasStats && (
+          <div
+            style={{
+              width: '100%', marginTop: 14,
+              display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: 2,
+              background: pal.line, border: `1px solid ${pal.line}`, borderRadius: 28, overflow: 'hidden',
+            }}
+          >
+            {slide.stats.map((st, i) => <StatCell key={i} stat={st} pal={pal} />)}
+          </div>
+        )}
+      </div>
+
+      {/* footer */}
+      <div style={{ font: "700 28px 'Nunito Sans'", letterSpacing: 4, textTransform: 'uppercase', color: pal.muted, flex: 'none' }}>
+        Il mio diario · Beach Volley
+      </div>
+    </div>
+  )
+}

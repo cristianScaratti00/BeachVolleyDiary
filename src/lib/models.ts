@@ -141,4 +141,4 @@ export interface Option {
 
 // Navigazione e modali a livello di App.
 export type Screen = 'home' | 'tornei' | 'torneo' | 'compagni' | 'compagno' | 'diario' | 'profilo' | 'crea'
-export type ModalKind = 'torneo' | 'torneoRapido' | 'partita' | 'foto' | 'socio' | 'story' | null
+export type ModalKind = 'torneo' | 'torneoRapido' | 'partita' | 'foto' | 'socio' | 'story' | 'wrapped' | null

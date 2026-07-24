@@ -11,6 +11,9 @@ import {
   deriveCompagno,
   deriveDiary,
   deriveStory,
+  deriveWrapped,
+  wrappedRangeForYear,
+  makeWrappedRange,
   deriveTorneiListServer,
   deriveCompagniServer,
   deriveTorneoDetailServer,
@@ -26,6 +29,7 @@ import type {
   SetField,
   SetsApi,
 } from "./lib/models";
+import type { WrappedRange } from "./lib/derive";
 import { permissionsFor } from "./lib/permissions";
 import { getDashboardStats } from "./lib/dashboard";
 import type { ServerDashboard } from "./lib/dashboard";
@@ -65,6 +69,9 @@ import FotoModal from "./components/modals/FotoModal";
 import CompagnoModal from "./components/modals/CompagnoModal";
 import QuickTorneoModal from "./components/modals/QuickTorneoModal";
 const StoryModal = lazy(() => import("./components/modals/StoryModal"));
+// Beach Wrapped: recap di stagione sfogliabile. Come StoryModal trascina
+// `html-to-image`, quindi lazy + Suspense (caricato solo quando lo si apre).
+const WrappedModal = lazy(() => import("./components/wrapped/WrappedModal"));
 
 export default function App() {
   const wide = useIsWide();
@@ -95,6 +102,9 @@ export default function App() {
   const [selP, setSelP] = useState<string | null>(null);
   const [modal, setModal] = useState<ModalKind>(null);
   const [storyT, setStoryT] = useState<string | null>(null);
+  // Intervallo del Beach Wrapped: impostato all'apertura (dal filtro stagione) e
+  // modificabile dall'utente dentro il modale (range configurabile).
+  const [wrappedRange, setWrappedRange] = useState<WrappedRange | null>(null);
   const [editId, setEditId] = useState<string | null>(null);
   const [fabOpen, setFabOpen] = useState(false);
   const [fPartner, setFPartner] = useState("all");
@@ -140,6 +150,19 @@ export default function App() {
     setStoryT(id);
     setFabOpen(false);
     setModal("story");
+  };
+  // Apre il Beach Wrapped: recap di stagione multi-slide. L'intervallo iniziale
+  // segue il filtro stagione della Home (o "Sempre" quando i filtri sono bloccati).
+  const openWrapped = () => {
+    const v = perm.check("shareStory");
+    if (!v.allowed) {
+      denyByPlan(v);
+      return;
+    }
+    track("wrapped_aperto");
+    setWrappedRange(wrappedRangeForYear(data, canFilter ? fYear : "Sempre"));
+    setFabOpen(false);
+    setModal("wrapped");
   };
 
   // Gli errori del DB finiscono nel toast in alto.
@@ -525,6 +548,10 @@ export default function App() {
       : null;
   const storyData =
     modal === "story" && storyT ? deriveStory(data, storyT) : null;
+  const wrappedData =
+    modal === "wrapped" && wrappedRange
+      ? deriveWrapped(data, wrappedRange, canFilter ? fPartner : "all")
+      : null;
 
   const renderScreen = () => {
     switch (screen) {
@@ -662,6 +689,7 @@ export default function App() {
             onQuickTorneo={openQuickTorneo}
             onAiCreate={openCrea}
             canAiCreate={perm.canUseAi}
+            onOpenWrapped={openWrapped}
             goTornei={() => go("tornei")}
             goCompagni={() => go("compagni")}
           />
@@ -856,6 +884,16 @@ export default function App() {
             story={storyData}
             onClose={closeModal}
             onNotice={setNotice}
+          />
+        </Suspense>
+      )}
+      {modal === "wrapped" && wrappedData && (
+        <Suspense fallback={null}>
+          <WrappedModal
+            wrapped={wrappedData}
+            onClose={closeModal}
+            onNotice={setNotice}
+            onRangeChange={(from, to) => setWrappedRange(makeWrappedRange(from, to))}
           />
         </Suspense>
       )}

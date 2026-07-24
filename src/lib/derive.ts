@@ -646,6 +646,239 @@ export function deriveStory(data: DiaryData, id: string): StoryData | null {
   }
 }
 
+// ---- Beach Wrapped (recap di stagione, stile Spotify Wrapped) --------------
+// Un mazzo di card 1080×1920 generate dai dati di stagione: vittorie, miglior
+// compagno, striscia, punti, miglior risultato + volume/rivali/curiosità.
+// Come deriveStory, è puro e client-side (nessuna nuova SQL): compone i selettori
+// già esistenti (computeStats/streakOf/placementRank) su un intervallo di date.
+
+// Intervallo del recap: [from, to] inclusi (ISO 'YYYY-MM-DD') + etichetta pronta.
+export interface WrappedRange { from: string; to: string; label: string }
+
+// Ogni slide ha la stessa forma: la varietà visiva (palette, accento, layout)
+// la mette il componente card. `kind` sceglie solo piccole differenze di resa.
+export type WrappedSlideKind =
+  | 'intro' | 'wins' | 'streak' | 'partner' | 'points'
+  | 'podium' | 'volume' | 'rival' | 'funfacts' | 'outro'
+
+export interface WrappedStat { value: string; label: string }
+
+export interface WrappedSlide {
+  kind: WrappedSlideKind
+  eyebrow: string      // etichetta maiuscola sopra l'hero
+  headline: string     // il numero/parola grande
+  title: string        // titolo secondario (nome torneo/compagno…)
+  caption: string      // riga di supporto
+  stats: WrappedStat[] // mini-griglia stat opzionale (0..4)
+  emoji: string        // decorazione quando non c'è una foto
+  photoUrl?: string | null // foto di copertina (URL firmato) per intro/podio
+}
+
+export interface WrappedData {
+  range: WrappedRange
+  partnerName: string | null // compagno selezionato (o null = tutti)
+  hasEnoughData: boolean     // sotto soglia il recap non ha senso: mostra l'empty
+  played: number
+  slides: WrappedSlide[]
+  slug: string               // base del nome file scaricato
+}
+
+// Soglia minima di partite perché il recap valga la pena di essere mostrato.
+export const WRAPPED_MIN_MATCHES = 3
+
+// "20 giu 2026" — data compatta per le etichette d'intervallo.
+function wrappedDayLabel(d: string): string {
+  return (+d.slice(8, 10)) + ' ' + (MONTHS_SHORT[(+d.slice(5, 7)) - 1] || '').toLowerCase() + ' ' + d.slice(0, 4)
+}
+
+// "Stagione 2026" se l'intervallo copre un anno solare intero, altrimenti
+// "20 giu 2026 – 30 lug 2026". Usata sia dai preset sia dai range personalizzati.
+export function wrappedRangeLabel(from: string, to: string): string {
+  const y = from.slice(0, 4)
+  const fullYear = from.slice(5) === '01-01' && to === y + '-12-31'
+  return fullYear ? 'Stagione ' + y : wrappedDayLabel(from) + ' – ' + wrappedDayLabel(to)
+}
+
+// Costruisce un WrappedRange normalizzato: riordina from/to se invertiti (due
+// input date scambiati non devono rompere il recap) e calcola l'etichetta.
+export function makeWrappedRange(from: string, to: string): WrappedRange {
+  const [a, b] = from <= to ? [from, to] : [to, from]
+  return { from: a, to: b, label: wrappedRangeLabel(a, b) }
+}
+
+// Intervallo iniziale dal filtro stagione della Home: l'anno selezionato come
+// anno solare, oppure "Sempre" = dal primo torneo a oggi. `today` iniettabile.
+export function wrappedRangeForYear(data: DiaryData, fYear: string, today = todayISO()): WrappedRange {
+  if (fYear && fYear !== 'Sempre') return { from: fYear + '-01-01', to: fYear + '-12-31', label: 'Stagione ' + fYear }
+  const dates = data.tournaments.map((t) => t.date).filter(Boolean).sort()
+  const from = dates[0] || (today.slice(0, 4) + '-01-01')
+  return { from, to: today, label: 'Sempre' }
+}
+
+// Genera il mazzo di slide per l'intervallo [range.from, range.to]. Se `fPartner`
+// è un id, tutte le statistiche sono ristrette alle partite con quel compagno.
+export function deriveWrapped(data: DiaryData, range: WrappedRange, fPartner = 'all'): WrappedData {
+  const inRange = (d: string) => d >= range.from && d <= range.to
+  const ms = matchesWithDates(data).filter((m) => inRange(m.date) && (fPartner === 'all' || m.partnerId === fPartner))
+  const s = computeStats(ms)
+  const played = s.played
+  const partnerName = fPartner !== 'all' ? (partnerObj(data, fPartner)?.name ?? null) : null
+
+  // Tornei nell'intervallo. Con un compagno filtrato restano solo quelli in cui
+  // ho effettivamente giocato con lui (coerente con le statistiche partite).
+  const rangeTourns = data.tournaments.filter((t) => inRange(t.date))
+  const tIdsPlayed = new Set(ms.map((m) => m.tournamentId))
+  const tourns = fPartner === 'all' ? rangeTourns : rangeTourns.filter((t) => tIdsPlayed.has(t.id))
+
+  const ranks = tourns.map((t) => placementRank(t.placement))
+  const best = ranks.length ? Math.min(...ranks) : 9
+  const podi = ranks.filter((r) => r <= 3).length
+  // Miglior torneo: al piazzamento migliore, il più recente.
+  const bestTourn = tourns
+    .filter((t) => placementRank(t.placement) === best)
+    .sort((a, b) => (a.date < b.date ? 1 : -1))[0]
+
+  // Miglior compagno (solo senza filtro compagno): win% più alto con ≥2 partite,
+  // a parità di win% vince chi ne ha giocate di più.
+  const partnerRows = data.partners
+    .map((p) => {
+      const ps = computeStats(ms.filter((m) => m.partnerId === p.id))
+      return { name: p.name, played: ps.played, won: ps.won, winPct: ps.winPct }
+    })
+    .filter((p) => p.played >= 2)
+    .sort((a, b) => b.winPct - a.winPct || b.played - a.played)
+  const topPartner = fPartner === 'all' ? partnerRows[0] : undefined
+
+  // Rivale più affrontato (avversari sono testo libero): per numero di sfide.
+  const oppMap = new Map<string, { played: number; won: number }>()
+  ms.forEach((m) => {
+    const key = (m.opponents || '').trim()
+    if (!key) return
+    const cur = oppMap.get(key) || { played: 0, won: 0 }
+    cur.played += 1
+    if (res(m).won) cur.won += 1
+    oppMap.set(key, cur)
+  })
+  const topRival = [...oppMap.entries()]
+    .map(([name, v]) => ({ name, ...v }))
+    .sort((a, b) => b.played - a.played || b.won - a.won)[0]
+
+  // Miglior scarto in una vittoria (differenza punti nel match).
+  let bestMargin = 0
+  ms.forEach((m) => { const r = res(m); if (r.won) { const mar = r.pf - r.pa; if (mar > bestMargin) bestMargin = mar } })
+
+  const cities = new Set(tourns.map((t) => t.city).filter(Boolean)).size
+  const setsPlayed = s.sw + s.sl
+  const streak = streakOf(ms)
+  const hasEnoughData = played >= WRAPPED_MIN_MATCHES
+
+  // Prima foto disponibile di un torneo (URL firmato), per la copertina.
+  const photoOf = (tid: string | undefined): string | null =>
+    (tid ? data.photos.find((p) => p.tournamentId === tid && p.url)?.url ?? null : null)
+  const coverTourn = tourns.find((t) => photoOf(t.id))
+
+  const slides: WrappedSlide[] = []
+
+  // 1) Intro — sempre. Copertina con il teaser dei numeri di stagione.
+  slides.push({
+    kind: 'intro', eyebrow: 'Beach Wrapped', headline: range.label,
+    title: partnerName ? 'in coppia con ' + partnerName : 'Beach Volley Diary',
+    caption: played + (played === 1 ? ' partita · ' : ' partite · ') + tourns.length + (tourns.length === 1 ? ' torneo' : ' tornei'),
+    stats: [], emoji: '🏖️', photoUrl: photoOf(coverTourn?.id),
+  })
+
+  if (played > 0) {
+    slides.push({
+      kind: 'wins', eyebrow: 'Vittorie totali', headline: String(s.won),
+      title: s.won === 1 ? 'partita vinta' : 'partite vinte', caption: 'su ' + played + ' giocate',
+      stats: [{ value: s.winPct + '%', label: 'Win rate' }, { value: s.won + '–' + s.lost, label: 'Record' }],
+      emoji: '🏐',
+    })
+  }
+
+  if (streak >= 2) {
+    slides.push({
+      kind: 'streak', eyebrow: 'Striscia vincente', headline: String(streak),
+      title: 'vittorie di fila', caption: 'il miglior filotto della stagione', stats: [], emoji: '🔥',
+    })
+  }
+
+  if (topPartner) {
+    slides.push({
+      kind: 'partner', eyebrow: 'Miglior compagno', headline: topPartner.name,
+      title: topPartner.winPct + '% insieme', caption: topPartner.won + ' vinte su ' + topPartner.played + ' partite',
+      stats: [], emoji: '🤝',
+    })
+  }
+
+  if (played > 0) {
+    slides.push({
+      kind: 'points', eyebrow: 'Punti realizzati', headline: String(s.pf),
+      title: 'punti messi a terra', caption: 'differenziale ' + (s.diff >= 0 ? '+' : '') + s.diff,
+      stats: [
+        { value: String(s.pa), label: 'Subiti' },
+        { value: (s.diff >= 0 ? '+' : '') + s.diff, label: 'Diff.' },
+        { value: String(s.avgFor), label: 'Media a partita' },
+      ],
+      emoji: '💥',
+    })
+  }
+
+  if (bestTourn && best <= 8) {
+    slides.push({
+      kind: 'podium', eyebrow: 'Miglior risultato', headline: resultLabelOf(bestTourn.placement),
+      title: bestTourn.name, caption: [bestTourn.city, fmtDateFull(bestTourn.date)].filter(Boolean).join(' · '),
+      stats: [], emoji: bestTourn.emoji || '🏆', photoUrl: photoOf(bestTourn.id),
+    })
+  }
+
+  if (tourns.length > 0) {
+    slides.push({
+      kind: 'volume', eyebrow: 'In numeri', headline: String(tourns.length),
+      title: tourns.length === 1 ? 'torneo giocato' : 'tornei giocati',
+      caption: 'la tua stagione a colpo d’occhio',
+      stats: [
+        { value: String(played), label: 'Partite' },
+        { value: String(setsPlayed), label: 'Set giocati' },
+        { value: String(podi), label: 'Podi' },
+        { value: String(cities), label: cities === 1 ? 'Città' : 'Città diverse' },
+      ],
+      emoji: '📆',
+    })
+  }
+
+  if (topRival && topRival.played >= 2) {
+    slides.push({
+      kind: 'rival', eyebrow: 'Il tuo rivale', headline: topRival.name,
+      title: topRival.played + ' sfide', caption: topRival.won + ' vinte · ' + (topRival.played - topRival.won) + ' perse',
+      stats: [], emoji: '⚔️',
+    })
+  }
+
+  if (played > 0) {
+    slides.push({
+      kind: 'funfacts', eyebrow: 'Lo sapevi?', headline: s.setPct + '%',
+      title: 'dei set vinti', caption: 'la stagione nei piccoli numeri',
+      stats: [
+        { value: String(s.dist['2-0']), label: '2-0 netti' },
+        { value: String(s.dist['2-1']), label: 'Rimonte 2-1' },
+        { value: '+' + bestMargin, label: 'Miglior scarto' },
+        { value: String(s.avgAg), label: 'Media subiti' },
+      ],
+      emoji: '✨',
+    })
+  }
+
+  // Outro — sempre. Chiusura + invito a condividere.
+  slides.push({
+    kind: 'outro', eyebrow: 'Alla prossima', headline: 'Grazie',
+    title: 'Condividi il tuo Beach Wrapped', caption: 'Beach Volley Diary', stats: [], emoji: '🎉',
+  })
+
+  const slug = ('beach-wrapped-' + range.label).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'beach-wrapped'
+  return { range, partnerName, hasEnoughData, played, slides, slug }
+}
+
 // ---- Mapper da RPC server → view-model (presentazione lato client) ----
 
 export function deriveTorneiListServer(sv: SvTorneiList): TorneiListData {
