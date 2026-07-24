@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, Suspense, lazy } from "react";
+import { useState, useEffect, useMemo, useRef, Suspense, lazy } from "react";
 import { useDiary } from "./hooks/useDiary";
 import { useIsWide } from "./hooks/useMedia";
 import { useAuth } from "./hooks/useAuth";
@@ -22,6 +22,10 @@ import {
   partnerOptions,
   yearOptions,
 } from "./lib/derive";
+// Mappa delle conquiste: selettore in un modulo suo (si porta dietro il
+// gazetteer e il tracciato dell'Italia, ~17 KB grezzi). Vive dentro la
+// schermata Tornei come seconda vista, quindi viaggia con lei.
+import { deriveMappa } from "./lib/derive.mappa";
 import type {
   Screen,
   ModalKind,
@@ -55,6 +59,7 @@ import { Avatar } from "./components/ui";
 import { track } from "@vercel/analytics";
 import Home from "./screens/Home";
 import Tornei from "./screens/Tornei";
+import type { TorneiVista } from "./screens/Tornei";
 import TorneoDetail from "./screens/TorneoDetail";
 import Compagni from "./screens/Compagni";
 import CompagnoDetail from "./screens/CompagnoDetail";
@@ -119,6 +124,11 @@ export default function App() {
   const [fabOpen, setFabOpen] = useState(false);
   const [fPartner, setFPartner] = useState("all");
   const [fYear, setFYear] = useState("Sempre");
+  // Lista o mappa dentro la schermata Tornei. Sta qui e non lì perché aprire un
+  // torneo dalla mappa cambia `screen` e smonta Tornei: con lo stato locale il
+  // ritorno indietro riportava sempre alla lista, buttando via la vista da cui
+  // si era partiti.
+  const [torneiVista, setTorneiVista] = useState<TorneiVista>("lista");
   const [form, setForm] = useState<AnyForm>({});
   const [notice, setNotice] = useState<string | null>(null);
   const [serverDash, setServerDash] = useState<ServerDashboard | null>(null);
@@ -136,6 +146,22 @@ export default function App() {
     partners: data.partners.filter((p) => !p.shared).length,
   });
   const canFilter = perm.canUseFilters;
+
+  // La mappa lavora sui dati client grezzi: le servono `city` (che i view-model
+  // appiattiscono dentro `meta`) e i tornei condivisi, che le RPC escludono.
+  // Segue lo stesso filtro stagione della lista, senza aggiungere stato.
+  //
+  // Sta quassù, e non in fondo con le altre derivate, perché è un hook: sotto il
+  // return anticipato dello splash sarebbe una chiamata condizionale. Ed è
+  // memoizzata perché è l'unica derivata cara — geocodifica, declustering e le
+  // partite città per città — mentre App si ri-renderizza a ogni tasto battuto
+  // nei modali, che tengono il form qui. Le dipendenze sono i dati e il filtro:
+  // nient'altro può cambiarne il risultato. ("Oggi" viene ricalcolato ad ogni
+  // `reload()`, cioè ad ogni cambio schermata e ritorno sulla tab.)
+  const mappaData = useMemo(
+    () => deriveMappa(data, canFilter ? fYear : "Sempre"),
+    [data, canFilter, fYear],
+  );
   // Azione non consentita dal piano → messaggio in cima (nessun paywall attivo).
   const denyByPlan = (v: { title?: string; message?: string }) =>
     setNotice(v.message ?? "Funzione non disponibile con il tuo piano.");
@@ -301,6 +327,13 @@ export default function App() {
     setFabOpen(false);
     scrollTop();
   };
+  // Cambio di vista dentro Tornei. L'evento si registra solo sul passaggio alla
+  // mappa (come `wrapped_aperto`): serve a sapere se la mappa viene usata, non
+  // quante volte si rimbalza fra le due viste.
+  const setVistaTornei = (v: TorneiVista) => {
+    if (v === "mappa" && torneiVista !== "mappa") track("mappa_aperta");
+    setTorneiVista(v);
+  };
 
   // ---------- form helpers ----------
   const setField: SetField = (k, v) =>
@@ -441,6 +474,7 @@ export default function App() {
     setFabOpen(false);
     setForm({
       name: "",
+      city: "",
       partnerId: (P[0] && P[0].id) || "new",
       newPartnerName: "",
       date: today,
@@ -571,31 +605,29 @@ export default function App() {
       ? deriveWrapped(data, wrappedRange, canFilter ? fPartner : "all")
       : null;
 
+  // La schermata Tornei è anche il fallback di `torneo` finché il dettaglio non
+  // è pronto: un elemento solo, così le due strade non possono divergere nei
+  // prop (la vista lista/mappa in particolare deve essere la stessa).
+  const torneiScreen = (
+    <Tornei
+      list={torneiList}
+      mappa={mappaData}
+      vista={torneiVista}
+      onVista={setVistaTornei}
+      onOpenTorneo={openTorneoDetail}
+      onNewTorneo={() => openTorneo(null)}
+      onQuickTorneo={openQuickTorneo}
+      onAssistant={openCrea}
+      canAssistant={perm.canUseAi}
+    />
+  );
+
   const renderScreen = () => {
     switch (screen) {
       case "tornei":
-        return (
-          <Tornei
-            list={torneiList}
-            onOpenTorneo={openTorneoDetail}
-            onNewTorneo={() => openTorneo(null)}
-            onQuickTorneo={openQuickTorneo}
-            onAssistant={openCrea}
-            canAssistant={perm.canUseAi}
-          />
-        );
+        return torneiScreen;
       case "torneo":
-        if (!torneoData)
-          return (
-            <Tornei
-              list={torneiList}
-              onOpenTorneo={openTorneoDetail}
-              onNewTorneo={() => openTorneo(null)}
-              onQuickTorneo={openQuickTorneo}
-              onAssistant={openCrea}
-              canAssistant={perm.canUseAi}
-            />
-          );
+        if (!torneoData) return torneiScreen;
         return (
           <TorneoDetail
             t={torneoData}

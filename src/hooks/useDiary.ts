@@ -38,6 +38,18 @@ function errMsg(e: unknown): string {
   return 'Errore di comunicazione con il database.'
 }
 
+// Città: unico punto di normalizzazione in scrittura, uguale per le tre porte
+// (form completo, form rapido, assistente guidato). Spazi ai bordi e spazi
+// doppi via — `"  Bellaria  Igea Marina "` e `"Bellaria Igea Marina"` devono
+// essere la stessa riga nel DB, non due.
+//
+// Solo spaziatura: maiuscole e accenti restano come li ha scritti l'utente,
+// perché è la grafia che poi si legge sulla mappa e nelle card. A confrontare
+// ci pensano `geoKey` (mappa) e `city_key` del DB (`lower(btrim(city))`, la
+// stanza di "Chi c'è oggi"): entrambi tollerano il resto, ma nessuno dei due
+// ripulisce gli spazi in mezzo.
+const cleanCity = (city: string | undefined): string => (city ?? '').trim().replace(/\s+/g, ' ')
+
 // Scarica tutto il diario dell'utente loggato e lo rimappa nel modello di dominio
 // (snake_case → camelCase; righe match_sets → array `sets` inline).
 async function fetchAll(): Promise<DiaryData> {
@@ -176,7 +188,7 @@ export function useDiary(): UseDiary {
     const row = {
       name: f.name,
       date: f.date ?? '',
-      city: f.city ?? '',
+      city: cleanCity(f.city),
       category: f.category ?? 'Amatoriale',
       format: f.format ?? '2vs2',
       surface: f.surface ?? 'Sabbia outdoor',
@@ -227,7 +239,9 @@ export function useDiary(): UseDiary {
     const row = {
       name: f.name,
       date: f.date ?? '',
-      city: '',
+      // Il form rapido ora chiede la città: senza, ogni torneo creato al volo
+      // restava fuori dalla mappa delle conquiste. Resta facoltativa.
+      city: cleanCity(f.city),
       category: f.category ?? 'Amatoriale',
       format: '2vs2',
       surface: 'Sabbia outdoor',
@@ -268,7 +282,7 @@ export function useDiary(): UseDiary {
     const row = {
       name: f.name,
       date: f.date ?? '',
-      city: f.city ?? '',
+      city: cleanCity(f.city),
       category: f.category ?? 'Amatoriale',
       format: f.format ?? '2vs2',
       surface: f.surface ?? 'Sabbia outdoor',

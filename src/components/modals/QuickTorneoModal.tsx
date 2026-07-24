@@ -1,5 +1,5 @@
 import type { ChangeEvent } from 'react'
-import { Sheet, Title, Label, inputStyle, selectStyle, Actions } from './Sheet'
+import { Sheet, Title, Label, CityInput, inputStyle, selectStyle, Actions } from './Sheet'
 import { CATEGORIES, PLACEMENTS } from '../../lib/db.enums'
 import type { AnyForm, SetField, Option, Category, Placement } from '../../lib/models'
 
@@ -12,9 +12,13 @@ interface QuickTorneoModalProps {
   onSave: () => void
 }
 
-// Creazione rapida: solo i campi essenziali (nome, compagno, data, categoria,
-// piazzamento). Formato 2vs2 e superficie "Sabbia outdoor" sono i default più
-// comuni, quindi fissi e non richiesti — si cambiano poi da "Modifica".
+// Creazione rapida: solo i campi essenziali (nome, città, compagno, data,
+// categoria, piazzamento). Formato 2vs2 e superficie "Sabbia outdoor" sono i
+// default più comuni, quindi fissi e non richiesti — si cambiano poi da "Modifica".
+//
+// La città c'è anche qui, pur essendo un form "rapido": senza, ogni torneo
+// creato al volo nasceva senza luogo e restava fuori dalla mappa per sempre.
+// Resta facoltativa — un campo in più, non un ostacolo in più.
 export default function QuickTorneoModal({ form, setField, partnerOptions, canAddPartner, onClose, onSave }: QuickTorneoModalProps) {
   const isNewPartner = form.partnerId === 'new'
   return (
@@ -39,6 +43,11 @@ export default function QuickTorneoModal({ form, setField, partnerOptions, canAd
             <input value={form.newPartnerName || ''} onChange={(e: ChangeEvent<HTMLInputElement>) => setField('newPartnerName', e.target.value)} placeholder="es. Giulia" style={inputStyle} />
           </div>
         )}
+
+        <div>
+          <Label>Città</Label>
+          <CityInput value={form.city || ''} onChange={(v) => setField('city', v)} />
+        </div>
 
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           <div style={{ flex: 1, minWidth: 130 }}>

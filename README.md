@@ -11,10 +11,14 @@ Prima di tutto servono le credenziali Supabase: copia `.env.example` in `.env.lo
 
 ```bash
 npm install
-npm run dev       # http://localhost:5173
-npm run build     # type-check (tsc -b) + build di produzione in dist/
-npm run typecheck # solo controllo dei tipi
-npm run preview   # anteprima della build
+cp .env.example .env.local   # e compila con URL e chiave del tuo progetto Supabase
+
+npm run dev            # http://localhost:5173
+npm run build          # type-check (tsc -b) + build di produzione in dist/
+npm run typecheck      # solo controllo dei tipi dell'app
+npm run typecheck:test # controllo dei tipi dei test
+npm test               # suite Vitest (jsdom + Testing Library + axe)
+npm run preview        # anteprima della build
 ```
 
 ## Funzionalità
@@ -122,4 +126,4 @@ I report QA per feature stanno in `docs/`.
 - Colori: `#FF6B35` arancio · `#F7A883` arancio soft · `#C4501E` arancio scuro · `#1B2A4A` blu notte ·
   bordi `rgba(27,42,74,.1)` · fill `#F2F0EC` · sfondo `#FAF8F5`
 - Stile: superfici piatte con bordo (classe `.card`), etichette maiuscole (`.lbl`), pallino colore
-  per piazzamento del torneo (oro/soft/neutro), esito partita a cerchio **V/P**.
+  per piazzamento del torneo (oro/soft/neutro, `dotForRank`), esito partita a cerchio **V/P**.
