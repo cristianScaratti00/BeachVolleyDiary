@@ -23,6 +23,9 @@ npm run preview   # anteprima della build
   da un elenco (o si crea al volo con nome, città e coordinate) e il dettaglio torneo mostra
   "quante volte hai giocato qui" più una mappa OpenStreetMap. Le coordinate arrivano solo dal GPS
   del dispositivo o incollate a mano — nessuna chiamata di geocoding.
+  Il catalogo è **condiviso fra gli utenti** ("Bagno 26 · Riccione" è lo stesso posto per tutti):
+  tutti lo leggono, ognuno può correggere solo le voci che ha creato. I tornei conservano
+  comunque la città come testo, così quelli senza luogo restano leggibili.
 - **Compagni** — statistiche per ogni compagno di gioco + dettaglio.
 - **Galleria** — segnaposti colorati collegati ai tornei.
 - **CRUD completo** — crea/modifica/elimina tornei, partite (con punteggi per set) e foto,
