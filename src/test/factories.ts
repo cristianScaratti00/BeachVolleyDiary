@@ -6,7 +6,14 @@ import type {
   DiaryData,
   SetScore,
 } from "../lib/models";
-import type { TorneoCard, TorneiListData } from "../lib/derive";
+import type {
+  TorneoCard,
+  TorneiListData,
+  DiaryEntry,
+  DiaryMatchHit,
+  DiarySearchFields,
+} from "../lib/derive";
+import { normalizeText } from "../lib/search";
 import type { PresentUser } from "../lib/models";
 
 // "Oggi" fisso per tutti i test: `deriveTorneiSections` accetta `today` come
@@ -134,6 +141,78 @@ export function makePhoto(over: Partial<Photo> = {}): Photo {
 export function makeData(over: Partial<DiaryData> = {}): DiaryData {
   return { tournaments: [], matches: [], partners: [], photos: [], ...over };
 }
+// ---------------------------------------------------------------------------
+// Diario (view-model): una voce già derivata, per i test dello screen. I campi
+// `search` seguono di default i valori mostrati (normalizzati come fa
+// `deriveDiary`), così una voce di fabbrica risponde alla ricerca sul proprio
+// titolo/data senza doverli scrivere due volte; il resto si passa a mano.
+// ---------------------------------------------------------------------------
+
+export function makeDiaryMatchHit(over: Partial<DiaryMatchHit> = {}): DiaryMatchHit {
+  seq += 1;
+  const id = over.id ?? `m${seq}`;
+  const phase = over.phase ?? "Girone";
+  const opponents = over.opponents ?? "Rossi/Bianchi";
+  const note = over.note ?? "";
+  return {
+    id,
+    phase,
+    opponents,
+    note,
+    esitoShort: "V",
+    esitoColor: "#FF6B35",
+    setChips: [
+      { txt: "21-15", bg: "#FFF1EA", color: "#C4501E" },
+      { txt: "21-15", bg: "#FFF1EA", color: "#C4501E" },
+    ],
+    search: [phase, opponents, note].map(normalizeText).filter(Boolean),
+    ...over,
+  };
+}
+
+// I campi `search` si possono sovrascrivere uno per volta (es. solo `place`):
+// nel test si scrive il campo che conta, non tutti e sette.
+type DiaryEntryOver = Partial<Omit<DiaryEntry, "search">> & {
+  search?: Partial<DiarySearchFields>;
+};
+
+export function makeDiaryEntry(over: DiaryEntryOver = {}): DiaryEntry {
+  seq += 1;
+  const id = over.id ?? `t${seq}`;
+  const title = over.title ?? `Torneo ${id}`;
+  const day = over.day ?? "15";
+  const month = over.month ?? "Giu";
+  const year = over.year ?? "2026";
+  const matches = over.matches ?? [];
+  return {
+    id,
+    day,
+    month,
+    year,
+    emoji: "🏖️",
+    title,
+    desc: "Tappa Open a Rimini · 2 vittorie su 3 — 67% W",
+    accent: "rgba(27,42,74,.25)",
+    badge: "Gironi",
+    badgeBg: "#F2F0EC",
+    badgeColor: "rgba(27,42,74,.5)",
+    photos: [],
+    morePhotos: 0,
+    ...over,
+    matches,
+    search: {
+      title: normalizeText(title),
+      place: "",
+      when: normalizeText(`${year} ${month} ${day}`),
+      partner: "",
+      opponents: normalizeText(matches.map((m) => m.opponents).join(" ")),
+      notes: normalizeText(matches.map((m) => m.note).join(" ")),
+      captions: "",
+      ...over.search,
+    },
+  };
+}
+
 // Un utente presente nella stanza di "Chi c'è oggi" (già mappato/ordinato).
 let presentSeq = 0;
 export function makePresentUser(over: Partial<PresentUser> = {}): PresentUser {
