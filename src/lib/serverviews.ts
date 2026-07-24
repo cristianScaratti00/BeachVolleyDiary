@@ -37,6 +37,15 @@ export interface SvCompagnoDetail {
   matches: SvCompagnoMatch[]; error?: string
 }
 
+// Forma grezza di una riga della RPC who_is_here ("Chi c'è oggi").
+export interface SvPresentUser {
+  id: string
+  name: string
+  avatar_url: string | null
+  looking_for_partner: boolean
+  note: string
+}
+
 function ok<T>(data: unknown, error: unknown): T | null {
   if (error || !data || (typeof data === 'object' && (data as { error?: string }).error)) {
     // eslint-disable-next-line no-console
@@ -61,4 +70,11 @@ export async function getTorneoDetail(id: string): Promise<SvTorneoDetail | null
 export async function getCompagnoDetail(id: string): Promise<SvCompagnoDetail | null> {
   const { data, error } = await supabase.rpc('compagno_detail', { p_id: id })
   return ok<SvCompagnoDetail>(data, error)
+}
+
+// "Chi c'è oggi": gli altri presenti nella città+giorno (reciprocità lato DB).
+// Una stanza vuota è `[]` (valido, non un errore); `null` solo su errore RPC.
+export async function getWhoIsHere(city: string, date: string): Promise<SvPresentUser[] | null> {
+  const { data, error } = await supabase.rpc('who_is_here', { p_city: city, p_date: date })
+  return ok<SvPresentUser[]>(data, error)
 }

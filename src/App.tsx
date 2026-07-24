@@ -241,6 +241,14 @@ export default function App() {
     };
   }, [screen, selP, data]);
 
+  // "Chi c'è oggi": ricarica la stanza ogni volta che si apre la schermata
+  // (fetch-on-open, Q4). No-op se non sei in check-in; il resto è manuale
+  // (pulsante "Aggiorna") o automatico dopo un check-in.
+  useEffect(() => {
+    if (screen === "oggi") check.refresh();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen]);
+
   // Su desktop scrolla il <main>; su mobile la pagina. Reset ad ogni navigazione.
   const mainRef = useRef<HTMLElement>(null);
   const scrollTop = () => {

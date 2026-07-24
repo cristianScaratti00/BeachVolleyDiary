@@ -20,7 +20,7 @@ export interface UseDiary {
   deletePartita: (editId: string | null) => Promise<boolean>
   saveFoto: (f: AnyForm, file: File | null) => Promise<boolean>
   deleteFoto: (photoId: string) => Promise<boolean>
-  saveCompagno: (f: AnyForm) => Promise<boolean>
+  saveCompagno: (f: AnyForm) => Promise<string | null>
   deleteCompagno: (id: string) => Promise<boolean>
   searchUsers: (query: string) => Promise<AppUser[]>
   linkPartner: (partnerId: string, userId: string) => Promise<{ ok: boolean; error?: string }>
@@ -452,13 +452,16 @@ export function useDiary(): UseDiary {
   }, [reload])
 
   // Aggiunge un compagno "generico", indipendente da qualsiasi partita.
-  const saveCompagno = useCallback(async (f: AnyForm) => {
+  // Ritorna l'id del socio creato (o null se fallisce): serve a "Chi c'è oggi"
+  // per collegarlo subito all'utente presente (saveCompagno → linkPartner).
+  const saveCompagno = useCallback(async (f: AnyForm): Promise<string | null> => {
     const name = (f.name ?? '').trim()
-    if (!name) return false
-    const { error } = await supabase.from('partners').insert({ name, color: f.color || NEW_PARTNER_COLOR })
-    if (error) return fail(error)
+    if (!name) return null
+    const { data: ins, error } = await supabase
+      .from('partners').insert({ name, color: f.color || NEW_PARTNER_COLOR }).select('id').single()
+    if (error || !ins) { fail(error); return null }
     await reload()
-    return true
+    return ins.id
   }, [reload])
 
   return { data, loading, error, clearError, reload, saveTorneo, quickCreateTorneo, createGuidedTorneo, deleteTorneo, savePartita, deletePartita, saveFoto, deleteFoto, saveCompagno, deleteCompagno, searchUsers, linkPartner, unlinkPartner }

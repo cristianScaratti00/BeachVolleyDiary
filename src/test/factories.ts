@@ -1,11 +1,12 @@
 // ============================================================================
-// Fixture per i test della schermata Tornei.
+// Fixture per i test delle schermate (Tornei, Chi c'è oggi).
 //
 // Regola: ogni test dichiara solo i campi che gli interessano (id, format,
-// date…). Tutto il resto arriva da qui, così quando `TorneoCard` cresce di un
+// date…). Tutto il resto arriva da qui, così quando un view-model cresce di un
 // campo si aggiorna un punto solo e i test restano leggibili.
 // ============================================================================
 import type { TorneoCard, TorneiListData } from '../lib/derive'
+import type { PresentUser } from '../lib/models'
 
 // "Oggi" fisso per tutti i test: `deriveTorneiSections` accetta `today` come
 // parametro proprio per questo. Nessun test deve dipendere dall'orologio, o a
@@ -42,6 +43,21 @@ export function makeList(tornei: TorneoCard[], over: Partial<TorneiListData> = {
     tPlayed: tornei.length,
     podi: 0,
     bestPlacement: 'Gironi',
+    ...over,
+  }
+}
+
+// Un utente presente nella stanza di "Chi c'è oggi" (già mappato/ordinato).
+let presentSeq = 0
+export function makePresentUser(over: Partial<PresentUser> = {}): PresentUser {
+  presentSeq += 1
+  const id = over.id ?? `u${presentSeq}`
+  return {
+    id,
+    name: `Utente ${id}`,
+    avatarUrl: null,
+    lookingForPartner: true,
+    note: '',
     ...over,
   }
 }
