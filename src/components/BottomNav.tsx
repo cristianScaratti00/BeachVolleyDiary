@@ -1,12 +1,13 @@
 import type { Screen } from "../lib/models";
 import NavIcon from "./NavIcons";
 
-// Slot della barra: 4 voci di navigazione + l'azione centrale "Crea".
+// Slot della barra: 5 voci di navigazione + l'azione centrale "Crea".
 type Slot = { kind: "nav"; key: Screen } | { kind: "action" };
 
 const SLOTS: Slot[] = [
   { kind: "nav", key: "home" },
   { kind: "nav", key: "tornei" },
+  { kind: "nav", key: "oggi" },
   { kind: "action" },
   { kind: "nav", key: "compagni" },
   { kind: "nav", key: "diario" },

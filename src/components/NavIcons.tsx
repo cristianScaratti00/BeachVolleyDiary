@@ -43,6 +43,13 @@ export default function NavIcon({ screen, size = 20 }: { screen: Screen; size?: 
           <path d="M17.5 14.6c1.9.5 3.5 1.9 3.5 4.9" />
         </Svg>
       )
+    case 'oggi': // pin "sei qui" — chi c'è oggi in spiaggia
+      return (
+        <Svg size={size}>
+          <path d="M12 21s6-5.1 6-10a6 6 0 1 0-12 0c0 4.9 6 10 6 10Z" />
+          <circle cx="12" cy="11" r="2.4" />
+        </Svg>
+      )
     case 'diario': // quaderno / diario
       return (
         <Svg size={size}>

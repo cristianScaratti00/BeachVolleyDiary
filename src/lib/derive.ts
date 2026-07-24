@@ -2,9 +2,9 @@ import { res, computeStats, streakOf, placementRank, fmtDate, yearOf, esitoStyle
 import type { SetChip } from './stats'
 import { MONTHS_SHORT, MONTHS_FULL } from './theme'
 import { FORMATS, PHASES, PLACEMENTS } from './db.enums'
-import type { DiaryData, Tournament, Partner, Match, Option } from './models'
+import type { DiaryData, Tournament, Partner, Match, Option, PresentUser } from './models'
 import type { ServerDashboard, ServerPhaseRow } from './dashboard'
-import type { SvTorneiList, SvCompagno, SvTorneoDetail, SvCompagnoDetail } from './serverviews'
+import type { SvTorneiList, SvCompagno, SvTorneoDetail, SvCompagnoDetail, SvPresentUser } from './serverviews'
 
 // ---------------------------------------------------------------------------
 // View-model types (le forme restituite dai selettori, consumate dagli screen)
@@ -404,9 +404,11 @@ export function deriveDashboardServer(sv: ServerDashboard, data: DiaryData, fPar
 }
 
 // ---- Tornei list ----
-// "Oggi" in ISO. Unica definizione del confine imminente/passato: l'ordinamento
-// agenda e la sezione "Prossimi tornei" non devono mai dissentire su dov'è.
-function todayISO(): string {
+// "Oggi" in ISO (UTC). Unica definizione del confine imminente/passato:
+// l'ordinamento agenda, la sezione "Prossimi tornei" e il check-in di "Chi c'è
+// oggi" non devono mai dissentire su dov'è "oggi". Esportata perché sia l'unica
+// sorgente di "oggi" anche fuori da qui (es. useCheckIn).
+export function todayISO(): string {
   return new Date().toISOString().slice(0, 10)
 }
 
@@ -955,4 +957,31 @@ export function partnerOptions(data: DiaryData): Option[] {
 export function yearOptions(data: DiaryData): string[] {
   const years = Array.from(new Set(data.tournaments.map((t) => yearOf(t.date)))).sort((a, b) => (a < b ? 1 : -1))
   return [...years, 'Sempre']
+}
+
+// ---- "Chi c'è oggi?" ----
+// Normalizza il nome di una città come fa il DB (`city_key = lower(btrim(city))`):
+// così client e server concordano su quali check-in finiscono nella stessa
+// stanza. Usata anche per non interrogare la stanza con una città vuota.
+export function normalizeCity(city: string): string {
+  return city.trim().toLowerCase()
+}
+
+// Mappa le righe grezze di `who_is_here` sul view-model della stanza e le ordina:
+// prima chi cerca compagno, poi per nome (case-insensitive). Pura: non muta
+// l'input, l'ordinamento non dipende da come arrivano le righe dal DB.
+export function deriveWhoIsHere(rows: SvPresentUser[]): PresentUser[] {
+  return rows
+    .map((r) => ({
+      id: r.id,
+      name: (r.name ?? '').trim() || 'Utente',
+      avatarUrl: r.avatar_url,
+      lookingForPartner: r.looking_for_partner,
+      note: (r.note ?? '').trim(),
+    }))
+    .sort((a, b) => {
+      // "Cerca compagno" in cima: è il motivo per cui si apre questa schermata.
+      if (a.lookingForPartner !== b.lookingForPartner) return a.lookingForPartner ? -1 : 1
+      return a.name.localeCompare(b.name, 'it', { sensitivity: 'base' })
+    })
 }

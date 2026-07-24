@@ -309,6 +309,60 @@ export type Database = {
           },
         ]
       }
+      check_ins: {
+        Row: {
+          id: string
+          user_id: string
+          city: string
+          // Colonna generata (lower(btrim(city))): presente in lettura, non
+          // scrivibile — assente da Insert/Update.
+          city_key: string
+          date: string
+          tournament_id: string | null
+          looking_for_partner: boolean
+          note: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string
+          city: string
+          date?: string
+          tournament_id?: string | null
+          looking_for_partner?: boolean
+          note?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          city?: string
+          date?: string
+          tournament_id?: string | null
+          looking_for_partner?: boolean
+          note?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'check_ins_tournament_id_fkey'
+            columns: ['tournament_id']
+            isOneToOne: false
+            referencedRelation: 'tournaments'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'check_ins_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+        ]
+      }
     }
     Views: {
       match_scores: {
@@ -357,6 +411,16 @@ export type Database = {
       search_users: {
         Args: { p_query?: string }
         Returns: { id: string; name: string; email: string }[]
+      }
+      who_is_here: {
+        Args: { p_city: string; p_date?: string }
+        Returns: {
+          id: string
+          name: string
+          avatar_url: string | null
+          looking_for_partner: boolean
+          note: string
+        }[]
       }
       set_avatar: {
         Args: { p_url: string }
