@@ -1,5 +1,6 @@
 import type { CSSProperties, ChangeEvent } from "react";
 import type { DashboardStats, TorneoCard } from "../lib/derive";
+import { WRAPPED_MIN_MATCHES } from "../lib/derive";
 import type { Option } from "../lib/models";
 import { Badge } from "../components/ui";
 import {
@@ -32,6 +33,7 @@ interface HomeProps {
   onQuickTorneo: () => void;
   onAiCreate: () => void;
   canAiCreate: boolean; // assistente AI disponibile solo con Premium
+  onOpenWrapped: () => void; // apre il recap di stagione "Beach Wrapped"
   goTornei: () => void;
   goCompagni: () => void;
 }
@@ -46,6 +48,7 @@ export default function Home({
   // onQuickTorneo: bottone "Torneo rapido" attualmente commentato nell'header.
   onAiCreate,
   canAiCreate,
+  onOpenWrapped,
   goTornei,
   goCompagni,
 }: HomeProps) {
@@ -68,6 +71,10 @@ export default function Home({
     color: "#1B2A4A",
     cursor: "pointer",
   };
+  // Etichetta del recap: segue la stagione selezionata ("Beach Wrapped 2026")
+  // oppure resta generico su "Sempre". La CTA compare solo con dati da raccontare.
+  const wrappedTitle =
+    fYear && fYear !== "Sempre" ? `Beach Wrapped ${fYear}` : "Beach Wrapped";
   return (
     <div style={{ animation: "pop .32s ease both" }}>
       {/* header */}
@@ -101,6 +108,59 @@ export default function Home({
           )}
         </div>
       </div>
+
+      {/* Beach Wrapped: banner stagionale — recap sfogliabile da condividere.
+          Compare solo con dati a sufficienza, così la CTA non porta a un recap vuoto. */}
+      {s.played >= WRAPPED_MIN_MATCHES && (
+        <button
+          onClick={onOpenWrapped}
+          style={{
+            width: "100%",
+            textAlign: "left",
+            marginTop: 16,
+            cursor: "pointer",
+            border: "none",
+            borderRadius: 16,
+            padding: 20,
+            display: "flex",
+            alignItems: "center",
+            gap: 16,
+            flexWrap: "wrap",
+            color: "#fff",
+            background:
+              "linear-gradient(118deg,#16233F 0%,#243A63 46%,#FF6B35 128%)",
+            boxShadow: "0 14px 34px -16px rgba(22,35,63,.7)",
+          }}
+        >
+          <div
+            style={{
+              width: 46,
+              height: 46,
+              borderRadius: "50%",
+              background: "rgba(255,255,255,.16)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 24,
+              flex: "none",
+            }}
+          >
+            🏝️
+          </div>
+          <div style={{ flex: 1, minWidth: 190 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+              <span className="num" style={{ fontSize: 18, fontWeight: 500, letterSpacing: "-.2px", color: "#fff" }}>{wrappedTitle}</span>
+              <Badge tone="onColor">Novità</Badge>
+            </div>
+            <div style={{ font: "600 13px 'Nunito Sans'", color: "rgba(255,255,255,.82)", marginTop: 3 }}>
+              Rivivi la tua stagione in card da sfogliare e condividere — vittorie, miglior compagno, striscia e altro.
+            </div>
+          </div>
+          <span style={{ flex: "none", display: "inline-flex", alignItems: "center", gap: 8, font: "800 13px 'Nunito Sans'", background: "rgba(255,255,255,.16)", color: "#fff", padding: "9px 16px", borderRadius: 11 }}>
+            Apri il recap →
+          </span>
+        </button>
+      )}
 
       {/* key numbers row */}
       <KeyNumbers s={s} />

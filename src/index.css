@@ -48,3 +48,11 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: #FF6B35
 /* chat assistant: bolla in ingresso + puntini "sta scrivendo" */
 @keyframes bubble { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: none; } }
 @keyframes blink { 0%, 70%, 100% { opacity: .22; transform: translateY(0); } 35% { opacity: 1; transform: translateY(-3px); } }
+
+/* Beach Wrapped: barra di avanzamento stile storia IG (riempie da 0 a 100%) e
+   ingresso della card ad ogni cambio slide. Rispetta prefers-reduced-motion. */
+@keyframes wrappedbar { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes wrappedin { from { opacity: 0; transform: translateY(14px) scale(.985); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .wrapped-card-anim { animation: none !important; }
+}
