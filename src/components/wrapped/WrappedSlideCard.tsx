@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import type { WrappedSlide } from '../../lib/derive'
 import type { WrappedPalette } from './palette'
 
@@ -21,6 +22,33 @@ function headlineSize(text: string): number {
   if (len <= 16) return 130
   if (len <= 24) return 96
   return 76
+}
+
+// Larghezza utile del contenuto: 1080 meno i 92px di padding per lato.
+const CONTENT_W = 1080 - 92 * 2
+
+// Foto di copertina (intro/podio). Il contenitore segue l'aspetto REALE della
+// foto — non una banda fissa ultra-larga — così una foto verticale da telefono
+// non finisce ritagliata in una striscia zoomata. L'aspetto è limitato a un
+// intervallo ragionevole (da 3:4 verticale a 7:5 orizzontale) e l'altezza a
+// [520, 940]px, così la card resta bilanciata qualunque sia la sorgente.
+function WrappedPhoto({ src }: { src: string }) {
+  const [ar, setAr] = useState<number | null>(null)
+  useEffect(() => {
+    let alive = true
+    const im = new Image()
+    im.onload = () => { if (alive) setAr(im.naturalWidth / im.naturalHeight || null) }
+    im.src = src
+    return () => { alive = false }
+  }, [src])
+
+  const aspect = Math.min(1.4, Math.max(0.75, ar ?? 4 / 3))
+  const height = Math.round(Math.min(880, Math.max(520, CONTENT_W / aspect)))
+  return (
+    <div style={{ width: '100%', height }}>
+      <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 40, display: 'block' }} />
+    </div>
+  )
 }
 
 function StatCell({ stat, pal }: { stat: { value: string; label: string }; pal: WrappedPalette }) {
@@ -74,9 +102,7 @@ export default function WrappedSlideCard({ slide, pal, index, total, photoSrc }:
         }}
       >
         {photoSrc ? (
-          <div style={{ width: '100%', height: 560 }}>
-            <img src={photoSrc} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 40, display: 'block' }} />
-          </div>
+          <WrappedPhoto src={photoSrc} />
         ) : (
           <div style={{ fontSize: 150, lineHeight: 1 }}>{slide.emoji}</div>
         )}
@@ -85,7 +111,7 @@ export default function WrappedSlideCard({ slide, pal, index, total, photoSrc }:
 
         <div
           className="num"
-          style={{ fontSize: headlineSize(slide.headline), fontWeight: 500, lineHeight: 0.98, letterSpacing: -2, color: pal.fg, overflowWrap: 'anywhere' }}
+          style={{ fontSize: headlineSize(slide.headline), fontWeight: 500, lineHeight: 1.04, letterSpacing: -2, color: pal.fg, overflowWrap: 'anywhere' }}
         >
           {slide.headline}
         </div>

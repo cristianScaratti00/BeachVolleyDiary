@@ -120,7 +120,8 @@ export default function WrappedModal({ wrapped, onClose, onNotice, onRangeChange
     const node = captureRefs.current[i]
     if (!node) return null
     if (document.fonts?.ready) await document.fonts.ready
-    return toPng(node, { pixelRatio: 1, cacheBust: true, width: 1080, height: 1920 })
+    // pixelRatio 2 → PNG 2160×3840: nitido su schermi retina e dopo l'upload IG.
+    return toPng(node, { pixelRatio: 2, cacheBust: true, width: 1080, height: 1920 })
   }
 
   const fileName = (i: number) => `${wrapped.slug}-${pad2(i + 1)}.png`
@@ -153,7 +154,7 @@ export default function WrappedModal({ wrapped, onClose, onNotice, onRangeChange
       for (let i = 0; i < n; i++) {
         const node = captureRefs.current[i]
         if (!node) continue
-        const url = await toPng(node, { pixelRatio: 1, cacheBust: true, width: 1080, height: 1920 })
+        const url = await toPng(node, { pixelRatio: 2, cacheBust: true, width: 1080, height: 1920 })
         const a = document.createElement('a')
         a.href = url
         a.download = fileName(i)
@@ -177,7 +178,7 @@ export default function WrappedModal({ wrapped, onClose, onNotice, onRangeChange
     try {
       if (document.fonts?.ready) await document.fonts.ready
       const node = captureRefs.current[idx]
-      const blob = node ? await toBlob(node, { pixelRatio: 1, cacheBust: true, width: 1080, height: 1920 }) : null
+      const blob = node ? await toBlob(node, { pixelRatio: 2, cacheBust: true, width: 1080, height: 1920 }) : null
       if (!blob) throw new Error('blob assente')
       const file = new File([blob], fileName(idx), { type: 'image/png' })
       if (navigator.canShare?.({ files: [file] })) {
@@ -267,12 +268,19 @@ export default function WrappedModal({ wrapped, onClose, onNotice, onRangeChange
         aria-label={`Beach Wrapped, slide ${idx + 1} di ${n}`}
         style={{ width: boxW, height: boxH, position: 'relative', borderRadius: 20, overflow: 'hidden', boxShadow: '0 30px 80px -20px rgba(0,0,0,.6)', cursor: 'pointer', touchAction: 'pan-y', outline: 'none', userSelect: 'none' }}
       >
+        {/* Due layer separati: quello ESTERNO fa l'animazione d'entrata
+            (fade+slide), quello INTERNO tiene lo scale d'anteprima. Sono divisi
+            perché `wrappedin` termina con `transform: none` e, se fosse sullo
+            stesso nodo dello scale, con fill-mode `both` sovrascriverebbe lo
+            `scale(${scale})` facendo esplodere la card a piena risoluzione. */}
         <div
           key={idx}
           className="wrapped-card-anim"
-          style={{ position: 'absolute', top: 0, left: 0, width: 1080, height: 1920, transform: `scale(${scale})`, transformOrigin: 'top left', animation: reduceMotion ? undefined : 'wrappedin .4s cubic-bezier(.2,.8,.2,1) both' }}
+          style={{ position: 'absolute', top: 0, left: 0, width: boxW, height: boxH, animation: reduceMotion ? undefined : 'wrappedin .4s cubic-bezier(.2,.8,.2,1) both' }}
         >
-          <WrappedSlideCard slide={slides[idx]} pal={wrappedPalette(idx)} index={idx} total={n} photoSrc={photoFor(slides[idx].photoUrl)} />
+          <div style={{ width: 1080, height: 1920, transform: `scale(${scale})`, transformOrigin: 'top left' }}>
+            <WrappedSlideCard slide={slides[idx]} pal={wrappedPalette(idx)} index={idx} total={n} photoSrc={photoFor(slides[idx].photoUrl)} />
+          </div>
         </div>
       </div>
 
