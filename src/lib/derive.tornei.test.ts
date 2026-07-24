@@ -1,7 +1,8 @@
 // ============================================================================
 // Regole della lista tornei: split imminenti/passati, formati presenti,
-// raggruppamento e filtro. Sono funzioni pure con `today` iniettabile, quindi
-// si verificano senza montare React e senza toccare l'orologio.
+// raggruppamento, filtro e riepilogo di testata (piazzamento migliore). Sono
+// funzioni pure con `today` iniettabile, quindi si verificano senza montare
+// React e senza toccare l'orologio.
 // ============================================================================
 import { describe, it, expect } from 'vitest'
 import {
@@ -9,10 +10,13 @@ import {
   torneiFormats,
   groupTorneiByFormat,
   deriveTorneiSections,
+  deriveTorneiList,
+  deriveTorneiListServer,
   TORNEI_FILTER_ALL,
 } from './derive'
-import { FORMATS } from './db.enums'
-import { makeTorneo, TODAY } from '../test/factories'
+import { placementRank } from './stats'
+import { FORMATS, PLACEMENTS } from './db.enums'
+import { makeTorneo, makeData, makeTournament, TODAY } from '../test/factories'
 
 const ids = (list: Array<{ id: string }>) => list.map((t) => t.id)
 
@@ -245,5 +249,72 @@ describe('deriveTorneiSections', () => {
     const s = deriveTorneiSections(list, TORNEI_FILTER_ALL, TODAY)
     const visti = [...ids(s.upcoming), ...s.groups.flatMap((g) => ids(g.tornei))]
     expect(visti.sort()).toEqual(ids(list).sort())
+  })
+})
+
+describe('deriveTorneiList — riepilogo di testata', () => {
+  it('una semifinale è un piazzamento, non un "—"', () => {
+    // Regressione: 'Semifinale' non era nella scala e cadeva nel fallback,
+    // così la testata leggeva "miglior piazzamento —" a chi era arrivato in
+    // semifinale.
+    const data = makeData({
+      tournaments: [makeTournament({ id: 't1', date: '2026-05-01', placement: 'Semifinale' })],
+    })
+    expect(deriveTorneiList(data, 'Sempre').bestPlacement).toBe('Semifinale')
+  })
+
+  it('tra semifinale e gironi il migliore è la semifinale', () => {
+    const data = makeData({
+      tournaments: [
+        makeTournament({ id: 't1', date: '2026-05-01', placement: 'Gironi' }),
+        makeTournament({ id: 't2', date: '2026-06-01', placement: 'Semifinale' }),
+      ],
+    })
+    expect(deriveTorneiList(data, 'Sempre').bestPlacement).toBe('Semifinale')
+  })
+
+  it('una semifinale non conta come podio', () => {
+    const data = makeData({
+      tournaments: [
+        makeTournament({ id: 't1', date: '2026-05-01', placement: 'Semifinale' }),
+        makeTournament({ id: 't2', date: '2026-06-01', placement: '3°' }),
+      ],
+    })
+    const list = deriveTorneiList(data, 'Sempre')
+    expect(list.podi).toBe(1)
+    expect(list.bestPlacement).toBe('3°')
+  })
+
+  it('conta e valuta solo i tornei dell\'anno selezionato', () => {
+    const data = makeData({
+      tournaments: [
+        makeTournament({ id: 't1', date: '2025-07-01', placement: '1° 🏆' }),
+        makeTournament({ id: 't2', date: '2026-07-01', placement: 'Semifinale' }),
+      ],
+    })
+    const list = deriveTorneiList(data, '2026')
+    expect(list.tPlayed).toBe(1)
+    expect(list.bestPlacement).toBe('Semifinale')
+  })
+
+  it('senza tornei nel periodo non c\'è miglior piazzamento', () => {
+    expect(deriveTorneiList(makeData(), 'Sempre').bestPlacement).toBe('—')
+  })
+})
+
+describe('deriveTorneiListServer — rank dalla RPC', () => {
+  const svList = (best_rank: number) => ({ tornei: [], t_played: 0, podi: 0, best_rank })
+
+  it('rimappa ogni rank della scala nella sua etichetta', () => {
+    // Il `best_rank` arriva da public.placement_rank (SQL) e qui torna testo:
+    // la mappa inversa deve chiudere il giro su tutta la scala, altrimenti un
+    // piazzamento reale si presenta come "—" solo sul percorso server.
+    PLACEMENTS.filter((l) => l !== 'In corso').forEach((l) => {
+      expect(deriveTorneiListServer(svList(placementRank(l))).bestPlacement).toBe(l)
+    })
+  })
+
+  it('un rank senza risultato resta "—"', () => {
+    expect(deriveTorneiListServer(svList(9)).bestPlacement).toBe('—')
   })
 })

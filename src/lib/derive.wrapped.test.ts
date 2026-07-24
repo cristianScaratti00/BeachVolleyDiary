@@ -368,6 +368,25 @@ describe('deriveWrapped — miglior risultato', () => {
     expect(slideOf(deriveWrapped(data, FULL_YEAR), 'podium').title).toBe('Recente')
   })
 
+  it('una semifinale è un risultato significativo: la slide compare', () => {
+    // Regressione: 'Semifinale' cadeva fuori dalla scala (rank 9 > soglia 8) e
+    // una stagione chiusa al meglio in semifinale perdeva la slide del tutto.
+    const data = makeData({
+      tournaments: [
+        makeTournament({ id: 't1', name: 'Cervia Beach', city: 'Cervia', date: '2026-04-12', placement: 'Semifinale' }),
+        makeTournament({ id: 't2', name: 'Riccione Open', city: 'Riccione', date: '2026-05-20', placement: 'Gironi' }),
+      ],
+      matches: [
+        makeMatch({ id: 'm1', tournamentId: 't1', sets: winSets() }),
+        makeMatch({ id: 'm2', tournamentId: 't2', sets: lossSets() }),
+      ],
+    })
+    const podium = slideOf(deriveWrapped(data, FULL_YEAR), 'podium')
+    expect(podium.headline).toBe('IN SEMIFINALE')
+    expect(podium.title).toBe('Cervia Beach')
+    expect(podium.caption).toBe('Cervia · 12 aprile 2026')
+  })
+
   it('senza piazzamenti significativi (solo "In corso") non compare', () => {
     const data = makeData({
       tournaments: [makeTournament({ id: 't1', date: '2026-05-01', placement: 'In corso' })],
