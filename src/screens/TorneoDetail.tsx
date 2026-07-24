@@ -1,7 +1,10 @@
-import { useState } from 'react'
+import { Suspense, lazy, useState } from 'react'
 import type { TorneoDetailData } from '../lib/derive'
 import { BackLink, Badge, StatGrid, StatTile, SectionTitle, MatchRow, EmptyCard, InlineLink, MUTED } from '../components/ui'
 import PhotoLightbox, { type Shot } from '../components/PhotoLightbox'
+// La mappa trascina Leaflet + il suo CSS: chunk separato, scaricato solo dai
+// tornei che hanno davvero delle coordinate.
+const VenueMap = lazy(() => import('../components/VenueMap'))
 
 // Glifo Instagram (line-icon, eredita currentColor).
 function IgGlyph({ size = 14 }: { size?: number }) {
@@ -53,6 +56,16 @@ export default function TorneoDetail({ t, goBack, onEdit, onAddPartita, onOpenMa
         </div>
         <div className="num" style={{ fontSize: 'clamp(24px,4vw,34px)', fontWeight: 500, letterSpacing: '-.5px', marginTop: 8 }}>{t.name}</div>
         <div style={{ font: "600 13.5px 'Nunito Sans'", color: MUTED, marginTop: 4 }}>{t.meta}</div>
+        {/* Il nome del luogo sta già in `meta`: qui si aggiunge solo ciò che il
+            luogo come entità permette di dire — quante volte ci ho giocato.
+            Testo in navy e non nell'arancione scuro dei badge: su fondo pagina
+            quella coppia si ferma a 4.39:1, sotto AA per un 12.5px (vedi
+            contrast.test.ts). L'accento lo mette il 📍. */}
+        {t.venueHistory && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, font: "700 12.5px 'Nunito Sans'", color: '#1B2A4A', marginTop: 8 }}>
+            <span aria-hidden="true">📍</span> {t.venueHistory}
+          </div>
+        )}
         {!readOnly && (
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 16 }}>
             <div className="chip" onClick={onShareStory} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, font: "700 12.5px 'Nunito Sans'", padding: '9px 15px', borderRadius: 10, color: '#fff', cursor: 'pointer', background: 'linear-gradient(45deg,#F58529,#DD2A7B 55%,#8134AF)', boxShadow: '0 4px 14px -5px rgba(221,42,123,.55)' }}>
@@ -73,6 +86,33 @@ export default function TorneoDetail({ t, goBack, onEdit, onAddPartita, onOpenMa
         <StatTile value={t.setPct + '%'} label="set vinti" valueSize={24} pad="16px 18px" />
         <StatTile value={t.diffStr} label="differenziale" valueSize={24} pad="16px 18px" />
       </StatGrid>
+
+      {t.venueLat != null && t.venueLng != null && (
+        <>
+          <SectionTitle
+            action={
+              t.venueMapUrl ? (
+                <a
+                  className="chip"
+                  href={t.venueMapUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: 6, font: "700 12px 'Nunito Sans'", padding: '8px 13px', borderRadius: 9, border: '1px solid rgba(27,42,74,.18)', color: '#1B2A4A', textDecoration: 'none' }}
+                >
+                  Apri la mappa ↗
+                </a>
+              ) : undefined
+            }
+          >
+            {t.venueName || 'Luogo'}
+          </SectionTitle>
+          {/* Il fallback ha la stessa altezza della mappa: il contenuto sotto non
+              salta quando il chunk di Leaflet finisce di caricare. */}
+          <Suspense fallback={<div style={{ height: 200, borderRadius: 14, border: '1px solid rgba(27,42,74,.1)', background: '#F2F0EC' }} />}>
+            <VenueMap lat={t.venueLat} lng={t.venueLng} label={t.venueName || t.venueCity} />
+          </Suspense>
+        </>
+      )}
 
       <SectionTitle>Partite</SectionTitle>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

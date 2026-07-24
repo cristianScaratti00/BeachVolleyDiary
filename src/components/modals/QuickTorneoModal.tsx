@@ -1,21 +1,25 @@
 import type { ChangeEvent } from 'react'
 import { Sheet, Title, Label, inputStyle, selectStyle, Actions } from './Sheet'
+import VenuePicker from './VenuePicker'
 import { CATEGORIES, PLACEMENTS } from '../../lib/db.enums'
-import type { AnyForm, SetField, Option, Category, Placement } from '../../lib/models'
+import type { AnyForm, SetField, Option, Venue, Category, Placement } from '../../lib/models'
 
 interface QuickTorneoModalProps {
   form: AnyForm
   setField: SetField
   partnerOptions: Option[]
   canAddPartner: boolean
+  venues: Venue[]
   onClose: () => void
   onSave: () => void
 }
 
-// Creazione rapida: solo i campi essenziali (nome, compagno, data, categoria,
-// piazzamento). Formato 2vs2 e superficie "Sabbia outdoor" sono i default più
-// comuni, quindi fissi e non richiesti — si cambiano poi da "Modifica".
-export default function QuickTorneoModal({ form, setField, partnerOptions, canAddPartner, onClose, onSave }: QuickTorneoModalProps) {
+// Creazione rapida: solo i campi essenziali (nome, compagno, luogo, data,
+// categoria, piazzamento). Formato 2vs2 e superficie "Sabbia outdoor" sono i
+// default più comuni, quindi fissi e non richiesti — si cambiano poi da
+// "Modifica". Il luogo invece c'è: prima ogni torneo rapido nasceva senza, e
+// recuperarlo dopo non capitava quasi mai.
+export default function QuickTorneoModal({ form, setField, partnerOptions, canAddPartner, venues, onClose, onSave }: QuickTorneoModalProps) {
   const isNewPartner = form.partnerId === 'new'
   return (
     <Sheet onClose={onClose} maxWidth={460}>
@@ -39,6 +43,8 @@ export default function QuickTorneoModal({ form, setField, partnerOptions, canAd
             <input value={form.newPartnerName || ''} onChange={(e: ChangeEvent<HTMLInputElement>) => setField('newPartnerName', e.target.value)} placeholder="es. Giulia" style={inputStyle} />
           </div>
         )}
+
+        <VenuePicker form={form} setField={setField} venues={venues} />
 
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           <div style={{ flex: 1, minWidth: 130 }}>

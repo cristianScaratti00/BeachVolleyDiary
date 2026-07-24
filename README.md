@@ -19,6 +19,10 @@ npm run preview   # anteprima della build
   punti fatti vs subiti, distribuzione risultati (2-0 / 2-1 / 1-2 / 0-2), win rate per compagno.
   Filtri per compagno e stagione.
 - **Tornei** — elenco + dettaglio con record, set, differenziale, partite e foto.
+- **Luoghi** — il posto in cui si gioca è un'entità, non più una città a testo libero: si sceglie
+  da un elenco (o si crea al volo con nome, città e coordinate) e il dettaglio torneo mostra
+  "quante volte hai giocato qui" più una mappa OpenStreetMap. Le coordinate arrivano solo dal GPS
+  del dispositivo o incollate a mano — nessuna chiamata di geocoding.
 - **Compagni** — statistiche per ogni compagno di gioco + dettaglio.
 - **Galleria** — segnaposti colorati collegati ai tornei.
 - **CRUD completo** — crea/modifica/elimina tornei, partite (con punteggi per set) e foto,
@@ -46,6 +50,9 @@ src/
 │   ├── database.types.ts # contratto DB Supabase (generato)
 │   └── db.enums.ts        # union + costanti dei campi vincolati
 ├── components/           # Sidebar, BottomNav, modali (.tsx con props tipizzate)
+│   ├── VenueMap.tsx      # mappa del luogo (Leaflet) — unico punto che importa leaflet,
+│   │                     #   caricato in lazy() solo per i tornei con coordinate
+│   └── modals/VenuePicker.tsx  # selettore luogo condiviso dai due modali torneo
 └── screens/              # Home, Tornei, TorneoDetail, Compagni, CompagnoDetail, Galleria
 ```
 

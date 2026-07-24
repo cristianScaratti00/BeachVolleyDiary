@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { NEW_PARTNER_COLOR } from '../lib/theme'
 import type {
-  DiaryData, Tournament, Match, Photo, Partner, AnyForm, GuidedMatch, AppUser,
+  DiaryData, Tournament, Match, Photo, Partner, Venue, AnyForm, GuidedMatch, AppUser,
   Category, Format, Surface, Phase, Placement,
 } from '../lib/models'
 
@@ -25,9 +25,25 @@ export interface UseDiary {
   searchUsers: (query: string) => Promise<AppUser[]>
   linkPartner: (partnerId: string, userId: string) => Promise<{ ok: boolean; error?: string }>
   unlinkPartner: (partnerId: string) => Promise<boolean>
+  // ---- luoghi ----
+  // Unisce due luoghi duplicati ("Riccione" e "Riccione (RN)"): ripunta i tornei
+  // del primo sul secondo ed elimina il primo. Il backfill sa fondere solo le
+  // varianti di maiuscole/spazi, il resto richiede l'occhio di chi c'era.
+  mergeVenues: (fromId: string, toId: string) => Promise<boolean>
 }
 
-const EMPTY: DiaryData = { tournaments: [], matches: [], partners: [], photos: [] }
+const EMPTY: DiaryData = { tournaments: [], matches: [], partners: [], photos: [], venues: [] }
+
+// Snapshot testuale del luogo, scritto sempre su `tournaments.city` accanto a
+// `venue_id`: i client che non conoscono i venue (e i tornei importati) devono
+// continuare a leggere un luogo. Legge il venue scelto, o i campi del luogo
+// nuovo, e ricade sul `city` del form per i chiamanti che non passano un venue.
+function citySnapshot(f: AnyForm, venues: Venue[]): string {
+  if (f.venueId === 'new') return (f.newVenueCity ?? '').trim() || (f.newVenueName ?? '').trim()
+  const v = f.venueId ? venues.find((x) => x.id === f.venueId) : undefined
+  if (v) return v.city.trim() || v.name.trim()
+  return (f.city ?? '').trim()
+}
 
 // Bucket privato delle foto dei tornei (vedi migration tournament_photos_storage).
 const PHOTO_BUCKET = 'tournament-photos'
@@ -68,11 +84,19 @@ async function fetchAll(): Promise<DiaryData> {
     shared: p.user_id !== uid,
   }))
 
+  // TODO(ruolo 2 · data layer): quinta query parallela su `venues` (mappata come
+  // i partner, `shared: v.user_id !== uid`) + `venue_id` nella select dei tornei,
+  // una volta che la tabella esiste in database.types.ts. Finché la lista resta
+  // vuota il selettore dei luoghi mostra solo "＋ Nuovo luogo" e il torneo si
+  // salva comunque con il suo `city`: nessun dato va perso.
+  const venues: Venue[] = []
+
   const tournaments: Tournament[] = (tRes.data ?? []).map((t) => ({
     id: t.id,
     name: t.name,
     date: t.date,
     city: t.city,
+    venueId: null, // TODO(ruolo 2): t.venue_id
     category: t.category as Category,
     format: t.format as Format,
     surface: t.surface as Surface,
@@ -112,7 +136,7 @@ async function fetchAll(): Promise<DiaryData> {
     url: f.storage_path ? (signed.get(f.storage_path) ?? null) : null,
   }))
 
-  return { tournaments, matches, partners, photos }
+  return { tournaments, matches, partners, photos, venues }
 }
 
 // Owns the persisted diary data (Supabase) and exposes async mutations.
@@ -173,10 +197,14 @@ export function useDiary(): UseDiary {
       partnerId = sel
     }
 
+    // TODO(ruolo 2 · data layer): `venue_id: await resolveVenue(f)` accanto a
+    // `city` — 'new' + nome → insert su `venues`, un id → quel luogo. Il blocco
+    // è identico a quello del compagno qui sopra. La città resta scritta sempre
+    // (dual-write): è lo snapshot che leggono i client senza venue.
     const row = {
       name: f.name,
       date: f.date ?? '',
-      city: f.city ?? '',
+      city: citySnapshot(f, data.venues),
       category: f.category ?? 'Amatoriale',
       format: f.format ?? '2vs2',
       surface: f.surface ?? 'Sabbia outdoor',
@@ -202,9 +230,9 @@ export function useDiary(): UseDiary {
 
     await reload()
     return true
-  }, [reload, data.tournaments])
+  }, [reload, data.tournaments, data.venues])
 
-  // Creazione rapida: nome + compagno + data + categoria + piazzamento.
+  // Creazione rapida: nome + compagno + luogo + data + categoria + piazzamento.
   // Formato/superficie fissi. Ritorna l'id del nuovo torneo (o null se fallisce).
   const quickCreateTorneo = useCallback(async (f: AnyForm): Promise<string | null> => {
     if (!f.name) return null
@@ -224,10 +252,13 @@ export function useDiary(): UseDiary {
       partnerId = sel
     }
 
+    // Il torneo rapido non nasce più senza luogo: la città arriva dal selettore
+    // (prima era hardcoded a '', quindi ogni torneo rapido era place-less).
+    // TODO(ruolo 2 · data layer): `venue_id: await resolveVenue(f)`.
     const row = {
       name: f.name,
       date: f.date ?? '',
-      city: '',
+      city: citySnapshot(f, data.venues),
       category: f.category ?? 'Amatoriale',
       format: '2vs2',
       surface: 'Sabbia outdoor',
@@ -240,7 +271,7 @@ export function useDiary(): UseDiary {
     if (error || !ins) { fail(error); return null }
     await reload()
     return ins.id
-  }, [reload])
+  }, [reload, data.venues])
 
   // Creazione guidata (assistente chat): crea il torneo con tutti i campi e, in
   // un'unica passata, le partite raccolte durante la conversazione. Il compagno
@@ -265,10 +296,11 @@ export function useDiary(): UseDiary {
       partnerId = sel
     }
 
+    // TODO(ruolo 2 · data layer): `venue_id: await resolveVenue(f)`.
     const row = {
       name: f.name,
       date: f.date ?? '',
-      city: f.city ?? '',
+      city: citySnapshot(f, data.venues),
       category: f.category ?? 'Amatoriale',
       format: f.format ?? '2vs2',
       surface: f.surface ?? 'Sabbia outdoor',
@@ -304,7 +336,7 @@ export function useDiary(): UseDiary {
 
     await reload()
     return tournamentId
-  }, [reload, data.partners])
+  }, [reload, data.partners, data.venues])
 
   const deleteTorneo = useCallback(async (editId: string | null) => {
     if (!editId) return false
@@ -464,5 +496,17 @@ export function useDiary(): UseDiary {
     return ins.id
   }, [reload])
 
-  return { data, loading, error, clearError, reload, saveTorneo, quickCreateTorneo, createGuidedTorneo, deleteTorneo, savePartita, deletePartita, saveFoto, deleteFoto, saveCompagno, deleteCompagno, searchUsers, linkPartner, unlinkPartner }
+  // Unisce due luoghi duplicati. Nessuna SQL nuova: ripuntare i tornei e
+  // cancellare la riga sono due scritture che la RLS owner-only già consente.
+  // TODO(ruolo 2 · data layer):
+  //   update tournaments set venue_id = toId where venue_id = fromId
+  //   delete from venues where id = fromId
+  // (poi `reload()`). Finché i luoghi non sono persistiti non c'è nulla da
+  // unire, quindi il no-op è onesto: la UI resta nascosta senza duplicati.
+  const mergeVenues = useCallback(async (fromId: string, toId: string): Promise<boolean> => {
+    if (!fromId || !toId || fromId === toId) return false
+    return false
+  }, [])
+
+  return { data, loading, error, clearError, reload, saveTorneo, quickCreateTorneo, createGuidedTorneo, deleteTorneo, savePartita, deletePartita, saveFoto, deleteFoto, saveCompagno, deleteCompagno, searchUsers, linkPartner, unlinkPartner, mergeVenues }
 }

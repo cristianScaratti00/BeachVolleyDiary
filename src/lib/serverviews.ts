@@ -8,10 +8,19 @@ import { supabase } from './supabase'
 
 export interface SvSet { us: number; them: number }
 
+// Luogo di gioco allegato alle card/dettaglio torneo. Opzionale ovunque: `city`
+// resta nel payload (i client che non conoscono i venue continuano a leggerla) e
+// una RPC che non espone ancora `venue` non rompe la mappatura.
+export interface SvVenue {
+  id: string; name: string; city: string
+  lat: number | null; lng: number | null
+}
+
 export interface SvTorneoCard {
   id: string; name: string; category: string; city: string; date: string; format: string
   placement: string; rank: number; partner: string | null
   match_count: number; won: number; lost: number; win_pct: number
+  venue?: SvVenue | null
 }
 export interface SvTorneiList { tornei: SvTorneoCard[]; t_played: number; podi: number; best_rank: number }
 
@@ -27,6 +36,7 @@ export interface SvTorneoDetail {
   played: number; won: number; lost: number; win_pct: number
   sets_won: number; sets_lost: number; point_diff: number
   matches: SvTorneoMatch[]; photos: { color: string; caption: string }[]
+  venue?: SvVenue | null
   error?: string
 }
 

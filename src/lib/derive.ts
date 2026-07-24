@@ -2,7 +2,7 @@ import { res, computeStats, streakOf, placementRank, fmtDate, yearOf, esitoStyle
 import type { SetChip } from './stats'
 import { MONTHS_SHORT, MONTHS_FULL } from './theme'
 import { FORMATS, PHASES, PLACEMENTS } from './db.enums'
-import type { DiaryData, Tournament, Partner, Match, Option, PresentUser } from './models'
+import type { DiaryData, Tournament, Partner, Match, Option, PresentUser, Venue } from './models'
 import type { ServerDashboard, ServerPhaseRow } from './dashboard'
 import type { SvTorneiList, SvCompagno, SvTorneoDetail, SvCompagnoDetail, SvPresentUser } from './serverviews'
 
@@ -115,6 +115,13 @@ export interface TorneoDetailData {
   shared: boolean
   photos: TorneoPhoto[]
   matches: TorneoMatchRow[]
+  // ---- luogo ----
+  venueName: string // '' = torneo senza luogo (né venue né città)
+  venueCity: string
+  venueLat: number | null // coordinate: presenti o assenti sempre in coppia
+  venueLng: number | null
+  venueMapUrl: string | null // link OpenStreetMap, null senza coordinate
+  venueHistory: string | null // "3° torneo qui · 1 podio"
 }
 
 export interface CompagnoCard {
@@ -196,6 +203,121 @@ const partnerName = (data: DiaryData, id: string | null): string => (id ? partne
 const dotForRank = (r: number): string => (r === 1 ? '#FF6B35' : r <= 3 ? '#F7A883' : 'rgba(27,42,74,.25)')
 const dotFor = (t: Tournament): string => dotForRank(placementRank(t.placement))
 
+// ---------------------------------------------------------------------------
+// Luoghi (venues)
+// Il luogo è un'entità (`Tournament.venueId`), ma `Tournament.city` resta come
+// snapshot testuale: i tornei creati prima della migrazione — o da un client che
+// non conosce i venue — hanno solo quello. Ogni selettore qui sotto degrada su
+// `city`, così le due generazioni di dati convivono senza righe vuote.
+// ---------------------------------------------------------------------------
+
+// Il luogo collegato a un torneo (null se non collegato o non ancora caricato).
+export function venueOf(data: DiaryData, t: Tournament): Venue | null {
+  if (!t.venueId) return null
+  return data.venues.find((v) => v.id === t.venueId) ?? null
+}
+
+// Etichetta completa: "Bagno 26 · Riccione". Quando nome e città coincidono
+// (tipico dei luoghi nati dal backfill delle vecchie città) ne resta uno solo,
+// altrimenti si leggerebbe "Riccione · Riccione".
+export function venueLabel(v: Venue): string {
+  const name = v.name.trim()
+  const city = v.city.trim()
+  if (!name) return city
+  if (!city || normalizeCity(city) === normalizeCity(name)) return name
+  return name + ' · ' + city
+}
+
+// Token breve per le righe `meta`, dove il luogo sta accanto a data e formato:
+// il nome del posto, o lo snapshot testuale per i tornei senza venue.
+export function venueDisplay(data: DiaryData, t: Tournament): string {
+  return venueOf(data, t)?.name.trim() || t.city.trim()
+}
+
+// Il luogo "in prosa" (…«a Riccione»): si dice la città, non il nome del bagno.
+export function venuePlace(data: DiaryData, t: Tournament): string {
+  const v = venueOf(data, t)
+  return v?.city.trim() || v?.name.trim() || t.city.trim()
+}
+
+// Chiave di raggruppamento per luogo — l'unico modo corretto di confrontare due
+// tornei "sullo stesso posto" in una storia mista (righe con venue e righe con
+// la sola città). Prefissata per non confondere un id con un nome di città.
+// Stringa vuota = luogo sconosciuto: chi raggruppa deve scartarla.
+export function venueKeyOf(data: DiaryData, t: Tournament): string {
+  if (t.venueId) return 'v:' + t.venueId
+  const key = normalizeCity(t.city)
+  if (!key) return ''
+  // Torneo senza venue (da mobile, o antecedente alla migrazione): se la sua
+  // città identifica un solo luogo è quello, così la storia non si spezza in
+  // due. Con più luoghi nella stessa città indovinare sarebbe peggio del non
+  // fare: resta la chiave-città, comunque stabile e normalizzata come il DB.
+  const sameCity = data.venues.filter((v) => normalizeCity(v.city) === key)
+  return sameCity.length === 1 ? 'v:' + sameCity[0].id : 'c:' + key
+}
+
+export interface VenueHistory {
+  played: number // tornei giocati in quel luogo
+  podi: number // di cui finiti sul podio
+  ordinal: number // posizione (per data) del torneo richiesto; 0 = non trovato
+}
+
+// Quante volte ho giocato qui. `tournamentId` fa calcolare anche "il quante-simo"
+// è quel torneo, che è ciò che si legge nel dettaglio ("3° torneo qui").
+export function venueHistory(data: DiaryData, key: string, tournamentId?: string): VenueHistory {
+  if (!key) return { played: 0, podi: 0, ordinal: 0 }
+  const here = data.tournaments
+    .filter((t) => venueKeyOf(data, t) === key)
+    .sort((a, b) => (a.date === b.date ? (a.id < b.id ? -1 : 1) : a.date < b.date ? -1 : 1))
+  const podi = here.filter((t) => placementRank(t.placement) <= 3).length
+  const idx = tournamentId ? here.findIndex((t) => t.id === tournamentId) : -1
+  return { played: here.length, podi, ordinal: idx + 1 }
+}
+
+// "3° torneo qui · 1 podio". Null quando non c'è nulla da raccontare.
+export function venueHistoryLabel(h: VenueHistory): string | null {
+  if (!h.ordinal) return null
+  const parts = [h.ordinal + '° torneo qui']
+  if (h.podi > 0) parts.push(h.podi === 1 ? '1 podio' : h.podi + ' podi')
+  return parts.join(' · ')
+}
+
+export interface LatLng { lat: number; lng: number }
+
+// Legge un "45.0678, 12.5432" incollato (virgola, punto e virgola o spazio;
+// tollera parentesi e spazi di troppo). Null se non sono due numeri o se escono
+// dai limiti geografici: meglio nessuna coordinata che un puntino nell'oceano.
+export function parseLatLng(raw: string): LatLng | null {
+  const parts = raw.replace(/[()[\]]/g, '').trim().split(/[,;\s]+/).filter(Boolean)
+  if (parts.length !== 2) return null
+  const lat = Number(parts[0])
+  const lng = Number(parts[1])
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null
+  if (Math.abs(lat) > 90 || Math.abs(lng) > 180) return null
+  return { lat, lng }
+}
+
+// Coordinate come le scrive l'utente nel campo (5 decimali ≈ 1 m: più che
+// abbastanza per una spiaggia, e non finge una precisione che il GPS non ha).
+export function formatLatLng(lat: number, lng: number): string {
+  return lat.toFixed(5) + ', ' + lng.toFixed(5)
+}
+
+// Link "apri nelle mappe": OpenStreetMap, coerente con le tile della mappa
+// in-app e senza inviare nulla a un servizio di geocoding.
+export function mapUrl(lat: number | null, lng: number | null): string | null {
+  if (lat == null || lng == null) return null
+  return `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=16/${lat}/${lng}`
+}
+
+// Luoghi selezionabili nei form, in ordine alfabetico (l'ordine di creazione
+// non dice niente a chi cerca un posto in una tendina).
+export function venueOptions(data: DiaryData): Option[] {
+  return data.venues
+    .map((v) => ({ id: v.id, name: venueLabel(v) }))
+    .sort((a, b) => a.name.localeCompare(b.name, 'it', { sensitivity: 'base' }))
+}
+
 export function matchesWithDates(data: DiaryData): DatedMatch[] {
   return data.matches.map((m) => ({ ...m, date: tournObj(data, m.tournamentId)?.date || '2025-01-01' }))
 }
@@ -220,7 +342,10 @@ function decorateTournament(data: DiaryData, t: Tournament): TorneoCard {
     // Il formato resta anche qui: `meta` è condivisa con le card "Ultimi tornei"
     // della dashboard, dove non c'è raggruppamento, e il dettaglio torneo mostra
     // `surface` non `format`. Toglierlo lo farebbe sparire dal resto dell'app.
-    meta: fmtDate(t.date) + ' · ' + t.city + ' · ' + t.format + (t.partnerId ? ' · con ' + partnerName(data, t.partnerId) : ''),
+    // Il luogo è il nome del venue quando c'è; senza (torneo place-less) il
+    // filtro evita il separatore doppio che si vedeva con `city` vuota.
+    meta: [fmtDate(t.date), venueDisplay(data, t), t.format, t.partnerId ? 'con ' + partnerName(data, t.partnerId) : '']
+      .filter(Boolean).join(' · '),
     record: ts.won + '-' + ts.lost, winPct: ts.winPct, matchCount: ts.played,
     shared: t.shared,
   }
@@ -501,15 +626,24 @@ export function deriveTorneoDetail(data: DiaryData, id: string): TorneoDetailDat
   const ts = computeStats(tm)
   const photos = data.photos.filter((p) => p.tournamentId === t.id)
   const podium = placementRank(t.placement) <= 3
+  const v = venueOf(data, t)
+  const lat = v?.lat ?? null
+  const lng = v?.lng ?? null
   return {
     id: t.id, name: t.name, category: t.category, dot: dotFor(t),
     badge: t.placement,
     badgeBg: podium ? '#FFF1EA' : '#F2F0EC',
     badgeColor: podium ? '#C4501E' : 'rgba(27,42,74,.5)',
-    meta: fmtDate(t.date) + ' · ' + t.city + ' · ' + t.surface + (t.partnerId ? ' · con ' + partnerName(data, t.partnerId) : ''),
+    meta: [fmtDate(t.date), venueDisplay(data, t), t.surface, t.partnerId ? 'con ' + partnerName(data, t.partnerId) : '']
+      .filter(Boolean).join(' · '),
     record: ts.won + '-' + ts.lost, winPct: ts.winPct, played: ts.played, setStr: ts.sw + '-' + ts.sl, setPct: ts.setPct,
     diffStr: (ts.diff >= 0 ? '+' : '') + ts.diff,
     noMatches: tm.length === 0, hasPhotos: photos.length > 0, shared: t.shared,
+    venueName: venueDisplay(data, t),
+    venueCity: venuePlace(data, t),
+    venueLat: lat, venueLng: lng,
+    venueMapUrl: mapUrl(lat, lng),
+    venueHistory: venueHistoryLabel(venueHistory(data, venueKeyOf(data, t), t.id)),
     photos: photos.map((p) => ({ id: p.id, color: p.color, caption: p.caption, url: p.url })),
     matches: tm.map((m) => {
       const r = res(m); const es = esitoStyle(r.won)
@@ -564,10 +698,12 @@ export function deriveDiary(data: DiaryData): DiaryEntry[] {
     const rank = placementRank(t.placement)
     const podium = rank <= 3
 
-    // recap in stile diario: piazzamento/luogo + esito partite
+    // recap in stile diario: piazzamento/luogo + esito partite. Il luogo qui è
+    // "in prosa" (la città del venue), non il nome del bagno: «a Riccione».
+    const place = venuePlace(data, t)
     const parts: string[] = []
-    if (podium) parts.push(`Chiuso al ${t.placement}${t.city ? ' a ' + t.city : ''}`)
-    else if (t.city) parts.push(`Tappa ${t.category} a ${t.city}`)
+    if (podium) parts.push(`Chiuso al ${t.placement}${place ? ' a ' + place : ''}`)
+    else if (place) parts.push(`Tappa ${t.category} a ${place}`)
     else parts.push(t.category)
     parts.push(ts.played ? `${ts.won} ${ts.won === 1 ? 'vittoria' : 'vittorie'} su ${ts.played} — ${ts.winPct}% W` : 'Nessuna partita ancora')
 
@@ -625,7 +761,7 @@ export function deriveStory(data: DiaryData, id: string): StoryData | null {
   const partner = bpId ? (partnerObj(data, bpId)?.name || '—') : '—'
 
   const d = t.date || '2025-01-01'
-  const meta = [fmtDateFull(d), t.city, t.category].filter(Boolean).join('  ·  ')
+  const meta = [fmtDateFull(d), venueDisplay(data, t), t.category].filter(Boolean).join('  ·  ')
   const slug = (t.name || 'torneo').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'torneo'
   const withUrl = data.photos.filter((p) => p.tournamentId === t.id && p.url)
   const cover = withUrl[0]
@@ -769,7 +905,10 @@ export function deriveWrapped(data: DiaryData, range: WrappedRange, fPartner = '
   let bestMargin = 0
   ms.forEach((m) => { const r = res(m); if (r.won) { const mar = r.pf - r.pa; if (mar > bestMargin) bestMargin = mar } })
 
-  const cities = new Set(tourns.map((t) => t.city).filter(Boolean)).size
+  // "Città diverse": si contano i LUOGHI, via `venueKeyOf`. Contando le stringhe
+  // grezze, "Rimini" e "rimini " valevano due posti — e con i venue, due nomi
+  // diversi per la stessa spiaggia ne varrebbero altrettanti.
+  const cities = new Set(tourns.map((t) => venueKeyOf(data, t)).filter(Boolean)).size
   const setsPlayed = s.sw + s.sl
   const streak = streakOf(ms)
   const hasEnoughData = played >= WRAPPED_MIN_MATCHES
@@ -829,7 +968,7 @@ export function deriveWrapped(data: DiaryData, range: WrappedRange, fPartner = '
   if (bestTourn && best <= 8) {
     slides.push({
       kind: 'podium', eyebrow: 'Miglior risultato', headline: resultLabelOf(bestTourn.placement),
-      title: bestTourn.name, caption: [bestTourn.city, fmtDateFull(bestTourn.date)].filter(Boolean).join(' · '),
+      title: bestTourn.name, caption: [venueDisplay(data, bestTourn), fmtDateFull(bestTourn.date)].filter(Boolean).join(' · '),
       stats: [], emoji: bestTourn.emoji || '🏆', photoUrl: photoOf(bestTourn.id),
     })
   }
@@ -891,7 +1030,8 @@ export function deriveTorneiListServer(sv: SvTorneiList): TorneiListData {
       badge: c.placement,
       badgeBg: podium ? '#FFF1EA' : '#F2F0EC',
       badgeColor: podium ? '#C4501E' : 'rgba(27,42,74,.5)',
-      meta: fmtDate(c.date) + ' · ' + c.city + ' · ' + c.format + (c.partner ? ' · con ' + c.partner : ''),
+      meta: [fmtDate(c.date), c.venue?.name.trim() || c.city.trim(), c.format, c.partner ? 'con ' + c.partner : '']
+        .filter(Boolean).join(' · '),
       record: c.won + '-' + c.lost, winPct: c.win_pct, matchCount: c.match_count,
       shared: false,
     }
@@ -908,16 +1048,28 @@ export function deriveCompagniServer(sv: SvCompagno[]): CompagnoCard[] {
 export function deriveTorneoDetailServer(sv: SvTorneoDetail, data: DiaryData): TorneoDetailData {
   const podium = sv.rank <= 3
   const photos = data.photos.filter((p) => p.tournamentId === sv.id)
+  const venueName = sv.venue?.name.trim() || sv.city.trim()
+  const lat = sv.venue?.lat ?? null
+  const lng = sv.venue?.lng ?? null
+  // "Quante volte ho giocato qui" resta un conteggio client: la RPC aggrega un
+  // torneo alla volta e non sa nulla degli altri.
+  const local = data.tournaments.find((t) => t.id === sv.id)
   return {
     id: sv.id, name: sv.name, category: sv.category, dot: dotForRank(sv.rank),
     badge: sv.placement,
     badgeBg: podium ? '#FFF1EA' : '#F2F0EC',
     badgeColor: podium ? '#C4501E' : 'rgba(27,42,74,.5)',
-    meta: fmtDate(sv.date) + ' · ' + sv.city + ' · ' + sv.surface + (sv.partner ? ' · con ' + sv.partner : ''),
+    meta: [fmtDate(sv.date), venueName, sv.surface, sv.partner ? 'con ' + sv.partner : '']
+      .filter(Boolean).join(' · '),
     record: sv.won + '-' + sv.lost, winPct: sv.win_pct, played: sv.played, setStr: sv.sets_won + '-' + sv.sets_lost,
     setPct: sv.sets_won + sv.sets_lost > 0 ? Math.round((100 * sv.sets_won) / (sv.sets_won + sv.sets_lost)) : 0,
     diffStr: (sv.point_diff >= 0 ? '+' : '') + sv.point_diff,
     noMatches: sv.matches.length === 0, hasPhotos: photos.length > 0, shared: false,
+    venueName,
+    venueCity: sv.venue?.city.trim() || venueName,
+    venueLat: lat, venueLng: lng,
+    venueMapUrl: mapUrl(lat, lng),
+    venueHistory: local ? venueHistoryLabel(venueHistory(data, venueKeyOf(data, local), local.id)) : null,
     photos: photos.map((p) => ({ id: p.id, color: p.color, caption: p.caption, url: p.url })),
     matches: sv.matches.map((m) => {
       const es = esitoStyle(m.won)

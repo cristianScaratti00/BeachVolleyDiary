@@ -24,6 +24,29 @@ export interface AppUser {
 }
 
 // ---------------------------------------------------------------------------
+// Luogo di gioco (spiaggia/impianto). Promuove a entità ciò che finora era il
+// testo libero `Tournament.city`: due tornei alla stessa spiaggia puntano alla
+// stessa riga invece di condividere (o no) la stessa stringa.
+//
+// Catalogo condiviso fra gli utenti (scelta di prodotto): "Bagno 26 · Riccione"
+// è lo stesso posto per tutti. `shared` distingue le righe create da altri
+// (modificabili solo da chi le ha create) da quelle proprie.
+//
+// `city` resta comunque su Tournament come snapshot testuale: i tornei creati
+// altrove (o prima di questa feature) non hanno `venueId` e devono continuare a
+// leggersi. Ogni selettore che ragiona sul luogo usa `venueKeyOf` in derive.ts.
+// ---------------------------------------------------------------------------
+export interface Venue {
+  id: string;
+  name: string; // "Bagno 26" — come lo chiama chi ci gioca
+  city: string; // "Riccione" — può coincidere col nome (backfill dalle città)
+  lat: number | null; // coordinate opzionali, sempre insieme (o entrambe o nessuna)
+  lng: number | null;
+  surface: Surface | null; // superficie tipica: default suggerito nel form torneo
+  shared: boolean; // true = luogo creato da un altro utente (sola lettura)
+}
+
+// ---------------------------------------------------------------------------
 // "Chi c'è oggi?" — check-in di giornata + stanza live.
 // Dati transitori (per giorno), fuori dal DiaryData persistente: vivono nel
 // proprio hook (useCheckIn), non in useDiary.
@@ -67,7 +90,8 @@ export interface Tournament {
   id: string;
   name: string;
   date: string;
-  city: string;
+  city: string; // snapshot testuale del luogo (resta popolato anche con venueId)
+  venueId: string | null; // luogo strutturato; null = torneo "vecchio" o da mobile
   category: Category;
   format: Format;
   surface: Surface;
@@ -109,6 +133,7 @@ export interface DiaryData {
   matches: Match[];
   partners: Partner[];
   photos: Photo[];
+  venues: Venue[];
 }
 
 // ---------------------------------------------------------------------------
@@ -124,6 +149,12 @@ export interface TorneoForm {
   name: string;
   date: string;
   city: string;
+  // Luogo: id di un venue esistente, '' = nessuno, 'new' = crealo al volo dai
+  // campi `newVenue*`. Stesso idioma di `partnerId === 'new'` + newPartnerName.
+  venueId: string;
+  newVenueName: string;
+  newVenueCity: string;
+  newVenueCoords: string; // "45.0678, 12.5432" incollato o preso dal GPS
   category: Category;
   format: Format;
   surface: Surface;

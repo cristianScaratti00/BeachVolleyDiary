@@ -27,7 +27,8 @@ type Step =
   | 'partner'
   | 'partnerName'
   | 'date'
-  | 'city'
+  | 'venue'
+  | 'venueName'
   | 'category'
   | 'format'
   | 'surface'
@@ -49,7 +50,9 @@ interface Draft {
   partnerId: string // '' = nessuno, 'new', oppure un id compagno
   newPartnerName: string
   date: string
-  city: string
+  venueId: string // '' = saltato, 'new', oppure un id luogo
+  newVenueName: string // nome del luogo digitato quando venueId === 'new'
+  city: string // snapshot testuale, tenuto allineato al luogo scelto
   category: Category
   format: Format
   surface: Surface
@@ -69,6 +72,7 @@ interface Msg {
 interface CreaChatProps {
   wide: boolean
   partners: Option[]
+  venues: Option[] // luoghi già salvati, proposti come chip nello step "dove"
   onCreate: (form: AnyForm, matches: GuidedMatch[]) => Promise<string | null>
   onDone: (tournamentId: string) => void
   onExit: () => void
@@ -95,6 +99,8 @@ const initialDraft = (): Draft => ({
   partnerId: '',
   newPartnerName: '',
   date: todayISO(),
+  venueId: '',
+  newVenueName: '',
   city: '',
   category: 'Amatoriale',
   format: '2vs2',
@@ -105,7 +111,7 @@ const initialDraft = (): Draft => ({
   matches: [],
 })
 
-export default function CreaChat({ wide, partners, onCreate, onDone, onExit }: CreaChatProps) {
+export default function CreaChat({ wide, partners, venues, onCreate, onDone, onExit }: CreaChatProps) {
   const [messages, setMessages] = useState<Msg[]>([])
   const [typing, setTyping] = useState(true)
   const [step, setStep] = useState<Step>('boot')
@@ -198,8 +204,12 @@ export default function CreaChat({ wide, partners, onCreate, onDone, onExit }: C
       case 'date':
         await say('Quando si è svolto? 📅')
         break
-      case 'city':
-        await say('In che città? (puoi saltare)')
+      case 'venue':
+        if (venues.length) await say('Dove avete giocato? (puoi saltare)')
+        else await say('Dove avete giocato? Scrivi il nome del posto — o salta.')
+        break
+      case 'venueName':
+        await say('Come si chiama il posto? 📍')
         break
       case 'category':
         await say('Che categoria era?')
@@ -238,7 +248,7 @@ export default function CreaChat({ wide, partners, onCreate, onDone, onExit }: C
         await say('Partita registrata ✅. Vuoi aggiungerne un’altra?')
         break
       case 'recap':
-        await say({ card: <Recap d={draftRef.current} partners={partners} /> })
+        await say({ card: <Recap d={draftRef.current} partners={partners} venues={venues} /> })
         await say('Ecco il riepilogo. Confermo la creazione? 👇')
         break
       default:
@@ -284,13 +294,33 @@ export default function CreaChat({ wide, partners, onCreate, onDone, onExit }: C
   const pickDate = (iso: string, label: string) => {
     pushUser(label)
     patch({ date: iso })
-    goStep('city')
+    goStep('venue')
   }
-  const submitCity = (raw: string) => {
-    const v = raw.trim()
-    pushUser(v || 'Salto la città')
+  // Luogo già salvato: il torneo ci si aggancia. `city` resta vuota, la scrive
+  // il data layer dal luogo scelto (unica fonte, niente doppia verità).
+  const pickVenue = (v: Option) => {
+    pushUser(v.name)
+    patch({ venueId: v.id, newVenueName: '', city: '' })
+    goStep('category')
+  }
+  const chooseNewVenue = () => {
     setText('')
-    patch({ city: v })
+    goStep('venueName')
+  }
+  // Luogo nuovo: qui si chiede una riga sola (la chat non è un form), quindi il
+  // nome vale anche da città. Nel modale torneo i due campi restano separati.
+  const submitVenueName = (raw: string) => {
+    const v = raw.trim()
+    if (!v) return
+    pushUser(v)
+    setText('')
+    patch({ venueId: 'new', newVenueName: v, city: v })
+    goStep('category')
+  }
+  const skipVenue = () => {
+    pushUser('Salto il luogo')
+    setText('')
+    patch({ venueId: '', newVenueName: '', city: '' })
     goStep('category')
   }
   const pickCategory = (c: Category) => {
@@ -399,6 +429,9 @@ export default function CreaChat({ wide, partners, onCreate, onDone, onExit }: C
       partnerId: d.partnerId,
       newPartnerName: d.newPartnerName,
       date: d.date,
+      venueId: d.venueId,
+      newVenueName: d.newVenueName,
+      newVenueCity: d.newVenueName, // una riga sola: il nome vale anche da città
       city: d.city,
       category: d.category,
       format: d.format,
@@ -487,6 +520,7 @@ export default function CreaChat({ wide, partners, onCreate, onDone, onExit }: C
           <Dock
             step={step}
             partners={partners}
+            venues={venues}
             text={text}
             setText={setText}
             dateVal={dateVal}
@@ -501,7 +535,10 @@ export default function CreaChat({ wide, partners, onCreate, onDone, onExit }: C
               chooseNewPartner,
               submitPartnerName,
               pickDate,
-              submitCity,
+              pickVenue,
+              chooseNewVenue,
+              submitVenueName,
+              skipVenue,
               pickCategory,
               pickFormat,
               pickSurface,
@@ -566,14 +603,16 @@ function Typing() {
   )
 }
 
-function Recap({ d, partners }: { d: Draft; partners: Option[] }) {
+function Recap({ d, partners, venues }: { d: Draft; partners: Option[]; venues: Option[] }) {
   const partnerName =
     d.partnerId === '' ? 'Da solo' : d.partnerId === 'new' ? d.newPartnerName || 'Nuovo compagno' : partners.find((p) => p.id === d.partnerId)?.name || '—'
+  const venueName =
+    d.venueId === '' ? '—' : d.venueId === 'new' ? d.newVenueName || 'Nuovo luogo' : venues.find((v) => v.id === d.venueId)?.name || '—'
   const rows: [string, string][] = [
     ['Nome', d.name],
     ['Compagno', partnerName],
     ['Data', fmtDate(d.date)],
-    ['Città', d.city || '—'],
+    ['Luogo', venueName],
     ['Categoria', d.category],
     ['Formato', d.format],
     ['Superficie', d.surface],
@@ -620,7 +659,10 @@ interface Handlers {
   chooseNewPartner: () => void
   submitPartnerName: (v: string, fromResults: boolean) => void
   pickDate: (iso: string, label: string) => void
-  submitCity: (v: string) => void
+  pickVenue: (v: Option) => void
+  chooseNewVenue: () => void
+  submitVenueName: (v: string) => void
+  skipVenue: () => void
   pickCategory: (c: Category) => void
   pickFormat: (f: Format) => void
   pickSurface: (s: Surface) => void
@@ -640,6 +682,7 @@ interface Handlers {
 interface DockProps {
   step: Step
   partners: Option[]
+  venues: Option[]
   text: string
   setText: (v: string) => void
   dateVal: string
@@ -654,7 +697,7 @@ interface DockProps {
 const FINISHED_PLACEMENTS: Placement[] = ['1° 🏆', '2°', '3°', 'Semifinale', 'Quarti', 'Ottavi', 'Gironi']
 
 function Dock(props: DockProps) {
-  const { step, partners, text, setText, dateVal, setDateVal, scoreRows, setScoreRows, createdId, handlers: h } = props
+  const { step, partners, venues, text, setText, dateVal, setDateVal, scoreRows, setScoreRows, createdId, handlers: h } = props
 
   switch (step) {
     case 'name':
@@ -703,8 +746,23 @@ function Dock(props: DockProps) {
         </div>
       )
 
-    case 'city':
-      return <TextDock value={text} setValue={setText} placeholder="es. Rimini" skipLabel="Salta" onSkip={() => h.submitCity('')} onSubmit={() => h.submitCity(text)} />
+    case 'venue':
+      // Senza luoghi salvati una lista di chip sarebbe vuota: si chiede il nome
+      // (stesso ragionamento dello step compagno).
+      if (!venues.length)
+        return <TextDock value={text} setValue={setText} placeholder="es. Bagno 26 Riccione" skipLabel="Salta" onSkip={h.skipVenue} onSubmit={() => h.submitVenueName(text)} />
+      return (
+        <ChipsDock>
+          {venues.map((v) => (
+            <Chip key={v.id} onClick={() => h.pickVenue(v)}>{v.name}</Chip>
+          ))}
+          <Chip tone="primary" onClick={h.chooseNewVenue}>📍 Nuovo luogo</Chip>
+          <Chip onClick={h.skipVenue}>Salta</Chip>
+        </ChipsDock>
+      )
+
+    case 'venueName':
+      return <TextDock value={text} setValue={setText} placeholder="es. Bagno 26 Riccione" onSubmit={() => h.submitVenueName(text)} />
 
     case 'category':
       return (

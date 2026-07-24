@@ -94,3 +94,17 @@ describe('contrasto — contatori di sezione', () => {
     expect(contrast(ACCENT_FG, ACCENT_BG)).toBe(4.21)
   })
 })
+
+describe('contrasto — riga "torneo qui" del luogo', () => {
+  it('il testo della storia del luogo supera AA su fondo pagina', () => {
+    // Riga da 12.5px: testo normale per WCAG (grande = 18.66px bold), quindi
+    // serve 4.5:1 pieno. Per questo è navy e non arancione scuro.
+    expect(contrast(INK, PAGE)).toBeGreaterThanOrEqual(AA_TEXT)
+  })
+
+  it('l\'arancione scuro dei badge NON basterebbe qui', () => {
+    // 4.39:1 su fondo pagina: sotto AA. Fissato a numero perché la tentazione
+    // di riusarlo (sta bene) torni a farsi notare invece che passare liscia.
+    expect(contrast(ACCENT_FG, PAGE)).toBe(4.39)
+  })
+})
