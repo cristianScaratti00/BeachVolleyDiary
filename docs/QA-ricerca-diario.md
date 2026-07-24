@@ -8,9 +8,9 @@ presentazionale + data layer client (ruolo 1 della pipeline).
 
 | | |
 |---|---|
-| Ambito | `src/lib/search.ts` (**nuovo**), `src/lib/derive.ts` (`DiaryEntry` estesa, `DiaryMatchHit`, `DiarySearchFields`, `deriveDiarySearch`), `src/screens/Diario.tsx`, `src/test/factories.ts` (`makeDiaryEntry`, `makeDiaryMatchHit`) |
+| Ambito | `src/lib/search.ts` (**nuovo**), `src/lib/derive.ts` (`DiaryEntry` estesa, `DiaryMatchHit`, `DiarySearchFields`, `deriveDiarySearch`), `src/screens/Diario.tsx`, `src/index.css`, `src/test/factories.ts` (`makeDiaryEntry`, `makeDiaryMatchHit`) |
 | Ambiente | Node 24 · Vitest 3.2.7 · jsdom 26 · Testing Library React 16 · axe-core 4.12 |
-| Suite | 262 test: 258 verdi + 4 `skip` preesistenti (difetti noti di Tornei). **+100 nuovi**: `search.test.ts` (24), `derive.diary.test.ts` (36), `Diario.test.tsx` (40) |
+| Suite | 267 test: 263 verdi + 4 `skip` preesistenti (difetti noti di Tornei). **+105 nuovi**: `search.test.ts` (24), `derive.diary.test.ts` (39), `Diario.test.tsx` (42) |
 | Comandi | `npm test` · `npm run typecheck` · `npm run typecheck:test` · `npm run build` |
 
 Tutti e quattro i comandi passano. Il Diario **non aveva alcun test**: questi
@@ -39,7 +39,7 @@ nessun dominio:
 - `matchesAllTokens` — AND fra i token, OR fra i campi; nessun token → risponde
   tutto; la subsequence non attraversa la concatenazione dei campi.
 
-**Regole del data layer** (`src/lib/derive.diary.test.ts`, 36 test) — funzioni
+**Regole del data layer** (`src/lib/derive.diary.test.ts`, 39 test) — funzioni
 pure, nessun orologio (il Diario non ha il concetto di "imminente"):
 
 - `deriveDiary` — comportamento attuale intatto (ordine dal più recente, recap
@@ -55,7 +55,7 @@ pure, nessun orologio (il Diario non ha il concetto di "imminente"):
   `hits: []`; nessun risultato → `[]`; ordine cronologico preservato; input non
   mutato; diario vuoto.
 
-**Schermata** (`src/screens/Diario.test.tsx`, 40 test) — montata con `vi.fn()` e
+**Schermata** (`src/screens/Diario.test.tsx`, 42 test) — montata con `vi.fn()` e
 dati di fabbrica, nessun mock di Supabase:
 
 - Campo: nome accessibile, placeholder, assente con diario vuoto, filtro mentre
@@ -122,6 +122,44 @@ dati di fabbrica, nessun mock di Supabase:
     e le partite senza compagno: un'etichetta da mostrare, non un dato. Metterlo
     nel testo cercabile avrebbe fatto rispondere *tutti* i tornei senza compagno
     a chi cerca «nessuno» (o «ness», o «nsn»).
+12. **Alla partita si chiedono solo i token che il torneo non spiega già.**
+    Sostituisce la regola iniziale («la partita risponde solo se soddisfa TUTTI i
+    token»), che rompeva la ricerca su query di restringimento — le più naturali
+    da scrivere, prima il torneo e poi cosa ci si cerca dentro. Vedi sotto.
+
+### Correzione: le query di restringimento (ruolo 2)
+
+La prima regola chiedeva **tutti** i token a una singola partita. Su dati
+realistici produceva due difetti, entrambi confermati con una sonda su
+`deriveDiary` + `deriveDiarySearch`:
+
+- **Falso negativo.** `girone` trovava il torneo di Riccione; **`riccione girone`
+  non trovava niente**. `phase` vive solo sulla partita e non compare fra i campi
+  della voce (`DiarySearchFields` non ha un campo fase): nessuna partita poteva
+  soddisfare anche «riccione», e la voce spariva del tutto. Aggiungere una parola
+  per restringere faceva sparire un torneo che c'era.
+- **Spiegazione persa.** `rossi` mostrava la voce **e** la riga della partita
+  contro Rossi; `riccione rossi` mostrava la voce **senza** alcuna riga. Proprio
+  il "perché" che la ricerca promette svaniva appena si restringeva.
+
+Ora `deriveDiarySearch` calcola i **token residui**: quelli a cui i campi di
+contesto della voce (titolo, luogo/categoria/formato/superficie/piazzamento,
+data, compagno, didascalie) non rispondono già. Alla partita si chiedono solo
+quelli.
+
+- Residuo vuoto → risponde il torneo per intero, nessuna riga: `riccione` e
+  `riccione 2025` restano puliti come prima.
+- Residuo non vuoto → le righe sono le partite che lo soddisfano: `riccione
+  rossi` → la partita contro Rossi; `riccione girone` → il girone di Riccione.
+- Token che arrivano da **partite diverse** (`gialli rimonta`, una per uno) →
+  la voce compare, ma senza righe: nessuna singola partita spiega entrambi, e
+  mostrarne una mentirebbe sul perché.
+
+`opponents` e `notes` restano nell'aggregato della voce (`entryFields`) proprio
+per quest'ultimo caso: servono a far comparire la voce, non a spiegarla.
+
+Coperto da 4 test in `derive.diary.test.ts` e 2 in `Diario.test.tsx`; verificato
+anche nel browser a 320px.
 
 ### Card del Diario raggiungibili da tastiera — come, e perché così
 
@@ -157,30 +195,69 @@ le due controindicazioni.
   che è un `<button>` vero e fa la stessa cosa.
 - **Ricerca solo sul Diario.** Le altre schermate non hanno un campo: Tornei ha
   il filtro a chip per formato, Compagni e Home niente.
+- **La ricerca si azzera aprendo un risultato e tornando indietro.** `App`
+  renderizza le schermate con uno `switch` su `screen`: aprire un torneo smonta
+  il Diario e con esso lo stato locale della query. È coerente con il resto
+  dell'app (il filtro a chip di Tornei si comporta uguale) e con la scelta di non
+  toccare `App.tsx`, ma su una query digitata pesa più che su un chip. Per
+  conservarla servirebbe alzare lo stato ad `App` — scelta di prodotto, non
+  difetto: lasciata al proprietario del progetto.
 - **`placementRank` non gestisce `'Semifinale'`** (nota di progetto): non tocca
   la ricerca — `place` contiene la stringa di piazzamento testuale, che risponde
   comunque — ma resta un difetto a monte, condiviso fra client e SQL.
 
-## Da verificare a mano (fuori dalla portata di jsdom)
+## Verifica nel browser vero (ruolo 2 — integrazione)
 
-jsdom non calcola il layout: le voci qui sotto **non sono state verificate**,
-non sono note come rotte. Serve `npm run dev` con un `.env` valido
-(vedi `.env.example`) e un account con dati.
+Il livello dati era già completo: `useDiary.fetchAll` scarica in un colpo solo
+tornei, partite (con `opponents` **e** `note`), compagni e foto
+(`useDiary.ts:49-62`), senza pagine né limiti. La ricerca client-side copre
+quindi davvero tutto il diario: nessuna query nuova serviva, e nessun campo
+cercabile resta scoperto per dati non caricati.
 
-1. **Resa del campo** a 320px e su desktop: il `padding-left` di 38px lascia
-   spazio alla lente, il `padding-right` di 42px al pulsante `×` (che compare
-   solo con una query in corso, quindi la larghezza del testo cambia mentre si
-   digita).
-2. **Nessuno zoom su iOS**: il campo eredita la regola `font-size: 16px` sotto i
-   900px di `index.css:18-20`.
-3. **Crocetta nativa di WebKit**: `appearance: none` dovrebbe toglierla su
-   Safari/Chrome, lasciando solo il nostro `×`. Da confermare su Safari vero.
-4. **Contorno di focus** del titolo-pulsante dentro alla card (`overflow:
-   hidden` sulla card + `outline-offset: 2px`): verificare che non venga
-   tagliato.
-5. **Screen reader** (VoiceOver/NVDA): il sottotitolo `role="status"` deve
+Ciò che jsdom non calcola è stato verificato montando il vero `<Diario>` con dati
+finti in una pagina Vite temporanea (banco di prova non committato), misurando in
+Chrome con `getComputedStyle`/`getBoundingClientRect`. Il media query mobile è
+stato esercitato dentro a un iframe da 320px, che valuta le media query sulla
+propria viewport.
+
+| Punto | Esito |
+|---|---|
+| `padding-left` 38px (lente) a 320px | ✅ 38px, lente non sovrapposta al testo |
+| `padding-right` 42px con query in corso | ✅ 42px; il `×` è 26×26 e resta dentro al campo, 8px dal bordo |
+| Nessuno zoom su iOS (`font-size: 16px` sotto 900px) | ✅ a 317px di viewport il campo calcola `16px` |
+| Overflow orizzontale a 320px | ✅ assente, con card e righe di partita in pagina |
+| Crocetta nativa di WebKit | ❌ **difetto trovato e corretto** (vedi sotto) |
+| Contorno di focus del titolo tagliato dalla card | ✅ non può esserlo: il pulsante sta a 16px dal bordo alto e ~100px dai lati, il contorno è 2px |
+
+### Difetto trovato: due pulsanti di cancellazione nel campo
+
+`appearance: none` sull'`<input>` **non** toglie la crocetta nativa di WebKit:
+quella è lo pseudo-elemento `::-webkit-search-cancel-button`, che si spegne solo
+prendendolo di mira. Verificato su Chrome: con una query in corso il campo
+mostrava **due** `×` affiancati — il nostro (tondo, con `aria-label`) e quello
+nativo (muto, fuori dalla grammatica visiva). La nota precedente dava la cosa per
+risolta dall'inline style; non lo era.
+
+Corretto in `src/index.css` con la regola sullo pseudo-elemento — non può stare
+negli style inline di React. Il commento in `Diario.tsx` che attribuiva il merito
+ad `appearance: none` è stato corretto per non rimandare qualcun altro sulla
+stessa pista.
+
+Non è testabile in jsdom (non rende gli pseudo-elementi): resta una verifica
+visiva, ora documentata.
+
+## Da verificare a mano (resta fuori portata)
+
+Serve `npm run dev` con un `.env` valido (vedi `.env.example`) e un account con
+dati — **non c'è `.env` nel worktree**, quindi il giro end-to-end contro Supabase
+vero non è stato fatto.
+
+1. **Safari**: la regola su `::-webkit-search-cancel-button` è verificata su
+   Chrome; Safari usa lo stesso pseudo-elemento, ma va confermato sul browser
+   vero.
+2. **Screen reader** (VoiceOver/NVDA): il sottotitolo `role="status"` deve
    annunciare il conteggio mentre si digita, senza diventare logorroico.
-6. **Prova sui dati veri**: refuso (`rccione`), due token (`riccione 2025`),
+3. **Prova sui dati veri**: refuso (`rccione`), due token (`riccione 2025`),
    parola presente solo in una nota, accenti (`Forlì`/`forli`/`FORLI`).
 
 ## Follow-up (fuori scope, come da piano)

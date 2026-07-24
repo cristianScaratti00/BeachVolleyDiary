@@ -441,7 +441,7 @@
       "source_file": "src/components/Logo.tsx",
       "source_location": "L1",
       "id": "components_logo",
-      "community": 2,
+      "community": 12,
       "norm_label": "logo.tsx"
     },
     {
@@ -450,7 +450,7 @@
       "source_file": "src/components/Logo.tsx",
       "source_location": "L13",
       "id": "components_logo_brandmark",
-      "community": 2,
+      "community": 12,
       "norm_label": "brandmark()"
     },
     {
@@ -459,7 +459,7 @@
       "source_file": "src/components/Logo.tsx",
       "source_location": "L59",
       "id": "components_logo_brandlockup",
-      "community": 2,
+      "community": 12,
       "norm_label": "brandlockup()"
     },
     {
@@ -585,7 +585,7 @@
       "source_file": "src/components/Splash.tsx",
       "source_location": "L1",
       "id": "components_splash",
-      "community": 2,
+      "community": 12,
       "norm_label": "splash.tsx"
     },
     {
@@ -594,7 +594,7 @@
       "source_file": "src/components/Splash.tsx",
       "source_location": "L5",
       "id": "components_splash_splash",
-      "community": 2,
+      "community": 12,
       "norm_label": "splash()"
     },
     {
@@ -621,7 +621,7 @@
       "source_file": "src/components/dashboard/PartnerCard.tsx",
       "source_location": "L1",
       "id": "dashboard_partnercard",
-      "community": 8,
+      "community": 43,
       "norm_label": "partnercard.tsx"
     },
     {
@@ -630,7 +630,7 @@
       "source_file": "src/components/dashboard/PartnerCard.tsx",
       "source_location": "L5",
       "id": "dashboard_partnercard_partnercard",
-      "community": 8,
+      "community": 43,
       "norm_label": "partnercard()"
     },
     {
@@ -639,7 +639,7 @@
       "source_file": "src/components/dashboard/PhaseCard.tsx",
       "source_location": "L1",
       "id": "dashboard_phasecard",
-      "community": 8,
+      "community": 43,
       "norm_label": "phasecard.tsx"
     },
     {
@@ -648,7 +648,7 @@
       "source_file": "src/components/dashboard/PhaseCard.tsx",
       "source_location": "L5",
       "id": "dashboard_phasecard_phasecard",
-      "community": 8,
+      "community": 43,
       "norm_label": "phasecard()"
     },
     {
@@ -657,7 +657,7 @@
       "source_file": "src/components/dashboard/PlacementCard.tsx",
       "source_location": "L1",
       "id": "dashboard_placementcard",
-      "community": 8,
+      "community": 43,
       "norm_label": "placementcard.tsx"
     },
     {
@@ -666,7 +666,7 @@
       "source_file": "src/components/dashboard/PlacementCard.tsx",
       "source_location": "L5",
       "id": "dashboard_placementcard_placementcard",
-      "community": 8,
+      "community": 43,
       "norm_label": "placementcard()"
     },
     {
@@ -675,7 +675,7 @@
       "source_file": "src/components/dashboard/PointsCard.tsx",
       "source_location": "L1",
       "id": "dashboard_pointscard",
-      "community": 8,
+      "community": 43,
       "norm_label": "pointscard.tsx"
     },
     {
@@ -684,7 +684,7 @@
       "source_file": "src/components/dashboard/PointsCard.tsx",
       "source_location": "L4",
       "id": "dashboard_pointscard_pointscard",
-      "community": 8,
+      "community": 43,
       "norm_label": "pointscard()"
     },
     {
@@ -693,7 +693,7 @@
       "source_file": "src/components/dashboard/RecentTornei.tsx",
       "source_location": "L1",
       "id": "dashboard_recenttornei",
-      "community": 8,
+      "community": 45,
       "norm_label": "recenttornei.tsx"
     },
     {
@@ -702,7 +702,7 @@
       "source_file": "src/components/dashboard/RecentTornei.tsx",
       "source_location": "L5",
       "id": "dashboard_recenttornei_recenttornei",
-      "community": 8,
+      "community": 43,
       "norm_label": "recenttornei()"
     },
     {
@@ -711,7 +711,7 @@
       "source_file": "src/components/dashboard/TrendCard.tsx",
       "source_location": "L1",
       "id": "dashboard_trendcard",
-      "community": 8,
+      "community": 43,
       "norm_label": "trendcard.tsx"
     },
     {
@@ -720,7 +720,7 @@
       "source_file": "src/components/dashboard/TrendCard.tsx",
       "source_location": "L6",
       "id": "dashboard_trendcard_stylewithvars",
-      "community": 8,
+      "community": 43,
       "norm_label": "stylewithvars"
     },
     {
@@ -729,7 +729,7 @@
       "source_file": "src/components/dashboard/TrendCard.tsx",
       "source_location": "L9",
       "id": "dashboard_trendcard_trendcard",
-      "community": 8,
+      "community": 43,
       "norm_label": "trendcard()"
     },
     {
@@ -738,7 +738,7 @@
       "source_file": "src/components/dashboard/WinLossCard.tsx",
       "source_location": "L1",
       "id": "dashboard_winlosscard",
-      "community": 8,
+      "community": 43,
       "norm_label": "winlosscard.tsx"
     },
     {
@@ -747,7 +747,7 @@
       "source_file": "src/components/dashboard/WinLossCard.tsx",
       "source_location": "L4",
       "id": "dashboard_winlosscard_winlosscard",
-      "community": 8,
+      "community": 43,
       "norm_label": "winlosscard()"
     },
     {
@@ -756,7 +756,7 @@
       "source_file": "src/components/dashboard/index.ts",
       "source_location": "L1",
       "id": "dashboard_index",
-      "community": 8,
+      "community": 43,
       "norm_label": "index.ts"
     },
     {
@@ -1143,7 +1143,7 @@
       "source_file": "src/components/ui.tsx",
       "source_location": "L1",
       "id": "components_ui",
-      "community": 8,
+      "community": 44,
       "norm_label": "ui.tsx"
     },
     {
@@ -1152,7 +1152,7 @@
       "source_file": "src/components/ui.tsx",
       "source_location": "L15",
       "id": "components_ui_badgetone",
-      "community": 8,
+      "community": 44,
       "norm_label": "badgetone"
     },
     {
@@ -1161,7 +1161,7 @@
       "source_file": "src/components/ui.tsx",
       "source_location": "L16",
       "id": "components_ui_badgesize",
-      "community": 8,
+      "community": 44,
       "norm_label": "badgesize"
     },
     {
@@ -1179,7 +1179,7 @@
       "source_file": "src/components/ui.tsx",
       "source_location": "L36",
       "id": "components_ui_btnvariant",
-      "community": 8,
+      "community": 44,
       "norm_label": "btnvariant"
     },
     {
@@ -1188,7 +1188,7 @@
       "source_file": "src/components/ui.tsx",
       "source_location": "L38",
       "id": "components_ui_btnbase",
-      "community": 8,
+      "community": 44,
       "norm_label": "btnbase"
     },
     {
@@ -1197,7 +1197,7 @@
       "source_file": "src/components/ui.tsx",
       "source_location": "L52",
       "id": "components_ui_button",
-      "community": 8,
+      "community": 44,
       "norm_label": "button()"
     },
     {
@@ -1206,7 +1206,7 @@
       "source_file": "src/components/ui.tsx",
       "source_location": "L58",
       "id": "components_ui_pageheader",
-      "community": 8,
+      "community": 44,
       "norm_label": "pageheader()"
     },
     {
@@ -1215,7 +1215,7 @@
       "source_file": "src/components/ui.tsx",
       "source_location": "L76",
       "id": "components_ui_filteroption",
-      "community": 8,
+      "community": 44,
       "norm_label": "filteroption"
     },
     {
@@ -1224,7 +1224,7 @@
       "source_file": "src/components/ui.tsx",
       "source_location": "L78",
       "id": "components_ui_filterchips",
-      "community": 8,
+      "community": 45,
       "norm_label": "filterchips()"
     },
     {
@@ -1242,7 +1242,7 @@
       "source_file": "src/components/ui.tsx",
       "source_location": "L125",
       "id": "components_ui_sectiontitle",
-      "community": 8,
+      "community": 45,
       "norm_label": "sectiontitle()"
     },
     {
@@ -1251,7 +1251,7 @@
       "source_file": "src/components/ui.tsx",
       "source_location": "L136",
       "id": "components_ui_emptynote",
-      "community": 8,
+      "community": 43,
       "norm_label": "emptynote()"
     },
     {
@@ -1260,7 +1260,7 @@
       "source_file": "src/components/ui.tsx",
       "source_location": "L141",
       "id": "components_ui_emptycard",
-      "community": 8,
+      "community": 45,
       "norm_label": "emptycard()"
     },
     {
@@ -1269,7 +1269,7 @@
       "source_file": "src/components/ui.tsx",
       "source_location": "L146",
       "id": "components_ui_inlinelink",
-      "community": 8,
+      "community": 45,
       "norm_label": "inlinelink()"
     },
     {
@@ -1296,7 +1296,7 @@
       "source_file": "src/components/ui.tsx",
       "source_location": "L172",
       "id": "components_ui_statitem",
-      "community": 8,
+      "community": 44,
       "norm_label": "statitem"
     },
     {
@@ -1305,7 +1305,7 @@
       "source_file": "src/components/ui.tsx",
       "source_location": "L173",
       "id": "components_ui_statfooter",
-      "community": 8,
+      "community": 44,
       "norm_label": "statfooter()"
     },
     {
@@ -1314,7 +1314,7 @@
       "source_file": "src/components/ui.tsx",
       "source_location": "L189",
       "id": "components_ui_meterrow",
-      "community": 8,
+      "community": 43,
       "norm_label": "meterrow()"
     },
     {
@@ -1323,7 +1323,7 @@
       "source_file": "src/components/ui.tsx",
       "source_location": "L206",
       "id": "components_ui_avatar",
-      "community": 7,
+      "community": 35,
       "norm_label": "avatar()"
     },
     {
@@ -1332,7 +1332,7 @@
       "source_file": "src/components/ui.tsx",
       "source_location": "L220",
       "id": "components_ui_setchip",
-      "community": 8,
+      "community": 44,
       "norm_label": "setchip"
     },
     {
@@ -1341,7 +1341,7 @@
       "source_file": "src/components/ui.tsx",
       "source_location": "L221",
       "id": "components_ui_matchrowprops",
-      "community": 8,
+      "community": 44,
       "norm_label": "matchrowprops"
     },
     {
@@ -1638,7 +1638,7 @@
       "source_file": "src/hooks/useConnection.ts",
       "source_location": "L1",
       "id": "hooks_useconnection",
-      "community": 36,
+      "community": 47,
       "norm_label": "useconnection.ts"
     },
     {
@@ -1647,7 +1647,7 @@
       "source_file": "src/hooks/useConnection.ts",
       "source_location": "L6",
       "id": "hooks_useconnection_networkinformation",
-      "community": 36,
+      "community": 47,
       "norm_label": "networkinformation"
     },
     {
@@ -1656,7 +1656,7 @@
       "source_file": "src/hooks/useConnection.ts",
       "source_location": "L13",
       "id": "hooks_useconnection_getconnection",
-      "community": 36,
+      "community": 47,
       "norm_label": "getconnection()"
     },
     {
@@ -1665,7 +1665,7 @@
       "source_file": "src/hooks/useConnection.ts",
       "source_location": "L24",
       "id": "hooks_useconnection_computeslow",
-      "community": 36,
+      "community": 47,
       "norm_label": "computeslow()"
     },
     {
@@ -1674,7 +1674,7 @@
       "source_file": "src/hooks/useConnection.ts",
       "source_location": "L35",
       "id": "hooks_useconnection_subscribe",
-      "community": 36,
+      "community": 47,
       "norm_label": "subscribe()"
     },
     {
@@ -1998,7 +1998,7 @@
       "source_file": "src/lib/database.types.ts",
       "source_location": "L19",
       "id": "lib_database_types_database",
-      "community": 14,
+      "community": 7,
       "norm_label": "database"
     },
     {
@@ -2421,7 +2421,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L18",
       "id": "lib_derive_dashboardstats",
-      "community": 8,
+      "community": 43,
       "norm_label": "dashboardstats"
     },
     {
@@ -2430,7 +2430,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L51",
       "id": "lib_derive_torneocard",
-      "community": 8,
+      "community": 45,
       "norm_label": "torneocard"
     },
     {
@@ -2448,7 +2448,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L73",
       "id": "lib_derive_torneilistdata",
-      "community": 8,
+      "community": 45,
       "norm_label": "torneilistdata"
     },
     {
@@ -2502,7 +2502,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L121",
       "id": "lib_derive_compagnocard",
-      "community": 8,
+      "community": 44,
       "norm_label": "compagnocard"
     },
     {
@@ -2565,7 +2565,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L202",
       "id": "lib_derive_diaryentry",
-      "community": 5,
+      "community": 46,
       "norm_label": "diaryentry"
     },
     {
@@ -2794,10 +2794,19 @@
       "norm_label": "diarysearchdata"
     },
     {
+      "label": "entryContextFields()",
+      "file_type": "code",
+      "source_file": "src/lib/derive.ts",
+      "source_location": "L683",
+      "id": "lib_derive_entrycontextfields",
+      "community": 10,
+      "norm_label": "entrycontextfields()"
+    },
+    {
       "label": "entryFields()",
       "file_type": "code",
       "source_file": "src/lib/derive.ts",
-      "source_location": "L682",
+      "source_location": "L692",
       "id": "lib_derive_entryfields",
       "community": 10,
       "norm_label": "entryfields()"
@@ -2806,16 +2815,16 @@
       "label": "deriveDiarySearch()",
       "file_type": "code",
       "source_file": "src/lib/derive.ts",
-      "source_location": "L693",
+      "source_location": "L703",
       "id": "lib_derive_derivediarysearch",
-      "community": 5,
+      "community": 46,
       "norm_label": "derivediarysearch()"
     },
     {
       "label": "fmtDateFull()",
       "file_type": "code",
       "source_file": "src/lib/derive.ts",
-      "source_location": "L710",
+      "source_location": "L732",
       "id": "lib_derive_fmtdatefull",
       "community": 15,
       "norm_label": "fmtdatefull()"
@@ -2824,7 +2833,7 @@
       "label": "resultLabelOf()",
       "file_type": "code",
       "source_file": "src/lib/derive.ts",
-      "source_location": "L716",
+      "source_location": "L738",
       "id": "lib_derive_resultlabelof",
       "community": 15,
       "norm_label": "resultlabelof()"
@@ -2833,7 +2842,7 @@
       "label": "deriveStory()",
       "file_type": "code",
       "source_file": "src/lib/derive.ts",
-      "source_location": "L729",
+      "source_location": "L751",
       "id": "lib_derive_derivestory",
       "community": 15,
       "norm_label": "derivestory()"
@@ -2842,7 +2851,7 @@
       "label": "WrappedRange",
       "file_type": "code",
       "source_file": "src/lib/derive.ts",
-      "source_location": "L774",
+      "source_location": "L796",
       "id": "lib_derive_wrappedrange",
       "community": 12,
       "norm_label": "wrappedrange"
@@ -2851,7 +2860,7 @@
       "label": "WrappedSlideKind",
       "file_type": "code",
       "source_file": "src/lib/derive.ts",
-      "source_location": "L778",
+      "source_location": "L800",
       "id": "lib_derive_wrappedslidekind",
       "community": 5,
       "norm_label": "wrappedslidekind"
@@ -2860,7 +2869,7 @@
       "label": "WrappedStat",
       "file_type": "code",
       "source_file": "src/lib/derive.ts",
-      "source_location": "L782",
+      "source_location": "L804",
       "id": "lib_derive_wrappedstat",
       "community": 10,
       "norm_label": "wrappedstat"
@@ -2869,7 +2878,7 @@
       "label": "WrappedSlide",
       "file_type": "code",
       "source_file": "src/lib/derive.ts",
-      "source_location": "L784",
+      "source_location": "L806",
       "id": "lib_derive_wrappedslide",
       "community": 6,
       "norm_label": "wrappedslide"
@@ -2878,7 +2887,7 @@
       "label": "WrappedData",
       "file_type": "code",
       "source_file": "src/lib/derive.ts",
-      "source_location": "L795",
+      "source_location": "L817",
       "id": "lib_derive_wrappeddata",
       "community": 6,
       "norm_label": "wrappeddata"
@@ -2887,7 +2896,7 @@
       "label": "wrappedDayLabel()",
       "file_type": "code",
       "source_file": "src/lib/derive.ts",
-      "source_location": "L808",
+      "source_location": "L830",
       "id": "lib_derive_wrappeddaylabel",
       "community": 10,
       "norm_label": "wrappeddaylabel()"
@@ -2896,7 +2905,7 @@
       "label": "wrappedRangeLabel()",
       "file_type": "code",
       "source_file": "src/lib/derive.ts",
-      "source_location": "L814",
+      "source_location": "L836",
       "id": "lib_derive_wrappedrangelabel",
       "community": 10,
       "norm_label": "wrappedrangelabel()"
@@ -2905,7 +2914,7 @@
       "label": "makeWrappedRange()",
       "file_type": "code",
       "source_file": "src/lib/derive.ts",
-      "source_location": "L822",
+      "source_location": "L844",
       "id": "lib_derive_makewrappedrange",
       "community": 10,
       "norm_label": "makewrappedrange()"
@@ -2914,16 +2923,16 @@
       "label": "wrappedRangeForYear()",
       "file_type": "code",
       "source_file": "src/lib/derive.ts",
-      "source_location": "L829",
+      "source_location": "L851",
       "id": "lib_derive_wrappedrangeforyear",
-      "community": 5,
+      "community": 12,
       "norm_label": "wrappedrangeforyear()"
     },
     {
       "label": "deriveWrapped()",
       "file_type": "code",
       "source_file": "src/lib/derive.ts",
-      "source_location": "L838",
+      "source_location": "L860",
       "id": "lib_derive_derivewrapped",
       "community": 15,
       "norm_label": "derivewrapped()"
@@ -2932,7 +2941,7 @@
       "label": "deriveTorneiListServer()",
       "file_type": "code",
       "source_file": "src/lib/derive.ts",
-      "source_location": "L1002",
+      "source_location": "L1024",
       "id": "lib_derive_derivetorneilistserver",
       "community": 12,
       "norm_label": "derivetorneilistserver()"
@@ -2941,7 +2950,7 @@
       "label": "deriveCompagniServer()",
       "file_type": "code",
       "source_file": "src/lib/derive.ts",
-      "source_location": "L1018",
+      "source_location": "L1040",
       "id": "lib_derive_derivecompagniserver",
       "community": 12,
       "norm_label": "derivecompagniserver()"
@@ -2950,7 +2959,7 @@
       "label": "deriveTorneoDetailServer()",
       "file_type": "code",
       "source_file": "src/lib/derive.ts",
-      "source_location": "L1024",
+      "source_location": "L1046",
       "id": "lib_derive_derivetorneodetailserver",
       "community": 12,
       "norm_label": "derivetorneodetailserver()"
@@ -2959,7 +2968,7 @@
       "label": "deriveCompagnoDetailServer()",
       "file_type": "code",
       "source_file": "src/lib/derive.ts",
-      "source_location": "L1049",
+      "source_location": "L1071",
       "id": "lib_derive_derivecompagnodetailserver",
       "community": 12,
       "norm_label": "derivecompagnodetailserver()"
@@ -2968,7 +2977,7 @@
       "label": "tournamentOptions()",
       "file_type": "code",
       "source_file": "src/lib/derive.ts",
-      "source_location": "L1064",
+      "source_location": "L1086",
       "id": "lib_derive_tournamentoptions",
       "community": 12,
       "norm_label": "tournamentoptions()"
@@ -2977,7 +2986,7 @@
       "label": "partnerOptions()",
       "file_type": "code",
       "source_file": "src/lib/derive.ts",
-      "source_location": "L1068",
+      "source_location": "L1090",
       "id": "lib_derive_partneroptions",
       "community": 12,
       "norm_label": "partneroptions()"
@@ -2986,7 +2995,7 @@
       "label": "yearOptions()",
       "file_type": "code",
       "source_file": "src/lib/derive.ts",
-      "source_location": "L1073",
+      "source_location": "L1095",
       "id": "lib_derive_yearoptions",
       "community": 12,
       "norm_label": "yearoptions()"
@@ -2995,7 +3004,7 @@
       "label": "normalizeCity()",
       "file_type": "code",
       "source_file": "src/lib/derive.ts",
-      "source_location": "L1082",
+      "source_location": "L1104",
       "id": "lib_derive_normalizecity",
       "community": 16,
       "norm_label": "normalizecity()"
@@ -3004,7 +3013,7 @@
       "label": "deriveWhoIsHere()",
       "file_type": "code",
       "source_file": "src/lib/derive.ts",
-      "source_location": "L1089",
+      "source_location": "L1111",
       "id": "lib_derive_derivewhoishere",
       "community": 16,
       "norm_label": "derivewhoishere()"
@@ -3384,7 +3393,7 @@
       "source_file": "src/lib/permissions.ts",
       "source_location": "L51",
       "id": "lib_permissions_permissionsfor",
-      "community": 12,
+      "community": 29,
       "norm_label": "permissionsfor()"
     },
     {
@@ -3690,7 +3699,7 @@
       "source_file": "src/lib/stats.ts",
       "source_location": "L86",
       "id": "lib_stats_fmtdate",
-      "community": 17,
+      "community": 15,
       "norm_label": "fmtdate()"
     },
     {
@@ -3735,7 +3744,7 @@
       "source_file": "src/lib/supabase.ts",
       "source_location": "L1",
       "id": "lib_supabase",
-      "community": 1,
+      "community": 7,
       "norm_label": "supabase.ts"
     },
     {
@@ -3744,7 +3753,7 @@
       "source_file": "src/lib/supabase.ts",
       "source_location": "L19",
       "id": "lib_supabase_supabase",
-      "community": 1,
+      "community": 7,
       "norm_label": "supabase"
     },
     {
@@ -3987,7 +3996,7 @@
       "source_file": "src/screens/Compagni.tsx",
       "source_location": "L1",
       "id": "screens_compagni",
-      "community": 8,
+      "community": 44,
       "norm_label": "compagni.tsx"
     },
     {
@@ -3996,7 +4005,7 @@
       "source_file": "src/screens/Compagni.tsx",
       "source_location": "L4",
       "id": "screens_compagni_compagniprops",
-      "community": 8,
+      "community": 44,
       "norm_label": "compagniprops"
     },
     {
@@ -4005,7 +4014,7 @@
       "source_file": "src/screens/Compagni.tsx",
       "source_location": "L10",
       "id": "screens_compagni_compagni",
-      "community": 8,
+      "community": 44,
       "norm_label": "compagni()"
     },
     {
@@ -4347,7 +4356,7 @@
       "source_file": "src/screens/Diario.tsx",
       "source_location": "L1",
       "id": "screens_diario",
-      "community": 5,
+      "community": 46,
       "norm_label": "diario.tsx"
     },
     {
@@ -4356,7 +4365,7 @@
       "source_file": "src/screens/Diario.tsx",
       "source_location": "L7",
       "id": "screens_diario_diarioprops",
-      "community": 5,
+      "community": 46,
       "norm_label": "diarioprops"
     },
     {
@@ -4365,7 +4374,7 @@
       "source_file": "src/screens/Diario.tsx",
       "source_location": "L15",
       "id": "screens_diario_igglyph",
-      "community": 5,
+      "community": 46,
       "norm_label": "igglyph()"
     },
     {
@@ -4374,7 +4383,7 @@
       "source_file": "src/screens/Diario.tsx",
       "source_location": "L26",
       "id": "screens_diario_searchglyph",
-      "community": 5,
+      "community": 46,
       "norm_label": "searchglyph()"
     },
     {
@@ -4383,7 +4392,7 @@
       "source_file": "src/screens/Diario.tsx",
       "source_location": "L37",
       "id": "screens_diario_sronly",
-      "community": 5,
+      "community": 46,
       "norm_label": "sronly"
     },
     {
@@ -4392,25 +4401,25 @@
       "source_file": "src/screens/Diario.tsx",
       "source_location": "L43",
       "id": "screens_diario_searchfield",
-      "community": 5,
+      "community": 46,
       "norm_label": "searchfield"
     },
     {
       "label": "EntryCard()",
       "file_type": "code",
       "source_file": "src/screens/Diario.tsx",
-      "source_location": "L99",
+      "source_location": "L102",
       "id": "screens_diario_entrycard",
-      "community": 5,
+      "community": 46,
       "norm_label": "entrycard()"
     },
     {
       "label": "Diario()",
       "file_type": "code",
       "source_file": "src/screens/Diario.tsx",
-      "source_location": "L189",
+      "source_location": "L192",
       "id": "screens_diario_diario",
-      "community": 5,
+      "community": 46,
       "norm_label": "diario()"
     },
     {
@@ -4419,7 +4428,7 @@
       "source_file": "src/screens/Home.tsx",
       "source_location": "L1",
       "id": "screens_home",
-      "community": 8,
+      "community": 43,
       "norm_label": "home.tsx"
     },
     {
@@ -4428,7 +4437,7 @@
       "source_file": "src/screens/Home.tsx",
       "source_location": "L17",
       "id": "screens_home_homefilters",
-      "community": 8,
+      "community": 43,
       "norm_label": "homefilters"
     },
     {
@@ -4437,7 +4446,7 @@
       "source_file": "src/screens/Home.tsx",
       "source_location": "L28",
       "id": "screens_home_homeprops",
-      "community": 8,
+      "community": 45,
       "norm_label": "homeprops"
     },
     {
@@ -4446,7 +4455,7 @@
       "source_file": "src/screens/Home.tsx",
       "source_location": "L43",
       "id": "screens_home_home",
-      "community": 8,
+      "community": 43,
       "norm_label": "home()"
     },
     {
@@ -4455,7 +4464,7 @@
       "source_file": "src/screens/Login.tsx",
       "source_location": "L1",
       "id": "screens_login",
-      "community": 2,
+      "community": 36,
       "norm_label": "login.tsx"
     },
     {
@@ -4464,7 +4473,7 @@
       "source_file": "src/screens/Login.tsx",
       "source_location": "L8",
       "id": "screens_login_mode",
-      "community": 2,
+      "community": 36,
       "norm_label": "mode"
     },
     {
@@ -4473,7 +4482,7 @@
       "source_file": "src/screens/Login.tsx",
       "source_location": "L10",
       "id": "screens_login_inputstyle",
-      "community": 2,
+      "community": 36,
       "norm_label": "inputstyle"
     },
     {
@@ -4482,7 +4491,7 @@
       "source_file": "src/screens/Login.tsx",
       "source_location": "L19",
       "id": "screens_login_seg",
-      "community": 2,
+      "community": 36,
       "norm_label": "seg()"
     },
     {
@@ -4491,7 +4500,7 @@
       "source_file": "src/screens/Login.tsx",
       "source_location": "L31",
       "id": "screens_login_features",
-      "community": 2,
+      "community": 36,
       "norm_label": "features"
     },
     {
@@ -4500,7 +4509,7 @@
       "source_file": "src/screens/Login.tsx",
       "source_location": "L37",
       "id": "screens_login_login",
-      "community": 2,
+      "community": 36,
       "norm_label": "login()"
     },
     {
@@ -4635,7 +4644,7 @@
       "source_file": "src/screens/Tornei.tsx",
       "source_location": "L1",
       "id": "screens_tornei",
-      "community": 8,
+      "community": 45,
       "norm_label": "tornei.tsx"
     },
     {
@@ -4644,7 +4653,7 @@
       "source_file": "src/screens/Tornei.tsx",
       "source_location": "L6",
       "id": "screens_tornei_torneiprops",
-      "community": 8,
+      "community": 45,
       "norm_label": "torneiprops"
     },
     {
@@ -4653,7 +4662,7 @@
       "source_file": "src/screens/Tornei.tsx",
       "source_location": "L15",
       "id": "screens_tornei_tornei",
-      "community": 22,
+      "community": 45,
       "norm_label": "tornei()"
     },
     {
@@ -4662,7 +4671,7 @@
       "source_file": "src/screens/Tornei.tsx",
       "source_location": "L72",
       "id": "screens_tornei_torneisection",
-      "community": 8,
+      "community": 45,
       "norm_label": "torneisection()"
     },
     {
@@ -4671,7 +4680,7 @@
       "source_file": "src/screens/Tornei.tsx",
       "source_location": "L93",
       "id": "screens_tornei_sectioncount",
-      "community": 8,
+      "community": 45,
       "norm_label": "sectioncount()"
     },
     {
@@ -4680,7 +4689,7 @@
       "source_file": "src/screens/Tornei.tsx",
       "source_location": "L111",
       "id": "screens_tornei_torneigrid",
-      "community": 8,
+      "community": 45,
       "norm_label": "torneigrid()"
     },
     {
@@ -4689,7 +4698,7 @@
       "source_file": "src/screens/Tornei.tsx",
       "source_location": "L122",
       "id": "screens_tornei_torneocardview",
-      "community": 8,
+      "community": 45,
       "norm_label": "torneocardview()"
     },
     {
@@ -5674,10 +5683,19 @@
       "norm_label": "decisioni e assunzioni (documentate)"
     },
     {
+      "label": "Correzione: le query di restringimento (ruolo 2)",
+      "file_type": "document",
+      "source_file": "docs/QA-ricerca-diario.md",
+      "source_location": "L130",
+      "id": "docs_qa_ricerca_diario_correzione_le_query_di_restringimento_ruolo_2",
+      "community": 37,
+      "norm_label": "correzione: le query di restringimento (ruolo 2)"
+    },
+    {
       "label": "Card del Diario raggiungibili da tastiera \u2014 come, e perch\u00e9 cos\u00ec",
       "file_type": "document",
       "source_file": "docs/QA-ricerca-diario.md",
-      "source_location": "L126",
+      "source_location": "L164",
       "id": "docs_qa_ricerca_diario_card_del_diario_raggiungibili_da_tastiera_come_e_perch\u00e9_cos\u00ec",
       "community": 37,
       "norm_label": "card del diario raggiungibili da tastiera \u2014 come, e perche cosi"
@@ -5686,25 +5704,43 @@
       "label": "Limitazioni note",
       "file_type": "document",
       "source_file": "docs/QA-ricerca-diario.md",
-      "source_location": "L146",
+      "source_location": "L184",
       "id": "docs_qa_ricerca_diario_limitazioni_note",
       "community": 37,
       "norm_label": "limitazioni note"
     },
     {
-      "label": "Da verificare a mano (fuori dalla portata di jsdom)",
+      "label": "Verifica nel browser vero (ruolo 2 \u2014 integrazione)",
       "file_type": "document",
       "source_file": "docs/QA-ricerca-diario.md",
-      "source_location": "L164",
-      "id": "docs_qa_ricerca_diario_da_verificare_a_mano_fuori_dalla_portata_di_jsdom",
+      "source_location": "L209",
+      "id": "docs_qa_ricerca_diario_verifica_nel_browser_vero_ruolo_2_integrazione",
       "community": 37,
-      "norm_label": "da verificare a mano (fuori dalla portata di jsdom)"
+      "norm_label": "verifica nel browser vero (ruolo 2 \u2014 integrazione)"
+    },
+    {
+      "label": "Difetto trovato: due pulsanti di cancellazione nel campo",
+      "file_type": "document",
+      "source_file": "docs/QA-ricerca-diario.md",
+      "source_location": "L232",
+      "id": "docs_qa_ricerca_diario_difetto_trovato_due_pulsanti_di_cancellazione_nel_campo",
+      "community": 37,
+      "norm_label": "difetto trovato: due pulsanti di cancellazione nel campo"
+    },
+    {
+      "label": "Da verificare a mano (resta fuori portata)",
+      "file_type": "document",
+      "source_file": "docs/QA-ricerca-diario.md",
+      "source_location": "L249",
+      "id": "docs_qa_ricerca_diario_da_verificare_a_mano_resta_fuori_portata",
+      "community": 37,
+      "norm_label": "da verificare a mano (resta fuori portata)"
     },
     {
       "label": "Follow-up (fuori scope, come da piano)",
       "file_type": "document",
       "source_file": "docs/QA-ricerca-diario.md",
-      "source_location": "L186",
+      "source_location": "L263",
       "id": "docs_qa_ricerca_diario_follow_up_fuori_scope_come_da_piano",
       "community": 37,
       "norm_label": "follow-up (fuori scope, come da piano)"
@@ -5713,7 +5749,7 @@
       "label": "Come far girare la suite",
       "file_type": "document",
       "source_file": "docs/QA-ricerca-diario.md",
-      "source_location": "L197",
+      "source_location": "L274",
       "id": "docs_qa_ricerca_diario_come_far_girare_la_suite",
       "community": 37,
       "norm_label": "come far girare la suite"
@@ -5924,6 +5960,15 @@
       "id": "supabase_readme_prossimi_passi",
       "community": 21,
       "norm_label": "prossimi passi"
+    },
+    {
+      "label": "Da verificare a mano (fuori dalla portata di jsdom)",
+      "file_type": "document",
+      "source_file": "docs/QA-ricerca-diario.md",
+      "source_location": "L164",
+      "community": 37,
+      "norm_label": "da verificare a mano (fuori dalla portata di jsdom)",
+      "id": "docs_qa_ricerca_diario_da_verificare_a_mano_fuori_dalla_portata_di_jsdom"
     },
     {
       "label": "package.json",
@@ -14879,6 +14924,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/derive.ts",
+      "source_location": "L683",
+      "weight": 1.0,
+      "source": "lib_derive",
+      "target": "lib_derive_entrycontextfields",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/derive.ts",
       "source_location": "L678",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -16343,6 +16398,17 @@
       "weight": 1.0,
       "source": "lib_derive_derivecompagno",
       "target": "lib_stats_streakof"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/derive.ts",
+      "source_location": "L694",
+      "weight": 1.0,
+      "source": "lib_derive_entryfields",
+      "target": "lib_derive_entrycontextfields",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -20344,6 +20410,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "docs/QA-ricerca-diario.md",
+      "source_location": "L249",
+      "weight": 1.0,
+      "source": "docs_qa_ricerca_diario_qa_ricerca_sul_diario",
+      "target": "docs_qa_ricerca_diario_da_verificare_a_mano_resta_fuori_portata",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/QA-ricerca-diario.md",
       "source_location": "L80",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -20374,11 +20450,41 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "docs/QA-ricerca-diario.md",
+      "source_location": "L209",
+      "weight": 1.0,
+      "source": "docs_qa_ricerca_diario_qa_ricerca_sul_diario",
+      "target": "docs_qa_ricerca_diario_verifica_nel_browser_vero_ruolo_2_integrazione",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/QA-ricerca-diario.md",
       "source_location": "L122",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "docs_qa_ricerca_diario_decisioni_e_assunzioni_documentate",
       "target": "docs_qa_ricerca_diario_card_del_diario_raggiungibili_da_tastiera_come_e_perch\u00e9_cos\u00ec"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/QA-ricerca-diario.md",
+      "source_location": "L130",
+      "weight": 1.0,
+      "source": "docs_qa_ricerca_diario_decisioni_e_assunzioni_documentate",
+      "target": "docs_qa_ricerca_diario_correzione_le_query_di_restringimento_ruolo_2",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/QA-ricerca-diario.md",
+      "source_location": "L232",
+      "weight": 1.0,
+      "source": "docs_qa_ricerca_diario_verifica_nel_browser_vero_ruolo_2_integrazione",
+      "target": "docs_qa_ricerca_diario_difetto_trovato_due_pulsanti_di_cancellazione_nel_campo",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -21442,5 +21548,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "5db3cdfdf939a9fe48d77c73ebf2311a7ed983a4"
+  "built_at_commit": "7fbe51b06237e9be31c04573d43c318d7c702ec1"
 }

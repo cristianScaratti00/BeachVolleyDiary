@@ -232,6 +232,28 @@ describe('Diario — riscontri di partita', () => {
     expect(within(cardOf('Riccione Cup')).getByText('vs Gialli/Blu')).toBeInTheDocument()
     expect(within(cardOf('Forlì Beach')).getByText('vs Neri/Grigi')).toBeInTheDocument()
   })
+
+  it('restringere con il nome del torneo non fa sparire il riscontro', async () => {
+    // Il caso che si scrive davvero: prima il torneo, poi chi c'era. La riga
+    // deve restare, altrimenti aggiungere una parola *toglie* la spiegazione.
+    const user = userEvent.setup()
+    renderDiario()
+    await type(user, 'riccione rossi')
+    expect(titles()).toEqual(['Riccione Cup'])
+    const card = cardOf('Riccione Cup')
+    expect(within(card).getByText('vs Rossi/Bianchi')).toBeInTheDocument()
+    expect(within(card).queryByText('vs Gialli/Blu')).not.toBeInTheDocument()
+  })
+
+  it('restringere con la fase non svuota la lista', async () => {
+    // `phase` sta solo sulla partita: se le si chiedessero tutti i token,
+    // 'riccione girone' non troverebbe niente pur esistendo quel girone.
+    const user = userEvent.setup()
+    renderDiario()
+    await type(user, 'riccione girone')
+    expect(titles()).toEqual(['Riccione Cup'])
+    expect(within(cardOf('Riccione Cup')).getByText('vs Gialli/Blu')).toBeInTheDocument()
+  })
 })
 
 // ---------------------------------------------------------------- nessun risultato

@@ -260,10 +260,33 @@ describe('deriveDiarySearch — riscontri di partita', () => {
     expect(ids(r.results[1].hits)).toEqual(['m3'])
   })
 
-  it('la partita risponde solo se soddisfa TUTTI i token', () => {
-    // 'riccione' non sta in nessuna partita: la voce compare (risponde il
-    // torneo) ma senza righe che promettano una spiegazione che non c'è.
-    expect(hitsFor('riccione rossi', 't1')).toEqual([])
+  it('alla partita chiede solo i token che il torneo non spiega già', () => {
+    // 'riccione' lo spiega il torneo, 'rossi' no: la riga da mostrare è m1, la
+    // partita contro Rossi/Bianchi. Chiedendo *tutti* i token alla singola
+    // partita non compariva nessuna riga, e il "perché" spariva proprio quando
+    // si aggiunge una parola per restringere.
+    expect(ids(hitsFor('riccione rossi', 't1'))).toEqual(['m1'])
+  })
+
+  it('restringere un torneo già trovato non lo fa sparire dalla lista', () => {
+    // `phase` vive solo sulla partita e non è fra i campi della voce: nessuna
+    // partita poteva soddisfare anche 'riccione', così 'riccione girone' non
+    // trovava NIENTE pur esistendo un girone a Riccione.
+    const r = deriveDiarySearch(entries(), 'riccione girone')
+    expect(resultIds(r.results)).toEqual(['t1'])
+    expect(ids(r.results[0].hits)).toEqual(['m2'])
+  })
+
+  it('se il torneo spiega tutti i token non promette righe di partita', () => {
+    expect(hitsFor('riccione 2025', 't1')).toEqual([])
+  })
+
+  it('token che arrivano da partite diverse: voce sì, righe no', () => {
+    // 'gialli' è di m2, 'rimonta' di m1: nessuna partita spiega entrambi, e
+    // mostrarne una sola mentirebbe sul perché.
+    const r = deriveDiarySearch(entries(), 'gialli rimonta')
+    expect(resultIds(r.results)).toEqual(['t1'])
+    expect(r.results[0].hits).toEqual([])
   })
 
   it('porta in pagina una voce che risponde solo da una partita', () => {

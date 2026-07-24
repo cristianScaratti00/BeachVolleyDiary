@@ -677,11 +677,21 @@ export interface DiarySearchData {
   total: number   // voci totali del diario, per il sottotitolo
 }
 
+// Ciò che la voce spiega *da sé*: identità del torneo, non della singola partita.
+// Un token che risponde qui è già spiegato dalla card (titolo, badge, data, recap)
+// e non va chiesto anche alle partite.
+function entryContextFields(e: DiaryEntry): string[] {
+  const s = e.search
+  return [s.title, s.place, s.when, s.partner, s.captions].filter(Boolean)
+}
+
 // I campi cercabili di una voce, come array: OR fra i campi, ma ognuno resta
-// separato dagli altri (vedi `matchesAllTokens`).
+// separato dagli altri (vedi `matchesAllTokens`). `opponents` e `notes` sono
+// l'aggregato di tutte le partite: servono a far comparire la voce anche quando
+// i token arrivano da partite diverse.
 function entryFields(e: DiaryEntry): string[] {
   const s = e.search
-  return [s.title, s.place, s.when, s.partner, s.opponents, s.notes, s.captions].filter(Boolean)
+  return [...entryContextFields(e), s.opponents, s.notes].filter(Boolean)
 }
 
 // Selettore unico della ricerca sul Diario, gemello di `deriveTorneiSections`:
@@ -698,10 +708,22 @@ export function deriveDiarySearch(entries: DiaryEntry[], query: string): DiarySe
   }
   const results: DiarySearchResult[] = []
   entries.forEach((entry) => {
-    // I riscontri di partita si calcolano sempre: sono il "perché" da mostrare
-    // sotto la voce, anche quando a rispondere è già il torneo.
-    const hits = entry.matches.filter((m) => matchesAllTokens(tokens, m.search))
-    if (matchesAllTokens(tokens, entryFields(entry)) || hits.length > 0) results.push({ entry, hits })
+    // Alla partita si chiedono solo i token che il torneo non spiega già.
+    // Chiederglieli *tutti* rompeva la ricerca in due modi, entrambi su query
+    // che restringono un torneo già trovato:
+    //   - «riccione girone» non trovava NIENTE, pur esistendo un girone a
+    //     Riccione: `phase` vive solo sulla partita e non compare fra i campi
+    //     della voce, così nessuna partita poteva soddisfare anche «riccione»
+    //     e la voce spariva del tutto;
+    //   - «riccione rossi» mostrava la voce senza la riga della partita contro
+    //     Rossi — cioè proprio il "perché" che la ricerca promette, perso
+    //     appena si aggiunge una parola per restringere.
+    const context = entryContextFields(entry)
+    const residual = tokens.filter((t) => !matchesAllTokens([t], context))
+    // Residuo vuoto = risponde il torneo per intero: nessuna riga da mostrare,
+    // che è ciò che rende leggibile una ricerca per nome o per data.
+    const hits = residual.length ? entry.matches.filter((m) => matchesAllTokens(residual, m.search)) : []
+    if (hits.length > 0 || matchesAllTokens(tokens, entryFields(entry))) results.push({ entry, hits })
   })
   return { query, active: true, results, total: entries.length }
 }

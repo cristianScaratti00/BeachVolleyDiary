@@ -48,8 +48,11 @@ const searchField: CSSProperties = {
   font: "600 14px 'Nunito Sans'",
   background: '#fff',
   color: '#1B2A4A',
-  // Toglie la crocetta nativa di WebKit su input[type=search]: il reset è il
-  // nostro `<button>`, che esiste anche dove il browser non ne offre uno.
+  // Normalizza la resa nativa del campo (bordi/altezza di input[type=search]).
+  // NON basta a togliere la crocetta di WebKit: quella è un pseudo-elemento e
+  // si spegne in index.css (`::-webkit-search-cancel-button`), altrimenti il
+  // campo mostra due pulsanti di cancellazione. Il reset è il nostro `<button>`,
+  // che esiste anche dove il browser non ne offre uno.
   appearance: 'none',
   WebkitAppearance: 'none',
 }

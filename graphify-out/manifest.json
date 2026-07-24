@@ -205,8 +205,8 @@
     "semantic_hash": ""
   },
   "src/lib/derive.ts": {
-    "mtime": 1784919652.7234704,
-    "ast_hash": "c47bece078cdaa271921e12431cd741e",
+    "mtime": 1784920064.8359365,
+    "ast_hash": "69735ab417432545acaf646703bccf6b",
     "semantic_hash": ""
   },
   "src/lib/derive.wrapped.test.ts": {
@@ -270,8 +270,8 @@
     "semantic_hash": ""
   },
   "src/screens/Diario.tsx": {
-    "mtime": 1784919473.862195,
-    "ast_hash": "2c8c0a3580c4981efc42cd3b6d030f8f",
+    "mtime": 1784920422.0568626,
+    "ast_hash": "bcf39bcfef560253370353527839849c",
     "semantic_hash": ""
   },
   "src/screens/Home.tsx": {
@@ -475,8 +475,8 @@
     "semantic_hash": ""
   },
   "src/lib/derive.diary.test.ts": {
-    "mtime": 1784919658.6323583,
-    "ast_hash": "e04dcbfdc73b42a98a3811dd50b2b333",
+    "mtime": 1784920114.576736,
+    "ast_hash": "c69fcc52f1158de4247cdf8a296980c4",
     "semantic_hash": ""
   },
   "src/lib/search.test.ts": {
@@ -500,8 +500,8 @@
     "semantic_hash": ""
   },
   "src/screens/Diario.test.tsx": {
-    "mtime": 1784919507.8042605,
-    "ast_hash": "e33d88ecb992bed4880d8f1101b957c1",
+    "mtime": 1784920144.3789093,
+    "ast_hash": "762170686f9aaf8782bcf2c8e266053c",
     "semantic_hash": ""
   },
   "supabase/migrations/20260724120000_checkins_who_is_here.sql": {
@@ -515,8 +515,8 @@
     "semantic_hash": ""
   },
   "docs/QA-ricerca-diario.md": {
-    "mtime": 1784919683.0580025,
-    "ast_hash": "a9ac162f980d61ac8f42c5f5f920960f",
+    "mtime": 1784920572.9386737,
+    "ast_hash": "d16d0b914fba4328f349e75184cb7f87",
     "semantic_hash": ""
   }
 }
