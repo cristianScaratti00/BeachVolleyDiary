@@ -25,8 +25,8 @@ npm run preview   # anteprima della build
   punti fatti vs subiti, distribuzione piazzamenti, win rate per fase e per compagno,
   tornei recenti. Filtri per compagno e stagione. Aggregazione server-side
   (RPC `dashboard_stats`) con fallback al calcolo client.
-- **Tornei** — elenco raggruppato per formato con filtro a chip, evidenza del torneo in corso e
-  di quelli imminenti; dettaglio con record, set, differenziale, partite e foto.
+- **Tornei** — i tornei da oggi in poi restano in cima sotto "Prossimi tornei", i passati sono
+  raggruppati per formato con filtro a chip; dettaglio con record, set, differenziale, partite e foto.
 - **Chi c'è oggi** — check-in per città + giorno con flag "cerco compagno"; in reciprocità si
   vedono gli altri presenti oggi (RPC `who_is_here`) e li si aggiunge come compagno sul posto.
 - **Compagni** — statistiche per compagno + dettaglio. Un compagno può essere collegato a un
@@ -39,9 +39,12 @@ npm run preview   # anteprima della build
   linguistico: è una macchina a stati scriptata (`src/screens/CreaChat.tsx`).
 - **Profilo** — nome visualizzato, password, foto profilo (bucket `avatars` + RPC `set_avatar`), logout.
 - **CRUD completo** — tornei (form completo, creazione rapida o assistente), partite con punteggi
-  per set, foto e compagni, tramite bottom-sheet modali. Compagno nuovo creabile al volo dalla partita.
+  per set, foto e compagni, tramite bottom-sheet modali. Un compagno nuovo si crea al volo dal
+  torneo ("＋ Nuovo compagno"), in tutti e tre i percorsi di creazione; la partita eredita il
+  compagno del torneo.
 - **Persistenza** — Postgres su Supabase con Row Level Security per-utente; client tipizzato in
-  `src/lib/supabase.ts`, mutazioni in `useDiary`. Foto su Storage privato con URL firmati.
+  `src/lib/supabase.ts`, mutazioni in `useDiary`. Foto dei tornei su Storage privato
+  (bucket `tournament-photos`) con URL firmati.
 - **Piani e permessi** — `limits.ts` (cosa sblocca ciascun piano) + `permissions.ts` ("posso fare X
   adesso?"), con enforcement autoritativo lato DB. **Oggi sospesi**: `PLANS_ENABLED = false`
   (`src/lib/limits.ts`), quindi ogni utente ha tutto sbloccato.
