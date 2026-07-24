@@ -10,7 +10,7 @@ normalizzazione — smette di essere l'unica idea di "dove ho giocato": nasce
 |---|---|
 | Ambito | `supabase/migrations/20260725120000_venues.sql` (tabella `venues`, FK `tournaments.venue_id`, RLS, backfill, trigger `sync_tournament_city`, RPC `tornei_list`/`torneo_detail`, `seed_demo`), `src/lib/database.types.ts`, `src/hooks/useDiary.ts` (`resolveVenue`, dual-write, `mergeVenues`), `src/lib/derive.venues.server.test.ts` |
 | Ambiente | Node 22 · Vitest 3.2.7 · jsdom 26 · Testing Library React 16 |
-| Suite | 211 test: 207 verdi + 4 `skip` preesistenti (difetti noti di Tornei). **+11 nuovi** in `derive.venues.server.test.ts` (i 36 di `derive.venues.test.ts` sono del ruolo 1) |
+| Suite | Dopo il merge con `main`: **356 test — 352 verdi + 4 `skip`** preesistenti (difetti noti di Tornei). Di questi, **+11** in `derive.venues.server.test.ts` e **+36** in `derive.venues.test.ts` sono dei luoghi, **+5** in `derive.mappa.test.ts` coprono l'incastro con la mappa (§ *Incontro con la mappa delle conquiste*) |
 | Comandi | `npm test` · `npm run typecheck` · `npm run typecheck:test` · `npm run build` |
 | DB | Migration **applicate** al progetto `whgotqljwmtsoulwbzyf` via MCP `apply_migration` (`venues`, `venues_seed_demo`) |
 
@@ -135,6 +135,45 @@ e poi elimini il duplicato, autorizzata al solo proprietario di `p_from`. È
 strettamente migliore di quello che il proprietario può già fare oggi (spostare
 invece di orfanare), al costo di una funzione `definer` in più.
 
+## Incontro con la mappa delle conquiste (merge di `main`)
+
+Nel frattempo `main` ha acquisito **"La mappa delle conquiste"**
+(`docs/QA-mappa-conquiste.md`): sagoma dell'Italia in SVG, un pin per città,
+geocoding da un gazetteer committato (`src/lib/geo.ts`) — zero dipendenze e zero
+rete. Le due feature rispondono alla stessa domanda ("dove ho giocato?") da due
+lati, quindi il merge non è stato solo testuale. Cosa è stato deciso:
+
+- **La mappa continua a geocodificare `tournaments.city`.** È esattamente ciò che
+  il dual-write garantisce: `citySnapshot` scrive la città del luogo scelto
+  accanto a `venue_id`, quindi un torneo agganciato a "Bagno 26 · Riccione" ha
+  `city = 'Riccione'` e il pin cade dove deve. Nessuna riga della mappa è stata
+  riscritta per i luoghi.
+- **Il pin resta per CITTÀ, non per luogo.** Due bagni della stessa spiaggia sono
+  un pin solo: a 1 unità di viewBox ≈ 3 km non si distinguerebbero, e
+  «conquistare Riccione» è la frase che quella mappa vuole dire. Il singolo posto
+  ha già la sua mappa a zoom di strada nel dettaglio torneo.
+- **Le coordinate del luogo sono un RIPESCAGGIO, non la fonte preferita**
+  (`puntoDelGruppo` in `derive.mappa.ts`): prima il gazetteer, poi — solo se non
+  conosce quella città — le coordinate salvate. Il gazetteer è una tabella
+  curata; le coordinate di un luogo sono dati inseriti a mano e possono essere
+  sbagliate. Così un pin già corretto **non si sposta mai** per una posizione
+  salvata male, e le coordinate possono solo *aggiungere* città alla mappa (una
+  spiaggia presa col GPS che il gazetteer non conosce smette di finire in "Non
+  ancora sulla mappa"). Fissato da 5 test in `derive.mappa.test.ts`, incluso il
+  caso `0, 0` (Golfo di Guinea) che non deve far sparire Rimini.
+- **`CityInput` sopravvive dentro `VenuePicker`.** Il `<datalist>` di
+  `CITTA_SUGGERITE` era il rimedio ai refusi quando la città si digitava a ogni
+  torneo; ora è il campo "Città" del luogo nuovo — si scrive **una volta per
+  posto** e quella grafia resta in catalogo per tutti. Il suggerimento vale di
+  più, non di meno. Stesso trattamento nell'assistente (step `venue`/`venueName`).
+- **`cleanCity` di `main` si applica anche al catalogo.** Le chiavi uniche del DB
+  sono `lower(btrim(…))` e non collassano gli spazi interni: senza la ripulitura,
+  "Bagno  26" e "Bagno 26" sarebbero due righe per lo stesso posto.
+- **Due mappe, due dipendenze diverse, di proposito.** La mappa delle conquiste
+  non fa rete; quella del luogo scarica tile da `tile.openstreetmap.org` e si
+  porta dietro Leaflet — per questo è in `lazy()` e compare solo per i tornei con
+  coordinate (chunk misurato: 151 KB / 44 KB gz, fuori dal bundle principale).
+
 ## Non fatto, di proposito
 
 - **`saveVenue` / `deleteVenue` in `useDiary`** (piano §3): nessun chiamante.
@@ -163,9 +202,14 @@ passaggi restano da fare a schermo con `npm run dev`:
    la sua `city`.
 6. **"Unisci a…"** su `cormank` → `cormano`: i tornei passano, il doppione
    sparisce, la storia del luogo superstite li conta tutti.
-7. **Mappa**: le tile arrivano da `tile.openstreetmap.org` — è **l'unica**
-   chiamata di rete verso terzi della feature (la ricerca del luogo resta
-   offline: GPS o coordinate incollate, nessun geocoding).
+7. **Mappa del luogo**: le tile arrivano da `tile.openstreetmap.org` — è
+   **l'unica** chiamata di rete verso terzi della feature (la ricerca del luogo
+   resta offline: GPS o coordinate incollate, nessun geocoding).
+8. **Mappa delle conquiste** (vista "Mappa" dentro Tornei): un torneo creato
+   scegliendo un luogo la cui città è in `CITTA_SUGGERITE` deve comparire come
+   pin; uno con una città inventata ma con coordinate salvate deve comparire
+   **lo stesso** (ripescaggio); uno con città inventata e senza coordinate resta
+   in "Non ancora sulla mappa".
 
 ## Follow-up
 
@@ -176,6 +220,13 @@ passaggi restano da fare a schermo con `npm run dev`:
   oggi escluso di proposito, manderebbe i nomi dei luoghi a un servizio terzo.
 - `deriveWrapped` conta ora i luoghi con `venueKeyOf`, ma il resto delle
   statistiche per-luogo (miglior spiaggia, win rate per campo) è tutto da fare.
+- **Pin per luogo invece che per città** nella mappa delle conquiste: oggi
+  impossibile alla scala dell'Italia (1 unità ≈ 3 km), diventerebbe sensato con
+  uno zoom regionale — che è una feature a sé, non una rifinitura.
+- **Coordinate mancanti sui luoghi del backfill**: le voci nate dalle vecchie
+  città non hanno `lat`/`lng`, quindi il dettaglio torneo non mostra la mappa
+  finché qualcuno non le compila. Un'azione "prendi le coordinate dal gazetteer"
+  le riempirebbe in blocco, e a differenza del geocoding online non costa rete.
 
 ## Come far girare la suite
 

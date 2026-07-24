@@ -200,7 +200,9 @@ const partnerObj = (data: DiaryData, id: string): Partner | undefined => data.pa
 const partnerName = (data: DiaryData, id: string | null): string => (id ? partnerObj(data, id)?.name || 'Nessuno' : 'Nessuno')
 
 // Placement-driven accent dot (replaces the old emoji tile).
-const dotForRank = (r: number): string => (r === 1 ? '#FF6B35' : r <= 3 ? '#F7A883' : 'rgba(27,42,74,.25)')
+// Esportata perché la Mappa delle conquiste colori i pin con la STESSA regola
+// dei pallini delle card: un solo posto dove si decide cosa vuol dire "arancio".
+export const dotForRank = (r: number): string => (r === 1 ? '#FF6B35' : r <= 3 ? '#F7A883' : 'rgba(27,42,74,.25)')
 const dotFor = (t: Tournament): string => dotForRank(placementRank(t.placement))
 
 // ---------------------------------------------------------------------------

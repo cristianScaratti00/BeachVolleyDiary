@@ -7,20 +7,34 @@
 // Si falsifica solo `Date`, non `setTimeout`, così user-event resta normale.
 // ============================================================================
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { useState } from 'react'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import Tornei from './Tornei'
-import { makeTorneo, makeList, TODAY } from '../test/factories'
+import type { TorneiVista } from './Tornei'
+import { makeTorneo, makeList, makeMappaData, makeMappaPin, TODAY } from '../test/factories'
 import { expectNoA11yViolations } from '../test/axe'
 
 const noop = () => {}
 
-function renderTornei(tornei = [makeTorneo()], over: Partial<Parameters<typeof Tornei>[0]> = {}) {
+// La vista Lista/Mappa è controllata da App, perché deve sopravvivere all'andata
+// e ritorno sul dettaglio torneo (che smonta questa schermata). Nei test la
+// tiene questo guscio minimo, così il selettore si clicca come farebbe un utente.
+type TorneiProps = Parameters<typeof Tornei>[0]
+type HarnessProps = Omit<TorneiProps, 'vista' | 'onVista'> & { vistaIniziale?: TorneiVista }
+
+function TorneiConVista({ vistaIniziale = 'lista', ...rest }: HarnessProps) {
+  const [vista, setVista] = useState<TorneiVista>(vistaIniziale)
+  return <Tornei {...rest} vista={vista} onVista={setVista} />
+}
+
+function renderTornei(tornei = [makeTorneo()], over: Partial<HarnessProps> = {}) {
   const onOpenTorneo = vi.fn()
   const onNewTorneo = vi.fn()
   const view = render(
-    <Tornei
+    <TorneiConVista
       list={makeList(tornei)}
+      mappa={makeMappaData()}
       onOpenTorneo={onOpenTorneo}
       onNewTorneo={onNewTorneo}
       onQuickTorneo={noop}
@@ -31,6 +45,100 @@ function renderTornei(tornei = [makeTorneo()], over: Partial<Parameters<typeof T
   )
   return { ...view, onOpenTorneo, onNewTorneo }
 }
+
+// ---------------------------------------------------------------- vista
+describe('Tornei — selettore di vista Lista/Mappa', () => {
+  const conMappa = { mappa: makeMappaData({ pins: [makeMappaPin({ city: 'Cervia', tier: 'vinto' })] }) }
+
+  it('parte dalla lista', () => {
+    renderTornei([makeTorneo()], conMappa)
+    expect(screen.getByRole('button', { name: 'Lista' })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.queryByRole('img')).not.toBeInTheDocument()
+  })
+
+  it('il selettore sono `button` veri con lo stato annunciato', () => {
+    renderTornei([makeTorneo()], conMappa)
+    const gruppo = screen.getByRole('group', { name: 'Come vedere i tornei' })
+    expect(within(gruppo).getAllByRole('button')).toHaveLength(2)
+  })
+
+  it('la chip Mappa mostra quante città ci sono', () => {
+    renderTornei([makeTorneo()], conMappa)
+    expect(screen.getByRole('button', { name: 'Mappa · 1' })).toBeInTheDocument()
+  })
+
+  it('senza città la chip resta senza contatore', () => {
+    renderTornei([makeTorneo()], { mappa: makeMappaData() })
+    expect(screen.getByRole('button', { name: 'Mappa' })).toBeInTheDocument()
+  })
+
+  it('passando a Mappa compare il disegno e sparisce la lista', async () => {
+    const user = userEvent.setup()
+    renderTornei([makeTorneo({ name: 'Rimini Open' })], conMappa)
+    await user.click(screen.getByRole('button', { name: /^Mappa/ }))
+    expect(screen.getByRole('img')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Apri il torneo Rimini Open' })).not.toBeInTheDocument()
+  })
+
+  it('si torna alla lista', async () => {
+    const user = userEvent.setup()
+    renderTornei([makeTorneo({ name: 'Rimini Open' })], conMappa)
+    await user.click(screen.getByRole('button', { name: /^Mappa/ }))
+    await user.click(screen.getByRole('button', { name: 'Lista' }))
+    expect(screen.getByRole('button', { name: 'Apri il torneo Rimini Open' })).toBeInTheDocument()
+  })
+
+  it('dalla mappa si apre un torneo con la stessa callback della lista', async () => {
+    const user = userEvent.setup()
+    const pin = makeMappaPin({ city: 'Cervia', tier: 'vinto' })
+    const { onOpenTorneo } = renderTornei([makeTorneo()], {
+      mappa: makeMappaData({ pins: [pin] }),
+    })
+    await user.click(screen.getByRole('button', { name: /^Mappa/ }))
+    await user.click(screen.getByRole('button', { name: /Cervia/ }))
+    await user.click(screen.getByRole('button', { name: new RegExp(`Apri il torneo ${pin.tornei[0].name}`) }))
+    expect(onOpenTorneo).toHaveBeenCalledExactlyOnceWith(pin.tornei[0].id)
+  })
+
+  it('senza tornei il selettore non compare: non c\'è niente da mappare', () => {
+    renderTornei([], conMappa)
+    expect(screen.queryByRole('group', { name: 'Come vedere i tornei' })).not.toBeInTheDocument()
+  })
+
+  // ---- vista controllata da App -------------------------------------------
+  // Aprire un torneo dalla mappa porta su `screen === 'torneo'`, che smonta
+  // questa schermata: se la vista fosse stata locale, tornare indietro avrebbe
+  // riportato sulla lista chi era partito dalla mappa. Questi due test tengono
+  // fermo il contratto che lo impedisce.
+  it('montata su "mappa" apre già sulla mappa (è così che si torna dal dettaglio)', () => {
+    renderTornei([makeTorneo({ name: 'Rimini Open' })], { ...conMappa, vistaIniziale: 'mappa' })
+    expect(screen.getByRole('img')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /^Mappa/ })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.queryByRole('button', { name: 'Apri il torneo Rimini Open' })).not.toBeInTheDocument()
+  })
+
+  it('la vista non cambia da sé: il click la chiede e basta', async () => {
+    const user = userEvent.setup()
+    const onVista = vi.fn()
+    render(
+      <Tornei
+        list={makeList([makeTorneo({ name: 'Rimini Open' })])}
+        {...conMappa}
+        vista="lista"
+        onVista={onVista}
+        onOpenTorneo={noop}
+        onNewTorneo={noop}
+        onQuickTorneo={noop}
+        onAssistant={noop}
+        canAssistant
+      />,
+    )
+    await user.click(screen.getByRole('button', { name: /^Mappa/ }))
+    expect(onVista).toHaveBeenCalledExactlyOnceWith('mappa')
+    // Nessuno stato interno: finché App non aggiorna la prop, resta la lista.
+    expect(screen.getByRole('button', { name: 'Apri il torneo Rimini Open' })).toBeInTheDocument()
+  })
+})
 
 // Titoli di sezione nell'ordine in cui compaiono nel DOM.
 const sectionTitles = () =>
@@ -234,9 +342,12 @@ describe('Tornei — filtro a chip', () => {
     await user.click(screen.getByRole('button', { name: '4vs4' }))
     expect(sectionTitles()).toEqual(['Prossimi tornei1 torneo'])
 
+    // Stesso componente, prop diverse: il filtro per formato è stato locale e
+    // deve sopravvivere al rerender, o il test non proverebbe niente.
     rerender(
-      <Tornei
+      <TorneiConVista
         list={makeList(dati.filter((t) => t.format !== '4vs4'))}
+        mappa={makeMappaData()}
         onOpenTorneo={onOpenTorneo}
         onNewTorneo={noop}
         onQuickTorneo={noop}
@@ -358,11 +469,11 @@ describe('Tornei — tastiera e accessibilità', () => {
     expect(sectionTitles()).toEqual(['3vs31 torneo'])
   })
 
-  it('l\'ordine di tabulazione è filtro → card, nell\'ordine visivo', async () => {
+  it('l\'ordine di tabulazione è vista → filtro → card, nell\'ordine visivo', async () => {
     const user = userEvent.setup()
     renderTornei(dati)
     const stops: (string | null)[] = []
-    for (let i = 0; i < 7; i += 1) {
+    for (let i = 0; i < 9; i += 1) {
       await user.tab()
       const el = document.activeElement as HTMLElement | null
       stops.push(el?.getAttribute('aria-label') ?? el?.textContent ?? null)
@@ -370,7 +481,10 @@ describe('Tornei — tastiera e accessibilità', () => {
     // Le azioni dell'header ("✨ Assistente", "⚡ Rapido", "＋ Nuovo torneo")
     // non compaiono: sono `div`, non sono raggiungibili da tastiera — difetto #4
     // di docs/QA-tornei-formati.md, preesistente in ui.tsx.
+    // Il selettore di vista (Lista/Mappa) apre la pagina: è la scelta più a
+    // monte, e la sua posizione nel DOM coincide con quella visiva.
     expect(stops).toEqual([
+      'Lista', 'Mappa',
       'Tutti', '2vs2', '3vs3', '4vs4',
       'Apri il torneo Riccione Cup',
       'Apri il torneo Rimini Open',
@@ -435,8 +549,9 @@ describe('Tornei — difetti noti (vedi docs/QA-tornei-formati.md)', () => {
     const { rerender, onOpenTorneo } = renderTornei(dati)
     const render4vs4 = (tornei: typeof dati) =>
       rerender(
-        <Tornei
+        <TorneiConVista
           list={makeList(tornei)}
+          mappa={makeMappaData()}
           onOpenTorneo={onOpenTorneo}
           onNewTorneo={noop}
           onQuickTorneo={noop}

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties, ReactNode, ChangeEvent, FormEvent } from 'react'
 import { CATEGORIES, FORMATS, SURFACES, PHASES } from '../lib/db.enums'
 import { MONTHS_SHORT } from '../lib/theme'
+import { CITTA_SUGGERITE } from '../lib/geo'
 import type {
   AnyForm, Option, GuidedMatch,
   Category, Format, Surface, Phase, Placement,
@@ -206,7 +207,7 @@ export default function CreaChat({ wide, partners, venues, onCreate, onDone, onE
         break
       case 'venue':
         if (venues.length) await say('Dove avete giocato? (puoi saltare)')
-        else await say('Dove avete giocato? Scrivi il nome del posto — o salta.')
+        else await say('Dove avete giocato? Scrivi la località — o salta.')
         break
       case 'venueName':
         await say('Come si chiama il posto? 📍')
@@ -746,11 +747,17 @@ function Dock(props: DockProps) {
         </div>
       )
 
+    // Il luogo nuovo digitato qui vale anche da città (la chat chiede una riga
+    // sola), e quella stringa diventa lo snapshot `tournaments.city` che la
+    // mappa geocodifica: quindi gli stessi suggerimenti degli altri due form.
+    // È la terza porta da cui entra un luogo, e un refuso qui costa quanto
+    // altrove — il torneo finisce in "Non ancora sulla mappa" invece che sulla
+    // costa giusta.
     case 'venue':
       // Senza luoghi salvati una lista di chip sarebbe vuota: si chiede il nome
       // (stesso ragionamento dello step compagno).
       if (!venues.length)
-        return <TextDock value={text} setValue={setText} placeholder="es. Bagno 26 Riccione" skipLabel="Salta" onSkip={h.skipVenue} onSubmit={() => h.submitVenueName(text)} />
+        return <TextDock value={text} setValue={setText} placeholder="es. Riccione" suggerimenti={CITTA_SUGGERITE} skipLabel="Salta" onSkip={h.skipVenue} onSubmit={() => h.submitVenueName(text)} />
       return (
         <ChipsDock>
           {venues.map((v) => (
@@ -762,7 +769,7 @@ function Dock(props: DockProps) {
       )
 
     case 'venueName':
-      return <TextDock value={text} setValue={setText} placeholder="es. Bagno 26 Riccione" onSubmit={() => h.submitVenueName(text)} />
+      return <TextDock value={text} setValue={setText} placeholder="es. Riccione" suggerimenti={CITTA_SUGGERITE} onSubmit={() => h.submitVenueName(text)} />
 
     case 'category':
       return (
@@ -862,13 +869,19 @@ const fieldStyle: CSSProperties = {
   background: '#fff',
 }
 
-function TextDock({ value, setValue, placeholder, onSubmit, onSkip, skipLabel }: {
+// Id del `<datalist>` dei suggerimenti. Fisso perché nella chat c'è un solo
+// input alla volta: lo step corrente decide cosa montare, quindi due liste non
+// possono coesistere.
+const SUGGERIMENTI_ID = 'crea-suggerimenti'
+
+function TextDock({ value, setValue, placeholder, onSubmit, onSkip, skipLabel, suggerimenti }: {
   value: string
   setValue: (v: string) => void
   placeholder: string
   onSubmit: () => void
   onSkip?: () => void
   skipLabel?: string
+  suggerimenti?: readonly string[]
 }) {
   const submit = (e: FormEvent) => {
     e.preventDefault()
@@ -882,7 +895,22 @@ function TextDock({ value, setValue, placeholder, onSubmit, onSkip, skipLabel }:
         </ChipsDock>
       )}
       <form onSubmit={submit} style={{ display: 'flex', gap: 8 }}>
-        <input autoFocus value={value} onChange={(e: ChangeEvent<HTMLInputElement>) => setValue(e.target.value)} placeholder={placeholder} style={{ ...fieldStyle, flex: 1 }} />
+        <input
+          autoFocus
+          value={value}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => setValue(e.target.value)}
+          placeholder={placeholder}
+          // Suggerisce senza vincolare: il campo resta testo libero, come lo
+          // schema (`tournaments.city` è `text` senza CHECK).
+          list={suggerimenti ? SUGGERIMENTI_ID : undefined}
+          autoComplete="off"
+          style={{ ...fieldStyle, flex: 1 }}
+        />
+        {suggerimenti && (
+          <datalist id={SUGGERIMENTI_ID}>
+            {suggerimenti.map((s) => <option key={s} value={s} />)}
+          </datalist>
+        )}
         <SendBtn onClick={onSubmit} disabled={!value.trim() && !onSkip} />
       </form>
     </div>

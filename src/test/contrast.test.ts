@@ -108,3 +108,41 @@ describe('contrasto — riga "torneo qui" del luogo', () => {
     expect(contrast(ACCENT_FG, PAGE)).toBe(4.39)
   })
 })
+
+// ============================================================================
+// Mappa delle conquiste — perché il contorno dei pin non è una rifinitura.
+//
+// Su una card il pallino da 8px sta accanto a un'etichetta testuale: è
+// decorativo, e WCAG 1.4.11 non si applica. Sulla mappa lo stesso colore è
+// l'UNICO portatore di "qui sono uscito ai gironi" — quindi 1.4.11 si applica
+// davvero, e nessuno dei tre riempimenti lo supera. Il segnale portante è il
+// CONTORNO navy, che invece lo supera abbondantemente.
+//
+// I tre rapporti bocciati sono fissati a numero apposta: se qualcuno "pulisce"
+// il contorno dei pin come rumore visivo, resta questo file a dire che quel
+// contorno era l'unica cosa conforme.
+// ============================================================================
+const TERRA = '#F2F0EC' // fondo della terraferma disegnata (src/screens/Mappa.tsx)
+
+describe('contrasto — pin della mappa', () => {
+  it('il contorno navy dei pin supera la soglia per gli elementi non testuali', () => {
+    // 12.49:1 — è questo a rendere visibile ogni pin, indipendentemente dal
+    // riempimento. È un REQUISITO di Mappa.tsx, non una scelta estetica.
+    expect(contrast(INK, TERRA)).toBeGreaterThanOrEqual(AA_NON_TEXT)
+  })
+
+  it('nessuno dei tre riempimenti basterebbe da solo', () => {
+    expect(contrast('#FF6B35', TERRA)).toBe(2.49) // vinto
+    expect(contrast('#F7A883', TERRA)).toBe(1.7) // podio
+    expect(contrast('rgba(27,42,74,.25)', TERRA)).toBe(1.63) // giocato
+    // Tutti e tre sotto 3:1. Il colore resta un canale ridondante: forma
+    // (pieno-con-punto / pieno / vuoto) e testo portano la stessa informazione.
+    ;[2.49, 1.7, 1.63].forEach((r) => expect(r).toBeLessThan(AA_NON_TEXT))
+  })
+
+  it('la terraferma si distingue dal fondo bianco della card solo di poco', () => {
+    // 1.14:1 — la sagoma è decorativa: nessun fatto dipende dal vederla, e
+    // infatti il riassunto testuale dell'SVG e la lista non la citano mai.
+    expect(contrast(TERRA, WHITE)).toBe(1.14)
+  })
+})

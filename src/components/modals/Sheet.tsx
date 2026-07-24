@@ -1,4 +1,5 @@
-import type { CSSProperties, ReactNode } from 'react'
+import type { CSSProperties, ChangeEvent, ReactNode } from 'react'
+import { CITTA_SUGGERITE } from '../../lib/geo'
 
 interface SheetProps {
   maxWidth?: number
@@ -35,6 +36,43 @@ export function Label({ children, mb = 6 }: { children: ReactNode; mb?: number }
 
 export const inputStyle: CSSProperties = { width: '100%', border: '1px solid rgba(27,42,74,.16)', borderRadius: 11, padding: '12px 14px', font: "700 14px 'Nunito Sans'", background: '#fff' }
 export const selectStyle: CSSProperties = { ...inputStyle, cursor: 'pointer' }
+
+// Campo città con suggerimenti. Vive dentro al `VenuePicker` (la città del
+// luogo nuovo), che a sua volta sta in TorneoModal e QuickTorneoModal — mai
+// aperti insieme, quindi l'id del `<datalist>` può restare fisso.
+//
+// `<datalist>` e non un `<select>`: la città resta testo libero (lo schema non
+// ha CHECK e la gente gioca anche dove il gazetteer non arriva), ma chi scrive
+// "Rimini" invece di "rimini " ottiene un pin sulla mappa invece di una riga in
+// "Non ancora sulla mappa". È il punto in cui i refusi si prevengono, non si curano.
+//
+// Da quando i luoghi sono entità (`venues`), questo campo si scrive UNA volta
+// per posto invece che ad ogni torneo: il suggerimento vale di più, non di meno,
+// perché quella grafia poi resta in catalogo per tutti.
+const CITTA_LIST_ID = 'citta-suggerite'
+
+export function CityInput({ id, value, onChange }: {
+  id?: string
+  value: string
+  onChange: (city: string) => void
+}) {
+  return (
+    <>
+      <input
+        id={id}
+        value={value}
+        onChange={(e: ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
+        placeholder="es. Rimini"
+        list={CITTA_LIST_ID}
+        autoComplete="off"
+        style={inputStyle}
+      />
+      <datalist id={CITTA_LIST_ID}>
+        {CITTA_SUGGERITE.map((c) => <option key={c} value={c} />)}
+      </datalist>
+    </>
+  )
+}
 
 interface ActionsProps {
   onDelete?: (() => void) | null

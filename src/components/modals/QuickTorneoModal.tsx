@@ -17,8 +17,12 @@ interface QuickTorneoModalProps {
 // Creazione rapida: solo i campi essenziali (nome, compagno, luogo, data,
 // categoria, piazzamento). Formato 2vs2 e superficie "Sabbia outdoor" sono i
 // default più comuni, quindi fissi e non richiesti — si cambiano poi da
-// "Modifica". Il luogo invece c'è: prima ogni torneo rapido nasceva senza, e
-// recuperarlo dopo non capitava quasi mai.
+// "Modifica".
+//
+// Il luogo invece c'è, pur essendo un form "rapido": prima ogni torneo creato al
+// volo nasceva senza (`city: ''` fisso) e restava fuori dalla mappa delle
+// conquiste per sempre, perché recuperarlo dopo non capitava quasi mai. Resta
+// facoltativo — un campo in più, non un ostacolo in più.
 export default function QuickTorneoModal({ form, setField, partnerOptions, canAddPartner, venues, onClose, onSave }: QuickTorneoModalProps) {
   const isNewPartner = form.partnerId === 'new'
   return (

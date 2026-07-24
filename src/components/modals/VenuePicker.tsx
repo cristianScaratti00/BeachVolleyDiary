@@ -10,10 +10,15 @@
 // Le coordinate arrivano solo dal dispositivo (📍 Usa la mia posizione) o
 // incollate a mano: nessuna chiamata a servizi di geocoding, quindi nessun nome
 // di luogo esce dall'app.
+//
+// La CITTÀ del luogo nuovo usa `CityInput` (datalist di `CITTA_SUGGERITE`): è
+// quella che finisce nello snapshot `tournaments.city`, cioè la stringa che la
+// Mappa delle conquiste geocodifica. Scriverla come la conosce il gazetteer è la
+// differenza fra un pin sulla costa e una riga in "Non ancora sulla mappa".
 // ============================================================================
 import { useState } from 'react'
 import type { CSSProperties, ChangeEvent, ReactNode } from 'react'
-import { inputStyle, selectStyle } from './Sheet'
+import { CityInput, inputStyle, selectStyle } from './Sheet'
 import { venueLabel, parseLatLng, formatLatLng } from '../../lib/derive'
 import type { AnyForm, SetField, Venue } from '../../lib/models'
 
@@ -144,13 +149,10 @@ function NewVenueFields({ form, setField }: { form: AnyForm; setField: SetField 
 
       <div>
         <FieldLabel htmlFor="venue-city">Città</FieldLabel>
-        <input
-          id="venue-city"
-          value={form.newVenueCity ?? ''}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => setField('newVenueCity', e.target.value)}
-          placeholder="es. Riccione"
-          style={inputStyle}
-        />
+        {/* Con i suggerimenti del gazetteer: questa stringa diventa lo snapshot
+            `tournaments.city` di ogni torneo giocato qui, ed è quella che la
+            mappa geocodifica. Scritta com'è in elenco, il pin cade sulla costa. */}
+        <CityInput id="venue-city" value={form.newVenueCity ?? ''} onChange={(v) => setField('newVenueCity', v)} />
       </div>
 
       <div>

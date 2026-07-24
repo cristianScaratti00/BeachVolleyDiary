@@ -35,15 +35,28 @@ export interface UseDiary {
 
 const EMPTY: DiaryData = { tournaments: [], matches: [], partners: [], photos: [], venues: [] }
 
+// Città: unico punto di normalizzazione in scrittura, per lo snapshot dei
+// tornei e per i nomi del catalogo luoghi. Spazi ai bordi e spazi doppi via —
+// `"  Bellaria  Igea Marina "` e `"Bellaria Igea Marina"` devono essere la
+// stessa riga nel DB, non due.
+//
+// Solo spaziatura: maiuscole e accenti restano come li ha scritti l'utente,
+// perché è la grafia che poi si legge sulla mappa e nelle card. A confrontare
+// ci pensano `geoKey` (mappa) e le chiavi generate dal DB (`lower(btrim(…))`:
+// `check_ins.city_key`, `venues.city_key`/`name_key`): tutte tollerano il
+// resto, ma nessuna ripulisce gli spazi in mezzo — per questo si ripulisce qui.
+const cleanCity = (city: string | undefined): string => (city ?? '').trim().replace(/\s+/g, ' ')
+
 // Snapshot testuale del luogo, scritto sempre su `tournaments.city` accanto a
 // `venue_id`: i client che non conoscono i venue (e i tornei importati) devono
-// continuare a leggere un luogo. Legge il venue scelto, o i campi del luogo
-// nuovo, e ricade sul `city` del form per i chiamanti che non passano un venue.
+// continuare a leggere un luogo — la Mappa delle conquiste geocodifica proprio
+// questa stringa. Legge il venue scelto, o i campi del luogo nuovo, e ricade sul
+// `city` del form per i chiamanti che non passano un venue.
 function citySnapshot(f: AnyForm, venues: Venue[]): string {
-  if (f.venueId === 'new') return (f.newVenueCity ?? '').trim() || (f.newVenueName ?? '').trim()
+  if (f.venueId === 'new') return cleanCity(f.newVenueCity) || cleanCity(f.newVenueName)
   const v = f.venueId ? venues.find((x) => x.id === f.venueId) : undefined
-  if (v) return v.city.trim() || v.name.trim()
-  return (f.city ?? '').trim()
+  if (v) return cleanCity(v.city) || cleanCity(v.name)
+  return cleanCity(f.city)
 }
 
 // ---------------------------------------------------------------------------
@@ -68,11 +81,14 @@ async function resolveVenue(f: AnyForm): Promise<ResolvedVenue> {
   if (!sel) return { ok: true, id: null }
   if (sel !== 'new') return { ok: true, id: sel }
 
-  const name = (f.newVenueName ?? '').trim()
+  // Stessa ripulitura della città: le chiavi uniche del DB sono
+  // `lower(btrim(…))` e non collassano gli spazi interni, quindi "Bagno  26" e
+  // "Bagno 26" sarebbero due righe di catalogo per lo stesso posto.
+  const name = cleanCity(f.newVenueName)
   // "＋ Nuovo luogo" senza nome: non c'è niente da creare. Il torneo si salva
   // senza luogo (con la sua `city`) invece di bloccarsi su un campo vuoto.
   if (!name) return { ok: true, id: null }
-  const city = (f.newVenueCity ?? '').trim()
+  const city = cleanCity(f.newVenueCity)
   // Coordinate malformate → nessuna coordinata (il vincolo DB le vuole in
   // coppia). Il picker segnala già l'errore mentre si digita: meglio salvare il
   // torneo senza mappa che rifiutare tutto per una virgola.
@@ -338,6 +354,9 @@ export function useDiary(): UseDiary {
     const row = {
       name: f.name,
       date: f.date ?? '',
+      // Il form rapido ora chiede il luogo: senza, ogni torneo creato al volo
+      // restava place-less e fuori dalla mappa delle conquiste (che geocodifica
+      // proprio questo snapshot). Resta facoltativo.
       city: citySnapshot(f, data.venues),
       venue_id: venue.id,
       category: f.category ?? 'Amatoriale',
