@@ -6,6 +6,14 @@ export default defineConfig({
   plugins: [react()],
   build: {
     rollupOptions: {
+      // Due pagine indipendenti: l'app (index.html, React + Supabase) e la
+      // landing pubblica su /presentazione/, che è HTML statico e non importa
+      // niente da src/. Restano due bundle separati: chi apre la landing non
+      // scarica una riga dell'app.
+      input: {
+        main: 'index.html',
+        presentazione: 'presentazione/index.html',
+      },
       output: {
         // Separa i vendor pesanti in chunk propri: caricano in parallelo e
         // restano in cache tra i deploy (cambiano di rado). Il resto dell'app

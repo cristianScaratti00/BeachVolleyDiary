@@ -1,16 +1,16 @@
 # Graph Report - BeachVolleyDiary  (2026-07-27)
 
 ## Corpus Check
-- 126 files · ~114,548 words
+- 128 files · ~150,223 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 996 nodes · 1893 edges · 67 communities (60 shown, 7 thin omitted)
+- 1006 nodes · 1901 edges · 63 communities (55 shown, 8 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 2 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `4e4220ec`
+- Built from commit: `6c626054`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -72,12 +72,7 @@
 - [[_COMMUNITY_Community 57|Community 57]]
 - [[_COMMUNITY_Community 58|Community 58]]
 - [[_COMMUNITY_Community 59|Community 59]]
-- [[_COMMUNITY_Community 60|Community 60]]
-- [[_COMMUNITY_Community 61|Community 61]]
-- [[_COMMUNITY_Community 62|Community 62]]
 - [[_COMMUNITY_Community 63|Community 63]]
-- [[_COMMUNITY_Community 64|Community 64]]
-- [[_COMMUNITY_Community 65|Community 65]]
 - [[_COMMUNITY_Community 66|Community 66]]
 
 ## God Nodes (most connected - your core abstractions)
@@ -97,21 +92,21 @@
   src/App.tsx → src/screens/ChiCeOggi.test.tsx
 - `ProfiloProps` --references--> `Session`  [EXTRACTED]
   src/screens/Profilo.tsx → src/lib/auth.ts
-- `Gruppo` --references--> `Tournament`  [EXTRACTED]
-  src/lib/derive.mappa.ts → src/lib/models.ts
-- `Tornei()` --calls--> `deriveTorneiSections()`  [EXTRACTED]
-  src/screens/Tornei.tsx → src/lib/derive.ts
 - `HomeFilters` --references--> `Option`  [EXTRACTED]
   src/screens/Home.tsx → src/lib/models.ts
+- `App()` --calls--> `useAuth()`  [EXTRACTED]
+  src/App.tsx → src/hooks/useAuth.tsx
+- `App()` --calls--> `useIsWide()`  [EXTRACTED]
+  src/App.tsx → src/hooks/useMedia.ts
 
 ## Import Cycles
 - None detected.
 
-## Communities (67 total, 7 thin omitted)
+## Communities (63 total, 8 thin omitted)
 
 ### Community 0 - "Community 0"
-Cohesion: 0.06
-Nodes (41): ConquisteMapProps, ITALIA, dotForRank(), cittaFuoriMappa(), deriveMappa(), formaDelPin(), grafiaPiuRecente(), Gruppo (+33 more)
+Cohesion: 0.07
+Nodes (40): ConquisteMapProps, ITALIA, dotForRank(), cittaFuoriMappa(), deriveMappa(), formaDelPin(), grafiaPiuRecente(), MappaLegendaRow (+32 more)
 
 ### Community 1 - "Community 1"
 Cohesion: 0.22
@@ -130,12 +125,12 @@ Cohesion: 0.05
 Nodes (37): dependencies, html-to-image, leaflet, leaflet.markercluster, motion, react, react-dom, @supabase/supabase-js (+29 more)
 
 ### Community 5 - "Community 5"
-Cohesion: 0.27
-Nodes (14): mappa(), mappaCon(), FULL_YEAR, kinds(), seasonRich(), seasonWith(), slideOf(), lossSets() (+6 more)
+Cohesion: 0.05
+Nodes (50): deriveDiary(), diario, entries(), entry(), mappa(), mappaCon(), FULL_YEAR, kinds() (+42 more)
 
 ### Community 6 - "Community 6"
-Cohesion: 0.17
-Nodes (11): WrappedData, Chip(), WRAPPED_PALETTES, wrappedPalette, overlayStyle, pad2(), WrappedModal(), WrappedModalProps (+3 more)
+Cohesion: 0.13
+Nodes (15): WrappedData, WrappedSlide, Chip(), WRAPPED_PALETTES, wrappedPalette, overlayStyle, pad2(), makeWrapped() (+7 more)
 
 ### Community 7 - "Community 7"
 Cohesion: 0.06
@@ -147,19 +142,19 @@ Nodes (14): Badge(), EmptyNote(), MeterRow(), PartnerCard(), PhaseCard(), Placem
 
 ### Community 9 - "Community 9"
 Cohesion: 0.15
-Nodes (24): citySnapshot(), cleanCity(), EMPTY, ResolvedVenue, useDiary, Category, Format, Phase (+16 more)
+Nodes (23): citySnapshot(), cleanCity(), EMPTY, ResolvedVenue, Category, Format, Phase, Placement (+15 more)
 
 ### Community 10 - "Community 10"
-Cohesion: 0.09
-Nodes (26): CompagnoMatchRow, DashboardData, DatedMatch, DiaryMatchHit, DiaryPhotoThumb, DiarySearchData, DiarySearchFields, DiarySearchResult (+18 more)
+Cohesion: 0.08
+Nodes (28): CompagnoMatchRow, DashboardData, DatedMatch, deriveWhoIsHere(), DiaryMatchHit, DiaryPhotoThumb, DiarySearchData, DiarySearchFields (+20 more)
 
 ### Community 11 - "Community 11"
 Cohesion: 0.10
 Nodes (20): compilerOptions, composite, isolatedModules, jsx, lib, module, moduleDetection, moduleResolution (+12 more)
 
 ### Community 12 - "Community 12"
-Cohesion: 0.14
-Nodes (20): ConnectionSnackbar(), useSlowConnection(), useIsWide(), byAgendaDate(), deriveCompagni(), deriveCompagniServer(), deriveCompagnoDetailServer(), deriveTorneiList() (+12 more)
+Cohesion: 0.53
+Nodes (3): ConnectionSnackbar(), useSlowConnection(), useIsWide()
 
 ### Community 13 - "Community 13"
 Cohesion: 0.11
@@ -174,16 +169,16 @@ Cohesion: 0.26
 Nodes (13): deriveCompagno(), deriveDashboard(), deriveStory(), deriveWrapped(), filteredMatches(), fmtDateFull(), matchesWithDates(), partnerName() (+5 more)
 
 ### Community 16 - "Community 16"
-Cohesion: 0.11
-Nodes (17): deriveWhoIsHere(), getCompagniList(), getCompagnoDetail(), getTorneiList(), getTorneoDetail(), getWhoIsHere(), ok(), SvCompagno (+9 more)
+Cohesion: 0.09
+Nodes (32): byAgendaDate(), deriveCompagni(), deriveCompagniServer(), deriveCompagnoDetailServer(), deriveTorneiList(), deriveTorneiListServer(), partnerOptions(), tournamentOptions() (+24 more)
 
 ### Community 17 - "Community 17"
 Cohesion: 0.14
 Nodes (15): PLACEMENTS, decorateTournament(), dotFor(), nelPeriodo(), torneoRow(), esitoStyle, fmtDate(), MatchResult (+7 more)
 
 ### Community 18 - "Community 18"
-Cohesion: 0.12
-Nodes (8): ENTRATA, MOLLA, MotionRootProps, SVELTO, MappaCitta, MappaTier, MappaTorneoRow, ConquisteMap
+Cohesion: 0.09
+Nodes (13): ENTRATA, MOLLA, MotionRootProps, SVELTO, FilterChips(), MappaCitta, MappaData, MappaTier (+5 more)
 
 ### Community 19 - "Community 19"
 Cohesion: 0.15
@@ -199,7 +194,7 @@ Nodes (12): 1) Supabase CLI (consigliato), 1) Supabase CLI (solo per uno stack l
 
 ### Community 22 - "Community 22"
 Cohesion: 0.13
-Nodes (14): EmptyCard(), FilterChips(), InlineLink(), PageHeader(), SectionTitle(), StatFooter(), RecentTornei(), CompagnoCard (+6 more)
+Nodes (16): BadgeSize, BadgeTone, btnBase, BtnVariant, Button(), EmptyCard(), FilterOption, InlineLink() (+8 more)
 
 ### Community 23 - "Community 23"
 Cohesion: 0.25
@@ -234,8 +229,8 @@ Cohesion: 0.11
 Nodes (17): compilerOptions, composite, isolatedModules, lib, module, moduleDetection, moduleResolution, noEmit (+9 more)
 
 ### Community 37 - "Community 37"
-Cohesion: 0.13
-Nodes (17): Avatar(), BackLink(), BadgeSize, BadgeTone, btnBase, BtnVariant, FilterOption, MatchRow() (+9 more)
+Cohesion: 0.10
+Nodes (16): PhotoLightboxProps, Shot, Avatar(), BackLink(), MatchRow(), StatGrid(), StatTile(), KeyNumbers() (+8 more)
 
 ### Community 38 - "Community 38"
 Cohesion: 0.17
@@ -295,66 +290,42 @@ Nodes (17): BIAS, cercaLuoghi(), comuneDi(), contestoDi(), coordinateDi(), GeoSe
 
 ### Community 53 - "Community 53"
 Cohesion: 0.22
-Nodes (7): Button(), deriveDiarySearch(), DiaryEntry, Diario(), DiarioProps, searchField, srOnly
+Nodes (7): PageHeader(), deriveDiarySearch(), DiaryEntry, Diario(), DiarioProps, searchField, srOnly
 
 ### Community 54 - "Community 54"
-Cohesion: 0.20
-Nodes (5): PhotoLightboxProps, Shot, TorneoDetailData, TorneoDetailProps, VenueMap
+Cohesion: 0.35
+Nodes (12): UseCheckInDeps, AnyForm, Option, SetField, Venue, CompagnoModalProps, FotoModalProps, PartitaModalProps (+4 more)
 
 ### Community 55 - "Community 55"
-Cohesion: 0.48
-Nodes (5): FORMATS, deriveTorneiSections(), groupTorneiByFormat(), splitUpcoming(), torneiFormats()
+Cohesion: 0.33
+Nodes (7): FORMATS, deriveTorneiSections(), groupTorneiByFormat(), splitUpcoming(), torneiFormats(), Tornei(), makeTorneo()
 
 ### Community 56 - "Community 56"
-Cohesion: 0.13
-Nodes (27): UseCheckInDeps, AnyForm, Option, SetField, SetsApi, Venue, CompagnoModalProps, FotoModalProps (+19 more)
-
-### Community 59 - "Community 59"
-Cohesion: 0.32
-Nodes (5): deriveDiary(), diario, entries(), entry(), makePhoto()
-
-### Community 60 - "Community 60"
-Cohesion: 0.18
-Nodes (10): Props, renderScreen(), cervia, jesolo, rimini, spiaMappa, expectNoA11yViolations(), makeMappaPin() (+2 more)
-
-### Community 61 - "Community 61"
-Cohesion: 0.15
-Nodes (9): renderMappa(), HarnessProps, renderTornei(), RIQUADRO_MAPPA, TorneiProps, TorneiVista, makeList(), makeMappaData() (+1 more)
-
-### Community 62 - "Community 62"
-Cohesion: 0.40
-Nodes (4): WrappedSlide, makeWrapped(), renderModal(), SLIDES
+Cohesion: 0.17
+Nodes (12): noteStyle, setInput, Actions(), ActionsProps, inputStyle, Label(), selectStyle, Sheet() (+4 more)
 
 ### Community 63 - "Community 63"
-Cohesion: 0.40
-Nodes (4): C, MONTHS_FULL, MONTHS_SHORT, SWATCH_COLORS
-
-### Community 64 - "Community 64"
-Cohesion: 0.21
-Nodes (7): SetScore, dati, searchBox(), type(), DiaryEntryOver, makeDiaryEntry(), makeDiaryMatchHit()
-
-### Community 65 - "Community 65"
-Cohesion: 0.57
-Nodes (5): isSubsequence(), matchesAllTokens(), normalizeText(), tokenize(), tokenMatchesField()
+Cohesion: 0.25
+Nodes (6): C, MONTHS_FULL, MONTHS_SHORT, SWATCH_COLORS, fieldWrap, nameStyle
 
 ## Knowledge Gaps
-- **407 isolated node(s):** `allow`, `name`, `private`, `version`, `type` (+402 more)
+- **409 isolated node(s):** `allow`, `name`, `private`, `version`, `type` (+404 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **7 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **8 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `AnyForm` connect `Community 56` to `Community 3`, `Community 9`, `Community 12`, `Community 14`, `Community 50`, `Community 52`?**
+- **Why does `AnyForm` connect `Community 54` to `Community 3`, `Community 37`, `Community 9`, `Community 14`, `Community 16`, `Community 50`, `Community 52`, `Community 56`, `Community 63`?**
   _High betweenness centrality (0.008) - this node is a cross-community bridge._
-- **Why does `Option` connect `Community 56` to `Community 8`, `Community 9`, `Community 10`, `Community 3`?**
-  _High betweenness centrality (0.006) - this node is a cross-community bridge._
-- **Why does `Venue` connect `Community 56` to `Community 64`, `Community 5`, `Community 9`, `Community 10`, `Community 14`, `Community 50`?**
+- **Why does `Option` connect `Community 54` to `Community 3`, `Community 8`, `Community 9`, `Community 10`, `Community 56`, `Community 63`?**
+  _High betweenness centrality (0.005) - this node is a cross-community bridge._
+- **Why does `useAuth()` connect `Community 2` to `Community 24`, `Community 1`, `Community 16`, `Community 47`?**
   _High betweenness centrality (0.004) - this node is a cross-community bridge._
 - **What connects `allow`, `name`, `private` to the rest of the system?**
-  _407 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _409 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.06464646464646465 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06638714185883997 - nodes in this community are weakly interconnected._
 - **Should `Community 3` be split into smaller, more focused modules?**
   _Cohesion score 0.07661290322580645 - nodes in this community are weakly interconnected._
 - **Should `Community 4` be split into smaller, more focused modules?**

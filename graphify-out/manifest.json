@@ -15,8 +15,8 @@
     "semantic_hash": ""
   },
   "src/components/BottomNav.tsx": {
-    "mtime": 1785158944.1698558,
-    "ast_hash": "02b5f4ca82a2eba7e00879da27d3bb00",
+    "mtime": 1785162856.9413457,
+    "ast_hash": "d3f1ffeddbb32f73f3df78c5573ded35",
     "semantic_hash": ""
   },
   "src/components/ConnectionSnackbar.tsx": {
@@ -40,8 +40,8 @@
     "semantic_hash": ""
   },
   "src/components/Sidebar.tsx": {
-    "mtime": 1784904323.0743554,
-    "ast_hash": "90cd5f3330c61a1d44e824a6941c5bfb",
+    "mtime": 1785162890.2733917,
+    "ast_hash": "960aa6e660c4bd7b3ed69919e15a195b",
     "semantic_hash": ""
   },
   "src/components/Splash.tsx": {
@@ -435,8 +435,8 @@
     "semantic_hash": ""
   },
   "vite.config.ts": {
-    "mtime": 1783977605.4549186,
-    "ast_hash": "fee4adf31f01c425cf2f6326c3f41f9c",
+    "mtime": 1785163008.2099354,
+    "ast_hash": "a7658781dc9cbf069370a6d8704f8e43",
     "semantic_hash": ""
   },
   "vitest.config.ts": {
@@ -455,8 +455,8 @@
     "semantic_hash": ""
   },
   "index.html": {
-    "mtime": 1783958071.2662513,
-    "ast_hash": "dc3814b0824593c52a260280c80f4cae",
+    "mtime": 1785162983.356255,
+    "ast_hash": "d9e8c9bc71de805fd2c3f8b04e7b5bc9",
     "semantic_hash": ""
   },
   "supabase/README.md": {
@@ -510,8 +510,8 @@
     "semantic_hash": ""
   },
   ".claude/settings.local.json": {
-    "mtime": 1785156584.3397598,
-    "ast_hash": "160b7664c191fb576bf468723aff586b",
+    "mtime": 1785163134.850614,
+    "ast_hash": "f98819a98e9478a77465c24c99910d01",
     "semantic_hash": ""
   },
   "src/components/VenueMap.tsx": {
@@ -632,6 +632,66 @@
   "src/components/Motion.tsx": {
     "mtime": 1785158979.4150815,
     "ast_hash": "b691226efa8218bd1f4d530110183951",
+    "semantic_hash": ""
+  },
+  "presentazione/landing.js": {
+    "mtime": 1785163362.702459,
+    "ast_hash": "f911f60971cfbaf7bef618563ca59dff",
+    "semantic_hash": ""
+  },
+  "public/sw.js": {
+    "mtime": 1785162707.5023377,
+    "ast_hash": "49d39bf315de8db0e6318a11a61e9dec",
+    "semantic_hash": ""
+  },
+  "presentazione/index.html": {
+    "mtime": 1785163515.4843054,
+    "ast_hash": "209f90cae2c6978e30190245f4e2d534",
+    "semantic_hash": ""
+  },
+  "public/offline.html": {
+    "mtime": 1785162710.9208496,
+    "ast_hash": "100852b0be67dac67ebf12eb1d85971a",
+    "semantic_hash": ""
+  },
+  "public/icons/apple-touch-icon.png": {
+    "mtime": 1785162628.4154618,
+    "ast_hash": "da47d59eee0cdfc0ae30f5e28eae32fb",
+    "semantic_hash": ""
+  },
+  "public/icons/icon-192.png": {
+    "mtime": 1785162628.3535855,
+    "ast_hash": "fcb2488d10f0994f3857844533268c4f",
+    "semantic_hash": ""
+  },
+  "public/icons/icon-512.png": {
+    "mtime": 1785162628.380478,
+    "ast_hash": "214340c922e813641e9ed0f40fea88e2",
+    "semantic_hash": ""
+  },
+  "public/icons/icon-maskable-512.png": {
+    "mtime": 1785162628.4008756,
+    "ast_hash": "cfb54f91aa5041b20f38ce53803b61e1",
+    "semantic_hash": ""
+  },
+  "public/icons/icon.svg": {
+    "mtime": 1785162621.1063807,
+    "ast_hash": "b139a98c95f4079645e3a1610b929b86",
+    "semantic_hash": ""
+  },
+  "public/presentazione/screens/home.png": {
+    "mtime": 1785162580.0717268,
+    "ast_hash": "bf9dcfa491f4ef96974937d1653af6ae",
+    "semantic_hash": ""
+  },
+  "public/presentazione/screens/tornei.png": {
+    "mtime": 1785162580.1080377,
+    "ast_hash": "9616225ebec1976e66a2396650cb1b95",
+    "semantic_hash": ""
+  },
+  "public/presentazione/screens/wrapped.png": {
+    "mtime": 1785162580.1448786,
+    "ast_hash": "6f3d394b8bdfc7f5f3828db39ff3d4b7",
     "semantic_hash": ""
   }
 }

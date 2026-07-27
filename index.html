@@ -5,6 +5,12 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2224%22 fill=%22%231B2A4A%22/><line x1=%2218%22 y1=%2248%22 x2=%2282%22 y2=%2248%22 stroke=%22%23FAF8F5%22 stroke-width=%229%22 stroke-linecap=%22round%22/><circle cx=%2266%22 cy=%2230%22 r=%2216%22 fill=%22%23FF6B35%22/></svg>" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#FAF8F5" />
+    <!-- PWA: il manifest è condiviso con la landing (/presentazione), che è il
+         posto da cui si installa. `start_url` punta qui, così l'icona in Home
+         apre direttamente il diario. Il service worker lo registra la landing. -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Beach Diary" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

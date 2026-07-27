@@ -26,7 +26,7 @@ type Slot = { kind: "nav"; key: Screen } | { kind: "action" };
 const SLOTS: Slot[] = [
   { kind: "nav", key: "home" },
   { kind: "nav", key: "tornei" },
-  { kind: "nav", key: "oggi" },
+  // { kind: "nav", key: "oggi" },
   { kind: "action" },
   { kind: "nav", key: "compagni" },
   { kind: "nav", key: "diario" },
@@ -128,108 +128,108 @@ export default function BottomNav({
 
       <AnimatePresence>
         {fabOpen && (
-        <m.div
-          key="speed-dial"
-          onClick={onToggleFab}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.18 }}
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 42,
-          }}
-        >
           <m.div
-            variants={SPEED_DIAL}
-            initial="chiuso"
-            animate="aperto"
-            exit="chiuso"
+            key="speed-dial"
+            onClick={onToggleFab}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
             style={{
-              position: "absolute",
-              left: "50%",
-              bottom: 90,
-              // `translateX` resta qui e NON fra le proprietà animate: Motion
-              // scrive `transform` da sé sulle voci, non su questo contenitore.
-              transform: "translateX(-50%)",
-              display: "flex",
-              flexDirection: "column",
-              gap: 10,
-              alignItems: "center",
+              position: "fixed",
+              inset: 0,
+              zIndex: 42,
             }}
           >
             <m.div
-              className="chip"
-              variants={VOCE}
-              transition={MOLLA}
-              onClick={onAssistant}
+              variants={SPEED_DIAL}
+              initial="chiuso"
+              animate="aperto"
+              exit="chiuso"
               style={{
+                position: "absolute",
+                left: "50%",
+                bottom: 90,
+                // `translateX` resta qui e NON fra le proprietà animate: Motion
+                // scrive `transform` da sé sulle voci, non su questo contenitore.
+                transform: "translateX(-50%)",
                 display: "flex",
+                flexDirection: "column",
+                gap: 10,
                 alignItems: "center",
-                gap: 7,
-                background: "linear-gradient(135deg,#FF6B35,#FF9558)",
-                color: "#fff",
-                font: "700 13.5px 'Nunito Sans'",
-                padding: "12px 20px",
-                borderRadius: 12,
-                boxShadow: "0 8px 22px -8px rgba(255,107,53,.7)",
-                cursor: "pointer",
               }}
             >
-              ✨ Crea con l’assistente
-              {!canAssistant && (
-                <span
-                  style={{
-                    font: "800 8px 'Nunito Sans'",
-                    letterSpacing: ".4px",
-                    textTransform: "uppercase",
-                    padding: "2px 5px",
-                    borderRadius: 4,
-                    background: "rgba(255,255,255,.28)",
-                    color: "#fff",
-                  }}
-                >
-                  Premium
-                </span>
-              )}
-            </m.div>
-            <m.div
-              className="chip"
-              variants={VOCE}
-              transition={MOLLA}
-              onClick={onNewTorneo}
-              style={{
-                background: "#fff",
-                color: "#1B2A4A",
-                font: "700 13.5px 'Nunito Sans'",
-                padding: "12px 20px",
-                borderRadius: 12,
-                boxShadow: "0 8px 22px -8px rgba(27,42,74,.4)",
-                cursor: "pointer",
-              }}
-            >
-              Nuovo torneo
-            </m.div>
-            <m.div
-              className="chip"
-              variants={VOCE}
-              transition={MOLLA}
-              onClick={onNewPartita}
-              style={{
-                background: "#1B2A4A",
-                color: "#fff",
-                font: "700 13.5px 'Nunito Sans'",
-                padding: "12px 20px",
-                borderRadius: 12,
-                boxShadow: "0 8px 22px -8px rgba(27,42,74,.4)",
-                cursor: "pointer",
-              }}
-            >
-              Nuova partita
+              <m.div
+                className="chip"
+                variants={VOCE}
+                transition={MOLLA}
+                onClick={onAssistant}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 7,
+                  background: "linear-gradient(135deg,#FF6B35,#FF9558)",
+                  color: "#fff",
+                  font: "700 13.5px 'Nunito Sans'",
+                  padding: "12px 20px",
+                  borderRadius: 12,
+                  boxShadow: "0 8px 22px -8px rgba(255,107,53,.7)",
+                  cursor: "pointer",
+                }}
+              >
+                ✨ Crea con l’assistente
+                {!canAssistant && (
+                  <span
+                    style={{
+                      font: "800 8px 'Nunito Sans'",
+                      letterSpacing: ".4px",
+                      textTransform: "uppercase",
+                      padding: "2px 5px",
+                      borderRadius: 4,
+                      background: "rgba(255,255,255,.28)",
+                      color: "#fff",
+                    }}
+                  >
+                    Premium
+                  </span>
+                )}
+              </m.div>
+              <m.div
+                className="chip"
+                variants={VOCE}
+                transition={MOLLA}
+                onClick={onNewTorneo}
+                style={{
+                  background: "#fff",
+                  color: "#1B2A4A",
+                  font: "700 13.5px 'Nunito Sans'",
+                  padding: "12px 20px",
+                  borderRadius: 12,
+                  boxShadow: "0 8px 22px -8px rgba(27,42,74,.4)",
+                  cursor: "pointer",
+                }}
+              >
+                Nuovo torneo
+              </m.div>
+              <m.div
+                className="chip"
+                variants={VOCE}
+                transition={MOLLA}
+                onClick={onNewPartita}
+                style={{
+                  background: "#1B2A4A",
+                  color: "#fff",
+                  font: "700 13.5px 'Nunito Sans'",
+                  padding: "12px 20px",
+                  borderRadius: 12,
+                  boxShadow: "0 8px 22px -8px rgba(27,42,74,.4)",
+                  cursor: "pointer",
+                }}
+              >
+                Nuova partita
+              </m.div>
             </m.div>
           </m.div>
-        </m.div>
         )}
       </AnimatePresence>
     </>
