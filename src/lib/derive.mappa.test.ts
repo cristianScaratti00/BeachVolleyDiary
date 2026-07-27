@@ -125,22 +125,28 @@ describe('deriveMappa — aggregazione per città', () => {
   })
 })
 
-// ---------------------------------------------------------------- quirk fissati
-describe('deriveMappa — difetti noti di placementRank, fissati apposta', () => {
-  it("'Semifinale' ranka 9 come tutto ciò che placementRank non riconosce", () => {
-    // Difetto preesistente (stats.ts:60-69 e la SQL `placement_rank`): una
-    // semifinale è classificata PEGGIO di un'uscita ai gironi (8). Qui è
-    // asserito com'è oggi, così correggerlo sarà una scelta deliberata e non un
-    // incidente: quando `placementRank('Semifinale')` diventerà 5, questo test
-    // fallisce e chi corregge sa di dover guardare anche la mappa.
+// ------------------------------------------------- piazzamenti sul filo mappa
+describe('deriveMappa — come i piazzamenti arrivano sul pin', () => {
+  it("'Semifinale' ranka 4, meglio di un'uscita ai gironi", () => {
+    // Questo test nasce come tripwire del difetto opposto: `placementRank`
+    // non riconosceva 'Semifinale' e la faceva cadere nel fallback 9, cioè
+    // PEGGIO di 'Gironi' (8). La correzione è arrivata con
+    // `20260724120100_placement_rank_semifinale.sql` (+ `stats.ts` e
+    // `PLACEMENT_LABELS`), e il test ha fatto il suo mestiere: è fallito, così
+    // la mappa è stata guardata insieme al resto.
+    //
+    // Resta 'giocato': `tierOf` promuove solo il podio (rank <= 3). Una
+    // semifinale ora è ordinata al posto giusto, ma non è un podio.
     const m = mappa([{ city: 'Rimini', placement: 'Semifinale' }])
-    expect(pinDi(m, 'Rimini')!.rank).toBe(9)
+    expect(pinDi(m, 'Rimini')!.rank).toBe(4)
     expect(pinDi(m, 'Rimini')!.tier).toBe('giocato')
   })
 
   it("'best' porta la stringa grezza 'Semifinale', non il trattino", () => {
-    // `PLACEMENT_LABELS` non ha la chiave 9 → stamperebbe '—'. Portare la
-    // stringa grezza aggira il difetto senza propagarlo.
+    // `best` non passa da `PLACEMENT_LABELS`: porta il testo scritto sul
+    // torneo. Oggi la chiave 4 esiste e darebbe la stessa stringa, ma la
+    // grezza resta più solida — non dipende dal fatto che la tabella delle
+    // etichette copra ogni rank, e il fallback di quella tabella è '—'.
     const m = mappa([{ city: 'Rimini', placement: 'Semifinale' }])
     expect(pinDi(m, 'Rimini')!.best).toBe('Semifinale')
     expect(pinDi(m, 'Rimini')!.best).not.toBe('—')

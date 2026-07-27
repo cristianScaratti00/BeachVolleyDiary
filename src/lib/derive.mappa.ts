@@ -258,9 +258,10 @@ export function deriveMappa(data: DiaryData, fYear: string, today = todayISO()):
     const rank = Math.min(...ranks)
     const tier = tierOf(rank)
     // `best` porta la stringa GREZZA del piazzamento, non `PLACEMENT_LABELS[rank]`:
-    // quella mappa non ha chiavi 5 e 7, e `placementRank('Semifinale')` vale 9,
-    // quindi una semifinale stamperebbe '—'. Portare la stringa grezza aggira il
-    // difetto di `placementRank` senza propagarlo (vedi docs/QA-mappa-conquiste.md).
+    // quella tabella non copre ogni rank (manca la chiave 7) e ricade su '—',
+    // quindi un piazzamento fuori scala sparirebbe dietro un trattino. La stringa
+    // grezza è anche quella che l'utente ha scritto sul torneo, ed è ciò che si
+    // legge sul pin (vedi docs/QA-mappa-conquiste.md).
     const migliore = g.tornei.filter((t) => placementRank(t.placement) === rank).sort((a, b) => (a.date < b.date ? 1 : -1))[0]
     const partite = data.matches.filter((m) => g.tornei.some((t) => t.id === m.tournamentId))
     const s = computeStats(partite)

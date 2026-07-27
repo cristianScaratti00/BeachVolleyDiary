@@ -57,12 +57,16 @@ export function res(m: WithSets): MatchResult {
 }
 
 // Rank a placement string so tournaments can be compared (lower = better).
+// I numeri non sono contigui di proposito: contano solo l'ordine e le soglie
+// (1 = vittoria, <= 3 = podio, <= 8 = risultato reale, 9 = nessun risultato).
+// Deve restare allineata a public.placement_rank (SQL) e a PLACEMENT_LABELS.
 export function placementRank(l: string): number {
   if (!l) return 9
   if (l.indexOf('1°') === 0) return 1
   if (l.indexOf('2°') === 0) return 2
   if (l.indexOf('3°') === 0) return 3
-  if (l === 'Quarti') return 4
+  if (l === 'Semifinale') return 4
+  if (l === 'Quarti') return 5
   if (l === 'Ottavi') return 6
   if (l === 'Gironi') return 8
   return 9

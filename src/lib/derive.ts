@@ -226,7 +226,9 @@ export interface DiaryEntry {
 
 type DatedMatch = Match & { date: string }
 
-const PLACEMENT_LABELS: Record<number, string> = { 1: '1° 🏆', 2: '2°', 3: '3°', 4: 'Quarti', 6: 'Ottavi', 8: 'Gironi', 9: '—' }
+// Mappa inversa di placementRank (stats.ts): il rank arriva anche dalle RPC
+// (best_rank), qui torna etichetta. Va tenuta allineata a quella scala.
+const PLACEMENT_LABELS: Record<number, string> = { 1: '1° 🏆', 2: '2°', 3: '3°', 4: 'Semifinale', 5: 'Quarti', 6: 'Ottavi', 8: 'Gironi', 9: '—' }
 
 const tournObj = (data: DiaryData, id: string): Tournament | undefined => data.tournaments.find((x) => x.id === id)
 const partnerObj = (data: DiaryData, id: string): Partner | undefined => data.partners.find((x) => x.id === id)

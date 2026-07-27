@@ -51,7 +51,7 @@ propaga la rinomina di un luogo su quello snapshot.
 - `color` valida un hex `#RRGGBB`.
 - `category` ∈ {Amatoriale, Open, Serie, Pro}; `format` ∈ {2vs2, 3vs3, 4vs4};
   `surface` ∈ {Sabbia outdoor, Indoor, Erba}; `phase` ∈ {Girone, Ottavi, Quarti, Semifinale, Finale};
-  `placement` ∈ {1° 🏆, 2°, 3°, Quarti, Ottavi, Gironi, In corso}.
+  `placement` ∈ {1° 🏆, 2°, 3°, Semifinale, Quarti, Ottavi, Gironi, In corso}.
 - Eliminare un torneo elimina a cascata partite, set e foto collegate.
 - Un socio con partite **non** è eliminabile (RESTRICT); uno senza partite sì.
 - `user_id` ha `default auth.uid()`: dal client non serve passarlo esplicitamente.
