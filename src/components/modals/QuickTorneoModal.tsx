@@ -1,10 +1,6 @@
 import type { ChangeEvent } from 'react'
-<<<<<<< HEAD
-import { Sheet, Title, Label, CityInput, inputStyle, selectStyle, Actions } from './Sheet'
-=======
 import { Sheet, Title, Label, inputStyle, selectStyle, Actions } from './Sheet'
 import VenuePicker from './VenuePicker'
->>>>>>> queuer/turn-the-free-text-city-into-a-real-venu-66f05c98
 import { CATEGORIES, PLACEMENTS } from '../../lib/db.enums'
 import type { AnyForm, SetField, Option, Venue, Category, Placement } from '../../lib/models'
 
@@ -18,23 +14,12 @@ interface QuickTorneoModalProps {
   onSave: () => void
 }
 
-<<<<<<< HEAD
-// Creazione rapida: solo i campi essenziali (nome, città, compagno, data,
-// categoria, piazzamento). Formato 2vs2 e superficie "Sabbia outdoor" sono i
-// default più comuni, quindi fissi e non richiesti — si cambiano poi da "Modifica".
-//
-// La città c'è anche qui, pur essendo un form "rapido": senza, ogni torneo
-// creato al volo nasceva senza luogo e restava fuori dalla mappa per sempre.
-// Resta facoltativa — un campo in più, non un ostacolo in più.
-export default function QuickTorneoModal({ form, setField, partnerOptions, canAddPartner, onClose, onSave }: QuickTorneoModalProps) {
-=======
 // Creazione rapida: solo i campi essenziali (nome, compagno, luogo, data,
 // categoria, piazzamento). Formato 2vs2 e superficie "Sabbia outdoor" sono i
 // default più comuni, quindi fissi e non richiesti — si cambiano poi da
 // "Modifica". Il luogo invece c'è: prima ogni torneo rapido nasceva senza, e
 // recuperarlo dopo non capitava quasi mai.
 export default function QuickTorneoModal({ form, setField, partnerOptions, canAddPartner, venues, onClose, onSave }: QuickTorneoModalProps) {
->>>>>>> queuer/turn-the-free-text-city-into-a-real-venu-66f05c98
   const isNewPartner = form.partnerId === 'new'
   return (
     <Sheet onClose={onClose} maxWidth={460}>
@@ -59,14 +44,7 @@ export default function QuickTorneoModal({ form, setField, partnerOptions, canAd
           </div>
         )}
 
-<<<<<<< HEAD
-        <div>
-          <Label>Città</Label>
-          <CityInput value={form.city || ''} onChange={(v) => setField('city', v)} />
-        </div>
-=======
         <VenuePicker form={form} setField={setField} venues={venues} />
->>>>>>> queuer/turn-the-free-text-city-into-a-real-venu-66f05c98
 
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           <div style={{ flex: 1, minWidth: 130 }}>

@@ -95,7 +95,6 @@ describe('contrasto — contatori di sezione', () => {
   })
 })
 
-<<<<<<< HEAD
 // ============================================================================
 // Mappa delle conquiste — perché il contorno dei pin non è una rifinitura.
 //
@@ -131,7 +130,9 @@ describe('contrasto — pin della mappa', () => {
     // 1.14:1 — la sagoma è decorativa: nessun fatto dipende dal vederla, e
     // infatti il riassunto testuale dell'SVG e la lista non la citano mai.
     expect(contrast(TERRA, WHITE)).toBe(1.14)
-=======
+  })
+})
+
 describe('contrasto — riga "torneo qui" del luogo', () => {
   it('il testo della storia del luogo supera AA su fondo pagina', () => {
     // Riga da 12.5px: testo normale per WCAG (grande = 18.66px bold), quindi
@@ -143,6 +144,5 @@ describe('contrasto — riga "torneo qui" del luogo', () => {
     // 4.39:1 su fondo pagina: sotto AA. Fissato a numero perché la tentazione
     // di riusarlo (sta bene) torni a farsi notare invece che passare liscia.
     expect(contrast(ACCENT_FG, PAGE)).toBe(4.39)
->>>>>>> queuer/turn-the-free-text-city-into-a-real-venu-66f05c98
   })
 })

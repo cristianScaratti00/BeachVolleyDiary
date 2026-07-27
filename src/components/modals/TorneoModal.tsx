@@ -1,10 +1,6 @@
 import type { CSSProperties, ChangeEvent } from 'react'
-<<<<<<< HEAD
-import { Sheet, Title, Label, CityInput, inputStyle, selectStyle, Actions } from './Sheet'
-=======
 import { Sheet, Title, Label, inputStyle, selectStyle, Actions } from './Sheet'
 import VenuePicker from './VenuePicker'
->>>>>>> queuer/turn-the-free-text-city-into-a-real-venu-66f05c98
 import { SWATCH_COLORS } from '../../lib/theme'
 import type { AnyForm, SetField, Option, Venue, Category, Format, Surface, Placement } from '../../lib/models'
 
@@ -63,16 +59,6 @@ export default function TorneoModal({ form, editId, setField, partnerOptions, ca
             <input type="date" value={form.date || ''} onChange={(e: ChangeEvent<HTMLInputElement>) => setField('date', e.target.value)} style={inputStyle} />
           </div>
           <div style={fieldWrap}>
-<<<<<<< HEAD
-            <Label>Città</Label>
-            <CityInput value={form.city || ''} onChange={(v) => setField('city', v)} />
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-          <div style={fieldWrap}>
-=======
->>>>>>> queuer/turn-the-free-text-city-into-a-real-venu-66f05c98
             <Label>Categoria</Label>
             <select value={form.category || 'Amatoriale'} onChange={(e: ChangeEvent<HTMLSelectElement>) => setField('category', e.target.value as Category)} style={selectStyle}>
               <option>Amatoriale</option><option>Open</option><option>Serie</option><option>Pro</option><option>King</option><option>Queen</option>

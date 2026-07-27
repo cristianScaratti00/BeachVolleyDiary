@@ -39,11 +39,13 @@ const EMPTY: DiaryData = { tournaments: [], matches: [], partners: [], photos: [
 // `venue_id`: i client che non conoscono i venue (e i tornei importati) devono
 // continuare a leggere un luogo. Legge il venue scelto, o i campi del luogo
 // nuovo, e ricade sul `city` del form per i chiamanti che non passano un venue.
+// Qualunque strada prenda, lo snapshot passa da `cleanCity`: è l'unico punto di
+// normalizzazione in scrittura, e vale anche per il testo che arriva dal venue.
 function citySnapshot(f: AnyForm, venues: Venue[]): string {
-  if (f.venueId === 'new') return (f.newVenueCity ?? '').trim() || (f.newVenueName ?? '').trim()
+  if (f.venueId === 'new') return cleanCity(f.newVenueCity) || cleanCity(f.newVenueName)
   const v = f.venueId ? venues.find((x) => x.id === f.venueId) : undefined
-  if (v) return v.city.trim() || v.name.trim()
-  return (f.city ?? '').trim()
+  if (v) return cleanCity(v.city) || cleanCity(v.name)
+  return cleanCity(f.city)
 }
 
 // ---------------------------------------------------------------------------
@@ -293,12 +295,8 @@ export function useDiary(): UseDiary {
     const row = {
       name: f.name,
       date: f.date ?? '',
-<<<<<<< HEAD
-      city: cleanCity(f.city),
-=======
       city: citySnapshot(f, data.venues),
       venue_id: venue.id,
->>>>>>> queuer/turn-the-free-text-city-into-a-real-venu-66f05c98
       category: f.category ?? 'Amatoriale',
       format: f.format ?? '2vs2',
       surface: f.surface ?? 'Sabbia outdoor',
@@ -354,14 +352,10 @@ export function useDiary(): UseDiary {
     const row = {
       name: f.name,
       date: f.date ?? '',
-<<<<<<< HEAD
-      // Il form rapido ora chiede la città: senza, ogni torneo creato al volo
-      // restava fuori dalla mappa delle conquiste. Resta facoltativa.
-      city: cleanCity(f.city),
-=======
+      // Il form rapido ora chiede il luogo: senza, ogni torneo creato al volo
+      // restava fuori dalla mappa delle conquiste. Resta facoltativo.
       city: citySnapshot(f, data.venues),
       venue_id: venue.id,
->>>>>>> queuer/turn-the-free-text-city-into-a-real-venu-66f05c98
       category: f.category ?? 'Amatoriale',
       format: '2vs2',
       surface: 'Sabbia outdoor',
@@ -405,12 +399,8 @@ export function useDiary(): UseDiary {
     const row = {
       name: f.name,
       date: f.date ?? '',
-<<<<<<< HEAD
-      city: cleanCity(f.city),
-=======
       city: citySnapshot(f, data.venues),
       venue_id: venue.id,
->>>>>>> queuer/turn-the-free-text-city-into-a-real-venu-66f05c98
       category: f.category ?? 'Amatoriale',
       format: f.format ?? '2vs2',
       surface: f.surface ?? 'Sabbia outdoor',

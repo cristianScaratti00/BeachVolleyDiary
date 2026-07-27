@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import type { CSSProperties, ReactNode, ChangeEvent, FormEvent } from "react";
 import { CATEGORIES, FORMATS, SURFACES, PHASES } from "../lib/db.enums";
 import { MONTHS_SHORT } from "../lib/theme";
-import { CITTA_SUGGERITE } from "../lib/geo";
 import type {
   AnyForm,
   Option,
