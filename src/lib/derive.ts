@@ -1,6 +1,7 @@
 import { res, computeStats, streakOf, placementRank, fmtDate, yearOf, esitoStyle, setChips } from './stats'
 import type { SetChip } from './stats'
 import { MONTHS_SHORT, MONTHS_FULL } from './theme'
+import { normalizeText, tokenize, matchesAllTokens } from './search'
 import { FORMATS, PHASES, PLACEMENTS } from './db.enums'
 import type { DiaryData, Tournament, Partner, Match, Option, PresentUser, Venue } from './models'
 import type { ServerDashboard, ServerPhaseRow } from './dashboard'
@@ -175,6 +176,36 @@ export interface StoryData {
   photoUrls: string[]     // fino a 3 foto del torneo, per la striscia in fondo
   emoji: string           // emoji del torneo, per il visual quando non c'è foto
 }
+// Una partita del torneo, già decorata: sul Diario è la risposta a "perché
+// questa voce è comparsa?" quando il riscontro arriva da un avversario o da una
+// nota (la nota, oggi, non compare da nessun'altra parte nel Diario).
+export interface DiaryMatchHit {
+  id: string
+  phase: string
+  opponents: string
+  note: string
+  esitoShort: string
+  esitoColor: string
+  setChips: SetChip[]
+  // Campi normalizzati della partita (fase, avversari, nota, compagno), uno per
+  // elemento e mai concatenati: la subsequence si valuta su un campo per volta.
+  // Non viene mai renderizzato.
+  search: string[]
+}
+
+// Testo normalizzato per la ricerca. Non viene mai renderizzato: sta qui perché
+// `deriveDiarySearch` resti puro e ricalcolabile senza `DiaryData`, come
+// `deriveTorneiSections` lavora sui `TorneoCard` e non sui `Tournament`.
+export interface DiarySearchFields {
+  title: string     // nome del torneo
+  place: string     // città · categoria · formato · superficie · piazzamento
+  when: string      // '2025' + 'giu' + 'giugno' + giorno
+  partner: string   // compagno del torneo + compagni delle partite
+  opponents: string // avversari di tutte le partite
+  notes: string     // note di tutte le partite
+  captions: string  // didascalie delle foto
+}
+
 export interface DiaryEntry {
   id: string
   day: string    // giorno del mese, es. '20'
@@ -189,6 +220,8 @@ export interface DiaryEntry {
   badgeColor: string
   photos: DiaryPhotoThumb[] // massimo 4 thumbnail
   morePhotos: number        // foto oltre le prime 4
+  search: DiarySearchFields // testo cercabile, già normalizzato
+  matches: DiaryMatchHit[]  // tutte le partite del torneo, per spiegare i riscontri
 }
 
 type DatedMatch = Match & { date: string }
@@ -710,10 +743,44 @@ export function deriveDiary(data: DiaryData): DiaryEntry[] {
     parts.push(ts.played ? `${ts.won} ${ts.won === 1 ? 'vittoria' : 'vittorie'} su ${ts.played} — ${ts.winPct}% W` : 'Nessuna partita ancora')
 
     const d = t.date || '2025-01-01'
+    const mIdx = +d.slice(5, 7) - 1
+
+    // Partite decorate: alimentano sia i riscontri mostrati sotto la voce sia
+    // il testo cercabile del torneo, così l'una cosa non può divergere dall'altra.
+    // Il nome del compagno *se c'è*: `partnerName` ricade su 'Nessuno', che è
+    // un'etichetta da mostrare, non un dato — cercarlo troverebbe tutti i tornei
+    // senza compagno.
+    const partnerText = (id: string | null): string => (id ? partnerObj(data, id)?.name || '' : '')
+
+    const matches: DiaryMatchHit[] = tm.map((m) => {
+      const es = esitoStyle(res(m).won)
+      return {
+        id: m.id, phase: m.phase, opponents: m.opponents, note: m.note,
+        esitoShort: es.short, esitoColor: es.color, setChips: setChips(m),
+        search: [m.phase, m.opponents, m.note, partnerText(m.partnerId)].map(normalizeText).filter(Boolean),
+      }
+    })
+
+    const search: DiarySearchFields = {
+      title: normalizeText(t.name),
+      place: normalizeText([t.city, t.category, t.format, t.surface, t.placement].filter(Boolean).join(' ')),
+      // Anno, mese abbreviato e mese per esteso, giorno con e senza zero: si
+      // cerca "giugno" tanto quanto "giu" o "2025".
+      when: normalizeText([d.slice(0, 4), MONTHS_SHORT[mIdx], MONTHS_FULL[mIdx], d.slice(8, 10), String(+d.slice(8, 10))].filter(Boolean).join(' ')),
+      // Il compagno del torneo più quelli delle singole partite: possono
+      // differire (un torneo giocato con più compagni).
+      partner: normalizeText([partnerText(t.partnerId), ...tm.map((m) => partnerText(m.partnerId))].join(' ')),
+      opponents: normalizeText(tm.map((m) => m.opponents).join(' ')),
+      notes: normalizeText(tm.map((m) => m.note).join(' ')),
+      // Tutte le foto, non solo le 4 in miniatura: una didascalia identifica il
+      // torneo anche quando la sua foto non è fra quelle mostrate.
+      captions: normalizeText(photos.map((p) => p.caption).join(' ')),
+    }
+
     return {
       id: t.id,
       day: d.slice(8, 10) || '—',
-      month: MONTHS_SHORT[+d.slice(5, 7) - 1] || '',
+      month: MONTHS_SHORT[mIdx] || '',
       year: d.slice(0, 4),
       emoji: t.emoji || '🏖️',
       title: t.name,
@@ -724,8 +791,79 @@ export function deriveDiary(data: DiaryData): DiaryEntry[] {
       badgeColor: podium ? '#C4501E' : 'rgba(27,42,74,.5)',
       photos: photos.slice(0, 4).map((p) => ({ color: p.color, caption: p.caption, url: p.url })),
       morePhotos: Math.max(0, photos.length - 4),
+      search,
+      matches,
     }
   })
+}
+
+// ---- Ricerca sul Diario ----
+// Lunghezza minima (dopo la normalizzazione) perché la ricerca sia attiva.
+// A 1 la lista reagisce già al primo carattere: i dati sono in memoria e il
+// filtro non costa niente. Sotto la soglia la pagina resta il diario di sempre.
+export const DIARIO_SEARCH_MIN = 1
+
+export interface DiarySearchResult {
+  entry: DiaryEntry
+  hits: DiaryMatchHit[] // partite che spiegano il riscontro; vuoto = ha risposto il torneo
+}
+
+export interface DiarySearchData {
+  query: string   // testo digitato, per l'etichetta
+  active: boolean // query non vuota dopo la normalizzazione
+  results: DiarySearchResult[]
+  total: number   // voci totali del diario, per il sottotitolo
+}
+
+// Ciò che la voce spiega *da sé*: identità del torneo, non della singola partita.
+// Un token che risponde qui è già spiegato dalla card (titolo, badge, data, recap)
+// e non va chiesto anche alle partite.
+function entryContextFields(e: DiaryEntry): string[] {
+  const s = e.search
+  return [s.title, s.place, s.when, s.partner, s.captions].filter(Boolean)
+}
+
+// I campi cercabili di una voce, come array: OR fra i campi, ma ognuno resta
+// separato dagli altri (vedi `matchesAllTokens`). `opponents` e `notes` sono
+// l'aggregato di tutte le partite: servono a far comparire la voce anche quando
+// i token arrivano da partite diverse.
+function entryFields(e: DiaryEntry): string[] {
+  const s = e.search
+  return [...entryContextFields(e), s.opponents, s.notes].filter(Boolean)
+}
+
+// Selettore unico della ricerca sul Diario, gemello di `deriveTorneiSections`:
+// dalla query digitata alle voci da renderizzare, con il perché di ciascuna.
+// Puro: non muta `entries`, non guarda l'orologio, non tocca la rete.
+//
+// L'ordine cronologico non viene mai rimescolato per rilevanza: un diario si
+// legge nel tempo, e riordinarlo per punteggio disorienta più di quanto aiuti.
+export function deriveDiarySearch(entries: DiaryEntry[], query: string): DiarySearchData {
+  const tokens = tokenize(query)
+  const active = tokens.join('').length >= DIARIO_SEARCH_MIN
+  if (!active) {
+    return { query, active: false, results: entries.map((entry) => ({ entry, hits: [] })), total: entries.length }
+  }
+  const results: DiarySearchResult[] = []
+  entries.forEach((entry) => {
+    // Alla partita si chiedono solo i token che il torneo non spiega già.
+    // Chiederglieli *tutti* rompeva la ricerca in due modi, entrambi su query
+    // che restringono un torneo già trovato:
+    //   - «riccione girone» non trovava NIENTE, pur esistendo un girone a
+    //     Riccione: `phase` vive solo sulla partita e non compare fra i campi
+    //     della voce, così nessuna partita poteva soddisfare anche «riccione»
+    //     e la voce spariva del tutto;
+    //   - «riccione rossi» mostrava la voce senza la riga della partita contro
+    //     Rossi — cioè proprio il "perché" che la ricerca promette, perso
+    //     appena si aggiunge una parola per restringere.
+    const context = entryContextFields(entry)
+    const residual = tokens.filter((t) => !matchesAllTokens([t], context))
+    // Residuo vuoto = risponde il torneo per intero: nessuna riga da mostrare,
+    // che è ciò che rende leggibile una ricerca per nome o per data.
+    const hits = residual.length ? entry.matches.filter((m) => matchesAllTokens(residual, m.search)) : []
+    if (hits.length > 0 || matchesAllTokens(tokens, entryFields(entry))) results.push({ entry, hits })
+  })
+  return { query, active: true, results, total: entries.length }
 }
 
 // ---- Story Instagram (Premium) ----

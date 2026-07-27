@@ -13,6 +13,16 @@ body {
 input, select, textarea, button { font-family: 'Nunito Sans', sans-serif; }
 input:focus, select:focus, textarea:focus { outline: none; border-color: #FF6B35 !important; }
 
+/* WebKit disegna una propria crocetta dentro a input[type=search]. `appearance:
+   none` sull'INPUT non la toglie (verificato su Chrome): senza questa regola il
+   campo di ricerca del Diario mostra DUE pulsanti di cancellazione — il nostro,
+   con nome accessibile, e quello nativo, muto e fuori dalla grammatica visiva.
+   Va sul pseudo-elemento, quindi non può stare negli style inline di React. */
+input[type="search"]::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
 /* iOS ingrandisce (zoom) i campi con font-size < 16px quando prendono il focus.
    Su mobile forziamo almeno 16px per evitare lo zoom automatico. */
 @media (max-width: 900px) {
