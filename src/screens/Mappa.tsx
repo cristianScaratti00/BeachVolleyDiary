@@ -1,32 +1,31 @@
 // ============================================================================
-// "La mappa delle conquiste": l'Italia in SVG con un pin per ogni città in cui
-// hai giocato, colorato dal miglior piazzamento ottenuto lì.
+// "La mappa delle conquiste": una mappa interattiva con un pin per ogni città
+// in cui hai giocato, colorato dal miglior piazzamento ottenuto lì.
 //
 // Presentazionale: riceve un `MappaData` già completo (coordinate comprese) e
-// lo disegna. Nessun calcolo di geometria qui dentro — la stessa divisione di
-// `TrendCard`, che riceve `trendPts`/`trendLine` già pronti. Vale doppio in
-// questa schermata: jsdom non fa layout, quindi qualunque numero misurato dal
-// DOM sarebbe intestabile.
+// lo dispone. Nessun calcolo di geometria qui dentro — la stessa divisione di
+// `TrendCard`, che riceve `trendPts`/`trendLine` già pronti.
+//
+// La mappa vera vive in `ConquisteMap`, caricato in `lazy()`: Leaflet e il
+// plugin cluster stanno in un chunk a parte, che scarica solo chi apre questa
+// vista. Qui resta tutto ciò che funziona SENZA quel chunk — statistiche,
+// legenda, filtro ed elenco città — ed è anche il motivo per cui la schermata
+// resta testabile: jsdom non fa layout, quindi la mappa non si disegna nei
+// test, ma l'elenco sotto sì, e porta gli stessi fatti in testo.
 // ============================================================================
-import { useRef, useState } from 'react'
+import { lazy, Suspense, useRef, useState } from 'react'
 import type { MappaData, MappaPin, MappaCitta, MappaTier, MappaTorneoRow } from '../lib/derive.mappa'
 import { SectionTitle, FilterChips, Badge, StatGrid, StatTile, EmptyCard, InlineLink, INK, MUTED, LINE } from '../components/ui'
 
-// Fondo della terraferma. È il colore su cui si calcolano i rapporti di
-// contrasto in `src/test/contrast.test.ts`.
-const TERRA = '#F2F0EC'
-const COSTA = 'rgba(27,42,74,.22)'
-const FILO = 'rgba(27,42,74,.28)' // filo di richiamo dei pin spostati
-// ⚠️ Contorno navy su OGNI pin: è il contorno, non il riempimento, a portare il
-// contrasto richiesto da WCAG 1.4.11. I tre riempimenti stanno fra 1,6:1 e
-// 2,5:1 sul fondo terra — sotto la soglia di 3:1. Sulle card il pallino è
-// decorativo accanto a un'etichetta; qui è l'unico portatore del risultato,
-// quindi il contorno è un REQUISITO, non una rifinitura: toglierlo come "rumore
-// visivo" reintroduce in silenzio un 1,69:1.
+const ConquisteMap = lazy(() => import('../components/ConquisteMap'))
+
+// Contorno navy dei glifi di legenda: gli stessi colori con cui `ConquisteMap`
+// disegna i pin, così la legenda insegna davvero a leggere la mappa.
 const CONTORNO = INK
-const CONTORNO_W = 1.4
-// Cerchio invisibile per il tocco: i pin disegnati sono 10-16 unità, il dito no.
-const HIT_R = 12
+// Altezza del riquadro mappa. Fissa e non in `aspect-ratio`: il segnaposto del
+// caricamento deve occupare esattamente lo spazio della mappa, o al suo arrivo
+// la pagina sobbalza sotto le dita.
+const MAPPA_H = 380
 
 const TUTTE = 'tutte'
 
@@ -101,35 +100,32 @@ export default function Mappa({ m, onOpenTorneo, onNewTorneo }: MappaProps) {
       )}
 
       <div className="card" style={{ padding: 16, marginTop: 18 }}>
-        <div style={{ maxWidth: 420, margin: '0 auto' }}>
-          <svg
-            viewBox={m.viewBox}
-            width="100%"
-            role="img"
-            aria-label={m.srSummary}
-            focusable="false"
-            style={{ display: 'block', height: 'auto' }}
-          >
-            <path d={m.outline} fill={TERRA} stroke={COSTA} strokeWidth={0.8} strokeLinejoin="round" />
-            {/* I pin non sono raggiungibili da tastiera di proposito: la
-                superficie accessibile è la lista qui sotto, che porta gli stessi
-                fatti in testo. `tabIndex` qui dentro farebbe scattare la regola
-                `aria-hidden-focus` di axe. */}
-            <g aria-hidden="true">
-              {m.pins.map((p) => (
-                <Pin key={p.key} p={p} selected={sel === p.key} onSelect={() => seleziona(p.key)} />
-              ))}
-            </g>
-          </svg>
-        </div>
+        {/* Il segnaposto ha l'altezza esatta della mappa: quando il chunk di
+            Leaflet arriva, non si sposta niente sotto le dita. */}
+        <Suspense
+          fallback={
+            <div
+              aria-hidden="true"
+              style={{ height: MAPPA_H, borderRadius: 14, background: '#F2F0EC', border: '1px solid rgba(27,42,74,.1)' }}
+            />
+          }
+        >
+          <ConquisteMap
+            pins={m.pins}
+            selected={sel}
+            onSelect={seleziona}
+            srSummary={m.srSummary}
+            height={MAPPA_H}
+          />
+        </Suspense>
 
         <Legenda rows={m.legenda} />
 
-        {m.pins.some((p) => p.displaced) && (
+        {m.pins.some((p) => !p.preciso) && (
           <div style={{ font: "600 11.5px 'Nunito Sans'", color: 'rgba(27,42,74,.45)', marginTop: 10, lineHeight: 1.4 }}>
-            Alcune città della stessa costa sono troppo vicine per stare una accanto
-            all'altra: il pin è scostato e un filo sottile indica il punto esatto.
-            L'elenco qui sotto è la fonte precisa.
+            Alcuni pin cadono sul centro della città: sono i tornei senza un luogo
+            geolocalizzato. Aggiungi le coordinate al luogo e il pin si sposta sul
+            campo dove hai giocato davvero.
           </div>
         )}
       </div>
@@ -204,40 +200,6 @@ export default function Mappa({ m, onOpenTorneo, onNewTorneo }: MappaProps) {
         </div>
       )}
     </div>
-  )
-}
-
-// ---------------------------------------------------------------- pin
-function Pin({ p, selected, onSelect }: { p: MappaPin; selected: boolean; onSelect: () => void }) {
-  return (
-    <g>
-      {p.displaced && (
-        <>
-          <line x1={p.ax} y1={p.ay} x2={p.x} y2={p.y} stroke={FILO} strokeWidth={0.8} />
-          <circle cx={p.ax} cy={p.ay} r={1.3} fill={FILO} />
-        </>
-      )}
-      {selected && (
-        <circle cx={p.x} cy={p.y} r={p.radius + 4.5} fill="none" stroke={INK} strokeWidth={1.2} opacity={0.55} />
-      )}
-      <circle
-        cx={p.x}
-        cy={p.y}
-        r={p.radius}
-        // Il pin "giocato" è vuoto: bianco pieno, non trasparente, o la costa
-        // sottostante lo attraverserebbe e sembrerebbe un artefatto.
-        fill={p.hollow ? '#fff' : p.fill}
-        stroke={CONTORNO}
-        strokeWidth={CONTORNO_W}
-        // Contorno tratteggiato = città fatta solo di tornei condivisi da un
-        // socio. Anche questo è un canale non cromatico; la riga di lista lo
-        // ripete a parole con il badge "Condiviso".
-        strokeDasharray={p.shared ? '3 2' : undefined}
-      />
-      {p.inner > 0 && <circle cx={p.x} cy={p.y} r={p.inner} fill="#fff" />}
-      <title>{p.srLabel}</title>
-      <circle cx={p.x} cy={p.y} r={HIT_R} fill="transparent" onClick={onSelect} style={{ cursor: 'pointer' }} />
-    </g>
   )
 }
 

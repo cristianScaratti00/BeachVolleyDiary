@@ -15,6 +15,18 @@ import type { TorneiVista } from './Tornei'
 import { makeTorneo, makeList, makeMappaData, makeMappaPin, TODAY } from '../test/factories'
 import { expectNoA11yViolations } from '../test/axe'
 
+// La mappa vera è Leaflet dentro un `lazy()`: in jsdom non si disegna e il suo
+// caricamento renderebbe questi test dipendenti dai tempi di un `import()`. Qui
+// interessa solo *che* la vista mappa compaia al posto della lista, quindi lo
+// stub ne riproduce la forma accessibile. Il contenuto ha i suoi test in
+// `Mappa.test.tsx`.
+vi.mock('../components/ConquisteMap', () => ({
+  default: ({ srSummary }: { srSummary: string }) => <div role="region" aria-label={srSummary} />,
+}))
+
+// Il riquadro mappa, cercato per nome: `srSummary` comincia sempre così.
+const RIQUADRO_MAPPA = { name: /Mappa d'Italia/ } as const
+
 const noop = () => {}
 
 // La vista Lista/Mappa è controllata da App, perché deve sopravvivere all'andata
@@ -53,7 +65,7 @@ describe('Tornei — selettore di vista Lista/Mappa', () => {
   it('parte dalla lista', () => {
     renderTornei([makeTorneo()], conMappa)
     expect(screen.getByRole('button', { name: 'Lista' })).toHaveAttribute('aria-pressed', 'true')
-    expect(screen.queryByRole('img')).not.toBeInTheDocument()
+    expect(screen.queryByRole('region', RIQUADRO_MAPPA)).not.toBeInTheDocument()
   })
 
   it('il selettore sono `button` veri con lo stato annunciato', () => {
@@ -72,11 +84,11 @@ describe('Tornei — selettore di vista Lista/Mappa', () => {
     expect(screen.getByRole('button', { name: 'Mappa' })).toBeInTheDocument()
   })
 
-  it('passando a Mappa compare il disegno e sparisce la lista', async () => {
+  it('passando a Mappa compare il riquadro e sparisce la lista', async () => {
     const user = userEvent.setup()
     renderTornei([makeTorneo({ name: 'Rimini Open' })], conMappa)
     await user.click(screen.getByRole('button', { name: /^Mappa/ }))
-    expect(screen.getByRole('img')).toBeInTheDocument()
+    expect(screen.getByRole('region', RIQUADRO_MAPPA)).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Apri il torneo Rimini Open' })).not.toBeInTheDocument()
   })
 
@@ -112,7 +124,7 @@ describe('Tornei — selettore di vista Lista/Mappa', () => {
   // fermo il contratto che lo impedisce.
   it('montata su "mappa" apre già sulla mappa (è così che si torna dal dettaglio)', () => {
     renderTornei([makeTorneo({ name: 'Rimini Open' })], { ...conMappa, vistaIniziale: 'mappa' })
-    expect(screen.getByRole('img')).toBeInTheDocument()
+    expect(screen.getByRole('region', RIQUADRO_MAPPA)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /^Mappa/ })).toHaveAttribute('aria-pressed', 'true')
     expect(screen.queryByRole('button', { name: 'Apri il torneo Rimini Open' })).not.toBeInTheDocument()
   })

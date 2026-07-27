@@ -1,7 +1,7 @@
 {
   "package.json": {
-    "mtime": 1784930526.093213,
-    "ast_hash": "171ff101e5be6ea6841a9716126c99e2",
+    "mtime": 1785148622.37368,
+    "ast_hash": "98f09e1bc181801a881a2bee015df59c",
     "semantic_hash": ""
   },
   "src/App.tsx": {
@@ -290,8 +290,8 @@
     "semantic_hash": ""
   },
   "src/screens/Tornei.test.tsx": {
-    "mtime": 1784930368.8192372,
-    "ast_hash": "1125482f07c82d6bc1f0224b3e6f0421",
+    "mtime": 1785149520.3738637,
+    "ast_hash": "a4c73f0ee7d2f777d9b420f88cb54e55",
     "semantic_hash": ""
   },
   "src/screens/Tornei.tsx": {
@@ -310,13 +310,13 @@
     "semantic_hash": ""
   },
   "src/test/contrast.test.ts": {
-    "mtime": 1785137993.5677996,
-    "ast_hash": "6b65c68078d94e572f4b9bcdd16773d5",
+    "mtime": 1785149787.263028,
+    "ast_hash": "49faf2f5fd6b8ca0618ca399e5c0aa6d",
     "semantic_hash": ""
   },
   "src/test/factories.ts": {
-    "mtime": 1785138352.430394,
-    "ast_hash": "0fc1298dfc3924bfeae5ef095b501c6d",
+    "mtime": 1785149337.1998,
+    "ast_hash": "b65627ba37dd71cfc83e43b2ca59deb1",
     "semantic_hash": ""
   },
   "src/test/setup.ts": {
@@ -445,8 +445,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1785138078.0697134,
-    "ast_hash": "ac3c94ffbc11edb29ac467b05588496d",
+    "mtime": 1785153474.9235349,
+    "ast_hash": "526c785db2646cd084792483d22a490a",
     "semantic_hash": ""
   },
   "docs/QA-tornei-formati.md": {
@@ -510,8 +510,8 @@
     "semantic_hash": ""
   },
   ".claude/settings.local.json": {
-    "mtime": 1785138191.9049115,
-    "ast_hash": "6d5e2eceb2e827295ce8575fb4588095",
+    "mtime": 1785153990.8076305,
+    "ast_hash": "728202081a9d346e0c224a59dbd9a83c",
     "semantic_hash": ""
   },
   "src/components/VenueMap.tsx": {
@@ -520,8 +520,8 @@
     "semantic_hash": ""
   },
   "src/components/modals/VenuePicker.tsx": {
-    "mtime": 1784931587.8441412,
-    "ast_hash": "953a2101964c3a76c8e4e8142f414943",
+    "mtime": 1785153852.9918973,
+    "ast_hash": "189a6e310ca48708c52ce313794659f1",
     "semantic_hash": ""
   },
   "src/lib/derive.diary.test.ts": {
@@ -530,13 +530,13 @@
     "semantic_hash": ""
   },
   "src/lib/derive.mappa.test.ts": {
-    "mtime": 1785139204.0208395,
-    "ast_hash": "b47d5dc91018509046e6eccb456abd48",
+    "mtime": 1785149344.9149826,
+    "ast_hash": "ab209f23fb429775d037feb6c51f6ee3",
     "semantic_hash": ""
   },
   "src/lib/derive.mappa.ts": {
-    "mtime": 1785139214.0343,
-    "ast_hash": "e640201503074700b1bd83da970acd39",
+    "mtime": 1785148890.9986563,
+    "ast_hash": "7565c0281dc725bac5e172e64176f5ef",
     "semantic_hash": ""
   },
   "src/lib/derive.venues.server.test.ts": {
@@ -550,18 +550,13 @@
     "semantic_hash": ""
   },
   "src/lib/geo.test.ts": {
-    "mtime": 1784930368.8172688,
-    "ast_hash": "f17440624e4be9993ab68b4a0493917b",
+    "mtime": 1785149212.880708,
+    "ast_hash": "e7817d4caa7a32c4b3f35583472ed304",
     "semantic_hash": ""
   },
   "src/lib/geo.ts": {
-    "mtime": 1784931587.844874,
-    "ast_hash": "78fca5161b32b3a697afb53a87fe3a06",
-    "semantic_hash": ""
-  },
-  "src/lib/italy.ts": {
-    "mtime": 1784930368.817845,
-    "ast_hash": "3f643159dc11394d32e99d52c242dea8",
+    "mtime": 1785153485.2540505,
+    "ast_hash": "99b867e4e393fb31553a6582afb4c2e1",
     "semantic_hash": ""
   },
   "src/lib/search.test.ts": {
@@ -580,13 +575,13 @@
     "semantic_hash": ""
   },
   "src/screens/Mappa.test.tsx": {
-    "mtime": 1784930368.818492,
-    "ast_hash": "a63f76748435f00fb49df8aa6d4bd458",
+    "mtime": 1785149459.420781,
+    "ast_hash": "46a0851156aac722a2729b83bbcc5026",
     "semantic_hash": ""
   },
   "src/screens/Mappa.tsx": {
-    "mtime": 1784930368.8187273,
-    "ast_hash": "caa476906cf8285520ea2636d97aa803",
+    "mtime": 1785149005.8464012,
+    "ast_hash": "fe8632e597f1bde195e1afe2a9bbaae2",
     "semantic_hash": ""
   },
   "supabase/migrations/20260725120000_venues.sql": {
@@ -605,8 +600,33 @@
     "semantic_hash": ""
   },
   "docs/QA-venues.md": {
-    "mtime": 1784931587.8409035,
-    "ast_hash": "e7dea0831a1ffee4c1551181aa6ddf70",
+    "mtime": 1785153501.3306592,
+    "ast_hash": "f056fb158297fa2ae34c3058edc0f6ac",
+    "semantic_hash": ""
+  },
+  "src/components/ConquisteMap.tsx": {
+    "mtime": 1785150076.4161332,
+    "ast_hash": "889f6603de8a85d8835cdd39ebaa7a82",
+    "semantic_hash": ""
+  },
+  "src/test/italia-sagoma.ts": {
+    "mtime": 1785148778.2698796,
+    "ast_hash": "42ebf1a3fa368a42fab531c14f117742",
+    "semantic_hash": ""
+  },
+  "src/components/modals/VenuePicker.test.tsx": {
+    "mtime": 1785153872.7620084,
+    "ast_hash": "6b1340985c43e470fe7f53d071560712",
+    "semantic_hash": ""
+  },
+  "src/lib/geosearch.test.ts": {
+    "mtime": 1785153891.036716,
+    "ast_hash": "7bf94bc594b95efbc3c951032cbfc00a",
+    "semantic_hash": ""
+  },
+  "src/lib/geosearch.ts": {
+    "mtime": 1785153843.4938784,
+    "ast_hash": "6e6f0da67bfd8a625dafa797d49180d7",
     "semantic_hash": ""
   }
 }

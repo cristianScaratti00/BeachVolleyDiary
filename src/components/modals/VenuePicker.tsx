@@ -7,14 +7,18 @@
 // una spiaggia a mano è l'eccezione, non la regola — che è il vero rimedio ai
 // doppioni tipo "Riccione" / "riccione " / "Riccione (RN)".
 //
-// Le coordinate arrivano solo dal dispositivo (📍 Usa la mia posizione) o
-// incollate a mano: nessuna chiamata a servizi di geocoding, quindi nessun nome
-// di luogo esce dall'app.
+// Le coordinate si prendono in tre modi, dal più preciso al più manuale:
+// cercando il luogo (Photon/OpenStreetMap), dal GPS del dispositivo, oppure
+// incollandole. La ricerca è l'unico punto in cui del testo scritto qui esce
+// verso un servizio esterno — vedi `lib/geosearch.ts` per il perché — ed è
+// facoltativa: se non risponde, gli altri due modi restano.
 // ============================================================================
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { CSSProperties, ChangeEvent, ReactNode } from 'react'
 import { inputStyle, selectStyle } from './Sheet'
 import { venueLabel, parseLatLng, formatLatLng } from '../../lib/derive'
+import { cercaLuoghi, MIN_QUERY } from '../../lib/geosearch'
+import type { LuogoTrovato } from '../../lib/geosearch'
 import type { AnyForm, SetField, Venue } from '../../lib/models'
 
 const MUTED = 'rgba(27,42,74,.5)'
@@ -98,6 +102,131 @@ export default function VenuePicker({ form, setField, venues, suggestSurface = f
   )
 }
 
+// ------------------------------------------------------------ cerca il luogo
+// Attesa fra l'ultimo tasto e la richiesta. 350ms è la soglia sotto cui non si
+// percepisce ritardo, e sopra cui si smette di interrogare il servizio a ogni
+// lettera: scrivere "riccione" fa UNA richiesta, non otto.
+const ATTESA_MS = 350
+
+type StatoRicerca = 'fermo' | 'cerco' | 'nessuno' | 'errore'
+
+// Esiti come lista di `button` veri, non una tendina che fluttua sopra il
+// modale: stesso pattern dell'elenco città della mappa. Porta gratis tastiera
+// e lettura dello screen reader, e dentro un bottom-sheet che già scorre non
+// deve inseguire la posizione del campo.
+function RicercaLuogo({ onPick }: { onPick: (l: LuogoTrovato) => void }) {
+  const [q, setQ] = useState('')
+  const [esiti, setEsiti] = useState<LuogoTrovato[]>([])
+  const [stato, setStato] = useState<StatoRicerca>('fermo')
+
+  useEffect(() => {
+    const testo = q.trim()
+    if (testo.length < MIN_QUERY) {
+      setEsiti([])
+      setStato('fermo')
+      return
+    }
+    // Ogni battuta annulla la ricerca precedente: senza, una risposta lenta
+    // arrivata in ritardo sovrascriverebbe i risultati di quella nuova.
+    const ac = new AbortController()
+    const timer = setTimeout(() => {
+      setStato('cerco')
+      cercaLuoghi(testo, ac.signal)
+        .then((trovati) => {
+          setEsiti(trovati)
+          setStato(trovati.length ? 'fermo' : 'nessuno')
+        })
+        .catch(() => {
+          // Annullata da noi: la sostituisce la ricerca successiva, non è un
+          // errore da mostrare.
+          if (ac.signal.aborted) return
+          setEsiti([])
+          setStato('errore')
+        })
+    }, ATTESA_MS)
+    return () => {
+      clearTimeout(timer)
+      ac.abort()
+    }
+  }, [q])
+
+  const scegli = (l: LuogoTrovato) => {
+    onPick(l)
+    // Fatto: l'elenco sparisce e i campi qui sotto mostrano cosa è stato preso.
+    setQ('')
+    setEsiti([])
+    setStato('fermo')
+  }
+
+  const messaggio =
+    stato === 'cerco' ? 'Cerco…'
+    : stato === 'nessuno' ? 'Nessun luogo trovato. Puoi scrivere i campi a mano qui sotto.'
+    : stato === 'errore' ? 'Ricerca non disponibile. Usa il GPS o scrivi i campi a mano.'
+    : esiti.length ? `${esiti.length} ${esiti.length === 1 ? 'luogo trovato' : 'luoghi trovati'}`
+    : ''
+
+  return (
+    <div>
+      <FieldLabel htmlFor="venue-search">Cerca il luogo</FieldLabel>
+      <input
+        id="venue-search"
+        type="search"
+        value={q}
+        onChange={(e: ChangeEvent<HTMLInputElement>) => setQ(e.target.value)}
+        placeholder="es. Bagno 26 Riccione"
+        autoComplete="off"
+        aria-describedby="venue-search-hint"
+        style={inputStyle}
+      />
+      <div id="venue-search-hint" style={hintStyle}>
+        Cerca la spiaggia o la città su OpenStreetMap e compila nome, città e
+        coordinate. Scegliere il posto esatto mette il pin sul campo, non sul
+        centro della città.
+      </div>
+
+      {/* Vive sempre nel DOM, anche vuoto: una regione live inserita solo
+          quando ha qualcosa da dire spesso non viene annunciata. */}
+      <div role="status" aria-live="polite" style={{ ...hintStyle, color: stato === 'errore' ? DANGER : MUTED }}>
+        {messaggio}
+      </div>
+
+      {esiti.length > 0 && (
+        <ul style={{ listStyle: 'none', margin: '8px 0 0', padding: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {esiti.map((l) => (
+            <li key={l.id}>
+              <button
+                type="button"
+                onClick={() => scegli(l)}
+                style={{
+                  width: '100%', textAlign: 'left', cursor: 'pointer',
+                  border: '1px solid rgba(27,42,74,.16)', background: '#fff',
+                  borderRadius: 11, padding: '10px 12px',
+                }}
+              >
+                <span style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
+                  <span style={{ font: "700 13.5px 'Nunito Sans'", color: '#1B2A4A' }}>{l.nome}</span>
+                  {/* Il tipo distingue lo stabilimento dal ristorante che si
+                      chiama uguale: senza, si sceglie a caso fra otto righe. */}
+                  {l.tipo && (
+                    <span style={{ font: "700 10.5px 'Nunito Sans'", color: MUTED, background: '#F2F0EC', borderRadius: 6, padding: '2px 6px', whiteSpace: 'nowrap' }}>
+                      {l.tipo}
+                    </span>
+                  )}
+                </span>
+                {l.contesto && (
+                  <span style={{ display: 'block', font: "600 11.5px 'Nunito Sans'", color: MUTED, marginTop: 2 }}>
+                    {l.contesto}
+                  </span>
+                )}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
+
 // ------------------------------------------------------------- luogo nuovo
 function NewVenueFields({ form, setField }: { form: AnyForm; setField: SetField }) {
   // 'idle' finché non si chiede la posizione; l'errore resta finché non si
@@ -129,8 +258,20 @@ function NewVenueFields({ form, setField }: { form: AnyForm; setField: SetField 
     )
   }
 
+  // Un risultato scelto riempie i tre campi in un colpo. Restano tutti
+  // modificabili: la ricerca è un punto di partenza, non un vincolo — il nome
+  // OSM di un bagno non sempre è quello con cui lo chiami tu.
+  const usaRisultato = (l: LuogoTrovato) => {
+    setGeoErr('')
+    setField('newVenueName', l.nome)
+    setField('newVenueCity', l.citta)
+    setField('newVenueCoords', formatLatLng(l.lat, l.lng))
+  }
+
   return (
     <div style={panelStyle}>
+      <RicercaLuogo onPick={usaRisultato} />
+
       <div>
         <FieldLabel htmlFor="venue-name">Nome del luogo</FieldLabel>
         <input

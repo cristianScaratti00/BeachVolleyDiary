@@ -96,40 +96,67 @@ describe('contrasto — contatori di sezione', () => {
 })
 
 // ============================================================================
-// Mappa delle conquiste — perché il contorno dei pin non è una rifinitura.
+// Mappa delle conquiste — perché il pin ha DUE bordi e non uno.
 //
 // Su una card il pallino da 8px sta accanto a un'etichetta testuale: è
 // decorativo, e WCAG 1.4.11 non si applica. Sulla mappa lo stesso colore è
-// l'UNICO portatore di "qui sono uscito ai gironi" — quindi 1.4.11 si applica
-// davvero, e nessuno dei tre riempimenti lo supera. Il segnale portante è il
-// CONTORNO navy, che invece lo supera abbondantemente.
+// l'UNICO portatore di "qui sono uscito ai gironi", quindi 1.4.11 si applica
+// davvero — e nessuno dei tre riempimenti lo supera da solo.
 //
-// I tre rapporti bocciati sono fissati a numero apposta: se qualcuno "pulisce"
-// il contorno dei pin come rumore visivo, resta questo file a dire che quel
-// contorno era l'unica cosa conforme.
+// Con le tile OpenStreetMap il problema cambia natura rispetto al vecchio
+// disegno SVG: lì sotto i pin c'era un beige costante e bastava misurare contro
+// quello. Qui sotto può esserci mare, bosco, sabbia o asfalto, e **nessun
+// colore singolo supera 3:1 contro tutti**. I numeri lo dicono chiaro:
+//
+//   fondo               bianco   navy
+//   acqua OSM            1.60    8.87
+//   bosco fitto          9.84    1.45
+//
+// Esattamente invertiti. Da qui il doppio bordo — alone bianco fuori, contorno
+// navy dentro: qualunque sia la tile, uno dei due la stacca. È la soluzione
+// cartografica standard, e qui è un REQUISITO: togliere uno dei due bordi come
+// "rumore visivo" fa sparire i pin su metà della penisola, in silenzio.
 // ============================================================================
-const TERRA = '#F2F0EC' // fondo della terraferma disegnata (src/screens/Mappa.tsx)
+const VINTO = '#FF6B35'
+const PODIO = '#F7A883'
+const GIOCATO = 'rgba(27,42,74,.25)'
+// Due tile agli antipodi per luminosità: coprono il caso chiaro e quello scuro.
+const TILE_MARE = '#AAD3DF' // acqua, la tinta standard di OSM
+const TILE_BOSCO_FITTO = '#2E4A2E' // il verde più carico che capita sotto un pin
 
 describe('contrasto — pin della mappa', () => {
-  it('il contorno navy dei pin supera la soglia per gli elementi non testuali', () => {
-    // 12.49:1 — è questo a rendere visibile ogni pin, indipendentemente dal
-    // riempimento. È un REQUISITO di Mappa.tsx, non una scelta estetica.
-    expect(contrast(INK, TERRA)).toBeGreaterThanOrEqual(AA_NON_TEXT)
+  it('su ogni tile almeno uno dei due bordi supera la soglia', () => {
+    // L'invariante che tiene in piedi la mappa. Non "il bianco basta" né "il
+    // navy basta": basta la COPPIA, ed è per questo che ci sono entrambi.
+    for (const tile of [TILE_MARE, TILE_BOSCO_FITTO]) {
+      const meglio = Math.max(contrast(WHITE, tile), contrast(INK, tile))
+      expect(meglio, tile).toBeGreaterThanOrEqual(AA_NON_TEXT)
+    }
   })
 
-  it('nessuno dei tre riempimenti basterebbe da solo', () => {
-    expect(contrast('#FF6B35', TERRA)).toBe(2.49) // vinto
-    expect(contrast('#F7A883', TERRA)).toBe(1.7) // podio
-    expect(contrast('rgba(27,42,74,.25)', TERRA)).toBe(1.63) // giocato
-    // Tutti e tre sotto 3:1. Il colore resta un canale ridondante: forma
+  it('preso da solo, ciascun bordo fallisce su metà dei fondi', () => {
+    // Fissati a numero: sono la prova che la ridondanza non è decorativa.
+    expect(contrast(WHITE, TILE_MARE)).toBe(1.6) // il bianco sparisce sull'acqua…
+    expect(contrast(INK, TILE_MARE)).toBe(8.87) // …e lì lavora il navy
+    expect(contrast(INK, TILE_BOSCO_FITTO)).toBe(1.45) // il navy sparisce nel bosco…
+    expect(contrast(WHITE, TILE_BOSCO_FITTO)).toBe(9.84) // …e lì lavora il bianco
+  })
+
+  it('il contorno navy si stacca sempre dal proprio alone', () => {
+    // 14.22:1 — i due bordi non si confondono mai fra loro, qualunque cosa ci
+    // sia sotto: è ciò che rende leggibile il pin come forma unica.
+    expect(contrast(INK, WHITE)).toBe(14.22)
+  })
+
+  it('nessuno dei tre riempimenti basterebbe da solo sulle tile', () => {
+    // Sul mare il pin "vinto" arancione sta a 1.77:1: senza bordi sarebbe
+    // invisibile su mezza riviera, che è esattamente dove si gioca.
+    expect(contrast(VINTO, TILE_MARE)).toBe(1.77)
+    expect(contrast(PODIO, TILE_MARE)).toBe(1.2)
+    expect(contrast(GIOCATO, TILE_MARE)).toBe(1.56)
+    // Tutti sotto 3:1. Il colore resta un canale ridondante: forma
     // (pieno-con-punto / pieno / vuoto) e testo portano la stessa informazione.
-    ;[2.49, 1.7, 1.63].forEach((r) => expect(r).toBeLessThan(AA_NON_TEXT))
-  })
-
-  it('la terraferma si distingue dal fondo bianco della card solo di poco', () => {
-    // 1.14:1 — la sagoma è decorativa: nessun fatto dipende dal vederla, e
-    // infatti il riassunto testuale dell'SVG e la lista non la citano mai.
-    expect(contrast(TERRA, WHITE)).toBe(1.14)
+    ;[1.77, 1.2, 1.56].forEach((r) => expect(r).toBeLessThan(AA_NON_TEXT))
   })
 })
 

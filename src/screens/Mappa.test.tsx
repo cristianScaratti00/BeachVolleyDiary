@@ -5,15 +5,38 @@
 //
 // Il tema ricorrente dei test qui è che la mappa **non può parlare solo con il
 // colore**: ogni cosa che il pin dice deve esistere anche in testo, dentro una
-// lista raggiungibile da tastiera.
+// lista raggiungibile da tastiera. Da quando la mappa è Leaflet quel principio
+// non è più solo accessibilità, è l'unico modo di testare la schermata: jsdom
+// non fa layout, quindi la mappa vera non si disegna nemmeno.
+//
+// `ConquisteMap` è quindi sostituito da uno stub. Non è una scorciatoia: il
+// componente vero è un involucro attorno a Leaflet e non ha logica propria da
+// verificare, mentre montarlo davvero renderebbe i test dipendenti dai tempi
+// del suo `import()` in `lazy()`.
 // ============================================================================
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, within, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import Mappa from './Mappa'
 import { makeMappaData, makeMappaPin, makeMappaTorneoRow } from '../test/factories'
-import type { MappaData } from '../lib/derive.mappa'
+import type { MappaData, MappaPin } from '../lib/derive.mappa'
 import { expectNoA11yViolations } from '../test/axe'
+
+// Le props con cui la schermata chiama la mappa. Sono il confine fra le due:
+// verificarle qui è ciò che rimpiazza i vecchi test sui `<circle>` dell'SVG.
+const spiaMappa = vi.hoisted(() => ({
+  props: null as null | { pins: MappaPin[]; selected: string | null; onSelect: (k: string) => void; srSummary: string },
+}))
+
+vi.mock('../components/ConquisteMap', () => ({
+  // Stessa forma accessibile del componente vero: un `region` con il riassunto
+  // testuale come nome. Così i controlli axe qui sotto verificano davvero la
+  // struttura che finisce in produzione.
+  default: (props: NonNullable<typeof spiaMappa.props>) => {
+    spiaMappa.props = props
+    return <div role="region" aria-label={props.srSummary} />
+  },
+}))
 
 function renderMappa(m: Partial<MappaData> = {}) {
   const onOpenTorneo = vi.fn()
@@ -60,57 +83,27 @@ describe('Mappa — stato vuoto', () => {
   })
 })
 
-// ---------------------------------------------------------------- l'SVG
-describe('Mappa — il disegno', () => {
-  it('l’SVG ha un nome accessibile che nomina il numero di città', () => {
+// ---------------------------------------------------------------- la mappa
+describe('Mappa — il riquadro della mappa', () => {
+  it('è una region col riassunto testuale come nome accessibile', () => {
+    // Chi usa uno screen reader deve sapere cosa sta saltando: il nome dice
+    // quante città ci sono e che l'elenco completo è più sotto.
     renderMappa({ pins: [jesolo, rimini, cervia] })
-    const svg = screen.getByRole('img')
-    expect(svg).toHaveAttribute('aria-label', expect.stringContaining('3 città'))
+    const mappa = screen.getByRole('region')
+    expect(mappa).toHaveAttribute('aria-label', expect.stringContaining('3 città'))
   })
 
-  it('il gruppo dei pin è nascosto agli screen reader e non focalizzabile', () => {
-    // I pin dentro un gruppo `aria-hidden` NON devono essere focalizzabili, o
-    // scatta `aria-hidden-focus`. La tastiera passa dalla lista.
-    const { container } = renderMappa({ pins: [cervia] })
-    const gruppo = container.querySelector('g[aria-hidden="true"]')
-    expect(gruppo).toBeTruthy()
-    expect(gruppo!.querySelectorAll('[tabindex]')).toHaveLength(0)
+  it('avvisa quando un pin cade sul centro città invece che sul campo', () => {
+    // Il pin approssimato è una piccola bugia geografica: la schermata la
+    // dichiara invece di lasciarla scoprire a chi conosce il posto.
+    const impreciso = makeMappaPin({ city: 'Riccione', preciso: false })
+    renderMappa({ pins: [rimini, impreciso] })
+    expect(screen.getByText(/cadono sul centro della città/i)).toBeInTheDocument()
   })
 
-  it('l’SVG non è raggiungibile col tab', () => {
-    const { container } = renderMappa({ pins: [cervia] })
-    expect(container.querySelector('svg[role="img"]')).toHaveAttribute('focusable', 'false')
-  })
-
-  it('ogni pin ha il contorno navy che porta il contrasto', () => {
-    // Requisito WCAG 1.4.11, non una rifinitura: i riempimenti arancio stanno
-    // sotto 3:1 sul fondo terra, il contorno no.
-    const { container } = renderMappa({ pins: [cervia, rimini, jesolo] })
-    const pieni = [...container.querySelectorAll('circle')].filter(
-      (c) => c.getAttribute('stroke') === '#1B2A4A',
-    )
-    expect(pieni.length).toBeGreaterThanOrEqual(3)
-  })
-
-  it('il pin "vinto" ha il punto interno, il pin "giocato" è vuoto', () => {
-    const { container } = renderMappa({ pins: [cervia, jesolo] })
-    const bianchi = [...container.querySelectorAll('circle')].filter(
-      (c) => c.getAttribute('fill') === '#fff',
-    )
-    // Il timbro di Cervia + il riempimento vuoto di Jesolo.
-    expect(bianchi.length).toBeGreaterThanOrEqual(2)
-  })
-
-  it('disegna il filo di richiamo solo per i pin spostati', () => {
-    const spostato = makeMappaPin({ city: 'Riccione', displaced: true, x: 200, y: 140, ax: 175, ay: 122 })
-    const { container } = renderMappa({ pins: [rimini, spostato] })
-    expect(container.querySelectorAll('line')).toHaveLength(1)
-    expect(screen.getByText(/il pin è scostato/i)).toBeInTheDocument()
-  })
-
-  it('senza pin spostati non spiega lo spostamento', () => {
-    renderMappa({ pins: [rimini] })
-    expect(screen.queryByText(/il pin è scostato/i)).not.toBeInTheDocument()
+  it('con tutti i pin sul luogo esatto non dice niente', () => {
+    renderMappa({ pins: [makeMappaPin({ city: 'Rimini', preciso: true })] })
+    expect(screen.queryByText(/cadono sul centro della città/i)).not.toBeInTheDocument()
   })
 })
 
@@ -217,30 +210,40 @@ describe('Mappa — la lista è la fonte di verità', () => {
 
 // ---------------------------------------------------------------- pin ↔ lista
 describe('Mappa — pin e riga sono la stessa selezione', () => {
-  it('cliccare il pin espande la riga della sua città', async () => {
-    const user = userEvent.setup()
-    const { container } = renderMappa({ pins: [cervia] })
-    const hit = container.querySelector('g[aria-hidden="true"] circle[fill="transparent"]')
-    expect(hit).toBeTruthy()
-    await user.click(hit as Element)
+  it('selezionare una città sulla mappa espande la sua riga', async () => {
+    renderMappa({ pins: [cervia] })
+    await act(async () => spiaMappa.props!.onSelect('cervia'))
     expect(screen.getByRole('button', { name: /Cervia/ })).toHaveAttribute('aria-expanded', 'true')
   })
 
-  it('cliccare il pin non lancia in jsdom', async () => {
-    // `scrollIntoView` non esiste in jsdom: senza la chiamata opzionale questo
-    // test esplode invece di passare.
-    const user = userEvent.setup()
-    const { container } = renderMappa({ pins: [cervia, rimini] })
-    const hits = container.querySelectorAll('g[aria-hidden="true"] circle[fill="transparent"]')
-    await expect(user.click(hits[0] as Element)).resolves.toBeUndefined()
+  it('la mappa riceve indietro la città selezionata', async () => {
+    // Un solo stato, due superfici: è così che il pin si accende quando la
+    // selezione parte dalla lista, e viceversa.
+    renderMappa({ pins: [cervia, rimini] })
+    expect(spiaMappa.props!.selected).toBeNull()
+    await act(async () => spiaMappa.props!.onSelect('cervia'))
+    expect(spiaMappa.props!.selected).toBe('cervia')
   })
 
-  it('il pin selezionato prende un anello', async () => {
-    const user = userEvent.setup()
-    const { container } = renderMappa({ pins: [cervia] })
-    const prima = container.querySelectorAll('circle[fill="none"]').length
-    await user.click(container.querySelector('circle[fill="transparent"]') as Element)
-    expect(container.querySelectorAll('circle[fill="none"]').length).toBe(prima + 1)
+  it('riselezionare la stessa città la deseleziona', async () => {
+    renderMappa({ pins: [cervia] })
+    await act(async () => spiaMappa.props!.onSelect('cervia'))
+    await act(async () => spiaMappa.props!.onSelect('cervia'))
+    expect(spiaMappa.props!.selected).toBeNull()
+  })
+
+  it('selezionare dalla mappa non lancia in jsdom', async () => {
+    // `scrollIntoView` non esiste in jsdom: senza la chiamata opzionale in
+    // `seleziona` questo test esplode invece di passare.
+    renderMappa({ pins: [cervia, rimini] })
+    await expect(act(async () => spiaMappa.props!.onSelect('cervia'))).resolves.not.toThrow()
+  })
+
+  it('la mappa riceve tutti i pin, anche quando la lista è filtrata', () => {
+    // Il filtro a chip restringe l'elenco, non la mappa: la vista d'insieme
+    // resta completa, com'era col disegno SVG.
+    renderMappa({ pins: [cervia, rimini, jesolo] })
+    expect(spiaMappa.props!.pins).toHaveLength(3)
   })
 })
 

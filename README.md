@@ -33,8 +33,11 @@ npm run preview        # anteprima della build
   raggruppati per formato con filtro a chip; dettaglio con record, set, differenziale, partite e foto.
 - **Luoghi** — il posto in cui si gioca è un'entità, non più una città a testo libero: si sceglie
   da un elenco (o si crea al volo con nome, città e coordinate) e il dettaglio torneo mostra
-  "quante volte hai giocato qui" più una mappa OpenStreetMap. Le coordinate arrivano solo dal GPS
-  del dispositivo o incollate a mano — nessuna chiamata di geocoding.
+  "quante volte hai giocato qui" più una mappa OpenStreetMap. Le coordinate si prendono in tre
+  modi: cercando il luogo su **Photon** (geocoder OpenStreetMap, senza chiave API — trova la
+  singola spiaggia, non solo il comune), dal GPS del dispositivo, o incollate a mano. La ricerca
+  è l'unico punto in cui del testo scritto nell'app esce verso un servizio esterno, ed è
+  facoltativa: se non risponde, gli altri due modi restano.
   Il catalogo è **condiviso fra gli utenti** ("Bagno 26 · Riccione" è lo stesso posto per tutti):
   tutti lo leggono, ognuno può correggere solo le voci che ha creato. I tornei conservano
   comunque la città come testo (`tournaments.city` scritta accanto a `venue_id`), così quelli

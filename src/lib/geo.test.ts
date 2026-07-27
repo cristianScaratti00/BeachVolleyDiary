@@ -1,25 +1,27 @@
 // ============================================================================
-// Proiezione, gazetteer e scioglimento dei grappoli. Tutto puro: nessuna rete,
-// nessun orologio, nessun DOM.
+// Confini dell'inquadratura, gazetteer e risoluzione città→coordinate. Tutto
+// puro: nessuna rete, nessun orologio, nessun DOM.
 //
 // Il test che conta davvero è il ciclo su TUTTO il gazetteer: una lat/lng
 // sbagliata mette Cattolica in Svizzera e nient'altro fallisce. Verificarne il
 // bounding box non basta (uno scambio lat/lng fra due città vicine ci passa
 // dentro), quindi ogni voce viene confrontata con la sagoma vera dell'Italia.
+//
+// La sagoma e la proiezione che la accompagna vivono in `src/test/`: da quando
+// la mappa è Leaflet non servono più all'app, ma restano l'unico modo di dire
+// se queste ~270 coordinate scritte a mano cadono dove dicono di cadere.
 // ============================================================================
 import { describe, it, expect } from 'vitest'
 import {
-  project,
   geoKey,
   geocodeCity,
-  spreadPins,
+  inItaly,
   GAZETTEER,
   ALIASES,
-  MAP_VIEW,
-  MIN_DIST,
+  ITALY_BOUNDS,
   CITTA_SUGGERITE,
 } from './geo'
-import { ITALY_OUTLINE } from './italy'
+import { ITALY_OUTLINE, MAP_VIEW, project } from '../test/italia-sagoma'
 import { normalizeCity } from './derive'
 
 // ---------------------------------------------------------------- helper sagoma
@@ -172,8 +174,45 @@ describe('geocodeCity', () => {
   })
 })
 
-// ---------------------------------------------------------------- project
-describe('project', () => {
+// ---------------------------------------------------------------- inItaly
+describe('inItaly — chi entra nell’inquadratura', () => {
+  it('tiene dentro l’Italia e fuori il resto', () => {
+    expect(inItaly({ lat: 44.06, lng: 12.57 })).toBe(true) // Rimini
+    expect(inItaly({ lat: 38.91, lng: 1.44 })).toBe(false) // Ibiza
+    expect(inItaly({ lat: 60.17, lng: 24.94 })).toBe(false) // Helsinki
+  })
+
+  it('comprende il margine di mare, quindi la sponda adriatica opposta', () => {
+    // Spalato è dentro il riquadro, e va bene così: la vista parte sull'Italia
+    // ma il rettangolo la eccede di qualche grado. Fissato a valore perché è
+    // esattamente il punto su cui un vecchio commento diceva il falso.
+    expect(inItaly({ lat: 43.51, lng: 16.44 })).toBe(true)
+  })
+
+  it('i bordi sono inclusivi', () => {
+    const { latMin, latMax, lngMin, lngMax } = ITALY_BOUNDS
+    expect(inItaly({ lat: latMin, lng: lngMin })).toBe(true)
+    expect(inItaly({ lat: latMax, lng: lngMax })).toBe(true)
+    expect(inItaly({ lat: latMin - 0.001, lng: lngMin })).toBe(false)
+    expect(inItaly({ lat: latMax, lng: lngMax + 0.001 })).toBe(false)
+  })
+
+  it('classifica ogni voce del gazetteer come faceva il vecchio riquadro SVG', () => {
+    // Il contratto del passaggio a Leaflet: `ITALY_BOUNDS` (lat/lng) deve dare
+    // la STESSA risposta di `project().inside` (viewBox) su tutte le voci, o
+    // qualche città avrebbe cambiato in silenzio sezione nella schermata.
+    const diverse = Object.entries(GAZETTEER)
+      .filter(([, [lat, lng]]) => inItaly({ lat, lng }) !== project({ lat, lng }).inside)
+      .map(([k]) => k)
+    expect(diverse).toEqual([])
+  })
+})
+
+// ---------------------------------------------------------------- proiezione (fixture)
+// `project` non è più codice di produzione: serve a proiettare le coordinate
+// sulla sagoma per validarle. Questi test tengono onesto l'oracolo — se la
+// proiezione sbaglia, tutti i controlli sul gazetteer diventano rumore.
+describe('project — l’oracolo dei test resta tarato', () => {
   it('è monotona in latitudine (più a nord = più in alto)', () => {
     expect(project({ lat: 46, lng: 12 }).y).toBeLessThan(project({ lat: 41, lng: 12 }).y)
   })
@@ -186,15 +225,9 @@ describe('project', () => {
     expect(project({ lat: 42, lng: 12.5 }).x).toBe(MAP_VIEW.w / 2)
   })
 
-  it('marca come fuori dal riquadro ciò che è fuori dal riquadro', () => {
-    expect(project({ lat: 44.06, lng: 12.57 }).inside).toBe(true) // Rimini
-    expect(project({ lat: 38.91, lng: 1.44 }).inside).toBe(false) // Ibiza
-    expect(project({ lat: 60.17, lng: 24.94 }).inside).toBe(false) // Helsinki
-  })
-
   it('mette i punti di riferimento nel quadrante giusto', () => {
-    // Se qualcuno cambia LAT_TOP/LNG0/SCALE senza rigenerare `italy.ts`, questi
-    // quattro numeri sono l'unica cosa che se ne accorge.
+    // Se qualcuno tocca LAT_TOP/LNG0/SCALE senza rigenerare il tracciato,
+    // questi quattro numeri sono l'unica cosa che se ne accorge.
     const trieste = project({ lat: 45.65, lng: 13.77 })
     const lecce = project({ lat: 40.35, lng: 18.17 })
     const cagliari = project({ lat: 39.22, lng: 9.12 })
@@ -347,81 +380,5 @@ describe('ITALY_OUTLINE', () => {
     // Tetto fissato a numero come i rapporti di contrasto: se qualcuno
     // rigenera il tracciato senza semplificarlo, qui se ne accorge.
     expect(ITALY_OUTLINE.length).toBeLessThan(8000)
-  })
-})
-
-// ---------------------------------------------------------------- spreadPins
-const seed = (key: string) => {
-  const g = geocodeCity(key)
-  if (!g) throw new Error(`città non geocodabile nel test: ${key}`)
-  return { key: geoKey(key), lat: g.lat, lng: g.lng }
-}
-
-describe('spreadPins — scioglimento dei grappoli', () => {
-  it('due città lontane non si spostano', () => {
-    const out = spreadPins([seed('Rimini'), seed('Palermo')])
-    expect(out.every((p) => !p.displaced)).toBe(true)
-    out.forEach((p) => {
-      expect(p.x).toBe(p.ax)
-      expect(p.y).toBe(p.ay)
-    })
-  })
-
-  it('la riviera romagnola viene distanziata di almeno MIN_DIST', () => {
-    const citta = ['Cesenatico', 'Bellaria', 'Rimini', 'Riccione', 'Misano Adriatico', 'Cattolica']
-    const out = spreadPins(citta.map(seed))
-    for (let i = 0; i < out.length; i++) {
-      for (let j = i + 1; j < out.length; j++) {
-        const d = Math.hypot(out[i].x - out[j].x, out[i].y - out[j].y)
-        expect(d, `${out[i].key} ↔ ${out[j].key}`).toBeGreaterThanOrEqual(MIN_DIST - 1e-9)
-      }
-    }
-  })
-
-  it('nel grappolo una sola città resta sulla propria ancora', () => {
-    const out = spreadPins(['Rimini', 'Riccione', 'Cattolica'].map(seed))
-    expect(out.filter((p) => !p.displaced).length).toBe(1)
-  })
-
-  it('l’ancora resta la posizione geografica vera anche dopo lo spostamento', () => {
-    const out = spreadPins(['Rimini', 'Riccione', 'Cattolica'].map(seed))
-    out.forEach((p) => {
-      const vero = project(geocodeCity(p.key)!)
-      expect(p.ax).toBeCloseTo(vero.x, 10)
-      expect(p.ay).toBeCloseTo(vero.y, 10)
-    })
-  })
-
-  it('mescolare l’input produce coordinate identiche', () => {
-    // La proprietà che tiene la mappa stabile: l'ordine con cui arrivano i
-    // tornei dal DB non deve poter muovere un pin.
-    const citta = ['Cattolica', 'Rimini', 'Riccione', 'Cervia', 'Cesenatico']
-    const a = spreadPins(citta.map(seed))
-    const b = spreadPins([...citta].reverse().map(seed))
-    const chiave = (list: ReturnType<typeof spreadPins>) =>
-      JSON.stringify([...list].sort((p, q) => (p.key < q.key ? -1 : 1)))
-    expect(chiave(a)).toBe(chiave(b))
-  })
-
-  it('i pin spostati restano dentro il riquadro', () => {
-    const citta = ['Cesenatico', 'Bellaria', 'Rimini', 'Riccione', 'Misano Adriatico', 'Cattolica', 'Gabicce Mare', 'Pesaro', 'Fano']
-    const out = spreadPins(citta.map(seed))
-    out.forEach((p) => {
-      expect(p.x, p.key).toBeGreaterThanOrEqual(0)
-      expect(p.x, p.key).toBeLessThanOrEqual(MAP_VIEW.w)
-      expect(p.y, p.key).toBeGreaterThanOrEqual(0)
-      expect(p.y, p.key).toBeLessThanOrEqual(MAP_VIEW.h)
-    })
-  })
-
-  it('restituisce un pin per seme, senza perderne né duplicarne', () => {
-    const citta = ['Rimini', 'Riccione', 'Cattolica', 'Palermo', 'Cagliari']
-    const out = spreadPins(citta.map(seed))
-    expect(out.length).toBe(citta.length)
-    expect(new Set(out.map((p) => p.key)).size).toBe(citta.length)
-  })
-
-  it('una lista vuota non esplode', () => {
-    expect(spreadPins([])).toEqual([])
   })
 })

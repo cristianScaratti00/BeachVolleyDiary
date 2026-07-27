@@ -1,10 +1,16 @@
 // ============================================================================
-// Geografia della "Mappa delle conquiste": proiezione, gazetteer statico,
-// risoluzione città→coordinate e scioglimento dei grappoli di pin.
+// Geografia della "Mappa delle conquiste": confini dell'inquadratura, gazetteer
+// statico e risoluzione città→coordinate.
 //
-// Puro: zero React, zero rete, zero orologio. Il geocoding è una tabella
+// Puro: zero React, zero rete, zero orologio. Questo gazetteer è una tabella
 // committata, non una chiamata HTTP — è ciò che tiene i test deterministici
-// (vitest.config.ts lo dichiara) e la mappa utilizzabile offline.
+// (vitest.config.ts lo dichiara) e la mappa popolata anche offline.
+//
+// Non è più l'unica strada per ottenere delle coordinate: il form del luogo
+// nuovo può cercarle su Photon (`lib/geosearch.ts`), che però richiede rete e
+// manda fuori il testo digitato. I due convivono con ruoli diversi — la ricerca
+// dà il punto ESATTO di un posto nuovo, questa tabella tiene sulla mappa i
+// tornei vecchi, che una coordinata non ce l'hanno e non l'avranno mai.
 // ============================================================================
 
 export interface GeoPoint {
@@ -12,39 +18,36 @@ export interface GeoPoint {
   lng: number
 }
 
-export interface ProjectedPoint {
-  x: number
-  y: number
-  inside: boolean // dentro il riquadro disegnato (un torneo all'estero non lo è)
-}
-
 // ---------------------------------------------------------------------------
-// Proiezione
+// Confini dell'inquadratura
 // ---------------------------------------------------------------------------
-// Equirettangolare con parallelo standard a 42°N.
-// NON Mercator: su un arco di latitudine di ~11° non guadagna nulla e complica
-// le costanti. NON equirettangolare pura: a queste latitudini cos(42°) ≈ 0,743,
-// quindi con `x = lng` l'Italia verrebbe circa un terzo troppo larga.
+// La mappa Leaflet parte inquadrata sull'Italia. Chi cade fuori da questo
+// riquadro non diventa un pin: finisce nell'elenco "Fuori dall'Italia", perché
+// un torneo a Doha altrimenti allargherebbe la vista fino a rimpicciolire
+// l'Italia di tutti.
 //
-// ⚠️ Queste quattro costanti sono condivise con `italy.ts`: il tracciato è già
-// proiettato con esse. Cambiarle senza rigenerare il path (comando in
-// `docs/QA-mappa-conquiste.md`) scollega i pin dalla costa e **nessun test di
-// tipo se ne accorge** — quelli sui quadranti sì, ed è il motivo per cui ci sono.
-export const MAP_VIEW = { w: 340, h: 408, viewBox: '0 0 340 408' } as const
+// I quattro numeri NON sono scelti a occhio: riproducono esattamente il riquadro
+// della vecchia mappa SVG (equirettangolare a 42°N su un viewBox 340×408), così
+// il passaggio a Leaflet non ha spostato di categoria nessuna delle voci del
+// gazetteer. C'è un test che lo verifica città per città.
+//
+// Il riquadro comprende un margine di mare attorno alla penisola, quindi tiene
+// dentro anche la sponda adriatica opposta: Spalato è un pin, non un
+// fuori-mappa. (Un vecchio commento sosteneva il contrario: era sbagliato.)
+export const ITALY_BOUNDS = {
+  latMin: 36.116667,
+  latMax: 47.45,
+  lngMin: 6.145623,
+  lngMax: 18.854377,
+} as const
 
-const LAT_TOP = 47.45 // latitudine del bordo superiore del riquadro
-const LNG0 = 12.5 // meridiano centrale: cade esattamente a x = 170
-const K = 0.7431448254773942 // cos(42°): comprime le longitudini alla scala giusta
-const SCALE = 36 // unità di viewBox per grado di latitudine (1 unità ≈ 3,1 km)
-
-// Quanto vale un'unità di viewBox in chilometri: serve solo alle etichette e ai
-// commenti, non ai calcoli.
-export const KM_PER_UNIT = 111.32 / SCALE // ≈ 3,09
-
-export function project(p: GeoPoint): ProjectedPoint {
-  const x = MAP_VIEW.w / 2 + (p.lng - LNG0) * K * SCALE
-  const y = (LAT_TOP - p.lat) * SCALE
-  return { x, y, inside: x >= 0 && x <= MAP_VIEW.w && y >= 0 && y <= MAP_VIEW.h }
+export function inItaly(p: GeoPoint): boolean {
+  return (
+    p.lat >= ITALY_BOUNDS.latMin &&
+    p.lat <= ITALY_BOUNDS.latMax &&
+    p.lng >= ITALY_BOUNDS.lngMin &&
+    p.lng <= ITALY_BOUNDS.lngMax
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -586,102 +589,6 @@ export function geocodeCity(city: string): GeoPoint | null {
   }
 
   return null
-}
-
-// ---------------------------------------------------------------------------
-// Scioglimento dei grappoli
-// ---------------------------------------------------------------------------
-// Il problema è grave, non teorico: Rimini e Riccione distano ~9 km, cioè 2,9
-// unità di viewBox. Da Cesenatico a Cattolica ci sono 6 comuni in ~50 km, cioè
-// 17 unità: sei pin in una manciata di pixel. Nessuno scaling lo risolve, la
-// geografia è densa davvero. La risposta cartografica standard è spostare il pin
-// e lasciare un filo di richiamo verso il punto vero.
-
-// Distanza minima fra due pin disegnati, in unità di viewBox (≈ 40 km).
-// Tarata sul raggio massimo di un pin (7,4): 13 lascia ~5,6 unità di aria fra due
-// dischi grandi — abbastanza per contarli, poco abbastanza da tenere il grappolo
-// vicino alla sua costa. A 16 la riviera romagnola finiva a galleggiare in mezzo
-// all'Emilia: ogni unità in più è un chilometro in più di bugia.
-export const MIN_DIST = 13
-const RING_SLOTS = [
-  { r: 1, n: 6, start: -90, step: 60 },
-  { r: 2, n: 12, start: -90, step: 30 },
-  { r: 3, n: 18, start: -90, step: 20 },
-]
-// Margine dal bordo entro cui può finire un pin SPOSTATO (l'ancora vera resta
-// dov'è, anche a ridosso del bordo): tiene dentro il cerchio più grande.
-const BORDO = 10
-
-export interface PinSeed {
-  key: string
-  lat: number
-  lng: number
-}
-
-export interface PlacedPin {
-  key: string
-  x: number // posizione DISEGNATA
-  y: number
-  ax: number // ancora geografica vera: capolinea del filo di richiamo
-  ay: number
-  displaced: boolean
-}
-
-const dist2 = (ax: number, ay: number, bx: number, by: number) => (ax - bx) ** 2 + (ay - by) ** 2
-
-// Restituisce le posizioni disegnate, una per seme, nell'ordine in cui sono
-// state piazzate (geografico: y, poi x, poi key).
-//
-// L'ordinamento è GEOGRAFICO e non "miglior risultato per primo" di proposito:
-// così i pin si muovono solo quando aggiungi una città **nuova**, mai quando
-// migliori un piazzamento in una città che non c'entra. È la proprietà che tiene
-// la mappa stabile nel tempo, ed è anche ciò che rende `spreadPins` deterministica
-// a prescindere dall'ordine in ingresso.
-export function spreadPins(seeds: PinSeed[]): PlacedPin[] {
-  const ordinati = seeds
-    .map((s) => {
-      const p = project(s)
-      return { key: s.key, ax: p.x, ay: p.y }
-    })
-    .sort((a, b) => a.ay - b.ay || a.ax - b.ax || (a.key < b.key ? -1 : a.key > b.key ? 1 : 0))
-
-  const piazzati: PlacedPin[] = []
-  const libero = (x: number, y: number) =>
-    piazzati.every((p) => dist2(p.x, p.y, x, y) >= MIN_DIST * MIN_DIST)
-  const dentro = (x: number, y: number) =>
-    x >= BORDO && x <= MAP_VIEW.w - BORDO && y >= BORDO && y <= MAP_VIEW.h - BORDO
-
-  for (const s of ordinati) {
-    let x = s.ax
-    let y = s.ay
-    let displaced = false
-
-    if (!libero(x, y)) {
-      // Spirale fissa di 36 slot attorno all'ancora: vince il primo libero e
-      // dentro il riquadro. Nessun valore casuale, nessun ciclo che può non
-      // terminare — se nessuno slot va bene si tiene l'ancora e si accetta la
-      // sovrapposizione (in pratica impossibile con 36 slot).
-      for (const anello of RING_SLOTS) {
-        let trovato = false
-        for (let i = 0; i < anello.n; i++) {
-          const a = ((anello.start + i * anello.step) * Math.PI) / 180
-          const cx = s.ax + Math.cos(a) * MIN_DIST * anello.r
-          const cy = s.ay + Math.sin(a) * MIN_DIST * anello.r
-          if (!dentro(cx, cy) || !libero(cx, cy)) continue
-          x = cx
-          y = cy
-          displaced = true
-          trovato = true
-          break
-        }
-        if (trovato) break
-      }
-    }
-
-    piazzati.push({ key: s.key, x, y, ax: s.ax, ay: s.ay, displaced })
-  }
-
-  return piazzati
 }
 
 // ---------------------------------------------------------------------------

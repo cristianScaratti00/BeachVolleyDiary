@@ -163,17 +163,22 @@ passaggi restano da fare a schermo con `npm run dev`:
    la sua `city`.
 6. **"Unisci a…"** su `cormank` → `cormano`: i tornei passano, il doppione
    sparisce, la storia del luogo superstite li conta tutti.
-7. **Mappa**: le tile arrivano da `tile.openstreetmap.org` — è **l'unica**
-   chiamata di rete verso terzi della feature (la ricerca del luogo resta
-   offline: GPS o coordinate incollate, nessun geocoding).
+7. **Rete verso terzi**: due chiamate, entrambe verso OpenStreetMap. Le tile
+   della mappa (`tile.openstreetmap.org`) e la ricerca del luogo
+   (`photon.komoot.io`), che manda fuori il testo digitato nel campo "Cerca il
+   luogo" — solo quello. GPS e coordinate incollate restano offline, e sono la
+   strada che resta quando la ricerca non risponde.
 
 ## Follow-up
 
 - RPC `merge_venues` `security definer` (vedi limitazione qui sopra).
 - Schermata "Luoghi" con statistiche per spiaggia (RPC `venues_list()` sul
   modello di `compagni_list`) + `saveVenue`/`deleteVenue`.
-- Geocoding (Nominatim/Photon) per digitare "Riccione" e ottenere le coordinate:
-  oggi escluso di proposito, manderebbe i nomi dei luoghi a un servizio terzo.
+- ~~Geocoding per digitare "Riccione" e ottenere le coordinate~~ — **fatto**
+  con Photon (`lib/geosearch.ts`). Scelto al posto di Nominatim perché la usage
+  policy di quest'ultimo vieta le ricerche a ogni tasto premuto. Il compromesso
+  sulla privacy è stato accettato consapevolmente: senza, ogni luogo nasceva
+  privo di coordinate e restava fuori dalla mappa.
 - `deriveWrapped` conta ora i luoghi con `venueKeyOf`, ma il resto delle
   statistiche per-luogo (miglior spiaggia, win rate per campo) è tutto da fare.
 

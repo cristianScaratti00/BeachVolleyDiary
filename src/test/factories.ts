@@ -293,11 +293,9 @@ export function makeMappaPin(over: Partial<MappaPin> = {}): MappaPin {
   return {
     key: city.toLowerCase(),
     city,
-    x: 172,
-    y: 120,
-    ax: 172,
-    ay: 120,
-    displaced: false,
+    lat: 44.06,
+    lng: 12.57,
+    preciso: true,
     rank: tier === "vinto" ? 1 : tier === "podio" ? 2 : 8,
     fill:
       tier === "vinto"
@@ -307,8 +305,8 @@ export function makeMappaPin(over: Partial<MappaPin> = {}): MappaPin {
           : "rgba(27,42,74,.25)",
     best: "Gironi",
     tier,
-    radius: 5,
-    inner: tier === "vinto" ? 2 : 0,
+    radius: 11,
+    inner: tier === "vinto" ? 3.74 : 0,
     hollow: tier === "giocato",
     count,
     podi: tier === "giocato" ? 0 : 1,
@@ -345,8 +343,6 @@ export function makeMappaData(over: Partial<MappaData> = {}): MappaData {
     srSummary: pins.length
       ? `Mappa d'Italia con ${pins.length} città in cui hai giocato.`
       : "Mappa d'Italia, ancora senza città.",
-    outline: "M10 10 L30 10 L30 30Z",
-    viewBox: "0 0 340 408",
     ...over,
   };
 }

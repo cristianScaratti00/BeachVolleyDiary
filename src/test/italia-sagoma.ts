@@ -1,22 +1,57 @@
 // ============================================================================
-// Tracciato dell'Italia in SVG — SOLO DATI, nessuna logica.
+// FIXTURE DI TEST — sagoma dell'Italia e proiezione che la accompagna.
 //
-// Generato una volta sola da Natural Earth 1:50m `admin_0_countries` (pubblico
-// dominio) e committato: la mappa non fa rete, non scarica tile, non aggiunge
-// dipendenze. Il comando esatto e lo script di conversione stanno in
-// `docs/QA-mappa-conquiste.md` — è l'unica traccia riproducibile di com'è nato
-// questo path, quindi va tenuta allineata se il tracciato viene rigenerato.
+// Questo file non fa parte dell'app: da quando la mappa è Leaflet, nessuna
+// schermata disegna più la penisola a mano. Vive qui perché resta l'unico
+// ORACOLO capace di dire se le ~270 coordinate scritte a mano in `geo.ts` sono
+// plausibili: proiettandole su questo tracciato si scopre chi finisce in mezzo
+// al mare, ed è così che si intercettano lat/lng invertite, segni sbagliati e
+// refusi di un grado. Cancellarlo insieme alla mappa SVG avrebbe tolto la rete
+// di sicurezza al gazetteer, che invece è rimasto.
 //
-// ⚠️ I vertici sono già proiettati con le costanti di `geo.ts` (`project()`):
-// stessa proiezione, stesso riquadro. Cambiare LAT_TOP / LNG0 / SCALE là dentro
-// senza rigenerare questo file scollega i pin dalla costa **senza che niente
-// fallisca**: è il modo silenzioso in cui questa feature può rompersi.
+// Tracciato generato una volta sola da Natural Earth 1:50m `admin_0_countries`
+// (pubblico dominio); comando e script di conversione in
+// `docs/QA-mappa-conquiste.md`.
 //
 // Tre anelli: penisola, Sicilia, Sardegna. Le isole minori (Elba, Ischia,
 // Eolie…) sono escluse dal filtro `min-area=1000km2`: a questa scala sarebbero
-// 1-2 px di rumore. Le loro località restano geocodabili — il pin cade appena
+// 1-2 px di rumore. Le loro località restano geocodabili — il punto cade appena
 // al largo, che è geograficamente corretto.
 // ============================================================================
+
+import type { GeoPoint } from '../lib/geo'
+
+// ---------------------------------------------------------------------------
+// Proiezione: equirettangolare con parallelo standard a 42°N.
+//
+// Stava in `geo.ts` finché la mappa era un SVG a viewBox fisso. Ora serve solo
+// qui, per portare una coordinata sul piano del tracciato: i vertici sotto sono
+// già proiettati con QUESTE costanti, quindi le due cose vivono insieme e non
+// possono più scollegarsi in silenzio (era il rischio annotato nel vecchio
+// commento, quando stavano in due file diversi).
+//
+// I confini che ne derivano sono gli stessi di `ITALY_BOUNDS` in `geo.ts`, che
+// è la versione in lat/lng usata dall'app: un test verifica che le due
+// definizioni classifichino ogni città allo stesso modo.
+// ---------------------------------------------------------------------------
+export const MAP_VIEW = { w: 340, h: 408, viewBox: '0 0 340 408' } as const
+
+const LAT_TOP = 47.45 // latitudine del bordo superiore del riquadro
+const LNG0 = 12.5 // meridiano centrale: cade esattamente a x = 170
+const K = 0.7431448254773942 // cos(42°): comprime le longitudini alla scala giusta
+const SCALE = 36 // unità di viewBox per grado di latitudine (1 unità ≈ 3,1 km)
+
+export interface ProjectedPoint {
+  x: number
+  y: number
+  inside: boolean // dentro il riquadro (un torneo all'estero non lo è)
+}
+
+export function project(p: GeoPoint): ProjectedPoint {
+  const x = MAP_VIEW.w / 2 + (p.lng - LNG0) * K * SCALE
+  const y = (LAT_TOP - p.lat) * SCALE
+  return { x, y, inside: x >= 0 && x <= MAP_VIEW.w && y >= 0 && y <= MAP_VIEW.h }
+}
 
 // 392 vertici · 3 anelli · ~4,7 KB grezzi (~2 KB gzippati).
 export const ITALY_OUTLINE =

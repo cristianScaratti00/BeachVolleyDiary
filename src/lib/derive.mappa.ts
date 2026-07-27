@@ -7,12 +7,14 @@
 // dell'Italia. Qui la dipendenza è confinata a un modulo solo.
 //
 // ⚠️ Onestà sul peso: la mappa è la seconda vista di Tornei, non una schermata
-// separata, quindi oggi App importa questo modulo **eagerly** e il chunk
-// principale cresce di ~30 KB grezzi / ~12 KB gzippati (39,5 → 51,4 KB gz,
-// misurato con `npm run build`). È il prezzo della scelta di interazione: dietro
-// un toggle a un click, un chunk lazy comprerebbe soprattutto uno spinner.
-// Se un domani la mappa diventasse una voce di navigazione a sé, questo file è
-// già il punto di taglio: basta un `lazy()` sul suo unico consumatore.
+// separata, quindi App importa questo modulo **eagerly** — sono i dati, e
+// servono anche solo per scrivere "Mappa · 7" sul toggle. Pesa il gazetteer
+// (~25 KB grezzi): il tracciato SVG dell'Italia non c'è più, se n'è andato con
+// il disegno a mano.
+//
+// Leaflet invece NON è qui e non è eager: sta in `ConquisteMap`, caricato in
+// `lazy()` dalla schermata. La libreria e il suo CSS (~150 KB grezzi) finiscono
+// in un chunk a parte, scaricato solo da chi apre davvero la vista mappa.
 //
 // Lavora su `DiaryData` e non su `TorneoCard` per due motivi concreti:
 // `TorneoCard` non espone `city` (è appiattita dentro la stringa `meta`, quattro
@@ -23,8 +25,7 @@
 import { computeStats, placementRank, fmtDate, yearOf } from './stats'
 import { dotForRank, todayISO } from './derive'
 import type { DiaryData, Tournament } from './models'
-import { geoKey, geocodeCity, project, spreadPins, MAP_VIEW } from './geo'
-import { ITALY_OUTLINE } from './italy'
+import { geoKey, geocodeCity, inItaly } from './geo'
 
 // ---------------------------------------------------------------------------
 // View-model
@@ -46,11 +47,13 @@ export interface MappaTorneoRow {
 export interface MappaPin {
   key: string // geoKey(city): chiave di aggregazione, stabile fra i render
   city: string // grafia da mostrare (quella del torneo più recente)
-  x: number // posizione DISEGNATA nel viewBox (già distanziata)
-  y: number
-  ax: number // ancora geografica vera: capolinea del filo di richiamo
-  ay: number
-  displaced: boolean // true = spostato per leggibilità ⇒ disegna il filo
+  // Coordinate VERE, non proiettate: le posiziona Leaflet. Vengono dal luogo
+  // geolocalizzato più recente della città; se nessun torneo ne ha uno, dal
+  // gazetteer (centro città). `preciso` dice quale delle due, così la
+  // schermata può essere onesta sulla differenza.
+  lat: number
+  lng: number
+  preciso: boolean // true = coordinate di un luogo reale, non del centro città
   rank: number // miglior placementRank della città
   fill: string // dotForRank(rank) — la regola esistente, non una nuova
   best: string // stringa GREZZA del piazzamento ('1° 🏆', 'Semifinale')
@@ -95,9 +98,7 @@ export interface MappaData {
   tornei: number // tornei che finiscono sulla mappa
   migliore: MappaPin | null
   legenda: MappaLegendaRow[]
-  srSummary: string // nome accessibile dell'SVG
-  outline: string // il tracciato: la schermata non importa `italy.ts`
-  viewBox: string
+  srSummary: string // riassunto testuale: nome accessibile della mappa
 }
 
 // ---------------------------------------------------------------------------
@@ -105,13 +106,18 @@ export interface MappaData {
 // ---------------------------------------------------------------------------
 // Colore = miglior piazzamento (`dotForRank`), dimensione = quanti tornei.
 // I due assi rispondono a due domande diverse: "dove ho vinto" e "dove torno".
-const R_MIN = 5
-const R_STEP = 0.5
+//
+// Il raggio è in PIXEL: su Leaflet il pin ha una dimensione sua, che non cambia
+// con lo zoom (a differenza del vecchio SVG, dove era in unità di viewBox).
+// 11 px di raggio = 22 di diametro: sopra la soglia del tocco comodo una volta
+// contato il margine, e ancora leggibile in mezzo alle tile.
+//
+// Non c'è più l'invariante sulla distanza minima fra pin: la sovrapposizione la
+// gestisce il raggruppamento a cluster, che unisce i vicini in un cerchio col
+// numero invece di spostarli dal punto vero.
+const R_MIN = 11
+const R_STEP = 1.5
 const R_EXTRA_MAX = 3 // oltre il 4° torneo il pin non cresce più
-// ⚠️ Invariante: `R_MIN + R_EXTRA_MAX * R_STEP` non deve superare `MIN_DIST / 2`,
-// o due pin adiacenti al massimo della crescita si sovrapporrebbero nonostante il
-// declustering. 5 + 3·0,5 = 6,5 = 13/2: al limite si sfiorano, mai si accavallano.
-// C'è un test che lo tiene fermo.
 
 function formaDelPin(tier: MappaTier, count: number): { radius: number; inner: number; hollow: boolean } {
   // La dimensione dice SOLO quanti tornei: il tier è già detto dalla forma e dal
@@ -193,7 +199,44 @@ function raggruppaPerCitta(tornei: Tournament[]): Gruppo[] {
 // "rimini" per anni e poi "Rimini" vede aggiornarsi l'etichetta, non nascere un
 // secondo pin.
 function grafiaPiuRecente(tornei: Tournament[]): string {
-  return [...tornei].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))[0].city.trim()
+  return piuRecentiPrima(tornei)[0].city.trim()
+}
+
+// Dal più recente al più vecchio. Serve a due domande diverse ("che grafia
+// mostro?", "quali coordinate uso?") che hanno la stessa risposta: l'ultima
+// volta che ci sei stato è quella che conta.
+const piuRecentiPrima = (t: Tournament[]): Tournament[] =>
+  [...t].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
+
+// ---------------------------------------------------------------------------
+// Dove cade il pin di una città
+// ---------------------------------------------------------------------------
+// Due sorgenti, in quest'ordine:
+//
+//  1. il LUOGO. Se un torneo della città ha un venue con coordinate, il pin
+//     cade sul campo dove hai giocato davvero. Vince il torneo più recente:
+//     una città può avere più campi, e l'ultimo è quello che frequenti ora.
+//  2. il GAZETTEER, sul nome della città. È il centro cittadino: approssimato,
+//     ma è ciò che tiene sulla mappa i tornei vecchi e quelli inseriti senza
+//     luogo, che altrimenti sparirebbero tutti insieme.
+//
+// `preciso` distingue i due casi. Non è un dettaglio decorativo: su una mappa
+// vera un pin sul centro di Riccione a 2 km dal bagno è una piccola bugia, e la
+// schermata preferisce dichiararla che nasconderla.
+//
+// Niente media fra le coordinate dei vari campi: la media di due spiagge
+// distanti è un punto in mezzo al mare dove non ha giocato nessuno.
+function posizioneDellaCitta(
+  tornei: Tournament[],
+  data: DiaryData,
+): { lat: number; lng: number; preciso: boolean } | null {
+  for (const t of piuRecentiPrima(tornei)) {
+    if (!t.venueId) continue
+    const v = data.venues.find((x) => x.id === t.venueId)
+    if (v && v.lat !== null && v.lng !== null) return { lat: v.lat, lng: v.lng, preciso: true }
+  }
+  const centro = geocodeCity(piuRecentiPrima(tornei)[0].city)
+  return centro ? { lat: centro.lat, lng: centro.lng, preciso: false } : null
 }
 
 function cittaFuoriMappa(g: Gruppo): MappaCitta {
@@ -218,17 +261,6 @@ export function deriveMappa(data: DiaryData, fYear: string, today = todayISO()):
   // 2025 — un conteggio vero ma di un altro anno, cioè un numero sbagliato.
   const nonGiocati = data.tournaments.filter((t) => !giaGiocato(t, today) && nelPeriodo(t, fYear)).length
 
-  // ---- Posizioni: calcolate su TUTTE le città mai giocate, non solo quelle
-  // dell'anno selezionato. È il motivo per cui cambiare filtro non fa saltare i
-  // pin da una parte all'altra della mappa: il grappolo si scioglie una volta
-  // sola, sull'insieme completo, e il filtro poi si limita a nascondere righe.
-  const semi = raggruppaPerCitta(giocati)
-    .map((g) => ({ key: g.key, punto: geocodeCity(g.tornei[0].city) }))
-    .filter((s): s is { key: string; punto: { lat: number; lng: number } } => !!s.punto)
-    .filter((s) => project(s.punto).inside)
-    .map((s) => ({ key: s.key, lat: s.punto.lat, lng: s.punto.lng }))
-  const posizioni = new Map(spreadPins(semi).map((p) => [p.key, p]))
-
   // ---- Bucket dell'anno selezionato. Tre bucket, nessuno silenzioso.
   const delPeriodo = giocati.filter((t) => nelPeriodo(t, fYear))
   const senzaCitta = delPeriodo.filter((t) => !geoKey(t.city)).length
@@ -238,18 +270,18 @@ export function deriveMappa(data: DiaryData, fYear: string, today = todayISO()):
   const sconosciute: MappaCitta[] = []
 
   for (const g of raggruppaPerCitta(delPeriodo)) {
-    const punto = geocodeCity(g.tornei[0].city)
+    const punto = posizioneDellaCitta(g.tornei, data)
     if (!punto) {
-      // Il gazetteer non la conosce. NON sparisce: la sezione "Non ancora sulla
-      // mappa" la rende visibile, ed è così che si scopre cosa manca.
+      // Né un luogo geolocalizzato né una città che il gazetteer conosce. NON
+      // sparisce: la sezione "Non ancora sulla mappa" la rende visibile, ed è
+      // così che si scopre cosa manca.
       sconosciute.push(cittaFuoriMappa(g))
       continue
     }
-    const pos = posizioni.get(g.key)
-    if (!pos) {
-      // Geocodabile ma fuori dal riquadro (Spalato, Ibiza). Riga di lista, mai
-      // un pin: il viewBox non si adatta ai dati, altrimenti un viaggio
-      // all'estero rimpicciolisce l'Italia di tutti.
+    if (!inItaly(punto)) {
+      // Fuori dall'inquadratura (Ibiza, Barcellona, Doha). Riga di lista, mai un
+      // pin: la vista non si allarga per inseguire un viaggio all'estero,
+      // altrimenti rimpicciolisce l'Italia di tutti.
       fuoriItalia.push(cittaFuoriMappa(g))
       continue
     }
@@ -278,11 +310,9 @@ export function deriveMappa(data: DiaryData, fYear: string, today = todayISO()):
     pins.push({
       key: g.key,
       city,
-      x: pos.x,
-      y: pos.y,
-      ax: pos.ax,
-      ay: pos.ay,
-      displaced: pos.displaced,
+      lat: punto.lat,
+      lng: punto.lng,
+      preciso: punto.preciso,
       rank,
       fill: dotForRank(rank),
       best: migliore.placement,
@@ -339,8 +369,6 @@ export function deriveMappa(data: DiaryData, fYear: string, today = todayISO()):
     migliore,
     legenda,
     srSummary,
-    outline: ITALY_OUTLINE,
-    viewBox: MAP_VIEW.viewBox,
   }
 }
 
