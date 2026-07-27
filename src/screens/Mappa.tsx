@@ -14,8 +14,11 @@
 // test, ma l'elenco sotto sì, e porta gli stessi fatti in testo.
 // ============================================================================
 import { lazy, Suspense, useRef, useState } from 'react'
+import * as m from 'motion/react-m'
+import { AnimatePresence } from 'motion/react'
 import type { MappaData, MappaPin, MappaCitta, MappaTier, MappaTorneoRow } from '../lib/derive.mappa'
 import { SectionTitle, FilterChips, Badge, StatGrid, StatTile, EmptyCard, InlineLink, INK, MUTED, LINE } from '../components/ui'
+import { ENTRATA } from '../components/Motion'
 
 const ConquisteMap = lazy(() => import('../components/ConquisteMap'))
 
@@ -278,19 +281,34 @@ function CittaRow({ p, open, onToggle, onOpenTorneo, rowRef }: {
         </span>
       </button>
 
-      {open && (
-        <div style={{ padding: '0 18px 16px', borderTop: `1px solid ${LINE}` }}>
-          <div style={{ font: "700 11px 'Nunito Sans'", color: 'rgba(27,42,74,.45)', letterSpacing: '1px', textTransform: 'uppercase', margin: '13px 0 9px' }}>
-            {p.count === 1 ? '1 torneo qui' : `${p.count} tornei qui`}
-            {p.played > 0 && ` · ${p.record} · ${p.winPct}% vittorie`}
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-            {p.tornei.map((t) => (
-              <TorneoRow key={t.id} t={t} onOpen={() => onOpenTorneo(t.id)} />
-            ))}
-          </div>
-        </div>
-      )}
+      {/* L'elenco scorre fuori invece di apparire di scatto: `height: auto` è
+          animabile da Motion (misura il contenuto), non dal CSS. `overflow:
+          hidden` serve a tagliare i tornei mentre l'altezza cresce, altrimenti
+          traboccherebbero sulla riga successiva per tutta l'animazione. */}
+      <AnimatePresence initial={false}>
+        {open && (
+          <m.div
+            key="tornei"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={ENTRATA}
+            style={{ overflow: 'hidden' }}
+          >
+            <div style={{ padding: '0 18px 16px', borderTop: `1px solid ${LINE}` }}>
+              <div style={{ font: "700 11px 'Nunito Sans'", color: 'rgba(27,42,74,.45)', letterSpacing: '1px', textTransform: 'uppercase', margin: '13px 0 9px' }}>
+                {p.count === 1 ? '1 torneo qui' : `${p.count} tornei qui`}
+                {p.played > 0 && ` · ${p.record} · ${p.winPct}% vittorie`}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+                {p.tornei.map((t) => (
+                  <TorneoRow key={t.id} t={t} onOpen={() => onOpenTorneo(t.id)} />
+                ))}
+              </div>
+            </div>
+          </m.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

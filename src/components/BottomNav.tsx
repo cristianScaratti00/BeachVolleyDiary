@@ -1,5 +1,24 @@
 import type { Screen } from "../lib/models";
+import * as m from "motion/react-m";
+import { AnimatePresence } from "motion/react";
 import NavIcon from "./NavIcons";
+import { MOLLA } from "./Motion";
+
+// Speed-dial: le voci escono in sequenza invece che tutte insieme.
+//
+// `staggerDirection: -1` fa partire dall'ULTIMA voce del DOM, cioè "Nuova
+// partita", che è quella disegnata più in basso e quindi più vicina al bottone
+// premuto. Le tre voci sembrano allora uscire DAL pulsante; nell'ordine
+// naturale sembrerebbero cadere dall'alto senza motivo.
+const SPEED_DIAL = {
+  chiuso: { transition: { staggerChildren: 0.035, staggerDirection: -1 } },
+  aperto: { transition: { staggerChildren: 0.045, staggerDirection: -1 } },
+};
+
+const VOCE = {
+  chiuso: { opacity: 0, y: 14, scale: 0.92 },
+  aperto: { opacity: 1, y: 0, scale: 1 },
+};
 
 // Slot della barra: 5 voci di navigazione + l'azione centrale "Crea".
 type Slot = { kind: "nav"; key: Screen } | { kind: "action" };
@@ -107,21 +126,32 @@ export default function BottomNav({
         </div>
       </div>
 
-      {fabOpen && (
-        <div
+      <AnimatePresence>
+        {fabOpen && (
+        <m.div
+          key="speed-dial"
           onClick={onToggleFab}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.18 }}
           style={{
             position: "fixed",
             inset: 0,
             zIndex: 42,
-            animation: "overlay .2s ease",
           }}
         >
-          <div
+          <m.div
+            variants={SPEED_DIAL}
+            initial="chiuso"
+            animate="aperto"
+            exit="chiuso"
             style={{
               position: "absolute",
               left: "50%",
               bottom: 90,
+              // `translateX` resta qui e NON fra le proprietà animate: Motion
+              // scrive `transform` da sé sulle voci, non su questo contenitore.
               transform: "translateX(-50%)",
               display: "flex",
               flexDirection: "column",
@@ -129,8 +159,10 @@ export default function BottomNav({
               alignItems: "center",
             }}
           >
-            <div
+            <m.div
               className="chip"
+              variants={VOCE}
+              transition={MOLLA}
               onClick={onAssistant}
               style={{
                 display: "flex",
@@ -161,9 +193,11 @@ export default function BottomNav({
                   Premium
                 </span>
               )}
-            </div>
-            <div
+            </m.div>
+            <m.div
               className="chip"
+              variants={VOCE}
+              transition={MOLLA}
               onClick={onNewTorneo}
               style={{
                 background: "#fff",
@@ -176,9 +210,11 @@ export default function BottomNav({
               }}
             >
               Nuovo torneo
-            </div>
-            <div
+            </m.div>
+            <m.div
               className="chip"
+              variants={VOCE}
+              transition={MOLLA}
               onClick={onNewPartita}
               style={{
                 background: "#1B2A4A",
@@ -191,10 +227,11 @@ export default function BottomNav({
               }}
             >
               Nuova partita
-            </div>
-          </div>
-        </div>
-      )}
+            </m.div>
+          </m.div>
+        </m.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }

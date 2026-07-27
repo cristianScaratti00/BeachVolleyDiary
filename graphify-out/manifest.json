@@ -1,12 +1,12 @@
 {
   "package.json": {
-    "mtime": 1785148622.37368,
-    "ast_hash": "98f09e1bc181801a881a2bee015df59c",
+    "mtime": 1785155815.2852013,
+    "ast_hash": "f6a8da3a8dbe78b35e1a071743b339cf",
     "semantic_hash": ""
   },
   "src/App.tsx": {
-    "mtime": 1784930526.093394,
-    "ast_hash": "6ab0b0a2dfca74b57e47d6afa10d2073",
+    "mtime": 1785156331.0343564,
+    "ast_hash": "bcdf9e171d5da082c8314fd45f495e7c",
     "semantic_hash": ""
   },
   "src/Root.tsx": {
@@ -15,8 +15,8 @@
     "semantic_hash": ""
   },
   "src/components/BottomNav.tsx": {
-    "mtime": 1784904323.07317,
-    "ast_hash": "fbab9b7cd4fc8c0a1096edf096ae3789",
+    "mtime": 1785158944.1698558,
+    "ast_hash": "02b5f4ca82a2eba7e00879da27d3bb00",
     "semantic_hash": ""
   },
   "src/components/ConnectionSnackbar.tsx": {
@@ -115,8 +115,8 @@
     "semantic_hash": ""
   },
   "src/components/modals/Sheet.tsx": {
-    "mtime": 1784931587.8438096,
-    "ast_hash": "82ecf5a3f833b71a79c31d75dd499737",
+    "mtime": 1785158944.1722095,
+    "ast_hash": "6c8d36f0930c17a49039319532cb9bf7",
     "semantic_hash": ""
   },
   "src/components/modals/StoryModal.tsx": {
@@ -135,8 +135,8 @@
     "semantic_hash": ""
   },
   "src/components/ui.tsx": {
-    "mtime": 1784706386.6835582,
-    "ast_hash": "425bd61632efb2336f1240c4d93cba08",
+    "mtime": 1785158944.1674068,
+    "ast_hash": "a45d4f921b1a4f55b0ea75d27f9c6c7e",
     "semantic_hash": ""
   },
   "src/components/wrapped/WrappedModal.test.tsx": {
@@ -250,8 +250,8 @@
     "semantic_hash": ""
   },
   "src/main.tsx": {
-    "mtime": 1783975352.420213,
-    "ast_hash": "d1e32c91e6c06fdcd9a014e6d2875856",
+    "mtime": 1785156239.5249841,
+    "ast_hash": "9696b42a66a216240b23331444c64232",
     "semantic_hash": ""
   },
   "src/screens/Compagni.tsx": {
@@ -510,8 +510,8 @@
     "semantic_hash": ""
   },
   ".claude/settings.local.json": {
-    "mtime": 1785153990.8076305,
-    "ast_hash": "728202081a9d346e0c224a59dbd9a83c",
+    "mtime": 1785156584.3397598,
+    "ast_hash": "160b7664c191fb576bf468723aff586b",
     "semantic_hash": ""
   },
   "src/components/VenueMap.tsx": {
@@ -580,8 +580,8 @@
     "semantic_hash": ""
   },
   "src/screens/Mappa.tsx": {
-    "mtime": 1785149005.8464012,
-    "ast_hash": "fe8632e597f1bde195e1afe2a9bbaae2",
+    "mtime": 1785158944.1748197,
+    "ast_hash": "7154cb12ffa389c277895e5a18e4224a",
     "semantic_hash": ""
   },
   "supabase/migrations/20260725120000_venues.sql": {
@@ -627,6 +627,11 @@
   "src/lib/geosearch.ts": {
     "mtime": 1785153843.4938784,
     "ast_hash": "6e6f0da67bfd8a625dafa797d49180d7",
+    "semantic_hash": ""
+  },
+  "src/components/Motion.tsx": {
+    "mtime": 1785158979.4150815,
+    "ast_hash": "b691226efa8218bd1f4d530110183951",
     "semantic_hash": ""
   }
 }

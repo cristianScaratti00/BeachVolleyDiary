@@ -5,12 +5,15 @@ import { SpeedInsights } from '@vercel/speed-insights/react'
 import './index.css'
 import Root from './Root'
 import { AuthProvider } from './hooks/useAuth'
+import { MotionRoot } from './components/Motion'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <AuthProvider>
-      <Root />
-    </AuthProvider>
+    <MotionRoot>
+      <AuthProvider>
+        <Root />
+      </AuthProvider>
+    </MotionRoot>
     {/* Vercel Web Analytics + Speed Insights: attivi solo in produzione su Vercel. */}
     <Analytics />
     <SpeedInsights />

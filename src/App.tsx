@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef, Suspense, lazy } from "react";
+import { AnimatePresence } from "motion/react";
 import { useDiary } from "./hooks/useDiary";
 import { useIsWide } from "./hooks/useMedia";
 import { useAuth } from "./hooks/useAuth";
@@ -907,8 +908,15 @@ export default function App() {
         />
       )}
 
-      {modal === "torneo" && (
+      {/* I bottom-sheet vivono dentro `AnimatePresence` per un motivo solo:
+          senza, React li smonta all'istante e l'uscita non esiste. Entravano
+          animati e sparivano di colpo. Story e Wrapped restano fuori: sono
+          visori a schermo intero, non usano `Sheet` e non hanno un'uscita da
+          animare. */}
+      <AnimatePresence>
+        {modal === "torneo" && (
         <TorneoModal
+          key="torneo"
           form={form}
           editId={editId}
           setField={setField}
@@ -923,6 +931,7 @@ export default function App() {
       )}
       {modal === "partita" && (
         <PartitaModal
+          key="partita"
           form={form}
           editId={editId}
           setField={setField}
@@ -935,6 +944,7 @@ export default function App() {
       )}
       {modal === "foto" && (
         <FotoModal
+          key="foto"
           form={form}
           setField={setField}
           tournOptions={tournamentOptions(data)}
@@ -947,6 +957,7 @@ export default function App() {
       )}
       {modal === "socio" && (
         <CompagnoModal
+          key="socio"
           form={form}
           setField={setField}
           onClose={closeModal}
@@ -955,6 +966,7 @@ export default function App() {
       )}
       {modal === "torneoRapido" && (
         <QuickTorneoModal
+          key="torneoRapido"
           form={form}
           setField={setField}
           partnerOptions={partnerOptions(data)}
@@ -963,7 +975,9 @@ export default function App() {
           onClose={closeModal}
           onSave={doSaveQuickTorneo}
         />
-      )}
+        )}
+      </AnimatePresence>
+
       {modal === "story" && storyData && (
         <Suspense fallback={null}>
           <StoryModal

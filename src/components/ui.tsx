@@ -4,7 +4,11 @@
 // righe partita, empty-state…) e ad uniformare l'aspetto del progetto.
 // Tutti sono presentazionali: ricevono dati già pronti dai view-model in derive.
 // ============================================================================
+import { useEffect } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
+import * as m from 'motion/react-m'
+import { animate, useMotionValue, useTransform, useReducedMotion } from 'motion/react'
+import { MOLLA } from './Motion'
 
 export const INK = '#1B2A4A'
 export const ORANGE = '#FF6B35'
@@ -73,6 +77,11 @@ export function PageHeader({ title, subtitle, actions }: { title: ReactNode; sub
 // raggiungibili da tastiera e annunciati come premuti/non premuti; l'attivo usa
 // il navy pieno, lo stesso linguaggio dello stato selezionato della bottom nav.
 // Il bordo c'è in entrambi gli stati: cambiare filtro non muove nulla.
+//
+// Il fondo navy dell'attivo è un elemento SOLO, che scivola da una chip
+// all'altra invece di spegnersi qui e riaccendersi là (`layoutId`). Costa una
+// riga e rende leggibile il passaggio: si vede *da dove* a *dove*, che su un
+// filtro a scelta singola è l'informazione principale.
 export interface FilterOption { value: string; label: ReactNode }
 
 export function FilterChips({ options, value, onChange, label, mt = 20 }: {
@@ -82,6 +91,10 @@ export function FilterChips({ options, value, onChange, label, mt = 20 }: {
   label: string // etichetta del gruppo per gli screen reader
   mt?: number
 }) {
+  // La pillola è condivisa dentro il gruppo, non fra gruppi: due filtri nella
+  // stessa schermata (Tornei ha formato e stagione) si scambierebbero il fondo
+  // volando da un capo all'altro della pagina. `label` è già unica per gruppo.
+  const pillola = `chip-attiva-${label}`
   return (
     <div role="group" aria-label={label} style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: mt }}>
       {options.map((o) => {
@@ -94,16 +107,31 @@ export function FilterChips({ options, value, onChange, label, mt = 20 }: {
             aria-pressed={on}
             onClick={() => onChange(o.value)}
             style={{
+              position: 'relative', // regge la pillola, che è in `absolute`
               padding: '10px 15px', borderRadius: 11, cursor: 'pointer',
               font: "700 13px 'Nunito Sans'",
-              background: on ? INK : '#fff',
+              background: 'transparent',
               color: on ? '#fff' : INK,
-              border: `1px solid ${on ? INK : 'rgba(27,42,74,.16)'}`,
-              // `.chip` anima l'opacità in hover: va ripetuta, l'inline vince sulla classe.
-              transition: 'background .18s ease, color .18s ease, border-color .18s ease, opacity .15s ease',
+              // Il bordo resta anche sull'attivo, solo trasparente: toglierlo
+              // sposterebbe di un pixel il testo delle chip vicine.
+              border: `1px solid ${on ? 'transparent' : 'rgba(27,42,74,.16)'}`,
+              // `.chip` anima l'opacità in hover: va ripetuta, l'inline vince
+              // sulla classe. Il colore del testo cambia con la stessa durata
+              // della molla, o corre avanti al fondo che lo sta raggiungendo.
+              transition: 'color .18s ease, border-color .18s ease, opacity .15s ease',
             }}
           >
-            {o.label}
+            {on && (
+              <m.span
+                layoutId={pillola}
+                transition={MOLLA}
+                // `inset: -1` copre anche il bordo del bottone, altrimenti
+                // resterebbe un filo chiaro attorno al navy.
+                style={{ position: 'absolute', inset: -1, borderRadius: 11, background: INK, zIndex: 0 }}
+              />
+            )}
+            {/* Sopra la pillola, o il fondo navy coprirebbe l'etichetta. */}
+            <span style={{ position: 'relative', zIndex: 1 }}>{o.label}</span>
           </button>
         )
       })}
@@ -157,11 +185,41 @@ export function StatGrid({ children, min = 130, radius = 12, mt = 20 }: { childr
   )
 }
 
+// Numero che sale da zero all'apertura della schermata.
+//
+// Anima SOLO i numeri veri: `StatTile` riceve un `ReactNode`, e metà delle
+// chiamate passano già stringhe formattate ("67%", "+12", "3-1"). Contare da
+// zero su una stringa vuol dire non contare affatto, quindi il tipo decide.
+//
+// Il valore è scritto direttamente nel DOM dalla MotionValue, senza passare da
+// uno stato React: un `setState` per fotogramma ri-renderizzerebbe la card
+// sessanta volte al secondo per far salire una cifra.
+function NumeroCheSale({ value }: { value: number }) {
+  const ridotto = useReducedMotion()
+  const mv = useMotionValue(ridotto ? value : 0)
+  const testo = useTransform(mv, (v) => String(Math.round(v)))
+
+  useEffect(() => {
+    if (ridotto) {
+      mv.set(value)
+      return
+    }
+    // Curva che parte veloce e si posa piano: il numero è leggibile quasi
+    // subito e gli ultimi decimi servono solo a far atterrare l'ultima cifra.
+    const corsa = animate(mv, value, { duration: 0.8, ease: [0.16, 1, 0.3, 1] })
+    return () => corsa.stop()
+  }, [value, ridotto, mv])
+
+  return <m.span>{testo}</m.span>
+}
+
 export function StatTile({ value, label, color, valueSize = 30, pad = 18 }: { value: ReactNode; label: ReactNode; color?: string; valueSize?: number; pad?: number | string }) {
   const big = valueSize >= 40
   return (
     <div style={{ background: '#fff', padding: pad }}>
-      <div className="num" style={{ fontSize: valueSize, color, ...(big ? { lineHeight: 1 } : {}) }}>{value}</div>
+      <div className="num" style={{ fontSize: valueSize, color, ...(big ? { lineHeight: 1 } : {}) }}>
+        {typeof value === 'number' ? <NumeroCheSale value={value} /> : value}
+      </div>
       <div className="lbl" style={{ marginTop: big ? 6 : 4 }}>{label}</div>
     </div>
   )

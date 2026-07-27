@@ -1,5 +1,8 @@
 import type { CSSProperties, ChangeEvent, ReactNode } from 'react'
+import * as m from 'motion/react-m'
+import type { PanInfo } from 'motion/react'
 import { CITTA_SUGGERITE } from '../../lib/geo'
+import { ENTRATA, MOLLA } from '../Motion'
 
 interface SheetProps {
   maxWidth?: number
@@ -8,21 +11,70 @@ interface SheetProps {
   children: ReactNode
 }
 
+// Quanto in basso va portato il foglio perché il rilascio lo chiuda, e quanto
+// veloce deve andare il dito perché la distanza non conti più.
+//
+// I due criteri servono entrambi: 120px da soli obbligherebbero a un gesto
+// lungo, e la sola velocità chiuderebbe il foglio su una sfiorata. Insieme
+// danno il comportamento che si conosce dai bottom-sheet di sistema — una
+// buttata giù decisa basta, un trascinamento lento va portato a termine.
+const CHIUDI_OLTRE_PX = 120
+const CHIUDI_OLTRE_VELOCITA = 550
+
 // Shared bottom-sheet modal shell used by all forms.
 export function Sheet({ maxWidth = 520, scroll = true, onClose, children }: SheetProps) {
   const inner: CSSProperties = {
     background: '#FAF8F5', width: '100%', maxWidth,
     borderRadius: '22px 22px 0 0', padding: 24,
-    animation: 'sheet .26s cubic-bezier(.2,.8,.2,1) both',
   }
   if (scroll) { inner.maxHeight = '92vh'; inner.overflowY = 'auto' }
+
+  const fineTrascinamento = (_e: unknown, info: PanInfo) => {
+    if (info.offset.y > CHIUDI_OLTRE_PX || info.velocity.y > CHIUDI_OLTRE_VELOCITA) onClose()
+    // Se non basta, non serve fare niente: senza `dragSnapToOrigin` Motion
+    // riporta da sé il foglio a `y: 0` con la molla.
+  }
+
   return (
-    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(27,42,74,.35)', backdropFilter: 'blur(3px)', zIndex: 60, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', animation: 'overlay .2s ease' }}>
-      <div onClick={(e) => e.stopPropagation()} style={inner}>
-        <div style={{ width: 40, height: 4, background: 'rgba(27,42,74,.15)', borderRadius: 4, margin: '0 auto 18px' }} />
+    <m.div
+      onClick={onClose}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      style={{ position: 'fixed', inset: 0, background: 'rgba(27,42,74,.35)', backdropFilter: 'blur(3px)', zIndex: 60, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
+    >
+      <m.div
+        onClick={(e) => e.stopPropagation()}
+        initial={{ y: 24, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        // L'uscita esce di scena per intero invece di dissolversi sul posto:
+        // il foglio "torna da dove è venuto", ed è la metà che finora mancava
+        // (React lo smontava di colpo, senza modo di animarlo).
+        exit={{ y: '100%', opacity: 0, transition: { duration: 0.2, ease: [0.4, 0, 1, 1] } }}
+        transition={ENTRATA}
+        drag="y"
+        // Solo verso il basso: tirare in su un foglio già appoggiato al fondo
+        // non vuol dire niente. L'elasticità lascia comunque un cenno di
+        // resistenza, così il gesto non sembra bloccato.
+        dragConstraints={{ top: 0, bottom: 0 }}
+        dragElastic={{ top: 0.02, bottom: 0.9 }}
+        dragMomentum={false}
+        dragTransition={{ bounceStiffness: 460, bounceDamping: 38 }}
+        onDragEnd={fineTrascinamento}
+        whileDrag={{ cursor: 'grabbing' }}
+        style={inner}
+      >
+        {/* La maniglia non è più solo decorativa: `dragListener` sta sul foglio
+            intero, ma questa è la parte che la mano cerca per trascinare. */}
+        <m.div
+          layout="position"
+          transition={MOLLA}
+          style={{ width: 40, height: 4, background: 'rgba(27,42,74,.15)', borderRadius: 4, margin: '0 auto 18px', cursor: 'grab' }}
+        />
         {children}
-      </div>
-    </div>
+      </m.div>
+    </m.div>
   )
 }
 
