@@ -160,22 +160,16 @@ export function mapPhotonFeature(f: PhotonFeature, i: number): LuogoTrovato | nu
 
 export class GeoSearchError extends Error {}
 
-/**
- * Cerca un luogo. Ritorna [] per le query troppo corte, senza toccare la rete.
- * Lancia `GeoSearchError` se il servizio non risponde — chi chiama lo mostra e
- * lascia comunque disponibili GPS e coordinate a mano.
- * `signal` serve a buttare via la richiesta di un tasto già superato.
- */
-export async function cercaLuoghi(query: string, signal?: AbortSignal): Promise<LuogoTrovato[]> {
-  const q = query.trim()
-  if (q.length < MIN_QUERY) return []
-
+// Interroga Photon e restituisce le feature grezze. Le due ricerche (luogo e
+// città) cambiano solo per i filtri nella query: il giro di rete, gli errori e
+// l'annullamento sono gli stessi, e vale la pena sbagliarli in un posto solo.
+async function chiediAPhoton(query: string, filtri: string, signal?: AbortSignal): Promise<PhotonFeature[]> {
   // ⚠️ NIENTE `lang`. Photon accetta solo default/de/en/fr: passargli `it` fa
   // rispondere 400 a OGNI richiesta, e la ricerca sembra semplicemente rotta.
   // Omesso vale "default", cioè il nome come sta nei dati OSM. Non garantisce
   // l'italiano — lo stesso posto può tornare "Italia" o "Italy" a seconda del
   // server che risponde — ma è l'opzione più vicina, e il paese è solo contesto.
-  const url = `${ENDPOINT}?q=${encodeURIComponent(q)}&limit=${LIMIT}&lat=${BIAS.lat}&lon=${BIAS.lon}`
+  const url = `${ENDPOINT}?q=${encodeURIComponent(query)}&limit=${LIMIT}&lat=${BIAS.lat}&lon=${BIAS.lon}${filtri}`
 
   let res: Response
   try {
@@ -195,10 +189,22 @@ export async function cercaLuoghi(query: string, signal?: AbortSignal): Promise<
   }
 
   const features = (body as { features?: unknown })?.features
-  if (!Array.isArray(features)) return []
+  return Array.isArray(features) ? (features as PhotonFeature[]) : []
+}
 
+/**
+ * Cerca un luogo. Ritorna [] per le query troppo corte, senza toccare la rete.
+ * Lancia `GeoSearchError` se il servizio non risponde — chi chiama lo mostra e
+ * lascia comunque disponibili GPS e coordinate a mano.
+ * `signal` serve a buttare via la richiesta di un tasto già superato.
+ */
+export async function cercaLuoghi(query: string, signal?: AbortSignal): Promise<LuogoTrovato[]> {
+  const q = query.trim()
+  if (q.length < MIN_QUERY) return []
+
+  const features = await chiediAPhoton(q, '', signal)
   const luoghi = features
-    .map((f, i) => mapPhotonFeature(f as PhotonFeature, i))
+    .map((f, i) => mapPhotonFeature(f, i))
     .filter((l): l is LuogoTrovato => l !== null)
 
   // Photon può restituire la stessa cosa a più zoom (il nodo e il poligono):
@@ -206,6 +212,70 @@ export async function cercaLuoghi(query: string, signal?: AbortSignal): Promise<
   const visti = new Set<string>()
   return luoghi.filter((l) => {
     const k = `${l.nome}|${l.citta}|${l.lat.toFixed(4)},${l.lng.toFixed(4)}`
+    if (visti.has(k)) return false
+    visti.add(k)
+    return true
+  })
+}
+
+// ----------------------------------------------------------------- le città
+//
+// Il campo "Città" è l'altra metà del problema dei doppioni: la ricerca del
+// luogo risolve la spiaggia, ma chi il posto lo scrive a mano continua a
+// produrre "Riccione" / "riccione " / "Riccione (RN)". Cercare la città sullo
+// stesso gazetteer significa che il nome arriva già scritto in un modo solo.
+
+export interface CittaTrovata {
+  id: string
+  nome: string // "Riccione"
+  contesto: string // "Rimini · Emilia-Romagna · Italia" — distingue gli omonimi
+  lat: number
+  lng: number
+}
+
+// Solo i `place` che sono davvero un posto abitato dove si può giocare.
+//
+// `osm_tag=place` senza valore lascia passare anche `quarter`,
+// `neighbourhood` e `isolated_dwelling`: cercando "riccio" quelli occupano
+// metà delle otto righe e spingono fuori Riccione. `hamlet` invece serve —
+// molte località costiere sono mappate come frazione, non come comune.
+const TIPI_CITTA = ['city', 'town', 'village', 'hamlet', 'suburb'] as const
+const FILTRO_CITTA = TIPI_CITTA.map((t) => `&osm_tag=place:${t}`).join('')
+
+export function mapPhotonCitta(f: PhotonFeature, i: number): CittaTrovata | null {
+  const p = f.properties ?? {}
+  const nome = nomeDi(p)
+  const punto = coordinateDi(f.geometry)
+  if (!nome || !punto) return null
+  return {
+    id: p.osm_type && p.osm_id ? `${p.osm_type}${p.osm_id}` : `c${i}`,
+    nome,
+    contesto: contestoDi(p, nome),
+    ...punto,
+  }
+}
+
+/**
+ * Cerca una città (comune, frazione, quartiere abitato). Stesse regole di
+ * `cercaLuoghi`: [] sotto `MIN_QUERY` senza toccare la rete, `GeoSearchError`
+ * se il servizio non risponde — e chi chiama deve poter scrivere a mano lo
+ * stesso, perché si gioca anche dove il gazetteer non arriva.
+ */
+export async function cercaCitta(query: string, signal?: AbortSignal): Promise<CittaTrovata[]> {
+  const q = query.trim()
+  if (q.length < MIN_QUERY) return []
+
+  const features = await chiediAPhoton(q, FILTRO_CITTA, signal)
+  const citta = features
+    .map((f, i) => mapPhotonCitta(f, i))
+    .filter((c): c is CittaTrovata => c !== null)
+
+  // Qui i doppioni sono più frequenti che sui luoghi: lo stesso comune torna
+  // spesso come nodo e come poligono amministrativo. Due righe identiche in una
+  // tendina sono peggio che altrove — si sceglie a caso senza accorgersene.
+  const visti = new Set<string>()
+  return citta.filter((c) => {
+    const k = `${c.nome}|${c.contesto}`
     if (visti.has(k)) return false
     visti.add(k)
     return true

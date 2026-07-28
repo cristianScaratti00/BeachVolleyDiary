@@ -13,12 +13,12 @@
 // verso un servizio esterno — vedi `lib/geosearch.ts` per il perché — ed è
 // facoltativa: se non risponde, gli altri due modi restano.
 // ============================================================================
-import { useEffect, useState } from 'react'
-import type { CSSProperties, ChangeEvent, ReactNode } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import type { CSSProperties, ChangeEvent, KeyboardEvent, ReactNode } from 'react'
 import { inputStyle, selectStyle } from './Sheet'
 import { venueLabel, parseLatLng, formatLatLng } from '../../lib/derive'
-import { cercaLuoghi, MIN_QUERY } from '../../lib/geosearch'
-import type { LuogoTrovato } from '../../lib/geosearch'
+import { cercaLuoghi, cercaCitta, MIN_QUERY } from '../../lib/geosearch'
+import type { LuogoTrovato, CittaTrovata } from '../../lib/geosearch'
 import type { AnyForm, SetField, Venue } from '../../lib/models'
 
 const MUTED = 'rgba(27,42,74,.5)'
@@ -185,8 +185,9 @@ function RicercaLuogo({ onPick }: { onPick: (l: LuogoTrovato) => void }) {
       </div>
 
       {/* Vive sempre nel DOM, anche vuoto: una regione live inserita solo
-          quando ha qualcosa da dire spesso non viene annunciata. */}
-      <div role="status" aria-live="polite" style={{ ...hintStyle, color: stato === 'errore' ? DANGER : MUTED }}>
+          quando ha qualcosa da dire spesso non viene annunciata. Il nome la
+          distingue da quella del campo "Città", che sta nello stesso pannello. */}
+      <div role="status" aria-live="polite" aria-label="Esito della ricerca del luogo" style={{ ...hintStyle, color: stato === 'errore' ? DANGER : MUTED }}>
         {messaggio}
       </div>
 
@@ -223,6 +224,205 @@ function RicercaLuogo({ onPick }: { onPick: (l: LuogoTrovato) => void }) {
           ))}
         </ul>
       )}
+    </div>
+  )
+}
+
+// ------------------------------------------------------------------- città
+//
+// Il campo "Città" è un combobox sullo stesso gazetteer della ricerca qui
+// sopra, non più un input a testo libero. Motivo: la ricerca del luogo risolve
+// la spiaggia, ma chi compila i campi a mano continuava a produrre "Riccione" /
+// "riccione " / "Riccione (RN)" — tre città diverse per la mappa e per i
+// raggruppamenti, un doppione solo da guardare.
+//
+// Resta un input vero, non un select: si gioca anche dove il gazetteer non
+// arriva, e lì si scrive a mano e si salva lo stesso. La tendina suggerisce,
+// non vincola — e se il servizio non risponde il campo non cambia mestiere.
+//
+// Qui una tendina in overlay invece dell'elenco statico usato dalla ricerca del
+// luogo: quello riempie tre campi ed è il centro del pannello, questo è un
+// campo fra gli altri, e spingere in basso il resto del form ad ogni lettera
+// farebbe ballare tutto ciò che sta sotto.
+const MAX_TENDINA_PX = 240
+
+function CittaAutocomplete({ value, onChange }: { value: string; onChange: (citta: string) => void }) {
+  // `q` è solo quello che viene DIGITATO: la ricerca del luogo qui sopra scrive
+  // in `value` senza passare di qui, e non deve far comparire una tendina su un
+  // campo che l'utente non ha toccato.
+  const [q, setQ] = useState('')
+  const [esiti, setEsiti] = useState<CittaTrovata[]>([])
+  const [aperto, setAperto] = useState(false)
+  const [attivo, setAttivo] = useState(-1)
+  const [stato, setStato] = useState<StatoRicerca>('fermo')
+  const listaRef = useRef<HTMLUListElement>(null)
+
+  useEffect(() => {
+    const testo = q.trim()
+    if (testo.length < MIN_QUERY) {
+      setEsiti([])
+      setAperto(false)
+      setStato('fermo')
+      return
+    }
+    const ac = new AbortController()
+    const timer = setTimeout(() => {
+      setStato('cerco')
+      cercaCitta(testo, ac.signal)
+        .then((trovate) => {
+          setEsiti(trovate)
+          setAttivo(-1)
+          setAperto(trovate.length > 0)
+          setStato(trovate.length ? 'fermo' : 'nessuno')
+        })
+        .catch(() => {
+          if (ac.signal.aborted) return
+          setEsiti([])
+          setAperto(false)
+          setStato('errore')
+        })
+    }, ATTESA_MS)
+    return () => {
+      clearTimeout(timer)
+      ac.abort()
+    }
+  }, [q])
+
+  // La tendina si apre dentro un foglio che scorre: se il campo sta in fondo,
+  // nasce sotto il bordo visibile e sembra che non sia successo niente. Il
+  // foglio la va a prendere da sé.
+  useEffect(() => {
+    if (aperto) listaRef.current?.scrollIntoView({ block: 'nearest' })
+  }, [aperto])
+
+  // La voce raggiunta da tastiera deve restare dentro la tendina, che ha una
+  // sua altezza massima: senza questo, dal quinto risultato in giù si naviga
+  // alla cieca.
+  useEffect(() => {
+    if (attivo < 0) return
+    listaRef.current?.children[attivo]?.scrollIntoView({ block: 'nearest' })
+  }, [attivo])
+
+  const scegli = (c: CittaTrovata) => {
+    onChange(c.nome)
+    setAperto(false)
+    setAttivo(-1)
+    setStato('fermo')
+  }
+
+  const suTasto = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'ArrowDown') {
+      if (!esiti.length) return
+      e.preventDefault()
+      if (!aperto) {
+        setAperto(true)
+        setAttivo(0)
+        return
+      }
+      setAttivo((i) => (i + 1) % esiti.length)
+    } else if (e.key === 'ArrowUp') {
+      if (!aperto || !esiti.length) return
+      e.preventDefault()
+      setAttivo((i) => (i <= 0 ? esiti.length - 1 : i - 1))
+    } else if (e.key === 'Enter') {
+      // Solo con una voce evidenziata: a tendina aperta ma senza selezione
+      // l'Invio deve restare quello del form, non mangiare il tasto.
+      if (aperto && attivo >= 0 && esiti[attivo]) {
+        e.preventDefault()
+        scegli(esiti[attivo])
+      }
+    } else if (e.key === 'Escape') {
+      if (!aperto) return
+      e.preventDefault()
+      setAperto(false)
+      setAttivo(-1)
+    }
+  }
+
+  const messaggio =
+    stato === 'cerco' ? 'Cerco…'
+    : stato === 'nessuno' ? 'Nessuna città trovata: puoi scriverla a mano.'
+    : stato === 'errore' ? 'Suggerimenti non disponibili: scrivi la città a mano.'
+    : ''
+
+  return (
+    <div>
+      <FieldLabel htmlFor="venue-city">Città</FieldLabel>
+      <div style={{ position: 'relative' }}>
+        <input
+          id="venue-city"
+          value={value}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => {
+            onChange(e.target.value)
+            setQ(e.target.value)
+          }}
+          onKeyDown={suTasto}
+          // La scelta col mouse arriva dopo il blur: le voci annullano il
+          // `mousedown`, così il campo non perde il fuoco e il click va a segno.
+          onBlur={() => { setAperto(false); setAttivo(-1) }}
+          placeholder="es. Riccione"
+          autoComplete="off"
+          role="combobox"
+          aria-expanded={aperto}
+          aria-controls="venue-city-list"
+          aria-autocomplete="list"
+          aria-activedescendant={aperto && attivo >= 0 ? `venue-city-opt-${attivo}` : undefined}
+          aria-describedby="venue-city-hint"
+          style={inputStyle}
+        />
+
+        {/* Sempre nel DOM anche da chiusa: `aria-controls` deve puntare a
+            qualcosa che esiste, o la relazione si rompe a metà. */}
+        <ul
+          ref={listaRef}
+          id="venue-city-list"
+          role="listbox"
+          aria-label="Città trovate"
+          hidden={!aperto || esiti.length === 0}
+          style={{
+            position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, zIndex: 5,
+            listStyle: 'none', margin: 0, padding: 4,
+            maxHeight: MAX_TENDINA_PX, overflowY: 'auto',
+            background: '#fff', border: '1px solid rgba(27,42,74,.16)', borderRadius: 11,
+            boxShadow: '0 12px 28px -12px rgba(27,42,74,.4)',
+          }}
+        >
+          {esiti.map((c, i) => (
+            <li
+              key={c.id}
+              id={`venue-city-opt-${i}`}
+              role="option"
+              aria-selected={i === attivo}
+              onMouseDown={(e) => e.preventDefault()}
+              onMouseEnter={() => setAttivo(i)}
+              onClick={() => scegli(c)}
+              style={{
+                cursor: 'pointer', borderRadius: 8, padding: '8px 10px',
+                background: i === attivo ? '#F2F0EC' : 'transparent',
+              }}
+            >
+              <span style={{ display: 'block', font: "700 13.5px 'Nunito Sans'", color: '#1B2A4A' }}>{c.nome}</span>
+              {/* Senza il contesto le sei "Milano" della lista sono identiche. */}
+              {c.contesto && (
+                <span style={{ display: 'block', font: "600 11.5px 'Nunito Sans'", color: MUTED, marginTop: 2 }}>
+                  {c.contesto}
+                </span>
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div id="venue-city-hint" style={hintStyle}>
+        Scrivi le prime lettere e scegli dai suggerimenti: così la stessa città
+        resta scritta allo stesso modo ovunque. Se non c'è, scrivila a mano.
+      </div>
+
+      {/* Separata dall'aiuto, come nella ricerca qui sopra: l'aiuto si legge al
+          fuoco e non cambia mai, questa parla solo quando ha una novità. */}
+      <div role="status" aria-live="polite" aria-label="Esito della ricerca della città" style={{ ...hintStyle, color: stato === 'errore' ? DANGER : MUTED }}>
+        {messaggio}
+      </div>
     </div>
   )
 }
@@ -283,16 +483,10 @@ function NewVenueFields({ form, setField }: { form: AnyForm; setField: SetField 
         />
       </div>
 
-      <div>
-        <FieldLabel htmlFor="venue-city">Città</FieldLabel>
-        <input
-          id="venue-city"
-          value={form.newVenueCity ?? ''}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => setField('newVenueCity', e.target.value)}
-          placeholder="es. Riccione"
-          style={inputStyle}
-        />
-      </div>
+      <CittaAutocomplete
+        value={form.newVenueCity ?? ''}
+        onChange={(citta) => setField('newVenueCity', citta)}
+      />
 
       <div>
         <FieldLabel htmlFor="venue-coords">Coordinate (facoltative)</FieldLabel>

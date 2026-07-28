@@ -468,7 +468,7 @@
       "source_file": "src/App.tsx",
       "source_location": "L1",
       "id": "src_app",
-      "community": 16,
+      "community": 2,
       "norm_label": "app.tsx"
     },
     {
@@ -477,7 +477,7 @@
       "source_file": "src/App.tsx",
       "source_location": "L73",
       "id": "src_app_diario",
-      "community": 16,
+      "community": 2,
       "norm_label": "diario"
     },
     {
@@ -486,7 +486,7 @@
       "source_file": "src/App.tsx",
       "source_location": "L74",
       "id": "src_app_creachat",
-      "community": 16,
+      "community": 2,
       "norm_label": "creachat"
     },
     {
@@ -495,7 +495,7 @@
       "source_file": "src/App.tsx",
       "source_location": "L80",
       "id": "src_app_storymodal",
-      "community": 16,
+      "community": 2,
       "norm_label": "storymodal"
     },
     {
@@ -504,7 +504,7 @@
       "source_file": "src/App.tsx",
       "source_location": "L83",
       "id": "src_app_wrappedmodal",
-      "community": 16,
+      "community": 2,
       "norm_label": "wrappedmodal"
     },
     {
@@ -513,7 +513,7 @@
       "source_file": "src/App.tsx",
       "source_location": "L85",
       "id": "src_app_app",
-      "community": 16,
+      "community": 2,
       "norm_label": "app()"
     },
     {
@@ -522,7 +522,7 @@
       "source_file": "src/Root.tsx",
       "source_location": "L1",
       "id": "src_root",
-      "community": 2,
+      "community": 1,
       "norm_label": "root.tsx"
     },
     {
@@ -531,7 +531,7 @@
       "source_file": "src/Root.tsx",
       "source_location": "L8",
       "id": "src_root_root",
-      "community": 2,
+      "community": 1,
       "norm_label": "root()"
     },
     {
@@ -603,7 +603,7 @@
       "source_file": "src/components/ConnectionSnackbar.tsx",
       "source_location": "L1",
       "id": "components_connectionsnackbar",
-      "community": 12,
+      "community": 1,
       "norm_label": "connectionsnackbar.tsx"
     },
     {
@@ -612,7 +612,7 @@
       "source_file": "src/components/ConnectionSnackbar.tsx",
       "source_location": "L10",
       "id": "components_connectionsnackbar_connectionsnackbar",
-      "community": 12,
+      "community": 1,
       "norm_label": "connectionsnackbar()"
     },
     {
@@ -747,7 +747,7 @@
       "source_file": "src/components/Motion.tsx",
       "source_location": "L86",
       "id": "components_motion_motionroot",
-      "community": 66,
+      "community": 1,
       "norm_label": "motionroot()"
     },
     {
@@ -783,7 +783,7 @@
       "source_file": "src/components/PhotoLightbox.tsx",
       "source_location": "L1",
       "id": "components_photolightbox",
-      "community": 37,
+      "community": 12,
       "norm_label": "photolightbox.tsx"
     },
     {
@@ -792,7 +792,7 @@
       "source_file": "src/components/PhotoLightbox.tsx",
       "source_location": "L5",
       "id": "components_photolightbox_shot",
-      "community": 37,
+      "community": 12,
       "norm_label": "shot"
     },
     {
@@ -801,7 +801,7 @@
       "source_file": "src/components/PhotoLightbox.tsx",
       "source_location": "L10",
       "id": "components_photolightbox_photolightboxprops",
-      "community": 37,
+      "community": 12,
       "norm_label": "photolightboxprops"
     },
     {
@@ -810,7 +810,7 @@
       "source_file": "src/components/PhotoLightbox.tsx",
       "source_location": "L18",
       "id": "components_photolightbox_extof",
-      "community": 37,
+      "community": 12,
       "norm_label": "extof()"
     },
     {
@@ -819,7 +819,7 @@
       "source_file": "src/components/PhotoLightbox.tsx",
       "source_location": "L31",
       "id": "components_photolightbox_photolightbox",
-      "community": 37,
+      "community": 12,
       "norm_label": "photolightbox()"
     },
     {
@@ -864,7 +864,7 @@
       "source_file": "src/components/Sidebar.tsx",
       "source_location": "L29",
       "id": "components_sidebar_sidebar",
-      "community": 2,
+      "community": 1,
       "norm_label": "sidebar()"
     },
     {
@@ -1089,7 +1089,7 @@
       "source_file": "src/components/modals/CompagnoModal.tsx",
       "source_location": "L5",
       "id": "modals_compagnomodal_compagnomodalprops",
-      "community": 54,
+      "community": 56,
       "norm_label": "compagnomodalprops"
     },
     {
@@ -1116,7 +1116,7 @@
       "source_file": "src/components/modals/FotoModal.tsx",
       "source_location": "L6",
       "id": "modals_fotomodal_fotomodalprops",
-      "community": 54,
+      "community": 56,
       "norm_label": "fotomodalprops"
     },
     {
@@ -1161,7 +1161,7 @@
       "source_file": "src/components/modals/PartitaModal.tsx",
       "source_location": "L8",
       "id": "modals_partitamodal_partitamodalprops",
-      "community": 54,
+      "community": 56,
       "norm_label": "partitamodalprops"
     },
     {
@@ -1188,7 +1188,7 @@
       "source_file": "src/components/modals/QuickTorneoModal.tsx",
       "source_location": "L7",
       "id": "modals_quicktorneomodal_quicktorneomodalprops",
-      "community": 54,
+      "community": 56,
       "norm_label": "quicktorneomodalprops"
     },
     {
@@ -1386,7 +1386,7 @@
       "source_file": "src/components/modals/TorneoModal.tsx",
       "source_location": "L1",
       "id": "modals_torneomodal",
-      "community": 63,
+      "community": 56,
       "norm_label": "torneomodal.tsx"
     },
     {
@@ -1395,7 +1395,7 @@
       "source_file": "src/components/modals/TorneoModal.tsx",
       "source_location": "L7",
       "id": "modals_torneomodal_fieldwrap",
-      "community": 63,
+      "community": 56,
       "norm_label": "fieldwrap"
     },
     {
@@ -1404,7 +1404,7 @@
       "source_file": "src/components/modals/TorneoModal.tsx",
       "source_location": "L8",
       "id": "modals_torneomodal_namestyle",
-      "community": 63,
+      "community": 56,
       "norm_label": "namestyle"
     },
     {
@@ -1413,7 +1413,7 @@
       "source_file": "src/components/modals/TorneoModal.tsx",
       "source_location": "L10",
       "id": "modals_torneomodal_torneomodalprops",
-      "community": 54,
+      "community": 56,
       "norm_label": "torneomodalprops"
     },
     {
@@ -1422,7 +1422,7 @@
       "source_file": "src/components/modals/TorneoModal.tsx",
       "source_location": "L23",
       "id": "modals_torneomodal_torneomodal",
-      "community": 63,
+      "community": 56,
       "norm_label": "torneomodal()"
     },
     {
@@ -1480,10 +1480,19 @@
       "norm_label": "cerca"
     },
     {
+      "label": "cercaCitta",
+      "file_type": "code",
+      "source_file": "src/components/modals/VenuePicker.test.tsx",
+      "source_location": "L20",
+      "id": "modals_venuepicker_test_cercacitta",
+      "community": 52,
+      "norm_label": "cercacitta"
+    },
+    {
       "label": "bagno",
       "file_type": "code",
       "source_file": "src/components/modals/VenuePicker.test.tsx",
-      "source_location": "L25",
+      "source_location": "L27",
       "id": "modals_venuepicker_test_bagno",
       "community": 52,
       "norm_label": "bagno"
@@ -1492,7 +1501,7 @@
       "label": "spiaggia",
       "file_type": "code",
       "source_file": "src/components/modals/VenuePicker.test.tsx",
-      "source_location": "L29",
+      "source_location": "L31",
       "id": "modals_venuepicker_test_spiaggia",
       "community": 52,
       "norm_label": "spiaggia"
@@ -1501,16 +1510,34 @@
       "label": "renderPicker()",
       "file_type": "code",
       "source_file": "src/components/modals/VenuePicker.test.tsx",
-      "source_location": "L36",
+      "source_location": "L38",
       "id": "modals_venuepicker_test_renderpicker",
       "community": 52,
       "norm_label": "renderpicker()"
     },
     {
+      "label": "statoRicerca()",
+      "file_type": "code",
+      "source_file": "src/components/modals/VenuePicker.test.tsx",
+      "source_location": "L46",
+      "id": "modals_venuepicker_test_statoricerca",
+      "community": 52,
+      "norm_label": "statoricerca()"
+    },
+    {
+      "label": "statoCitta()",
+      "file_type": "code",
+      "source_file": "src/components/modals/VenuePicker.test.tsx",
+      "source_location": "L47",
+      "id": "modals_venuepicker_test_statocitta",
+      "community": 52,
+      "norm_label": "statocitta()"
+    },
+    {
       "label": "digita()",
       "file_type": "code",
       "source_file": "src/components/modals/VenuePicker.test.tsx",
-      "source_location": "L48",
+      "source_location": "L55",
       "id": "modals_venuepicker_test_digita",
       "community": 52,
       "norm_label": "digita()"
@@ -1519,10 +1546,55 @@
       "label": "passaIlDebounce()",
       "file_type": "code",
       "source_file": "src/components/modals/VenuePicker.test.tsx",
-      "source_location": "L55",
+      "source_location": "L62",
       "id": "modals_venuepicker_test_passaildebounce",
       "community": 52,
       "norm_label": "passaildebounce()"
+    },
+    {
+      "label": "riccione",
+      "file_type": "code",
+      "source_file": "src/components/modals/VenuePicker.test.tsx",
+      "source_location": "L202",
+      "id": "modals_venuepicker_test_riccione",
+      "community": 52,
+      "norm_label": "riccione"
+    },
+    {
+      "label": "riccia",
+      "file_type": "code",
+      "source_file": "src/components/modals/VenuePicker.test.tsx",
+      "source_location": "L205",
+      "id": "modals_venuepicker_test_riccia",
+      "community": 52,
+      "norm_label": "riccia"
+    },
+    {
+      "label": "campoCitta()",
+      "file_type": "code",
+      "source_file": "src/components/modals/VenuePicker.test.tsx",
+      "source_location": "L209",
+      "id": "modals_venuepicker_test_campocitta",
+      "community": 52,
+      "norm_label": "campocitta()"
+    },
+    {
+      "label": "tendina()",
+      "file_type": "code",
+      "source_file": "src/components/modals/VenuePicker.test.tsx",
+      "source_location": "L213",
+      "id": "modals_venuepicker_test_tendina",
+      "community": 52,
+      "norm_label": "tendina()"
+    },
+    {
+      "label": "voci()",
+      "file_type": "code",
+      "source_file": "src/components/modals/VenuePicker.test.tsx",
+      "source_location": "L214",
+      "id": "modals_venuepicker_test_voci",
+      "community": 52,
+      "norm_label": "voci()"
     },
     {
       "label": "VenuePicker.tsx",
@@ -1575,7 +1647,7 @@
       "source_file": "src/components/modals/VenuePicker.tsx",
       "source_location": "L58",
       "id": "modals_venuepicker_venuepickerprops",
-      "community": 54,
+      "community": 56,
       "norm_label": "venuepickerprops"
     },
     {
@@ -1606,10 +1678,19 @@
       "norm_label": "ricercaluogo()"
     },
     {
+      "label": "CittaAutocomplete()",
+      "file_type": "code",
+      "source_file": "src/components/modals/VenuePicker.tsx",
+      "source_location": "L249",
+      "id": "modals_venuepicker_cittaautocomplete",
+      "community": 50,
+      "norm_label": "cittaautocomplete()"
+    },
+    {
       "label": "NewVenueFields()",
       "file_type": "code",
       "source_file": "src/components/modals/VenuePicker.tsx",
-      "source_location": "L231",
+      "source_location": "L431",
       "id": "modals_venuepicker_newvenuefields",
       "community": 50,
       "norm_label": "newvenuefields()"
@@ -1618,9 +1699,9 @@
       "label": "SelectedVenueNote()",
       "file_type": "code",
       "source_file": "src/components/modals/VenuePicker.tsx",
-      "source_location": "L332",
+      "source_location": "L526",
       "id": "modals_venuepicker_selectedvenuenote",
-      "community": 46,
+      "community": 50,
       "norm_label": "selectedvenuenote()"
     },
     {
@@ -1629,7 +1710,7 @@
       "source_file": "src/components/ui.tsx",
       "source_location": "L1",
       "id": "components_ui",
-      "community": 22,
+      "community": 37,
       "norm_label": "ui.tsx"
     },
     {
@@ -1638,7 +1719,7 @@
       "source_file": "src/components/ui.tsx",
       "source_location": "L19",
       "id": "components_ui_badgetone",
-      "community": 22,
+      "community": 37,
       "norm_label": "badgetone"
     },
     {
@@ -1647,7 +1728,7 @@
       "source_file": "src/components/ui.tsx",
       "source_location": "L20",
       "id": "components_ui_badgesize",
-      "community": 22,
+      "community": 37,
       "norm_label": "badgesize"
     },
     {
@@ -1665,7 +1746,7 @@
       "source_file": "src/components/ui.tsx",
       "source_location": "L40",
       "id": "components_ui_btnvariant",
-      "community": 22,
+      "community": 37,
       "norm_label": "btnvariant"
     },
     {
@@ -1674,7 +1755,7 @@
       "source_file": "src/components/ui.tsx",
       "source_location": "L42",
       "id": "components_ui_btnbase",
-      "community": 22,
+      "community": 37,
       "norm_label": "btnbase"
     },
     {
@@ -1683,7 +1764,7 @@
       "source_file": "src/components/ui.tsx",
       "source_location": "L56",
       "id": "components_ui_button",
-      "community": 22,
+      "community": 53,
       "norm_label": "button()"
     },
     {
@@ -1692,7 +1773,7 @@
       "source_file": "src/components/ui.tsx",
       "source_location": "L62",
       "id": "components_ui_pageheader",
-      "community": 53,
+      "community": 22,
       "norm_label": "pageheader()"
     },
     {
@@ -1701,7 +1782,7 @@
       "source_file": "src/components/ui.tsx",
       "source_location": "L85",
       "id": "components_ui_filteroption",
-      "community": 22,
+      "community": 37,
       "norm_label": "filteroption"
     },
     {
@@ -1710,7 +1791,7 @@
       "source_file": "src/components/ui.tsx",
       "source_location": "L87",
       "id": "components_ui_filterchips",
-      "community": 18,
+      "community": 22,
       "norm_label": "filterchips()"
     },
     {
@@ -1773,7 +1854,7 @@
       "source_file": "src/components/ui.tsx",
       "source_location": "L197",
       "id": "components_ui_numerochesale",
-      "community": 22,
+      "community": 37,
       "norm_label": "numerochesale()"
     },
     {
@@ -1791,7 +1872,7 @@
       "source_file": "src/components/ui.tsx",
       "source_location": "L230",
       "id": "components_ui_statitem",
-      "community": 22,
+      "community": 37,
       "norm_label": "statitem"
     },
     {
@@ -1827,7 +1908,7 @@
       "source_file": "src/components/ui.tsx",
       "source_location": "L278",
       "id": "components_ui_setchip",
-      "community": 22,
+      "community": 37,
       "norm_label": "setchip"
     },
     {
@@ -1836,7 +1917,7 @@
       "source_file": "src/components/ui.tsx",
       "source_location": "L279",
       "id": "components_ui_matchrowprops",
-      "community": 22,
+      "community": 37,
       "norm_label": "matchrowprops"
     },
     {
@@ -2052,7 +2133,7 @@
       "source_file": "src/hooks/useAuth.tsx",
       "source_location": "L19",
       "id": "hooks_useauth_authprovider",
-      "community": 66,
+      "community": 1,
       "norm_label": "authprovider()"
     },
     {
@@ -2061,7 +2142,7 @@
       "source_file": "src/hooks/useAuth.tsx",
       "source_location": "L74",
       "id": "hooks_useauth_useauth",
-      "community": 2,
+      "community": 1,
       "norm_label": "useauth()"
     },
     {
@@ -2079,7 +2160,7 @@
       "source_file": "src/hooks/useCheckIn.ts",
       "source_location": "L27",
       "id": "hooks_usecheckin_usecheckindeps",
-      "community": 54,
+      "community": 56,
       "norm_label": "usecheckindeps"
     },
     {
@@ -2133,7 +2214,7 @@
       "source_file": "src/hooks/useConnection.ts",
       "source_location": "L1",
       "id": "hooks_useconnection",
-      "community": 51,
+      "community": 1,
       "norm_label": "useconnection.ts"
     },
     {
@@ -2142,7 +2223,7 @@
       "source_file": "src/hooks/useConnection.ts",
       "source_location": "L6",
       "id": "hooks_useconnection_networkinformation",
-      "community": 51,
+      "community": 1,
       "norm_label": "networkinformation"
     },
     {
@@ -2151,7 +2232,7 @@
       "source_file": "src/hooks/useConnection.ts",
       "source_location": "L13",
       "id": "hooks_useconnection_getconnection",
-      "community": 51,
+      "community": 1,
       "norm_label": "getconnection()"
     },
     {
@@ -2160,7 +2241,7 @@
       "source_file": "src/hooks/useConnection.ts",
       "source_location": "L24",
       "id": "hooks_useconnection_computeslow",
-      "community": 51,
+      "community": 1,
       "norm_label": "computeslow()"
     },
     {
@@ -2169,7 +2250,7 @@
       "source_file": "src/hooks/useConnection.ts",
       "source_location": "L35",
       "id": "hooks_useconnection_subscribe",
-      "community": 51,
+      "community": 1,
       "norm_label": "subscribe()"
     },
     {
@@ -2178,7 +2259,7 @@
       "source_file": "src/hooks/useConnection.ts",
       "source_location": "L48",
       "id": "hooks_useconnection_useslowconnection",
-      "community": 12,
+      "community": 1,
       "norm_label": "useslowconnection()"
     },
     {
@@ -2196,7 +2277,7 @@
       "source_file": "src/hooks/useDiary.ts",
       "source_location": "L234",
       "id": "hooks_usediary_usediary",
-      "community": 37,
+      "community": 9,
       "norm_label": "usediary"
     },
     {
@@ -2232,7 +2313,7 @@
       "source_file": "src/hooks/useDiary.ts",
       "source_location": "L68",
       "id": "hooks_usediary_resolvevenue",
-      "community": 50,
+      "community": 46,
       "norm_label": "resolvevenue()"
     },
     {
@@ -2268,7 +2349,7 @@
       "source_file": "src/hooks/useMedia.ts",
       "source_location": "L1",
       "id": "hooks_usemedia",
-      "community": 12,
+      "community": 1,
       "norm_label": "usemedia.ts"
     },
     {
@@ -2277,7 +2358,7 @@
       "source_file": "src/hooks/useMedia.ts",
       "source_location": "L6",
       "id": "hooks_usemedia_subscribe",
-      "community": 12,
+      "community": 1,
       "norm_label": "subscribe()"
     },
     {
@@ -2286,7 +2367,7 @@
       "source_file": "src/hooks/useMedia.ts",
       "source_location": "L12",
       "id": "hooks_usemedia_useiswide",
-      "community": 12,
+      "community": 1,
       "norm_label": "useiswide()"
     },
     {
@@ -2304,7 +2385,7 @@
       "source_file": "src/lib/auth.ts",
       "source_location": "L13",
       "id": "lib_auth_session",
-      "community": 38,
+      "community": 1,
       "norm_label": "session"
     },
     {
@@ -2349,7 +2430,7 @@
       "source_file": "src/lib/auth.ts",
       "source_location": "L56",
       "id": "lib_auth_profilerow",
-      "community": 38,
+      "community": 1,
       "norm_label": "profilerow"
     },
     {
@@ -2529,7 +2610,7 @@
       "source_file": "src/lib/database.types.ts",
       "source_location": "L19",
       "id": "lib_database_types_database",
-      "community": 24,
+      "community": 40,
       "norm_label": "database"
     },
     {
@@ -2655,7 +2736,7 @@
       "source_file": "src/lib/db.enums.ts",
       "source_location": "L1",
       "id": "lib_db_enums",
-      "community": 3,
+      "community": 40,
       "norm_label": "db.enums.ts"
     },
     {
@@ -2664,7 +2745,7 @@
       "source_file": "src/lib/db.enums.ts",
       "source_location": "L11",
       "id": "lib_db_enums_categories",
-      "community": 3,
+      "community": 56,
       "norm_label": "categories"
     },
     {
@@ -2682,7 +2763,7 @@
       "source_file": "src/lib/db.enums.ts",
       "source_location": "L13",
       "id": "lib_db_enums_surfaces",
-      "community": 3,
+      "community": 40,
       "norm_label": "surfaces"
     },
     {
@@ -2691,7 +2772,7 @@
       "source_file": "src/lib/db.enums.ts",
       "source_location": "L14",
       "id": "lib_db_enums_phases",
-      "community": 3,
+      "community": 40,
       "norm_label": "phases"
     },
     {
@@ -2700,7 +2781,7 @@
       "source_file": "src/lib/db.enums.ts",
       "source_location": "L15",
       "id": "lib_db_enums_placements",
-      "community": 17,
+      "community": 55,
       "norm_label": "placements"
     },
     {
@@ -2709,7 +2790,7 @@
       "source_file": "src/lib/db.enums.ts",
       "source_location": "L18",
       "id": "lib_db_enums_roles",
-      "community": 3,
+      "community": 40,
       "norm_label": "roles"
     },
     {
@@ -2718,7 +2799,7 @@
       "source_file": "src/lib/db.enums.ts",
       "source_location": "L19",
       "id": "lib_db_enums_plans",
-      "community": 3,
+      "community": 40,
       "norm_label": "plans"
     },
     {
@@ -2772,7 +2853,7 @@
       "source_file": "src/lib/db.enums.ts",
       "source_location": "L26",
       "id": "lib_db_enums_role",
-      "community": 38,
+      "community": 1,
       "norm_label": "role"
     },
     {
@@ -2781,7 +2862,7 @@
       "source_file": "src/lib/db.enums.ts",
       "source_location": "L27",
       "id": "lib_db_enums_plan",
-      "community": 38,
+      "community": 1,
       "norm_label": "plan"
     },
     {
@@ -2790,7 +2871,7 @@
       "source_file": "src/lib/db.enums.ts",
       "source_location": "L30",
       "id": "lib_db_enums_tournamenttyped",
-      "community": 3,
+      "community": 40,
       "norm_label": "tournamenttyped"
     },
     {
@@ -2799,7 +2880,7 @@
       "source_file": "src/lib/db.enums.ts",
       "source_location": "L36",
       "id": "lib_db_enums_matchtyped",
-      "community": 3,
+      "community": 40,
       "norm_label": "matchtyped"
     },
     {
@@ -2808,7 +2889,7 @@
       "source_file": "src/lib/db.enums.ts",
       "source_location": "L39",
       "id": "lib_db_enums_matchwithsets",
-      "community": 3,
+      "community": 40,
       "norm_label": "matchwithsets"
     },
     {
@@ -2817,7 +2898,7 @@
       "source_file": "src/lib/derive.checkins.test.ts",
       "source_location": "L1",
       "id": "lib_derive_checkins_test",
-      "community": 10,
+      "community": 16,
       "norm_label": "derive.checkins.test.ts"
     },
     {
@@ -2826,7 +2907,7 @@
       "source_file": "src/lib/derive.checkins.test.ts",
       "source_location": "L11",
       "id": "lib_derive_checkins_test_ids",
-      "community": 10,
+      "community": 16,
       "norm_label": "ids()"
     },
     {
@@ -2835,7 +2916,7 @@
       "source_file": "src/lib/derive.checkins.test.ts",
       "source_location": "L14",
       "id": "lib_derive_checkins_test_row",
-      "community": 10,
+      "community": 16,
       "norm_label": "row()"
     },
     {
@@ -2925,7 +3006,7 @@
       "source_file": "src/lib/derive.mappa.test.ts",
       "source_location": "L1",
       "id": "lib_derive_mappa_test",
-      "community": 5,
+      "community": 0,
       "norm_label": "derive.mappa.test.ts"
     },
     {
@@ -2934,7 +3015,7 @@
       "source_file": "src/lib/derive.mappa.test.ts",
       "source_location": "L12",
       "id": "lib_derive_mappa_test_mappa",
-      "community": 5,
+      "community": 0,
       "norm_label": "mappa()"
     },
     {
@@ -2943,7 +3024,7 @@
       "source_file": "src/lib/derive.mappa.test.ts",
       "source_location": "L17",
       "id": "lib_derive_mappa_test_mappacon",
-      "community": 5,
+      "community": 0,
       "norm_label": "mappacon()"
     },
     {
@@ -3015,7 +3096,7 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L89",
       "id": "lib_derive_mappa_mappadata",
-      "community": 18,
+      "community": 22,
       "norm_label": "mappadata"
     },
     {
@@ -3060,7 +3141,7 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L157",
       "id": "lib_derive_mappa_nelperiodo",
-      "community": 17,
+      "community": 0,
       "norm_label": "nelperiodo()"
     },
     {
@@ -3069,7 +3150,7 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L160",
       "id": "lib_derive_mappa_torneorow",
-      "community": 17,
+      "community": 55,
       "norm_label": "torneorow()"
     },
     {
@@ -3087,7 +3168,7 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L176",
       "id": "lib_derive_mappa_gruppo",
-      "community": 9,
+      "community": 0,
       "norm_label": "gruppo"
     },
     {
@@ -3249,7 +3330,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L73",
       "id": "lib_derive_torneilistdata",
-      "community": 18,
+      "community": 22,
       "norm_label": "torneilistdata"
     },
     {
@@ -3294,7 +3375,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L99",
       "id": "lib_derive_torneodetaildata",
-      "community": 37,
+      "community": 12,
       "norm_label": "torneodetaildata"
     },
     {
@@ -3357,7 +3438,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L199",
       "id": "lib_derive_diarysearchfields",
-      "community": 10,
+      "community": 5,
       "norm_label": "diarysearchfields"
     },
     {
@@ -3420,7 +3501,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L240",
       "id": "lib_derive_dotforrank",
-      "community": 0,
+      "community": 46,
       "norm_label": "dotforrank()"
     },
     {
@@ -3429,7 +3510,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L241",
       "id": "lib_derive_dotfor",
-      "community": 17,
+      "community": 55,
       "norm_label": "dotfor()"
     },
     {
@@ -3510,7 +3591,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L327",
       "id": "lib_derive_parselatlng",
-      "community": 50,
+      "community": 46,
       "norm_label": "parselatlng()"
     },
     {
@@ -3564,7 +3645,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L370",
       "id": "lib_derive_decoratetournament",
-      "community": 17,
+      "community": 55,
       "norm_label": "decoratetournament()"
     },
     {
@@ -3600,7 +3681,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L579",
       "id": "lib_derive_byagendadate",
-      "community": 16,
+      "community": 2,
       "norm_label": "byagendadate()"
     },
     {
@@ -3645,7 +3726,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L645",
       "id": "lib_derive_derivetorneilist",
-      "community": 16,
+      "community": 2,
       "norm_label": "derivetorneilist()"
     },
     {
@@ -3663,7 +3744,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L697",
       "id": "lib_derive_derivecompagni",
-      "community": 16,
+      "community": 2,
       "norm_label": "derivecompagni()"
     },
     {
@@ -3681,7 +3762,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L729",
       "id": "lib_derive_derivediary",
-      "community": 5,
+      "community": 46,
       "norm_label": "derivediary()"
     },
     {
@@ -3762,7 +3843,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L936",
       "id": "lib_derive_wrappedrange",
-      "community": 16,
+      "community": 2,
       "norm_label": "wrappedrange"
     },
     {
@@ -3771,7 +3852,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L940",
       "id": "lib_derive_wrappedslidekind",
-      "community": 10,
+      "community": 5,
       "norm_label": "wrappedslidekind"
     },
     {
@@ -3834,7 +3915,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L991",
       "id": "lib_derive_wrappedrangeforyear",
-      "community": 16,
+      "community": 2,
       "norm_label": "wrappedrangeforyear()"
     },
     {
@@ -3852,7 +3933,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L1167",
       "id": "lib_derive_derivetorneilistserver",
-      "community": 16,
+      "community": 2,
       "norm_label": "derivetorneilistserver()"
     },
     {
@@ -3861,7 +3942,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L1184",
       "id": "lib_derive_derivecompagniserver",
-      "community": 16,
+      "community": 2,
       "norm_label": "derivecompagniserver()"
     },
     {
@@ -3879,7 +3960,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L1227",
       "id": "lib_derive_derivecompagnodetailserver",
-      "community": 16,
+      "community": 2,
       "norm_label": "derivecompagnodetailserver()"
     },
     {
@@ -3888,7 +3969,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L1242",
       "id": "lib_derive_tournamentoptions",
-      "community": 16,
+      "community": 2,
       "norm_label": "tournamentoptions()"
     },
     {
@@ -3897,7 +3978,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L1246",
       "id": "lib_derive_partneroptions",
-      "community": 16,
+      "community": 2,
       "norm_label": "partneroptions()"
     },
     {
@@ -3906,7 +3987,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L1251",
       "id": "lib_derive_yearoptions",
-      "community": 16,
+      "community": 2,
       "norm_label": "yearoptions()"
     },
     {
@@ -3924,7 +4005,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L1267",
       "id": "lib_derive_derivewhoishere",
-      "community": 10,
+      "community": 16,
       "norm_label": "derivewhoishere()"
     },
     {
@@ -4234,6 +4315,15 @@
       "norm_label": "mockfetch()"
     },
     {
+      "label": "riccione",
+      "file_type": "code",
+      "source_file": "src/lib/geosearch.test.ts",
+      "source_location": "L244",
+      "id": "lib_geosearch_test_riccione",
+      "community": 52,
+      "norm_label": "riccione"
+    },
+    {
       "label": "geosearch.ts",
       "file_type": "code",
       "source_file": "src/lib/geosearch.ts",
@@ -4351,13 +4441,67 @@
       "norm_label": "geosearcherror"
     },
     {
+      "label": "chiediAPhoton()",
+      "file_type": "code",
+      "source_file": "src/lib/geosearch.ts",
+      "source_location": "L166",
+      "id": "lib_geosearch_chiediaphoton",
+      "community": 52,
+      "norm_label": "chiediaphoton()"
+    },
+    {
       "label": "cercaLuoghi()",
       "file_type": "code",
       "source_file": "src/lib/geosearch.ts",
-      "source_location": "L169",
+      "source_location": "L201",
       "id": "lib_geosearch_cercaluoghi",
       "community": 52,
       "norm_label": "cercaluoghi()"
+    },
+    {
+      "label": "CittaTrovata",
+      "file_type": "code",
+      "source_file": "src/lib/geosearch.ts",
+      "source_location": "L228",
+      "id": "lib_geosearch_cittatrovata",
+      "community": 52,
+      "norm_label": "cittatrovata"
+    },
+    {
+      "label": "TIPI_CITTA",
+      "file_type": "code",
+      "source_file": "src/lib/geosearch.ts",
+      "source_location": "L242",
+      "id": "lib_geosearch_tipi_citta",
+      "community": 52,
+      "norm_label": "tipi_citta"
+    },
+    {
+      "label": "FILTRO_CITTA",
+      "file_type": "code",
+      "source_file": "src/lib/geosearch.ts",
+      "source_location": "L243",
+      "id": "lib_geosearch_filtro_citta",
+      "community": 52,
+      "norm_label": "filtro_citta"
+    },
+    {
+      "label": "mapPhotonCitta()",
+      "file_type": "code",
+      "source_file": "src/lib/geosearch.ts",
+      "source_location": "L245",
+      "id": "lib_geosearch_mapphotoncitta",
+      "community": 52,
+      "norm_label": "mapphotoncitta()"
+    },
+    {
+      "label": "cercaCitta()",
+      "file_type": "code",
+      "source_file": "src/lib/geosearch.ts",
+      "source_location": "L264",
+      "id": "lib_geosearch_cercacitta",
+      "community": 52,
+      "norm_label": "cercacitta()"
     },
     {
       "label": "limits.ts",
@@ -4365,7 +4509,7 @@
       "source_file": "src/lib/limits.ts",
       "source_location": "L1",
       "id": "lib_limits",
-      "community": 38,
+      "community": 1,
       "norm_label": "limits.ts"
     },
     {
@@ -4374,7 +4518,7 @@
       "source_file": "src/lib/limits.ts",
       "source_location": "L16",
       "id": "lib_limits_base_limits",
-      "community": 38,
+      "community": 1,
       "norm_label": "base_limits"
     },
     {
@@ -4383,7 +4527,7 @@
       "source_file": "src/lib/limits.ts",
       "source_location": "L49",
       "id": "lib_limits_entitlements",
-      "community": 38,
+      "community": 1,
       "norm_label": "entitlements"
     },
     {
@@ -4392,7 +4536,7 @@
       "source_file": "src/lib/limits.ts",
       "source_location": "L54",
       "id": "lib_limits_isunlimited",
-      "community": 38,
+      "community": 1,
       "norm_label": "isunlimited()"
     },
     {
@@ -4401,7 +4545,7 @@
       "source_file": "src/lib/limits.ts",
       "source_location": "L59",
       "id": "lib_limits_haspremium",
-      "community": 38,
+      "community": 1,
       "norm_label": "haspremium()"
     },
     {
@@ -4410,7 +4554,7 @@
       "source_file": "src/lib/limits.ts",
       "source_location": "L63",
       "id": "lib_limits_tournamentlimit",
-      "community": 38,
+      "community": 1,
       "norm_label": "tournamentlimit()"
     },
     {
@@ -4419,7 +4563,7 @@
       "source_file": "src/lib/limits.ts",
       "source_location": "L67",
       "id": "lib_limits_partnerlimit",
-      "community": 38,
+      "community": 1,
       "norm_label": "partnerlimit()"
     },
     {
@@ -4446,7 +4590,7 @@
       "source_file": "src/lib/models.ts",
       "source_location": "L20",
       "id": "lib_models_appuser",
-      "community": 37,
+      "community": 9,
       "norm_label": "appuser"
     },
     {
@@ -4455,7 +4599,7 @@
       "source_file": "src/lib/models.ts",
       "source_location": "L39",
       "id": "lib_models_venue",
-      "community": 54,
+      "community": 56,
       "norm_label": "venue"
     },
     {
@@ -4536,7 +4680,7 @@
       "source_file": "src/lib/models.ts",
       "source_location": "L131",
       "id": "lib_models_diarydata",
-      "community": 5,
+      "community": 9,
       "norm_label": "diarydata"
     },
     {
@@ -4590,7 +4734,7 @@
       "source_file": "src/lib/models.ts",
       "source_location": "L188",
       "id": "lib_models_anyform",
-      "community": 54,
+      "community": 56,
       "norm_label": "anyform"
     },
     {
@@ -4599,7 +4743,7 @@
       "source_file": "src/lib/models.ts",
       "source_location": "L193",
       "id": "lib_models_setfield",
-      "community": 54,
+      "community": 56,
       "norm_label": "setfield"
     },
     {
@@ -4608,7 +4752,7 @@
       "source_file": "src/lib/models.ts",
       "source_location": "L199",
       "id": "lib_models_setsapi",
-      "community": 9,
+      "community": 2,
       "norm_label": "setsapi"
     },
     {
@@ -4617,7 +4761,7 @@
       "source_file": "src/lib/models.ts",
       "source_location": "L208",
       "id": "lib_models_option",
-      "community": 54,
+      "community": 56,
       "norm_label": "option"
     },
     {
@@ -4626,7 +4770,7 @@
       "source_file": "src/lib/models.ts",
       "source_location": "L214",
       "id": "lib_models_modalkind",
-      "community": 9,
+      "community": 2,
       "norm_label": "modalkind"
     },
     {
@@ -4644,7 +4788,7 @@
       "source_file": "src/lib/permissions.ts",
       "source_location": "L1",
       "id": "lib_permissions",
-      "community": 38,
+      "community": 1,
       "norm_label": "permissions.ts"
     },
     {
@@ -4653,7 +4797,7 @@
       "source_file": "src/lib/permissions.ts",
       "source_location": "L14",
       "id": "lib_permissions_permissionaction",
-      "community": 38,
+      "community": 1,
       "norm_label": "permissionaction"
     },
     {
@@ -4662,7 +4806,7 @@
       "source_file": "src/lib/permissions.ts",
       "source_location": "L23",
       "id": "lib_permissions_usage",
-      "community": 38,
+      "community": 1,
       "norm_label": "usage"
     },
     {
@@ -4671,7 +4815,7 @@
       "source_file": "src/lib/permissions.ts",
       "source_location": "L29",
       "id": "lib_permissions_permissioncheck",
-      "community": 38,
+      "community": 1,
       "norm_label": "permissioncheck"
     },
     {
@@ -4680,7 +4824,7 @@
       "source_file": "src/lib/permissions.ts",
       "source_location": "L39",
       "id": "lib_permissions_permissions",
-      "community": 38,
+      "community": 1,
       "norm_label": "permissions"
     },
     {
@@ -4689,7 +4833,7 @@
       "source_file": "src/lib/permissions.ts",
       "source_location": "L51",
       "id": "lib_permissions_permissionsfor",
-      "community": 16,
+      "community": 1,
       "norm_label": "permissionsfor()"
     },
     {
@@ -4851,7 +4995,7 @@
       "source_file": "src/lib/serverviews.ts",
       "source_location": "L51",
       "id": "lib_serverviews_svpresentuser",
-      "community": 10,
+      "community": 16,
       "norm_label": "svpresentuser"
     },
     {
@@ -4914,7 +5058,7 @@
       "source_file": "src/lib/stats.test.ts",
       "source_location": "L1",
       "id": "lib_stats_test",
-      "community": 17,
+      "community": 55,
       "norm_label": "stats.test.ts"
     },
     {
@@ -4995,7 +5139,7 @@
       "source_file": "src/lib/stats.ts",
       "source_location": "L63",
       "id": "lib_stats_placementrank",
-      "community": 17,
+      "community": 55,
       "norm_label": "placementrank()"
     },
     {
@@ -5013,7 +5157,7 @@
       "source_file": "src/lib/stats.ts",
       "source_location": "L90",
       "id": "lib_stats_fmtdate",
-      "community": 17,
+      "community": 55,
       "norm_label": "fmtdate()"
     },
     {
@@ -5031,7 +5175,7 @@
       "source_file": "src/lib/stats.ts",
       "source_location": "L96",
       "id": "lib_stats_yearof",
-      "community": 17,
+      "community": 0,
       "norm_label": "yearof()"
     },
     {
@@ -5058,7 +5202,7 @@
       "source_file": "src/lib/supabase.ts",
       "source_location": "L1",
       "id": "lib_supabase",
-      "community": 24,
+      "community": 1,
       "norm_label": "supabase.ts"
     },
     {
@@ -5067,7 +5211,7 @@
       "source_file": "src/lib/supabase.ts",
       "source_location": "L19",
       "id": "lib_supabase_supabase",
-      "community": 24,
+      "community": 1,
       "norm_label": "supabase"
     },
     {
@@ -5076,7 +5220,7 @@
       "source_file": "src/lib/theme.ts",
       "source_location": "L1",
       "id": "lib_theme",
-      "community": 63,
+      "community": 17,
       "norm_label": "theme.ts"
     },
     {
@@ -5085,7 +5229,7 @@
       "source_file": "src/lib/theme.ts",
       "source_location": "L2",
       "id": "lib_theme_c",
-      "community": 63,
+      "community": 17,
       "norm_label": "c"
     },
     {
@@ -5094,7 +5238,7 @@
       "source_file": "src/lib/theme.ts",
       "source_location": "L16",
       "id": "lib_theme_swatch_colors",
-      "community": 63,
+      "community": 17,
       "norm_label": "swatch_colors"
     },
     {
@@ -5103,7 +5247,7 @@
       "source_file": "src/lib/theme.ts",
       "source_location": "L18",
       "id": "lib_theme_months_short",
-      "community": 63,
+      "community": 17,
       "norm_label": "months_short"
     },
     {
@@ -5112,7 +5256,7 @@
       "source_file": "src/lib/theme.ts",
       "source_location": "L20",
       "id": "lib_theme_months_full",
-      "community": 63,
+      "community": 17,
       "norm_label": "months_full"
     },
     {
@@ -5121,7 +5265,7 @@
       "source_file": "src/main.tsx",
       "source_location": "L1",
       "id": "src_main",
-      "community": 66,
+      "community": 1,
       "norm_label": "main.tsx"
     },
     {
@@ -5418,7 +5562,7 @@
       "source_file": "src/screens/CreaChat.tsx",
       "source_location": "L78",
       "id": "screens_creachat_creachatprops",
-      "community": 54,
+      "community": 56,
       "norm_label": "creachatprops"
     },
     {
@@ -5778,7 +5922,7 @@
       "source_file": "src/screens/Login.tsx",
       "source_location": "L1",
       "id": "screens_login",
-      "community": 2,
+      "community": 1,
       "norm_label": "login.tsx"
     },
     {
@@ -5787,7 +5931,7 @@
       "source_file": "src/screens/Login.tsx",
       "source_location": "L8",
       "id": "screens_login_mode",
-      "community": 2,
+      "community": 1,
       "norm_label": "mode"
     },
     {
@@ -5796,7 +5940,7 @@
       "source_file": "src/screens/Login.tsx",
       "source_location": "L10",
       "id": "screens_login_inputstyle",
-      "community": 2,
+      "community": 1,
       "norm_label": "inputstyle"
     },
     {
@@ -5805,7 +5949,7 @@
       "source_file": "src/screens/Login.tsx",
       "source_location": "L19",
       "id": "screens_login_seg",
-      "community": 2,
+      "community": 1,
       "norm_label": "seg()"
     },
     {
@@ -5814,7 +5958,7 @@
       "source_file": "src/screens/Login.tsx",
       "source_location": "L31",
       "id": "screens_login_features",
-      "community": 2,
+      "community": 1,
       "norm_label": "features"
     },
     {
@@ -5823,7 +5967,7 @@
       "source_file": "src/screens/Login.tsx",
       "source_location": "L37",
       "id": "screens_login_login",
-      "community": 2,
+      "community": 1,
       "norm_label": "login()"
     },
     {
@@ -5904,7 +6048,7 @@
       "source_file": "src/screens/Mappa.tsx",
       "source_location": "L35",
       "id": "screens_mappa_mappaprops",
-      "community": 18,
+      "community": 22,
       "norm_label": "mappaprops"
     },
     {
@@ -5967,7 +6111,7 @@
       "source_file": "src/screens/Profilo.tsx",
       "source_location": "L1",
       "id": "screens_profilo",
-      "community": 24,
+      "community": 1,
       "norm_label": "profilo.tsx"
     },
     {
@@ -5976,7 +6120,7 @@
       "source_file": "src/screens/Profilo.tsx",
       "source_location": "L10",
       "id": "screens_profilo_profiloprops",
-      "community": 24,
+      "community": 1,
       "norm_label": "profiloprops"
     },
     {
@@ -5985,7 +6129,7 @@
       "source_file": "src/screens/Profilo.tsx",
       "source_location": "L16",
       "id": "screens_profilo_msg",
-      "community": 24,
+      "community": 1,
       "norm_label": "msg"
     },
     {
@@ -5994,7 +6138,7 @@
       "source_file": "src/screens/Profilo.tsx",
       "source_location": "L18",
       "id": "screens_profilo_feedback",
-      "community": 24,
+      "community": 1,
       "norm_label": "feedback()"
     },
     {
@@ -6003,7 +6147,7 @@
       "source_file": "src/screens/Profilo.tsx",
       "source_location": "L27",
       "id": "screens_profilo_hintstyle",
-      "community": 24,
+      "community": 1,
       "norm_label": "hintstyle"
     },
     {
@@ -6012,7 +6156,7 @@
       "source_file": "src/screens/Profilo.tsx",
       "source_location": "L28",
       "id": "screens_profilo_readonlystyle",
-      "community": 24,
+      "community": 1,
       "norm_label": "readonlystyle"
     },
     {
@@ -6021,7 +6165,7 @@
       "source_file": "src/screens/Profilo.tsx",
       "source_location": "L30",
       "id": "screens_profilo_savebutton",
-      "community": 24,
+      "community": 1,
       "norm_label": "savebutton()"
     },
     {
@@ -6030,7 +6174,7 @@
       "source_file": "src/screens/Profilo.tsx",
       "source_location": "L47",
       "id": "screens_profilo_profilo",
-      "community": 2,
+      "community": 1,
       "norm_label": "profilo()"
     },
     {
@@ -6129,7 +6273,7 @@
       "source_file": "src/screens/Tornei.tsx",
       "source_location": "L1",
       "id": "screens_tornei",
-      "community": 18,
+      "community": 22,
       "norm_label": "tornei.tsx"
     },
     {
@@ -6147,7 +6291,7 @@
       "source_file": "src/screens/Tornei.tsx",
       "source_location": "L15",
       "id": "screens_tornei_torneiprops",
-      "community": 18,
+      "community": 22,
       "norm_label": "torneiprops"
     },
     {
@@ -6156,7 +6300,7 @@
       "source_file": "src/screens/Tornei.tsx",
       "source_location": "L32",
       "id": "screens_tornei_tornei",
-      "community": 55,
+      "community": 22,
       "norm_label": "tornei()"
     },
     {
@@ -6165,7 +6309,7 @@
       "source_file": "src/screens/Tornei.tsx",
       "source_location": "L108",
       "id": "screens_tornei_torneisection",
-      "community": 18,
+      "community": 22,
       "norm_label": "torneisection()"
     },
     {
@@ -6174,7 +6318,7 @@
       "source_file": "src/screens/Tornei.tsx",
       "source_location": "L129",
       "id": "screens_tornei_sectioncount",
-      "community": 18,
+      "community": 22,
       "norm_label": "sectioncount()"
     },
     {
@@ -6183,7 +6327,7 @@
       "source_file": "src/screens/Tornei.tsx",
       "source_location": "L147",
       "id": "screens_tornei_torneigrid",
-      "community": 18,
+      "community": 22,
       "norm_label": "torneigrid()"
     },
     {
@@ -6192,7 +6336,7 @@
       "source_file": "src/screens/Tornei.tsx",
       "source_location": "L158",
       "id": "screens_tornei_torneocardview",
-      "community": 18,
+      "community": 22,
       "norm_label": "torneocardview()"
     },
     {
@@ -6201,7 +6345,7 @@
       "source_file": "src/screens/TorneoDetail.tsx",
       "source_location": "L1",
       "id": "screens_torneodetail",
-      "community": 37,
+      "community": 12,
       "norm_label": "torneodetail.tsx"
     },
     {
@@ -6210,7 +6354,7 @@
       "source_file": "src/screens/TorneoDetail.tsx",
       "source_location": "L7",
       "id": "screens_torneodetail_venuemap",
-      "community": 37,
+      "community": 12,
       "norm_label": "venuemap"
     },
     {
@@ -6219,7 +6363,7 @@
       "source_file": "src/screens/TorneoDetail.tsx",
       "source_location": "L10",
       "id": "screens_torneodetail_igglyph",
-      "community": 37,
+      "community": 12,
       "norm_label": "igglyph()"
     },
     {
@@ -6228,7 +6372,7 @@
       "source_file": "src/screens/TorneoDetail.tsx",
       "source_location": "L20",
       "id": "screens_torneodetail_torneodetailprops",
-      "community": 37,
+      "community": 12,
       "norm_label": "torneodetailprops"
     },
     {
@@ -6237,7 +6381,7 @@
       "source_file": "src/screens/TorneoDetail.tsx",
       "source_location": "L34",
       "id": "screens_torneodetail_torneodetail",
-      "community": 37,
+      "community": 12,
       "norm_label": "torneodetail()"
     },
     {
@@ -6327,7 +6471,7 @@
       "source_file": "src/test/factories.ts",
       "source_location": "L32",
       "id": "test_factories_maketorneo",
-      "community": 55,
+      "community": 5,
       "norm_label": "maketorneo()"
     },
     {
@@ -6399,7 +6543,7 @@
       "source_file": "src/test/factories.ts",
       "source_location": "L150",
       "id": "test_factories_makevenue",
-      "community": 5,
+      "community": 16,
       "norm_label": "makevenue()"
     },
     {
@@ -9455,9 +9599,9 @@
       "source_file": "presentazione/landing.js",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "presentazione_landing",
-      "target": "presentazione_landing_callbacks",
-      "confidence_score": 1.0
+      "target": "presentazione_landing_callbacks"
     },
     {
       "relation": "contains",
@@ -9465,9 +9609,9 @@
       "source_file": "presentazione/landing.js",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "presentazione_landing",
-      "target": "presentazione_landing_io",
-      "confidence_score": 1.0
+      "target": "presentazione_landing_io"
     },
     {
       "relation": "contains",
@@ -9475,9 +9619,9 @@
       "source_file": "presentazione/landing.js",
       "source_location": "L27",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "presentazione_landing",
-      "target": "presentazione_landing_observe",
-      "confidence_score": 1.0
+      "target": "presentazione_landing_observe"
     },
     {
       "relation": "contains",
@@ -9485,9 +9629,9 @@
       "source_file": "presentazione/landing.js",
       "source_location": "L81",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "presentazione_landing",
-      "target": "presentazione_landing_setupbars",
-      "confidence_score": 1.0
+      "target": "presentazione_landing_setupbars"
     },
     {
       "relation": "contains",
@@ -9495,9 +9639,9 @@
       "source_file": "presentazione/landing.js",
       "source_location": "L101",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "presentazione_landing",
-      "target": "presentazione_landing_setupcarousel",
-      "confidence_score": 1.0
+      "target": "presentazione_landing_setupcarousel"
     },
     {
       "relation": "contains",
@@ -9505,9 +9649,9 @@
       "source_file": "presentazione/landing.js",
       "source_location": "L59",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "presentazione_landing",
-      "target": "presentazione_landing_setupcounters",
-      "confidence_score": 1.0
+      "target": "presentazione_landing_setupcounters"
     },
     {
       "relation": "contains",
@@ -9515,9 +9659,9 @@
       "source_file": "presentazione/landing.js",
       "source_location": "L186",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "presentazione_landing",
-      "target": "presentazione_landing_setupinstall",
-      "confidence_score": 1.0
+      "target": "presentazione_landing_setupinstall"
     },
     {
       "relation": "contains",
@@ -9525,9 +9669,9 @@
       "source_file": "presentazione/landing.js",
       "source_location": "L34",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "presentazione_landing",
-      "target": "presentazione_landing_setupreveals",
-      "confidence_score": 1.0
+      "target": "presentazione_landing_setupreveals"
     },
     {
       "relation": "imports_from",
@@ -13665,6 +13809,17 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/modals/VenuePicker.test.tsx",
+      "source_location": "L16",
+      "weight": 1.0,
+      "source": "modals_venuepicker_test",
+      "target": "lib_geosearch_cittatrovata",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/modals/VenuePicker.test.tsx",
       "source_location": "L15",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -13729,11 +13884,31 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/modals/VenuePicker.test.tsx",
+      "source_location": "L209",
+      "weight": 1.0,
+      "source": "modals_venuepicker_test",
+      "target": "modals_venuepicker_test_campocitta",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/modals/VenuePicker.test.tsx",
       "source_location": "L19",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "modals_venuepicker_test",
       "target": "modals_venuepicker_test_cerca"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/modals/VenuePicker.test.tsx",
+      "source_location": "L20",
+      "weight": 1.0,
+      "source": "modals_venuepicker_test",
+      "target": "modals_venuepicker_test_cercacitta",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -13769,11 +13944,82 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/modals/VenuePicker.test.tsx",
+      "source_location": "L205",
+      "weight": 1.0,
+      "source": "modals_venuepicker_test",
+      "target": "modals_venuepicker_test_riccia",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/modals/VenuePicker.test.tsx",
+      "source_location": "L202",
+      "weight": 1.0,
+      "source": "modals_venuepicker_test",
+      "target": "modals_venuepicker_test_riccione",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/modals/VenuePicker.test.tsx",
       "source_location": "L29",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "modals_venuepicker_test",
       "target": "modals_venuepicker_test_spiaggia"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/modals/VenuePicker.test.tsx",
+      "source_location": "L47",
+      "weight": 1.0,
+      "source": "modals_venuepicker_test",
+      "target": "modals_venuepicker_test_statocitta",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/modals/VenuePicker.test.tsx",
+      "source_location": "L46",
+      "weight": 1.0,
+      "source": "modals_venuepicker_test",
+      "target": "modals_venuepicker_test_statoricerca",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/modals/VenuePicker.test.tsx",
+      "source_location": "L213",
+      "weight": 1.0,
+      "source": "modals_venuepicker_test",
+      "target": "modals_venuepicker_test_tendina",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/modals/VenuePicker.test.tsx",
+      "source_location": "L214",
+      "weight": 1.0,
+      "source": "modals_venuepicker_test",
+      "target": "modals_venuepicker_test_voci",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/modals/VenuePicker.test.tsx",
+      "source_location": "L215",
+      "weight": 1.0,
+      "source": "modals_venuepicker_test_voci",
+      "target": "modals_venuepicker_test_tendina",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports_from",
@@ -13837,9 +14083,31 @@
       "source_file": "src/components/modals/VenuePicker.tsx",
       "source_location": "L20",
       "weight": 1.0,
+      "source": "modals_venuepicker",
+      "target": "lib_geosearch_cercacitta",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/modals/VenuePicker.tsx",
+      "source_location": "L20",
+      "weight": 1.0,
       "confidence_score": 1.0,
       "source": "modals_venuepicker",
       "target": "lib_geosearch_cercaluoghi"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/modals/VenuePicker.tsx",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "modals_venuepicker",
+      "target": "lib_geosearch_cittatrovata",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -13895,6 +14163,16 @@
       "confidence_score": 1.0,
       "source": "modals_venuepicker",
       "target": "lib_models_venue"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/modals/VenuePicker.tsx",
+      "source_location": "L249",
+      "weight": 1.0,
+      "source": "modals_venuepicker",
+      "target": "modals_venuepicker_cittaautocomplete",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -23083,6 +23361,17 @@
       "source_file": "src/lib/geosearch.test.ts",
       "source_location": "L10",
       "weight": 1.0,
+      "source": "lib_geosearch_test",
+      "target": "lib_geosearch_cercacitta",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/geosearch.test.ts",
+      "source_location": "L10",
+      "weight": 1.0,
       "confidence_score": 1.0,
       "source": "lib_geosearch_test",
       "target": "lib_geosearch_cercaluoghi"
@@ -23132,6 +23421,16 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "src/lib/geosearch.test.ts",
+      "source_location": "L244",
+      "weight": 1.0,
+      "source": "lib_geosearch_test",
+      "target": "lib_geosearch_test_riccione",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "src/lib/geosearch.ts",
       "source_location": "L43",
       "weight": 1.0,
@@ -23143,11 +23442,41 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/geosearch.ts",
+      "source_location": "L264",
+      "weight": 1.0,
+      "source": "lib_geosearch",
+      "target": "lib_geosearch_cercacitta",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/geosearch.ts",
       "source_location": "L169",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "lib_geosearch",
       "target": "lib_geosearch_cercaluoghi"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/geosearch.ts",
+      "source_location": "L166",
+      "weight": 1.0,
+      "source": "lib_geosearch",
+      "target": "lib_geosearch_chiediaphoton",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/geosearch.ts",
+      "source_location": "L228",
+      "weight": 1.0,
+      "source": "lib_geosearch",
+      "target": "lib_geosearch_cittatrovata",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -23183,6 +23512,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/geosearch.ts",
+      "source_location": "L243",
+      "weight": 1.0,
+      "source": "lib_geosearch",
+      "target": "lib_geosearch_filtro_citta",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/geosearch.ts",
       "source_location": "L161",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -23198,6 +23537,16 @@
       "confidence_score": 1.0,
       "source": "lib_geosearch",
       "target": "lib_geosearch_luogotrovato"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/geosearch.ts",
+      "source_location": "L245",
+      "weight": 1.0,
+      "source": "lib_geosearch",
+      "target": "lib_geosearch_mapphotoncitta",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -23253,6 +23602,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/geosearch.ts",
+      "source_location": "L242",
+      "weight": 1.0,
+      "source": "lib_geosearch",
+      "target": "lib_geosearch_tipi_citta",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/geosearch.ts",
       "source_location": "L133",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -23286,6 +23645,17 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/geosearch.ts",
+      "source_location": "L253",
+      "weight": 1.0,
+      "source": "lib_geosearch_mapphotoncitta",
+      "target": "lib_geosearch_contestodi",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/geosearch.ts",
       "source_location": "L155",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -23297,11 +23667,33 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/geosearch.ts",
+      "source_location": "L247",
+      "weight": 1.0,
+      "source": "lib_geosearch_mapphotoncitta",
+      "target": "lib_geosearch_nomedi",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/geosearch.ts",
       "source_location": "L146",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "lib_geosearch_mapphotonfeature",
       "target": "lib_geosearch_nomedi"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/geosearch.ts",
+      "source_location": "L248",
+      "weight": 1.0,
+      "source": "lib_geosearch_mapphotoncitta",
+      "target": "lib_geosearch_coordinatedi",
+      "confidence_score": 1.0
     },
     {
       "relation": "calls",
@@ -23324,6 +23716,28 @@
       "confidence_score": 1.0,
       "source": "lib_geosearch_mapphotonfeature",
       "target": "lib_geosearch_tipodi"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/geosearch.ts",
+      "source_location": "L268",
+      "weight": 1.0,
+      "source": "lib_geosearch_cercacitta",
+      "target": "lib_geosearch_chiediaphoton",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/geosearch.ts",
+      "source_location": "L205",
+      "weight": 1.0,
+      "source": "lib_geosearch_cercaluoghi",
+      "target": "lib_geosearch_chiediaphoton",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -29080,5 +29494,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "6c626054d2427d1679b37347eeb82ea85f826ae1"
+  "built_at_commit": "c4d2bd80abd11c7c1722e49ee7777786fbdadfe5"
 }

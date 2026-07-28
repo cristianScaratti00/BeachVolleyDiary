@@ -7,7 +7,7 @@
 // modo visibile — sposta soltanto i pin dall'altra parte del mondo.
 // ============================================================================
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { cercaLuoghi, mapPhotonFeature, GeoSearchError, MIN_QUERY } from './geosearch'
+import { cercaLuoghi, cercaCitta, mapPhotonFeature, GeoSearchError, MIN_QUERY } from './geosearch'
 
 // Rete di sicurezza: un test che dimentica di mockare `fetch` deve fallire
 // subito, non uscire davvero su photon.komoot.io. Scritta dopo averlo fatto —
@@ -235,5 +235,75 @@ describe('cercaLuoghi — quando il servizio non collabora', () => {
     const abort = new DOMException('annullata', 'AbortError')
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(abort))
     await expect(cercaLuoghi('riccione')).rejects.toBe(abort)
+  })
+})
+
+// ---------------------------------------------------------------- le città
+// Una feature Photon per un comune: nessun `city`, il comune è la provincia in
+// `county`. È il caso normale per i paesi costieri, non un'eccezione.
+const riccione = {
+  geometry: { type: 'Point', coordinates: [12.65, 44.0] },
+  properties: {
+    osm_type: 'N', osm_id: 1, osm_key: 'place', osm_value: 'town', name: 'Riccione',
+    county: 'Rimini', state: 'Emilia-Romagna', country: 'Italia',
+  },
+}
+
+describe('cercaCitta — la richiesta', () => {
+  it('chiede solo posti abitati, non strade né quartieri', async () => {
+    const spia = mockFetch({ features: [riccione] })
+    await cercaCitta('riccione')
+    const url = String(spia.mock.calls[0][0])
+    // Senza questi filtri il campo "Città" si riempie di fermate dell'autobus.
+    expect(url).toContain('osm_tag=place:city')
+    expect(url).toContain('osm_tag=place:town')
+    expect(url).toContain('osm_tag=place:village')
+    // `hamlet` serve: molte località di mare sono frazioni, non comuni.
+    expect(url).toContain('osm_tag=place:hamlet')
+  })
+
+  it('sotto le tre lettere non tocca la rete', async () => {
+    const spia = mockFetch({ features: [riccione] })
+    expect(await cercaCitta('ri')).toEqual([])
+    expect(spia).not.toHaveBeenCalled()
+  })
+
+  it('passa il segnale di annullamento', async () => {
+    const spia = mockFetch({ features: [] })
+    const ac = new AbortController()
+    await cercaCitta('riccione', ac.signal)
+    expect(spia.mock.calls[0][1]).toMatchObject({ signal: ac.signal })
+  })
+})
+
+describe('cercaCitta — cosa torna indietro', () => {
+  it('dà nome e contesto, senza ripetere il nome nel contesto', async () => {
+    mockFetch({ features: [riccione] })
+    const [c] = await cercaCitta('riccione')
+    expect(c.nome).toBe('Riccione')
+    expect(c.contesto).toBe('Rimini · Emilia-Romagna · Italia')
+    expect(c.lat).toBe(44.0)
+    expect(c.lng).toBe(12.65)
+  })
+
+  it('unisce il nodo e il poligono dello stesso comune', async () => {
+    // Photon restituisce spesso entrambi: in una tendina sono due righe
+    // identiche, e si sceglie a caso senza accorgersene.
+    const poligono = { ...riccione, properties: { ...riccione.properties, osm_type: 'R', osm_id: 2 } }
+    mockFetch({ features: [riccione, poligono] })
+    expect(await cercaCitta('riccione')).toHaveLength(1)
+  })
+
+  it('scarta le voci senza nome o senza coordinate', async () => {
+    const senzaNome = { geometry: { coordinates: [12, 44] }, properties: { osm_key: 'place' } }
+    mockFetch({ features: [senzaNome, riccione] })
+    expect(await cercaCitta('riccione')).toHaveLength(1)
+  })
+
+  it('un guasto del servizio è un GeoSearchError, non un risultato vuoto', async () => {
+    // Chi chiama deve poter distinguere "non c'è" da "non ha risposto": sono
+    // due messaggi diversi per chi sta scrivendo.
+    mockFetch({}, { ok: false, status: 502 })
+    await expect(cercaCitta('riccione')).rejects.toBeInstanceOf(GeoSearchError)
   })
 })
