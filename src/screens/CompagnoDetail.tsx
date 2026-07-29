@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { CompagnoDetailData } from '../lib/derive'
 import type { AppUser } from '../lib/models'
 import { BackLink, Avatar, StatGrid, StatTile, SectionTitle, MatchRow, EmptyCard, MUTED } from '../components/ui'
@@ -16,6 +16,11 @@ interface CompagnoDetailProps {
 
 const searchInput = { width: '100%', border: '1px solid rgba(27,42,74,.16)', borderRadius: 10, padding: '11px 13px', font: "600 14px 'Nunito Sans'", background: '#fff' } as const
 
+// Stessa soglia che applica `search_users` lato server: sotto, la RPC torna
+// vuoto. Tenerla anche qui evita una richiesta che sappiamo già inutile e
+// permette di spiegare perché non compare niente.
+const MIN_RICERCA = 3
+
 export default function CompagnoDetail({ cp, goBack, onOpenMatch, linked, onSearchUsers, onLink, onUnlink, onDelete }: CompagnoDetailProps) {
   const removeCompagno = () => {
     if (window.confirm(`Eliminare «${cp.name}»? Nei tornei e nelle partite resterà segnato come "nessuno" e non conterà più nelle sue statistiche. L'operazione non è reversibile.`)) onDelete()
@@ -26,17 +31,34 @@ export default function CompagnoDetail({ cp, goBack, onOpenMatch, linked, onSear
   const [busyId, setBusyId] = useState<string | null>(null)
   const [err, setErr] = useState('')
 
-  const openPicker = async () => {
+  const openPicker = () => {
     setOpen(true)
     setErr('')
     setQ('')
-    if (users === null) setUsers(await onSearchUsers(''))
+    setUsers(null)
   }
 
-  const filtered = (users ?? []).filter((u) => {
-    const s = q.trim().toLowerCase()
-    return !s || u.name.toLowerCase().includes(s) || u.email.toLowerCase().includes(s)
-  })
+  // La ricerca sta sul server e non restituisce più l'elenco completo: prima
+  // si caricavano TUTTI gli utenti (con le loro email) e si filtrava qui,
+  // che è come dare a chiunque si registri l'anagrafica dell'app.
+  // Sotto le tre lettere non si interroga nemmeno.
+  useEffect(() => {
+    if (!open) return
+    const testo = q.trim()
+    if (testo.length < MIN_RICERCA) {
+      setUsers(null)
+      return
+    }
+    let vivo = true
+    const t = setTimeout(async () => {
+      const trovati = await onSearchUsers(testo)
+      if (vivo) setUsers(trovati)
+    }, 300)
+    return () => {
+      vivo = false
+      clearTimeout(t)
+    }
+  }, [q, open, onSearchUsers])
 
   const pick = async (u: AppUser) => {
     if (busyId) return
@@ -75,14 +97,18 @@ export default function CompagnoDetail({ cp, goBack, onOpenMatch, linked, onSear
         ) : open ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             <div style={{ font: "700 13.5px 'Nunito Sans'" }}>Collega «{cp.name}» a un utente</div>
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Cerca per nome…" autoFocus style={searchInput} />
+            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Nome, o email esatta…" autoFocus style={searchInput} />
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 240, overflowY: 'auto' }}>
-              {users === null ? (
-                <div style={{ font: "600 12.5px 'Nunito Sans'", color: MUTED, padding: '8px 2px' }}>Caricamento…</div>
-              ) : filtered.length === 0 ? (
+              {q.trim().length < MIN_RICERCA ? (
+                <div style={{ font: "600 12.5px 'Nunito Sans'", color: MUTED, padding: '8px 2px' }}>
+                  Scrivi almeno {MIN_RICERCA} lettere del nome. Se conosci la sua email, incollala per intero.
+                </div>
+              ) : users === null ? (
+                <div style={{ font: "600 12.5px 'Nunito Sans'", color: MUTED, padding: '8px 2px' }}>Cerco…</div>
+              ) : users.length === 0 ? (
                 <div style={{ font: "600 12.5px 'Nunito Sans'", color: MUTED, padding: '8px 2px' }}>Nessun utente trovato.</div>
               ) : (
-                filtered.map((u) => (
+                users.map((u) => (
                   <div key={u.id} className="row" onClick={() => pick(u)} style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '9px 10px', borderRadius: 10, cursor: 'pointer', border: '1px solid rgba(27,42,74,.08)', opacity: busyId && busyId !== u.id ? 0.5 : 1 }}>
                     <Avatar initial={(u.name[0] || '?').toUpperCase()} size={34} font={14} />
                     <div style={{ flex: 1, minWidth: 0 }}>

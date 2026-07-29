@@ -26,6 +26,7 @@ export interface UseDiary {
   searchUsers: (query: string) => Promise<AppUser[]>
   linkPartner: (partnerId: string, userId: string) => Promise<{ ok: boolean; error?: string }>
   unlinkPartner: (partnerId: string) => Promise<boolean>
+  unlinkMe: (partnerId?: string) => Promise<number>
   // ---- luoghi ----
   // Unisce due luoghi duplicati ("Riccione" e "Riccione (RN)"): ripunta i tornei
   // del primo sul secondo ed elimina il primo. Il backfill sa fondere solo le
@@ -573,6 +574,17 @@ export function useDiary(): UseDiary {
     return true
   }, [reload])
 
+  // Il rovescio di `unlinkPartner`: qui a staccarsi è chi il collegamento lo
+  // SUBISCE. Serve una RPC e non una update perché la riga `partners` è di
+  // chi ci ha collegati, e la RLS — giustamente — non ce la fa toccare.
+  // Senza argomenti rimuove tutte le condivisioni ricevute.
+  const unlinkMe = useCallback(async (partnerId?: string): Promise<number> => {
+    const { data, error } = await supabase.rpc('unlink_me', partnerId ? { p_partner_id: partnerId } : {})
+    if (error) { fail(error); return 0 }
+    await reload()
+    return data ?? 0
+  }, [reload])
+
   // Elimina un socio: torneo e partite collegate restano segnati come "nessuno"
   // (FK ON DELETE SET NULL) e non contano più nelle statistiche per-compagno.
   const deleteCompagno = useCallback(async (id: string) => {
@@ -614,5 +626,5 @@ export function useDiary(): UseDiary {
     return true
   }, [reload])
 
-  return { data, loading, error, clearError, reload, saveTorneo, quickCreateTorneo, createGuidedTorneo, deleteTorneo, savePartita, deletePartita, saveFoto, deleteFoto, saveCompagno, deleteCompagno, searchUsers, linkPartner, unlinkPartner, mergeVenues }
+  return { data, loading, error, clearError, reload, saveTorneo, quickCreateTorneo, createGuidedTorneo, deleteTorneo, savePartita, deletePartita, saveFoto, deleteFoto, saveCompagno, deleteCompagno, searchUsers, linkPartner, unlinkPartner, unlinkMe, mergeVenues }
 }

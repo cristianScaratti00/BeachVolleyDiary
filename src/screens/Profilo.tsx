@@ -10,6 +10,10 @@ import { Label, inputStyle } from '../components/modals/Sheet'
 interface ProfiloProps {
   session: Session
   onLogout: () => void
+  /** Quanti altri utenti ti hanno collegato come loro socio. */
+  condivisioniRicevute: number
+  /** Toglie TUTTE le condivisioni ricevute. Ritorna quante ne ha tolte. */
+  onRimuoviCondivisioni: () => Promise<number>
 }
 
 // Esito dell'ultima azione di un riquadro (verde = fatto, rosso = errore).
@@ -44,7 +48,7 @@ function SaveButton({ label, disabled, onClick }: { label: string; disabled: boo
   )
 }
 
-export default function Profilo({ session, onLogout }: ProfiloProps) {
+export default function Profilo({ session, onLogout, condivisioniRicevute, onRimuoviCondivisioni }: ProfiloProps) {
   const initial = session.name?.[0]?.toUpperCase() || '?'
   const { refresh } = useAuth()
   const fileRef = useRef<HTMLInputElement>(null)
@@ -56,6 +60,22 @@ export default function Profilo({ session, onLogout }: ProfiloProps) {
   const [pw, setPw] = useState('')
   const [pw2, setPw2] = useState('')
   const [busyPw, setBusyPw] = useState(false)
+  const [busyCond, setBusyCond] = useState(false)
+  const [condMsg, setCondMsg] = useState<Msg>(null)
+
+  const rimuoviCondivisioni = async () => {
+    if (busyCond) return
+    if (!window.confirm('Togliere tutte le condivisioni ricevute? I tornei degli altri spariranno dal tuo diario e dalle tue statistiche.')) return
+    setBusyCond(true)
+    setCondMsg(null)
+    const n = await onRimuoviCondivisioni()
+    setBusyCond(false)
+    setCondMsg(
+      n > 0
+        ? { ok: true, text: n === 1 ? 'Condivisione rimossa.' : `${n} condivisioni rimosse.` }
+        : { ok: false, text: 'Non è stato possibile rimuoverle. Riprova.' },
+    )
+  }
   const [pwMsg, setPwMsg] = useState<Msg>(null)
 
   const nameDirty = name.trim() !== session.name.trim()
@@ -184,6 +204,46 @@ export default function Profilo({ session, onLogout }: ProfiloProps) {
           Hai effettuato l’accesso con Google o Apple: la password si gestisce direttamente dal tuo account, non da qui.
         </div>
       )}
+
+      {/* Chi ti collega come suo socio ti riversa i propri tornei nel diario e
+          nelle statistiche, senza chiedere. Questa è la via d'uscita: prima
+          non esisteva, e il collegamento era a senso unico e definitivo. */}
+      <div className="lbl" style={{ marginTop: 26, marginBottom: 12 }}>Condivisioni ricevute</div>
+      <div className="card" style={{ padding: 22 }}>
+        {condivisioniRicevute === 0 ? (
+          <div style={{ font: "600 13px 'Nunito Sans'", color: MUTED, lineHeight: 1.5 }}>
+            Nessuno ti ha collegato come suo compagno. Quando succede, i tornei
+            che avete giocato insieme compaiono nel tuo diario in sola lettura.
+          </div>
+        ) : (
+          <>
+            <div style={{ font: "600 13px 'Nunito Sans'", lineHeight: 1.5 }}>
+              {condivisioniRicevute === 1
+                ? 'Un altro giocatore ti ha collegato come suo compagno.'
+                : `${condivisioniRicevute} giocatori ti hanno collegato come loro compagno.`}{' '}
+              I loro tornei compaiono nel tuo diario e contano nelle tue statistiche.
+            </div>
+            <div style={hintStyle}>
+              Togliendo la condivisione spariscono dal tuo diario. I tuoi tornei
+              non vengono toccati, e chi ti aveva collegato può rifarlo.
+            </div>
+            <Feedback msg={condMsg} />
+            <button
+              onClick={rimuoviCondivisioni}
+              disabled={busyCond}
+              className="chip"
+              style={{
+                marginTop: 16, padding: '12px 22px', borderRadius: 11,
+                border: '1px solid rgba(255,71,126,.4)', background: 'transparent',
+                color: '#FF477E', font: "700 13.5px 'Nunito Sans'",
+                cursor: busyCond ? 'default' : 'pointer', opacity: busyCond ? 0.45 : 1,
+              }}
+            >
+              {busyCond ? 'Rimozione…' : 'Togli tutte le condivisioni'}
+            </button>
+          </>
+        )}
+      </div>
 
       <div className="chip" onClick={onLogout} style={{ display: 'inline-flex', marginTop: 26, padding: '11px 18px', borderRadius: 11, border: '1px solid rgba(255,71,126,.4)', color: '#FF477E', cursor: 'pointer', font: "700 13.5px 'Nunito Sans'" }}>Esci</div>
     </div>

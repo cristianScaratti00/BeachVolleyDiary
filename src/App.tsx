@@ -104,6 +104,7 @@ export default function App() {
     searchUsers,
     linkPartner,
     unlinkPartner,
+    unlinkMe,
     mergeVenues,
   } = useDiary();
 
@@ -717,7 +718,17 @@ export default function App() {
           />
         );
       case "profilo":
-        return <Profilo session={session!} onLogout={logout} />;
+        return (
+          <Profilo
+            session={session!}
+            onLogout={logout}
+            // Un socio `shared` è una riga creata da un ALTRO utente e resa
+            // visibile perché ci ha collegati: è esattamente una condivisione
+            // ricevuta.
+            condivisioniRicevute={data.partners.filter((p) => p.shared).length}
+            onRimuoviCondivisioni={() => unlinkMe()}
+          />
+        );
       case "crea":
         return (
           <CreaChat

@@ -524,6 +524,12 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: unknown
       }
+      // Chi è stato collegato come socio si toglie da solo. Senza argomenti
+      // rimuove TUTTE le condivisioni ricevute. Ritorna quante ne ha tolte.
+      unlink_me: {
+        Args: { p_partner_id?: string }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never
