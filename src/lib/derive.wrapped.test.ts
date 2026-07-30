@@ -14,6 +14,9 @@ import {
   makeWrappedRange,
   wrappedRangeLabel,
   wrappedRangeForYear,
+  wrappedDisponibile,
+  STAGIONE_INIZIO,
+  STAGIONE_FINE,
   WRAPPED_MIN_MATCHES,
 } from './derive'
 import type { WrappedData, WrappedSlideKind } from './derive'
@@ -545,5 +548,50 @@ describe('deriveWrapped — intervallo e composizione', () => {
     const snapshot = JSON.parse(JSON.stringify(data))
     deriveWrapped(data, FULL_YEAR)
     expect(data).toEqual(snapshot)
+  })
+})
+
+// ---------------------------------------------------------------- calendario
+// Il recap è di stagione: a stagione aperta racconterebbe una storia a metà.
+// Qui si presidiano i due confini, che sono l'unica cosa che si può sbagliare.
+describe('wrappedDisponibile — il recap arriva a stagione chiusa', () => {
+  it('durante la stagione non compare', () => {
+    for (const d of ['2026-05-01', '2026-06-15', '2026-07-31', '2026-08-15']) {
+      expect(wrappedDisponibile(d), d).toBe(false)
+    }
+  })
+
+  it('compare a stagione finita e resta per tutta la pausa', () => {
+    for (const d of ['2026-09-01', '2026-10-20', '2026-12-31', '2027-01-02', '2027-04-30']) {
+      expect(wrappedDisponibile(d), d).toBe(true)
+    }
+  })
+
+  it('l’ultimo giorno di stagione è ancora stagione, il primo dopo no', () => {
+    // Il confine esatto: il 31 agosto si può ancora giocare, quindi niente
+    // recap; dal 1° settembre la stagione è chiusa.
+    expect(wrappedDisponibile('2026-08-31')).toBe(false)
+    expect(wrappedDisponibile('2026-09-01')).toBe(true)
+  })
+
+  it('il giorno che riapre la stagione lo fa sparire', () => {
+    expect(wrappedDisponibile('2027-04-30')).toBe(true)
+    expect(wrappedDisponibile('2027-05-01')).toBe(false)
+  })
+
+  it('la regola è annuale: l’anno non conta, solo mese e giorno', () => {
+    for (const anno of ['2024', '2026', '2031']) {
+      expect(wrappedDisponibile(anno + '-07-01')).toBe(false)
+      expect(wrappedDisponibile(anno + '-11-01')).toBe(true)
+    }
+  })
+
+  it('le due date di confine restano confrontabili come stringhe MM-DD', () => {
+    // Il confronto lessicografico regge solo con larghezza fissa e zero davanti:
+    // se qualcuno scrivesse '5-1' la regola si romperebbe in silenzio.
+    for (const d of [STAGIONE_INIZIO, STAGIONE_FINE]) {
+      expect(d).toMatch(/^\d{2}-\d{2}$/)
+    }
+    expect(STAGIONE_INIZIO < STAGIONE_FINE).toBe(true)
   })
 })

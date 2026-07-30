@@ -1,6 +1,6 @@
 import type { CSSProperties, ChangeEvent } from "react";
 import type { DashboardStats, TorneoCard } from "../lib/derive";
-import { WRAPPED_MIN_MATCHES } from "../lib/derive";
+import { WRAPPED_MIN_MATCHES, wrappedDisponibile } from "../lib/derive";
 import type { Option } from "../lib/models";
 import { Badge } from "../components/ui";
 import {
@@ -110,8 +110,12 @@ export default function Home({
       </div>
 
       {/* Beach Wrapped: banner stagionale — recap sfogliabile da condividere.
-          Compare solo con dati a sufficienza, così la CTA non porta a un recap vuoto. */}
-      {s.played >= WRAPPED_MIN_MATCHES && (
+          Due condizioni, e sono diverse fra loro: `wrappedDisponibile` guarda il
+          CALENDARIO (il recap arriva a stagione chiusa, da settembre), la soglia
+          guarda i DATI (con due partite non c'è niente da raccontare). Entrambe
+          servono: a stagione finita ma senza partite la CTA porterebbe a un
+          recap vuoto, e con cento partite a giugno sarebbe comunque prematuro. */}
+      {wrappedDisponibile() && s.played >= WRAPPED_MIN_MATCHES && (
         <button
           onClick={onOpenWrapped}
           style={{

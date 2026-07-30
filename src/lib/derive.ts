@@ -966,6 +966,34 @@ export interface WrappedData {
 // Soglia minima di partite perché il recap valga la pena di essere mostrato.
 export const WRAPPED_MIN_MATCHES = 3
 
+// ---------------------------------------------------------------------------
+// Quando ha senso mostrare il Beach Wrapped
+//
+// È un recap di STAGIONE, e a stagione aperta racconterebbe una storia a metà:
+// a giugno "il tuo miglior torneo" è semplicemente l'unico che hai giocato, e
+// la striscia di vittorie è quella che stai ancora costruendo. Compare quindi a
+// stagione chiusa, e resta per tutta la pausa — finché non si ricomincia a
+// giocare c'è una stagione finita da guardare.
+//
+// La stagione del beach in Italia va indicativamente da maggio a fine agosto.
+// Se il calendario cambia, queste due date sono l'unica cosa da toccare.
+// ---------------------------------------------------------------------------
+/** Primo giorno della stagione: da qui il recap si nasconde. */
+export const STAGIONE_INIZIO = '05-01'
+/** Ultimo giorno della stagione: il recap compare dal giorno dopo. */
+export const STAGIONE_FINE = '08-31'
+
+/**
+ * `true` fuori stagione, cioè quando c'è una stagione conclusa da riguardare:
+ * dal 1° settembre fino al 30 aprile. `today` è iniettabile per i test.
+ */
+export function wrappedDisponibile(today = todayISO()): boolean {
+  // Solo mese-giorno: la regola è annuale e non dipende dall'anno. Il confronto
+  // fra stringhe 'MM-DD' funziona perché sono a larghezza fissa con lo zero.
+  const md = today.slice(5)
+  return md > STAGIONE_FINE || md < STAGIONE_INIZIO
+}
+
 // "20 giu 2026" — data compatta per le etichette d'intervallo.
 function wrappedDayLabel(d: string): string {
   return (+d.slice(8, 10)) + ' ' + (MONTHS_SHORT[(+d.slice(5, 7)) - 1] || '').toLowerCase() + ' ' + d.slice(0, 4)

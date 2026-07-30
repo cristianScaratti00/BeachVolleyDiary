@@ -40,7 +40,10 @@
       body { margin: 0; background: #FAF8F5; -webkit-font-smoothing: antialiased; }
       * { box-sizing: border-box; }
       @keyframes bvd-float { 0%,100% { transform: translate3d(0,0,0); } 50% { transform: translate3d(0,-10px,0); } }
-      @keyframes bvd-ball { 0%,100% { transform: translate3d(0,0,0) rotate(0deg); } 30% { transform: translate3d(0,-7px,0) rotate(-14deg); } 60% { transform: translate3d(0,1px,0) rotate(6deg); } }
+      /* Il pin dondola sulla propria punta. Prima era la palla che rimbalzava
+         via dalla rete; col logo nuovo la palla sta DENTRO il pin, e farla
+         schizzare fuori non vorrebbe dire niente. */
+      @keyframes bvd-pin { 0%,100% { transform: rotate(0deg); } 30% { transform: rotate(-7deg); } 62% { transform: rotate(4deg); } }
       @keyframes bvd-pulse { 0% { transform: scale(1); opacity: .55; } 70%,100% { transform: scale(2.4); opacity: 0; } }
       [data-bvd-mobilebar] { display: none; }
       @media (max-width: 900px) {
@@ -111,7 +114,8 @@
         <div style="max-width: 1160px; margin: 0 auto; padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; gap: 24px;">
           <div style="display: flex; align-items: center; gap: 12px;">
             <div style="width: 38px; height: 38px; border-radius: 10px; background: #1B2A4A; display: flex; align-items: center; justify-content: center; flex: none;">
-              <svg width="27" height="27" viewBox="0 0 100 100" fill="none" aria-hidden="true"><g stroke="#FAF8F5" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="48" x2="82" y2="48"/><line x1="18" y1="64" x2="82" y2="64"/><line x1="38" y1="40" x2="38" y2="72"/><line x1="62" y1="40" x2="62" y2="72"/></g><line x1="18" y1="40" x2="82" y2="40" stroke="#FAF8F5" stroke-width="5" stroke-linecap="round"/><circle cx="66" cy="28" r="11" fill="#FF6B35"/></svg>
+              <!-- 27px: sotto le cuciture, come la favicon e la sidebar dell'app. -->
+              <svg width="27" height="27" viewBox="0 0 100 100" fill="none" aria-hidden="true"><path d="M50 90 L34 58 A26 26 0 1 1 66 58 Z" fill="#FF6B35"/><circle cx="50" cy="40" r="20" fill="#FAF8F5"/></svg>
             </div>
             <span style="font: 700 18px 'Space Grotesk'; letter-spacing: -.4px; white-space: nowrap;">Beach<span style="font-weight: 400; color: rgba(27,42,74,.55);"> Diary</span></span>
           </div>
@@ -384,7 +388,25 @@
       <section id="inizia" style="border-top: 1px solid rgba(27,42,74,.1); background: #fff;">
         <div style="max-width: 1160px; margin: 0 auto; padding: 96px 32px; display: flex; flex-direction: column; align-items: center; gap: 26px; text-align: center;">
           <div data-bvd-reveal style="width: 76px; height: 76px; border-radius: 20px; background: #1B2A4A; display: flex; align-items: center; justify-content: center; position: relative;">
-            <svg width="55" height="55" viewBox="0 0 100 100" fill="none" aria-hidden="true"><g stroke="#FAF8F5" stroke-width="1.6" stroke-linecap="round"><line x1="16" y1="46" x2="84" y2="46"/><line x1="16" y1="58" x2="84" y2="58"/><line x1="16" y1="70" x2="84" y2="70"/><line x1="30" y1="40" x2="30" y2="72"/><line x1="44" y1="40" x2="44" y2="72"/><line x1="58" y1="40" x2="58" y2="72"/><line x1="72" y1="40" x2="72" y2="72"/></g><line x1="16" y1="40" x2="84" y2="40" stroke="#FAF8F5" stroke-width="5" stroke-linecap="round"/><line x1="17" y1="37" x2="17" y2="73" stroke="#FAF8F5" stroke-width="1.6" stroke-linecap="round"/><line x1="83" y1="37" x2="83" y2="73" stroke="#FAF8F5" stroke-width="1.6" stroke-linecap="round"/><g style="animation: bvd-ball 3.4s cubic-bezier(.4,0,.5,1) infinite; transform-origin: 70px 26px;"><circle cx="70" cy="26" r="13" fill="#FF6B35"/><path d="M60 23 Q70 17 80 23 M65 15 Q72 26 66 37 M77 16 Q70 26 76 37" stroke="#1B2A4A" stroke-width="1.7" fill="none" stroke-linecap="round"/></g></svg>
+            <!-- 55px: misura piena, tutte e sei le cuciture. La riga di terra
+                 sta FUORI dal gruppo animato, così il pin dondola sopra un
+                 appoggio fermo invece di trascinarselo dietro. -->
+            <svg width="55" height="55" viewBox="0 0 100 100" fill="none" aria-hidden="true">
+              <defs><clipPath id="bvd-cta-ball"><circle cx="50" cy="40" r="19"/></clipPath></defs>
+              <g style="animation: bvd-pin 3.4s cubic-bezier(.4,0,.5,1) infinite; transform-origin: 50px 90px;">
+                <path d="M50 90 L34 58 A26 26 0 1 1 66 58 Z" fill="#FF6B35"/>
+                <circle cx="50" cy="40" r="19" fill="#FAF8F5"/>
+                <g clip-path="url(#bvd-cta-ball)" stroke="#1B2A4A" stroke-width="2.2" fill="none" stroke-linecap="round">
+                  <path d="M50 40 C57 35 59 27 51 19.5"/>
+                  <path d="M50 40 C52 48.5 61 53 68 48"/>
+                  <path d="M50 40 C41.5 38 35 43 33 51"/>
+                  <path d="M56 18.5 C62 23.5 66 31 67.5 38"/>
+                  <path d="M63 55 C54.5 59.5 45.5 59.5 37 55"/>
+                  <path d="M32.5 38 C34 31 38 23.5 44 18.5"/>
+                </g>
+              </g>
+              <line x1="30" y1="90" x2="70" y2="90" stroke="rgba(250,248,245,.45)" stroke-width="4" stroke-linecap="round"/>
+            </svg>
           </div>
           <h2 data-bvd-reveal style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: clamp(30px, 3.8vw, 44px); line-height: 1.06; letter-spacing: -.036em; max-width: 620px; text-wrap: balance;">La prossima stagione te la ricorderai per intero</h2>
           <p style="margin: 0; font-size: 17.5px; line-height: 1.6; color: rgba(27,42,74,.68); max-width: 500px; text-wrap: pretty;">Registrati con email e password, segna il primo torneo, e da lì in avanti il diario si scrive da sé.</p>
@@ -415,7 +437,7 @@
         <div style="max-width: 1160px; margin: 0 auto; padding: 34px 32px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap;">
           <div style="display: flex; align-items: center; gap: 11px;">
             <div style="width: 30px; height: 30px; border-radius: 8px; background: #1B2A4A; display: flex; align-items: center; justify-content: center; flex: none;">
-              <svg width="21" height="21" viewBox="0 0 100 100" fill="none" aria-hidden="true"><g stroke="#FAF8F5" stroke-width="2.6" stroke-linecap="round"><line x1="20" y1="50" x2="80" y2="50"/><line x1="40" y1="42" x2="40" y2="70"/><line x1="60" y1="42" x2="60" y2="70"/></g><line x1="18" y1="42" x2="82" y2="42" stroke="#FAF8F5" stroke-width="6" stroke-linecap="round"/><circle cx="66" cy="30" r="12" fill="#FF6B35"/></svg>
+              <svg width="21" height="21" viewBox="0 0 100 100" fill="none" aria-hidden="true"><path d="M50 90 L34 58 A26 26 0 1 1 66 58 Z" fill="#FF6B35"/><circle cx="50" cy="40" r="20" fill="#FAF8F5"/></svg>
             </div>
             <span style="font: 700 15px 'Space Grotesk'; letter-spacing: -.3px;">Beach<span style="font-weight: 400; color: rgba(27,42,74,.55);"> Diary</span></span>
           </div>

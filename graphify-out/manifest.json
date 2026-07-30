@@ -25,8 +25,8 @@
     "semantic_hash": ""
   },
   "src/components/Logo.tsx": {
-    "mtime": 1783971522.3988242,
-    "ast_hash": "b30ca0e169c6fda3260bbda022a51bdc",
+    "mtime": 1785420649.2818086,
+    "ast_hash": "ba338afb8c86b8fe86cbf484ed564257",
     "semantic_hash": ""
   },
   "src/components/NavIcons.tsx": {
@@ -45,8 +45,8 @@
     "semantic_hash": ""
   },
   "src/components/Splash.tsx": {
-    "mtime": 1783958061.7570186,
-    "ast_hash": "abff2f060028a7cd0596a7eaa27a780b",
+    "mtime": 1785420556.014759,
+    "ast_hash": "a74feb80b07f98a0a6c6f4ff2a0019d9",
     "semantic_hash": ""
   },
   "src/components/dashboard/KeyNumbers.tsx": {
@@ -205,13 +205,13 @@
     "semantic_hash": ""
   },
   "src/lib/derive.ts": {
-    "mtime": 1785354228.4772906,
-    "ast_hash": "ab71d69c6d3e0f9d91d863cb80927412",
+    "mtime": 1785421133.0994093,
+    "ast_hash": "c0d99b524dcbbe1c59ec7da114025a5f",
     "semantic_hash": ""
   },
   "src/lib/derive.wrapped.test.ts": {
-    "mtime": 1785354410.125288,
-    "ast_hash": "a1722edf1bee1242744b6bcaf78a5df3",
+    "mtime": 1785421943.8493047,
+    "ast_hash": "075d606c504a854cddc8f193a09ee7b5",
     "semantic_hash": ""
   },
   "src/lib/limits.ts": {
@@ -275,8 +275,8 @@
     "semantic_hash": ""
   },
   "src/screens/Home.tsx": {
-    "mtime": 1784900639.7482083,
-    "ast_hash": "817284c3048eb3f85ea9a09a2b0b3617",
+    "mtime": 1785421151.7454233,
+    "ast_hash": "b09b46ee9add089aefb449429acbb6a0",
     "semantic_hash": ""
   },
   "src/screens/Login.tsx": {
@@ -455,8 +455,8 @@
     "semantic_hash": ""
   },
   "index.html": {
-    "mtime": 1785162983.356255,
-    "ast_hash": "d9e8c9bc71de805fd2c3f8b04e7b5bc9",
+    "mtime": 1785420667.957681,
+    "ast_hash": "02a21a7702a350fe9ba74c64ab547e6e",
     "semantic_hash": ""
   },
   "supabase/README.md": {
@@ -645,8 +645,8 @@
     "semantic_hash": ""
   },
   "presentazione/index.html": {
-    "mtime": 1785163515.4843054,
-    "ast_hash": "209f90cae2c6978e30190245f4e2d534",
+    "mtime": 1785420739.9167788,
+    "ast_hash": "5eb16bfe185d45b26c779d3aa0b429b3",
     "semantic_hash": ""
   },
   "public/offline.html": {
@@ -655,28 +655,28 @@
     "semantic_hash": ""
   },
   "public/icons/apple-touch-icon.png": {
-    "mtime": 1785162628.4154618,
-    "ast_hash": "da47d59eee0cdfc0ae30f5e28eae32fb",
+    "mtime": 1785420590.714119,
+    "ast_hash": "864ecec02a45e740eab44835efefd4dc",
     "semantic_hash": ""
   },
   "public/icons/icon-192.png": {
-    "mtime": 1785162628.3535855,
-    "ast_hash": "fcb2488d10f0994f3857844533268c4f",
+    "mtime": 1785420590.6596105,
+    "ast_hash": "3e593bd4fbb65dd4966b6634fd4053b4",
     "semantic_hash": ""
   },
   "public/icons/icon-512.png": {
-    "mtime": 1785162628.380478,
-    "ast_hash": "214340c922e813641e9ed0f40fea88e2",
+    "mtime": 1785420590.6826396,
+    "ast_hash": "966bb1258c1cca288834d09cf94648a8",
     "semantic_hash": ""
   },
   "public/icons/icon-maskable-512.png": {
-    "mtime": 1785162628.4008756,
-    "ast_hash": "cfb54f91aa5041b20f38ce53803b61e1",
+    "mtime": 1785420590.7009754,
+    "ast_hash": "c5c63743594e6fc564efbc4c637e2e90",
     "semantic_hash": ""
   },
   "public/icons/icon.svg": {
-    "mtime": 1785162621.1063807,
-    "ast_hash": "b139a98c95f4079645e3a1610b929b86",
+    "mtime": 1785420568.5315962,
+    "ast_hash": "5509ccaade7256682aa31b875adfd500",
     "semantic_hash": ""
   },
   "public/presentazione/screens/home.png": {
