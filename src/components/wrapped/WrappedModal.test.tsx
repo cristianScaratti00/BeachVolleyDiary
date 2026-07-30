@@ -10,12 +10,16 @@
 // per l'export. Per sapere "su quale slide siamo" si legge quindi il gruppo
 // visibile, non un testo qualsiasi (che comparirebbe anche nel layer nascosto).
 // ============================================================================
-import { describe, it, expect, vi } from 'vitest'
-import { render, screen, within, fireEvent } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { render, screen, within, fireEvent, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { WrappedData, WrappedSlide } from '../../lib/derive'
 import WrappedModal from './WrappedModal'
 import { expectNoA11yViolations } from '../../test/axe'
+
+// `html-to-image` tocca canvas e font: in jsdom non può girare, e comunque qui
+// interessa QUALE nodo viene catturato, non il PNG che ne esce.
+vi.mock('html-to-image', () => ({ toPng: vi.fn(), toBlob: vi.fn() }))
 
 const SLIDES: WrappedSlide[] = [
   { kind: 'intro', eyebrow: 'Beach Wrapped', headline: 'PRIMA', title: 'copertina', caption: '12 partite', stats: [], emoji: '🏖️' },
@@ -37,59 +41,119 @@ function makeWrapped(over: Partial<WrappedData> = {}): WrappedData {
 
 function renderModal(over: Partial<WrappedData> = {}, props: Partial<Parameters<typeof WrappedModal>[0]> = {}) {
   const onClose = vi.fn()
-  const onRangeChange = vi.fn()
-  const view = render(<WrappedModal wrapped={makeWrapped(over)} onClose={onClose} onRangeChange={onRangeChange} {...props} />)
-  return { ...view, onClose, onRangeChange }
+  const view = render(<WrappedModal wrapped={makeWrapped(over)} onClose={onClose} {...props} />)
+  return { ...view, onClose }
 }
 
 // La slide visibile: unico role="group" della UI, con l'indice nell'aria-label.
 const deck = () => screen.getByRole('group')
 
-describe('WrappedModal — navigazione', () => {
-  it('parte dalla prima slide e mostra il contatore', () => {
+// Sotto la card non c'è più una pulsantiera: si sfoglia col dito sulla card e
+// con le frecce da tastiera. Questi test presidiano proprio quello — che
+// togliendo i pulsanti non sia sparito anche il modo di muoversi.
+describe('WrappedModal — sfogliare senza pulsantiera', () => {
+  it('parte dalla prima slide', () => {
     renderModal()
     expect(deck()).toHaveAccessibleName(/slide 1 di 3/i)
     expect(within(deck()).getByText('PRIMA')).toBeInTheDocument()
   })
 
-  it('“Slide successiva” avanza; “precedente” torna indietro', async () => {
-    const user = userEvent.setup()
+  it('le frecce da tastiera avanzano e tornano indietro', () => {
     renderModal()
-    await user.click(screen.getByRole('button', { name: 'Slide successiva' }))
+    fireEvent.keyDown(deck(), { key: 'ArrowRight' })
     expect(deck()).toHaveAccessibleName(/slide 2 di 3/i)
     expect(within(deck()).getByText('SECONDA')).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: 'Slide precedente' }))
+    fireEvent.keyDown(deck(), { key: 'ArrowLeft' })
     expect(deck()).toHaveAccessibleName(/slide 1 di 3/i)
     expect(within(deck()).getByText('PRIMA')).toBeInTheDocument()
   })
 
-  it('“precedente” è disabilitato sulla prima, “successiva” sull’ultima', async () => {
-    const user = userEvent.setup()
+  it('agli estremi non si esce dal mazzo', () => {
     renderModal()
-    expect(screen.getByRole('button', { name: 'Slide precedente' })).toBeDisabled()
-    await user.click(screen.getByRole('button', { name: 'Slide successiva' }))
-    await user.click(screen.getByRole('button', { name: 'Slide successiva' }))
+    fireEvent.keyDown(deck(), { key: 'ArrowLeft' })
+    expect(deck()).toHaveAccessibleName(/slide 1 di 3/i)
+    for (let i = 0; i < 5; i++) fireEvent.keyDown(deck(), { key: 'ArrowRight' })
     expect(deck()).toHaveAccessibleName(/slide 3 di 3/i)
-    expect(screen.getByRole('button', { name: 'Slide successiva' })).toBeDisabled()
   })
 
-  it('il tasto play/pausa alterna l’auto-avanzamento', async () => {
-    const user = userEvent.setup()
+  it('non resta nessun pulsante di navigazione sotto la card', () => {
     renderModal()
-    const toggle = screen.getByRole('button', { name: 'Metti in pausa' })
-    expect(toggle).toHaveAttribute('aria-pressed', 'true')
-    await user.click(toggle)
-    expect(screen.getByRole('button', { name: 'Riproduci' })).toHaveAttribute('aria-pressed', 'false')
+    expect(screen.queryByRole('button', { name: /slide/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /pausa|riproduci/i })).not.toBeInTheDocument()
+  })
+})
+
+describe('WrappedModal — auto-avanzamento', () => {
+  beforeEach(() => vi.useFakeTimers())
+  afterEach(() => vi.useRealTimers())
+
+  const passaUnaSlide = async () => { await act(async () => { vi.advanceTimersByTime(5300) }) }
+
+  it('scorre da solo, come una storia', async () => {
+    renderModal()
+    await passaUnaSlide()
+    expect(deck()).toHaveAccessibleName(/slide 2 di 3/i)
+  })
+
+  it('tenendo premuto si ferma: è la pausa, ora che il pulsante non c’è più', async () => {
+    // Senza questo, togliere il tasto pausa lascerebbe un contenuto che si
+    // muove da solo e non si può fermare.
+    renderModal()
+    fireEvent.pointerDown(deck())
+    await passaUnaSlide()
+    await passaUnaSlide()
+    expect(deck()).toHaveAccessibleName(/slide 1 di 3/i)
+  })
+
+  it('la barra spaziatrice mette in pausa da tastiera', async () => {
+    renderModal()
+    fireEvent.keyDown(deck(), { key: ' ' })
+    await passaUnaSlide()
+    await passaUnaSlide()
+    expect(deck()).toHaveAccessibleName(/slide 1 di 3/i)
   })
 })
 
 describe('WrappedModal — azioni', () => {
-  it('cambiando l’intervallo chiama onRangeChange mantenendo l’altro estremo', () => {
-    const { onRangeChange } = renderModal()
-    fireEvent.change(screen.getByLabelText('Data inizio'), { target: { value: '2026-03-01' } })
-    expect(onRangeChange).toHaveBeenCalledWith('2026-03-01', '2026-12-31')
+  it('lo scarico compare solo sull’ultima slide', () => {
+    // È il recap che si porta via, non una slide qualsiasi: prima della fine
+    // quel pulsante invitava ad andarsene invece di guardare.
+    renderModal()
+    expect(screen.queryByRole('button', { name: /scarica/i })).not.toBeInTheDocument()
+    fireEvent.keyDown(deck(), { key: 'ArrowRight' })
+    expect(screen.queryByRole('button', { name: /scarica/i })).not.toBeInTheDocument()
+    fireEvent.keyDown(deck(), { key: 'ArrowRight' })
+    expect(screen.getByRole('button', { name: /scarica/i })).toBeInTheDocument()
   })
+
+  it('scarica il RIEPILOGO, non la slide che si sta guardando', async () => {
+    // Sull'ultima slide si legge "Grazie": scaricare quella sarebbe portarsi a
+    // casa un saluto invece dei propri numeri. Il PNG è sempre la card recap.
+    const toPng = vi.mocked((await import('html-to-image')).toPng)
+    toPng.mockResolvedValue('data:image/png;base64,x')
+    // Il download fa `a.click()` su un href data:; jsdom non sa navigare e lo
+    // urla su stderr ad ogni run. Qui il click sull'ancora non interessa.
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+
+    const conRecap: WrappedSlide[] = [
+      SLIDES[0],
+      { kind: 'recap', eyebrow: 'Riepilogo', headline: 'RECAP', title: '', caption: '', stats: [], emoji: '📊' },
+      SLIDES[2],
+    ]
+    renderModal({ slides: conRecap })
+    fireEvent.keyDown(deck(), { key: 'ArrowRight' })
+    fireEvent.keyDown(deck(), { key: 'ArrowRight' })
+    expect(deck()).toHaveAccessibleName(/slide 3 di 3/i)
+
+    fireEvent.click(screen.getByRole('button', { name: /scarica/i }))
+    await act(async () => {})
+
+    // Il nodo catturato è quello del recap (indice 1), non della slide corrente.
+    const nodo = toPng.mock.calls[0][0] as HTMLElement
+    expect(within(nodo).getByText('RECAP')).toBeInTheDocument()
+  })
+
 
   it('“Chiudi” chiama onClose', async () => {
     const user = userEvent.setup()

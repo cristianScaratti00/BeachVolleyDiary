@@ -49,7 +49,6 @@ function renderTornei(tornei = [makeTorneo()], over: Partial<HarnessProps> = {})
       mappa={makeMappaData()}
       onOpenTorneo={onOpenTorneo}
       onNewTorneo={onNewTorneo}
-      onQuickTorneo={noop}
       onAssistant={noop}
       canAssistant
       {...over}
@@ -140,7 +139,6 @@ describe('Tornei — selettore di vista Lista/Mappa', () => {
         onVista={onVista}
         onOpenTorneo={noop}
         onNewTorneo={noop}
-        onQuickTorneo={noop}
         onAssistant={noop}
         canAssistant
       />,
@@ -362,7 +360,6 @@ describe('Tornei — filtro a chip', () => {
         mappa={makeMappaData()}
         onOpenTorneo={onOpenTorneo}
         onNewTorneo={noop}
-        onQuickTorneo={noop}
         onAssistant={noop}
         canAssistant
       />,
@@ -566,7 +563,6 @@ describe('Tornei — difetti noti (vedi docs/QA-tornei-formati.md)', () => {
           mappa={makeMappaData()}
           onOpenTorneo={onOpenTorneo}
           onNewTorneo={noop}
-          onQuickTorneo={noop}
           onAssistant={noop}
           canAssistant
         />,
@@ -615,11 +611,26 @@ describe('Tornei — responsive', () => {
     expect(grid.style.gridTemplateColumns).toBe('repeat(auto-fill,minmax(min(100%,300px),1fr))')
   })
 
-  it('le chip vanno a capo invece di sfondare la riga', () => {
+  it('le chip del filtro restano su una riga che scorre, non vanno a capo', () => {
+    // Prima andavano a capo: con cinque o sei formati diventavano due righe che
+    // spingevano la lista fuori schermo. Ora la riga è una sola e scorre in
+    // orizzontale — il contenuto resta in alto qualunque sia il numero di chip.
     renderTornei([
       makeTorneo({ format: '2vs2', date: '2026-01-01' }),
       makeTorneo({ format: '3vs3', date: '2026-01-02' }),
     ])
-    expect(screen.getByRole('group', { name: /Filtra i tornei/ })).toHaveStyle({ flexWrap: 'wrap' })
+    expect(screen.getByRole('group', { name: /Filtra i tornei/ }))
+      .toHaveStyle({ flexWrap: 'nowrap', overflowX: 'auto' })
+  })
+
+  it('il selettore di vista divide la riga in parti uguali', () => {
+    // Lista e Mappa sono due VISTE, non due filtri: si prendono metà schermo a
+    // testa dentro una guida piena, così il bersaglio del dito è grande e la
+    // forma le distingue dalle chip del filtro qui sotto.
+    renderTornei([makeTorneo()], { mappa: makeMappaData({ pins: [makeMappaPin({ city: 'Cervia', tier: 'vinto' })] }) })
+    const vista = screen.getByRole('group', { name: 'Come vedere i tornei' })
+    for (const b of within(vista).getAllByRole('button')) {
+      expect(b).toHaveStyle({ flex: '1' })
+    }
   })
 })

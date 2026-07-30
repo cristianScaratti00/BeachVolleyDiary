@@ -498,8 +498,28 @@ describe('deriveWrapped — intervallo e composizione', () => {
 
   it('genera il mazzo completo nell’ordine narrativo atteso', () => {
     expect(kinds(deriveWrapped(seasonRich(), FULL_YEAR))).toEqual([
-      'intro', 'wins', 'streak', 'partner', 'points', 'podium', 'volume', 'rival', 'funfacts', 'outro',
+      'intro', 'wins', 'streak', 'partner', 'points', 'podium', 'volume', 'rival', 'funfacts', 'recap', 'outro',
     ])
+  })
+
+  it('la slide di riepilogo raccoglie la stagione intera in sei numeri', () => {
+    // È la card che si salva e si condivide: deve reggere da sola, senza le
+    // slide che la precedono. Sei valori e non di più — la griglia della card
+    // è due colonne per tre righe.
+    const rec = slideOf(deriveWrapped(seasonRich(), FULL_YEAR), 'recap')
+    expect(rec.stats).toHaveLength(6)
+    expect(rec.stats.map((s) => s.label)).toEqual(
+      ['Tornei', 'Partite', 'Vinte', 'Win rate', 'Podi', 'Set vinti'],
+    )
+    // Tutti compatti: un'etichetta lunga come "Semifinale" sfonderebbe la cella,
+    // per questo il miglior risultato sta nella caption e non fra le stat.
+    for (const s of rec.stats) expect(s.value.length).toBeLessThanOrEqual(5)
+    expect(rec.caption).toMatch(/Miglior risultato/)
+  })
+
+  it('senza partite non c’è niente da riepilogare: la slide non compare', () => {
+    const k = kinds(deriveWrapped(seasonWith([]), FULL_YEAR))
+    expect(k).not.toContain('recap')
   })
 
   it('apre sempre con intro e chiude sempre con outro', () => {

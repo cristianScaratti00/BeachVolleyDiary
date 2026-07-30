@@ -14,7 +14,6 @@ import {
   deriveStory,
   deriveWrapped,
   wrappedRangeForYear,
-  makeWrappedRange,
   deriveTorneiListServer,
   deriveCompagniServer,
   deriveTorneoDetailServer,
@@ -122,8 +121,9 @@ export default function App() {
   const [selP, setSelP] = useState<string | null>(null);
   const [modal, setModal] = useState<ModalKind>(null);
   const [storyT, setStoryT] = useState<string | null>(null);
-  // Intervallo del Beach Wrapped: impostato all'apertura (dal filtro stagione) e
-  // modificabile dall'utente dentro il modale (range configurabile).
+  // Intervallo del Beach Wrapped, impostato all'apertura dal filtro stagione.
+  // Non è più modificabile dentro il modale: il selettore di periodo è stato
+  // tolto per lasciare tutto lo spazio alla card.
   const [wrappedRange, setWrappedRange] = useState<WrappedRange | null>(null);
   const [editId, setEditId] = useState<string | null>(null);
   const [fabOpen, setFabOpen] = useState(false);
@@ -637,7 +637,6 @@ export default function App() {
       onVista={setVistaTornei}
       onOpenTorneo={openTorneoDetail}
       onNewTorneo={() => openTorneo(null)}
-      onQuickTorneo={openQuickTorneo}
       onAssistant={openCrea}
       canAssistant={perm.canUseAi}
     />
@@ -913,6 +912,7 @@ export default function App() {
           fabOpen={fabOpen}
           onToggleFab={() => setFabOpen((v) => !v)}
           onNewTorneo={() => openTorneo(null)}
+          onQuickTorneo={openQuickTorneo}
           onNewPartita={() => openPartita(null)}
           onAssistant={openCrea}
           canAssistant={perm.canUseAi}
@@ -1004,7 +1004,6 @@ export default function App() {
             wrapped={wrappedData}
             onClose={closeModal}
             onNotice={setNotice}
-            onRangeChange={(from, to) => setWrappedRange(makeWrappedRange(from, to))}
           />
         </Suspense>
       )}

@@ -96,7 +96,20 @@ export function FilterChips({ options, value, onChange, label, mt = 20 }: {
   // volando da un capo all'altro della pagina. `label` è già unica per gruppo.
   const pillola = `chip-attiva-${label}`
   return (
-    <div role="group" aria-label={label} style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: mt }}>
+    <div
+      role="group"
+      aria-label={label}
+      style={{
+        display: 'flex', gap: 8, marginTop: mt,
+        // Una riga sola che scorre invece di andare a capo: con cinque o sei
+        // formati le chip occupavano due righe e spingevano giù la lista, che
+        // è il contenuto. Su desktop, se ci stanno, non c'è nulla da scorrere.
+        flexWrap: 'nowrap', overflowX: 'auto', scrollbarWidth: 'none',
+        // Il fuoco da tastiera disegna il contorno FUORI dal bottone: senza
+        // questi due pixel `overflow` lo taglierebbe.
+        paddingBottom: 2, marginLeft: -2, paddingLeft: 2,
+      }}
+    >
       {options.map((o) => {
         const on = o.value === value
         return (
@@ -108,6 +121,7 @@ export function FilterChips({ options, value, onChange, label, mt = 20 }: {
             onClick={() => onChange(o.value)}
             style={{
               position: 'relative', // regge la pillola, che è in `absolute`
+              flex: 'none', whiteSpace: 'nowrap', // in una riga che scorre, niente restringimenti
               padding: '10px 15px', borderRadius: 11, cursor: 'pointer',
               font: "700 13px 'Nunito Sans'",
               background: 'transparent',
@@ -131,6 +145,74 @@ export function FilterChips({ options, value, onChange, label, mt = 20 }: {
               />
             )}
             {/* Sopra la pillola, o il fondo navy coprirebbe l'etichetta. */}
+            <span style={{ position: 'relative', zIndex: 1 }}>{o.label}</span>
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+// -------------------------------------------------------- SegmentedControl
+// Interruttore fra due o tre VISTE degli stessi dati — non un filtro.
+//
+// Prima Lista/Mappa erano `FilterChips`, identiche a quelle del formato che
+// stanno due centimetri più sotto: sembravano due filtri in fila, e non si
+// capiva che una cambia *come* si guardano i tornei e l'altra *quali*. Qui le
+// alternative si dividono la larghezza dentro una guida piena, che è la forma
+// che sui telefoni significa "scegli una di queste" — e il bersaglio del dito
+// diventa mezzo schermo invece di una chip.
+//
+// Il contratto di accessibilità è lo stesso di FilterChips (`role="group"` +
+// `aria-pressed`): cambia il vestito, non ciò che viene annunciato.
+export function SegmentedControl({ options, value, onChange, label, mt = 20 }: {
+  options: FilterOption[]
+  value: string
+  onChange: (value: string) => void
+  label: string
+  mt?: number
+}) {
+  const pillola = `segmento-attivo-${label}`
+  return (
+    <div
+      role="group"
+      aria-label={label}
+      style={{
+        display: 'flex', gap: 4, marginTop: mt, padding: 4,
+        background: '#F2F0EC', borderRadius: 13,
+        // Pieno sul telefono, compatto sul desktop: senza il tetto, dentro la
+        // colonna da 1120px due sole opzioni diventavano segmenti da 560px —
+        // un bersaglio grande quanto mezzo schermo per una scelta binaria.
+        maxWidth: 420,
+      }}
+    >
+      {options.map((o) => {
+        const on = o.value === value
+        return (
+          <button
+            key={o.value}
+            type="button"
+            className="chip"
+            aria-pressed={on}
+            onClick={() => onChange(o.value)}
+            style={{
+              position: 'relative',
+              flex: 1, minWidth: 0, // si dividono la riga in parti uguali
+              padding: '11px 12px', borderRadius: 10, border: 'none', cursor: 'pointer',
+              background: 'transparent',
+              color: on ? '#fff' : MUTED,
+              font: "700 13.5px 'Nunito Sans'",
+              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+              transition: 'color .18s ease, opacity .15s ease',
+            }}
+          >
+            {on && (
+              <m.span
+                layoutId={pillola}
+                transition={MOLLA}
+                style={{ position: 'absolute', inset: 0, borderRadius: 10, background: INK, zIndex: 0 }}
+              />
+            )}
             <span style={{ position: 'relative', zIndex: 1 }}>{o.label}</span>
           </button>
         )

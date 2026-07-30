@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import type { ChangeEvent } from 'react'
 import { toPng } from 'html-to-image'
 import { track } from '@vercel/analytics'
 import type { StoryData } from '../../lib/derive'
@@ -33,17 +32,19 @@ function StatCell({ val, label, pal, valColor }: { val: string; label: string; p
   )
 }
 
-const igKey = (partner: string) => 'bvd_ig_' + partner.toLowerCase()
-const cleanHandle = (v: string) => v.replace(/^@+/, '').replace(/[^a-zA-Z0-9._]/g, '')
-
-// Modale della storia Instagram: anteprima scalata della card 1080×1920, con foto
-// di copertina (o visual con emoji), tag IG del compagno, e generazione PNG.
+// Modale della storia Instagram: anteprima scalata della card 1080×1920, con
+// foto di copertina e generazione PNG.
+//
+// Il campo per il tag Instagram del compagno è stato rimosso: chiedeva un dato
+// che l'app non ha (e che andava ricordato a mano, per compagno, in
+// localStorage) per scrivere una @ dentro un'immagine, dove comunque non è
+// cliccabile. Il nome del compagno basta, e chi vuole taggarlo lo fa da
+// Instagram al momento della pubblicazione.
 export default function StoryModal({ story, onClose, onNotice }: StoryModalProps) {
   const [variant, setVariant] = useState<PaletteKey>('navy')
   const [busy, setBusy] = useState(false)
   const [vh, setVh] = useState(() => (typeof window !== 'undefined' ? window.innerHeight : 900))
   const [covers, setCovers] = useState<string[]>([])
-  const [handle, setHandle] = useState('')
   const cardRef = useRef<HTMLDivElement>(null)
   const pal = PALETTES[variant]
 
@@ -52,16 +53,6 @@ export default function StoryModal({ story, onClose, onNotice }: StoryModalProps
     window.addEventListener('resize', onResize)
     return () => window.removeEventListener('resize', onResize)
   }, [])
-
-  // Tag IG memorizzato per compagno (ricompare la volta dopo).
-  useEffect(() => {
-    try { setHandle(localStorage.getItem(igKey(story.partner)) || '') } catch { /* ignore */ }
-  }, [story.partner])
-  const onHandle = (e: ChangeEvent<HTMLInputElement>) => {
-    const h = cleanHandle(e.target.value)
-    setHandle(h)
-    try { localStorage.setItem(igKey(story.partner), h) } catch { /* ignore */ }
-  }
 
   // Foto (fino a 3): scarica le foto firmate e le inline come data URL (così
   // html-to-image le incorpora nel PNG senza problemi di canvas "tainted").
@@ -88,10 +79,11 @@ export default function StoryModal({ story, onClose, onNotice }: StoryModalProps
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [photoKey])
 
-  const scale = Math.max(0.26, Math.min(0.5, (vh - 300) / 1920))
+  // Il margine è sceso da 300 a 260: sotto la card è rimasta una riga sola
+  // (scarica + chiudi), la palette è passata sopra e il campo del tag non c'è più.
+  const scale = Math.max(0.26, Math.min(0.5, (vh - 260) / 1920))
   const boxW = Math.round(1080 * scale)
   const boxH = Math.round(1920 * scale)
-  const partnerLabel = handle ? '@' + handle : story.partner
 
   const download = async () => {
     const node = cardRef.current
@@ -116,6 +108,33 @@ export default function StoryModal({ story, onClose, onNotice }: StoryModalProps
 
   return (
     <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(11,18,33,.72)', backdropFilter: 'blur(6px)', zIndex: 70, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 18, padding: 20, animation: 'overlay .2s ease' }}>
+      {/* Palette sopra l'anteprima: è la scelta che si fa PRIMA di guardare il
+          risultato, e stando in alto il pollice non copre la card mentre la si
+          confronta. Sotto resta solo l'azione finale. */}
+      <div
+        onClick={(e) => e.stopPropagation()}
+        role="radiogroup"
+        aria-label="Colore della storia"
+        style={{ display: 'flex', gap: 4, background: 'rgba(255,255,255,.12)', padding: 4, borderRadius: 12 }}
+      >
+        {VARIANTS.map((v) => {
+          const active = variant === v.k
+          return (
+            <button
+              key={v.k}
+              type="button"
+              role="radio"
+              aria-checked={active}
+              className="chip"
+              onClick={() => setVariant(v.k)}
+              style={{ font: "700 13px 'Nunito Sans'", padding: '9px 18px', borderRadius: 9, border: 'none', cursor: 'pointer', background: active ? '#fff' : 'transparent', color: active ? '#1B2A4A' : 'rgba(255,255,255,.7)' }}
+            >
+              {v.label}
+            </button>
+          )
+        })}
+      </div>
+
       {/* anteprima scalata */}
       <div onClick={(e) => e.stopPropagation()} style={{ width: boxW, height: boxH, position: 'relative', borderRadius: 20, overflow: 'hidden', boxShadow: '0 30px 80px -20px rgba(0,0,0,.6)', animation: 'sheet .3s cubic-bezier(.2,.8,.2,1) both' }}>
         {/* nodo full-res catturato (1080×1920), scalato solo per l'anteprima */}
@@ -145,7 +164,7 @@ export default function StoryModal({ story, onClose, onNotice }: StoryModalProps
               <StatCell val={story.diffStr} label="DIFFERENZIALE" pal={pal} valColor={story.diffPositive ? pal.accent : pal.muted} />
             </div>
 
-            <div style={{ font: "700 38px 'Nunito Sans'", color: pal.fg }}>in coppia con <span style={{ color: pal.accent }}>{partnerLabel}</span></div>
+            <div style={{ font: "700 38px 'Nunito Sans'", color: pal.fg }}>in coppia con <span style={{ color: pal.accent }}>{story.partner}</span></div>
           </div>
 
           {/* media: striscia di fino a 3 foto del torneo; senza foto non si
@@ -170,24 +189,10 @@ export default function StoryModal({ story, onClose, onNotice }: StoryModalProps
         </div>
       </div>
 
-      {/* controlli */}
-      <div onClick={(e) => e.stopPropagation()} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, width: '100%', maxWidth: 460 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', background: 'rgba(255,255,255,.1)', borderRadius: 12, padding: '4px 6px 4px 14px' }}>
-          <span style={{ font: "800 15px 'Nunito Sans'", color: 'rgba(255,255,255,.6)' }}>@</span>
-          <input value={handle} onChange={onHandle} placeholder="tag Instagram del compagno" style={{ flex: 1, minWidth: 0, background: 'transparent', border: 'none', outline: 'none', color: '#fff', font: "700 14px 'Nunito Sans'", padding: '9px 0' }} />
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', justifyContent: 'center' }}>
-          <div style={{ display: 'flex', gap: 4, background: 'rgba(255,255,255,.12)', padding: 4, borderRadius: 12 }}>
-            {VARIANTS.map((v) => {
-              const active = variant === v.k
-              return (
-                <div key={v.k} className="chip" onClick={() => setVariant(v.k)} style={{ font: "700 13px 'Nunito Sans'", padding: '9px 16px', borderRadius: 9, cursor: 'pointer', background: active ? '#fff' : 'transparent', color: active ? '#1B2A4A' : 'rgba(255,255,255,.7)' }}>{v.label}</div>
-              )
-            })}
-          </div>
-          <div className="chip" onClick={download} style={{ display: 'flex', alignItems: 'center', gap: 8, font: "700 14px 'Nunito Sans'", padding: '11px 22px', borderRadius: 11, background: '#FF6B35', color: '#fff', cursor: 'pointer', opacity: busy ? 0.7 : 1 }}>{busy ? 'Generazione…' : '↓ Scarica immagine'}</div>
-          <div className="chip" onClick={onClose} style={{ font: "700 14px 'Nunito Sans'", padding: '11px 18px', borderRadius: 11, background: 'rgba(255,255,255,.14)', color: '#fff', cursor: 'pointer' }}>Chiudi</div>
-        </div>
+      {/* controlli: solo l'azione finale */}
+      <div onClick={(e) => e.stopPropagation()} style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', justifyContent: 'center' }}>
+        <button type="button" className="chip" onClick={download} style={{ display: 'flex', alignItems: 'center', gap: 8, font: "700 14px 'Nunito Sans'", padding: '11px 22px', borderRadius: 11, border: 'none', background: '#FF6B35', color: '#fff', cursor: 'pointer', opacity: busy ? 0.7 : 1 }}>{busy ? 'Generazione…' : '↓ Scarica immagine'}</button>
+        <button type="button" className="chip" onClick={onClose} style={{ font: "700 14px 'Nunito Sans'", padding: '11px 18px', borderRadius: 11, border: 'none', background: 'rgba(255,255,255,.14)', color: '#fff', cursor: 'pointer' }}>Chiudi</button>
       </div>
     </div>
   )

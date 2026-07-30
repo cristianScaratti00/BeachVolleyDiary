@@ -51,11 +51,13 @@ function WrappedPhoto({ src }: { src: string }) {
   )
 }
 
-function StatCell({ stat, pal }: { stat: { value: string; label: string }; pal: WrappedPalette }) {
+// `compact` serve alla slide di riepilogo: sei celle invece di due o tre non
+// entrerebbero in altezza alla misura piena.
+function StatCell({ stat, pal, compact = false }: { stat: { value: string; label: string }; pal: WrappedPalette; compact?: boolean }) {
   return (
-    <div style={{ background: pal.bg, padding: '44px 48px' }}>
-      <div className="num" style={{ fontSize: 84, lineHeight: 1, color: pal.fg }}>{stat.value}</div>
-      <div style={{ font: "700 24px 'Nunito Sans'", letterSpacing: 2, textTransform: 'uppercase', color: pal.muted, marginTop: 14 }}>{stat.label}</div>
+    <div style={{ background: pal.bg, padding: compact ? '32px 36px' : '44px 48px' }}>
+      <div className="num" style={{ fontSize: compact ? 68 : 84, lineHeight: 1, color: pal.fg }}>{stat.value}</div>
+      <div style={{ font: `700 ${compact ? 21 : 24}px 'Nunito Sans'`, letterSpacing: 2, textTransform: 'uppercase', color: pal.muted, marginTop: compact ? 10 : 14 }}>{stat.label}</div>
     </div>
   )
 }
@@ -69,9 +71,12 @@ interface WrappedSlideCardProps {
 }
 
 export default function WrappedSlideCard({ slide, pal, index, total, photoSrc }: WrappedSlideCardProps) {
-  const centered = slide.kind === 'intro' || slide.kind === 'outro'
+  // Il riepilogo è la card-manifesto di fine mazzo: centrata come intro e outro,
+  // griglia fissa a due colonne e celle compatte per far stare sei numeri.
+  const recap = slide.kind === 'recap'
+  const centered = slide.kind === 'intro' || slide.kind === 'outro' || recap
   const hasStats = slide.stats.length > 0
-  const cols = slide.stats.length === 4 ? 2 : slide.stats.length
+  const cols = recap ? 2 : slide.stats.length === 4 ? 2 : slide.stats.length
   const num = (n: number) => String(n).padStart(2, '0')
 
   return (
@@ -104,7 +109,8 @@ export default function WrappedSlideCard({ slide, pal, index, total, photoSrc }:
         {photoSrc ? (
           <WrappedPhoto src={photoSrc} />
         ) : (
-          <div style={{ fontSize: 150, lineHeight: 1 }}>{slide.emoji}</div>
+          // Sul riepilogo l'emoji si fa da parte: lo spazio serve alle sei celle.
+          <div style={{ fontSize: recap ? 96 : 150, lineHeight: 1 }}>{slide.emoji}</div>
         )}
 
         <div style={{ font: "700 34px 'Nunito Sans'", letterSpacing: 6, textTransform: 'uppercase', color: pal.accent }}>{slide.eyebrow}</div>
@@ -127,7 +133,7 @@ export default function WrappedSlideCard({ slide, pal, index, total, photoSrc }:
               background: pal.line, border: `1px solid ${pal.line}`, borderRadius: 28, overflow: 'hidden',
             }}
           >
-            {slide.stats.map((st, i) => <StatCell key={i} stat={st} pal={pal} />)}
+            {slide.stats.map((st, i) => <StatCell key={i} stat={st} pal={pal} compact={recap} />)}
           </div>
         )}
       </div>

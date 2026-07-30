@@ -44,6 +44,14 @@ input[type="search"]::-webkit-search-cancel-button {
    avere contrasto sufficiente sia sul fondo crema sia sui chip pieni. */
 .chip:focus-visible, .lift:focus-visible { outline: 2px solid #1B2A4A; outline-offset: 2px; }
 
+/* Voci della bottom nav. Sono `button` veri (lo erano `div`, e uno screen
+   reader annunciava cinque "pulsante" muti), ma un `button` tondo mostra
+   l'anello di fuoco del browser attorno all'icona: sul tocco compariva un
+   cerchio grigio che sembrava un difetto grafico. Qui si spegne quello di
+   default e si tiene il nostro, che scatta solo navigando da tastiera. */
+.navbtn:focus { outline: none; }
+.navbtn:focus-visible { outline: 2px solid #1B2A4A; outline-offset: 2px; }
+
 ::-webkit-scrollbar { width: 0; height: 0; }
 
 /* type utilities */

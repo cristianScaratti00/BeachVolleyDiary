@@ -939,7 +939,7 @@ export interface WrappedRange { from: string; to: string; label: string }
 // la mette il componente card. `kind` sceglie solo piccole differenze di resa.
 export type WrappedSlideKind =
   | 'intro' | 'wins' | 'streak' | 'partner' | 'points'
-  | 'podium' | 'volume' | 'rival' | 'funfacts' | 'outro'
+  | 'podium' | 'volume' | 'rival' | 'funfacts' | 'recap' | 'outro'
 
 export interface WrappedStat { value: string; label: string }
 
@@ -949,7 +949,7 @@ export interface WrappedSlide {
   headline: string     // il numero/parola grande
   title: string        // titolo secondario (nome torneo/compagno…)
   caption: string      // riga di supporto
-  stats: WrappedStat[] // mini-griglia stat opzionale (0..4)
+  stats: WrappedStat[] // mini-griglia stat opzionale (0..4; la slide 'recap' ne porta 6)
   emoji: string        // decorazione quando non c'è una foto
   photoUrl?: string | null // foto di copertina (URL firmato) per intro/podio
 }
@@ -1149,6 +1149,34 @@ export function deriveWrapped(data: DiaryData, range: WrappedRange, fPartner = '
         { value: String(s.avgAg), label: 'Media subiti' },
       ],
       emoji: '✨',
+    })
+  }
+
+  // Riepilogo — la card che tiene tutto insieme, subito prima della chiusura.
+  // Le slide precedenti raccontano un numero per volta; questa è quella che si
+  // salva e si condivide, quindi porta l'intera stagione in una griglia sola.
+  // Sei valori tutti compatti: nella card stanno in due colonne per tre righe,
+  // e un'etichetta lunga come "Semifinale" farebbe saltare la misura — infatti
+  // il miglior risultato sta nella caption, non fra le stat.
+  if (played > 0) {
+    slides.push({
+      kind: 'recap',
+      eyebrow: 'Riepilogo',
+      headline: range.label,
+      title: partnerName ? 'in coppia con ' + partnerName : 'la stagione in un colpo d’occhio',
+      caption: [
+        bestTourn && best <= 8 ? 'Miglior risultato: ' + resultLabelOf(bestTourn.placement) : '',
+        cities > 0 ? cities + (cities === 1 ? ' luogo' : ' luoghi') : '',
+      ].filter(Boolean).join(' · '),
+      stats: [
+        { value: String(tourns.length), label: tourns.length === 1 ? 'Torneo' : 'Tornei' },
+        { value: String(played), label: 'Partite' },
+        { value: String(s.won), label: 'Vinte' },
+        { value: s.winPct + '%', label: 'Win rate' },
+        { value: String(podi), label: 'Podi' },
+        { value: s.setPct + '%', label: 'Set vinti' },
+      ],
+      emoji: '📊',
     })
   }
 

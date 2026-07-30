@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { deriveTorneiSections, TORNEI_FILTER_ALL } from '../lib/derive'
 import type { TorneiListData, TorneoCard } from '../lib/derive'
-import { PageHeader, SectionTitle, FilterChips, Button, Badge, StatFooter, EmptyCard, InlineLink, MUTED } from '../components/ui'
+import { PageHeader, SectionTitle, FilterChips, SegmentedControl, Button, Badge, StatFooter, EmptyCard, InlineLink, MUTED } from '../components/ui'
 import Mappa from './Mappa'
 import type { MappaData } from '../lib/derive.mappa'
 
@@ -24,12 +24,11 @@ interface TorneiProps {
   onVista: (v: TorneiVista) => void
   onOpenTorneo: (id: string) => void
   onNewTorneo: () => void
-  onQuickTorneo: () => void
   onAssistant: () => void
   canAssistant: boolean
 }
 
-export default function Tornei({ list, mappa, vista, onVista, onOpenTorneo, onNewTorneo, onQuickTorneo, onAssistant, canAssistant }: TorneiProps) {
+export default function Tornei({ list, mappa, vista, onVista, onOpenTorneo, onNewTorneo, onAssistant, canAssistant }: TorneiProps) {
   const { tornei, tPlayed, podi, bestPlacement } = list
   // Il filtro è puramente di presentazione: vive qui, non risale ad App. Quale
   // valore sia lecito e cosa mostrare di conseguenza lo decide `derive`.
@@ -41,13 +40,16 @@ export default function Tornei({ list, mappa, vista, onVista, onOpenTorneo, onNe
       <PageHeader
         title="Tornei"
         subtitle={`${tPlayed} tornei · ${podi} podi · miglior piazzamento ${bestPlacement}`}
+        // Due azioni e non tre: con "⚡ Rapido" in mezzo la riga andava a capo
+        // su qualunque telefono, e la fascia vuota sopra la lista costava più
+        // di quanto valesse una terza porta d'ingresso. La creazione rapida
+        // resta dove serve davvero, sul + della barra di navigazione.
         actions={
           <>
             <Button variant="assistant" onClick={onAssistant} style={{ padding: '11px 15px', gap: 6 }}>
               ✨ Assistente
               {!canAssistant && <Badge tone="onColor" size="sm" />}
             </Button>
-            <Button variant="outline" onClick={onQuickTorneo} style={{ background: '#F2F0EC', border: 'none', padding: '11px 15px', gap: 6 }}>⚡ Rapido</Button>
             <Button variant="dark" onClick={onNewTorneo}>＋ Nuovo torneo</Button>
           </>
         }
@@ -60,9 +62,10 @@ export default function Tornei({ list, mappa, vista, onVista, onOpenTorneo, onNe
       ) : (
         <>
           {/* Lista o mappa: stesso insieme di tornei, due modi di leggerlo.
-              `FilterChips` perché sono `button` veri con `aria-pressed`, lo
-              stesso linguaggio del filtro per formato qui sotto. */}
-          <FilterChips
+              Segmentato e non a chip — cambia la VISTA, mentre le chip qui
+              sotto scelgono QUALI tornei: due gesti diversi meritavano due
+              forme diverse, prima erano indistinguibili. */}
+          <SegmentedControl
             label="Come vedere i tornei"
             value={vista}
             onChange={(v) => onVista(v as TorneiVista)}
