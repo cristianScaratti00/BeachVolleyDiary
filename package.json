@@ -13,6 +13,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@microsoft/clarity": "^1.0.2",
     "@supabase/supabase-js": "^2.110.0",
     "@types/leaflet.markercluster": "^1.5.6",
     "@vercel/analytics": "^2.0.1",

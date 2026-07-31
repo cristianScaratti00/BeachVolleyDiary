@@ -11,6 +11,7 @@ import { supabase } from './supabase'
 import type { Role, Plan } from './db.enums'
 
 export interface Session {
+  id: string // uuid di auth.users — serve a Clarity per legare le sessioni registrate
   email: string
   name: string
   role: Role // admin | user
@@ -86,6 +87,7 @@ export async function sessionForUser(user: User | null | undefined): Promise<Ses
   const fallback = ((meta.name ?? meta.full_name ?? meta.user_name) as string | undefined)?.trim()
   const email = user.email ?? ''
   return {
+    id: user.id,
     email,
     name: fullName?.trim() || fallback || email.split('@')[0] || 'Utente',
     role,

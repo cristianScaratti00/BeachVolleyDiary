@@ -1,7 +1,7 @@
 {
   "package.json": {
-    "mtime": 1785155815.2852013,
-    "ast_hash": "f6a8da3a8dbe78b35e1a071743b339cf",
+    "mtime": 1785482143.7603068,
+    "ast_hash": "fcb287e76dd62b7d2201c76811eec967",
     "semantic_hash": ""
   },
   "src/App.tsx": {
@@ -160,8 +160,8 @@
     "semantic_hash": ""
   },
   "src/hooks/useAuth.tsx": {
-    "mtime": 1784040665.3652098,
-    "ast_hash": "0391d3fd925f4993f00ff0faa4bf1560",
+    "mtime": 1785482589.978551,
+    "ast_hash": "01e1bf72f880986c0b413d9962beada5",
     "semantic_hash": ""
   },
   "src/hooks/useConnection.ts": {
@@ -180,8 +180,8 @@
     "semantic_hash": ""
   },
   "src/lib/auth.ts": {
-    "mtime": 1784627735.5041533,
-    "ast_hash": "26e459821599142f6452d51ab980df39",
+    "mtime": 1785482561.210629,
+    "ast_hash": "b5bcebe45068fd6e2b10384bf00a3666",
     "semantic_hash": ""
   },
   "src/lib/dashboard.ts": {
@@ -250,8 +250,8 @@
     "semantic_hash": ""
   },
   "src/main.tsx": {
-    "mtime": 1785156239.5249841,
-    "ast_hash": "9696b42a66a216240b23331444c64232",
+    "mtime": 1785482203.4117532,
+    "ast_hash": "888b8bbd5cf83f4212268a1d7add7721",
     "semantic_hash": ""
   },
   "src/screens/Compagni.tsx": {
@@ -455,8 +455,8 @@
     "semantic_hash": ""
   },
   "index.html": {
-    "mtime": 1785420667.957681,
-    "ast_hash": "02a21a7702a350fe9ba74c64ab547e6e",
+    "mtime": 1785482214.827959,
+    "ast_hash": "d511881dd9c90e57137f7b2d327e32ec",
     "semantic_hash": ""
   },
   "supabase/README.md": {
@@ -510,8 +510,8 @@
     "semantic_hash": ""
   },
   ".claude/settings.local.json": {
-    "mtime": 1785397168.7575924,
-    "ast_hash": "c02f22517ec0893292ae178cd813cd1f",
+    "mtime": 1785482313.3859751,
+    "ast_hash": "baf66271547eff767162d0eba8620a33",
     "semantic_hash": ""
   },
   "src/components/VenueMap.tsx": {
@@ -695,8 +695,8 @@
     "semantic_hash": ""
   },
   "vercel.json": {
-    "mtime": 1785332523.3219807,
-    "ast_hash": "8d0bc37fcbd7b6b169933dc713c5da1a",
+    "mtime": 1785482225.4401286,
+    "ast_hash": "8d16e4abb07837f9224cd5507c088d72",
     "semantic_hash": ""
   },
   "supabase/migrations/20260729120000_security_hardening.sql": {
