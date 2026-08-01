@@ -30,6 +30,17 @@ auth.users ──┐ (1:N su tutte le tabelle, ON DELETE CASCADE)
 | `photos` | Galleria (segnaposti colorati) | `tournament_id` → tournaments **CASCADE** |
 | `venues` | Luoghi di gioco (nome, città, coordinate, superficie tipica) | `user_id` → auth.users **SET NULL** (il luogo sopravvive al suo autore) |
 | `check_ins` | Presenza opt-in di giornata ("Chi c'è oggi") | `tournament_id` → tournaments **SET NULL** |
+| `bug_reports` | Segnalazioni di problemi (app in alpha) | `user_id` → auth.users **CASCADE** |
+
+### `bug_reports` — l'altra asimmetria: owner in scrittura, admin in lettura
+
+Chi segnala scrive e rilegge solo le proprie righe; l'elenco completo (con nome
+ed email di chi ha segnalato) passa dalla RPC **`bug_reports_list()`**, gated su
+`is_admin()` — a un non admin restituisce zero righe. Gli admin fanno avanzare
+`status` (`nuovo → in_corso → risolto → chiuso`) via la policy
+`bug_reports_update_admin`. Nessuna policy di DELETE: una segnalazione si chiude,
+non si cancella. `area` è uno slug (le etichette italiane stanno in
+`src/lib/segnalazioni.ts`).
 
 ### `venues` — l'eccezione alla regola owner-only
 

@@ -96,6 +96,29 @@ describe('contrasto — contatori di sezione', () => {
 })
 
 // ============================================================================
+// Banner alpha — il testo secondario NON riusa MUTED.
+//
+// Il fondo sabbia del banner è la coppia accent già in casa, ma il corpo del
+// testo lì sopra è la parte che si deve leggere davvero: è l'avviso che dice
+// che l'app può rompersi. Con MUTED (.55) starebbe a ~3.2:1, cioè peggio del
+// debito già noto; con .72 passa AA. Il numero è fissato qui perché schiarirlo
+// per "uniformarlo al resto" sarebbe una regressione silenziosa.
+// ============================================================================
+const BANNER_ALPHA_BG = '#FFF1EA' // stesso fondo del badge da podio
+const BANNER_ALPHA_FG = 'rgba(27,42,74,.72)'
+
+describe('contrasto — banner versione alpha', () => {
+  it('il testo del banner supera AA sul fondo sabbia', () => {
+    expect(contrast(BANNER_ALPHA_FG, BANNER_ALPHA_BG)).toBeGreaterThanOrEqual(AA_TEXT)
+  })
+
+  it('MUTED sullo stesso fondo NON basterebbe', () => {
+    // La ragione per cui il banner ha un token suo invece di riusare MUTED.
+    expect(contrast(MUTED, BANNER_ALPHA_BG)).toBeLessThan(AA_TEXT)
+  })
+})
+
+// ============================================================================
 // Mappa delle conquiste — perché il pin ha DUE bordi e non uno.
 //
 // Su una card il pallino da 8px sta accanto a un'etichetta testuale: è

@@ -4,8 +4,10 @@ import type { Session } from '../lib/auth'
 import { updateDisplayName, updatePassword } from '../lib/auth'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
+import { useScelta, riapriScelta } from '../lib/consenso'
 import { Avatar, Badge, MUTED } from '../components/ui'
 import { Label, inputStyle } from '../components/modals/Sheet'
+import SegnalazioniAdmin from '../components/SegnalazioniAdmin'
 
 interface ProfiloProps {
   session: Session
@@ -60,6 +62,7 @@ export default function Profilo({ session, onLogout, condivisioniRicevute, onRim
   const [pw, setPw] = useState('')
   const [pw2, setPw2] = useState('')
   const [busyPw, setBusyPw] = useState(false)
+  const consenso = useScelta()
   const [busyCond, setBusyCond] = useState(false)
   const [condMsg, setCondMsg] = useState<Msg>(null)
 
@@ -244,6 +247,39 @@ export default function Profilo({ session, onLogout, condivisioniRicevute, onRim
           </>
         )}
       </div>
+
+      {/* Ritirare il consenso deve essere facile quanto darlo, altrimenti non
+          è un consenso: da qui si torna alla domanda iniziale. */}
+      <div className="lbl" style={{ marginTop: 26, marginBottom: 12 }}>Cookie e statistiche</div>
+      <div className="card" style={{ padding: 22 }}>
+        <div style={{ font: "600 13px 'Nunito Sans'", lineHeight: 1.5 }}>
+          {consenso === 'accettato'
+            ? 'Hai accettato gli strumenti di misura: ci aiutano a capire quali schermate si usano e dove ci si blocca.'
+            : consenso === 'rifiutato'
+              ? 'Hai rifiutato gli strumenti di misura. Non raccogliamo statistiche sull’uso dell’app.'
+              : 'Non hai ancora scelto: finché non decidi non raccogliamo nessuna statistica.'}
+        </div>
+        <div style={hintStyle}>
+          Quello che serve a tenerti collegato resta sempre attivo, ed è escluso da questa scelta.
+        </div>
+        <button
+          onClick={riapriScelta}
+          className="chip"
+          style={{
+            marginTop: 16, padding: '12px 22px', borderRadius: 11,
+            border: '1px solid rgba(27,42,74,.2)', background: 'transparent',
+            color: '#1B2A4A', font: "700 13.5px 'Nunito Sans'", cursor: 'pointer',
+          }}
+        >
+          Cambia scelta
+        </button>
+      </div>
+
+      {/* Bacheca dei problemi segnalati dagli utenti (app in alpha). Sta in
+          fondo perché è l'unica sezione che può diventare lunga, e sotto non
+          spinge giù nulla. Il `role === 'admin'` qui è solo UI: la RPC che la
+          alimenta è gated su `is_admin()` lato DB. */}
+      {session.role === 'admin' && <SegnalazioniAdmin />}
 
       <div className="chip" onClick={onLogout} style={{ display: 'inline-flex', marginTop: 26, padding: '11px 18px', borderRadius: 11, border: '1px solid rgba(255,71,126,.4)', color: '#FF477E', cursor: 'pointer', font: "700 13.5px 'Nunito Sans'" }}>Esci</div>
     </div>

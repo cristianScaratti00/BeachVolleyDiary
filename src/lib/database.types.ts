@@ -423,6 +423,47 @@ export type Database = {
           },
         ]
       }
+      bug_reports: {
+        Row: {
+          id: string
+          user_id: string
+          title: string
+          description: string
+          area: string
+          status: string
+          user_agent: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string
+          title: string
+          description: string
+          area?: string
+          // `status` non compare: lo stato iniziale è 'nuovo' (default DB) e
+          // solo gli admin lo fanno avanzare.
+          user_agent?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          // In pratica gli admin cambiano solo lo stato: le policy consentono
+          // l'UPDATE solo a loro, e il resto della riga è la segnalazione così
+          // com'è stata scritta.
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'bug_reports_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+        ]
+      }
     }
     Views: {
       match_scores: {
@@ -530,6 +571,22 @@ export type Database = {
         Args: { p_partner_id?: string }
         Returns: number
       }
+      // Bacheca delle segnalazioni: gated su is_admin() lato DB — a un non
+      // admin restituisce zero righe (non un errore).
+      bug_reports_list: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          created_at: string
+          title: string
+          description: string
+          area: string
+          status: string
+          user_agent: string
+          reporter_name: string
+          reporter_email: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
@@ -558,4 +615,5 @@ export type Match = Tables<'matches'>
 export type MatchSet = Tables<'match_sets'>
 export type Photo = Tables<'photos'>
 export type Venue = Tables<'venues'>
+export type BugReport = Tables<'bug_reports'>
 export type MatchScore = Views<'match_scores'>

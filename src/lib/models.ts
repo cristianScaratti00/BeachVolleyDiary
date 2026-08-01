@@ -229,4 +229,5 @@ export type Screen =
   | "diario"
   | "profilo"
   | "crea"
-  | "oggi";
+  | "oggi"
+  | "segnala";

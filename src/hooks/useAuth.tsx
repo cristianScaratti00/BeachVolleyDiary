@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, useCallback } from 'rea
 import type { ReactNode } from 'react'
 import Clarity from '@microsoft/clarity'
 import { supabase } from '../lib/supabase'
+import { useScelta } from '../lib/consenso'
 import { loginUser, registerUser, logoutUser, sessionForUser, signInWithProvider } from '../lib/auth'
 import type { Session, AuthResult, OAuthProvider } from '../lib/auth'
 
@@ -45,12 +46,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // le registrazioni con i tuoi dati, e costa molto meno in esposizione.
   //
   // Il guard su PROD non è pignoleria: `Clarity.identify` chiama
-  // `window.clarity(...)` senza try/catch (a differenza di `init`), e in
-  // sviluppo, dove Clarity non è inizializzato, quella funzione non esiste.
+  // `window.clarity(...)` senza try/catch (a differenza di `init`), e senza
+  // consenso — o in sviluppo — quella funzione non esiste proprio.
+  //
+  // `consenso` sta fra le dipendenze e non solo nella condizione: chi accetta
+  // dopo essere già entrato deve essere identificato subito, senza aspettare
+  // un cambio di sessione che potrebbe non arrivare mai.
+  const consenso = useScelta()
   useEffect(() => {
-    if (!import.meta.env.PROD || !session?.id) return
+    if (!import.meta.env.PROD || consenso !== 'accettato' || !session?.id) return
     Clarity.identify(session.id)
-  }, [session?.id])
+  }, [session?.id, consenso])
 
   // Riallinea piano/ruolo rileggendo il profilo (senza rete sulla sessione: usa
   // quella locale). Serve perché un cambio piano lato admin non emette eventi

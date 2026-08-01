@@ -3,6 +3,7 @@ import type { DashboardStats, TorneoCard } from "../lib/derive";
 import { WRAPPED_MIN_MATCHES, wrappedDisponibile } from "../lib/derive";
 import type { Option } from "../lib/models";
 import { Badge } from "../components/ui";
+import BannerAlpha from "../components/BannerAlpha";
 import {
   KeyNumbers,
   TrendCard,
@@ -34,6 +35,7 @@ interface HomeProps {
   onAiCreate: () => void;
   canAiCreate: boolean; // assistente AI disponibile solo con Premium
   onOpenWrapped: () => void; // apre il recap di stagione "Beach Wrapped"
+  onSegnala: () => void; // banner alpha → schermata di segnalazione
   goTornei: () => void;
   goCompagni: () => void;
 }
@@ -49,6 +51,7 @@ export default function Home({
   onAiCreate,
   canAiCreate,
   onOpenWrapped,
+  onSegnala,
   goTornei,
   goCompagni,
 }: HomeProps) {
@@ -108,6 +111,11 @@ export default function Home({
           )}
         </div>
       </div>
+
+      {/* Avviso alpha: sta in cima, sopra ai numeri, perché è il contesto in
+          cui va letto tutto il resto — e perché è l'unico ingresso alla
+          schermata di segnalazione. */}
+      <BannerAlpha onSegnala={onSegnala} />
 
       {/* Beach Wrapped: banner stagionale — recap sfogliabile da condividere.
           Due condizioni, e sono diverse fra loro: `wrappedDisponibile` guarda il

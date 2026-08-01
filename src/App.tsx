@@ -66,6 +66,8 @@ import Compagni from "./screens/Compagni";
 import CompagnoDetail from "./screens/CompagnoDetail";
 import Profilo from "./screens/Profilo";
 import ChiCeOggi from "./screens/ChiCeOggi";
+import Segnala from "./screens/Segnala";
+import { inviaSegnalazione } from "./lib/segnalazioni";
 import { useCheckIn } from "./hooks/useCheckIn";
 // Lazy: schermate/modali pesanti caricate solo quando servono (code-splitting).
 // CreaChat = wizard AI; StoryModal trascina `html-to-image`.
@@ -728,6 +730,9 @@ export default function App() {
             onRimuoviCondivisioni={() => unlinkMe()}
           />
         );
+      case "segnala":
+        // La rete sta in `lib/segnalazioni`: qui si passa solo la funzione.
+        return <Segnala onBack={() => go("home")} onInvia={inviaSegnalazione} />;
       case "crea":
         return (
           <CreaChat
@@ -784,6 +789,7 @@ export default function App() {
             onAiCreate={openCrea}
             canAiCreate={perm.canUseAi}
             onOpenWrapped={openWrapped}
+            onSegnala={() => go("segnala")}
             goTornei={() => go("tornei")}
             goCompagni={() => go("compagni")}
           />
