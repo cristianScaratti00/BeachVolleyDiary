@@ -11,7 +11,7 @@
 // visibile, non un testo qualsiasi (che comparirebbe anche nel layer nascosto).
 // ============================================================================
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, within, fireEvent, act } from '@testing-library/react'
+import { render, screen, within, fireEvent, act, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { WrappedData, WrappedSlide } from '../../lib/derive'
 import WrappedModal from './WrappedModal'
@@ -130,36 +130,190 @@ describe('WrappedModal — azioni', () => {
   it('scarica il RIEPILOGO, non la slide che si sta guardando', async () => {
     // Sull'ultima slide si legge "Grazie": scaricare quella sarebbe portarsi a
     // casa un saluto invece dei propri numeri. Il PNG è sempre la card recap.
-    const toPng = vi.mocked((await import('html-to-image')).toPng)
-    toPng.mockResolvedValue('data:image/png;base64,x')
-    // Il download fa `a.click()` su un href data:; jsdom non sa navigare e lo
-    // urla su stderr ad ogni run. Qui il click sull'ancora non interessa.
-    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
-
-    const conRecap: WrappedSlide[] = [
-      SLIDES[0],
-      { kind: 'recap', eyebrow: 'Riepilogo', headline: 'RECAP', title: '', caption: '', stats: [], emoji: '📊' },
-      SLIDES[2],
-    ]
-    renderModal({ slides: conRecap })
-    fireEvent.keyDown(deck(), { key: 'ArrowRight' })
-    fireEvent.keyDown(deck(), { key: 'ArrowRight' })
+    const toBlob = await pngPronto()
+    renderModal({ slides: CON_RECAP })
+    vaiAllUltima()
     expect(deck()).toHaveAccessibleName(/slide 3 di 3/i)
 
     fireEvent.click(screen.getByRole('button', { name: /scarica/i }))
-    await act(async () => {})
+    await waitFor(() => expect(ancore).toHaveLength(1))
 
     // Il nodo catturato è quello del recap (indice 1), non della slide corrente.
-    const nodo = toPng.mock.calls[0][0] as HTMLElement
+    const nodo = toBlob.mock.calls[0][0] as HTMLElement
     expect(within(nodo).getByText('RECAP')).toBeInTheDocument()
   })
-
 
   it('“Chiudi” chiama onClose', async () => {
     const user = userEvent.setup()
     const { onClose } = renderModal()
     await user.click(screen.getByRole('button', { name: 'Chiudi' }))
     expect(onClose).toHaveBeenCalled()
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Export dell'immagine. `toBlob` è mockato (vedi in cima): qui conta COSA si
+// cattura, COME si consegna (link blob:, share sheet, appunti) e QUANDO.
+// ---------------------------------------------------------------------------
+
+const CON_RECAP: WrappedSlide[] = [
+  SLIDES[0],
+  { kind: 'recap', eyebrow: 'Riepilogo', headline: 'RECAP', title: '', caption: '', stats: [], emoji: '📊' },
+  SLIDES[2],
+]
+
+// Le ancore cliccate per lo scarico (jsdom non sa scaricare: si registrano).
+let ancore: Array<{ href: string; download: string; inDom: boolean }> = []
+
+async function pngPronto() {
+  const toBlob = vi.mocked((await import('html-to-image')).toBlob)
+  toBlob.mockReset()
+  toBlob.mockResolvedValue(new Blob(['png'], { type: 'image/png' }))
+  return toBlob
+}
+
+const vaiAllUltima = () => {
+  for (let i = 0; i < 5; i++) fireEvent.keyDown(deck(), { key: 'ArrowRight' })
+}
+
+// navigator.share / clipboard non esistono in jsdom: ogni test li installa
+// (prima del render, perché il componente li rileva al montaggio) e li toglie.
+const installati: string[] = []
+function installa(target: object, key: string, value: unknown) {
+  Object.defineProperty(target, key, { value, configurable: true, writable: true })
+  installati.push(key)
+}
+
+beforeEach(() => {
+  ancore = []
+  vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (this: HTMLAnchorElement) {
+    ancore.push({ href: this.href, download: this.download, inDom: document.body.contains(this) })
+  })
+  installa(URL, 'createObjectURL', vi.fn(() => 'blob:http://localhost/png'))
+  installa(URL, 'revokeObjectURL', vi.fn())
+})
+
+afterEach(() => {
+  for (const key of installati.splice(0)) {
+    delete (navigator as unknown as Record<string, unknown>)[key]
+    delete (URL as unknown as Record<string, unknown>)[key]
+    delete (globalThis as unknown as Record<string, unknown>)[key]
+  }
+  vi.restoreAllMocks()
+})
+
+describe('WrappedModal — scarica', () => {
+  it('prepara l’immagine appena si arriva all’ultima slide, prima del tocco', async () => {
+    // È ciò che tiene vivo il permesso di condividere su iOS: al tocco il PNG
+    // c'è già. Prima dell'ultima slide invece non si genera niente.
+    const toBlob = await pngPronto()
+    renderModal({ slides: CON_RECAP })
+    fireEvent.keyDown(deck(), { key: 'ArrowRight' })
+    await act(async () => {})
+    expect(toBlob).not.toHaveBeenCalled()
+
+    fireEvent.keyDown(deck(), { key: 'ArrowRight' })
+    await waitFor(() => expect(toBlob).toHaveBeenCalled())
+  })
+
+  it('scarica con un link blob: agganciato alla pagina, non con un data: URL', async () => {
+    // Il vecchio `data:` di qualche MB su un'ancora staccata: sui telefoni
+    // spesso il tocco non produceva nulla.
+    await pngPronto()
+    renderModal({ slides: CON_RECAP })
+    vaiAllUltima()
+    fireEvent.click(screen.getByRole('button', { name: /scarica/i }))
+    await waitFor(() => expect(ancore).toHaveLength(1))
+    expect(ancore[0]).toEqual({
+      href: 'blob:http://localhost/png',
+      download: 'beach-wrapped-stagione-2026-02.png',
+      inDom: true,
+    })
+  })
+
+  it('se la generazione fallisce lo dice, invece di non fare nulla', async () => {
+    const toBlob = vi.mocked((await import('html-to-image')).toBlob)
+    toBlob.mockReset()
+    toBlob.mockRejectedValue(new Error('canvas'))
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const onNotice = vi.fn()
+    renderModal({ slides: CON_RECAP }, { onNotice })
+    vaiAllUltima()
+    fireEvent.click(screen.getByRole('button', { name: /scarica/i }))
+    await waitFor(() => expect(onNotice).toHaveBeenCalledWith(expect.stringMatching(/impossibile generare/i)))
+    expect(ancore).toHaveLength(0)
+  })
+})
+
+describe('WrappedModal — condividi', () => {
+  it('senza share sheet né appunti non promette una condivisione che non c’è', async () => {
+    await pngPronto()
+    renderModal()
+    vaiAllUltima()
+    expect(screen.queryByRole('button', { name: /condividi/i })).not.toBeInTheDocument()
+    const scarica = screen.getByRole('button', { name: /scarica/i })
+    // Pronto quando la preparazione in sottofondo ha finito.
+    await waitFor(() => expect(scarica).toHaveAttribute('aria-busy', 'false'))
+  })
+
+  it('con lo share sheet condivide il PNG del riepilogo, senza testo allegato', async () => {
+    await pngPronto()
+    const share = vi.fn().mockResolvedValue(undefined)
+    installa(navigator, 'canShare', vi.fn(() => true))
+    installa(navigator, 'share', share)
+    renderModal({ slides: CON_RECAP })
+    expect(screen.queryByRole('button', { name: /condividi/i })).not.toBeInTheDocument()
+    vaiAllUltima()
+
+    fireEvent.click(screen.getByRole('button', { name: /condividi/i }))
+    await waitFor(() => expect(share).toHaveBeenCalledTimes(1))
+    const data = share.mock.calls[0][0] as ShareData
+    const file = data.files?.[0] as File
+    expect(file.name).toBe('beach-wrapped-stagione-2026-02.png')
+    expect(file.type).toBe('image/png')
+    // Con un `text` alcune app (Instagram) prendono la didascalia e perdono l'immagine.
+    expect(data.text).toBeUndefined()
+    // Scarica resta accanto, come alternativa.
+    expect(screen.getByRole('button', { name: /scarica/i })).toBeInTheDocument()
+  })
+
+  it('chiudere lo share sheet senza scegliere non è un errore', async () => {
+    await pngPronto()
+    installa(navigator, 'canShare', vi.fn(() => true))
+    installa(navigator, 'share', vi.fn().mockRejectedValue(Object.assign(new Error('x'), { name: 'AbortError' })))
+    const onNotice = vi.fn()
+    renderModal({ slides: CON_RECAP }, { onNotice })
+    vaiAllUltima()
+    fireEvent.click(screen.getByRole('button', { name: /condividi/i }))
+    await act(async () => {})
+    await act(async () => {})
+    expect(onNotice).not.toHaveBeenCalled()
+  })
+
+  it('se il browser nega il permesso, invita a ritoccare (l’immagine ora è pronta)', async () => {
+    await pngPronto()
+    installa(navigator, 'canShare', vi.fn(() => true))
+    installa(navigator, 'share', vi.fn().mockRejectedValue(Object.assign(new Error('x'), { name: 'NotAllowedError' })))
+    const onNotice = vi.fn()
+    renderModal({ slides: CON_RECAP }, { onNotice })
+    vaiAllUltima()
+    fireEvent.click(screen.getByRole('button', { name: /condividi/i }))
+    await waitFor(() => expect(onNotice).toHaveBeenCalledWith(expect.stringMatching(/tocca di nuovo/i)))
+  })
+
+  it('senza share sheet ma con gli appunti copia l’immagine', async () => {
+    await pngPronto()
+    const write = vi.fn().mockResolvedValue(undefined)
+    installa(globalThis, 'ClipboardItem', class { constructor(public items: Record<string, Blob>) {} })
+    installa(navigator, 'clipboard', { write })
+    const onNotice = vi.fn()
+    renderModal({ slides: CON_RECAP }, { onNotice })
+    vaiAllUltima()
+    fireEvent.click(screen.getByRole('button', { name: /condividi/i }))
+    await waitFor(() => expect(write).toHaveBeenCalledTimes(1))
+    const [item] = write.mock.calls[0][0] as Array<{ items: Record<string, Blob> }>
+    expect(item.items['image/png']).toBeInstanceOf(Blob)
+    expect(onNotice).toHaveBeenCalledWith(expect.stringMatching(/copiata/i))
   })
 })
 

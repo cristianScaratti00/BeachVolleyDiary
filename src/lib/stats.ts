@@ -56,6 +56,13 @@ export function res(m: WithSets): MatchResult {
   return { usS, themS, pf, pa, won: usS > themS, score: (m.sets || []).map((s) => s.us + '-' + s.them).join('  ') }
 }
 
+// Testo del badge risultato: il piazzamento, più il tabellone quando c'è
+// ("1° 🏆 · Gold", "Quarti · Silver"). Solo presentazione: il rank e i colori
+// del badge restano quelli del piazzamento.
+export function placementLabel(placement: string, bracket: string | null | undefined): string {
+  return bracket ? placement + ' · ' + bracket : placement
+}
+
 // Rank a placement string so tournaments can be compared (lower = better).
 // I numeri non sono contigui di proposito: contano solo l'ordine e le soglie
 // (1 = vittoria, <= 3 = podio, <= 8 = risultato reale, 9 = nessun risultato).

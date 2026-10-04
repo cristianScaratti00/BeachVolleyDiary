@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties, ReactNode, ChangeEvent, FormEvent } from "react";
-import { CATEGORIES, FORMATS, SURFACES, PHASES } from "../lib/db.enums";
+import { CATEGORIES, FORMATS, SURFACES, PHASES, BRACKETS } from "../lib/db.enums";
 import { MONTHS_SHORT } from "../lib/theme";
 import type {
   AnyForm,
@@ -11,6 +11,7 @@ import type {
   Surface,
   Phase,
   Placement,
+  Bracket,
 } from "../lib/models";
 
 // ============================================================================
@@ -40,6 +41,7 @@ type Step =
   | "surface"
   | "status"
   | "placement"
+  | "bracket"
   | "askResults"
   | "resultsPartner"
   | "resultsPartnerName"
@@ -64,6 +66,7 @@ interface Draft {
   surface: Surface;
   status: "finished" | "ongoing" | "";
   placement: Placement;
+  bracket: Bracket | ""; // '' = nessun tabellone
   color: string;
   matches: GuidedMatch[];
 }
@@ -115,6 +118,7 @@ const initialDraft = (): Draft => ({
   surface: "Sabbia outdoor",
   status: "",
   placement: "In corso",
+  bracket: "",
   color: LABEL_COLORS[0],
   matches: [],
 });
@@ -255,6 +259,9 @@ export default function CreaChat({
       case "placement":
         await say("Ottimo! Che piazzamento hai ottenuto? 🏆");
         break;
+      case "bracket":
+        await say("In che tabellone? (se il torneo li aveva)");
+        break;
       case "askResults":
         if (d.status === "ongoing")
           await say("Vuoi già registrare le partite giocate finora?");
@@ -385,6 +392,11 @@ export default function CreaChat({
   const pickPlacement = (p: Placement) => {
     pushUser(p);
     patch({ placement: p });
+    goStep("bracket");
+  };
+  const pickBracket = (b: Bracket | "") => {
+    pushUser(b || "Nessun tabellone");
+    patch({ bracket: b });
     goStep("askResults");
   };
 
@@ -475,6 +487,7 @@ export default function CreaChat({
       format: d.format,
       surface: d.surface,
       placement: d.placement,
+      bracket: d.bracket,
       color: d.color,
       emoji: "🏖️",
     };
@@ -706,6 +719,7 @@ export default function CreaChat({
               pickSurface,
               pickStatus,
               pickPlacement,
+              pickBracket,
               answerResults,
               pickResultsPartner,
               submitOpponents,
@@ -858,7 +872,9 @@ function Recap({
     ["Superficie", d.surface],
     [
       "Stato",
-      d.status === "ongoing" ? "In corso ⏳" : `Finito · ${d.placement}`,
+      d.status === "ongoing"
+        ? "In corso ⏳"
+        : `Finito · ${d.placement}${d.bracket ? " · " + d.bracket : ""}`,
     ],
   ];
   return (
@@ -977,6 +993,7 @@ interface Handlers {
   pickSurface: (s: Surface) => void;
   pickStatus: (s: "finished" | "ongoing") => void;
   pickPlacement: (p: Placement) => void;
+  pickBracket: (b: Bracket | "") => void;
   answerResults: (yes: boolean) => void;
   pickResultsPartner: (p: Option) => void;
   submitOpponents: (v: string) => void;
@@ -1218,6 +1235,18 @@ function Dock(props: DockProps) {
               {p}
             </Chip>
           ))}
+        </ChipsDock>
+      );
+
+    case "bracket":
+      return (
+        <ChipsDock>
+          {BRACKETS.map((b) => (
+            <Chip key={b} onClick={() => h.pickBracket(b)}>
+              {b}
+            </Chip>
+          ))}
+          <Chip onClick={() => h.pickBracket("")}>Nessun tabellone</Chip>
         </ChipsDock>
       );
 

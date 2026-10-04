@@ -4,9 +4,9 @@
 // (camelCase vs snake_case, set inline vs tabella match_sets).
 // I vincoli sui campi enum sono condivisi con db.enums.ts.
 // ============================================================================
-import type { Category, Format, Surface, Phase, Placement } from "./db.enums";
+import type { Category, Format, Surface, Phase, Placement, Bracket } from "./db.enums";
 
-export type { Category, Format, Surface, Phase, Placement };
+export type { Category, Format, Surface, Phase, Placement, Bracket };
 
 export interface Partner {
   id: string;
@@ -96,6 +96,7 @@ export interface Tournament {
   format: Format;
   surface: Surface;
   placement: Placement;
+  bracket: Bracket | null; // tabellone Gold/Silver/Bronze; null = nessuno
   color: string;
   emoji: string;
   partnerId: string | null; // compagno principale del torneo (con chi l'ho giocato)
@@ -159,6 +160,7 @@ export interface TorneoForm {
   format: Format;
   surface: Surface;
   placement: Placement;
+  bracket: Bracket | ""; // '' = nessun tabellone (a DB diventa null)
   color: string;
   emoji: string;
 }

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
-import { toPng } from "html-to-image";
+import { toBlob } from "html-to-image";
 import { track } from "@vercel/analytics";
 import type { WrappedData } from "../../lib/derive";
 import { wrappedPalette } from "./palette";
@@ -8,13 +8,13 @@ import WrappedSlideCard from "./WrappedSlideCard";
 
 // ============================================================================
 // Beach Wrapped — visore a schermo intero, sfogliabile stile storia Instagram.
-// Riusa la pipeline di StoryModal (card fissa 1080×1920 → toPng/toBlob dopo
+// Riusa la pipeline di StoryModal (card fissa 1080×1920 → toBlob dopo
 // document.fonts.ready, foto CORS inlinate come data-URL) e aggiunge:
 //  · barre di avanzamento IG + navigazione tap/swipe/tastiera + auto-avanzamento
-//  · UNA sola azione: scarica la card corrente. "Scarica tutte" e Web Share sono
-//    stati tolti — moltiplicavano i pulsanti sotto la card senza aggiungere
-//    granché (il download singolo copre entrambi i casi), e lo spazio che
-//    liberano va all'anteprima, che qui è il contenuto.
+//  · sull'ultima slide due azioni sul riepilogo: "Condividi" (share sheet
+//    nativo col PNG: Instagram, WhatsApp, "Salva immagine"; dove non c'è,
+//    copia negli appunti) e "Scarica". "Scarica tutte" resta fuori: un
+//    pulsante per slide moltiplicava i comandi senza servire a nessuno.
 // Il nodo catturato NON è quello scalato dell'anteprima: c'è un layer nascosto a
 // piena risoluzione (una card per slide) così l'immagine esce sempre pixel-perfect.
 // ============================================================================
@@ -52,6 +52,22 @@ export default function WrappedModal({
       typeof window !== "undefined" &&
       !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches,
   );
+  // Cosa sa fare questo browser con un'immagine. Share sheet con file: i
+  // telefoni (e qualche desktop). Altrimenti gli appunti, dove ci sono.
+  const [canShareFiles] = useState(() => {
+    try {
+      const probe = new File([new Blob()], "probe.png", { type: "image/png" });
+      return !!navigator.canShare?.({ files: [probe] });
+    } catch {
+      return false;
+    }
+  });
+  const [canCopyImage] = useState(
+    () =>
+      typeof ClipboardItem !== "undefined" &&
+      typeof navigator.clipboard?.write === "function",
+  );
+  const canShare = canShareFiles || canCopyImage;
   const captureRefs = useRef<(HTMLDivElement | null)[]>([]);
   const downX = useRef<number | null>(null);
 
@@ -186,17 +202,20 @@ export default function WrappedModal({
       new Promise((r) => setTimeout(r, 3000)),
     ]);
 
-  const capturePng = async (i: number): Promise<string | null> => {
+  const renderBlob = async (i: number): Promise<Blob> => {
     const node = captureRefs.current[i];
-    if (!node) return null;
+    if (!node) throw new Error("card non montata");
     await fontsPronti();
     // pixelRatio 2 → PNG 2160×3840: nitido su schermi retina e dopo l'upload IG.
-    return toPng(node, {
-      pixelRatio: 2,
-      cacheBust: true,
-      width: 1080,
-      height: 1920,
-    });
+    const opts = { pixelRatio: 2, cacheBust: true, width: 1080, height: 1920 };
+    // WebKit disegna l'SVG intermedio prima di aver decodificato font e foto
+    // inlinati, e la prima immagine esce senza (difetto noto di html-to-image
+    // su Safari/iOS). Una passata a vuoto li mette in cache; costa poco perché
+    // gira in sottofondo, mentre si guarda l'ultima slide.
+    await toBlob(node, opts).catch(() => null);
+    const blob = await toBlob(node, opts);
+    if (!blob) throw new Error("immagine vuota");
+    return blob;
   };
 
   const fileName = (i: number) => `${wrapped.slug}-${pad2(i + 1)}.png`;
@@ -209,31 +228,131 @@ export default function WrappedModal({
   const recapIdx = slides.findIndex((s) => s.kind === "recap");
   const exportIdx = recapIdx >= 0 ? recapIdx : idx;
 
-  const downloadCurrent = async () => {
-    if (busy) return;
+  // L'immagine si prepara PRIMA del tocco, appena si arriva all'ultima slide.
+  // Non è solo velocità: iOS concede `navigator.share` solo a ridosso del
+  // gesto, e generare il PNG dopo il tocco (secondi, su un telefono) faceva
+  // scadere il permesso. Con il Blob già pronto, il tocco condivide subito.
+  // La chiave cambia se cambiano la card o le foto caricate: niente PNG vecchi.
+  const shotKey = `${rangeKey}|${exportIdx}|${Object.keys(photos).length}`;
+  const shotRef = useRef<{ key: string; promise: Promise<Blob> } | null>(null);
+  const blobRef = useRef<{ key: string; blob: Blob } | null>(null);
+  const [readyKey, setReadyKey] = useState<string | null>(null);
+  const ready = readyKey === shotKey;
+
+  const prepare = (): Promise<Blob> => {
+    if (shotRef.current?.key === shotKey) return shotRef.current.promise;
+    const key = shotKey;
+    // Tetto all'intera generazione. Il timeout sui font qui sopra copre solo
+    // la NOSTRA attesa: html-to-image aspetta i font per conto suo, e se non
+    // arrivano mai resta appeso. Senza tetto il pulsante resterebbe su
+    // "Preparo…" per sempre, senza errore e senza modo di riprovare.
+    const promise = Promise.race([
+      renderBlob(exportIdx),
+      new Promise<never>((_, rej) =>
+        setTimeout(() => rej(new Error("timeout generazione")), 20000),
+      ),
+    ]);
+    shotRef.current = { key, promise };
+    promise.then(
+      (blob) => {
+        blobRef.current = { key, blob };
+        setReadyKey(key);
+      },
+      // Un errore non resta in cache: il tocco successivo riprova.
+      () => {
+        if (shotRef.current?.promise === promise) shotRef.current = null;
+      },
+    );
+    return promise;
+  };
+
+  const atEnd = idx === n - 1;
+  useEffect(() => {
+    if (!atEnd || !wrapped.hasEnoughData) return;
+    // In sottofondo: un fallimento qui non si mostra, lo dirà il tocco.
+    prepare().catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [atEnd, shotKey, wrapped.hasEnoughData]);
+
+  // Il Blob pronto, oppure lo genera adesso (tocco arrivato prima della fine
+  // della preparazione). `busy` copre solo l'attesa visibile.
+  const getBlob = async (): Promise<Blob> => {
+    const pronto = blobRef.current;
+    if (pronto?.key === shotKey) return pronto.blob;
     setBusy(true);
     try {
-      // Tetto all'intera generazione. Il timeout sui font qui sopra copre solo
-      // la NOSTRA attesa: html-to-image aspetta i font per conto suo, e se non
-      // arrivano mai resta appeso. Senza questo, il pulsante — che ora è
-      // l'unica azione del recap — resterebbe su "Genero…" per sempre, senza
-      // errore e senza modo di riprovare. Meglio dire che non è riuscito.
-      const url = await Promise.race([
-        capturePng(exportIdx),
-        new Promise<null>((r) => setTimeout(() => r(null), 20000)),
-      ]);
-      if (!url) throw new Error("generazione non riuscita");
+      return await prepare();
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const failed = (e: unknown) => {
+    // eslint-disable-next-line no-console
+    console.error("[wrapped] immagine", e);
+    onNotice?.("Impossibile generare l’immagine. Riprova.");
+  };
+
+  // Scarico via Blob URL e ancora agganciata al documento. Prima era un
+  // `data:` da qualche MB cliccato su un'ancora staccata: su iOS (e nell'app
+  // installata) spesso non partiva niente, senza errore.
+  const download = async () => {
+    if (busy) return;
+    try {
+      const blob = await getBlob();
+      const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
       a.download = fileName(exportIdx);
+      a.rel = "noopener";
+      document.body.appendChild(a);
       a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
       track("wrapped_scaricato");
     } catch (e) {
-      // eslint-disable-next-line no-console
-      console.error("[wrapped] toPng", e);
-      onNotice?.("Impossibile generare l’immagine. Riprova.");
-    } finally {
-      setBusy(false);
+      failed(e);
+    }
+  };
+
+  const share = async () => {
+    if (busy) return;
+    let blob: Blob;
+    try {
+      blob = await getBlob();
+    } catch (e) {
+      failed(e);
+      return;
+    }
+    const file = new File([blob], fileName(exportIdx), { type: "image/png" });
+    if (canShareFiles) {
+      try {
+        // Solo il file, niente `text`: con un testo allegato alcune app
+        // (Instagram in testa) ricevono la didascalia e perdono l'immagine.
+        await navigator.share({ files: [file], title: "Il mio Beach Wrapped" });
+        track("wrapped_condiviso", { via: "share" });
+      } catch (e) {
+        const name = (e as { name?: string })?.name;
+        // Share sheet chiuso senza scegliere: non è un errore.
+        if (name === "AbortError") return;
+        // Permesso del gesto scaduto (l'immagine non era ancora pronta al
+        // tocco): adesso lo è, quindi il secondo tocco funziona.
+        if (name === "NotAllowedError") {
+          onNotice?.("Immagine pronta: tocca di nuovo “Condividi”.");
+          return;
+        }
+        failed(e);
+      }
+      return;
+    }
+    // Desktop senza share sheet: l'immagine negli appunti, da incollare nel
+    // post o nella chat.
+    try {
+      await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+      track("wrapped_condiviso", { via: "appunti" });
+      onNotice?.("Immagine copiata: incollala nel post o nella chat.");
+    } catch (e) {
+      failed(e);
     }
   };
 
@@ -475,25 +594,55 @@ export default function WrappedModal({
           maxWidth: 520,
         }}
       >
-        {/* Lo scarico compare SOLO sull'ultima: il recap si condivide alla fine,
-            e prima di allora quel pulsante invitava a portarsi via una slide
-            qualsiasi invece di guardarle. Lo spazio resta riservato anche
-            quando è nascosto, o la card ballerebbe all'ultimo passaggio. */}
-        <div style={{ minHeight: 44, display: "flex", alignItems: "center" }}>
-          {idx === n - 1 && (
+        {/* Condividi/Scarica compaiono SOLO sull'ultima: il recap si condivide
+            alla fine, e prima di allora quei pulsanti invitavano a portarsi via
+            una slide qualsiasi invece di guardarle. Lo spazio resta riservato
+            anche quando sono nascosti, o la card ballerebbe all'ultimo passaggio. */}
+        <div
+          style={{
+            minHeight: 44,
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            flexWrap: "wrap",
+            justifyContent: "center",
+          }}
+        >
+          {atEnd && (canShare ? (
+            <>
+              <button
+                type="button"
+                className="chip"
+                onClick={share}
+                aria-busy={busy || !ready}
+                style={{ ...chip("#FF6B35"), border: "none" }}
+              >
+                {busy ? "Preparo…" : "Condividi"}
+              </button>
+              <button
+                type="button"
+                className="chip"
+                onClick={download}
+                style={{ ...chip("rgba(255,255,255,.16)"), border: "none" }}
+              >
+                ↓ Scarica
+              </button>
+            </>
+          ) : (
             <button
               type="button"
               className="chip"
-              onClick={downloadCurrent}
+              onClick={download}
+              aria-busy={busy || !ready}
               style={{ ...chip("#FF6B35"), border: "none" }}
             >
               {busy
-                ? "Genero…"
+                ? "Preparo…"
                 : recapIdx >= 0
                   ? "↓ Scarica il riepilogo"
                   : "↓ Scarica"}
             </button>
-          )}
+          ))}
         </div>
 
         {/* intervallo stagione configurabile */}

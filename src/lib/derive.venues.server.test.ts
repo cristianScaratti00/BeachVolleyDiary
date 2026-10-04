@@ -50,24 +50,24 @@ describe('deriveTorneiListServer — il luogo nella riga meta', () => {
   it('mostra il nome del luogo quando la RPC lo manda', () => {
     const [card] = deriveTorneiListServer(svList([
       svCard({ venue: { id: 'v1', name: 'Bagno 26', city: 'Riccione', lat: null, lng: null } }),
-    ])).tornei
+    ]), makeData()).tornei
     expect(card.meta).toContain('Bagno 26')
   })
 
   it('ricade sulla città quando il torneo non ha luogo (venue: null)', () => {
-    const [card] = deriveTorneiListServer(svList([svCard({ venue: null })])).tornei
+    const [card] = deriveTorneiListServer(svList([svCard({ venue: null })]), makeData()).tornei
     expect(card.meta).toContain('Riccione')
     expect(card.meta).not.toContain('null')
   })
 
   it('ricade sulla città anche se la RPC non conosce ancora `venue`', () => {
     // Forma 3: payload di una `tornei_list` antecedente alla migration.
-    const [card] = deriveTorneiListServer(svList([svCard()])).tornei
+    const [card] = deriveTorneiListServer(svList([svCard()]), makeData()).tornei
     expect(card.meta).toContain('Riccione')
   })
 
   it('non lascia un separatore vuoto quando non c\'è né luogo né città', () => {
-    const [card] = deriveTorneiListServer(svList([svCard({ city: '', venue: null })])).tornei
+    const [card] = deriveTorneiListServer(svList([svCard({ city: '', venue: null })]), makeData()).tornei
     expect(card.meta).not.toContain('·  ·')
     expect(card.meta).toBe('15 Giu · 2vs2')
   })
@@ -77,7 +77,7 @@ describe('deriveTorneiListServer — il luogo nella riga meta', () => {
     // al luogo rinominato: comanda il dato vivo, non lo snapshot.
     const [card] = deriveTorneiListServer(svList([
       svCard({ city: 'vecchia grafia', venue: { id: 'v1', name: 'Bagno 26', city: 'Riccione', lat: null, lng: null } }),
-    ])).tornei
+    ]), makeData()).tornei
     expect(card.meta).toContain('Bagno 26')
     expect(card.meta).not.toContain('vecchia grafia')
   })

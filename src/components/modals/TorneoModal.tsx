@@ -2,7 +2,8 @@ import type { CSSProperties, ChangeEvent } from 'react'
 import { Sheet, Title, Label, inputStyle, selectStyle, Actions } from './Sheet'
 import VenuePicker from './VenuePicker'
 import { SWATCH_COLORS } from '../../lib/theme'
-import type { AnyForm, SetField, Option, Venue, Category, Format, Surface, Placement } from '../../lib/models'
+import { BRACKETS } from '../../lib/db.enums'
+import type { AnyForm, SetField, Option, Venue, Category, Format, Surface, Placement, Bracket } from '../../lib/models'
 
 const fieldWrap: CSSProperties = { flex: 1, minWidth: 130 }
 const nameStyle: CSSProperties = { ...inputStyle, font: "700 15px 'Nunito Sans'" }
@@ -81,11 +82,22 @@ export default function TorneoModal({ form, editId, setField, partnerOptions, ca
           </div>
         </div>
 
-        <div>
-          <Label>Piazzamento</Label>
-          <select value={form.placement || 'Gironi'} onChange={(e: ChangeEvent<HTMLSelectElement>) => setField('placement', e.target.value as Placement)} style={selectStyle}>
-            <option>1° 🏆</option><option>2°</option><option>3°</option><option>Semifinale</option><option>Quarti</option><option>Ottavi</option><option>Gironi</option><option>In corso</option>
-          </select>
+        {/* Il tabellone affianca il piazzamento: "2°" da solo non dice se era
+            il Gold o il Silver. Facoltativo, perché non tutti i tornei ne hanno. */}
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          <div style={fieldWrap}>
+            <Label>Piazzamento</Label>
+            <select value={form.placement || 'Gironi'} onChange={(e: ChangeEvent<HTMLSelectElement>) => setField('placement', e.target.value as Placement)} style={selectStyle}>
+              <option>1° 🏆</option><option>2°</option><option>3°</option><option>Semifinale</option><option>Quarti</option><option>Ottavi</option><option>Gironi</option><option>In corso</option>
+            </select>
+          </div>
+          <div style={fieldWrap}>
+            <Label>Tabellone</Label>
+            <select aria-label="Tabellone" value={form.bracket || ''} onChange={(e: ChangeEvent<HTMLSelectElement>) => setField('bracket', e.target.value as Bracket | '')} style={selectStyle}>
+              <option value="">— Nessuno —</option>
+              {BRACKETS.map((b) => <option key={b}>{b}</option>)}
+            </select>
+          </div>
         </div>
 
         <div>

@@ -1,8 +1,8 @@
 import type { ChangeEvent } from 'react'
 import { Sheet, Title, Label, inputStyle, selectStyle, Actions } from './Sheet'
 import VenuePicker from './VenuePicker'
-import { CATEGORIES, PLACEMENTS } from '../../lib/db.enums'
-import type { AnyForm, SetField, Option, Venue, Category, Placement } from '../../lib/models'
+import { CATEGORIES, PLACEMENTS, BRACKETS } from '../../lib/db.enums'
+import type { AnyForm, SetField, Option, Venue, Category, Placement, Bracket } from '../../lib/models'
 
 interface QuickTorneoModalProps {
   form: AnyForm
@@ -15,7 +15,7 @@ interface QuickTorneoModalProps {
 }
 
 // Creazione rapida: solo i campi essenziali (nome, compagno, luogo, data,
-// categoria, piazzamento). Formato 2vs2 e superficie "Sabbia outdoor" sono i
+// categoria, piazzamento + tabellone). Formato 2vs2 e superficie "Sabbia outdoor" sono i
 // default più comuni, quindi fissi e non richiesti — si cambiano poi da
 // "Modifica". Il luogo invece c'è: prima ogni torneo rapido nasceva senza, e
 // recuperarlo dopo non capitava quasi mai.
@@ -59,11 +59,20 @@ export default function QuickTorneoModal({ form, setField, partnerOptions, canAd
           </div>
         </div>
 
-        <div>
-          <Label>Piazzamento</Label>
-          <select value={form.placement || 'In corso'} onChange={(e: ChangeEvent<HTMLSelectElement>) => setField('placement', e.target.value as Placement)} style={selectStyle}>
-            {PLACEMENTS.map((p) => <option key={p}>{p}</option>)}
-          </select>
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          <div style={{ flex: 1, minWidth: 130 }}>
+            <Label>Piazzamento</Label>
+            <select value={form.placement || 'In corso'} onChange={(e: ChangeEvent<HTMLSelectElement>) => setField('placement', e.target.value as Placement)} style={selectStyle}>
+              {PLACEMENTS.map((p) => <option key={p}>{p}</option>)}
+            </select>
+          </div>
+          <div style={{ flex: 1, minWidth: 130 }}>
+            <Label>Tabellone</Label>
+            <select aria-label="Tabellone" value={form.bracket || ''} onChange={(e: ChangeEvent<HTMLSelectElement>) => setField('bracket', e.target.value as Bracket | '')} style={selectStyle}>
+              <option value="">— Nessuno —</option>
+              {BRACKETS.map((b) => <option key={b}>{b}</option>)}
+            </select>
+          </div>
         </div>
 
         <div style={{ font: "600 12px 'Nunito Sans'", color: 'rgba(27,42,74,.5)', background: '#F2F0EC', borderRadius: 9, padding: '9px 12px' }}>

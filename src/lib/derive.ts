@@ -1,4 +1,4 @@
-import { res, computeStats, streakOf, placementRank, fmtDate, yearOf, esitoStyle, setChips } from './stats'
+import { res, computeStats, streakOf, placementRank, placementLabel, fmtDate, yearOf, esitoStyle, setChips } from './stats'
 import type { SetChip } from './stats'
 import { MONTHS_SHORT, MONTHS_FULL } from './theme'
 import { normalizeText, tokenize, matchesAllTokens } from './search'
@@ -373,7 +373,7 @@ function decorateTournament(data: DiaryData, t: Tournament): TorneoCard {
   const podium = placementRank(t.placement) <= 3
   return {
     id: t.id, name: t.name, category: t.category, format: t.format, date: t.date, dot: dotFor(t),
-    badge: t.placement,
+    badge: placementLabel(t.placement, t.bracket),
     badgeBg: podium ? '#FFF1EA' : '#F2F0EC',
     badgeColor: podium ? '#C4501E' : 'rgba(27,42,74,.5)',
     // Il formato resta anche qui: `meta` è condivisa con le card "Ultimi tornei"
@@ -668,7 +668,7 @@ export function deriveTorneoDetail(data: DiaryData, id: string): TorneoDetailDat
   const lng = v?.lng ?? null
   return {
     id: t.id, name: t.name, category: t.category, dot: dotFor(t),
-    badge: t.placement,
+    badge: placementLabel(t.placement, t.bracket),
     badgeBg: podium ? '#FFF1EA' : '#F2F0EC',
     badgeColor: podium ? '#C4501E' : 'rgba(27,42,74,.5)',
     meta: [fmtDate(t.date), venueDisplay(data, t), t.surface, t.partnerId ? 'con ' + partnerName(data, t.partnerId) : '']
@@ -765,7 +765,7 @@ export function deriveDiary(data: DiaryData): DiaryEntry[] {
 
     const search: DiarySearchFields = {
       title: normalizeText(t.name),
-      place: normalizeText([t.city, t.category, t.format, t.surface, t.placement].filter(Boolean).join(' ')),
+      place: normalizeText([t.city, t.category, t.format, t.surface, t.placement, t.bracket].filter(Boolean).join(' ')),
       // Anno, mese abbreviato e mese per esteso, giorno con e senza zero: si
       // cerca "giugno" tanto quanto "giu" o "2025".
       when: normalizeText([d.slice(0, 4), MONTHS_SHORT[mIdx], MONTHS_FULL[mIdx], d.slice(8, 10), String(+d.slice(8, 10))].filter(Boolean).join(' ')),
@@ -788,7 +788,7 @@ export function deriveDiary(data: DiaryData): DiaryEntry[] {
       title: t.name,
       desc: parts.join(' · '),
       accent: dotForRank(rank),
-      badge: t.placement,
+      badge: placementLabel(t.placement, t.bracket),
       badgeBg: podium ? '#FFF1EA' : '#F2F0EC',
       badgeColor: podium ? '#C4501E' : 'rgba(27,42,74,.5)',
       photos: photos.slice(0, 4).map((p) => ({ color: p.color, caption: p.caption, url: p.url })),
@@ -911,7 +911,7 @@ export function deriveStory(data: DiaryData, id: string): StoryData | null {
   return {
     year: yearOf(d),
     name: t.name,
-    resultLabel: resultLabelOf(t.placement),
+    resultLabel: resultLabelOf(t.placement) + (t.bracket ? ' · ' + t.bracket.toUpperCase() : ''),
     meta,
     winPct: ts.winPct,
     record: ts.won + '–' + ts.lost,
@@ -1220,12 +1220,15 @@ export function deriveWrapped(data: DiaryData, range: WrappedRange, fPartner = '
 
 // ---- Mapper da RPC server → view-model (presentazione lato client) ----
 
-export function deriveTorneiListServer(sv: SvTorneiList): TorneiListData {
+// Il tabellone non passa dalla RPC (è un dato descrittivo, non un aggregato):
+// arriva dai dati client, come le foto nel dettaglio.
+export function deriveTorneiListServer(sv: SvTorneiList, data: DiaryData): TorneiListData {
+  const brackets = new Map(data.tournaments.map((t) => [t.id, t.bracket]))
   const tornei: TorneoCard[] = byAgendaDate(sv.tornei).map((c) => {
     const podium = c.rank <= 3
     return {
       id: c.id, name: c.name, category: c.category, format: c.format, date: c.date, dot: dotForRank(c.rank),
-      badge: c.placement,
+      badge: placementLabel(c.placement, brackets.get(c.id)),
       badgeBg: podium ? '#FFF1EA' : '#F2F0EC',
       badgeColor: podium ? '#C4501E' : 'rgba(27,42,74,.5)',
       meta: [fmtDate(c.date), c.venue?.name.trim() || c.city.trim(), c.format, c.partner ? 'con ' + c.partner : '']
@@ -1243,6 +1246,7 @@ export function deriveCompagniServer(sv: SvCompagno[]): CompagnoCard[] {
 
 // Le foto vengono prese dai dati client (che hanno gli URL firmati), non dal
 // payload RPC: le statistiche restano server-side, le immagini restano coerenti.
+// Stessa cosa per il tabellone, che la RPC non restituisce.
 export function deriveTorneoDetailServer(sv: SvTorneoDetail, data: DiaryData): TorneoDetailData {
   const podium = sv.rank <= 3
   const photos = data.photos.filter((p) => p.tournamentId === sv.id)
@@ -1254,7 +1258,7 @@ export function deriveTorneoDetailServer(sv: SvTorneoDetail, data: DiaryData): T
   const local = data.tournaments.find((t) => t.id === sv.id)
   return {
     id: sv.id, name: sv.name, category: sv.category, dot: dotForRank(sv.rank),
-    badge: sv.placement,
+    badge: placementLabel(sv.placement, local?.bracket),
     badgeBg: podium ? '#FFF1EA' : '#F2F0EC',
     badgeColor: podium ? '#C4501E' : 'rgba(27,42,74,.5)',
     meta: [fmtDate(sv.date), venueName, sv.surface, sv.partner ? 'con ' + sv.partner : '']

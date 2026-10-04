@@ -7,7 +7,7 @@
 // <= 8 risultato reale, 9 nessun risultato).
 // ============================================================================
 import { describe, it, expect } from 'vitest'
-import { placementRank } from './stats'
+import { placementRank, placementLabel } from './stats'
 import { PLACEMENTS } from './db.enums'
 
 describe('placementRank', () => {
@@ -50,5 +50,20 @@ describe('placementRank', () => {
     // Il match è per prefisso: l'emoji sul primo posto non deve declassarlo.
     expect(placementRank('1°')).toBe(placementRank('1° 🏆'))
     expect(placementRank('2° posto')).toBe(placementRank('2°'))
+  })
+})
+
+describe('placementLabel', () => {
+  it('senza tabellone il badge è il piazzamento così com\'è', () => {
+    // null = colonna vuota a DB, undefined = torneo assente dai dati client
+    // (percorso RPC), '' = valore "nessuno" del form: tutti e tre uguali.
+    expect(placementLabel('2°', null)).toBe('2°')
+    expect(placementLabel('2°', undefined)).toBe('2°')
+    expect(placementLabel('2°', '')).toBe('2°')
+  })
+
+  it('con il tabellone lo accoda al piazzamento', () => {
+    expect(placementLabel('1° 🏆', 'Gold')).toBe('1° 🏆 · Gold')
+    expect(placementLabel('Quarti', 'Silver')).toBe('Quarti · Silver')
   })
 })

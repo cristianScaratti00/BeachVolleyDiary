@@ -310,11 +310,11 @@ describe('deriveTorneiListServer — rank dalla RPC', () => {
     // la mappa inversa deve chiudere il giro su tutta la scala, altrimenti un
     // piazzamento reale si presenta come "—" solo sul percorso server.
     PLACEMENTS.filter((l) => l !== 'In corso').forEach((l) => {
-      expect(deriveTorneiListServer(svList(placementRank(l))).bestPlacement).toBe(l)
+      expect(deriveTorneiListServer(svList(placementRank(l)), makeData()).bestPlacement).toBe(l)
     })
   })
 
   it('un rank senza risultato resta "—"', () => {
-    expect(deriveTorneiListServer(svList(9)).bestPlacement).toBe('—')
+    expect(deriveTorneiListServer(svList(9), makeData()).bestPlacement).toBe('—')
   })
 })

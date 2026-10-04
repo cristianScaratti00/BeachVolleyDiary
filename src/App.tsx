@@ -395,6 +395,7 @@ export default function App() {
             newVenueName: "",
             newVenueCity: "",
             newVenueCoords: "",
+            bracket: t.bracket ?? "",
           }
         : {
             name: "",
@@ -408,6 +409,7 @@ export default function App() {
             format: "2vs2",
             surface: "Sabbia outdoor",
             placement: "Gironi",
+            bracket: "",
             color: "#FF6B35",
             emoji: "🏖️",
             partnerId: "",
@@ -503,6 +505,7 @@ export default function App() {
       date: today,
       category: "Amatoriale",
       placement: "In corso",
+      bracket: "",
     });
     setModal("torneoRapido");
   };
@@ -600,7 +603,7 @@ export default function App() {
   const hasShared = data.tournaments.some((t) => t.shared);
   const torneiList =
     srvTornei && !hasShared
-      ? deriveTorneiListServer(srvTornei)
+      ? deriveTorneiListServer(srvTornei, data)
       : deriveTorneiList(data, fYear);
   const compagniList = srvCompagni
     ? deriveCompagniServer(srvCompagni)

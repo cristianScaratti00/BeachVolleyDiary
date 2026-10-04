@@ -31,6 +31,9 @@ npm run preview        # anteprima della build
   (RPC `dashboard_stats`) con fallback al calcolo client.
 - **Tornei** — i tornei da oggi in poi restano in cima sotto "Prossimi tornei", i passati sono
   raggruppati per formato con filtro a chip; dettaglio con record, set, differenziale, partite e foto.
+  Accanto al piazzamento si può indicare il **tabellone** in cui è arrivato (Gold / Silver / Bronze /
+  Girone unico, facoltativo): compare nel badge ("2° · Silver"), nella story e nella ricerca del diario, ma non
+  cambia le statistiche — un 1° nel Bronze resta un 1° per podi e miglior piazzamento.
 - **Luoghi** — il posto in cui si gioca è un'entità, non più una città a testo libero: si sceglie
   da un elenco (o si crea al volo con nome, città e coordinate) e il dettaglio torneo mostra
   "quante volte hai giocato qui" più una mappa OpenStreetMap. Le coordinate si prendono in tre

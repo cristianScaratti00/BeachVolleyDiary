@@ -5,8 +5,8 @@
     "semantic_hash": ""
   },
   "src/App.tsx": {
-    "mtime": 1785606938.9211702,
-    "ast_hash": "6aa6a635d14a83da4913560a03e854b9",
+    "mtime": 1791143688.6101327,
+    "ast_hash": "b392bfe3e6cfe1c01bea2b3e88e807d3",
     "semantic_hash": ""
   },
   "src/Root.tsx": {
@@ -110,8 +110,8 @@
     "semantic_hash": ""
   },
   "src/components/modals/QuickTorneoModal.tsx": {
-    "mtime": 1785137895.5706072,
-    "ast_hash": "0d2ab7d32487fbb13c302a30979d9a9e",
+    "mtime": 1791143710.3182523,
+    "ast_hash": "cd0c03f1af1c5b3c43673f78e571db22",
     "semantic_hash": ""
   },
   "src/components/modals/Sheet.tsx": {
@@ -125,8 +125,8 @@
     "semantic_hash": ""
   },
   "src/components/modals/TorneoModal.tsx": {
-    "mtime": 1785137877.0799227,
-    "ast_hash": "cd87b240da7660142a9507ed969988d4",
+    "mtime": 1791143710.3178263,
+    "ast_hash": "176527ada84e636d7ef6570e81003a5d",
     "semantic_hash": ""
   },
   "src/components/modals/UpgradeSheet.tsx": {
@@ -140,13 +140,13 @@
     "semantic_hash": ""
   },
   "src/components/wrapped/WrappedModal.test.tsx": {
-    "mtime": 1785401624.0972872,
-    "ast_hash": "d80aa81d2901e82c031dcaa43d340d83",
+    "mtime": 1791144872.3403354,
+    "ast_hash": "4be26244141b141775c1fd88f40c0fd5",
     "semantic_hash": ""
   },
   "src/components/wrapped/WrappedModal.tsx": {
-    "mtime": 1785402466.8724504,
-    "ast_hash": "5c7985e04350b4a341b773b5f0a9ec57",
+    "mtime": 1791144644.6242046,
+    "ast_hash": "e8fcbed5ea612c00a1e834589bde6c4e",
     "semantic_hash": ""
   },
   "src/components/wrapped/WrappedSlideCard.tsx": {
@@ -170,8 +170,8 @@
     "semantic_hash": ""
   },
   "src/hooks/useDiary.ts": {
-    "mtime": 1785329582.7767613,
-    "ast_hash": "51ef2e80d160d83040e9e2f2aaf1d122",
+    "mtime": 1791143640.163697,
+    "ast_hash": "a629a4581976ee5bc34aef02a38b67e6",
     "semantic_hash": ""
   },
   "src/hooks/useMedia.ts": {
@@ -190,23 +190,23 @@
     "semantic_hash": ""
   },
   "src/lib/database.types.ts": {
-    "mtime": 1785606775.180114,
-    "ast_hash": "0a55d9f20f01681c1e98603a536e593c",
+    "mtime": 1791143631.5690248,
+    "ast_hash": "71fc1ecf4232c04708fe78d3d6ab83b0",
     "semantic_hash": ""
   },
   "src/lib/db.enums.ts": {
-    "mtime": 1783243408.2483835,
-    "ast_hash": "7bb3d46e8de5faaf9e144f39ce9bdcb9",
+    "mtime": 1791144245.5700579,
+    "ast_hash": "7fd624ef1f0020524d9783ea3d4d300e",
     "semantic_hash": ""
   },
   "src/lib/derive.tornei.test.ts": {
-    "mtime": 1785138697.8656328,
-    "ast_hash": "5939bdf03c025822bf05bf4d774f4d4e",
+    "mtime": 1791143748.0000494,
+    "ast_hash": "e5b1ec2dfa21fb94b4dbd298c508af0f",
     "semantic_hash": ""
   },
   "src/lib/derive.ts": {
-    "mtime": 1785421133.0994093,
-    "ast_hash": "c0d99b524dcbbe1c59ec7da114025a5f",
+    "mtime": 1791143679.769749,
+    "ast_hash": "796ed6af843ec7814ab10438f7aba89c",
     "semantic_hash": ""
   },
   "src/lib/derive.wrapped.test.ts": {
@@ -220,8 +220,8 @@
     "semantic_hash": ""
   },
   "src/lib/models.ts": {
-    "mtime": 1785606914.4503973,
-    "ast_hash": "582f456ce85d7e262071b6e90fe5a855",
+    "mtime": 1791143631.5705514,
+    "ast_hash": "6c93b7afa1534da07c717a5819aeea39",
     "semantic_hash": ""
   },
   "src/lib/permissions.ts": {
@@ -235,8 +235,8 @@
     "semantic_hash": ""
   },
   "src/lib/stats.ts": {
-    "mtime": 1785138697.8673291,
-    "ast_hash": "f04f70e10a9490ad9dfd22dd0bc29118",
+    "mtime": 1791143663.382526,
+    "ast_hash": "f649ffa0951ff30a267f916767c4d589",
     "semantic_hash": ""
   },
   "src/lib/supabase.ts": {
@@ -265,8 +265,8 @@
     "semantic_hash": ""
   },
   "src/screens/CreaChat.tsx": {
-    "mtime": 1785138122.3460462,
-    "ast_hash": "b91e228c46789d56b950f964ddbf7095",
+    "mtime": 1791143727.2983582,
+    "ast_hash": "2ffa9421b4dc0615ff175d9a7310ff38",
     "semantic_hash": ""
   },
   "src/screens/Diario.tsx": {
@@ -315,8 +315,8 @@
     "semantic_hash": ""
   },
   "src/test/factories.ts": {
-    "mtime": 1785149337.1998,
-    "ast_hash": "b65627ba37dd71cfc83e43b2ca59deb1",
+    "mtime": 1791143732.4086392,
+    "ast_hash": "f2e55b67d63e0ca5197335547f134034",
     "semantic_hash": ""
   },
   "src/test/setup.ts": {
@@ -445,8 +445,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1785153474.9235349,
-    "ast_hash": "526c785db2646cd084792483d22a490a",
+    "mtime": 1791143813.166865,
+    "ast_hash": "aabf8f5ad03a45bb872f150c0b2cb0b8",
     "semantic_hash": ""
   },
   "docs/QA-tornei-formati.md": {
@@ -455,8 +455,8 @@
     "semantic_hash": ""
   },
   "index.html": {
-    "mtime": 1785482214.827959,
-    "ast_hash": "d511881dd9c90e57137f7b2d327e32ec",
+    "mtime": 1791144772.9091973,
+    "ast_hash": "0156a3659f7873e583e779698bf9a0b6",
     "semantic_hash": ""
   },
   "supabase/README.md": {
@@ -475,8 +475,8 @@
     "semantic_hash": ""
   },
   "src/lib/stats.test.ts": {
-    "mtime": 1785138697.8669355,
-    "ast_hash": "cb0d34623a704e2347f40f23e3f345bf",
+    "mtime": 1791143785.9967592,
+    "ast_hash": "0f19bb441573e1e9f1877e851340acb5",
     "semantic_hash": ""
   },
   "src/screens/ChiCeOggi.test.tsx": {
@@ -510,8 +510,8 @@
     "semantic_hash": ""
   },
   ".claude/settings.local.json": {
-    "mtime": 1785831580.6899168,
-    "ast_hash": "7185d079d0933e24fe078222cf84401b",
+    "mtime": 1791143463.95555,
+    "ast_hash": "cf3015dc37acdcbb7eede154630ce26e",
     "semantic_hash": ""
   },
   "src/components/VenueMap.tsx": {
@@ -535,13 +535,13 @@
     "semantic_hash": ""
   },
   "src/lib/derive.mappa.ts": {
-    "mtime": 1785148890.9986563,
-    "ast_hash": "7565c0281dc725bac5e172e64176f5ef",
+    "mtime": 1791143679.7702622,
+    "ast_hash": "8f26ccc53728e4aaee75e4fbe4a10f25",
     "semantic_hash": ""
   },
   "src/lib/derive.venues.server.test.ts": {
-    "mtime": 1784930526.0951674,
-    "ast_hash": "860eae227cf1f77155bc78909919505a",
+    "mtime": 1791143748.0026052,
+    "ast_hash": "19a440f093feab6377174a4f92642b39",
     "semantic_hash": ""
   },
   "src/lib/derive.venues.test.ts": {
@@ -695,8 +695,8 @@
     "semantic_hash": ""
   },
   "vercel.json": {
-    "mtime": 1785482225.4401286,
-    "ast_hash": "8d16e4abb07837f9224cd5507c088d72",
+    "mtime": 1791144658.338812,
+    "ast_hash": "cf303ef715c20295b3fe2060016c5994",
     "semantic_hash": ""
   },
   "supabase/migrations/20260729120000_security_hardening.sql": {
@@ -772,6 +772,21 @@
   "src/components/modals/Sheet.test.tsx": {
     "mtime": 1785831805.162848,
     "ast_hash": "1da106cea40ae4ef4c2dec578267fabd",
+    "semantic_hash": ""
+  },
+  "src/components/modals/TorneoModal.test.tsx": {
+    "mtime": 1791144907.8326008,
+    "ast_hash": "59c30b5daad5b2b053b492240ae610a1",
+    "semantic_hash": ""
+  },
+  "src/lib/derive.bracket.test.ts": {
+    "mtime": 1791143786.0011325,
+    "ast_hash": "c0fb50736bd4c39aa95a977b762cde77",
+    "semantic_hash": ""
+  },
+  "supabase/migrations/20261004120000_tournament_bracket.sql": {
+    "mtime": 1791143621.2331834,
+    "ast_hash": "2bf5855cd3acbf1a05fd5c63b49a8c9f",
     "semantic_hash": ""
   }
 }

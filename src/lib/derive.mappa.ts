@@ -22,7 +22,7 @@
 // collegato esistono solo nei dati client — la RPC `tornei_list` filtra su
 // `user_id = auth.uid()`.
 // ============================================================================
-import { computeStats, placementRank, fmtDate, yearOf } from './stats'
+import { computeStats, placementRank, placementLabel, fmtDate, yearOf } from './stats'
 import { dotForRank, todayISO } from './derive'
 import type { DiaryData, Tournament } from './models'
 import { geoKey, geocodeCity, inItaly } from './geo'
@@ -164,7 +164,7 @@ function torneoRow(t: Tournament): MappaTorneoRow {
     name: t.name,
     date: t.date,
     dateLabel: fmtDate(t.date),
-    badge: t.placement,
+    badge: placementLabel(t.placement, t.bracket),
     badgeBg: podium ? '#FFF1EA' : '#F2F0EC',
     badgeColor: podium ? '#C4501E' : 'rgba(27,42,74,.5)',
     shared: t.shared,

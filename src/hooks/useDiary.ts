@@ -4,7 +4,7 @@ import { NEW_PARTNER_COLOR } from '../lib/theme'
 import { normalizeCity, parseLatLng } from '../lib/derive'
 import type {
   DiaryData, Tournament, Match, Photo, Partner, Venue, AnyForm, GuidedMatch, AppUser,
-  Category, Format, Surface, Phase, Placement,
+  Category, Format, Surface, Phase, Placement, Bracket,
 } from '../lib/models'
 
 export interface UseDiary {
@@ -145,7 +145,7 @@ async function fetchAll(): Promise<DiaryData> {
       .select('id, name, color, user_id, linked_user_id')
       .order('created_at', { ascending: true }),
     supabase.from('tournaments')
-      .select('id, name, date, city, venue_id, category, format, surface, placement, color, emoji, partner_id, user_id')
+      .select('id, name, date, city, venue_id, category, format, surface, placement, bracket, color, emoji, partner_id, user_id')
       .order('date', { ascending: false }),
     supabase.from('matches')
       .select('id, tournament_id, partner_id, opponents, phase, note, match_sets(set_number, us, them)')
@@ -191,6 +191,7 @@ async function fetchAll(): Promise<DiaryData> {
     format: t.format as Format,
     surface: t.surface as Surface,
     placement: t.placement as Placement,
+    bracket: t.bracket as Bracket | null,
     color: t.color,
     emoji: t.emoji,
     partnerId: t.partner_id,
@@ -302,6 +303,7 @@ export function useDiary(): UseDiary {
       format: f.format ?? '2vs2',
       surface: f.surface ?? 'Sabbia outdoor',
       placement: f.placement ?? 'Gironi',
+      bracket: f.bracket || null,
       color: f.color ?? '#FF6B35',
       emoji: f.emoji ?? '🏖️',
       partner_id: partnerId,
@@ -361,6 +363,7 @@ export function useDiary(): UseDiary {
       format: '2vs2',
       surface: 'Sabbia outdoor',
       placement: f.placement ?? 'In corso',
+      bracket: f.bracket || null,
       color: '#FF6B35',
       emoji: '🏖️',
       partner_id: partnerId,
@@ -406,6 +409,7 @@ export function useDiary(): UseDiary {
       format: f.format ?? '2vs2',
       surface: f.surface ?? 'Sabbia outdoor',
       placement: f.placement ?? 'In corso',
+      bracket: f.bracket || null,
       color: f.color ?? '#FF6B35',
       emoji: f.emoji ?? '🏖️',
       partner_id: partnerId,

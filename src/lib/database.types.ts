@@ -4,7 +4,7 @@
 // Generato a mano dalla migration supabase/migrations/20260703120000_init.sql;
 // una volta applicato lo schema puoi rigenerarlo con la CLI/MCP e otterrai lo stesso risultato.
 //
-// Nota: i campi con CHECK (category, format, surface, phase, placement) qui sono `string`
+// Nota: i campi con CHECK (category, format, surface, phase, placement, bracket) qui sono `string`
 // — esattamente come li emette il generatore. Per union più strette usa ./db.enums.ts.
 // ============================================================================
 
@@ -160,6 +160,7 @@ export type Database = {
           format: string
           surface: string
           placement: string
+          bracket: string | null
           color: string
           emoji: string
           partner_id: string | null
@@ -177,6 +178,7 @@ export type Database = {
           format?: string
           surface?: string
           placement?: string
+          bracket?: string | null
           color?: string
           emoji?: string
           partner_id?: string | null
@@ -194,6 +196,7 @@ export type Database = {
           format?: string
           surface?: string
           placement?: string
+          bracket?: string | null
           color?: string
           emoji?: string
           partner_id?: string | null
