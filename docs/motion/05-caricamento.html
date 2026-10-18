@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Caricamento ed errori · laboratorio del movimento</title>
+<link rel="stylesheet" href="../../src/styles/tokens.css">
+<link rel="stylesheet" href="../../src/styles/materials.css">
+<link rel="stylesheet" href="./_lab.css">
+<style>
+@layer components {
+  /* ========================================================= Skeleton
+     Tre tempi, tutti misurati dal momento in cui l'area chiede i dati:
+       0ms     lo spazio è già riservato all'altezza giusta (nessuno
+               spostamento quando arriva il contenuto), ma è VUOTO;
+       150ms   compaiono le forme (opacità, ENTRATA). Sotto i 150ms non si
+               vede niente: niente lampo grigio per un chunk in cache;
+       600ms   parte il respiro (opacità 1 ↔ .55). Mai lo shimmer.      */
+  .skel-wrap { animation: compari var(--dur-entrata) var(--ease-standard) 150ms both; }
+  .skel-wrap .ui-skeleton-group { animation-delay: 600ms; }
+  @keyframes compari { from { opacity: 0; } to { opacity: 1; } }
+
+  /* Due elementi, due animazioni: il contenitore compare, il gruppo dentro
+     respira. Sullo stesso nodo la seconda `animation` cancellerebbe la prima. */
+
+  /* Il contenuto vero arriva in SVELTO, sul posto: niente slide, niente
+     stagger. Se il caricamento è finito prima dei 150ms, arriva senza
+     dissolvenza (non c'era niente da sostituire). */
+  .arrivato { animation: compari var(--dur-svelto) var(--ease-standard) both; }
+
+  /* Timeline: la voce vera e la sua forma vuota hanno le stesse misure. */
+  .tl { display: grid; gap: var(--space-4); margin-top: var(--space-4); }
+  .tl-entry { display: grid; grid-template-columns: 64px 1fr; gap: var(--space-3); }
+  .tl-date { text-align: center; }
+  .tl-date .d { display: block; font: var(--type-num-m); letter-spacing: var(--track-num-m); font-variant-numeric: tabular-nums; }
+  .tl-date .m { display: block; font: var(--type-eyebrow); letter-spacing: var(--track-eyebrow); text-transform: uppercase; color: var(--ink-2); }
+  .tl-body h3 { font: var(--type-headline); letter-spacing: var(--track-headline); }
+  .tl-body p { font: var(--type-footnote); letter-spacing: var(--track-footnote); color: var(--ink-2); margin-top: var(--space-1); }
+  .tl-cover { aspect-ratio: 16 / 10; border-radius: var(--radius-control); margin-top: var(--space-3); background: linear-gradient(135deg, #F7C59F, #FF8657 55%, #1B2A4A); }
+  /* Le barre dello skeleton occupano esattamente l'interlinea del testo che
+     sostituiscono: 24px (20 + 2×2) per la data, 22 per il titolo, 18+4 per
+     la meta. */
+  .sk-date { width: 40px; height: 20px; margin: 2px auto; }
+  .sk-month { width: 28px; height: 12px; margin: 2px auto; }
+  .sk-title { height: 16px; margin: 3px 0; width: 70%; }
+  .sk-meta { height: 12px; margin: 3px 0; margin-top: calc(var(--space-1) + 3px); width: 45%; }
+  .sk-cover { aspect-ratio: 16 / 10; border-radius: var(--radius-control); margin-top: var(--space-3); }
+
+  /* VenueMap: segnaposto alto 200, stesso raggio della mappa (UX §6.4). */
+  .venue { height: 200px; border-radius: var(--radius-card); overflow: hidden; border: 1px solid var(--edge); margin-top: var(--space-3); position: relative; }
+  .venue .ui-skeleton { position: absolute; inset: 0; border-radius: 0; }
+  .venue .tiles { position: absolute; inset: 0; background:
+      linear-gradient(90deg, rgb(255 255 255 / .5) 1px, transparent 1px) 0 0 / 64px 64px,
+      linear-gradient(0deg, rgb(255 255 255 / .5) 1px, transparent 1px) 0 0 / 64px 64px,
+      linear-gradient(160deg, #AAD3DF 0 38%, #F2EFE9 38% 100%); }
+
+  /* ============================================== Errore di un'area */
+  .area-err { text-align: center; padding: var(--space-8) var(--space-4); border: 1px solid var(--edge); border-radius: var(--radius-card); background: var(--surface); margin-top: var(--space-4); animation: compari var(--dur-entrata) var(--ease-standard) both; }
+  .area-err .ic { color: var(--ink-3); }
+  .area-err h3 { font: var(--type-headline); margin-top: var(--space-2); }
+  .area-err .lab-row { justify-content: center; }
+}
+</style>
+</head>
+<body>
+<main class="lab-page no-tabbar" id="contenuto">
+  <h1 class="large-title">Caricamento</h1>
+  <p class="subtitle">Skeleton che combaciano, errori che si riprendono, avvisi</p>
+
+  <div class="lab-row" role="group" aria-label="Simula il caricamento della Timeline">
+    <button type="button" class="ui-button state" data-variant="neutral" data-size="sm" data-ms="80">Chunk in cache (80ms)</button>
+    <button type="button" class="ui-button state" data-variant="neutral" data-size="sm" data-ms="1800">Rete lenta (1,8s)</button>
+    <button type="button" class="ui-button state" data-variant="neutral" data-size="sm" data-ms="900" data-fail>Fallisce</button>
+  </div>
+
+  <section id="timeline" aria-label="Timeline">
+    <div class="tl" id="tl"></div>
+  </section>
+
+  <h2 class="section-title">Luogo</h2>
+  <div class="venue" id="venue" aria-busy="true"><div class="skel-wrap"><div class="ui-skeleton-group"><div class="ui-skeleton"></div></div></div></div>
+  <p class="footnote" style="margin-top: var(--space-2)"><a href="#mappa" style="color: var(--accent-text); font-weight: 600">Apri la mappa ↗</a> · il link c'è anche mentre la mappa carica</p>
+
+  <h2 class="section-title">Avvisi</h2>
+  <div class="lab-row" role="group" aria-label="Avvisi di prova">
+    <button type="button" class="ui-button state" data-variant="neutral" data-size="sm" id="t-ok">Successo</button>
+    <button type="button" class="ui-button state" data-variant="neutral" data-size="sm" id="t-info">Informazione</button>
+    <button type="button" class="ui-button state" data-variant="neutral" data-size="sm" id="t-err">Errore (resta)</button>
+    <button type="button" class="ui-button state" data-variant="neutral" data-size="sm" id="t-off">Offline on/off</button>
+  </div>
+  <div class="lab-note">
+    <b>Skeleton:</b> lo spazio è riservato subito; le forme compaiono solo dopo 150ms (un chunk in cache non lampeggia), il respiro parte a 600ms. Il contenuto arriva sul posto in SVELTO.
+    <b>Errore:</b> «Riprova» resta occupato almeno 300ms anche se la rete risponde subito "no": un tentativo che dura un fotogramma non si vede.
+    <b>Avvisi:</b> premi due volte lo stesso: non se ne aggiunge un secondo, cresce il contatore. Al massimo due insieme; info e successo si chiudono a 4s (pausa con il mouse sopra o il focus dentro); errore e offline restano.
+  </div>
+</main>
+
+<script src="./_lab.js"></script>
+<script>
+(function () {
+  const $ = (s) => document.querySelector(s)
+  const tl = $('#tl'), sec = $('#timeline')
+  const VOCI = [
+    { d: '12', m: 'lug', t: 'Summer Cup Riccione', p: 'Pro · 1° · con Marco', cover: true },
+    { d: '05', m: 'lug', t: 'Coppa del Bagnino', p: 'Amatoriale · 3° · con Marco', cover: false },
+    { d: '28', m: 'giu', t: "Torneo dell'Alba", p: 'Pro · Quarti · con Luca', cover: true },
+    { d: '21', m: 'giu', t: 'Notturno di Milano Marittima', p: 'Amatoriale · Gironi', cover: false },
+  ]
+  const BUSY_MIN = 300
+
+  // Lo skeleton riempie la PRIMA schermata e basta: sotto la piega non si
+  // promette niente, perché quante voci arriveranno non si sa.
+  function skeleton() {
+    const quante = Math.max(2, Math.ceil((innerHeight - sec.getBoundingClientRect().top) / 120))
+    return `<div class="skel-wrap"><div class="ui-skeleton-group tl">${Array.from({ length: Math.min(quante, 4) }, (_, i) => `
+      <div class="tl-entry"><div><div class="ui-skeleton sk-date"></div><div class="ui-skeleton sk-month"></div></div>
+      <div><div class="ui-skeleton sk-title"></div><div class="ui-skeleton sk-meta"></div>${i % 2 === 0 ? '<div class="ui-skeleton sk-cover"></div>' : ''}</div></div>`).join('')}</div></div>
+      <span class="sr-only">Caricamento…</span>`
+  }
+  function voci() {
+    return VOCI.map((v) => `<article class="tl-entry"><div class="tl-date"><span class="d">${v.d}</span><span class="m">${v.m}</span></div>
+      <div class="tl-body"><h3><a href="#t">${v.t}</a></h3><p>${v.p}</p>${v.cover ? '<div class="tl-cover" role="img" aria-label="Foto del torneo"></div>' : ''}</div></article>`).join('')
+  }
+
+  let giro = 0
+  function carica(ms, fallisce, bottone) {
+    const mio = ++giro
+    const t0 = performance.now()
+    sec.setAttribute('aria-busy', 'true')
+    tl.className = 'tl'
+    tl.innerHTML = skeleton()
+    setTimeout(() => {
+      if (mio !== giro) return
+      const lungo = performance.now() - t0 >= 150 * Lab.slow()
+      const fine = () => {
+        sec.removeAttribute('aria-busy')
+        if (fallisce) {
+          tl.innerHTML = `<div class="area-err"><svg class="i ic" aria-hidden="true"><use href="#i-alert"/></svg><h3>Questa parte non si è caricata.</h3>
+            <div class="lab-row"><button type="button" class="ui-button state" data-variant="tinted" id="riprova"><svg class="i" data-size="20" aria-hidden="true"><use href="#i-refresh"/></svg>Riprova</button></div></div>`
+          $('#riprova').addEventListener('click', (e) => riprova(e.currentTarget))
+        } else {
+          tl.innerHTML = voci()
+          if (lungo) tl.classList.add('arrivato')
+        }
+        if (bottone) { bottone.removeAttribute('aria-busy'); bottone.textContent = bottone.dataset.label }
+      }
+      // Un "Riprova" che fallisce subito resta occupato almeno BUSY_MIN.
+      const resto = bottone ? Math.max(0, BUSY_MIN * Lab.slow() - (performance.now() - t0)) : 0
+      setTimeout(fine, resto)
+    }, ms * Lab.slow())
+  }
+
+  // «Riprova»: l'etichetta cambia nello stesso fotogramma, il riquadro
+  // d'errore resta finché non c'è un esito. Il secondo tentativo usa la
+  // rete "lenta" e riesce, ma con ?fail2 fallisce ancora.
+  function riprova(b) {
+    b.dataset.label = b.textContent
+    b.style.minWidth = b.offsetWidth + 'px'
+    b.setAttribute('aria-busy', 'true')
+    b.textContent = 'Riprovo…'
+    const ancora = new URLSearchParams(location.search).has('fail2')
+    const mio = ++giro
+    setTimeout(() => {
+      if (mio !== giro) return
+      if (ancora) {
+        // Fallisce di nuovo: il riquadro si ridisegna con la sua comparsa,
+        // così si vede che il tentativo c'è stato.
+        b.removeAttribute('aria-busy'); b.textContent = b.dataset.label
+        const err = tl.querySelector('.area-err')
+        err.style.animation = 'none'; void err.offsetWidth; err.style.animation = ''
+      } else carica(700, false)
+    }, Math.max(BUSY_MIN, 60) * Lab.slow())
+  }
+
+  for (const b of document.querySelectorAll('[data-ms]')) {
+    b.addEventListener('click', () => carica(Number(b.dataset.ms), b.hasAttribute('data-fail')))
+  }
+  carica(1800, false)
+
+  // La mappa del luogo: il chunk arriva, le tile in dissolvenza (Leaflet
+  // fadeAnimation, spenta con reduced-motion: qui `.arrivato` resta una
+  // dissolvenza perché è opacità).
+  setTimeout(() => {
+    const v = $('#venue')
+    v.removeAttribute('aria-busy')
+    v.innerHTML = '<div class="tiles arrivato" role="img" aria-label="Mappa del luogo"></div>'
+  }, 1400 * Lab.slow())
+
+  // ------------------------------------------------------------ Avvisi
+  $('#t-ok').addEventListener('click', () => Lab.toast({ type: 'success', text: 'Foto aggiunta' }))
+  $('#t-info').addEventListener('click', () => Lab.toast({ type: 'info', text: 'Connessione lenta: potrebbe volerci un po\'.' }))
+  $('#t-err').addEventListener('click', () => Lab.toast({ type: 'error', text: 'Non è stato possibile salvare. Riprova tra poco.' }))
+  let off = false
+  $('#t-off').addEventListener('click', () => { off = !off; Lab.offline(off) })
+})()
+</script>
+</body>
+</html>

@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tocco, hover e focus · laboratorio del movimento</title>
+<link rel="stylesheet" href="../../src/styles/tokens.css">
+<link rel="stylesheet" href="../../src/styles/materials.css">
+<link rel="stylesheet" href="./_lab.css">
+<style>
+@layer components {
+  .demo { margin-top: var(--space-6); }
+  .demo h2 { font: var(--type-title-3); letter-spacing: var(--track-title-3); margin-bottom: var(--space-3); }
+  .photo-bg { border-radius: var(--radius-card); padding: var(--space-6) var(--space-4); background: linear-gradient(135deg, #1B2A4A 0 30%, #FF8657 30% 55%, #F7C59F 55%); display: flex; gap: var(--space-2); flex-wrap: wrap; }
+
+  /* ============================================================ Chip
+     La pillola delle FilterChips cambia LARGHEZZA oltre che posto. Un
+     `scaleX` su una capsula ne schiaccia le estremità; `layoutId` di Motion
+     lo corregge animando `border-radius` a ogni fotogramma (pittura).
+     Qui: TRE pezzi, tutti transform. Due tappi rotondi che scorrono e una
+     barra senza raggio che si allunga con scaleX, che non deforma niente. */
+  /* Livelli: fondo della chip (-1) < pillola (0) < etichetta (1). Così la
+     pillola scorre SOPRA le chip che attraversa e sotto le loro parole,
+     invece di sparire dietro i loro fondi bianchi. */
+  .chips { position: relative; isolation: isolate; display: flex; gap: var(--space-2); overflow-x: auto; scrollbar-width: none; padding: 2px; margin: -2px; }
+  .chip {
+    position: relative;
+    flex: none; height: 36px; padding: 0 var(--space-4);
+    border-radius: var(--radius-capsule);
+    font: var(--type-subhead-strong); letter-spacing: var(--track-subhead);
+    display: grid;
+    transition: transform var(--dur-svelto) var(--ease-standard);
+  }
+  .chip::before { content: ""; position: absolute; inset: 0; border-radius: inherit; background: var(--surface); box-shadow: inset 0 0 0 1px var(--separator); z-index: -1; }
+  /* L'inchiostro bianco arriva con la pillola (MOLLA), non prima. */
+  .chip > span { position: relative; z-index: 1; grid-area: 1 / 1; display: grid; place-items: center; transition: opacity var(--dur-molla) var(--ease-molla); }
+  .chip > .ink { color: var(--ink); }
+  .chip > .on { color: var(--on-select); opacity: 0; }
+  .chip[aria-pressed="true"]::before { opacity: 0; }
+  .chip[aria-pressed="true"] > .ink { opacity: 0; }
+  .chip[aria-pressed="true"] > .on { opacity: 1; }
+  .chip:active { transform: scale(var(--press-scale)); }
+  .pill3 { position: absolute; left: 0; top: 2px; height: 36px; pointer-events: none; z-index: 0; }
+  .pill3 > i {
+    position: absolute; top: 0; left: 0; height: 36px; display: block;
+    background: var(--select);
+    transition: transform var(--dur-molla) var(--ease-molla);
+  }
+  .pill3 > .capL, .pill3 > .capR { width: 36px; border-radius: 50%; }
+  .pill3 > .mid { width: 1px; transform-origin: 0 0; }
+  .rm .pill3 > i { transition: none; }
+
+  /* ========================================================== Switch */
+  .switch { position: relative; width: 51px; height: 31px; border-radius: var(--radius-capsule); background: var(--fill); flex: none; }
+  /* Il fondo navy è un livello che cambia opacità; il pomello trasla. Oggi
+     (ChiCeOggi) si animano `background` e `left`. */
+  .switch::before { content: ""; position: absolute; inset: 0; border-radius: inherit; background: var(--select); opacity: 0; transition: opacity var(--dur-svelto) var(--ease-standard); }
+  .switch .knob { position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 50%; background: #FFFFFF; box-shadow: 0 1px 3px rgb(14 22 38 / .3); transition: transform var(--dur-molla) var(--ease-molla); }
+  .switch[aria-checked="true"]::before { opacity: 1; }
+  .switch[aria-checked="true"] .knob { transform: translateX(20px); }
+  .rm .switch .knob { transition: none; }
+  .switch-row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); min-height: var(--touch); padding: var(--space-2) var(--space-4); background: var(--surface); border: 1px solid var(--edge); border-radius: var(--radius-card); }
+
+  .field { display: grid; gap: 6px; }
+  .field label { font: var(--type-footnote); color: var(--ink-2); }
+  .field input { height: var(--control-md); border: 1px solid var(--field-border); border-radius: var(--radius-control); background: var(--field); padding: 0 var(--space-3); }
+  .readonly-row { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); cursor: default; }
+}
+</style>
+</head>
+<body>
+<main class="lab-page no-tabbar" id="contenuto">
+  <h1 class="large-title">Tocco</h1>
+  <p class="subtitle">Pressione, hover e focus: lo stesso strato per tutto</p>
+  <div class="lab-note">
+    <b>Pressione:</b> le capsule scalano a .97 in SVELTO (con reduced-motion no, ma lo strato scurisce lo stesso: il feedback resta, sparisce solo il movimento). Righe e card non scalano: il fondo passa a <b>--surface-pressed</b> in 0ms e torna in SVELTO.
+    <b>Hover</b> (solo mouse): uno strato che cambia opacità, mai un colore animato. <b>Focus:</b> l'anello compare istantaneo. Prova con Tab.
+  </div>
+
+  <section class="demo">
+    <h2>Pulsanti</h2>
+    <div class="lab-row">
+      <button type="button" class="ui-button state" data-variant="filled">Crea torneo</button>
+      <button type="button" class="ui-button state" data-variant="tinted"><svg class="i" data-size="20" aria-hidden="true"><use href="#i-camera"/></svg>Aggiungi foto</button>
+      <button type="button" class="ui-button state" data-variant="neutral">Annulla</button>
+      <button type="button" class="ui-button state" data-variant="plain">Modifica</button>
+      <button type="button" class="ui-button state" data-variant="destructive">Elimina torneo</button>
+      <button type="button" class="ui-button state" data-variant="filled" aria-disabled="true">Disattivo</button>
+      <button type="button" class="ui-button state" data-variant="filled" id="occupato">Salva partita</button>
+      <button type="button" class="ui-icon-button state" aria-label="Altre azioni"><svg class="i" aria-hidden="true" style="stroke-width: 3"><use href="#i-ellipsis"/></svg></button>
+    </div>
+    <div class="photo-bg" style="margin-top: var(--space-3)">
+      <button type="button" class="ui-button state" data-variant="glass" data-material="glass-regular"><svg class="i" data-size="20" aria-hidden="true"><use href="#i-share"/></svg>Condividi</button>
+      <button type="button" class="ui-icon-button state" data-material="glass-thin" aria-label="Centra la mappa"><svg class="i" data-size="20" aria-hidden="true"><use href="#i-pin"/></svg></button>
+    </div>
+  </section>
+
+  <section class="demo">
+    <h2>Card e righe</h2>
+    <article class="ui-card">
+      <h3><a class="stretch" href="#t" aria-describedby="m1">Rimini Open</a></h3>
+      <p class="meta" id="m1">Pro · 1° · 12 lug · Rimini</p>
+      <div class="lab-row"><button type="button" class="ui-button state above" data-variant="tinted" data-size="sm"><svg class="i" data-size="20" aria-hidden="true"><use href="#i-share"/></svg>Storia Instagram</button></div>
+    </article>
+    <ul class="ui-list" style="margin-top: var(--space-3)">
+      <li><a class="ui-row state" href="#p"><span class="grow">Password</span><svg class="i chev" data-size="20" aria-hidden="true"><use href="#i-chevron-right"/></svg></a></li>
+      <li><button type="button" class="ui-row state"><span class="grow">Condivisioni ricevute</span><span class="value">2</span><svg class="i chev" data-size="20" aria-hidden="true"><use href="#i-chevron-right"/></svg></button></li>
+      <li><button type="button" class="ui-row state" data-tone="danger"><span class="grow">Esci</span></button></li>
+      <li><div class="readonly-row"><span class="grow">Partita di sola lettura: nessun hover, nessuna pressione</span></div></li>
+    </ul>
+  </section>
+
+  <section class="demo">
+    <h2>Filtri, interruttore, campo</h2>
+    <div class="chips" role="group" aria-label="Formato" id="chips">
+      <span class="pill3" aria-hidden="true"><i class="mid"></i><i class="capL"></i><i class="capR"></i></span>
+      <button type="button" class="chip" aria-pressed="true"><span class="ink">Tutti</span><span class="on" aria-hidden="true">Tutti</span></button>
+      <button type="button" class="chip" aria-pressed="false"><span class="ink">2vs2</span><span class="on" aria-hidden="true">2vs2</span></button>
+      <button type="button" class="chip" aria-pressed="false"><span class="ink">Re dello spiaggione</span><span class="on" aria-hidden="true">Re dello spiaggione</span></button>
+      <button type="button" class="chip" aria-pressed="false"><span class="ink">4vs4</span><span class="on" aria-hidden="true">4vs4</span></button>
+    </div>
+    <div class="switch-row" style="margin-top: var(--space-4)">
+      <span id="sw-l">Cerco compagno</span>
+      <button type="button" class="switch" role="switch" aria-checked="false" aria-labelledby="sw-l" id="sw"><span class="knob"></span></button>
+    </div>
+    <div class="field" style="margin-top: var(--space-4)">
+      <label for="f">Avversari</label>
+      <input id="f" placeholder="es. Bianchi / Verdi (facoltativo)">
+    </div>
+  </section>
+</main>
+
+<script src="./_lab.js"></script>
+<script>
+(function () {
+  // ------------------------------------------------------- Pillola a 3
+  const box = document.querySelector('#chips')
+  const pill = box.querySelector('.pill3')
+  const [mid, capL, capR] = pill.children
+  function posa(btn) {
+    const b = box.getBoundingClientRect(), r = btn.getBoundingClientRect()
+    const x = r.left - b.left + box.scrollLeft, w = r.width, h = r.height
+    capL.style.transform = `translateX(${x}px)`
+    capR.style.transform = `translateX(${x + w - h}px)`
+    // La barra va da metà del tappo sinistro a metà del destro.
+    mid.style.transform = `translateX(${x + h / 2}px) scaleX(${Math.max(0, w - h)})`
+  }
+  const chips = Array.from(box.querySelectorAll('.chip'))
+  // Prima posizione senza animazione: è lo stato di partenza.
+  for (const i of pill.children) i.style.transition = 'none'
+  posa(chips[0]); void pill.offsetWidth
+  for (const i of pill.children) i.style.transition = ''
+  for (const c of chips) c.addEventListener('click', () => {
+    for (const x of chips) x.setAttribute('aria-pressed', String(x === c))
+    posa(c)
+    // In una riga che scorre, la chip scelta entra in vista (vicino, senza fretta).
+    c.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: Lab.reduced() ? 'auto' : 'smooth' })
+  })
+
+  // ---------------------------------------------------------- Switch
+  const sw = document.querySelector('#sw')
+  sw.addEventListener('click', () => sw.setAttribute('aria-checked', String(sw.getAttribute('aria-checked') !== 'true')))
+
+  // ------------------------------------------------------- Occupato
+  const b = document.querySelector('#occupato')
+  b.addEventListener('click', () => {
+    if (b.getAttribute('aria-busy') === 'true') return
+    b.style.minWidth = b.offsetWidth + 'px'
+    b.setAttribute('aria-busy', 'true')
+    b.textContent = 'Salvataggio…'
+    setTimeout(() => { b.removeAttribute('aria-busy'); b.textContent = 'Salva partita'; b.style.minWidth = '' }, 1200 * Lab.slow())
+  })
+})()
+</script>
+</body>
+</html>
