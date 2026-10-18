@@ -4,6 +4,222 @@
   "graph": {},
   "nodes": [
     {
+      "label": "_lab.js",
+      "file_type": "code",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L1",
+      "id": "motion_lab",
+      "community": 15,
+      "norm_label": "_lab.js"
+    },
+    {
+      "label": "syncReduced()",
+      "file_type": "code",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L30",
+      "id": "motion_lab_syncreduced",
+      "community": 15,
+      "norm_label": "syncreduced()"
+    },
+    {
+      "label": "dur()",
+      "file_type": "code",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L41",
+      "id": "motion_lab_dur",
+      "community": 15,
+      "norm_label": "dur()"
+    },
+    {
+      "label": "ease()",
+      "file_type": "code",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L46",
+      "id": "motion_lab_ease",
+      "community": 15,
+      "norm_label": "ease()"
+    },
+    {
+      "label": "springSamples()",
+      "file_type": "code",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L58",
+      "id": "motion_lab_springsamples",
+      "community": 15,
+      "norm_label": "springsamples()"
+    },
+    {
+      "label": "spring()",
+      "file_type": "code",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L90",
+      "id": "motion_lab_spring",
+      "community": 15,
+      "norm_label": "spring()"
+    },
+    {
+      "label": "springValue()",
+      "file_type": "code",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L110",
+      "id": "motion_lab_springvalue",
+      "community": 15,
+      "norm_label": "springvalue()"
+    },
+    {
+      "label": "stop()",
+      "file_type": "code",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L121",
+      "id": "motion_lab_stop",
+      "community": 15,
+      "norm_label": "stop()"
+    },
+    {
+      "label": "flip()",
+      "file_type": "code",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L140",
+      "id": "motion_lab_flip",
+      "community": 15,
+      "norm_label": "flip()"
+    },
+    {
+      "label": "ensureRegion()",
+      "file_type": "code",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L173",
+      "id": "motion_lab_ensureregion",
+      "community": 15,
+      "norm_label": "ensureregion()"
+    },
+    {
+      "label": "allToasts()",
+      "file_type": "code",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L185",
+      "id": "motion_lab_alltoasts",
+      "community": 15,
+      "norm_label": "alltoasts()"
+    },
+    {
+      "label": "toast()",
+      "file_type": "code",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L189",
+      "id": "motion_lab_toast",
+      "community": 15,
+      "norm_label": "toast()"
+    },
+    {
+      "label": "arm()",
+      "file_type": "code",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L232",
+      "id": "motion_lab_arm",
+      "community": 15,
+      "norm_label": "arm()"
+    },
+    {
+      "label": "pause()",
+      "file_type": "code",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L240",
+      "id": "motion_lab_pause",
+      "community": 15,
+      "norm_label": "pause()"
+    },
+    {
+      "label": "dismiss()",
+      "file_type": "code",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L257",
+      "id": "motion_lab_dismiss",
+      "community": 15,
+      "norm_label": "dismiss()"
+    },
+    {
+      "label": "offline()",
+      "file_type": "code",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L274",
+      "id": "motion_lab_offline",
+      "community": 15,
+      "norm_label": "offline()"
+    },
+    {
+      "label": "trap()",
+      "file_type": "code",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L282",
+      "id": "motion_lab_trap",
+      "community": 15,
+      "norm_label": "trap()"
+    },
+    {
+      "label": "injectSprite()",
+      "file_type": "code",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L337",
+      "id": "motion_lab_injectsprite",
+      "community": 15,
+      "norm_label": "injectsprite()"
+    },
+    {
+      "label": "describe()",
+      "file_type": "code",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L371",
+      "id": "motion_lab_describe",
+      "community": 15,
+      "norm_label": "describe()"
+    },
+    {
+      "label": "check()",
+      "file_type": "code",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L378",
+      "id": "motion_lab_check",
+      "community": 15,
+      "norm_label": "check()"
+    },
+    {
+      "label": "effectiveOpacity()",
+      "file_type": "code",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L410",
+      "id": "motion_lab_effectiveopacity",
+      "community": 15,
+      "norm_label": "effectiveopacity()"
+    },
+    {
+      "label": "countGlass()",
+      "file_type": "code",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L415",
+      "id": "motion_lab_countglass",
+      "community": 15,
+      "norm_label": "countglass()"
+    },
+    {
+      "label": "paint()",
+      "file_type": "code",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L436",
+      "id": "motion_lab_paint",
+      "community": 15,
+      "norm_label": "paint()"
+    },
+    {
+      "label": "init()",
+      "file_type": "code",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L447",
+      "id": "motion_lab_init",
+      "community": 15,
+      "norm_label": "init()"
+    },
+    {
       "label": "package.json",
       "file_type": "code",
       "source_file": "package.json",
@@ -504,7 +720,7 @@
       "source_file": "src/Root.tsx",
       "source_location": "L1",
       "id": "src_root",
-      "community": 75,
+      "community": 64,
       "norm_label": "root.tsx"
     },
     {
@@ -513,7 +729,7 @@
       "source_file": "src/Root.tsx",
       "source_location": "L8",
       "id": "src_root_root",
-      "community": 75,
+      "community": 64,
       "norm_label": "root()"
     },
     {
@@ -531,7 +747,7 @@
       "source_file": "src/components/BannerAlpha.tsx",
       "source_location": "L1",
       "id": "components_banneralpha",
-      "community": 37,
+      "community": 18,
       "norm_label": "banneralpha.tsx"
     },
     {
@@ -540,7 +756,7 @@
       "source_file": "src/components/BannerAlpha.tsx",
       "source_location": "L18",
       "id": "components_banneralpha_banneralpha",
-      "community": 37,
+      "community": 18,
       "norm_label": "banneralpha()"
     },
     {
@@ -1062,7 +1278,7 @@
       "source_file": "src/components/Sidebar.tsx",
       "source_location": "L29",
       "id": "components_sidebar_sidebar",
-      "community": 38,
+      "community": 64,
       "norm_label": "sidebar()"
     },
     {
@@ -1206,7 +1422,7 @@
       "source_file": "src/components/dashboard/RecentTornei.tsx",
       "source_location": "L1",
       "id": "dashboard_recenttornei",
-      "community": 74,
+      "community": 37,
       "norm_label": "recenttornei.tsx"
     },
     {
@@ -1215,7 +1431,7 @@
       "source_file": "src/components/dashboard/RecentTornei.tsx",
       "source_location": "L5",
       "id": "dashboard_recenttornei_recenttornei",
-      "community": 74,
+      "community": 37,
       "norm_label": "recenttornei()"
     },
     {
@@ -1926,7 +2142,7 @@
       "source_file": "src/components/modals/VenuePicker.tsx",
       "source_location": "L526",
       "id": "modals_venuepicker_selectedvenuenote",
-      "community": 16,
+      "community": 46,
       "norm_label": "selectedvenuenote()"
     },
     {
@@ -1962,7 +2178,7 @@
       "source_file": "src/components/ui.tsx",
       "source_location": "L35",
       "id": "components_ui_badge",
-      "community": 37,
+      "community": 18,
       "norm_label": "badge()"
     },
     {
@@ -1989,7 +2205,7 @@
       "source_file": "src/components/ui.tsx",
       "source_location": "L56",
       "id": "components_ui_button",
-      "community": 37,
+      "community": 22,
       "norm_label": "button()"
     },
     {
@@ -1998,7 +2214,7 @@
       "source_file": "src/components/ui.tsx",
       "source_location": "L62",
       "id": "components_ui_pageheader",
-      "community": 12,
+      "community": 37,
       "norm_label": "pageheader()"
     },
     {
@@ -2016,7 +2232,7 @@
       "source_file": "src/components/ui.tsx",
       "source_location": "L87",
       "id": "components_ui_filterchips",
-      "community": 18,
+      "community": 12,
       "norm_label": "filterchips()"
     },
     {
@@ -2043,7 +2259,7 @@
       "source_file": "src/components/ui.tsx",
       "source_location": "L235",
       "id": "components_ui_sectiontitle",
-      "community": 74,
+      "community": 47,
       "norm_label": "sectiontitle()"
     },
     {
@@ -2061,7 +2277,7 @@
       "source_file": "src/components/ui.tsx",
       "source_location": "L251",
       "id": "components_ui_emptycard",
-      "community": 74,
+      "community": 37,
       "norm_label": "emptycard()"
     },
     {
@@ -2070,7 +2286,7 @@
       "source_file": "src/components/ui.tsx",
       "source_location": "L256",
       "id": "components_ui_inlinelink",
-      "community": 74,
+      "community": 37,
       "norm_label": "inlinelink()"
     },
     {
@@ -2160,7 +2376,7 @@
       "source_file": "src/components/ui.tsx",
       "source_location": "L373",
       "id": "components_ui_matchrow",
-      "community": 22,
+      "community": 47,
       "norm_label": "matchrow()"
     },
     {
@@ -2403,7 +2619,7 @@
       "source_file": "src/hooks/useAuth.tsx",
       "source_location": "L1",
       "id": "hooks_useauth",
-      "community": 65,
+      "community": 1,
       "norm_label": "useauth.tsx"
     },
     {
@@ -2412,7 +2628,7 @@
       "source_file": "src/hooks/useAuth.tsx",
       "source_location": "L9",
       "id": "hooks_useauth_authcontextvalue",
-      "community": 65,
+      "community": 1,
       "norm_label": "authcontextvalue"
     },
     {
@@ -2421,7 +2637,7 @@
       "source_file": "src/hooks/useAuth.tsx",
       "source_location": "L19",
       "id": "hooks_useauth_authcontext",
-      "community": 65,
+      "community": 1,
       "norm_label": "authcontext"
     },
     {
@@ -2439,7 +2655,7 @@
       "source_file": "src/hooks/useAuth.tsx",
       "source_location": "L97",
       "id": "hooks_useauth_useauth",
-      "community": 75,
+      "community": 64,
       "norm_label": "useauth()"
     },
     {
@@ -2691,7 +2907,7 @@
       "source_file": "src/lib/auth.ts",
       "source_location": "L23",
       "id": "lib_auth_authresult",
-      "community": 65,
+      "community": 1,
       "norm_label": "authresult"
     },
     {
@@ -2718,7 +2934,7 @@
       "source_file": "src/lib/auth.ts",
       "source_location": "L51",
       "id": "lib_auth_oauthprovider",
-      "community": 65,
+      "community": 1,
       "norm_label": "oauthprovider"
     },
     {
@@ -3105,7 +3321,7 @@
       "source_file": "src/lib/database.types.ts",
       "source_location": "L19",
       "id": "lib_database_types_database",
-      "community": 64,
+      "community": 1,
       "norm_label": "database"
     },
     {
@@ -3285,7 +3501,7 @@
       "source_file": "src/lib/db.enums.ts",
       "source_location": "L28",
       "id": "lib_db_enums_placements",
-      "community": 17,
+      "community": 53,
       "norm_label": "placements"
     },
     {
@@ -3420,7 +3636,7 @@
       "source_file": "src/lib/derive.bracket.test.ts",
       "source_location": "L1",
       "id": "lib_derive_bracket_test",
-      "community": 15,
+      "community": 55,
       "norm_label": "derive.bracket.test.ts"
     },
     {
@@ -3429,7 +3645,7 @@
       "source_file": "src/lib/derive.bracket.test.ts",
       "source_location": "L22",
       "id": "lib_derive_bracket_test_svcard",
-      "community": 15,
+      "community": 55,
       "norm_label": "svcard()"
     },
     {
@@ -3438,7 +3654,7 @@
       "source_file": "src/lib/derive.bracket.test.ts",
       "source_location": "L29",
       "id": "lib_derive_bracket_test_svdetail",
-      "community": 15,
+      "community": 55,
       "norm_label": "svdetail()"
     },
     {
@@ -3447,7 +3663,7 @@
       "source_file": "src/lib/derive.checkins.test.ts",
       "source_location": "L1",
       "id": "lib_derive_checkins_test",
-      "community": 15,
+      "community": 10,
       "norm_label": "derive.checkins.test.ts"
     },
     {
@@ -3456,7 +3672,7 @@
       "source_file": "src/lib/derive.checkins.test.ts",
       "source_location": "L11",
       "id": "lib_derive_checkins_test_ids",
-      "community": 15,
+      "community": 10,
       "norm_label": "ids()"
     },
     {
@@ -3465,7 +3681,7 @@
       "source_file": "src/lib/derive.checkins.test.ts",
       "source_location": "L14",
       "id": "lib_derive_checkins_test_row",
-      "community": 15,
+      "community": 10,
       "norm_label": "row()"
     },
     {
@@ -3699,7 +3915,7 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L160",
       "id": "lib_derive_mappa_torneorow",
-      "community": 17,
+      "community": 50,
       "norm_label": "torneorow()"
     },
     {
@@ -3717,7 +3933,7 @@
       "source_file": "src/lib/derive.mappa.ts",
       "source_location": "L176",
       "id": "lib_derive_mappa_gruppo",
-      "community": 0,
+      "community": 9,
       "norm_label": "gruppo"
     },
     {
@@ -3951,7 +4167,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L147",
       "id": "lib_derive_compagnodetaildata",
-      "community": 74,
+      "community": 47,
       "norm_label": "compagnodetaildata"
     },
     {
@@ -4059,7 +4275,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L241",
       "id": "lib_derive_dotfor",
-      "community": 17,
+      "community": 50,
       "norm_label": "dotfor()"
     },
     {
@@ -4068,7 +4284,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L252",
       "id": "lib_derive_venueof",
-      "community": 46,
+      "community": 50,
       "norm_label": "venueof()"
     },
     {
@@ -4077,7 +4293,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L260",
       "id": "lib_derive_venuelabel",
-      "community": 16,
+      "community": 46,
       "norm_label": "venuelabel()"
     },
     {
@@ -4086,7 +4302,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L270",
       "id": "lib_derive_venuedisplay",
-      "community": 46,
+      "community": 50,
       "norm_label": "venuedisplay()"
     },
     {
@@ -4095,7 +4311,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L275",
       "id": "lib_derive_venueplace",
-      "community": 46,
+      "community": 50,
       "norm_label": "venueplace()"
     },
     {
@@ -4194,7 +4410,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L370",
       "id": "lib_derive_decoratetournament",
-      "community": 17,
+      "community": 50,
       "norm_label": "decoratetournament()"
     },
     {
@@ -4230,7 +4446,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L579",
       "id": "lib_derive_byagendadate",
-      "community": 2,
+      "community": 55,
       "norm_label": "byagendadate()"
     },
     {
@@ -4275,7 +4491,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L645",
       "id": "lib_derive_derivetorneilist",
-      "community": 2,
+      "community": 55,
       "norm_label": "derivetorneilist()"
     },
     {
@@ -4284,7 +4500,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L659",
       "id": "lib_derive_derivetorneodetail",
-      "community": 46,
+      "community": 50,
       "norm_label": "derivetorneodetail()"
     },
     {
@@ -4473,7 +4689,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L1019",
       "id": "lib_derive_wrappedrangeforyear",
-      "community": 5,
+      "community": 2,
       "norm_label": "wrappedrangeforyear()"
     },
     {
@@ -4491,7 +4707,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L1225",
       "id": "lib_derive_derivetorneilistserver",
-      "community": 2,
+      "community": 55,
       "norm_label": "derivetorneilistserver()"
     },
     {
@@ -4563,7 +4779,7 @@
       "source_file": "src/lib/derive.ts",
       "source_location": "L1327",
       "id": "lib_derive_derivewhoishere",
-      "community": 15,
+      "community": 10,
       "norm_label": "derivewhoishere()"
     },
     {
@@ -4572,7 +4788,7 @@
       "source_file": "src/lib/derive.venues.server.test.ts",
       "source_location": "L1",
       "id": "lib_derive_venues_server_test",
-      "community": 15,
+      "community": 46,
       "norm_label": "derive.venues.server.test.ts"
     },
     {
@@ -4581,7 +4797,7 @@
       "source_file": "src/lib/derive.venues.server.test.ts",
       "source_location": "L25",
       "id": "lib_derive_venues_server_test_svcard",
-      "community": 15,
+      "community": 46,
       "norm_label": "svcard()"
     },
     {
@@ -4590,7 +4806,7 @@
       "source_file": "src/lib/derive.venues.server.test.ts",
       "source_location": "L34",
       "id": "lib_derive_venues_server_test_svlist",
-      "community": 15,
+      "community": 46,
       "norm_label": "svlist()"
     },
     {
@@ -4599,7 +4815,7 @@
       "source_file": "src/lib/derive.venues.server.test.ts",
       "source_location": "L38",
       "id": "lib_derive_venues_server_test_svdetail",
-      "community": 15,
+      "community": 46,
       "norm_label": "svdetail()"
     },
     {
@@ -5643,7 +5859,7 @@
       "source_file": "src/lib/serverviews.ts",
       "source_location": "L1",
       "id": "lib_serverviews",
-      "community": 15,
+      "community": 2,
       "norm_label": "serverviews.ts"
     },
     {
@@ -5652,7 +5868,7 @@
       "source_file": "src/lib/serverviews.ts",
       "source_location": "L9",
       "id": "lib_serverviews_svset",
-      "community": 15,
+      "community": 2,
       "norm_label": "svset"
     },
     {
@@ -5661,7 +5877,7 @@
       "source_file": "src/lib/serverviews.ts",
       "source_location": "L14",
       "id": "lib_serverviews_svvenue",
-      "community": 15,
+      "community": 2,
       "norm_label": "svvenue"
     },
     {
@@ -5670,7 +5886,7 @@
       "source_file": "src/lib/serverviews.ts",
       "source_location": "L19",
       "id": "lib_serverviews_svtorneocard",
-      "community": 15,
+      "community": 46,
       "norm_label": "svtorneocard"
     },
     {
@@ -5679,7 +5895,7 @@
       "source_file": "src/lib/serverviews.ts",
       "source_location": "L25",
       "id": "lib_serverviews_svtorneilist",
-      "community": 15,
+      "community": 2,
       "norm_label": "svtorneilist"
     },
     {
@@ -5688,7 +5904,7 @@
       "source_file": "src/lib/serverviews.ts",
       "source_location": "L27",
       "id": "lib_serverviews_svcompagno",
-      "community": 15,
+      "community": 2,
       "norm_label": "svcompagno"
     },
     {
@@ -5697,7 +5913,7 @@
       "source_file": "src/lib/serverviews.ts",
       "source_location": "L29",
       "id": "lib_serverviews_svtorneomatch",
-      "community": 15,
+      "community": 2,
       "norm_label": "svtorneomatch"
     },
     {
@@ -5706,7 +5922,7 @@
       "source_file": "src/lib/serverviews.ts",
       "source_location": "L33",
       "id": "lib_serverviews_svtorneodetail",
-      "community": 15,
+      "community": 2,
       "norm_label": "svtorneodetail"
     },
     {
@@ -5715,7 +5931,7 @@
       "source_file": "src/lib/serverviews.ts",
       "source_location": "L43",
       "id": "lib_serverviews_svcompagnomatch",
-      "community": 15,
+      "community": 2,
       "norm_label": "svcompagnomatch"
     },
     {
@@ -5724,7 +5940,7 @@
       "source_file": "src/lib/serverviews.ts",
       "source_location": "L44",
       "id": "lib_serverviews_svcompagnodetail",
-      "community": 15,
+      "community": 2,
       "norm_label": "svcompagnodetail"
     },
     {
@@ -5733,7 +5949,7 @@
       "source_file": "src/lib/serverviews.ts",
       "source_location": "L51",
       "id": "lib_serverviews_svpresentuser",
-      "community": 15,
+      "community": 10,
       "norm_label": "svpresentuser"
     },
     {
@@ -5742,7 +5958,7 @@
       "source_file": "src/lib/serverviews.ts",
       "source_location": "L59",
       "id": "lib_serverviews_ok",
-      "community": 15,
+      "community": 2,
       "norm_label": "ok()"
     },
     {
@@ -5751,7 +5967,7 @@
       "source_file": "src/lib/serverviews.ts",
       "source_location": "L68",
       "id": "lib_serverviews_gettorneilist",
-      "community": 15,
+      "community": 2,
       "norm_label": "gettorneilist()"
     },
     {
@@ -5760,7 +5976,7 @@
       "source_file": "src/lib/serverviews.ts",
       "source_location": "L72",
       "id": "lib_serverviews_getcompagnilist",
-      "community": 15,
+      "community": 2,
       "norm_label": "getcompagnilist()"
     },
     {
@@ -5769,7 +5985,7 @@
       "source_file": "src/lib/serverviews.ts",
       "source_location": "L76",
       "id": "lib_serverviews_gettorneodetail",
-      "community": 15,
+      "community": 2,
       "norm_label": "gettorneodetail()"
     },
     {
@@ -5778,7 +5994,7 @@
       "source_file": "src/lib/serverviews.ts",
       "source_location": "L80",
       "id": "lib_serverviews_getcompagnodetail",
-      "community": 15,
+      "community": 2,
       "norm_label": "getcompagnodetail()"
     },
     {
@@ -5787,7 +6003,7 @@
       "source_file": "src/lib/serverviews.ts",
       "source_location": "L87",
       "id": "lib_serverviews_getwhoishere",
-      "community": 15,
+      "community": 2,
       "norm_label": "getwhoishere()"
     },
     {
@@ -5796,7 +6012,7 @@
       "source_file": "src/lib/stats.test.ts",
       "source_location": "L1",
       "id": "lib_stats_test",
-      "community": 17,
+      "community": 50,
       "norm_label": "stats.test.ts"
     },
     {
@@ -5877,7 +6093,7 @@
       "source_file": "src/lib/stats.ts",
       "source_location": "L62",
       "id": "lib_stats_placementlabel",
-      "community": 17,
+      "community": 50,
       "norm_label": "placementlabel()"
     },
     {
@@ -5886,7 +6102,7 @@
       "source_file": "src/lib/stats.ts",
       "source_location": "L70",
       "id": "lib_stats_placementrank",
-      "community": 17,
+      "community": 50,
       "norm_label": "placementrank()"
     },
     {
@@ -5904,7 +6120,7 @@
       "source_file": "src/lib/stats.ts",
       "source_location": "L97",
       "id": "lib_stats_fmtdate",
-      "community": 17,
+      "community": 50,
       "norm_label": "fmtdate()"
     },
     {
@@ -5949,7 +6165,7 @@
       "source_file": "src/lib/supabase.ts",
       "source_location": "L1",
       "id": "lib_supabase",
-      "community": 64,
+      "community": 1,
       "norm_label": "supabase.ts"
     },
     {
@@ -5958,7 +6174,7 @@
       "source_file": "src/lib/supabase.ts",
       "source_location": "L19",
       "id": "lib_supabase_supabase",
-      "community": 64,
+      "community": 1,
       "norm_label": "supabase"
     },
     {
@@ -6291,7 +6507,7 @@
       "source_file": "src/screens/CompagnoDetail.tsx",
       "source_location": "L1",
       "id": "screens_compagnodetail",
-      "community": 74,
+      "community": 47,
       "norm_label": "compagnodetail.tsx"
     },
     {
@@ -6300,7 +6516,7 @@
       "source_file": "src/screens/CompagnoDetail.tsx",
       "source_location": "L6",
       "id": "screens_compagnodetail_compagnodetailprops",
-      "community": 74,
+      "community": 47,
       "norm_label": "compagnodetailprops"
     },
     {
@@ -6309,7 +6525,7 @@
       "source_file": "src/screens/CompagnoDetail.tsx",
       "source_location": "L17",
       "id": "screens_compagnodetail_searchinput",
-      "community": 74,
+      "community": 47,
       "norm_label": "searchinput"
     },
     {
@@ -6318,7 +6534,7 @@
       "source_file": "src/screens/CompagnoDetail.tsx",
       "source_location": "L24",
       "id": "screens_compagnodetail_compagnodetail",
-      "community": 74,
+      "community": 47,
       "norm_label": "compagnodetail()"
     },
     {
@@ -6732,7 +6948,7 @@
       "source_file": "src/screens/Login.tsx",
       "source_location": "L1",
       "id": "screens_login",
-      "community": 75,
+      "community": 71,
       "norm_label": "login.tsx"
     },
     {
@@ -6741,7 +6957,7 @@
       "source_file": "src/screens/Login.tsx",
       "source_location": "L8",
       "id": "screens_login_mode",
-      "community": 75,
+      "community": 71,
       "norm_label": "mode"
     },
     {
@@ -6750,7 +6966,7 @@
       "source_file": "src/screens/Login.tsx",
       "source_location": "L10",
       "id": "screens_login_inputstyle",
-      "community": 75,
+      "community": 71,
       "norm_label": "inputstyle"
     },
     {
@@ -6759,7 +6975,7 @@
       "source_file": "src/screens/Login.tsx",
       "source_location": "L19",
       "id": "screens_login_seg",
-      "community": 75,
+      "community": 71,
       "norm_label": "seg()"
     },
     {
@@ -6768,7 +6984,7 @@
       "source_file": "src/screens/Login.tsx",
       "source_location": "L31",
       "id": "screens_login_features",
-      "community": 75,
+      "community": 71,
       "norm_label": "features"
     },
     {
@@ -6777,7 +6993,7 @@
       "source_file": "src/screens/Login.tsx",
       "source_location": "L37",
       "id": "screens_login_login",
-      "community": 75,
+      "community": 71,
       "norm_label": "login()"
     },
     {
@@ -6984,7 +7200,7 @@
       "source_file": "src/screens/Profilo.tsx",
       "source_location": "L53",
       "id": "screens_profilo_profilo",
-      "community": 75,
+      "community": 64,
       "norm_label": "profilo()"
     },
     {
@@ -7452,7 +7668,7 @@
       "source_file": "src/test/factories.ts",
       "source_location": "L151",
       "id": "test_factories_makevenue",
-      "community": 15,
+      "community": 46,
       "norm_label": "makevenue()"
     },
     {
@@ -7461,7 +7677,7 @@
       "source_file": "src/test/factories.ts",
       "source_location": "L167",
       "id": "test_factories_makedata",
-      "community": 0,
+      "community": 5,
       "norm_label": "makedata()"
     },
     {
@@ -8687,6 +8903,663 @@
       "id": "art_direction_16_seam_per_i_ruoli_successivi",
       "community": 66,
       "norm_label": "16. seam per i ruoli successivi"
+    },
+    {
+      "label": "MOTION.md",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L1",
+      "id": "motion",
+      "community": 29,
+      "norm_label": "motion.md"
+    },
+    {
+      "label": "MOTION.md: il movimento di \"Bagnasciuga\"",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L1",
+      "id": "motion_motion_md_il_movimento_di_bagnasciuga",
+      "community": 75,
+      "norm_label": "motion.md: il movimento di \"bagnasciuga\""
+    },
+    {
+      "label": "Indice",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L16",
+      "id": "motion_indice",
+      "community": 75,
+      "norm_label": "indice"
+    },
+    {
+      "label": "0. In una frase",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L39",
+      "id": "motion_0_in_una_frase",
+      "community": 75,
+      "norm_label": "0. in una frase"
+    },
+    {
+      "label": "1. Le regole dure",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L54",
+      "id": "motion_1_le_regole_dure",
+      "community": 99,
+      "norm_label": "1. le regole dure"
+    },
+    {
+      "label": "1.1 Il contratto",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L56",
+      "id": "motion_1_1_il_contratto",
+      "community": 99,
+      "norm_label": "1.1 il contratto"
+    },
+    {
+      "label": "1.2 Che cosa \u00e8 un \"percorso caldo\"",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L67",
+      "id": "motion_1_2_che_cosa_\u00e8_un_percorso_caldo",
+      "community": 99,
+      "norm_label": "1.2 che cosa e un \"percorso caldo\""
+    },
+    {
+      "label": "1.3 Le eccezioni (tutte e sole)",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L78",
+      "id": "motion_1_3_le_eccezioni_tutte_e_sole",
+      "community": 99,
+      "norm_label": "1.3 le eccezioni (tutte e sole)"
+    },
+    {
+      "label": "2. Vocabolario e costanti",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L91",
+      "id": "motion_2_vocabolario_e_costanti",
+      "community": 100,
+      "norm_label": "2. vocabolario e costanti"
+    },
+    {
+      "label": "2.1 Le cinque curve (da ART_DIRECTION \u00a711.1, invariate)",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L93",
+      "id": "motion_2_1_le_cinque_curve_da_art_direction_11_1_invariate",
+      "community": 100,
+      "norm_label": "2.1 le cinque curve (da art_direction \u00a711.1, invariate)"
+    },
+    {
+      "label": "2.2 Le regole d'uso che questo documento aggiunge",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L103",
+      "id": "motion_2_2_le_regole_d_uso_che_questo_documento_aggiunge",
+      "community": 100,
+      "norm_label": "2.2 le regole d'uso che questo documento aggiunge"
+    },
+    {
+      "label": "2.3 Costanti nuove (contratto, `\u27c2 F2`)",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L113",
+      "id": "motion_2_3_costanti_nuove_contratto_f2",
+      "community": 100,
+      "norm_label": "2.3 costanti nuove (contratto, `\u27c2 f2`)"
+    },
+    {
+      "label": "3. Coreografia: regole trasversali",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L131",
+      "id": "motion_3_coreografia_regole_trasversali",
+      "community": 92,
+      "norm_label": "3. coreografia: regole trasversali"
+    },
+    {
+      "label": "3.1 La scala dei tempi di risposta",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L133",
+      "id": "motion_3_1_la_scala_dei_tempi_di_risposta",
+      "community": 92,
+      "norm_label": "3.1 la scala dei tempi di risposta"
+    },
+    {
+      "label": "3.2 Interrompibilit\u00e0",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L143",
+      "id": "motion_3_2_interrompibilit\u00e0",
+      "community": 92,
+      "norm_label": "3.2 interrompibilita"
+    },
+    {
+      "label": "3.3 Chi esce non blocca, chi entra risponde",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L149",
+      "id": "motion_3_3_chi_esce_non_blocca_chi_entra_risponde",
+      "community": 92,
+      "norm_label": "3.3 chi esce non blocca, chi entra risponde"
+    },
+    {
+      "label": "3.4 Il vetro durante le transizioni",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L155",
+      "id": "motion_3_4_il_vetro_durante_le_transizioni",
+      "community": 92,
+      "norm_label": "3.4 il vetro durante le transizioni"
+    },
+    {
+      "label": "3.5 Focus e animazione (M3)",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L166",
+      "id": "motion_3_5_focus_e_animazione_m3",
+      "community": 92,
+      "norm_label": "3.5 focus e animazione (m3)"
+    },
+    {
+      "label": "3.6 Origine: ci\u00f2 che tocchi \u00e8 ci\u00f2 che si apre",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L180",
+      "id": "motion_3_6_origine_ci\u00f2_che_tocchi_\u00e8_ci\u00f2_che_si_apre",
+      "community": 92,
+      "norm_label": "3.6 origine: cio che tocchi e cio che si apre"
+    },
+    {
+      "label": "3.7 Overlay impilati",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L190",
+      "id": "motion_3_7_overlay_impilati",
+      "community": 92,
+      "norm_label": "3.7 overlay impilati"
+    },
+    {
+      "label": "3.8 History e animazioni",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L195",
+      "id": "motion_3_8_history_e_animazioni",
+      "community": 92,
+      "norm_label": "3.8 history e animazioni"
+    },
+    {
+      "label": "4. Specifica per elemento",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L203",
+      "id": "motion_4_specifica_per_elemento",
+      "community": 95,
+      "norm_label": "4. specifica per elemento"
+    },
+    {
+      "label": "4.1 Shell",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L207",
+      "id": "motion_4_1_shell",
+      "community": 95,
+      "norm_label": "4.1 shell"
+    },
+    {
+      "label": "4.2 Overlay",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L263",
+      "id": "motion_4_2_overlay",
+      "community": 95,
+      "norm_label": "4.2 overlay"
+    },
+    {
+      "label": "4.3 Primitive",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L332",
+      "id": "motion_4_3_primitive",
+      "community": 95,
+      "norm_label": "4.3 primitive"
+    },
+    {
+      "label": "4.4 Dati",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L372",
+      "id": "motion_4_4_dati",
+      "community": 95,
+      "norm_label": "4.4 dati"
+    },
+    {
+      "label": "5. Le transizioni dei flussi",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L391",
+      "id": "motion_5_le_transizioni_dei_flussi",
+      "community": 74,
+      "norm_label": "5. le transizioni dei flussi"
+    },
+    {
+      "label": "F0. Avvio",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L395",
+      "id": "motion_f0_avvio",
+      "community": 74,
+      "norm_label": "f0. avvio"
+    },
+    {
+      "label": "F1. Primo avvio",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L404",
+      "id": "motion_f1_primo_avvio",
+      "community": 74,
+      "norm_label": "f1. primo avvio"
+    },
+    {
+      "label": "F2. Creare un torneo",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L408",
+      "id": "motion_f2_creare_un_torneo",
+      "community": 74,
+      "norm_label": "f2. creare un torneo"
+    },
+    {
+      "label": "F3. Aggiungere una partita \u2192 \u00abPunto segnato\u00bb",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L419",
+      "id": "motion_f3_aggiungere_una_partita_punto_segnato",
+      "community": 74,
+      "norm_label": "f3. aggiungere una partita \u2192 \u00abpunto segnato\u00bb"
+    },
+    {
+      "label": "F4. Tornei: viste, ricerca, filtri",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L429",
+      "id": "motion_f4_tornei_viste_ricerca_filtri",
+      "community": 74,
+      "norm_label": "f4. tornei: viste, ricerca, filtri"
+    },
+    {
+      "label": "F5. Dettaglio torneo",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L440",
+      "id": "motion_f5_dettaglio_torneo",
+      "community": 74,
+      "norm_label": "f5. dettaglio torneo"
+    },
+    {
+      "label": "F6. Chi c'\u00e8 oggi",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L452",
+      "id": "motion_f6_chi_c_\u00e8_oggi",
+      "community": 74,
+      "norm_label": "f6. chi c'e oggi"
+    },
+    {
+      "label": "F7. Compagni",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L462",
+      "id": "motion_f7_compagni",
+      "community": 74,
+      "norm_label": "f7. compagni"
+    },
+    {
+      "label": "F8. Statistiche e Wrapped",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L466",
+      "id": "motion_f8_statistiche_e_wrapped",
+      "community": 74,
+      "norm_label": "f8. statistiche e wrapped"
+    },
+    {
+      "label": "F9. Profilo",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L473",
+      "id": "motion_f9_profilo",
+      "community": 74,
+      "norm_label": "f9. profilo"
+    },
+    {
+      "label": "F10. Segnala e segnalazioni",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L482",
+      "id": "motion_f10_segnala_e_segnalazioni",
+      "community": 74,
+      "norm_label": "f10. segnala e segnalazioni"
+    },
+    {
+      "label": "F11. Assistente",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L489",
+      "id": "motion_f11_assistente",
+      "community": 74,
+      "norm_label": "f11. assistente"
+    },
+    {
+      "label": "6. Caricamento",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L505",
+      "id": "motion_6_caricamento",
+      "community": 96,
+      "norm_label": "6. caricamento"
+    },
+    {
+      "label": "6.1 Spinner: solo due, e nessun altro",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L507",
+      "id": "motion_6_1_spinner_solo_due_e_nessun_altro",
+      "community": 96,
+      "norm_label": "6.1 spinner: solo due, e nessun altro"
+    },
+    {
+      "label": "6.2 Lo skeleton in tre tempi (demo 05)",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L511",
+      "id": "motion_6_2_lo_skeleton_in_tre_tempi_demo_05",
+      "community": 96,
+      "norm_label": "6.2 lo skeleton in tre tempi (demo 05)"
+    },
+    {
+      "label": "6.3 Inventario degli skeleton",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L526",
+      "id": "motion_6_3_inventario_degli_skeleton",
+      "community": 96,
+      "norm_label": "6.3 inventario degli skeleton"
+    },
+    {
+      "label": "6.4 Chunk lazy fallito",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L540",
+      "id": "motion_6_4_chunk_lazy_fallito",
+      "community": 96,
+      "norm_label": "6.4 chunk lazy fallito"
+    },
+    {
+      "label": "7. Feedback immediato e ottimistico",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L546",
+      "id": "motion_7_feedback_immediato_e_ottimistico",
+      "community": 75,
+      "norm_label": "7. feedback immediato e ottimistico"
+    },
+    {
+      "label": "8. Recupero dagli errori",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L563",
+      "id": "motion_8_recupero_dagli_errori",
+      "community": 93,
+      "norm_label": "8. recupero dagli errori"
+    },
+    {
+      "label": "8.1 Niente scossone",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L565",
+      "id": "motion_8_1_niente_scossone",
+      "community": 93,
+      "norm_label": "8.1 niente scossone"
+    },
+    {
+      "label": "8.2 Salvataggio fallito",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L572",
+      "id": "motion_8_2_salvataggio_fallito",
+      "community": 93,
+      "norm_label": "8.2 salvataggio fallito"
+    },
+    {
+      "label": "8.3 Ottimismo smentito",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L576",
+      "id": "motion_8_3_ottimismo_smentito",
+      "community": 93,
+      "norm_label": "8.3 ottimismo smentito"
+    },
+    {
+      "label": "8.4 \u00abRiprova\u00bb",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L580",
+      "id": "motion_8_4_riprova",
+      "community": 93,
+      "norm_label": "8.4 \u00abriprova\u00bb"
+    },
+    {
+      "label": "8.5 Gesti rifiutati",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L586",
+      "id": "motion_8_5_gesti_rifiutati",
+      "community": 93,
+      "norm_label": "8.5 gesti rifiutati"
+    },
+    {
+      "label": "9. Scroll",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L592",
+      "id": "motion_9_scroll",
+      "community": 101,
+      "norm_label": "9. scroll"
+    },
+    {
+      "label": "9.1 Effetti legati allo scroll: solo a soglia",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L594",
+      "id": "motion_9_1_effetti_legati_allo_scroll_solo_a_soglia",
+      "community": 101,
+      "norm_label": "9.1 effetti legati allo scroll: solo a soglia"
+    },
+    {
+      "label": "9.2 Rifiutati, con il motivo",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L600",
+      "id": "motion_9_2_rifiutati_con_il_motivo",
+      "community": 101,
+      "norm_label": "9.2 rifiutati, con il motivo"
+    },
+    {
+      "label": "9.3 Scroll programmatici",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L611",
+      "id": "motion_9_3_scroll_programmatici",
+      "community": 101,
+      "norm_label": "9.3 scroll programmatici"
+    },
+    {
+      "label": "10. Il momento firmato: \u00abPunto segnato\u00bb",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L629",
+      "id": "motion_10_il_momento_firmato_punto_segnato",
+      "community": 94,
+      "norm_label": "10. il momento firmato: \u00abpunto segnato\u00bb"
+    },
+    {
+      "label": "10.1 Che cos'\u00e8",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L631",
+      "id": "motion_10_1_che_cos_\u00e8",
+      "community": 94,
+      "norm_label": "10.1 che cos'e"
+    },
+    {
+      "label": "10.2 La coreografia",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L641",
+      "id": "motion_10_2_la_coreografia",
+      "community": 94,
+      "norm_label": "10.2 la coreografia"
+    },
+    {
+      "label": "10.3 Come \u00e8 fatto il tabellone (`\u27c2 F2`, sostituisce `NumeroCheSale`)",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L658",
+      "id": "motion_10_3_come_\u00e8_fatto_il_tabellone_f2_sostituisce_numerochesale",
+      "community": 94,
+      "norm_label": "10.3 come e fatto il tabellone (`\u27c2 f2`, sostituisce `numerochesale`)"
+    },
+    {
+      "label": "10.4 La traccia, altrove",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L672",
+      "id": "motion_10_4_la_traccia_altrove",
+      "community": 94,
+      "norm_label": "10.4 la traccia, altrove"
+    },
+    {
+      "label": "11. Riduzione del movimento: la matrice",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L678",
+      "id": "motion_11_riduzione_del_movimento_la_matrice",
+      "community": 97,
+      "norm_label": "11. riduzione del movimento: la matrice"
+    },
+    {
+      "label": "11.1 I meccanismi",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L680",
+      "id": "motion_11_1_i_meccanismi",
+      "community": 97,
+      "norm_label": "11.1 i meccanismi"
+    },
+    {
+      "label": "11.2 Che cosa resta, sempre",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L691",
+      "id": "motion_11_2_che_cosa_resta_sempre",
+      "community": 97,
+      "norm_label": "11.2 che cosa resta, sempre"
+    },
+    {
+      "label": "11.3 La matrice",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L699",
+      "id": "motion_11_3_la_matrice",
+      "community": 97,
+      "norm_label": "11.3 la matrice"
+    },
+    {
+      "label": "12. Costi: cosa \u00e8 caro e cosa usare al suo posto",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L731",
+      "id": "motion_12_costi_cosa_\u00e8_caro_e_cosa_usare_al_suo_posto",
+      "community": 75,
+      "norm_label": "12. costi: cosa e caro e cosa usare al suo posto"
+    },
+    {
+      "label": "13. Cosa cambia nel codice di oggi",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L756",
+      "id": "motion_13_cosa_cambia_nel_codice_di_oggi",
+      "community": 75,
+      "norm_label": "13. cosa cambia nel codice di oggi"
+    },
+    {
+      "label": "14. Deviazioni da UX.md e ART_DIRECTION.md",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L793",
+      "id": "motion_14_deviazioni_da_ux_md_e_art_direction_md",
+      "community": 75,
+      "norm_label": "14. deviazioni da ux.md e art_direction.md"
+    },
+    {
+      "label": "15. Le demo",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L817",
+      "id": "motion_15_le_demo",
+      "community": 75,
+      "norm_label": "15. le demo"
+    },
+    {
+      "label": "16. Verifica e test",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L843",
+      "id": "motion_16_verifica_e_test",
+      "community": 98,
+      "norm_label": "16. verifica e test"
+    },
+    {
+      "label": "16.1 Che cosa si pu\u00f2 fissare in jsdom (`\u27c2 F2`, `\u27c2 QA`)",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L845",
+      "id": "motion_16_1_che_cosa_si_pu\u00f2_fissare_in_jsdom_f2_qa",
+      "community": 98,
+      "norm_label": "16.1 che cosa si puo fissare in jsdom (`\u27c2 f2`, `\u27c2 qa`)"
+    },
+    {
+      "label": "16.2 Un test statico sul CSS (`\u27c2 QA`)",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L857",
+      "id": "motion_16_2_un_test_statico_sul_css_qa",
+      "community": 98,
+      "norm_label": "16.2 un test statico sul css (`\u27c2 qa`)"
+    },
+    {
+      "label": "16.3 A mano, su dispositivi veri",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L867",
+      "id": "motion_16_3_a_mano_su_dispositivi_veri",
+      "community": 98,
+      "norm_label": "16.3 a mano, su dispositivi veri"
+    },
+    {
+      "label": "17. Seam per i ruoli successivi",
+      "file_type": "document",
+      "source_file": "MOTION.md",
+      "source_location": "L878",
+      "id": "motion_17_seam_per_i_ruoli_successivi",
+      "community": 75,
+      "norm_label": "17. seam per i ruoli successivi"
     },
     {
       "label": "README.md",
@@ -11564,6 +12437,467 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L185",
+      "weight": 1.0,
+      "source": "motion_lab",
+      "target": "motion_lab_alltoasts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L232",
+      "weight": 1.0,
+      "source": "motion_lab",
+      "target": "motion_lab_arm",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L378",
+      "weight": 1.0,
+      "source": "motion_lab",
+      "target": "motion_lab_check",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L415",
+      "weight": 1.0,
+      "source": "motion_lab",
+      "target": "motion_lab_countglass",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L371",
+      "weight": 1.0,
+      "source": "motion_lab",
+      "target": "motion_lab_describe",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L257",
+      "weight": 1.0,
+      "source": "motion_lab",
+      "target": "motion_lab_dismiss",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L41",
+      "weight": 1.0,
+      "source": "motion_lab",
+      "target": "motion_lab_dur",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L46",
+      "weight": 1.0,
+      "source": "motion_lab",
+      "target": "motion_lab_ease",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L410",
+      "weight": 1.0,
+      "source": "motion_lab",
+      "target": "motion_lab_effectiveopacity",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L173",
+      "weight": 1.0,
+      "source": "motion_lab",
+      "target": "motion_lab_ensureregion",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L140",
+      "weight": 1.0,
+      "source": "motion_lab",
+      "target": "motion_lab_flip",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L447",
+      "weight": 1.0,
+      "source": "motion_lab",
+      "target": "motion_lab_init",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L337",
+      "weight": 1.0,
+      "source": "motion_lab",
+      "target": "motion_lab_injectsprite",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L274",
+      "weight": 1.0,
+      "source": "motion_lab",
+      "target": "motion_lab_offline",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L436",
+      "weight": 1.0,
+      "source": "motion_lab",
+      "target": "motion_lab_paint",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L240",
+      "weight": 1.0,
+      "source": "motion_lab",
+      "target": "motion_lab_pause",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L90",
+      "weight": 1.0,
+      "source": "motion_lab",
+      "target": "motion_lab_spring",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L58",
+      "weight": 1.0,
+      "source": "motion_lab",
+      "target": "motion_lab_springsamples",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L110",
+      "weight": 1.0,
+      "source": "motion_lab",
+      "target": "motion_lab_springvalue",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L121",
+      "weight": 1.0,
+      "source": "motion_lab",
+      "target": "motion_lab_stop",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L30",
+      "weight": 1.0,
+      "source": "motion_lab",
+      "target": "motion_lab_syncreduced",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L189",
+      "weight": 1.0,
+      "source": "motion_lab",
+      "target": "motion_lab_toast",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L282",
+      "weight": 1.0,
+      "source": "motion_lab",
+      "target": "motion_lab_trap",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L271",
+      "weight": 1.0,
+      "source": "motion_lab_dismiss",
+      "target": "motion_lab_dur",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L158",
+      "weight": 1.0,
+      "source": "motion_lab_flip",
+      "target": "motion_lab_dur",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L158",
+      "weight": 1.0,
+      "source": "motion_lab_flip",
+      "target": "motion_lab_ease",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L97",
+      "weight": 1.0,
+      "source": "motion_lab_spring",
+      "target": "motion_lab_springsamples",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L91",
+      "weight": 1.0,
+      "source": "motion_lab_spring",
+      "target": "motion_lab_stop",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L124",
+      "weight": 1.0,
+      "source": "motion_lab_stop",
+      "target": "motion_lab_springvalue",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L186",
+      "weight": 1.0,
+      "source": "motion_lab_alltoasts",
+      "target": "motion_lab_ensureregion",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L449",
+      "weight": 1.0,
+      "source": "motion_lab_init",
+      "target": "motion_lab_ensureregion",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L190",
+      "weight": 1.0,
+      "source": "motion_lab_toast",
+      "target": "motion_lab_ensureregion",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L275",
+      "weight": 1.0,
+      "source": "motion_lab_offline",
+      "target": "motion_lab_alltoasts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L192",
+      "weight": 1.0,
+      "source": "motion_lab_toast",
+      "target": "motion_lab_alltoasts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L276",
+      "weight": 1.0,
+      "source": "motion_lab_offline",
+      "target": "motion_lab_toast",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L202",
+      "weight": 1.0,
+      "source": "motion_lab_toast",
+      "target": "motion_lab_arm",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L210",
+      "weight": 1.0,
+      "source": "motion_lab_toast",
+      "target": "motion_lab_dismiss",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L277",
+      "weight": 1.0,
+      "source": "motion_lab_offline",
+      "target": "motion_lab_dismiss",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L448",
+      "weight": 1.0,
+      "source": "motion_lab_init",
+      "target": "motion_lab_injectsprite",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L382",
+      "weight": 1.0,
+      "source": "motion_lab_check",
+      "target": "motion_lab_describe",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L390",
+      "weight": 1.0,
+      "source": "motion_lab_check",
+      "target": "motion_lab_paint",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L424",
+      "weight": 1.0,
+      "source": "motion_lab_countglass",
+      "target": "motion_lab_effectiveopacity",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L432",
+      "weight": 1.0,
+      "source": "motion_lab_countglass",
+      "target": "motion_lab_paint",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "docs/motion/_lab.js",
+      "source_location": "L454",
+      "weight": 1.0,
+      "source": "motion_lab_init",
+      "target": "motion_lab_paint",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "package.json",
       "source_location": "L15",
       "weight": 1.0,
@@ -11717,9 +13051,9 @@
       "source_file": "package.json",
       "source_location": "L22",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_package_dependencies",
-      "target": "beachvolleydiary_package_dependencies_leaflet",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_package_dependencies_leaflet"
     },
     {
       "relation": "contains",
@@ -11727,9 +13061,9 @@
       "source_file": "package.json",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_package_dependencies",
-      "target": "beachvolleydiary_package_dependencies_leaflet_markercluster",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_package_dependencies_leaflet_markercluster"
     },
     {
       "relation": "contains",
@@ -11737,9 +13071,9 @@
       "source_file": "package.json",
       "source_location": "L16",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_package_dependencies",
-      "target": "beachvolleydiary_package_dependencies_microsoft_clarity",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_package_dependencies_microsoft_clarity"
     },
     {
       "relation": "contains",
@@ -11747,9 +13081,9 @@
       "source_file": "package.json",
       "source_location": "L24",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_package_dependencies",
-      "target": "beachvolleydiary_package_dependencies_motion",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_package_dependencies_motion"
     },
     {
       "relation": "contains",
@@ -11787,9 +13121,9 @@
       "source_file": "package.json",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_package_dependencies",
-      "target": "beachvolleydiary_package_dependencies_types_leaflet_markercluster",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_package_dependencies_types_leaflet_markercluster"
     },
     {
       "relation": "contains",
@@ -11810,6 +13144,17 @@
       "confidence_score": 1.0,
       "source": "beachvolleydiary_package_dependencies",
       "target": "beachvolleydiary_package_dependencies_vercel_speed_insights"
+    },
+    {
+      "relation": "imports",
+      "confidence": "EXTRACTED",
+      "source_file": "package.json",
+      "source_location": "L24",
+      "weight": 1.0,
+      "context": "import",
+      "source": "beachvolleydiary_package_dependencies_motion",
+      "target": "motion",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -11877,9 +13222,9 @@
       "source_file": "package.json",
       "source_location": "L33",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "beachvolleydiary_package_devdependencies",
-      "target": "beachvolleydiary_package_devdependencies_types_leaflet",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_package_devdependencies_types_leaflet"
     },
     {
       "relation": "contains",
@@ -29721,9 +31066,9 @@
       "source_file": "src/lib/theme.ts",
       "source_location": "L70",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_theme",
-      "target": "lib_theme_bp",
-      "confidence_score": 1.0
+      "target": "lib_theme_bp"
     },
     {
       "relation": "contains",
@@ -29741,9 +31086,9 @@
       "source_file": "src/lib/theme.ts",
       "source_location": "L91",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_theme",
-      "target": "lib_theme_data_tone",
-      "confidence_score": 1.0
+      "target": "lib_theme_data_tone"
     },
     {
       "relation": "contains",
@@ -29751,9 +31096,9 @@
       "source_file": "src/lib/theme.ts",
       "source_location": "L84",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_theme",
-      "target": "lib_theme_datatone",
-      "confidence_score": 1.0
+      "target": "lib_theme_datatone"
     },
     {
       "relation": "contains",
@@ -29761,9 +31106,9 @@
       "source_file": "src/lib/theme.ts",
       "source_location": "L82",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_theme",
-      "target": "lib_theme_lib_podium",
-      "confidence_score": 1.0
+      "target": "lib_theme_lib_podium"
     },
     {
       "relation": "contains",
@@ -29771,9 +31116,9 @@
       "source_file": "src/lib/theme.ts",
       "source_location": "L81",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_theme",
-      "target": "lib_theme_lib_win",
-      "confidence_score": 1.0
+      "target": "lib_theme_lib_win"
     },
     {
       "relation": "contains",
@@ -29811,9 +31156,9 @@
       "source_file": "src/lib/theme.ts",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_theme",
-      "target": "lib_theme_token",
-      "confidence_score": 1.0
+      "target": "lib_theme_token"
     },
     {
       "relation": "imports_from",
@@ -31798,9 +33143,9 @@
       "source_file": "src/test/wcag.ts",
       "source_location": "L41",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "test_wcag",
-      "target": "test_wcag_contrast",
-      "confidence_score": 1.0
+      "target": "test_wcag_contrast"
     },
     {
       "relation": "contains",
@@ -31808,9 +33153,9 @@
       "source_file": "src/test/wcag.ts",
       "source_location": "L32",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "test_wcag",
-      "target": "test_wcag_luminance",
-      "confidence_score": 1.0
+      "target": "test_wcag_luminance"
     },
     {
       "relation": "contains",
@@ -31818,9 +33163,9 @@
       "source_file": "src/test/wcag.ts",
       "source_location": "L25",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "test_wcag",
-      "target": "test_wcag_over",
-      "confidence_score": 1.0
+      "target": "test_wcag_over"
     },
     {
       "relation": "contains",
@@ -31828,9 +33173,9 @@
       "source_file": "src/test/wcag.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "test_wcag",
-      "target": "test_wcag_parsecolor",
-      "confidence_score": 1.0
+      "target": "test_wcag_parsecolor"
     },
     {
       "relation": "contains",
@@ -31838,9 +33183,9 @@
       "source_file": "src/test/wcag.ts",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "test_wcag",
-      "target": "test_wcag_rgb",
-      "confidence_score": 1.0
+      "target": "test_wcag_rgb"
     },
     {
       "relation": "calls",
@@ -31849,9 +33194,9 @@
       "source_file": "src/test/wcag.ts",
       "source_location": "L42",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "test_wcag_contrast",
-      "target": "test_wcag_parsecolor",
-      "confidence_score": 1.0
+      "target": "test_wcag_parsecolor"
     },
     {
       "relation": "calls",
@@ -31860,9 +33205,9 @@
       "source_file": "src/test/wcag.ts",
       "source_location": "L26",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "test_wcag_over",
-      "target": "test_wcag_parsecolor",
-      "confidence_score": 1.0
+      "target": "test_wcag_parsecolor"
     },
     {
       "relation": "calls",
@@ -31871,9 +33216,9 @@
       "source_file": "src/test/wcag.ts",
       "source_location": "L42",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "test_wcag_contrast",
-      "target": "test_wcag_over",
-      "confidence_score": 1.0
+      "target": "test_wcag_over"
     },
     {
       "relation": "calls",
@@ -31882,9 +33227,9 @@
       "source_file": "src/test/wcag.ts",
       "source_location": "L44",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "test_wcag_contrast",
-      "target": "test_wcag_luminance",
-      "confidence_score": 1.0
+      "target": "test_wcag_luminance"
     },
     {
       "relation": "contains",
@@ -32472,9 +33817,9 @@
       "source_file": "vercel.json",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_vercel_json",
-      "target": "beachvolleydiary_vercel_headers",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_vercel_headers"
     },
     {
       "relation": "contains",
@@ -32482,9 +33827,9 @@
       "source_file": "vercel.json",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_vercel_json",
-      "target": "beachvolleydiary_vercel_schema",
-      "confidence_score": 1.0
+      "target": "beachvolleydiary_vercel_schema"
     },
     {
       "relation": "contains",
@@ -32502,9 +33847,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction",
-      "target": "art_direction_art_direction_md_bagnasciuga",
-      "confidence_score": 1.0
+      "target": "art_direction_art_direction_md_bagnasciuga"
     },
     {
       "relation": "contains",
@@ -32512,9 +33857,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L37",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_art_direction_md_bagnasciuga",
-      "target": "art_direction_0_in_una_frase",
-      "confidence_score": 1.0
+      "target": "art_direction_0_in_una_frase"
     },
     {
       "relation": "contains",
@@ -32522,9 +33867,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L521",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_art_direction_md_bagnasciuga",
-      "target": "art_direction_10_iconografia_e_immagini",
-      "confidence_score": 1.0
+      "target": "art_direction_10_iconografia_e_immagini"
     },
     {
       "relation": "contains",
@@ -32532,9 +33877,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L618",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_art_direction_md_bagnasciuga",
-      "target": "art_direction_11_movimento",
-      "confidence_score": 1.0
+      "target": "art_direction_11_movimento"
     },
     {
       "relation": "contains",
@@ -32542,9 +33887,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L677",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_art_direction_md_bagnasciuga",
-      "target": "art_direction_12_il_livello_dei_token_come_si_usa",
-      "confidence_score": 1.0
+      "target": "art_direction_12_il_livello_dei_token_come_si_usa"
     },
     {
       "relation": "contains",
@@ -32552,9 +33897,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L697",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_art_direction_md_bagnasciuga",
-      "target": "art_direction_13_migrazione_dal_linguaggio_vecchio",
-      "confidence_score": 1.0
+      "target": "art_direction_13_migrazione_dal_linguaggio_vecchio"
     },
     {
       "relation": "contains",
@@ -32562,9 +33907,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L738",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_art_direction_md_bagnasciuga",
-      "target": "art_direction_14_il_test_admin_bootstrap",
-      "confidence_score": 1.0
+      "target": "art_direction_14_il_test_admin_bootstrap"
     },
     {
       "relation": "contains",
@@ -32572,9 +33917,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L760",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_art_direction_md_bagnasciuga",
-      "target": "art_direction_15_dove_questo_documento_corregge_ux_md_e_il_piano",
-      "confidence_score": 1.0
+      "target": "art_direction_15_dove_questo_documento_corregge_ux_md_e_il_piano"
     },
     {
       "relation": "contains",
@@ -32582,9 +33927,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L781",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_art_direction_md_bagnasciuga",
-      "target": "art_direction_16_seam_per_i_ruoli_successivi",
-      "confidence_score": 1.0
+      "target": "art_direction_16_seam_per_i_ruoli_successivi"
     },
     {
       "relation": "contains",
@@ -32592,9 +33937,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L45",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_art_direction_md_bagnasciuga",
-      "target": "art_direction_1_estendere_o_spingere_la_decisione",
-      "confidence_score": 1.0
+      "target": "art_direction_1_estendere_o_spingere_la_decisione"
     },
     {
       "relation": "contains",
@@ -32602,9 +33947,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L72",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_art_direction_md_bagnasciuga",
-      "target": "art_direction_2_direzione_estetica",
-      "confidence_score": 1.0
+      "target": "art_direction_2_direzione_estetica"
     },
     {
       "relation": "contains",
@@ -32612,9 +33957,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L115",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_art_direction_md_bagnasciuga",
-      "target": "art_direction_3_tipografia",
-      "confidence_score": 1.0
+      "target": "art_direction_3_tipografia"
     },
     {
       "relation": "contains",
@@ -32622,9 +33967,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L186",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_art_direction_md_bagnasciuga",
-      "target": "art_direction_4_colore",
-      "confidence_score": 1.0
+      "target": "art_direction_4_colore"
     },
     {
       "relation": "contains",
@@ -32632,9 +33977,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L316",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_art_direction_md_bagnasciuga",
-      "target": "art_direction_5_spazio_e_layout",
-      "confidence_score": 1.0
+      "target": "art_direction_5_spazio_e_layout"
     },
     {
       "relation": "contains",
@@ -32642,9 +33987,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L363",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_art_direction_md_bagnasciuga",
-      "target": "art_direction_6_raggi_e_grammatica_delle_forme",
-      "confidence_score": 1.0
+      "target": "art_direction_6_raggi_e_grammatica_delle_forme"
     },
     {
       "relation": "contains",
@@ -32652,9 +33997,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L398",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_art_direction_md_bagnasciuga",
-      "target": "art_direction_7_elevazione_e_ombre",
-      "confidence_score": 1.0
+      "target": "art_direction_7_elevazione_e_ombre"
     },
     {
       "relation": "contains",
@@ -32662,9 +34007,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L419",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_art_direction_md_bagnasciuga",
-      "target": "art_direction_8_bordi_e_superfici",
-      "confidence_score": 1.0
+      "target": "art_direction_8_bordi_e_superfici"
     },
     {
       "relation": "contains",
@@ -32672,9 +34017,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L467",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_art_direction_md_bagnasciuga",
-      "target": "art_direction_9_materiali_il_vetro",
-      "confidence_score": 1.0
+      "target": "art_direction_9_materiali_il_vetro"
     },
     {
       "relation": "contains",
@@ -32682,9 +34027,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_art_direction_md_bagnasciuga",
-      "target": "art_direction_indice",
-      "confidence_score": 1.0
+      "target": "art_direction_indice"
     },
     {
       "relation": "contains",
@@ -32692,9 +34037,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L74",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_2_direzione_estetica",
-      "target": "art_direction_2_1_aggettivi_in_ordine_di_priorit\u00e0",
-      "confidence_score": 1.0
+      "target": "art_direction_2_1_aggettivi_in_ordine_di_priorit\u00e0"
     },
     {
       "relation": "contains",
@@ -32702,9 +34047,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L83",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_2_direzione_estetica",
-      "target": "art_direction_2_2_riferimenti_cosa_si_prende_da_ognuno",
-      "confidence_score": 1.0
+      "target": "art_direction_2_2_riferimenti_cosa_si_prende_da_ognuno"
     },
     {
       "relation": "contains",
@@ -32712,9 +34057,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L94",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_2_direzione_estetica",
-      "target": "art_direction_2_3_anti_riferimenti_se_ci_somiglia_\u00e8_sbagliato",
-      "confidence_score": 1.0
+      "target": "art_direction_2_3_anti_riferimenti_se_ci_somiglia_\u00e8_sbagliato"
     },
     {
       "relation": "contains",
@@ -32722,9 +34067,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L102",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_2_direzione_estetica",
-      "target": "art_direction_2_4_le_sei_mosse_firmate",
-      "confidence_score": 1.0
+      "target": "art_direction_2_4_le_sei_mosse_firmate"
     },
     {
       "relation": "contains",
@@ -32732,9 +34077,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L117",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_3_tipografia",
-      "target": "art_direction_3_1_famiglie",
-      "confidence_score": 1.0
+      "target": "art_direction_3_1_famiglie"
     },
     {
       "relation": "contains",
@@ -32742,9 +34087,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L140",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_3_tipografia",
-      "target": "art_direction_3_2_scala",
-      "confidence_score": 1.0
+      "target": "art_direction_3_2_scala"
     },
     {
       "relation": "contains",
@@ -32752,9 +34097,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L173",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_3_tipografia",
-      "target": "art_direction_3_3_regole",
-      "confidence_score": 1.0
+      "target": "art_direction_3_3_regole"
     },
     {
       "relation": "contains",
@@ -32762,9 +34107,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L188",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_4_colore",
-      "target": "art_direction_4_1_principio",
-      "confidence_score": 1.0
+      "target": "art_direction_4_1_principio"
     },
     {
       "relation": "contains",
@@ -32772,9 +34117,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L192",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_4_colore",
-      "target": "art_direction_4_2_ruoli_semantici_tema_chiaro_attivo",
-      "confidence_score": 1.0
+      "target": "art_direction_4_2_ruoli_semantici_tema_chiaro_attivo"
     },
     {
       "relation": "contains",
@@ -32782,9 +34127,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L227",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_4_colore",
-      "target": "art_direction_4_3_le_regole_del_colore",
-      "confidence_score": 1.0
+      "target": "art_direction_4_3_le_regole_del_colore"
     },
     {
       "relation": "contains",
@@ -32792,9 +34137,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L242",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_4_colore",
-      "target": "art_direction_4_4_il_testo_sul_vetro_fondo_peggiore",
-      "confidence_score": 1.0
+      "target": "art_direction_4_4_il_testo_sul_vetro_fondo_peggiore"
     },
     {
       "relation": "contains",
@@ -32802,9 +34147,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L260",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_4_colore",
-      "target": "art_direction_4_5_i_colori_dei_dati",
-      "confidence_score": 1.0
+      "target": "art_direction_4_5_i_colori_dei_dati"
     },
     {
       "relation": "contains",
@@ -32812,9 +34157,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L284",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_4_colore",
-      "target": "art_direction_4_6_tema_scuro_predisposto_non_attivo",
-      "confidence_score": 1.0
+      "target": "art_direction_4_6_tema_scuro_predisposto_non_attivo"
     },
     {
       "relation": "contains",
@@ -32822,9 +34167,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L302",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_4_colore",
-      "target": "art_direction_4_7_palette_dei_png_esportati_storia_e_wrapped_f4",
-      "confidence_score": 1.0
+      "target": "art_direction_4_7_palette_dei_png_esportati_storia_e_wrapped_f4"
     },
     {
       "relation": "contains",
@@ -32832,9 +34177,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L318",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_5_spazio_e_layout",
-      "target": "art_direction_5_1_scala_passi_di_4",
-      "confidence_score": 1.0
+      "target": "art_direction_5_1_scala_passi_di_4"
     },
     {
       "relation": "contains",
@@ -32842,9 +34187,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L326",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_5_spazio_e_layout",
-      "target": "art_direction_5_2_ritmo",
-      "confidence_score": 1.0
+      "target": "art_direction_5_2_ritmo"
     },
     {
       "relation": "contains",
@@ -32852,9 +34197,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L345",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_5_spazio_e_layout",
-      "target": "art_direction_5_3_costanti_di_layout",
-      "confidence_score": 1.0
+      "target": "art_direction_5_3_costanti_di_layout"
     },
     {
       "relation": "contains",
@@ -32862,9 +34207,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L365",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_6_raggi_e_grammatica_delle_forme",
-      "target": "art_direction_6_1_scala",
-      "confidence_score": 1.0
+      "target": "art_direction_6_1_scala"
     },
     {
       "relation": "contains",
@@ -32872,9 +34217,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L377",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_6_raggi_e_grammatica_delle_forme",
-      "target": "art_direction_6_2_concentricit\u00e0",
-      "confidence_score": 1.0
+      "target": "art_direction_6_2_concentricit\u00e0"
     },
     {
       "relation": "contains",
@@ -32882,9 +34227,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L385",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_6_raggi_e_grammatica_delle_forme",
-      "target": "art_direction_6_3_grammatica",
-      "confidence_score": 1.0
+      "target": "art_direction_6_3_grammatica"
     },
     {
       "relation": "contains",
@@ -32892,9 +34237,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L469",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_9_materiali_il_vetro",
-      "target": "art_direction_9_1_il_principio_il_vetro_si_guadagna",
-      "confidence_score": 1.0
+      "target": "art_direction_9_1_il_principio_il_vetro_si_guadagna"
     },
     {
       "relation": "contains",
@@ -32902,9 +34247,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L475",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_9_materiali_il_vetro",
-      "target": "art_direction_9_2_i_cinque_materiali",
-      "confidence_score": 1.0
+      "target": "art_direction_9_2_i_cinque_materiali"
     },
     {
       "relation": "contains",
@@ -32912,9 +34257,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L494",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_9_materiali_il_vetro",
-      "target": "art_direction_9_3_come_si_applica",
-      "confidence_score": 1.0
+      "target": "art_direction_9_3_come_si_applica"
     },
     {
       "relation": "contains",
@@ -32922,9 +34267,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L508",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_9_materiali_il_vetro",
-      "target": "art_direction_9_4_fallback_in_tokens_css_e_materials_css",
-      "confidence_score": 1.0
+      "target": "art_direction_9_4_fallback_in_tokens_css_e_materials_css"
     },
     {
       "relation": "contains",
@@ -32932,9 +34277,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L523",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_10_iconografia_e_immagini",
-      "target": "art_direction_10_1_il_set_di_icone_estensione_di_navicons_tsx_f2",
-      "confidence_score": 1.0
+      "target": "art_direction_10_1_il_set_di_icone_estensione_di_navicons_tsx_f2"
     },
     {
       "relation": "contains",
@@ -32942,9 +34287,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L571",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_10_iconografia_e_immagini",
-      "target": "art_direction_10_2_il_marchio",
-      "confidence_score": 1.0
+      "target": "art_direction_10_2_il_marchio"
     },
     {
       "relation": "contains",
@@ -32952,9 +34297,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L579",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_10_iconografia_e_immagini",
-      "target": "art_direction_10_3_immagini",
-      "confidence_score": 1.0
+      "target": "art_direction_10_3_immagini"
     },
     {
       "relation": "contains",
@@ -32962,9 +34307,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L600",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_10_iconografia_e_immagini",
-      "target": "art_direction_10_4_la_tela_dei_png_storia_1080_1920_e_wrapped_f4",
-      "confidence_score": 1.0
+      "target": "art_direction_10_4_la_tela_dei_png_storia_1080_1920_e_wrapped_f4"
     },
     {
       "relation": "contains",
@@ -32972,9 +34317,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L620",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_11_movimento",
-      "target": "art_direction_11_1_vocabolario_allineato_a_motion_tsx_verificato_da_tokens_test_ts",
-      "confidence_score": 1.0
+      "target": "art_direction_11_1_vocabolario_allineato_a_motion_tsx_verificato_da_tokens_test_ts"
     },
     {
       "relation": "contains",
@@ -32982,9 +34327,9 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L642",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_11_movimento",
-      "target": "art_direction_11_2_cosa_si_anima",
-      "confidence_score": 1.0
+      "target": "art_direction_11_2_cosa_si_anima"
     },
     {
       "relation": "contains",
@@ -32992,8 +34337,728 @@
       "source_file": "ART_DIRECTION.md",
       "source_location": "L664",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "art_direction_11_movimento",
-      "target": "art_direction_11_3_cosa_non_si_anima_di_proposito",
+      "target": "art_direction_11_3_cosa_non_si_anima_di_proposito"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "motion",
+      "target": "motion_motion_md_il_movimento_di_bagnasciuga",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L39",
+      "weight": 1.0,
+      "source": "motion_motion_md_il_movimento_di_bagnasciuga",
+      "target": "motion_0_in_una_frase",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L629",
+      "weight": 1.0,
+      "source": "motion_motion_md_il_movimento_di_bagnasciuga",
+      "target": "motion_10_il_momento_firmato_punto_segnato",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L678",
+      "weight": 1.0,
+      "source": "motion_motion_md_il_movimento_di_bagnasciuga",
+      "target": "motion_11_riduzione_del_movimento_la_matrice",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L731",
+      "weight": 1.0,
+      "source": "motion_motion_md_il_movimento_di_bagnasciuga",
+      "target": "motion_12_costi_cosa_\u00e8_caro_e_cosa_usare_al_suo_posto",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L756",
+      "weight": 1.0,
+      "source": "motion_motion_md_il_movimento_di_bagnasciuga",
+      "target": "motion_13_cosa_cambia_nel_codice_di_oggi",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L793",
+      "weight": 1.0,
+      "source": "motion_motion_md_il_movimento_di_bagnasciuga",
+      "target": "motion_14_deviazioni_da_ux_md_e_art_direction_md",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L817",
+      "weight": 1.0,
+      "source": "motion_motion_md_il_movimento_di_bagnasciuga",
+      "target": "motion_15_le_demo",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L843",
+      "weight": 1.0,
+      "source": "motion_motion_md_il_movimento_di_bagnasciuga",
+      "target": "motion_16_verifica_e_test",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L878",
+      "weight": 1.0,
+      "source": "motion_motion_md_il_movimento_di_bagnasciuga",
+      "target": "motion_17_seam_per_i_ruoli_successivi",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L54",
+      "weight": 1.0,
+      "source": "motion_motion_md_il_movimento_di_bagnasciuga",
+      "target": "motion_1_le_regole_dure",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L91",
+      "weight": 1.0,
+      "source": "motion_motion_md_il_movimento_di_bagnasciuga",
+      "target": "motion_2_vocabolario_e_costanti",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L131",
+      "weight": 1.0,
+      "source": "motion_motion_md_il_movimento_di_bagnasciuga",
+      "target": "motion_3_coreografia_regole_trasversali",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L203",
+      "weight": 1.0,
+      "source": "motion_motion_md_il_movimento_di_bagnasciuga",
+      "target": "motion_4_specifica_per_elemento",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L391",
+      "weight": 1.0,
+      "source": "motion_motion_md_il_movimento_di_bagnasciuga",
+      "target": "motion_5_le_transizioni_dei_flussi",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L505",
+      "weight": 1.0,
+      "source": "motion_motion_md_il_movimento_di_bagnasciuga",
+      "target": "motion_6_caricamento",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L546",
+      "weight": 1.0,
+      "source": "motion_motion_md_il_movimento_di_bagnasciuga",
+      "target": "motion_7_feedback_immediato_e_ottimistico",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L563",
+      "weight": 1.0,
+      "source": "motion_motion_md_il_movimento_di_bagnasciuga",
+      "target": "motion_8_recupero_dagli_errori",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L592",
+      "weight": 1.0,
+      "source": "motion_motion_md_il_movimento_di_bagnasciuga",
+      "target": "motion_9_scroll",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L16",
+      "weight": 1.0,
+      "source": "motion_motion_md_il_movimento_di_bagnasciuga",
+      "target": "motion_indice",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L56",
+      "weight": 1.0,
+      "source": "motion_1_le_regole_dure",
+      "target": "motion_1_1_il_contratto",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L67",
+      "weight": 1.0,
+      "source": "motion_1_le_regole_dure",
+      "target": "motion_1_2_che_cosa_\u00e8_un_percorso_caldo",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L78",
+      "weight": 1.0,
+      "source": "motion_1_le_regole_dure",
+      "target": "motion_1_3_le_eccezioni_tutte_e_sole",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L93",
+      "weight": 1.0,
+      "source": "motion_2_vocabolario_e_costanti",
+      "target": "motion_2_1_le_cinque_curve_da_art_direction_11_1_invariate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L103",
+      "weight": 1.0,
+      "source": "motion_2_vocabolario_e_costanti",
+      "target": "motion_2_2_le_regole_d_uso_che_questo_documento_aggiunge",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L113",
+      "weight": 1.0,
+      "source": "motion_2_vocabolario_e_costanti",
+      "target": "motion_2_3_costanti_nuove_contratto_f2",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L133",
+      "weight": 1.0,
+      "source": "motion_3_coreografia_regole_trasversali",
+      "target": "motion_3_1_la_scala_dei_tempi_di_risposta",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L143",
+      "weight": 1.0,
+      "source": "motion_3_coreografia_regole_trasversali",
+      "target": "motion_3_2_interrompibilit\u00e0",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L149",
+      "weight": 1.0,
+      "source": "motion_3_coreografia_regole_trasversali",
+      "target": "motion_3_3_chi_esce_non_blocca_chi_entra_risponde",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L155",
+      "weight": 1.0,
+      "source": "motion_3_coreografia_regole_trasversali",
+      "target": "motion_3_4_il_vetro_durante_le_transizioni",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L166",
+      "weight": 1.0,
+      "source": "motion_3_coreografia_regole_trasversali",
+      "target": "motion_3_5_focus_e_animazione_m3",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L180",
+      "weight": 1.0,
+      "source": "motion_3_coreografia_regole_trasversali",
+      "target": "motion_3_6_origine_ci\u00f2_che_tocchi_\u00e8_ci\u00f2_che_si_apre",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L190",
+      "weight": 1.0,
+      "source": "motion_3_coreografia_regole_trasversali",
+      "target": "motion_3_7_overlay_impilati",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L195",
+      "weight": 1.0,
+      "source": "motion_3_coreografia_regole_trasversali",
+      "target": "motion_3_8_history_e_animazioni",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L207",
+      "weight": 1.0,
+      "source": "motion_4_specifica_per_elemento",
+      "target": "motion_4_1_shell",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L263",
+      "weight": 1.0,
+      "source": "motion_4_specifica_per_elemento",
+      "target": "motion_4_2_overlay",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L332",
+      "weight": 1.0,
+      "source": "motion_4_specifica_per_elemento",
+      "target": "motion_4_3_primitive",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L372",
+      "weight": 1.0,
+      "source": "motion_4_specifica_per_elemento",
+      "target": "motion_4_4_dati",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L395",
+      "weight": 1.0,
+      "source": "motion_5_le_transizioni_dei_flussi",
+      "target": "motion_f0_avvio",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L482",
+      "weight": 1.0,
+      "source": "motion_5_le_transizioni_dei_flussi",
+      "target": "motion_f10_segnala_e_segnalazioni",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L489",
+      "weight": 1.0,
+      "source": "motion_5_le_transizioni_dei_flussi",
+      "target": "motion_f11_assistente",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L404",
+      "weight": 1.0,
+      "source": "motion_5_le_transizioni_dei_flussi",
+      "target": "motion_f1_primo_avvio",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L408",
+      "weight": 1.0,
+      "source": "motion_5_le_transizioni_dei_flussi",
+      "target": "motion_f2_creare_un_torneo",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L419",
+      "weight": 1.0,
+      "source": "motion_5_le_transizioni_dei_flussi",
+      "target": "motion_f3_aggiungere_una_partita_punto_segnato",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L429",
+      "weight": 1.0,
+      "source": "motion_5_le_transizioni_dei_flussi",
+      "target": "motion_f4_tornei_viste_ricerca_filtri",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L440",
+      "weight": 1.0,
+      "source": "motion_5_le_transizioni_dei_flussi",
+      "target": "motion_f5_dettaglio_torneo",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L452",
+      "weight": 1.0,
+      "source": "motion_5_le_transizioni_dei_flussi",
+      "target": "motion_f6_chi_c_\u00e8_oggi",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L462",
+      "weight": 1.0,
+      "source": "motion_5_le_transizioni_dei_flussi",
+      "target": "motion_f7_compagni",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L466",
+      "weight": 1.0,
+      "source": "motion_5_le_transizioni_dei_flussi",
+      "target": "motion_f8_statistiche_e_wrapped",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L473",
+      "weight": 1.0,
+      "source": "motion_5_le_transizioni_dei_flussi",
+      "target": "motion_f9_profilo",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L507",
+      "weight": 1.0,
+      "source": "motion_6_caricamento",
+      "target": "motion_6_1_spinner_solo_due_e_nessun_altro",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L511",
+      "weight": 1.0,
+      "source": "motion_6_caricamento",
+      "target": "motion_6_2_lo_skeleton_in_tre_tempi_demo_05",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L526",
+      "weight": 1.0,
+      "source": "motion_6_caricamento",
+      "target": "motion_6_3_inventario_degli_skeleton",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L540",
+      "weight": 1.0,
+      "source": "motion_6_caricamento",
+      "target": "motion_6_4_chunk_lazy_fallito",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L565",
+      "weight": 1.0,
+      "source": "motion_8_recupero_dagli_errori",
+      "target": "motion_8_1_niente_scossone",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L572",
+      "weight": 1.0,
+      "source": "motion_8_recupero_dagli_errori",
+      "target": "motion_8_2_salvataggio_fallito",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L576",
+      "weight": 1.0,
+      "source": "motion_8_recupero_dagli_errori",
+      "target": "motion_8_3_ottimismo_smentito",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L580",
+      "weight": 1.0,
+      "source": "motion_8_recupero_dagli_errori",
+      "target": "motion_8_4_riprova",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L586",
+      "weight": 1.0,
+      "source": "motion_8_recupero_dagli_errori",
+      "target": "motion_8_5_gesti_rifiutati",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L594",
+      "weight": 1.0,
+      "source": "motion_9_scroll",
+      "target": "motion_9_1_effetti_legati_allo_scroll_solo_a_soglia",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L600",
+      "weight": 1.0,
+      "source": "motion_9_scroll",
+      "target": "motion_9_2_rifiutati_con_il_motivo",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L611",
+      "weight": 1.0,
+      "source": "motion_9_scroll",
+      "target": "motion_9_3_scroll_programmatici",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L631",
+      "weight": 1.0,
+      "source": "motion_10_il_momento_firmato_punto_segnato",
+      "target": "motion_10_1_che_cos_\u00e8",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L641",
+      "weight": 1.0,
+      "source": "motion_10_il_momento_firmato_punto_segnato",
+      "target": "motion_10_2_la_coreografia",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L658",
+      "weight": 1.0,
+      "source": "motion_10_il_momento_firmato_punto_segnato",
+      "target": "motion_10_3_come_\u00e8_fatto_il_tabellone_f2_sostituisce_numerochesale",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L672",
+      "weight": 1.0,
+      "source": "motion_10_il_momento_firmato_punto_segnato",
+      "target": "motion_10_4_la_traccia_altrove",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L680",
+      "weight": 1.0,
+      "source": "motion_11_riduzione_del_movimento_la_matrice",
+      "target": "motion_11_1_i_meccanismi",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L691",
+      "weight": 1.0,
+      "source": "motion_11_riduzione_del_movimento_la_matrice",
+      "target": "motion_11_2_che_cosa_resta_sempre",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L699",
+      "weight": 1.0,
+      "source": "motion_11_riduzione_del_movimento_la_matrice",
+      "target": "motion_11_3_la_matrice",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L845",
+      "weight": 1.0,
+      "source": "motion_16_verifica_e_test",
+      "target": "motion_16_1_che_cosa_si_pu\u00f2_fissare_in_jsdom_f2_qa",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L857",
+      "weight": 1.0,
+      "source": "motion_16_verifica_e_test",
+      "target": "motion_16_2_un_test_statico_sul_css_qa",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "MOTION.md",
+      "source_location": "L867",
+      "weight": 1.0,
+      "source": "motion_16_verifica_e_test",
+      "target": "motion_16_3_a_mano_su_dispositivi_veri",
       "confidence_score": 1.0
     },
     {
@@ -33062,9 +35127,9 @@
       "source_file": "UX.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux",
-      "target": "ux_ux_md_refactor_liquid_glass_e_nuova_architettura_dei_flussi",
-      "confidence_score": 1.0
+      "target": "ux_ux_md_refactor_liquid_glass_e_nuova_architettura_dei_flussi"
     },
     {
       "relation": "contains",
@@ -33072,9 +35137,9 @@
       "source_file": "UX.md",
       "source_location": "L46",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_ux_md_refactor_liquid_glass_e_nuova_architettura_dei_flussi",
-      "target": "ux_0_sintesi",
-      "confidence_score": 1.0
+      "target": "ux_0_sintesi"
     },
     {
       "relation": "contains",
@@ -33082,9 +35147,9 @@
       "source_file": "UX.md",
       "source_location": "L1133",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_ux_md_refactor_liquid_glass_e_nuova_architettura_dei_flussi",
-      "target": "ux_10_mappa_d_uso_del_vetro",
-      "confidence_score": 1.0
+      "target": "ux_10_mappa_d_uso_del_vetro"
     },
     {
       "relation": "contains",
@@ -33092,9 +35157,9 @@
       "source_file": "UX.md",
       "source_location": "L1156",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_ux_md_refactor_liquid_glass_e_nuova_architettura_dei_flussi",
-      "target": "ux_11_immagini_esportate_storia_e_wrapped",
-      "confidence_score": 1.0
+      "target": "ux_11_immagini_esportate_storia_e_wrapped"
     },
     {
       "relation": "contains",
@@ -33102,9 +35167,9 @@
       "source_file": "UX.md",
       "source_location": "L1173",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_ux_md_refactor_liquid_glass_e_nuova_architettura_dei_flussi",
-      "target": "ux_12_contenuti_e_microcopy",
-      "confidence_score": 1.0
+      "target": "ux_12_contenuti_e_microcopy"
     },
     {
       "relation": "contains",
@@ -33112,9 +35177,9 @@
       "source_file": "UX.md",
       "source_location": "L1200",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_ux_md_refactor_liquid_glass_e_nuova_architettura_dei_flussi",
-      "target": "ux_13_analytics_contratto_da_preservare",
-      "confidence_score": 1.0
+      "target": "ux_13_analytics_contratto_da_preservare"
     },
     {
       "relation": "contains",
@@ -33122,9 +35187,9 @@
       "source_file": "UX.md",
       "source_location": "L1221",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_ux_md_refactor_liquid_glass_e_nuova_architettura_dei_flussi",
-      "target": "ux_14_impatto_sui_test",
-      "confidence_score": 1.0
+      "target": "ux_14_impatto_sui_test"
     },
     {
       "relation": "contains",
@@ -33132,9 +35197,9 @@
       "source_file": "UX.md",
       "source_location": "L1267",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_ux_md_refactor_liquid_glass_e_nuova_architettura_dei_flussi",
-      "target": "ux_15_decisioni_prese_e_domande_aperte",
-      "confidence_score": 1.0
+      "target": "ux_15_decisioni_prese_e_domande_aperte"
     },
     {
       "relation": "contains",
@@ -33142,9 +35207,9 @@
       "source_file": "UX.md",
       "source_location": "L1313",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_ux_md_refactor_liquid_glass_e_nuova_architettura_dei_flussi",
-      "target": "ux_16_indice_dei_seam",
-      "confidence_score": 1.0
+      "target": "ux_16_indice_dei_seam"
     },
     {
       "relation": "contains",
@@ -33152,9 +35217,9 @@
       "source_file": "UX.md",
       "source_location": "L60",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_ux_md_refactor_liquid_glass_e_nuova_architettura_dei_flussi",
-      "target": "ux_1_contraddizioni_con_il_prodotto_esistente_leggere_per_prime",
-      "confidence_score": 1.0
+      "target": "ux_1_contraddizioni_con_il_prodotto_esistente_leggere_per_prime"
     },
     {
       "relation": "contains",
@@ -33162,9 +35227,9 @@
       "source_file": "UX.md",
       "source_location": "L91",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_ux_md_refactor_liquid_glass_e_nuova_architettura_dei_flussi",
-      "target": "ux_2_utenti_e_obiettivi",
-      "confidence_score": 1.0
+      "target": "ux_2_utenti_e_obiettivi"
     },
     {
       "relation": "contains",
@@ -33172,9 +35237,9 @@
       "source_file": "UX.md",
       "source_location": "L120",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_ux_md_refactor_liquid_glass_e_nuova_architettura_dei_flussi",
-      "target": "ux_3_architettura_dell_informazione",
-      "confidence_score": 1.0
+      "target": "ux_3_architettura_dell_informazione"
     },
     {
       "relation": "contains",
@@ -33182,9 +35247,9 @@
       "source_file": "UX.md",
       "source_location": "L190",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_ux_md_refactor_liquid_glass_e_nuova_architettura_dei_flussi",
-      "target": "ux_4_modello_di_navigazione_e_contratto_del_router",
-      "confidence_score": 1.0
+      "target": "ux_4_modello_di_navigazione_e_contratto_del_router"
     },
     {
       "relation": "contains",
@@ -33192,9 +35257,9 @@
       "source_file": "UX.md",
       "source_location": "L348",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_ux_md_refactor_liquid_glass_e_nuova_architettura_dei_flussi",
-      "target": "ux_5_flussi",
-      "confidence_score": 1.0
+      "target": "ux_5_flussi"
     },
     {
       "relation": "contains",
@@ -33202,9 +35267,9 @@
       "source_file": "UX.md",
       "source_location": "L608",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_ux_md_refactor_liquid_glass_e_nuova_architettura_dei_flussi",
-      "target": "ux_6_inventario_degli_stati_schermata_per_schermata",
-      "confidence_score": 1.0
+      "target": "ux_6_inventario_degli_stati_schermata_per_schermata"
     },
     {
       "relation": "contains",
@@ -33212,9 +35277,9 @@
       "source_file": "UX.md",
       "source_location": "L767",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_ux_md_refactor_liquid_glass_e_nuova_architettura_dei_flussi",
-      "target": "ux_7_contratti_d_interazione_shell_e_primitive",
-      "confidence_score": 1.0
+      "target": "ux_7_contratti_d_interazione_shell_e_primitive"
     },
     {
       "relation": "contains",
@@ -33222,9 +35287,9 @@
       "source_file": "UX.md",
       "source_location": "L930",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_ux_md_refactor_liquid_glass_e_nuova_architettura_dei_flussi",
-      "target": "ux_8_accessibilit\u00e0",
-      "confidence_score": 1.0
+      "target": "ux_8_accessibilit\u00e0"
     },
     {
       "relation": "contains",
@@ -33232,9 +35297,9 @@
       "source_file": "UX.md",
       "source_location": "L1089",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_ux_md_refactor_liquid_glass_e_nuova_architettura_dei_flussi",
-      "target": "ux_9_comportamento_responsive",
-      "confidence_score": 1.0
+      "target": "ux_9_comportamento_responsive"
     },
     {
       "relation": "contains",
@@ -33242,9 +35307,9 @@
       "source_file": "UX.md",
       "source_location": "L24",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_ux_md_refactor_liquid_glass_e_nuova_architettura_dei_flussi",
-      "target": "ux_indice",
-      "confidence_score": 1.0
+      "target": "ux_indice"
     },
     {
       "relation": "contains",
@@ -33252,9 +35317,9 @@
       "source_file": "UX.md",
       "source_location": "L93",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_2_utenti_e_obiettivi",
-      "target": "ux_2_1_persone",
-      "confidence_score": 1.0
+      "target": "ux_2_1_persone"
     },
     {
       "relation": "contains",
@@ -33262,9 +35327,9 @@
       "source_file": "UX.md",
       "source_location": "L102",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_2_utenti_e_obiettivi",
-      "target": "ux_2_2_obiettivi_jobs_to_be_done_e_criteri_di_successo",
-      "confidence_score": 1.0
+      "target": "ux_2_2_obiettivi_jobs_to_be_done_e_criteri_di_successo"
     },
     {
       "relation": "contains",
@@ -33272,9 +35337,9 @@
       "source_file": "UX.md",
       "source_location": "L122",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_3_architettura_dell_informazione",
-      "target": "ux_3_1_mappa_del_sito",
-      "confidence_score": 1.0
+      "target": "ux_3_1_mappa_del_sito"
     },
     {
       "relation": "contains",
@@ -33282,9 +35347,9 @@
       "source_file": "UX.md",
       "source_location": "L160",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_3_architettura_dell_informazione",
-      "target": "ux_3_2_glossario_dell_interfaccia",
-      "confidence_score": 1.0
+      "target": "ux_3_2_glossario_dell_interfaccia"
     },
     {
       "relation": "contains",
@@ -33292,9 +35357,9 @@
       "source_file": "UX.md",
       "source_location": "L177",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_3_architettura_dell_informazione",
-      "target": "ux_3_3_stato_condiviso_che_attraversa_le_schermate",
-      "confidence_score": 1.0
+      "target": "ux_3_3_stato_condiviso_che_attraversa_le_schermate"
     },
     {
       "relation": "contains",
@@ -33302,9 +35367,9 @@
       "source_file": "UX.md",
       "source_location": "L338",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_4_modello_di_navigazione_e_contratto_del_router",
-      "target": "ux_4_10_primo_caricamento_fallito_come_riconoscerlo_senza_toccare_usediary",
-      "confidence_score": 1.0
+      "target": "ux_4_10_primo_caricamento_fallito_come_riconoscerlo_senza_toccare_usediary"
     },
     {
       "relation": "contains",
@@ -33312,9 +35377,9 @@
       "source_file": "UX.md",
       "source_location": "L192",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_4_modello_di_navigazione_e_contratto_del_router",
-      "target": "ux_4_1_tabella_delle_rotte",
-      "confidence_score": 1.0
+      "target": "ux_4_1_tabella_delle_rotte"
     },
     {
       "relation": "contains",
@@ -33322,9 +35387,9 @@
       "source_file": "UX.md",
       "source_location": "L252",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_4_modello_di_navigazione_e_contratto_del_router",
-      "target": "ux_4_2_semantica_della_history",
-      "confidence_score": 1.0
+      "target": "ux_4_2_semantica_della_history"
     },
     {
       "relation": "contains",
@@ -33332,9 +35397,9 @@
       "source_file": "UX.md",
       "source_location": "L274",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_4_modello_di_navigazione_e_contratto_del_router",
-      "target": "ux_4_3_sheet_dialoghi_e_visori_nella_history",
-      "confidence_score": 1.0
+      "target": "ux_4_3_sheet_dialoghi_e_visori_nella_history"
     },
     {
       "relation": "contains",
@@ -33342,9 +35407,9 @@
       "source_file": "UX.md",
       "source_location": "L306",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_4_modello_di_navigazione_e_contratto_del_router",
-      "target": "ux_4_4_gestione_del_focus_al_cambio_di_rotta",
-      "confidence_score": 1.0
+      "target": "ux_4_4_gestione_del_focus_al_cambio_di_rotta"
     },
     {
       "relation": "contains",
@@ -33352,9 +35417,9 @@
       "source_file": "UX.md",
       "source_location": "L312",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_4_modello_di_navigazione_e_contratto_del_router",
-      "target": "ux_4_5_autenticazione_e_deep_link",
-      "confidence_score": 1.0
+      "target": "ux_4_5_autenticazione_e_deep_link"
     },
     {
       "relation": "contains",
@@ -33362,9 +35427,9 @@
       "source_file": "UX.md",
       "source_location": "L319",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_4_modello_di_navigazione_e_contratto_del_router",
-      "target": "ux_4_6_gating_funzionale",
-      "confidence_score": 1.0
+      "target": "ux_4_6_gating_funzionale"
     },
     {
       "relation": "contains",
@@ -33372,9 +35437,9 @@
       "source_file": "UX.md",
       "source_location": "L324",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_4_modello_di_navigazione_e_contratto_del_router",
-      "target": "ux_4_7_vercel_e_service_worker",
-      "confidence_score": 1.0
+      "target": "ux_4_7_vercel_e_service_worker"
     },
     {
       "relation": "contains",
@@ -33382,9 +35447,9 @@
       "source_file": "UX.md",
       "source_location": "L330",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_4_modello_di_navigazione_e_contratto_del_router",
-      "target": "ux_4_8_analytics_e_percorsi",
-      "confidence_score": 1.0
+      "target": "ux_4_8_analytics_e_percorsi"
     },
     {
       "relation": "contains",
@@ -33392,9 +35457,9 @@
       "source_file": "UX.md",
       "source_location": "L334",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_4_modello_di_navigazione_e_contratto_del_router",
-      "target": "ux_4_9_ricaricamento_dei_dati",
-      "confidence_score": 1.0
+      "target": "ux_4_9_ricaricamento_dei_dati"
     },
     {
       "relation": "contains",
@@ -33402,9 +35467,9 @@
       "source_file": "UX.md",
       "source_location": "L355",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_5_flussi",
-      "target": "ux_f0_avvio_e_autenticazione",
-      "confidence_score": 1.0
+      "target": "ux_f0_avvio_e_autenticazione"
     },
     {
       "relation": "contains",
@@ -33412,9 +35477,9 @@
       "source_file": "UX.md",
       "source_location": "L568",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_5_flussi",
-      "target": "ux_f10_segnala_un_problema_e_bacheca_admin",
-      "confidence_score": 1.0
+      "target": "ux_f10_segnala_un_problema_e_bacheca_admin"
     },
     {
       "relation": "contains",
@@ -33422,9 +35487,9 @@
       "source_file": "UX.md",
       "source_location": "L581",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_5_flussi",
-      "target": "ux_f11_assistente_guidato",
-      "confidence_score": 1.0
+      "target": "ux_f11_assistente_guidato"
     },
     {
       "relation": "contains",
@@ -33432,9 +35497,9 @@
       "source_file": "UX.md",
       "source_location": "L374",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_5_flussi",
-      "target": "ux_f1_primo_avvio_account_appena_creato",
-      "confidence_score": 1.0
+      "target": "ux_f1_primo_avvio_account_appena_creato"
     },
     {
       "relation": "contains",
@@ -33442,9 +35507,9 @@
       "source_file": "UX.md",
       "source_location": "L388",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_5_flussi",
-      "target": "ux_f2_creare_un_torneo_sheet_unificato",
-      "confidence_score": 1.0
+      "target": "ux_f2_creare_un_torneo_sheet_unificato"
     },
     {
       "relation": "contains",
@@ -33452,9 +35517,9 @@
       "source_file": "UX.md",
       "source_location": "L432",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_5_flussi",
-      "target": "ux_f3_aggiungere_una_partita",
-      "confidence_score": 1.0
+      "target": "ux_f3_aggiungere_una_partita"
     },
     {
       "relation": "contains",
@@ -33462,9 +35527,9 @@
       "source_file": "UX.md",
       "source_location": "L456",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_5_flussi",
-      "target": "ux_f4_ritrovare_un_torneo_tornei",
-      "confidence_score": 1.0
+      "target": "ux_f4_ritrovare_un_torneo_tornei"
     },
     {
       "relation": "contains",
@@ -33472,9 +35537,9 @@
       "source_file": "UX.md",
       "source_location": "L479",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_5_flussi",
-      "target": "ux_f5_dettaglio_torneo",
-      "confidence_score": 1.0
+      "target": "ux_f5_dettaglio_torneo"
     },
     {
       "relation": "contains",
@@ -33482,9 +35547,9 @@
       "source_file": "UX.md",
       "source_location": "L500",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_5_flussi",
-      "target": "ux_f6_check_in_chi_c_\u00e8_oggi_solo_se_oggi_attivo",
-      "confidence_score": 1.0
+      "target": "ux_f6_check_in_chi_c_\u00e8_oggi_solo_se_oggi_attivo"
     },
     {
       "relation": "contains",
@@ -33492,9 +35557,9 @@
       "source_file": "UX.md",
       "source_location": "L519",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_5_flussi",
-      "target": "ux_f7_compagni",
-      "confidence_score": 1.0
+      "target": "ux_f7_compagni"
     },
     {
       "relation": "contains",
@@ -33502,9 +35567,9 @@
       "source_file": "UX.md",
       "source_location": "L535",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_5_flussi",
-      "target": "ux_f8_statistiche_e_beach_wrapped",
-      "confidence_score": 1.0
+      "target": "ux_f8_statistiche_e_beach_wrapped"
     },
     {
       "relation": "contains",
@@ -33512,9 +35577,9 @@
       "source_file": "UX.md",
       "source_location": "L549",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_5_flussi",
-      "target": "ux_f9_profilo",
-      "confidence_score": 1.0
+      "target": "ux_f9_profilo"
     },
     {
       "relation": "contains",
@@ -33522,9 +35587,9 @@
       "source_file": "UX.md",
       "source_location": "L621",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_6_inventario_degli_stati_schermata_per_schermata",
-      "target": "ux_6_0_stati_trasversali_valgono_per_ogni_schermata_di_dati",
-      "confidence_score": 1.0
+      "target": "ux_6_0_stati_trasversali_valgono_per_ogni_schermata_di_dati"
     },
     {
       "relation": "contains",
@@ -33532,9 +35597,9 @@
       "source_file": "UX.md",
       "source_location": "L754",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_6_inventario_degli_stati_schermata_per_schermata",
-      "target": "ux_6_10_assistente_crea",
-      "confidence_score": 1.0
+      "target": "ux_6_10_assistente_crea"
     },
     {
       "relation": "contains",
@@ -33542,9 +35607,9 @@
       "source_file": "UX.md",
       "source_location": "L634",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_6_inventario_degli_stati_schermata_per_schermata",
-      "target": "ux_6_1_home",
-      "confidence_score": 1.0
+      "target": "ux_6_1_home"
     },
     {
       "relation": "contains",
@@ -33552,9 +35617,9 @@
       "source_file": "UX.md",
       "source_location": "L657",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_6_inventario_degli_stati_schermata_per_schermata",
-      "target": "ux_6_2_statistiche_statistiche",
-      "confidence_score": 1.0
+      "target": "ux_6_2_statistiche_statistiche"
     },
     {
       "relation": "contains",
@@ -33562,9 +35627,9 @@
       "source_file": "UX.md",
       "source_location": "L667",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_6_inventario_degli_stati_schermata_per_schermata",
-      "target": "ux_6_3_tornei_tornei_timeline_mappa",
-      "confidence_score": 1.0
+      "target": "ux_6_3_tornei_tornei_timeline_mappa"
     },
     {
       "relation": "contains",
@@ -33572,9 +35637,9 @@
       "source_file": "UX.md",
       "source_location": "L681",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_6_inventario_degli_stati_schermata_per_schermata",
-      "target": "ux_6_4_dettaglio_torneo_tornei_id",
-      "confidence_score": 1.0
+      "target": "ux_6_4_dettaglio_torneo_tornei_id"
     },
     {
       "relation": "contains",
@@ -33582,9 +35647,9 @@
       "source_file": "UX.md",
       "source_location": "L698",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_6_inventario_degli_stati_schermata_per_schermata",
-      "target": "ux_6_5_visori_storia_wrapped_foto",
-      "confidence_score": 1.0
+      "target": "ux_6_5_visori_storia_wrapped_foto"
     },
     {
       "relation": "contains",
@@ -33592,9 +35657,9 @@
       "source_file": "UX.md",
       "source_location": "L709",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_6_inventario_degli_stati_schermata_per_schermata",
-      "target": "ux_6_6_compagni_compagni_e_compagni_id",
-      "confidence_score": 1.0
+      "target": "ux_6_6_compagni_compagni_e_compagni_id"
     },
     {
       "relation": "contains",
@@ -33602,9 +35667,9 @@
       "source_file": "UX.md",
       "source_location": "L721",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_6_inventario_degli_stati_schermata_per_schermata",
-      "target": "ux_6_7_chi_c_\u00e8_oggi_oggi",
-      "confidence_score": 1.0
+      "target": "ux_6_7_chi_c_\u00e8_oggi_oggi"
     },
     {
       "relation": "contains",
@@ -33612,9 +35677,9 @@
       "source_file": "UX.md",
       "source_location": "L734",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_6_inventario_degli_stati_schermata_per_schermata",
-      "target": "ux_6_8_profilo_segnala_segnalazioni",
-      "confidence_score": 1.0
+      "target": "ux_6_8_profilo_segnala_segnalazioni"
     },
     {
       "relation": "contains",
@@ -33622,9 +35687,9 @@
       "source_file": "UX.md",
       "source_location": "L742",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_6_inventario_degli_stati_schermata_per_schermata",
-      "target": "ux_6_9_login",
-      "confidence_score": 1.0
+      "target": "ux_6_9_login"
     },
     {
       "relation": "contains",
@@ -33632,9 +35697,9 @@
       "source_file": "UX.md",
       "source_location": "L905",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_7_contratti_d_interazione_shell_e_primitive",
-      "target": "ux_7_10_segmentedcontrol_e_filterchips",
-      "confidence_score": 1.0
+      "target": "ux_7_10_segmentedcontrol_e_filterchips"
     },
     {
       "relation": "contains",
@@ -33642,9 +35707,9 @@
       "source_file": "UX.md",
       "source_location": "L913",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_7_contratti_d_interazione_shell_e_primitive",
-      "target": "ux_7_11_altri_controlli",
-      "confidence_score": 1.0
+      "target": "ux_7_11_altri_controlli"
     },
     {
       "relation": "contains",
@@ -33652,9 +35717,9 @@
       "source_file": "UX.md",
       "source_location": "L771",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_7_contratti_d_interazione_shell_e_primitive",
-      "target": "ux_7_1_tabbar_sotto_i_900px",
-      "confidence_score": 1.0
+      "target": "ux_7_1_tabbar_sotto_i_900px"
     },
     {
       "relation": "contains",
@@ -33662,9 +35727,9 @@
       "source_file": "UX.md",
       "source_location": "L786",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_7_contratti_d_interazione_shell_e_primitive",
-      "target": "ux_7_2_sidebar_dai_900px_in_su",
-      "confidence_score": 1.0
+      "target": "ux_7_2_sidebar_dai_900px_in_su"
     },
     {
       "relation": "contains",
@@ -33672,9 +35737,9 @@
       "source_file": "UX.md",
       "source_location": "L792",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_7_contratti_d_interazione_shell_e_primitive",
-      "target": "ux_7_3_navbar_con_large_title",
-      "confidence_score": 1.0
+      "target": "ux_7_3_navbar_con_large_title"
     },
     {
       "relation": "contains",
@@ -33682,9 +35747,9 @@
       "source_file": "UX.md",
       "source_location": "L803",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_7_contratti_d_interazione_shell_e_primitive",
-      "target": "ux_7_4_action_sheet_del_e_popover_desktop",
-      "confidence_score": 1.0
+      "target": "ux_7_4_action_sheet_del_e_popover_desktop"
     },
     {
       "relation": "contains",
@@ -33692,9 +35757,9 @@
       "source_file": "UX.md",
       "source_location": "L822",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_7_contratti_d_interazione_shell_e_primitive",
-      "target": "ux_7_5_sheet_restyle_di_sheet_tsx",
-      "confidence_score": 1.0
+      "target": "ux_7_5_sheet_restyle_di_sheet_tsx"
     },
     {
       "relation": "contains",
@@ -33702,9 +35767,9 @@
       "source_file": "UX.md",
       "source_location": "L848",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_7_contratti_d_interazione_shell_e_primitive",
-      "target": "ux_7_6_card_cliccabili_e_righe_difetti_4_e_5",
-      "confidence_score": 1.0
+      "target": "ux_7_6_card_cliccabili_e_righe_difetti_4_e_5"
     },
     {
       "relation": "contains",
@@ -33712,9 +35777,9 @@
       "source_file": "UX.md",
       "source_location": "L863",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_7_contratti_d_interazione_shell_e_primitive",
-      "target": "ux_7_7_confirmdialog_e_azioni_distruttive",
-      "confidence_score": 1.0
+      "target": "ux_7_7_confirmdialog_e_azioni_distruttive"
     },
     {
       "relation": "contains",
@@ -33722,9 +35787,9 @@
       "source_file": "UX.md",
       "source_location": "L884",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_7_contratti_d_interazione_shell_e_primitive",
-      "target": "ux_7_8_toast_sostituisce_il_notice_di_app_e_connectionsnackbar",
-      "confidence_score": 1.0
+      "target": "ux_7_8_toast_sostituisce_il_notice_di_app_e_connectionsnackbar"
     },
     {
       "relation": "contains",
@@ -33732,9 +35797,9 @@
       "source_file": "UX.md",
       "source_location": "L896",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_7_contratti_d_interazione_shell_e_primitive",
-      "target": "ux_7_9_ricerca_searchfield",
-      "confidence_score": 1.0
+      "target": "ux_7_9_ricerca_searchfield"
     },
     {
       "relation": "contains",
@@ -33742,9 +35807,9 @@
       "source_file": "UX.md",
       "source_location": "L934",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_8_accessibilit\u00e0",
-      "target": "ux_8_1_difetti_accertati_da_chiudere",
-      "confidence_score": 1.0
+      "target": "ux_8_1_difetti_accertati_da_chiudere"
     },
     {
       "relation": "contains",
@@ -33752,9 +35817,9 @@
       "source_file": "UX.md",
       "source_location": "L949",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_8_accessibilit\u00e0",
-      "target": "ux_8_2_percorsi_da_tastiera",
-      "confidence_score": 1.0
+      "target": "ux_8_2_percorsi_da_tastiera"
     },
     {
       "relation": "contains",
@@ -33762,9 +35827,9 @@
       "source_file": "UX.md",
       "source_location": "L974",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_8_accessibilit\u00e0",
-      "target": "ux_8_3_focus_regole",
-      "confidence_score": 1.0
+      "target": "ux_8_3_focus_regole"
     },
     {
       "relation": "contains",
@@ -33772,9 +35837,9 @@
       "source_file": "UX.md",
       "source_location": "L985",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_8_accessibilit\u00e0",
-      "target": "ux_8_4_ruoli_e_attributi_aria",
-      "confidence_score": 1.0
+      "target": "ux_8_4_ruoli_e_attributi_aria"
     },
     {
       "relation": "contains",
@@ -33782,9 +35847,9 @@
       "source_file": "UX.md",
       "source_location": "L1007",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_8_accessibilit\u00e0",
-      "target": "ux_8_5_contrasto_obiettivi_e_calcolo_sul_vetro",
-      "confidence_score": 1.0
+      "target": "ux_8_5_contrasto_obiettivi_e_calcolo_sul_vetro"
     },
     {
       "relation": "contains",
@@ -33792,9 +35857,9 @@
       "source_file": "UX.md",
       "source_location": "L1049",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_8_accessibilit\u00e0",
-      "target": "ux_8_6_bersagli_tattili",
-      "confidence_score": 1.0
+      "target": "ux_8_6_bersagli_tattili"
     },
     {
       "relation": "contains",
@@ -33802,9 +35867,9 @@
       "source_file": "UX.md",
       "source_location": "L1061",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_8_accessibilit\u00e0",
-      "target": "ux_8_7_movimento_e_trasparenza",
-      "confidence_score": 1.0
+      "target": "ux_8_7_movimento_e_trasparenza"
     },
     {
       "relation": "contains",
@@ -33812,9 +35877,9 @@
       "source_file": "UX.md",
       "source_location": "L1067",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_8_accessibilit\u00e0",
-      "target": "ux_8_8_testo_zoom_e_lingua",
-      "confidence_score": 1.0
+      "target": "ux_8_8_testo_zoom_e_lingua"
     },
     {
       "relation": "contains",
@@ -33822,9 +35887,9 @@
       "source_file": "UX.md",
       "source_location": "L1074",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_8_accessibilit\u00e0",
-      "target": "ux_8_9_annunci",
-      "confidence_score": 1.0
+      "target": "ux_8_9_annunci"
     },
     {
       "relation": "contains",
@@ -33832,9 +35897,9 @@
       "source_file": "UX.md",
       "source_location": "L1091",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_9_comportamento_responsive",
-      "target": "ux_9_1_breakpoint",
-      "confidence_score": 1.0
+      "target": "ux_9_1_breakpoint"
     },
     {
       "relation": "contains",
@@ -33842,9 +35907,9 @@
       "source_file": "UX.md",
       "source_location": "L1101",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_9_comportamento_responsive",
-      "target": "ux_9_2_per_schermata",
-      "confidence_score": 1.0
+      "target": "ux_9_2_per_schermata"
     },
     {
       "relation": "contains",
@@ -33852,9 +35917,9 @@
       "source_file": "UX.md",
       "source_location": "L1118",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_9_comportamento_responsive",
-      "target": "ux_9_3_aree_sicure_tastiera_e_orientamento",
-      "confidence_score": 1.0
+      "target": "ux_9_3_aree_sicure_tastiera_e_orientamento"
     },
     {
       "relation": "contains",
@@ -33862,9 +35927,9 @@
       "source_file": "UX.md",
       "source_location": "L1225",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_14_impatto_sui_test",
-      "target": "ux_14_1_contratti_che_cambiano",
-      "confidence_score": 1.0
+      "target": "ux_14_1_contratti_che_cambiano"
     },
     {
       "relation": "contains",
@@ -33872,9 +35937,9 @@
       "source_file": "UX.md",
       "source_location": "L1245",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_14_impatto_sui_test",
-      "target": "ux_14_2_test_nuovi_richiesti_dalla_specifica",
-      "confidence_score": 1.0
+      "target": "ux_14_2_test_nuovi_richiesti_dalla_specifica"
     },
     {
       "relation": "contains",
@@ -33882,9 +35947,9 @@
       "source_file": "UX.md",
       "source_location": "L1255",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_14_impatto_sui_test",
-      "target": "ux_14_3_verifiche_manuali_fuori_dalla_portata_di_jsdom",
-      "confidence_score": 1.0
+      "target": "ux_14_3_verifiche_manuali_fuori_dalla_portata_di_jsdom"
     },
     {
       "relation": "contains",
@@ -33892,9 +35957,9 @@
       "source_file": "UX.md",
       "source_location": "L1269",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_15_decisioni_prese_e_domande_aperte",
-      "target": "ux_15_1_gi\u00e0_deciso_dall_utente_da_non_riaprire",
-      "confidence_score": 1.0
+      "target": "ux_15_1_gi\u00e0_deciso_dall_utente_da_non_riaprire"
     },
     {
       "relation": "contains",
@@ -33902,9 +35967,9 @@
       "source_file": "UX.md",
       "source_location": "L1282",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ux_15_decisioni_prese_e_domande_aperte",
-      "target": "ux_15_2_domande_aperte_con_la_risposta_raccomandata",
-      "confidence_score": 1.0
+      "target": "ux_15_2_domande_aperte_con_la_risposta_raccomandata"
     },
     {
       "relation": "contains",
@@ -34372,9 +36437,9 @@
       "source_file": "docs/QA-venues.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_docs_qa_venues_md",
-      "target": "docs_qa_venues_qa_luoghi_venues_la_citt\u00e0_diventa_un_posto_vero",
-      "confidence_score": 1.0
+      "target": "docs_qa_venues_qa_luoghi_venues_la_citt\u00e0_diventa_un_posto_vero"
     },
     {
       "relation": "contains",
@@ -34502,9 +36567,9 @@
       "source_file": "supabase/README.md",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "users_cristianscaratti_desktop_projects_icib_beachvolleydiary_supabase_readme_md",
-      "target": "supabase_readme_supabase_beach_volley_diary",
-      "confidence_score": 1.0
+      "target": "supabase_readme_supabase_beach_volley_diary"
     },
     {
       "relation": "contains",
@@ -35888,5 +37953,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "19bf22873a599ea6ce29d656462c4772e480d162"
+  "built_at_commit": "9f0cf49971baa4aceb1ef3e795898299ba168df4"
 }
