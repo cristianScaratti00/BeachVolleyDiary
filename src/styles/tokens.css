@@ -342,6 +342,12 @@
     --ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);   /* ENTRATA e SVELTO */
     --ease-racconto: cubic-bezier(0.16, 1, 0.3, 1);    /* come NumeroCheSale */
     --ease-respiro: cubic-bezier(0.45, 0, 0.55, 1);
+    /* Lo skeleton in tre tempi (MOTION.md §6.2): a 0ms lo spazio è riservato
+       ma vuoto, a 150ms compaiono le forme (un chunk in cache non lampeggia
+       grigio), a 600ms parte il respiro. Ritardi, non durate: con
+       reduced-motion restano, perché non spostano niente. */
+    --delay-skeleton: 150ms;
+    --delay-respiro: 600ms;
     /* MOLLA (stiffness 460, damping 38, mass 0.9: ζ 0.934, quasi critica)
        campionata in 17 punti su 320ms. Fallback più sotto per chi non ha
        `linear()`. */

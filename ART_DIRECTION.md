@@ -626,6 +626,7 @@ Niente lente che deforma, niente riflessi che si muovono: in CSS su Safari non s
 | `--dur-molla` + `--ease-molla` | 320ms, `linear(0, .077, .236, …, 1)` | `MOLLA` (460/38/0.9, ζ 0.934) | tutto ciò che si sposta nello spazio |
 | `--dur-racconto` + `--ease-racconto` | 800ms, `cubic-bezier(.16,1,.3,1)` | la curva di `NumeroCheSale` | numeri che salgono, grafici che si disegnano: una volta per montaggio |
 | `--dur-respiro` + `--ease-respiro` | 1400ms, `cubic-bezier(.45,0,.55,1)` | | pulsazione degli skeleton (mezzo ciclo, `alternate`) |
+| `--delay-skeleton` · `--delay-respiro` | 150ms · 600ms | | lo skeleton in tre tempi (MOTION.md §6.2): forme a 150ms, respiro da 600ms |
 | `--motion-scale` | 1 (0 con reduced-motion) | | moltiplica ogni spostamento: `translateY(calc(12px * var(--motion-scale)))` |
 | `--press-scale` | .97 (1 con reduced-motion) | | pressione dei pulsanti |
 

@@ -2,11 +2,12 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/react'
-// Prima i token: il primo foglio dichiara l'ordine dei livelli CSS. Da soli
-// non disegnano niente (solo custom properties e `[data-material]`), quindi
-// convivono con index.css finché la migrazione non lo assorbe.
+// Prima i token: il primo foglio dichiara l'ordine dei livelli CSS. Poi i
+// materiali (`[data-material]`) e la base degli elementi nudi. index.css è il
+// linguaggio di prima, fuori dai livelli: resta finché la Fase 6 non lo toglie.
 import './styles/tokens.css'
 import './styles/materials.css'
+import './styles/base.css'
 import './index.css'
 import Root from './Root'
 import { AuthProvider } from './hooks/useAuth'

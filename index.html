@@ -15,8 +15,14 @@
       rel="icon"
       href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2224%22 fill=%22%231B2A4A%22/><g transform=%22translate(50,50) scale(0.78) translate(-50,-52)%22><path d=%22M50 90 L34 58 A26 26 0 1 1 66 58 Z%22 fill=%22%23FF6B35%22/><circle cx=%2250%22 cy=%2240%22 r=%2220%22 fill=%22%23FAF8F5%22/></g></svg>"
     />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#FAF8F5" />
+    <!-- `viewport-fit=cover`: TabBar, NavBar, sheet e visori arrivano fino ai
+         bordi dello schermo e si scostano da soli con `env(safe-area-inset-*)`.
+         Niente `maximum-scale`: lo zoom resta libero (UX §8.8). -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <!-- Un solo colore, quello del fondo dove sta la barra di stato (--bg-top):
+         la dark mode non c'è in questo giro (UX C17, ART_DIRECTION D11). -->
+    <meta name="theme-color" content="#FAF6F0" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <!-- PWA: il manifest è condiviso con la landing (/presentazione), che è il
          posto da cui si installa. `start_url` punta qui, così l'icona in Home
          apre direttamente il diario. Il service worker lo registra la landing. -->
@@ -30,12 +36,23 @@
          un foglio cross-origin senza CORS è illeggibile — il PNG usciva in
          Times. Google Fonts risponde con ACAO *, quindi non cambia altro.
          Per lo stesso motivo connect-src (vercel.json) ammette i due domini. -->
+    <!-- Inter: il font dell'interfaccia su Android e Windows (su Apple vince
+         SF Pro) e l'UNICO della tela dei PNG, che deve poterlo incorporare
+         (ART_DIRECTION §3.1). Variabile con l'asse ottico: da 28px in su passa
+         da solo al taglio Display. -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&display=swap"
+      rel="stylesheet"
+      crossorigin="anonymous"
+    />
+    <!-- Il foglio di prima: convive con Inter finché la migrazione non toglie
+         l'ultimo uso di Space Grotesk e Nunito Sans (Fase 6). -->
     <link
       href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&display=swap"
       rel="stylesheet"
       crossorigin="anonymous"
     />
-    <title>Beach Volley Diary</title>
+    <title>Beach Diary</title>
   </head>
   <body>
     <div id="root"></div>

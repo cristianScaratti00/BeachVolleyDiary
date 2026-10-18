@@ -1,120 +1,82 @@
 // ============================================================================
-// Contrasto WCAG dei colori introdotti dal filtro a chip e dai contatori di
-// sezione.
+// Contrasto WCAG dei punti dell'interfaccia che non sono semplici coppie di
+// token: chip e contatori come li disegnano le primitive, il banner alpha, i
+// pin della mappa sulle tile vere, la riga "torneo qui" del luogo.
 //
 // axe non può misurarlo: jsdom non fa layout e non implementa canvas, quindi la
 // regola color-contrast restituisce sempre "incomplete". I colori però sono
 // costanti note, quindi il rapporto si calcola direttamente — deterministico e
 // senza browser.
 //
-// Cosa presidia questo file: che i token NUOVI non stiano peggio di quelli di
-// casa che riusano. Il debito di contrasto del design system (testo secondario
-// al 55% di opacità) è preesistente e documentato in
-// docs/QA-tornei-formati.md — qui è fissato a numero, così se qualcuno
-// schiarisce ancora quei colori il test se ne accorge.
+// Le coppie di token in quanto tali (ogni inchiostro su ogni fondo, il vetro
+// nel caso peggiore) le verifica src/styles/tokens.test.ts leggendo il CSS.
+// Qui restano i REQUISITI: i pin, la riga del luogo, il banner. Non sono scelte
+// di stile e non si "uniformano" al resto.
 // ============================================================================
 import { describe, it, expect } from 'vitest'
-import { INK, MUTED } from '../components/ui'
+import { contrast, AA_TEXT, AA_NON_TEXT } from './wcag'
+import { LIT } from '../lib/theme'
 
-const AA_TEXT = 4.5 // WCAG 1.4.3, testo normale
-const AA_NON_TEXT = 3 // WCAG 1.4.11, bordi/indicatori/stati
+const WHITE = '#FFFFFF'
+const INK = LIT.ink
+const PAGE = LIT.bg
 
-const PAGE = '#FAF8F5' // body, src/index.css
-const WHITE = '#ffffff'
-const NEUTRAL_BG = '#F2F0EC' // fondo del contatore neutro e di Badge tone="neutral"
-const ACCENT_BG = '#FFF1EA' // fondo del contatore "Prossimi tornei" e del badge podio
-const ACCENT_FG = '#C4501E'
-const FOCUS_RING = '#1B2A4A' // .chip:focus-visible, src/index.css
-
-type RGB = [number, number, number]
-
-// Accetta '#RRGGBB' e 'rgba(r,g,b,a)' — MUTED è esportato in quella forma.
-function parse(color: string): { rgb: RGB; alpha: number } {
-  const rgba = color.match(/rgba?\(([^)]+)\)/)
-  if (rgba) {
-    const [r, g, b, a = '1'] = rgba[1].split(',').map((s) => s.trim())
-    return { rgb: [+r, +g, +b], alpha: +a }
-  }
-  return { rgb: [1, 3, 5].map((i) => parseInt(color.slice(i, i + 2), 16)) as RGB, alpha: 1 }
-}
-
-// Un colore semitrasparente non ha un contrasto proprio: va composto sul fondo
-// su cui viene realmente disegnato.
-function flatten(color: string, background: string): RGB {
-  const fg = parse(color)
-  const bg = parse(background)
-  return fg.rgb.map((c, i) => fg.alpha * c + (1 - fg.alpha) * bg.rgb[i]) as RGB
-}
-
-function luminance(rgb: RGB): number {
-  const [r, g, b] = rgb.map((v) => {
-    const s = v / 255
-    return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4
-  })
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b
-}
-
-export function contrast(color: string, background: string): number {
-  const [hi, lo] = [luminance(flatten(color, background)), luminance(flatten(background, background))].sort((a, b) => b - a)
-  return Math.round(((hi + 0.05) / (lo + 0.05)) * 100) / 100
-}
-
-describe('contrasto — filtro a chip', () => {
-  it('il testo della chip non attiva supera AA', () => {
-    expect(contrast(INK, WHITE)).toBeGreaterThanOrEqual(AA_TEXT)
+describe('contrasto — filtro a chip (FilterChips)', () => {
+  it('il testo della chip non attiva supera AA sulla carta', () => {
+    expect(contrast(LIT.ink, LIT.surface)).toBeGreaterThanOrEqual(AA_TEXT)
   })
 
-  it('il testo della chip attiva supera AA', () => {
-    expect(contrast(WHITE, INK)).toBeGreaterThanOrEqual(AA_TEXT)
+  it('il testo della chip attiva supera AA sulla pillola navy', () => {
+    expect(contrast(LIT.onSelect, LIT.select)).toBeGreaterThanOrEqual(AA_TEXT)
   })
 
-  it('lo stato selezionato si distingue dallo sfondo pagina senza affidarsi al bordo', () => {
+  it('lo stato selezionato si distingue dal fondo pagina senza affidarsi al bordo', () => {
     // Il navy pieno è ciò che rende leggibile "quale filtro è attivo" anche a
     // chi non distingue un bordo dall'altro.
+    expect(contrast(LIT.select, PAGE)).toBeGreaterThanOrEqual(AA_NON_TEXT)
+  })
+
+  it('l\'anello di focus si stacca dal fondo pagina', () => {
+    // `outline-offset: 2px` disegna l'anello FUORI dalla chip: il fondo di
+    // riferimento è la pagina, non il riempimento navy della chip attiva.
     expect(contrast(INK, PAGE)).toBeGreaterThanOrEqual(AA_NON_TEXT)
   })
-
-  it('il contorno di focus si stacca dallo sfondo pagina', () => {
-    // `outline-offset: 2px` disegna il contorno FUORI dalla chip: il fondo di
-    // riferimento è la pagina, non il riempimento navy della chip attiva.
-    expect(contrast(FOCUS_RING, PAGE)).toBeGreaterThanOrEqual(AA_NON_TEXT)
-  })
 })
 
-describe('contrasto — contatori di sezione', () => {
-  it('il contatore neutro riusa esattamente la coppia di Badge tone="neutral"', () => {
-    // Nessun token nuovo: il contatore non aggiunge debito, lo eredita.
-    // 3.34:1 è sotto AA — difetto sistemico del design system, non di questa
-    // schermata (vedi docs/QA-tornei-formati.md, difetto #3).
-    expect(contrast(MUTED, NEUTRAL_BG)).toBe(3.34)
+describe('contrasto — contatori di sezione e badge', () => {
+  it('il contatore neutro supera AA (era 3.34 con MUTED su #F2F0EC, difetto #3)', () => {
+    // Badge neutro: --ink-2 su --fill.
+    expect(contrast(LIT.ink2, LIT.fill)).toBe(5.34)
   })
 
-  it('il contatore accent riusa esattamente la coppia del badge da podio', () => {
-    // 4.21:1, appena sotto AA. Stessa coppia già usata su ogni card.
-    expect(contrast(ACCENT_FG, ACCENT_BG)).toBe(4.21)
+  it('il contatore accent supera AA (era 4.21 con #C4501E su #FFF1EA)', () => {
+    // Badge accento e "Prossimi tornei": --accent-text su --accent-wash.
+    expect(contrast(LIT.accentText, LIT.accentWash)).toBe(4.71)
+  })
+
+  it('le vecchie coppie restano sotto AA: sono il motivo del cambio', () => {
+    expect(contrast('rgba(27,42,74,.55)', '#F2F0EC')).toBe(3.34)
+    expect(contrast('#C4501E', '#FFF1EA')).toBe(4.21)
   })
 })
 
 // ============================================================================
-// Banner alpha — il testo secondario NON riusa MUTED.
-//
-// Il fondo sabbia del banner è la coppia accent già in casa, ma il corpo del
-// testo lì sopra è la parte che si deve leggere davvero: è l'avviso che dice
-// che l'app può rompersi. Con MUTED (.55) starebbe a ~3.2:1, cioè peggio del
-// debito già noto; con .72 passa AA. Il numero è fissato qui perché schiarirlo
-// per "uniformarlo al resto" sarebbe una regressione silenziosa.
+// Banner alpha — l'avviso che dice che l'app può rompersi si deve leggere
+// davvero. Fondo --accent-wash con il bordo --accent-edge, testo --ink pieno
+// (ART_DIRECTION §8: 12.07). Il link è --accent-text, 600.
 // ============================================================================
-const BANNER_ALPHA_BG = '#FFF1EA' // stesso fondo del badge da podio
-const BANNER_ALPHA_FG = 'rgba(27,42,74,.72)'
-
 describe('contrasto — banner versione alpha', () => {
-  it('il testo del banner supera AA sul fondo sabbia', () => {
-    expect(contrast(BANNER_ALPHA_FG, BANNER_ALPHA_BG)).toBeGreaterThanOrEqual(AA_TEXT)
+  it('il testo del banner supera AA sul fondo tinto', () => {
+    expect(contrast(LIT.ink, LIT.accentWash)).toBe(12.07)
   })
 
-  it('MUTED sullo stesso fondo NON basterebbe', () => {
-    // La ragione per cui il banner ha un token suo invece di riusare MUTED.
-    expect(contrast(MUTED, BANNER_ALPHA_BG)).toBeLessThan(AA_TEXT)
+  it('il link "Segnala un problema" supera AA sullo stesso fondo', () => {
+    expect(contrast(LIT.accentText, LIT.accentWash)).toBeGreaterThanOrEqual(AA_TEXT)
+  })
+
+  it('il secondario di prima (.55) sullo stesso fondo NON basterebbe', () => {
+    // La ragione per cui il banner scrive con l'inchiostro pieno.
+    expect(contrast('rgba(27,42,74,.55)', LIT.accentWash)).toBeLessThan(AA_TEXT)
   })
 })
 
@@ -139,6 +101,8 @@ describe('contrasto — banner versione alpha', () => {
 // navy dentro: qualunque sia la tile, uno dei due la stacca. È la soluzione
 // cartografica standard, e qui è un REQUISITO: togliere uno dei due bordi come
 // "rumore visivo" fa sparire i pin su metà della penisola, in silenzio.
+// I pin NON passano dai token (ART_DIRECTION §4.5): restano i letterali di
+// `dotForRank`, ed è su quelli che si misura.
 // ============================================================================
 const VINTO = '#FF6B35'
 const PODIO = '#F7A883'
@@ -185,14 +149,14 @@ describe('contrasto — pin della mappa', () => {
 
 describe('contrasto — riga "torneo qui" del luogo', () => {
   it('il testo della storia del luogo supera AA su fondo pagina', () => {
-    // Riga da 12.5px: testo normale per WCAG (grande = 18.66px bold), quindi
-    // serve 4.5:1 pieno. Per questo è navy e non arancione scuro.
+    // Riga in footnote (13px): testo normale per WCAG (grande = 18.66px
+    // bold), quindi serve 4.5:1 pieno. Per questo è inchiostro e non arancio.
     expect(contrast(INK, PAGE)).toBeGreaterThanOrEqual(AA_TEXT)
   })
 
-  it('l\'arancione scuro dei badge NON basterebbe qui', () => {
-    // 4.39:1 su fondo pagina: sotto AA. Fissato a numero perché la tentazione
-    // di riusarlo (sta bene) torni a farsi notare invece che passare liscia.
-    expect(contrast(ACCENT_FG, PAGE)).toBe(4.39)
+  it('l\'arancione scuro dei badge di prima NON sarebbe bastato qui', () => {
+    // 4.39:1 sul vecchio fondo sabbia: sotto AA. Fissato a numero perché la
+    // tentazione di riusarlo torni a farsi notare invece che passare liscia.
+    expect(contrast('#C4501E', '#FAF8F5')).toBe(4.39)
   })
 })

@@ -278,6 +278,11 @@ describe('token — un solo vocabolario di movimento', () => {
     expect(bezier(L('ease-standard'))).toEqual([...SVELTO.ease])
   })
 
+  it('lo skeleton compare a 150ms e respira da 600ms (MOTION.md §2.3)', () => {
+    expect(ms(L('delay-skeleton'))).toBe(150)
+    expect(ms(L('delay-respiro'))).toBe(600)
+  })
+
   it('--ease-molla è la molla MOLLA campionata', () => {
     // Soluzione esatta dell'oscillatore smorzato con velocità iniziale nulla.
     const { stiffness: k, damping: c, mass: m } = MOLLA
