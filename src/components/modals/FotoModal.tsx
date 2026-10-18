@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ChangeEvent } from 'react'
-import { Sheet, Label, inputStyle, selectStyle, Actions } from './Sheet'
+import { Sheet } from './Sheet'
+import { Label, inputStyle, selectStyle, Actions } from './legacy'
 import type { AnyForm, SetField, Option } from '../../lib/models'
 
 interface FotoModalProps {

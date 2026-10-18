@@ -1,0 +1,23 @@
+/* Badge: toni dai token, tutte le coppie ≥ 4.5 (tokens.test.ts). */
+@layer components {
+  .ui-badge {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    height: var(--badge-h);
+    padding: 0 var(--space-2);
+    border-radius: var(--radius-capsule);
+    font: var(--type-caption-1);
+    font-weight: 600;
+    letter-spacing: var(--track-caption-1);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    background: var(--fill);
+    color: var(--ink-2);
+  }
+  .ui-badge[data-tone="accent"] { background: var(--accent-wash); color: var(--accent-text); }
+  .ui-badge[data-tone="select"] { background: var(--select); color: var(--on-select); }
+  .ui-badge[data-tone="success"] { background: var(--success-wash); color: var(--success); }
+  .ui-badge[data-tone="danger"] { background: var(--danger-wash); color: var(--danger); }
+}

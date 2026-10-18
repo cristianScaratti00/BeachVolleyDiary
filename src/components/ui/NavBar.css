@@ -1,0 +1,93 @@
+@layer components {
+  /* La barra compatta: alta --navbar-h più la safe-area, sticky in cima a chi
+     scorre (la finestra sotto i 900, `<main>` da 900). Esce dai margini della
+     pagina fino ai bordi. */
+  .ui-navbar {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-navbar);
+    display: grid;
+    grid-template-columns: minmax(var(--touch), 1fr) auto minmax(var(--touch), 1fr);
+    align-items: center;
+    gap: var(--space-2);
+    height: calc(var(--safe-top) + var(--navbar-h));
+    padding: var(--safe-top) var(--space-2) 0;
+    margin: 0 calc(-1 * var(--gutter));
+  }
+  .ui-navbar-glass {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity var(--dur-svelto) var(--ease-standard), visibility 0s linear var(--dur-svelto);
+  }
+  /* Il filo inferiore arriva insieme al vetro (ART_DIRECTION §7). */
+  .ui-navbar-glass::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: var(--hairline);
+    background: var(--separator);
+  }
+  .ui-navbar[data-scrolled] .ui-navbar-glass {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity var(--dur-svelto) var(--ease-standard), visibility 0s;
+  }
+  .ui-navbar-lead { justify-self: start; min-width: 0; display: flex; align-items: center; }
+  .ui-navbar-trail { justify-self: end; display: flex; align-items: center; gap: var(--space-1); }
+  .ui-navbar-compact {
+    min-width: 0;
+    max-width: 100%;
+    font: var(--type-headline);
+    letter-spacing: var(--track-headline);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    opacity: 0;
+    transform: translateY(calc(4px * var(--motion-scale)));
+    transition: opacity var(--dur-svelto) var(--ease-standard), transform var(--dur-svelto) var(--ease-standard);
+  }
+  .ui-navbar[data-scrolled] .ui-navbar-compact { opacity: 1; transform: none; }
+
+  .ui-navbar-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+    min-height: var(--touch);
+    max-width: 100%;
+    padding-right: var(--space-2);
+    color: var(--ink);
+    font: var(--type-body);
+    letter-spacing: var(--track-body);
+  }
+  .ui-navbar-back-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  @media (hover: hover) and (pointer: fine) {
+    .ui-navbar-back:hover .ui-navbar-back-label { text-decoration: underline; text-underline-offset: var(--space-0-5); }
+  }
+
+  .ui-largetitle { padding-top: var(--space-2); }
+  .ui-largetitle-eyebrow {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-bottom: var(--space-2);
+  }
+  .ui-largetitle-h1 {
+    font: var(--type-large-title);
+    letter-spacing: var(--track-large-title);
+    overflow-wrap: anywhere;
+  }
+  .ui-largetitle-sub {
+    margin-top: var(--space-0-5);
+    font: var(--type-subhead);
+    letter-spacing: var(--track-subhead);
+    color: var(--ink-2);
+  }
+  .ui-navbar-sentinel { display: block; height: 1px; margin-top: -1px; }
+}

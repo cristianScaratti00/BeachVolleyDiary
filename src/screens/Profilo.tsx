@@ -6,7 +6,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import { useScelta, riapriScelta } from '../lib/consenso'
 import { Avatar, Badge, MUTED } from '../components/ui'
-import { Label, inputStyle } from '../components/modals/Sheet'
+import { Label, inputStyle } from '../components/modals/legacy'
 import SegnalazioniAdmin from '../components/SegnalazioniAdmin'
 
 interface ProfiloProps {

@@ -1,5 +1,6 @@
 import type { CSSProperties, ChangeEvent } from 'react'
-import { Sheet, Title, Label, inputStyle, selectStyle, Actions } from './Sheet'
+import { Sheet } from './Sheet'
+import { Title, Label, inputStyle, selectStyle, Actions } from './legacy'
 import type { AnyForm, SetField, SetsApi, Option, Phase } from '../../lib/models'
 
 const setInput: CSSProperties = { flex: 1, minWidth: 0, border: '1px solid rgba(27,42,74,.16)', borderRadius: 10, padding: 11, font: "600 16px 'Space Grotesk'", textAlign: 'center', background: '#fff' }

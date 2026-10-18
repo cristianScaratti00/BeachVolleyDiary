@@ -348,6 +348,7 @@ Un valore fuori scala (14, 18, 22) è il sintomo di un altro errore: di solito u
 |---|---|---|
 | `--content-max` | 1120px | colonna del contenuto su desktop (come oggi) |
 | `--reading-max` | 720px | Profilo, Segnala, form, assistente |
+| `--timeline-max` | 840px | Tornei · Timeline (UX §9.2) |
 | `--sheet-max` | 560px | form sheet centrato da 600 in su |
 | `--segmented-max` | 420px | |
 | `--sidebar-w` / `--sidebar-inset` | 240px / 12px | la Sidebar galleggia a 12px dai bordi della finestra |
@@ -357,6 +358,13 @@ Un valore fuori scala (14, 18, 22) è il sintomo di un altro errore: di solito u
 | `--tabbar-h` / `--tabbar-side` / `--tabbar-max` | 64 / 16 / 480 px | da 600 la capsula si centra, larga al massimo 480 |
 | `--tabbar-bottom` | `max(12px, env(safe-area-inset-bottom))` | |
 | Breakpoint (`BP` in `theme.ts`) | 360 · 600 · 900 · 1280 | UX §9.1; il 900 è `useIsWide` e non si sposta |
+| `--badge-h` · `--segment-h` · `--search-h` | 20 · 36 (44 − 2×4) · 40 px | badge, segmenti e chip, ricerca (§8) |
+| `--esito-size` · `--plus-size` | 28 · 56 (64 − 2×4) px | cerchio V/P, ＋ della TabBar |
+| `--switch-w` / `--switch-h` · `--handle-w` / `--handle-h` | 51 / 31 · 36 / 5 px | interruttore, maniglia dello sheet |
+| `--swatch-ring` · `--photo-ring` | filo interno navy al 16% · al 6% | campioni colore (§4.3.7), foto (§10.3) |
+| `--mappa-h` · `--venue-map-h` · `--dock-max` | 380 · 200 · 720 px | riquadro Mappa (UX C3), VenueMap, colonna dell'assistente |
+| `--card-min` · `--card-min-narrow` · `--chart-min` · `--stat-min` · `--photo-min` | 300 · 250 · 280 · 110 · 100 px | il minimo delle colonne delle griglie (UX §9.2) |
+| `--timeline-date` · `--empty-max` · `--dialog-w` · `--popover-w` | 64 (78 da 600) · 320 · 320 · 300 px | colonna della data in Timeline, stato vuoto, ConfirmDialog centrato, popover |
 
 ---
 

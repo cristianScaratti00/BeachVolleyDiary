@@ -70,6 +70,23 @@ export const SVELTO = { duration: 0.18, ease: [0.2, 0.8, 0.2, 1] } as const
  */
 export const MOLLA = { type: 'spring', stiffness: 460, damping: 38, mass: 0.9 } as const
 
+/**
+ * Oltre questo numero di elementi che si spostano insieme, il layout cambia
+ * senza animazione (MOTION.md §12): misurare e muovere quaranta nodi su un
+ * Android economico costa più di quanto il movimento chiarisca.
+ */
+export const FLIP_MAX = 24
+
+/**
+ * Durata minima visibile dello stato occupato, SOLO per i «Riprova»
+ * (MOTION.md §8.4): un tentativo che fallisce in un fotogramma (offline) non si
+ * vede, e il pulsante sembra non funzionare. Mai per i salvataggi riusciti.
+ */
+export const BUSY_MIN_MS = 300
+
+/** Chiusura automatica di avvisi informativi e di successo (UX §7.8). */
+export const TOAST_MS = 4000
+
 interface MotionRootProps {
   children: ReactNode
 }

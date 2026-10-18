@@ -15,7 +15,7 @@
 // ============================================================================
 import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties, ChangeEvent, KeyboardEvent, ReactNode } from 'react'
-import { inputStyle, selectStyle } from './Sheet'
+import { inputStyle, selectStyle } from './legacy'
 import { venueLabel, parseLatLng, formatLatLng } from '../../lib/derive'
 import { cercaLuoghi, cercaCitta, MIN_QUERY } from '../../lib/geosearch'
 import type { LuogoTrovato, CittaTrovata } from '../../lib/geosearch'

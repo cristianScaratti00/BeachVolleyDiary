@@ -136,6 +136,9 @@
 
     /* ---------------------------------------------------------- Linee */
     --hairline: 1px; /* 0.5px sugli schermi ≥2x, più sotto */
+    /* Bordo di card, campi e chip: resta 1px anche a 2x, perché a 0.5px e
+       all'8% sparirebbe (ART_DIRECTION §8). */
+    --border-w: 1px;
     /* Separatori fra righe di un gruppo. */
     --separator: rgb(27 42 74 / 0.14);
     /* Bordo delle card di contenuto: le definisce, non le incornicia. */
@@ -289,6 +292,7 @@
     --gutter: 16px;                 /* 24 da 600, 32 da 900: più sotto */
     --content-max: 1120px;
     --reading-max: 720px;
+    --timeline-max: 840px;          /* Tornei · Timeline (UX §9.2) */
     --sheet-max: 560px;
     --segmented-max: 420px;
     --sidebar-w: 240px;
@@ -307,6 +311,35 @@
     --tabbar-clearance: calc(var(--tabbar-h) + var(--tabbar-bottom) + var(--space-4));
     --safe-top: env(safe-area-inset-top, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+    /* Misure di singoli controlli (ART_DIRECTION §5.3 e §8): stanno qui perché
+       nessun componente scriva un numero a mano. Dove possono, derivano dalla
+       concentricità: guida 44 − 2×4 = segmento 36; capsula 64 − 2×4 = ＋ 56. */
+    --badge-h: 20px;
+    --segment-h: calc(var(--control-md) - 2 * var(--space-1));
+    --search-h: 40px;
+    --esito-size: 28px;
+    --plus-size: calc(var(--tabbar-h) - 2 * var(--space-1));
+    --switch-w: 51px;
+    --switch-h: 31px;
+    --handle-w: 36px;
+    --handle-h: 5px;
+    --swatch-ring: inset 0 0 0 1px rgb(27 42 74 / 0.16);
+    --photo-ring: inset 0 0 0 1px rgb(27 42 74 / 0.06);
+    --mappa-h: 380px;
+    --venue-map-h: 200px;
+    --dock-max: 720px;
+    /* Griglie (UX §9.2): colonne `minmax(min(100%, X), 1fr)`, mai scroll
+       orizzontale. */
+    --card-min: 300px;
+    --card-min-narrow: 250px;
+    --chart-min: 280px;
+    --stat-min: 110px;
+    --photo-min: 100px;
+    --timeline-date: 64px;
+    --empty-max: 320px;
+    --dialog-w: 320px;
+    --popover-w: 300px;
 
     /* ---------------------------------------------------------- Raggi */
     /* Concentrici: dentro un contenitore con inset ≤ 10px il raggio interno è
@@ -364,7 +397,7 @@
   }
 
   @media (min-width: 600px) {
-    :root { --gutter: 24px; }
+    :root { --gutter: 24px; --timeline-date: 78px; }
   }
   @media (min-width: 900px) {
     :root { --gutter: 32px; }

@@ -1,0 +1,58 @@
+@layer components {
+  .ui-avatar {
+    --d: var(--space-10);
+    position: relative;
+    flex: none;
+    display: inline-grid;
+    place-items: center;
+    width: var(--d);
+    height: var(--d);
+    border-radius: 50%;
+    overflow: hidden;
+    background: var(--select);
+    color: var(--on-select);
+  }
+  .ui-avatar[data-size="24"] { --d: var(--space-6); }
+  .ui-avatar[data-size="32"] { --d: var(--space-8); }
+  .ui-avatar[data-size="48"] { --d: var(--space-12); }
+  .ui-avatar[data-size="64"] { --d: var(--space-16); }
+  .ui-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .ui-avatar:has(img)::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: var(--photo-ring);
+  }
+  .ui-avatar-initial {
+    font-family: var(--font-ui);
+    font-weight: 600;
+    font-size: calc(var(--d) * 0.42);
+    line-height: 1;
+  }
+  .ui-avatar[data-busy] > img,
+  .ui-avatar[data-busy] > .ui-avatar-initial { opacity: 0.6; }
+  .ui-avatar[data-busy] > .ui-spinner { position: absolute; }
+
+  /* Lo spinner: un anello che gira. Con reduced-motion sta fermo (un arco
+     visibile basta a dire "aspetta"). */
+  .ui-spinner-wrap { display: inline-grid; place-items: center; }
+  .ui-spinner {
+    width: var(--icon-24);
+    height: var(--icon-24);
+    border-radius: 50%;
+    border: var(--space-0-5) solid currentColor;
+    border-right-color: transparent;
+    opacity: 0.8;
+    animation: ui-gira var(--dur-respiro) linear infinite;
+  }
+  @keyframes ui-gira { to { transform: rotate(1turn); } }
+  @media (prefers-reduced-motion: reduce) {
+    .ui-spinner { animation: none; }
+  }
+}

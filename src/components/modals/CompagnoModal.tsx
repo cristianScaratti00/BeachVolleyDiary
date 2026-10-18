@@ -1,5 +1,6 @@
 import type { ChangeEvent } from 'react'
-import { Sheet, Title, Label, inputStyle, Actions } from './Sheet'
+import { Sheet } from './Sheet'
+import { Title, Label, inputStyle, Actions } from './legacy'
 import type { AnyForm, SetField } from '../../lib/models'
 
 interface CompagnoModalProps {

@@ -1,0 +1,16 @@
+/* Il wordmark (ART_DIRECTION §10.2). Il marchio resta com'è: i suoi colori
+   sono il marchio, non palette. */
+@layer components {
+  .ui-brand { display: inline-flex; align-items: center; gap: var(--space-3); color: var(--ink); }
+  .ui-brand-word {
+    font: var(--type-headline);
+    font-weight: 700;
+    letter-spacing: var(--track-title-1);
+    white-space: nowrap;
+  }
+  .ui-brand[data-size="s"] { gap: var(--space-2); }
+  .ui-brand[data-size="l"] .ui-brand-word { font: var(--type-title-2); font-weight: 700; letter-spacing: var(--track-title-1); }
+  .ui-brand-word-2 { font-weight: 400; color: var(--ink-2); }
+  .ui-brand[data-light] { color: var(--ink-inverse); }
+  .ui-brand[data-light] .ui-brand-word-2 { color: var(--on-glass-dark-2); }
+}

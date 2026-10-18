@@ -1,5 +1,6 @@
 import type { ChangeEvent } from 'react'
-import { Sheet, Title, Label, inputStyle, selectStyle, Actions } from './Sheet'
+import { Sheet } from './Sheet'
+import { Title, Label, inputStyle, selectStyle, Actions } from './legacy'
 import VenuePicker from './VenuePicker'
 import { CATEGORIES, PLACEMENTS, BRACKETS } from '../../lib/db.enums'
 import type { AnyForm, SetField, Option, Venue, Category, Placement, Bracket } from '../../lib/models'

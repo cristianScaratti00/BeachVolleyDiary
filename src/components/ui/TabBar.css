@@ -1,0 +1,104 @@
+@layer components {
+  .ui-tabbar {
+    position: fixed;
+    left: var(--tabbar-side);
+    right: var(--tabbar-side);
+    bottom: var(--tabbar-bottom);
+    z-index: var(--z-tabbar);
+    max-width: var(--tabbar-max);
+    height: var(--tabbar-h);
+    margin: 0 auto;
+    padding: var(--space-1);
+    border-radius: var(--radius-capsule);
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    color: var(--ink);
+    transition: opacity var(--dur-entrata) var(--ease-standard), transform var(--dur-entrata) var(--ease-standard), visibility 0s;
+  }
+  /* Sopra il velo SOLO col menu ＋ aperto: il ＋ da cui il menu nasce resta
+     acceso. Il cambio di livello avviene dove nessuno lo vede. */
+  .ui-tabbar[data-lifted] { z-index: calc(var(--z-scrim) + 1); }
+  /* Tastiera su: via in SVELTO, poi `visibility: hidden`. */
+  .ui-tabbar[data-hidden] {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(calc(var(--space-4) * var(--motion-scale)));
+    transition: opacity var(--dur-svelto) var(--ease-standard), transform var(--dur-svelto) var(--ease-standard), visibility 0s linear var(--dur-svelto);
+  }
+
+  .ui-tabbar-pill {
+    position: absolute;
+    top: var(--space-1);
+    bottom: var(--space-1);
+    left: var(--space-1);
+    width: calc((100% - 2 * var(--space-1)) / 5);
+    border-radius: var(--radius-capsule);
+    background: var(--select);
+    transform: translateX(calc(var(--i, 0) * 100%));
+    transition: transform var(--dur-molla) var(--ease-molla);
+    pointer-events: none;
+  }
+  .ui-tabbar-pill[data-hidden] { opacity: 0; }
+
+  .ui-tab {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    min-width: 0;
+    border-radius: var(--radius-capsule);
+    color: inherit;
+    text-decoration: none;
+  }
+  .ui-tab:focus-visible { outline-offset: calc(-1 * var(--focus-width)); }
+  .ui-tab > span {
+    grid-area: 1 / 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-0-5);
+    min-width: 0;
+    transition: opacity var(--dur-molla) var(--ease-molla);
+  }
+  /* Inattiva: etichetta --ink-2 (sul vetro è l'inchiostro all'85%: 5.20 nel
+     caso peggiore), icona --ink-3 (≥ 3:1 come componente). */
+  .ui-tab > .ui-ink { color: var(--ink-2); }
+  .ui-tab > .ui-ink .ui-icon { color: var(--ink-3); }
+  .ui-tab > .ui-ink-on { color: var(--on-select); opacity: 0; }
+  .ui-tab[aria-current="page"] > .ui-ink { opacity: 0; }
+  .ui-tab[aria-current="page"] > .ui-ink-on { opacity: 1; }
+  .ui-tab-label {
+    max-width: 100%;
+    font: var(--type-caption-2);
+    letter-spacing: var(--track-caption-2);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .ui-tab-avatar { display: inline-grid; border-radius: 50%; }
+  .ui-tab-avatar[data-on] { box-shadow: 0 0 0 var(--space-0-5) var(--on-select); }
+
+  .ui-tab-plus-slot { position: relative; z-index: 1; display: grid; place-items: center; }
+  .ui-tab-plus {
+    display: grid;
+    place-items: center;
+    width: var(--plus-size);
+    height: var(--plus-size);
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--on-accent);
+    box-shadow: var(--elev-float);
+    transition: transform var(--dur-svelto) var(--ease-standard);
+  }
+  .ui-tab-plus:active { transform: scale(var(--press-scale)); }
+
+  /* Telefono in orizzontale: la barra si abbassa e le etichette spariscono a
+     vista (il nome accessibile resta). */
+  @media (max-height: 400px) {
+    .ui-tab-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-tabbar-pill { transition: none; }
+  }
+}
