@@ -33,6 +33,14 @@ export function Card({ as: Tag = 'article', traccia, tone, className, children, 
   )
 }
 
+/**
+ * Il nome di un'entità come si mostra. Un nome vuoto (dati vecchi, un import)
+ * lasciava una card senza link da toccare e un h1 vuoto nel dettaglio.
+ */
+export function nomeVisibile(name: ReactNode): ReactNode {
+  return typeof name === 'string' && name.trim() === '' ? 'Senza nome' : name
+}
+
 /** Il titolo-link di una card di entità: `<h3><a>` esteso a tutta la card. */
 export function CardLink({ to, children, describedBy, level = 3, traccia, className }: {
   to: Route
@@ -48,7 +56,7 @@ export function CardLink({ to, children, describedBy, level = 3, traccia, classN
   return (
     <H className={className ? `ui-card-title ${className}` : 'ui-card-title'}>
       <Link to={to} className="ui-card-link" aria-describedby={describedBy} traccia={traccia}>
-        {children}
+        {nomeVisibile(children)}
       </Link>
     </H>
   )

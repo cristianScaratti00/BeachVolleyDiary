@@ -36,6 +36,7 @@ import {
   Page,
   PlacementBadge,
   Section,
+  nomeVisibile,
   placementText,
 } from '../components/ui/index'
 import { BrandMark } from '../components/Logo'
@@ -121,7 +122,7 @@ function Adesso({ adesso, today, checkIn, onAggiungiPartita, onAggiornaPiazzamen
               <h3 className="ui-card-title">
                 Com'è andata a «
                 <Link to={{ name: 'torneo', id: daChiudere.id }} className="ui-card-link" aria-describedby={`${id}-chiudi`}>
-                  {daChiudere.name}
+                  {nomeVisibile(daChiudere.name)}
                 </Link>
                 »?
               </h3>

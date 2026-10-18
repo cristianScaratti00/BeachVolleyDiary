@@ -9,8 +9,12 @@
     border-radius: var(--radius-card);
     overflow: hidden;
   }
-  .ui-stat-grid[data-cols="3"],
-  .ui-stat-grid[data-cols="6"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .ui-stat-grid[data-cols="3"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  /* Sei numeri: 3×2 dai 360px; sotto, 2×3 (celle da 95px non reggono
+     un'etichetta da tabellone nemmeno sillabata). */
+  @media (min-width: 360px) {
+    .ui-stat-grid[data-cols="6"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
   @media (min-width: 600px) {
     .ui-stat-grid[data-cols="4"] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
     .ui-stat-grid[data-cols="6"] { grid-template-columns: repeat(6, minmax(0, 1fr)); }
@@ -39,6 +43,13 @@
     letter-spacing: var(--track-eyebrow);
     text-transform: uppercase;
     color: var(--ink-2);
+    /* In tre colonne a 390px la cella lascia 86px e «DIFFERENZIALE» ne
+       misura 103: usciva dalla card e copriva il filo. Va a capo in sillabe
+       (lang="it"), e se il browser non sa sillabare spezza la parola. */
+    -webkit-hyphens: auto;
+    hyphens: auto;
+    hyphenate-limit-chars: 6 3 3;
+    overflow-wrap: break-word;
   }
 
   /* -------------------------------------------------------- StatFooter */
@@ -68,7 +79,7 @@
   /* ------------------------------------------------------------ Meter */
   .ui-meter { min-width: 0; }
   .ui-meter-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); }
-  .ui-meter-label { font: var(--type-subhead-strong); letter-spacing: var(--track-subhead); min-width: 0; }
+  .ui-meter-label { font: var(--type-subhead-strong); letter-spacing: var(--track-subhead); min-width: 0; overflow-wrap: anywhere; }
   .ui-meter-value { font: var(--type-num-s); font-variant-numeric: tabular-nums; flex: none; }
   .ui-meter-sub {
     margin-top: var(--space-1);

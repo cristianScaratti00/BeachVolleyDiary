@@ -570,7 +570,11 @@ function SelectedVenueNote({ venue, venues, onMerge }: {
             className="ui-button"
             data-variant="neutral"
             data-size="md"
-            onClick={merge}
+            onClick={() => {
+              // Disattivo finché manca il luogo da tenere: il tocco porta lì.
+              if (!target) document.getElementById('venue-merge-target')?.focus()
+              else void merge()
+            }}
             aria-disabled={!target || busy || undefined}
             aria-busy={busy || undefined}
           >

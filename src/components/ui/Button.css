@@ -57,16 +57,19 @@
   .ui-button[data-block] { display: flex; width: 100%; }
 
   .ui-button[data-variant="filled"] { background: var(--accent); color: var(--on-accent); }
-  .ui-button[data-variant="tinted"] { background: var(--accent-wash); color: var(--accent-text); }
-  .ui-button[data-variant="plain"] { color: var(--accent-text); padding: 0 var(--space-3); }
+  /* `--label-state`: il tono dell'etichetta in hover e premuto. Lo strato è
+     `currentColor` e scurisce il fondo verso il testo: l'arancio e il danger
+     scendono di un tono per restare ≥ 4.5 (tokens.css, `-state`). */
+  .ui-button[data-variant="tinted"] { background: var(--accent-wash); color: var(--accent-text); --label-state: var(--accent-text-state); }
+  .ui-button[data-variant="plain"] { color: var(--accent-text); padding: 0 var(--space-3); --label-state: var(--accent-text-state); }
   .ui-button[data-variant="quiet"] { color: var(--ink); padding: 0 var(--space-3); }
   .ui-button[data-variant="neutral"] { background: var(--fill); color: var(--ink); }
   .ui-button[data-variant="destructive"] { background: var(--danger); color: var(--on-danger); }
-  .ui-button[data-variant="destructive-plain"] { color: var(--danger); padding: 0 var(--space-3); }
+  .ui-button[data-variant="destructive-plain"] { color: var(--danger); padding: 0 var(--space-3); --label-state: var(--danger-state); }
   /* Sul vetro si scrive solo con l'inchiostro (ART_DIRECTION §4.4): il
      materiale ridefinisce --ink, e --ink sul vetro scuro è il bianco. */
   .ui-button[data-variant="glass"] { color: var(--ink); --material-elev: var(--elev-float); }
-  [data-material] .ui-button[data-variant="plain"] { color: var(--ink); }
+  [data-material] .ui-button[data-variant="plain"] { color: var(--ink); --label-state: var(--ink); }
 
   /* Disattivato: niente opacità sul pulsante intero (sul vetro mostrerebbe
      quello che c'è sotto), fondo --fill ed etichetta --ink-disabled. */
@@ -78,11 +81,17 @@
 
   @media (hover: hover) and (pointer: fine) {
     .ui-button:not([aria-disabled="true"]):not([aria-busy="true"]):hover::before { opacity: var(--state-hover); }
+    .ui-button:is([data-variant="tinted"], [data-variant="plain"], [data-variant="destructive-plain"]):not([aria-disabled="true"]):not([aria-busy="true"]):hover {
+      color: var(--label-state);
+    }
   }
   .ui-button:not([aria-disabled="true"]):not([aria-busy="true"]):active { transform: scale(var(--press-scale)); }
   .ui-button:not([aria-disabled="true"]):not([aria-busy="true"]):active::before {
     opacity: var(--state-press);
     transition-duration: 0ms;
+  }
+  .ui-button:is([data-variant="tinted"], [data-variant="plain"], [data-variant="destructive-plain"]):not([aria-disabled="true"]):not([aria-busy="true"]):active {
+    color: var(--label-state);
   }
 
   /* ------------------------------------------------------------ IconButton */
@@ -115,8 +124,13 @@
   .ui-icon-button[data-variant="quiet"] { color: var(--ink-2); }
   .ui-icon-button[data-variant="glass"] { --material-elev: var(--elev-float); }
   @media (hover: hover) and (pointer: fine) {
-    .ui-icon-button:hover::before { opacity: var(--state-hover); }
+    .ui-icon-button:not([aria-disabled="true"]):hover::before { opacity: var(--state-hover); }
   }
-  .ui-icon-button:active { transform: scale(var(--press-scale)); }
-  .ui-icon-button:active::before { opacity: var(--state-press); transition-duration: 0ms; }
+  .ui-icon-button:not([aria-disabled="true"]):active { transform: scale(var(--press-scale)); }
+  .ui-icon-button:not([aria-disabled="true"]):active::before { opacity: var(--state-press); transition-duration: 0ms; }
+  /* Disattivato come il Button: niente strato, niente scala, fondo --fill se
+     era pieno. Resta raggiungibile (`aria-disabled`). Il colore dell'icona lo
+     sceglie il contesto quando serve (MapZoom: --ink-3 sul vetro). */
+  .ui-icon-button[aria-disabled="true"] { cursor: default; color: var(--ink-disabled); }
+  .ui-icon-button[aria-disabled="true"][data-variant="filled"] { background: var(--fill); }
 }

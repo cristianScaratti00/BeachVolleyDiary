@@ -22,7 +22,31 @@
   /* L'assistente e Wrapped occupano tutto lo schermo. */
   .app-main[data-fullscreen] { padding: 0; }
   @media (min-width: 900px) {
-    .app-main[data-fullscreen] { overflow: hidden; }
+    .app-main[data-fullscreen] { overflow: hidden; scrollbar-gutter: auto; }
+  }
+
+  /* Chi scorre lascia libere le barre che galleggiano sopra di lui. Il
+     browser porta in vista l'elemento a fuoco (Tab) rispettando questi
+     margini: senza, il campo o il link a fuoco finiva SOTTO la TabBar o
+     sotto la NavBar compatta (WCAG 2.4.11). Vale anche per `scrollIntoView`. */
+  :root {
+    scroll-padding-top: calc(var(--safe-top) + var(--navbar-h));
+    scroll-padding-bottom: var(--tabbar-clearance);
+  }
+  @media (min-width: 900px) {
+    .app-main { scroll-padding-top: var(--navbar-h); scroll-padding-bottom: var(--space-4); }
+  }
+
+  /* La scrollbar classica (Windows, Linux, macOS con «mostra sempre») occupa
+     spazio: senza un posto riservato la colonna si sposta di lato quando
+     compare (da una pagina corta a una lunga) e quando uno sheet blocca lo
+     scroll (`useScrollLock` mette `overflow: hidden`). Le scrollbar sovrapposte
+     dei telefoni non prendono spazio: lì non cambia niente. */
+  @media (hover: hover) and (pointer: fine) and (max-width: 899px) {
+    :root { scrollbar-gutter: stable; }
+  }
+  @media (min-width: 900px) {
+    .app-main { scrollbar-gutter: stable; }
   }
 
   .app-lazy-area { display: contents; }

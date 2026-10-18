@@ -199,7 +199,9 @@ L'interfaccia usa **un inchiostro** (navy), **due superfici** (sabbia e carta) e
 | `--ink-placeholder` | `#697288` | **4.81** su `--field` | | | | | solo dentro un campo |
 | `--accent-text` | `#B2461A` | 5.55 | 4.92 | 4.63 | 4.74 | 4.71 | arancio come testo: link, pulsanti *plain* e *tinted*, badge |
 | `--accent-strong` | `#DC4F17` | 4.06 | 3.60 | 3.38 | 3.47 | 3.45 | arancio come grafica che porta significato |
+| `--accent-text-state` | `#9D3E17` | 6.70 | 5.94 | 5.58 | 5.72 | 5.69 | l'etichetta arancio in hover e premuto (vedi sotto, «Strato di stato») |
 | `--danger` | `#C81F52` | 5.56 | 4.93 | 4.64 | 4.75 | 4.72 | azioni distruttive, errori |
+| `--danger-state` | `#B01B48` | 6.78 | 6.01 | 5.65 | 5.79 | 5.76 | l'etichetta danger in hover e premuto |
 | `--success` | `#11784A` | 5.51 | 4.89 | 4.59 | 4.71 | 4.68 | esito positivo (solo testo e icone) |
 | `--focus-ring` / `--select` | `#1B2A4A` | 14.22 | 12.61 | 11.85 | | | anello di focus, pillola di selezione |
 
@@ -336,7 +338,7 @@ Un valore fuori scala (14, 18, 22) è il sintomo di un altro errore: di solito u
 | Padding delle card | 16 (< 600) · 20 (≥ 600) |
 | Righe di ListGroup | altezza minima 44 (una riga) / 56 (con sottotitolo); padding 12 verticale, 16 orizzontale; separatore rientrato di 16 da sinistra (o fino al testo, se la riga ha un'icona) |
 | Campi di un form | etichetta → campo: 6; campo → campo: 16; gruppo → gruppo: 24 |
-| Chip in riga | gap 8; 2px di margine per l'anello di focus (comportamento attuale) |
+| Chip in riga | gap 8; `--focus-reach` (4px) di margine per l'anello di focus, che sono anche i 4px che portano il bersaglio a 44 |
 | Griglia foto | gap 4 (come Foto di Apple), celle `minmax(100px, 1fr)` |
 | Griglia di statistiche | celle separate da **1px di `--edge`** (il "tabellone"), padding delle celle 16 |
 | Fondo pagina su mobile | `padding-bottom: var(--tabbar-clearance)` = 64 + `max(12px, safe-area)` + 16 |
@@ -356,7 +358,7 @@ Un valore fuori scala (14, 18, 22) è il sintomo di un altro errore: di solito u
 | `--touch` | 44px | bersaglio minimo, sempre |
 | `--control-sm` / `-md` / `-lg` | 32 / 44 / 52 px | `sm` solo con area cliccabile estesa a 44 |
 | `--navbar-h` | 52px | barra compatta, più `--safe-top` |
-| `--tabbar-h` / `--tabbar-side` / `--tabbar-max` | 64 / 16 / 480 px | da 600 la capsula si centra, larga al massimo 480 |
+| `--tabbar-h` / `--tabbar-side` / `--tabbar-max` | 64 / 16 / 480 px | da 600 la capsula si centra, larga al massimo 480; sotto i 360 il margine scende a 8 (a 320 «Compagni» non ci stava) |
 | `--tabbar-bottom` | `max(12px, env(safe-area-inset-bottom))` | |
 | Breakpoint (`BP` in `theme.ts`) | 360 · 600 · 900 · 1280 | UX §9.1; il 900 è `useIsWide` e non si sposta |
 | `--badge-h` · `--segment-h` · `--search-h` | 20 · 36 (44 − 2×4) · 40 px | badge, segmenti e chip, ricerca (§8) |
@@ -459,7 +461,8 @@ Le FilterChips sono capsule e la guida del segmented è un rettangolo da 14 (§1
 | `destructive` | `--danger` (pieno) oppure nessuno | `--on-danger` / `--danger` | 5.56 | conferma in un ConfirmDialog (pieno); riga in un gruppo (testo) |
 | navy (`data-variant="select"`) | `--select` | `--on-select` | 14.22 | solo come stato premuto di un toggle, mai come CTA |
 
-- **Disabilitato**: fondo `--fill`, etichetta `--ink-disabled`, `aria-disabled`. Niente `opacity` sull'intero pulsante: sul vetro l'opacità mostra quello che c'è sotto.
+- **Disabilitato**: fondo `--fill`, etichetta `--ink-disabled`, `aria-disabled`. Niente `opacity` sull'intero pulsante: sul vetro l'opacità mostra quello che c'è sotto. Vale anche per `IconButton` (lo fa la primitiva). Il tocco su un disattivato dice perché (`onDisabledClick`: porta al campo che manca).
+- **Strato di stato** (polish): lo strato è `currentColor` a .08/.12 *sotto* l'etichetta, quindi scurisce il fondo verso il testo. Con `--accent-text` il premuto scendeva a 4.01 sul wash e 4.17 sul fondo; con `--danger` a 4.09. In hover e premuto le varianti `tinted`, `plain` e `destructive-plain` passano a `--accent-text-state` / `--danger-state` (premuto ≥ 4.66 su ogni fondo). Il test che lo ricalcola è in `tokens.test.ts`.
 - **Occupato**: l'etichetta cambia («Creo…»), `aria-busy`, larghezza bloccata con `min-width` alla misura di riposo, così il pulsante non si restringe.
 
 **Focus** (`⟂ F1`, in `base.css`):
@@ -470,6 +473,9 @@ Le FilterChips sono capsule e la guida del segmented è un rettangolo da 14 (§1
 
 - Navy su tutto il chiaro: 12.61 sul `--bg`, 7.04 sul vetro nel caso peggiore. Bianco dentro `[data-surface="dark"]` e `glass-dark` (lo fa `materials.css`).
 - **Mai** `outline: none` senza un sostituto. Gli input tengono l'anello **e** il bordo.
+- **`--focus-reach`** (= larghezza + offset, 4px): lo spazio che un contenitore con `overflow` lascia all'anello (`padding: var(--focus-reach); margin: calc(-1 * var(--focus-reach))`). Con 2px l'anello usciva mozzato (chip, «Altri dettagli», righe set).
+- Nei gruppi di righe la prima e l'ultima riga prendono il raggio del gruppo, così l'anello (che segue il raggio) non viene tagliato dagli angoli.
+- Chi scorre lascia libere le barre: `scroll-padding` sotto la NavBar compatta e sopra la TabBar (`AppShell.css`), così l'elemento a fuoco non finisce mai coperto (WCAG 2.4.11).
 
 **Scrollbar** (`⟂ F1`): su `(hover: hover) and (pointer: fine)` sono visibili e sottili (`scrollbar-width: thin; scrollbar-color: var(--ink-3) transparent`). Si nascondono solo le righe che scorrono in orizzontale (chip), e solo su touch.
 

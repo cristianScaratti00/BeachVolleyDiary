@@ -24,35 +24,40 @@ export default function Compagni({ compagni, traccia, onNuovoCompagno }: Compagn
           action={<Button variant="filled" icon="plus" onClick={onNuovoCompagno}>Aggiungi un compagno</Button>}
         />
       ) : (
-        <CardGrid min="narrow" className="compagni-grid" label="I tuoi compagni">
-          {compagni.map((p) => {
-            const meta = `compagno-meta-${p.id}`
-            return (
-              <li key={p.id} className="compagni-item">
-                <Card traccia={traccia === p.id}>
-                  <div className="compagni-head">
-                    <Avatar name={p.name} size={48} />
-                    <div className="compagni-who">
-                      <CardLink to={{ name: 'compagno', id: p.id }} describedBy={meta}>
-                        {p.name}
-                      </CardLink>
-                      <p id={meta} className="compagni-meta">
-                        {p.played === 1 ? '1 partita insieme' : `${p.played} partite insieme`}
-                      </p>
+        <>
+          {/* Le card hanno il nome in un h3 (UX §7.6): senza un h2 in mezzo
+              l'indice dei titoli saltava dal h1 della pagina al h3. */}
+          <h2 className="sr-only">I tuoi compagni</h2>
+          <CardGrid min="narrow" className="compagni-grid" label="I tuoi compagni">
+            {compagni.map((p) => {
+              const meta = `compagno-meta-${p.id}`
+              return (
+                <li key={p.id} className="compagni-item">
+                  <Card traccia={traccia === p.id}>
+                    <div className="compagni-head">
+                      <Avatar name={p.name} size={48} />
+                      <div className="compagni-who">
+                        <CardLink to={{ name: 'compagno', id: p.id }} describedBy={meta}>
+                          {p.name}
+                        </CardLink>
+                        <p id={meta} className="compagni-meta">
+                          {p.played === 1 ? '1 partita insieme' : `${p.played} partite insieme`}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                  <StatFooter
-                    items={[
-                      { value: `${p.winPct}%`, label: 'vittorie', tone: p.played > 0 ? 'win' : undefined },
-                      { value: p.won, label: 'vinte' },
-                      { value: p.lost, label: 'perse' },
-                    ]}
-                  />
-                </Card>
-              </li>
-            )
-          })}
-        </CardGrid>
+                    <StatFooter
+                      items={[
+                        { value: `${p.winPct}%`, label: 'vittorie', tone: p.played > 0 ? 'win' : undefined },
+                        { value: p.won, label: 'vinte' },
+                        { value: p.lost, label: 'perse' },
+                      ]}
+                    />
+                  </Card>
+                </li>
+              )
+            })}
+          </CardGrid>
+        </>
       )}
     </Page>
   )

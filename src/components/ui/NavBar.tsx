@@ -19,6 +19,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Icon } from './Icon'
+import { nomeVisibile } from './Card'
 import './NavBar.css'
 
 export interface NavBarBack {
@@ -75,7 +76,7 @@ export function NavBar({ title, subtitle, subtitleLive, back, leading, actions, 
             leading
           )}
         </div>
-        <div className="ui-navbar-compact" aria-hidden="true">{title}</div>
+        <div className="ui-navbar-compact" aria-hidden="true">{nomeVisibile(title)}</div>
         <div className="ui-navbar-trail">
           {scrolledActions?.(scattata)}
           {actions}
@@ -83,7 +84,7 @@ export function NavBar({ title, subtitle, subtitleLive, back, leading, actions, 
       </div>
       <div className="ui-largetitle">
         {eyebrow && <div className="ui-largetitle-eyebrow">{eyebrow}</div>}
-        <h1 className="ui-largetitle-h1" tabIndex={-1}>{title}</h1>
+        <h1 className="ui-largetitle-h1" tabIndex={-1}>{nomeVisibile(title)}</h1>
         {subtitle != null && subtitle !== '' && (
           <p className="ui-largetitle-sub" role={subtitleLive ? 'status' : undefined}>{subtitle}</p>
         )}

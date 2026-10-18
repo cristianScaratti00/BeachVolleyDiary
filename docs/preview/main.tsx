@@ -11,7 +11,8 @@
 // client, che è il percorso di ripiego normale.
 //
 // Parametri: ?vuoto (account senza dati) · ?fallito (primo caricamento
-// fallito) · ?lento (le mutazioni impiegano 1,5s).
+// fallito) · ?lento (le mutazioni impiegano 1,5s) · ?estremo (nomi lunghissimi,
+// stringhe vuote, numeri enormi: la prova di resistenza dei layout).
 // ============================================================================
 import { StrictMode, useCallback, useMemo, useState } from 'react'
 import { createRoot } from 'react-dom/client'
@@ -83,10 +84,53 @@ function datiDiProva(): DiaryData {
   return { tournaments: tornei, matches: partite, partners: [pGiulia, pMarco, pAltro], photos: foto3, venues: [vRimini, vRiccione] }
 }
 
+// ?estremo: i dati che rompono i layout. Nomi lunghissimi e parole senza
+// spazi, stringhe vuote, emoji, numeri enormi (150 partite, set ai vantaggi
+// infiniti), 40 tornei per le liste lunghe. Serve a cercare a occhio testo che
+// trabocca, ellissi che mangiano l'informazione e righe che non vanno a capo.
+function datiEstremi(): DiaryData {
+  const lungo = 'Maria Antonietta Benedetta Dell’Acqua-Fontanarossa'
+  const p1: Partner = { id: uuid(), name: lungo, color: '#FF6B35', linkedUserId: uuid(), shared: false }
+  const p2: Partner = { id: uuid(), name: 'Superlunghissimonomesenzaspazi', color: '#00B4D8', linkedUserId: null, shared: false }
+  const p3: Partner = { id: uuid(), name: '🏐🔥', color: '#FFD23F', linkedUserId: null, shared: true }
+  const v1: Venue = { id: uuid(), name: 'Stabilimento Balneare Bagno Novantanove e Mezzo «Da Gigi»', city: 'San Giovanni in Marignano', lat: 43.94, lng: 12.71, surface: 'Sabbia outdoor', shared: false }
+  const v2: Venue = { id: uuid(), name: '', city: '', lat: null, lng: null, surface: null, shared: false }
+  const base = (o: Partial<Tournament>): Tournament => ({
+    id: uuid(), name: 'Torneo', date: oggi, city: 'Castiglione della Pescaia', venueId: null, category: 'Open', format: '2vs2',
+    surface: 'Sabbia outdoor', placement: 'Gironi', bracket: null, color: '#FF6B35', emoji: '🏖️', partnerId: p1.id, shared: false, ...o,
+  })
+  const posti = ['1° 🏆', '2°', '3°', 'Semifinale', 'Quarti', 'Ottavi', 'Gironi'] as const
+  const tornei: Tournament[] = [
+    base({ name: 'Campionato Regionale Open Misto di Beach Volley della Riviera Romagnola — Memorial Giovanni Battista Ferrari', venueId: v1.id, city: v1.city, placement: 'In corso', bracket: 'Girone unico' }),
+    base({ name: 'Precisazionedellaprecisazionesenzaspazi2026', date: giorni(5), placement: 'In corso', partnerId: p2.id, city: '' }),
+    base({ name: '', date: giorni(-3), venueId: v2.id, city: '', placement: '1° 🏆', partnerId: null }),
+    base({ name: '🏐🏐🏐 Beach 🔥 Party 🎉', date: giorni(-7), placement: '2°', partnerId: p3.id, shared: true }),
+  ]
+  for (let i = 0; i < 40; i++) {
+    tornei.push(base({ name: `Tappa ${i + 1} del circuito estivo`, date: giorni(-10 - i * 9), city: i % 3 ? 'Rimini' : 'Lido di Spina', placement: posti[i % posti.length], partnerId: [p1.id, p2.id, null][i % 3] }))
+  }
+  const partite: Match[] = []
+  for (let i = 0; i < 150; i++) {
+    const t = tornei[i % 3 === 0 ? 0 : 4 + (i % 40)]
+    const vinta = i % 4 !== 0
+    partite.push({
+      id: uuid(), tournamentId: t.id, partnerId: t.partnerId,
+      opponents: i % 7 === 0 ? '' : i % 5 === 0 ? 'Associazione Sportiva Dilettantistica Bianchi-Verdi / Rossi-Neri' : `Coppia ${i}`,
+      phase: (['Girone', 'Ottavi', 'Quarti', 'Semifinale', 'Finale'] as const)[i % 5], note: '',
+      sets: i % 9 === 0 ? [{ us: 38, them: 36 }, { us: 29, them: 31 }, { us: 21, them: 19 }] : [{ us: vinta ? 21 : 15, them: vinta ? 12 : 21 }, { us: vinta ? 21 : 19, them: vinta ? 19 : 21 }],
+    })
+  }
+  const foto3: Photo[] = [
+    { id: uuid(), tournamentId: tornei[0].id, color: '#FF6B35', caption: 'Una didascalia che continua e continua e non accenna a finire perché qualcuno ha incollato un intero racconto della giornata', url: foto('#F7C59F', '#FF8657') },
+    { id: uuid(), tournamentId: tornei[0].id, color: '#00B4D8', caption: '', url: null },
+  ]
+  return { tournaments: tornei, matches: partite, partners: [p1, p2, p3], photos: foto3, venues: [v1, v2] }
+}
+
 const VUOTO: DiaryData = { tournaments: [], matches: [], partners: [], photos: [], venues: [] }
 
 function useDiarioFinto(): UseDiary {
-  const [data, setData] = useState<DiaryData>(() => (qs.has('vuoto') ? VUOTO : datiDiProva()))
+  const [data, setData] = useState<DiaryData>(() => (qs.has('vuoto') ? VUOTO : qs.has('estremo') ? datiEstremi() : datiDiProva()))
   const [error, setError] = useState<string | null>(qs.has('fallito') ? 'rete' : null)
   const [primo, setPrimo] = useState(qs.has('fallito'))
   // Stabile come quello vero (useCallback): useScreenData ricarica quando cambia.
@@ -182,7 +226,9 @@ function useCheckInFinto(): UseCheckIn {
   }
 }
 
-const SESSIONE: Session = { id: '00000000-0000-4000-8000-000000000001', email: 'marta@esempio.it', name: 'Marta', role: 'admin', plan: 'premium', avatarUrl: null, hasPassword: true }
+const SESSIONE: Session = qs.has('estremo')
+  ? { id: '00000000-0000-4000-8000-000000000001', email: 'bartolomeo.alessandro.giovanbattista.rossi@esempio-lunghissimo.it', name: 'Bartolomeo Alessandro Giovanbattista', role: 'admin', plan: 'premium', avatarUrl: null, hasPassword: true }
+  : { id: '00000000-0000-4000-8000-000000000001', email: 'marta@esempio.it', name: 'Marta', role: 'admin', plan: 'premium', avatarUrl: null, hasPassword: true }
 
 function Anteprima() {
   const diary = useDiarioFinto()

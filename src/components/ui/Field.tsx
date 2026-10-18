@@ -247,10 +247,13 @@ export function Switch({ checked, onChange, label, hint, disabled, className }: 
   return (
     <div className={className ? `ui-switch-row ${className}` : 'ui-switch-row'}>
       <span className="ui-switch-text">
-        <span id={`${id}-l`} className="ui-switch-label">{label}</span>
+        {/* Un `<label>` vero: anche la scritta accende l'interruttore, non solo
+            il pomello da 51×31. */}
+        <label id={`${id}-l`} htmlFor={`${id}-s`} className="ui-switch-label">{label}</label>
         {hint && <span id={`${id}-h`} className="ui-switch-hint">{hint}</span>}
       </span>
       <button
+        id={`${id}-s`}
         type="button"
         role="switch"
         aria-checked={checked}

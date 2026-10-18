@@ -1,6 +1,8 @@
 /* Riga partita. Il cerchio non si deforma (`flex: none`) e le pastiglie non
-   vanno a capo dentro di sé; sotto i 360px vanno su una seconda riga
-   allineata a destra invece di schiacciare il nome (ART_DIRECTION §16 F2). */
+   vanno a capo dentro di sé; quando non lasciano al nome almeno 7.5rem vanno
+   su una seconda riga allineata a destra invece di schiacciarlo
+   (ART_DIRECTION §16 F2). Era una soglia fissa a 360px: a 390 tre set ai
+   vantaggi lasciavano al nome una colonna da una parola per riga. */
 @layer components {
   .ui-match { flex-direction: column; align-items: stretch; gap: var(--space-2); }
   .ui-match-main {
@@ -23,7 +25,7 @@
     font-weight: 600;
   }
   .ui-esito[data-win] { border-color: var(--data-win); color: var(--accent-text); }
-  .ui-match-who { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .ui-match-who { flex: 1 1 7.5rem; min-width: 0; display: flex; flex-direction: column; }
   .ui-match-title {
     font: var(--type-subhead-strong);
     letter-spacing: var(--track-subhead);
@@ -36,9 +38,6 @@
     overflow-wrap: anywhere;
   }
   .ui-match-sets { flex: none; display: flex; gap: var(--space-1); margin-left: auto; }
-  @media (max-width: 359px) {
-    .ui-match-sets { flex-basis: 100%; justify-content: flex-end; }
-  }
   .ui-set {
     font: var(--type-num-s);
     font-variant-numeric: tabular-nums;

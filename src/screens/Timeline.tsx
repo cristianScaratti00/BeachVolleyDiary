@@ -44,6 +44,8 @@ export default function Timeline({ results, onStoria, traccia }: TimelineProps) 
 
   return (
     <div className="timeline">
+      {/* Fra il h1 «Tornei» e i h3 delle card ci vuole un h2 (axe heading-order). */}
+      <h2 className="sr-only">Timeline</h2>
       <ul ref={lista} className="timeline-list">
         {visibili.map((r) => (
           <Voce key={r.entry.id} r={r} onStoria={onStoria} traccia={traccia === r.entry.id} />

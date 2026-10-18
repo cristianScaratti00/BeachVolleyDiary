@@ -409,6 +409,14 @@ describe('Timeline — tastiera e accessibilità', () => {
     expect(screen.getAllByRole('heading', { level: 1 }).map((h) => h.textContent)).toEqual(['Tornei'])
   })
 
+  it('fra il h1 e i h3 delle card c\'è un h2 (axe heading-order)', async () => {
+    await renderTimeline()
+    const h2 = screen.getByRole('heading', { level: 2, name: 'Timeline' })
+    const h3 = screen.getAllByRole('heading', { level: 3 })
+    expect(h3.length).toBeGreaterThan(0)
+    expect(h2.compareDocumentPosition(h3[0]) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
   it('una foto senza immagine è un riquadro con il suo nome', async () => {
     await renderTimeline([makeDiaryEntry({ id: 'f1', title: 'Foto Cup', photos: [{ color: '#00B4D8', caption: '', url: null }] })])
     expect(screen.getByRole('img', { name: 'Foto non disponibile' })).toBeInTheDocument()

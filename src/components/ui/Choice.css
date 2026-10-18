@@ -58,6 +58,13 @@
   :is(.ui-segment, .ui-chip)[aria-pressed="true"] > .ui-ink { opacity: 0; }
   :is(.ui-segment, .ui-chip)[aria-pressed="true"] > .ui-ink-on { opacity: 1; }
   .ui-segment:focus-visible { outline-offset: 0; }
+  /* Il segmento è alto 36 dentro una guida da 44: il bersaglio prende anche
+     i 4px di guida sopra e sotto (UX §8.6, 44 sempre). */
+  .ui-segment::after {
+    content: "";
+    position: absolute;
+    inset: calc((var(--segment-h) - var(--touch)) / 2) 0;
+  }
 
   /* ---------------------------------------------------------------- Chip */
   /* Livelli: fondo della chip (-1) < pillola (0) < etichetta (1). La pillola
@@ -69,9 +76,11 @@
     flex-wrap: nowrap;
     gap: var(--space-2);
     overflow-x: auto;
-    /* I 2px per l'anello di focus, che `overflow` taglierebbe. */
-    padding: var(--space-0-5);
-    margin: calc(-1 * var(--space-0-5));
+    /* Lo spazio per l'anello di focus, che `overflow` taglierebbe: largo
+       quanto l'anello esce dal bordo (2 + 2). Era 2px e l'anello usciva
+       mozzato sopra e sotto. Sono anche i 4px che portano il bersaglio a 44. */
+    padding: var(--focus-reach);
+    margin: calc(-1 * var(--focus-reach));
   }
   /* Le righe che scorrono di lato nascondono la scrollbar solo sul touch. */
   @media (hover: none) {
@@ -101,6 +110,13 @@
     transition: opacity var(--dur-svelto) var(--ease-standard);
   }
   .ui-chip[aria-pressed="true"]::before { opacity: 0; }
+  /* Bersaglio da 44 come il segmento: 4px sopra e sotto, dentro il padding
+     della riga (che `overflow` altrimenti taglierebbe anche al tocco). */
+  .ui-chip::after {
+    content: "";
+    position: absolute;
+    inset: calc((var(--segment-h) - var(--touch)) / 2) 0;
+  }
   .ui-chip:active { transform: scale(var(--press-scale)); }
   @media (hover: hover) and (pointer: fine) {
     .ui-chip:not([aria-pressed="true"]):hover::before { box-shadow: inset 0 0 0 var(--border-w) var(--edge-strong); }
@@ -109,7 +125,7 @@
   .ui-chips-pill {
     position: absolute;
     left: 0;
-    top: var(--space-0-5);
+    top: var(--focus-reach);
     height: var(--segment-h);
     pointer-events: none;
     z-index: 0;

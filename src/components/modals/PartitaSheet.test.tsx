@@ -92,6 +92,17 @@ describe('PartitaSheet — nuova', () => {
     })
   })
 
+  it('senza torneo «Salva partita» resta disattivo, ma il tocco dice perché e porta al campo', async () => {
+    const user = userEvent.setup()
+    const { props } = renderSheet({ tournamentId: null, tournaments: [] })
+    const salva = screen.getByRole('button', { name: 'Salva partita' })
+    expect(salva).toHaveAttribute('aria-disabled', 'true')
+    await user.click(salva)
+    expect(props.onSave).not.toHaveBeenCalled()
+    expect(screen.getByLabelText('Torneo')).toHaveFocus()
+    expect(screen.getByLabelText('Torneo')).toHaveAccessibleDescription(/Crea prima un torneo/)
+  })
+
   it('i punteggi accettano solo cifre', async () => {
     const user = userEvent.setup()
     renderSheet()

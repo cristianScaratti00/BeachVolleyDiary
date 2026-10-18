@@ -168,6 +168,12 @@
     --accent-wash: #FFE8DC;
     /* Il wash sul fondo pagina fa 1.04: il bordo gli dà una forma. */
     --accent-edge: rgb(220 79 23 / 0.22);
+    /* L'arancio-testo SOTTO lo strato di stato (hover .08, premuto .12).
+       Lo strato è `currentColor` e scurisce il fondo verso l'etichetta: con
+       --accent-text il premuto scende a 4.01 sul wash e 4.17 sul fondo ✗.
+       Un tono più giù e tutti i casi restano sopra AA: premuto 4.78 sul
+       wash, 4.97 sul bg, 4.69 sul fill. */
+    --accent-text-state: #9D3E17;
 
     /* ------------------------------------------------------- Selezione */
     /* Tab attiva, segmento attivo, chip attiva: navy pieno, contenuto bianco.
@@ -182,6 +188,9 @@
     --danger: #C81F52;
     --on-danger: #FFFFFF;
     --danger-wash: #FDE8EE;
+    /* Lo stesso per il danger come testo (pulsante destructive-plain):
+       premuto 4.94 sul bg, 4.66 sul fill (con --danger: 4.09 ✗). */
+    --danger-state: #B01B48;
     /* success: solo testo e icone (5.51 su surface). Nessun pulsante verde. */
     --success: #11784A;
     --success-wash: #E4F4EC;
@@ -194,6 +203,9 @@
     --focus-ring: #1B2A4A;
     --focus-width: 2px;
     --focus-offset: 2px;
+    /* Quanto l'anello esce dal bordo: lo spazio che un contenitore con
+       `overflow` deve lasciare (padding + margine negativo) per non tagliarlo. */
+    --focus-reach: calc(var(--focus-width) + var(--focus-offset));
 
     /* ------------------------------------------------------------- Dati */
     /* Grafica dei dati (linee, barre, anelli): ≥3:1 sulla card bianca.
@@ -408,6 +420,11 @@
     :root { --hairline: 0.5px; }
   }
 
+  /* Sotto i 360px la capsula si allarga di 8px per lato: a 320 la colonna di
+     una tab fa 56px e «Compagni» ne misura 56.25 (finiva in «Compa…»). */
+  @media (max-width: 359px) {
+    :root { --tabbar-side: var(--space-2); }
+  }
   @media (min-width: 600px) {
     :root { --gutter: 24px; --timeline-date: 78px; }
   }
@@ -453,11 +470,14 @@
     --accent-text: #FF9466;
     --accent-wash: #3A2219;
     --accent-edge: rgb(255 122 71 / 0.28);
+    /* Nel buio lo strato schiarisce il fondo: l'etichetta sale di un tono. */
+    --accent-text-state: #FFA47D;
     --select: #F4F2EE;
     --on-select: #0E1626;
     --danger: #FF6B8E;
     --on-danger: #0E1626;
     --danger-wash: #3A1824;
+    --danger-state: #FF819F;
     --success: #3FCF8E;
     --success-wash: #12301F;
     --focus-ring: #F4F2EE;

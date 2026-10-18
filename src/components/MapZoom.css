@@ -19,12 +19,8 @@
     height: var(--hairline);
     background: var(--separator);
   }
-  /* Al limite dello zoom: resta raggiungibile (aria-disabled), ma senza
-     strato di stato né scala, come ogni disattivo (MOTION.md §4.3). */
-  .mapzoom .ui-icon-button[aria-disabled="true"] {
-    color: var(--ink-3);
-    cursor: default;
-  }
-  .mapzoom .ui-icon-button[aria-disabled="true"]:active { transform: none; }
-  .mapzoom .ui-icon-button[aria-disabled="true"]::before { opacity: 0; }
+  /* Al limite dello zoom: resta raggiungibile (aria-disabled); strato e
+     scala li spegne la primitiva (Button.css). Sul vetro --ink-disabled
+     sparirebbe: qui il segno resta --ink-3. */
+  .mapzoom .ui-icon-button[aria-disabled="true"] { color: var(--ink-3); }
 }

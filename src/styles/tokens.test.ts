@@ -17,7 +17,7 @@
 import { describe, it, expect } from 'vitest'
 import tokensCss from './tokens.css?raw'
 import materialsCss from './materials.css?raw'
-import { contrast, over, AA_TEXT, AA_NON_TEXT } from '../test/wcag'
+import { contrast, over, parseColor, AA_TEXT, AA_NON_TEXT } from '../test/wcag'
 import { TOKEN, LIT, dataTone } from '../lib/theme'
 import { ENTRATA, SVELTO, MOLLA } from '../components/Motion'
 
@@ -129,6 +129,62 @@ describe('token — tema chiaro: grafica e stati (≥ 3)', () => {
 
   it('--ink-3 non è un colore da testo', () => {
     expect(cr(L, 'ink-3', 'bg')).toBeLessThan(AA_TEXT)
+  })
+})
+
+// ============================================================================
+// Lo strato di stato (MOTION.md §4.3) è `currentColor` a .08/.12 SOTTO
+// l'etichetta: scurisce il fondo verso il testo. Il contrasto si misura col
+// livello già composto, e l'etichetta colorata passa al suo tono «-state».
+// ============================================================================
+describe('token — lo strato di stato non porta il testo sotto AA', () => {
+  const strato = (theme: (n: string) => string, ink: string, bg: string, alpha: string) => {
+    const { rgb } = parseColor(theme(ink))
+    return over(`rgb(${rgb.join(' ')} / ${theme(alpha)})`, theme(bg))
+  }
+  const casi = [
+    // [etichetta in hover/premuto, fondo a riposo] — tinted, plain, destructive-plain, chip accento
+    ['accent-text-state', 'accent-wash'], ['accent-text-state', 'bg'], ['accent-text-state', 'bg-top'],
+    ['accent-text-state', 'surface'], ['accent-text-state', 'fill'],
+    ['danger-state', 'bg'], ['danger-state', 'surface'], ['danger-state', 'fill'], ['danger-state', 'danger-wash'],
+  ] as const
+
+  it.each(casi.flatMap(([fg, bg]) => [[fg, bg, 'state-hover'], [fg, bg, 'state-press']]))(
+    'chiaro: %s su %s con %s ≥ 4.5',
+    (fg, bg, alpha) => {
+      expect(contrast(L(fg), strato(L, fg, bg, alpha))).toBeGreaterThanOrEqual(AA_TEXT)
+    },
+  )
+
+  it.each(casi.flatMap(([fg, bg]) => [[fg, bg, 'state-hover'], [fg, bg, 'state-press']]))(
+    'scuro: %s su %s con %s ≥ 4.5',
+    (fg, bg, alpha) => {
+      expect(contrast(D(fg), strato(D, fg, bg, alpha))).toBeGreaterThanOrEqual(AA_TEXT)
+    },
+  )
+
+  it('PROVA NEGATIVA: con l\'arancio e il danger di riposo il premuto scende sotto AA', () => {
+    // Il motivo per cui esistono i toni «-state». Se un giorno passa, si tolgono.
+    expect(contrast(L('accent-text'), strato(L, 'accent-text', 'accent-wash', 'state-press'))).toBe(4.01)
+    expect(contrast(L('accent-text'), strato(L, 'accent-text', 'bg', 'state-press'))).toBe(4.17)
+    expect(contrast(L('danger'), strato(L, 'danger', 'bg', 'state-press'))).toBeLessThan(AA_TEXT)
+  })
+
+  it('i numeri citati in ART_DIRECTION.md §4.2 e §8 (strato di stato)', () => {
+    expect(cr(L, 'accent-text-state', 'surface')).toBe(6.7)
+    expect(cr(L, 'accent-text-state', 'bg')).toBe(5.94)
+    expect(cr(L, 'accent-text-state', 'accent-wash')).toBe(5.69)
+    expect(cr(L, 'danger-state', 'surface')).toBe(6.78)
+    expect(cr(L, 'danger-state', 'bg')).toBe(6.01)
+    expect(contrast(L('accent-text-state'), strato(L, 'accent-text-state', 'fill', 'state-press'))).toBe(4.69)
+    expect(contrast(L('danger-state'), strato(L, 'danger-state', 'fill', 'state-press'))).toBe(4.66)
+  })
+
+  it('a riposo il tono «-state» regge da solo (il passaggio non fa sparire niente)', () => {
+    for (const bg of ['accent-wash', 'bg', 'surface', 'fill']) {
+      expect(cr(L, 'accent-text-state', bg)).toBeGreaterThanOrEqual(AA_TEXT)
+      expect(cr(L, 'danger-state', bg)).toBeGreaterThanOrEqual(AA_TEXT)
+    }
   })
 })
 

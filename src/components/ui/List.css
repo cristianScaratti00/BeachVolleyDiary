@@ -69,7 +69,19 @@
     pointer-events: none;
     transition: opacity var(--dur-svelto) var(--ease-standard);
   }
-  .ui-row:focus-visible { outline-offset: -2px; }
+  .ui-row:focus-visible { outline-offset: calc(-1 * var(--focus-width)); }
+  /* La prima e l'ultima riga prendono gli angoli del gruppo (raggio interno al
+     bordo): l'anello di focus, che segue il raggio, prima finiva mozzato dagli
+     angoli tondi dell'`overflow: hidden`. Anche il fondo premuto li segue. */
+  .ui-list > .ui-list-item:first-child > .ui-row {
+    border-top-left-radius: calc(var(--radius-card) - var(--border-w));
+    border-top-right-radius: calc(var(--radius-card) - var(--border-w));
+  }
+  .ui-list > .ui-list-item:last-child > .ui-row {
+    border-bottom-left-radius: calc(var(--radius-card) - var(--border-w));
+    border-bottom-right-radius: calc(var(--radius-card) - var(--border-w));
+  }
+  .ui-row::before { border-radius: inherit; }
   @media (hover: hover) and (pointer: fine) {
     .ui-row:is(a, button):not([aria-disabled="true"]):hover::before { opacity: 1; }
   }
@@ -97,5 +109,10 @@
     font-variant-numeric: tabular-nums;
   }
   .ui-row-chev { color: var(--ink-3); margin-right: calc(-1 * var(--space-1)); }
+  /* Un valore che porta il suo chevron (riga-pulsante che apre un dialogo,
+     es. «Cookie e statistiche»): il chevron esce di 4px per allinearsi agli
+     altri e l'`overflow` del valore lo tagliava. È uno stato corto, non va
+     in ellissi. */
+  .ui-row-value:has(> * > .ui-row-chev) { overflow: visible; }
   .ui-row[data-tone="danger"] .ui-row-chev { display: none; }
 }

@@ -23,7 +23,7 @@ import type { TorneiProps } from '../app/contracts'
 import { Link } from '../app/router'
 import { ENTRATA, FLIP_MAX, MOLLA, SVELTO } from '../components/Motion'
 import { useOnline } from '../hooks/useConnection'
-import { Badge, Bone, Button, EmptyState, FilterChips, Icon, Note, PlacementBadge, Section, Select, Skeleton, StatGrid, StatTile, placementText } from '../components/ui/index'
+import { Badge, Bone, Button, EmptyState, FilterChips, Icon, Note, PlacementBadge, Section, Select, Skeleton, StatGrid, StatTile, nomeVisibile, placementText } from '../components/ui/index'
 import './Mappa.css'
 
 const ConquisteMap = lazy(() => import('../components/ConquisteMap'))
@@ -337,7 +337,7 @@ function ElencoTornei({ tornei }: { tornei: MappaTorneoRow[] }) {
       {tornei.map((t) => (
         <li key={t.id} className="mappa-torneo">
           <Link to={{ name: 'torneo', id: t.id }} className="mappa-torneo-link">
-            {t.name}
+            {nomeVisibile(t.name)}
           </Link>
           <span className="mappa-torneo-date">{t.dateLabel}</span>
           {t.shared && <Badge>Condiviso</Badge>}

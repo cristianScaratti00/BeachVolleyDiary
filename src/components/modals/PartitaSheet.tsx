@@ -76,6 +76,9 @@ export default function PartitaSheet({
   const [righe, setRighe] = useState<Riga[]>(righeIniziali)
   const [errori, setErrori] = useState<Record<number, string>>({})
   const [occupato, setOccupato] = useState(false)
+  // «Salva» disattivo senza torneo: il tocco dice perché e porta al campo.
+  const [senzaTorneo, setSenzaTorneo] = useState(false)
+  const torneoRef = useRef<HTMLSelectElement>(null)
   const primoNoi = useRef<Record<number, HTMLInputElement | null>>({})
   const daFocalizzare = useRef<number | null>(null)
 
@@ -179,6 +182,10 @@ export default function PartitaSheet({
           <Button
             variant="filled"
             disabled={!campi.tournamentId}
+            onDisabledClick={() => {
+              setSenzaTorneo(true)
+              torneoRef.current?.focus()
+            }}
             busy={occupato}
             busyLabel="Salvataggio…"
             onClick={() => void salva()}
@@ -200,10 +207,15 @@ export default function PartitaSheet({
         <fieldset className="partita-sheet-fields" disabled={occupato}>
           <FormGroup>
             <Select
+              ref={torneoRef}
               label="Torneo"
               value={campi.tournamentId}
-              onChange={(v) => setCampi((c) => ({ ...c, tournamentId: v }))}
+              onChange={(v) => {
+                setSenzaTorneo(false)
+                setCampi((c) => ({ ...c, tournamentId: v }))
+              }}
               options={tournaments.map((t) => ({ value: t.id, label: t.name }))}
+              error={senzaTorneo && !campi.tournamentId ? (tournaments.length ? 'Scegli il torneo della partita.' : 'Crea prima un torneo: la partita sta dentro un torneo.') : undefined}
             />
             <Select
               label="Fase"

@@ -45,6 +45,9 @@
     color: var(--ink);
     font: var(--type-body);
     letter-spacing: var(--track-body);
+    /* Un segnaposto o un valore più lunghi del campo finiscono in «…» invece
+       di essere tagliati a metà parola. */
+    text-overflow: ellipsis;
     -webkit-appearance: none;
     appearance: none;
   }
@@ -93,6 +96,7 @@
     font: var(--type-callout);
     letter-spacing: var(--track-callout);
     color: var(--ink);
+    text-overflow: ellipsis;
   }
   /* Il bersaglio è 44 anche se il campo è alto 40. */
   .ui-search-clear {
@@ -122,7 +126,7 @@
     min-height: var(--touch);
   }
   .ui-switch-text { display: flex; flex-direction: column; min-width: 0; }
-  .ui-switch-label { font: var(--type-body); letter-spacing: var(--track-body); }
+  .ui-switch-label { font: var(--type-body); letter-spacing: var(--track-body); cursor: pointer; }
   .ui-switch-hint { font: var(--type-footnote); letter-spacing: var(--track-footnote); color: var(--ink-2); }
   .ui-switch {
     position: relative;
@@ -157,6 +161,12 @@
     transition: transform var(--dur-molla) var(--ease-molla);
   }
   .ui-switch[aria-checked="true"]::before { opacity: 1; }
+  /* Il pomello è alto 31: il bersaglio arriva a 44 (UX §8.6). */
+  .ui-switch::after {
+    content: "";
+    position: absolute;
+    inset: calc((var(--switch-h) - var(--touch)) / 2) calc(-1 * var(--space-1));
+  }
   .ui-switch[aria-checked="true"] .ui-switch-knob {
     transform: translateX(calc(var(--switch-w) - var(--switch-h)));
   }
@@ -247,8 +257,9 @@
     visibility: visible;
     transition: opacity var(--dur-entrata) var(--ease-standard), visibility 0s;
   }
-  /* L'anello di focus dei campi dentro non va tagliato dall'`overflow`. */
-  .ui-grow[data-open] > .ui-grow-inner { padding: var(--space-0-5); margin: calc(-1 * var(--space-0-5)); }
+  /* L'anello di focus dei campi dentro non va tagliato dall'`overflow`:
+     serve tutto lo spazio che l'anello prende fuori dal bordo (--focus-reach). */
+  .ui-grow[data-open] > .ui-grow-inner { padding: var(--focus-reach); margin: calc(-1 * var(--focus-reach)); }
   @media (prefers-reduced-motion: reduce) {
     .ui-grow, .ui-grow-inner, .ui-disclosure-chev { transition: none; }
   }

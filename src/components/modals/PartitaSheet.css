@@ -8,8 +8,9 @@
      ancorato in basso, con `grid-template-rows`. Entrata in ENTRATA, uscita in
      SVELTO; con reduced-motion istantanea (la riga non riceve `data-entra`). */
   .partita-sheet-set { display: grid; grid-template-rows: 1fr; }
-  .partita-sheet-set + .partita-sheet-set > .partita-sheet-set-inner { padding-top: var(--space-4); }
-  .partita-sheet-set-inner { min-height: 0; overflow: hidden; padding: var(--space-0-5); margin: calc(-1 * var(--space-0-5)); }
+  .partita-sheet-set + .partita-sheet-set > .partita-sheet-set-inner { padding-top: calc(var(--space-4) + var(--focus-reach)); }
+  /* Il padding è lo spazio dell'anello di focus dei campi (--focus-reach). */
+  .partita-sheet-set-inner { min-height: 0; overflow: hidden; padding: var(--focus-reach); margin: calc(-1 * var(--focus-reach)); }
   .partita-sheet-set[data-entra] { animation: partita-cresce var(--dur-entrata) var(--ease-standard) both; }
   .partita-sheet-set[data-entra] > .partita-sheet-set-inner { animation: partita-compare var(--dur-entrata) var(--ease-standard) both; }
   .partita-sheet-set[data-esce] { animation: partita-cala var(--dur-svelto) var(--ease-standard) both; pointer-events: none; }

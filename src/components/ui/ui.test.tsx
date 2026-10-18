@@ -109,6 +109,15 @@ describe('Card di entità', () => {
     const { container } = render(<Torneo />)
     await expectNoA11yViolations(container)
   })
+
+  it('un nome vuoto non lascia la card senza link da toccare', () => {
+    render(
+      <Card>
+        <CardLink to={{ name: 'torneo', id: '11111111-1111-4111-8111-111111111111' }}>{'  '}</CardLink>
+      </Card>,
+    )
+    expect(screen.getByRole('link', { name: 'Senza nome' })).toHaveAttribute('href', '/tornei/11111111-1111-4111-8111-111111111111')
+  })
 })
 
 describe('ListGroup e ListRow', () => {
@@ -215,6 +224,9 @@ describe('Campi', () => {
     expect(sw).toHaveAttribute('aria-checked', 'false')
     await user.click(sw)
     expect(sw).toHaveAttribute('aria-checked', 'true')
+    // Anche la scritta lo accende: il pomello da solo è un bersaglio da 51×31.
+    await user.click(screen.getByText('Cerco compagno'))
+    expect(sw).toHaveAttribute('aria-checked', 'false')
   })
 
   it('SwatchPicker: radiogroup con nomi, una fermata di Tab, frecce', async () => {

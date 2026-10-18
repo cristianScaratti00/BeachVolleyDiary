@@ -61,10 +61,13 @@ describe('Compagni — lista', () => {
     expect(container.querySelector('article .traccia')).not.toBeNull()
   })
 
-  it('il titolo è l\'unico h1, le card sono h3', () => {
+  it('il titolo è l\'unico h1, le card sono h3 sotto un h2 (l\'indice non salta un livello)', () => {
     renderScreen([card(), card({ id: '1b6f6a4e-3f6b-4b2a-9a51-1c2d3e4f5a6b', name: 'Marco' })])
     expect(screen.getAllByRole('heading', { level: 1 }).map((h) => h.textContent)).toEqual(['Compagni'])
-    expect(screen.getAllByRole('heading', { level: 3 })).toHaveLength(2)
+    const h2 = screen.getByRole('heading', { level: 2, name: 'I tuoi compagni' })
+    const h3 = screen.getAllByRole('heading', { level: 3 })
+    expect(h3).toHaveLength(2)
+    expect(h2.compareDocumentPosition(h3[0]) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   })
 
   it('nessuna violazione axe', async () => {

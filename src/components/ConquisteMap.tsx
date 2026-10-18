@@ -93,7 +93,9 @@ function pinIcona(p: MappaPin, selected: boolean): { html: string; lato: number 
 
 // Il cerchio del cluster riusa il vocabolario dei pin: fondo bianco, contorno
 // navy, alone. Dentro il numero di città raggruppate — non di tornei, o
-// direbbe una cosa diversa da quella che si apre cliccando.
+// direbbe una cosa diversa da quella che si apre cliccando. Il cluster è un
+// `role="button"` che si raggiunge col Tab (markercluster): l'SVG è muto, il
+// nome glielo dà lo `<span class="sr-only">`.
 function clusterIcona(n: number): { html: string; lato: number } {
   const r = n > 9 ? 17 : 15
   const lato = Math.ceil((r + ALONE_W + CONTORNO_W) * 2)
@@ -104,7 +106,7 @@ function clusterIcona(n: number): { html: string; lato: number } {
   <circle cx="${c}" cy="${c}" r="${r}" fill="${LIT.surface}" stroke="${CONTORNO}" stroke-width="${CONTORNO_W}"/>
   <text x="${c}" y="${c}" text-anchor="middle" dominant-baseline="central"
         style="font: var(--type-footnote); font-weight: 700; font-variant-numeric: tabular-nums" fill="${CONTORNO}">${n}</text>
-</svg>`
+</svg><span class="sr-only">${n} città vicine: ingrandisci</span>`
   return { html, lato }
 }
 
