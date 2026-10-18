@@ -18,6 +18,7 @@ import { useEffect, useRef, useState } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { LIT } from '../lib/theme'
+import { MapZoom } from './MapZoom'
 import './VenueMap.css'
 
 // Segnaposto disegnato a mano: nessuna immagine da caricare (le icone di default
@@ -38,16 +39,22 @@ interface VenueMapProps {
 
 export default function VenueMap({ lat, lng, label }: VenueMapProps) {
   const boxRef = useRef<HTMLDivElement>(null)
+  const mapRef = useRef<L.Map | null>(null)
   const [guasta, setGuasta] = useState(false)
+  // I limiti per i pulsanti +/−; `null` finché la mappa non c'è.
+  const [zoom, setZoom] = useState<{ canIn: boolean; canOut: boolean } | null>(null)
 
   useEffect(() => {
     const el = boxRef.current
     if (!el) return
-    // Stessa cortesia del resto dell'app (@media prefers-reduced-motion in
-    // index.css): niente pan/zoom animati per chi ha chiesto meno movimento.
+    // Stessa cortesia del resto dell'app (`--motion-scale` a 0 nei token):
+    // niente pan/zoom animati per chi ha chiesto meno movimento.
     const calm = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
     let map: L.Map | null = null
     let caricate = 0
+    // Annullato allo smontaggio, come in ConquisteMap: su una mappa già
+    // rimossa `invalidateSize` lancerebbe.
+    let raf = 0
     setGuasta(false)
     try {
       map = L.map(el, {
@@ -56,6 +63,8 @@ export default function VenueMap({ lat, lng, label }: VenueMapProps) {
         // La rotella scorre la pagina: su una scheda lunga una mappa che cattura
         // lo scroll è una trappola. Restano trascinamento, doppio click e +/−.
         scrollWheelZoom: false,
+        // Il +/− di Leaflet (26px, in inglese) lascia il posto a MapZoom.
+        zoomControl: false,
         attributionControl: true,
         keyboard: true, // frecce per spostarsi quando la mappa ha il focus
         zoomAnimation: !calm,
@@ -82,16 +91,26 @@ export default function VenueMap({ lat, lng, label }: VenueMapProps) {
         keyboard: false,
         icon: L.divIcon({ className: '', html: PIN_HTML, iconSize: [28, 36], iconAnchor: [14, 35] }),
       }).addTo(map)
+      mapRef.current = map
+      const m = map
+      const limiti = () => setZoom({ canIn: m.getZoom() < m.getMaxZoom(), canOut: m.getZoom() > m.getMinZoom() })
+      m.on('zoomend', limiti)
+      limiti()
       // Il contenitore nasce dentro un layout che può assestarsi dopo il primo
       // frame (card, immagini): senza questo la mappa resta a metà tile.
-      requestAnimationFrame(() => map?.invalidateSize())
+      raf = requestAnimationFrame(() => map?.invalidateSize())
     } catch {
       // Ambienti senza layout reale: la scheda resta leggibile e il link
       // "Apri la mappa" accanto continua a funzionare.
       setGuasta(true)
       return
     }
-    return () => { map?.remove() }
+    return () => {
+      cancelAnimationFrame(raf)
+      map?.remove()
+      mapRef.current = null
+      setZoom(null)
+    }
   }, [lat, lng, label])
 
   return (
@@ -105,6 +124,14 @@ export default function VenueMap({ lat, lng, label }: VenueMapProps) {
         aria-label={`Mappa di ${label}`}
         className="venuemap-box"
       />
+      {zoom && !guasta && (
+        <MapZoom
+          onIn={() => mapRef.current?.zoomIn()}
+          onOut={() => mapRef.current?.zoomOut()}
+          canIn={zoom.canIn}
+          canOut={zoom.canOut}
+        />
+      )}
       {guasta && (
         <p className="venuemap-error" role="status">
           Mappa non disponibile.

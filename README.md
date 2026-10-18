@@ -133,10 +133,11 @@ src/
 │   └── theme.ts          # TOKEN (var()), LIT (letterali), BP, dataTone, swatches
 ├── components/
 │   ├── ui/               # primitive: Button, Card, ListGroup, NavBar, TabBar, Sheet…
-│   │                     #   (.tsx + .css affiancati, classi `ui-`, varianti data-*)
-│   ├── ui.tsx            # barrel che ri-esporta ui/*
-│   ├── VenueMap.tsx      # mappa del luogo (Leaflet) — unico punto che importa leaflet,
-│   │                     #   caricato in lazy() solo per i tornei con coordinate
+│   │                     #   (.tsx + .css affiancati, classi `ui-`, varianti data-*;
+│   │                     #   si importano da `components/ui/index`)
+│   ├── VenueMap.tsx      # mappa del luogo e mappa delle conquiste: gli unici punti
+│   ├── ConquisteMap.tsx  #   che importano leaflet, entrambi caricati in lazy()
+│   ├── MapZoom.tsx       # i +/− di vetro sopra le due mappe (al posto di quelli di Leaflet)
 │   ├── dashboard/        # una card per ogni grafico della Home
 │   ├── modals/           # Sheet + sheet: torneo (unico), partita, foto, compagno,
 │   │                     #   collega, password; StoryModal; VenuePicker

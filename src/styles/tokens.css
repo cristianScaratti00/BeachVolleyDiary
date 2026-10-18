@@ -23,8 +23,9 @@
    ============================================================================ */
 
 /* L'ordine dei livelli si dichiara una volta, nel primo foglio importato.
-   Il CSS fuori dai livelli (oggi `src/index.css`) vince su tutti: per questo la
-   migrazione può convivere con gli stili vecchi finché la Fase 6 non li toglie. */
+   Il CSS fuori dai livelli vince su tutti: l'unico è quello di Leaflet (e del
+   suo cluster), che tocca solo le classi `.leaflet-*` e non si sovrascrive.
+   Non aggiungerne altro. */
 @layer reset, tokens, base, components, utilities;
 
 @layer tokens {

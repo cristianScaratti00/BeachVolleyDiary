@@ -202,6 +202,9 @@ describe('Mappa — la lista è la fonte di verità', () => {
     expect(within(riga).getByText('1°')).toBeInTheDocument()
     expect(within(riga).getByText('Primo posto')).toBeInTheDocument()
     expect(within(screen.getByRole('button', { name: /Jesolo/ })).getByText('Gironi')).toBeInTheDocument()
+    // Nemmeno l'etichetta della lib («miglior risultato 1° 🏆») porta l'emoji.
+    expect(riga.textContent).not.toContain('🏆')
+    expect(within(riga).getByText(/miglior risultato 1° · 50% vittorie/)).toBeInTheDocument()
   })
 
   it('elenca dal risultato migliore al peggiore', () => {

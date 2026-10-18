@@ -23,7 +23,7 @@ import type { TorneiProps } from '../app/contracts'
 import { Link } from '../app/router'
 import { ENTRATA, FLIP_MAX, MOLLA, SVELTO } from '../components/Motion'
 import { useOnline } from '../hooks/useConnection'
-import { Badge, Bone, Button, EmptyState, FilterChips, Icon, Note, PlacementBadge, Section, Select, Skeleton, StatGrid, StatTile } from '../components/ui/index'
+import { Badge, Bone, Button, EmptyState, FilterChips, Icon, Note, PlacementBadge, Section, Select, Skeleton, StatGrid, StatTile, placementText } from '../components/ui/index'
 import './Mappa.css'
 
 const ConquisteMap = lazy(() => import('../components/ConquisteMap'))
@@ -130,7 +130,7 @@ export default function Mappa({ m: dati, stagione, onNuovoTorneo }: MappaProps) 
 
       {dati.migliore && (
         <p className="mappa-best">
-          Il tuo posto migliore è <strong>{dati.migliore.city}</strong>: {placementTesto(dati.migliore.best)}
+          Il tuo posto migliore è <strong>{dati.migliore.city}</strong>: {placementText(dati.migliore.best)}
           {dati.migliore.count > 1 ? ` in ${dati.migliore.count} tornei` : ''}.
         </p>
       )}
@@ -238,7 +238,7 @@ export default function Mappa({ m: dati, stagione, onNuovoTorneo }: MappaProps) 
  * tier della città (vinto o podio = accento), non da un letterale della lib.
  */
 function BadgeRisultato({ best, podio }: { best: string; podio: boolean }) {
-  const testo = placementTesto(best)
+  const testo = placementText(best)
   const primo = testo !== best.trim()
   return (
     <Badge tone={podio ? 'accent' : 'neutral'}>
@@ -247,11 +247,6 @@ function BadgeRisultato({ best, podio }: { best: string; podio: boolean }) {
       {primo && <span className="sr-only">{testo.replace('1°', 'Primo posto')}</span>}
     </Badge>
   )
-}
-
-/** «1° 🏆» → «1°»: nelle frasi il trofeo è un'emoji di contenuto, non serve. */
-function placementTesto(best: string): string {
-  return best.replace(/\s*🏆\s*/u, '').trim()
 }
 
 // ---------------------------------------------------------------- legenda
@@ -303,7 +298,9 @@ function RigaCitta({ p, open, flip, onToggle, rowRef }: {
             {p.city}
             {p.shared && <Badge>Condiviso</Badge>}
           </span>
-          <span className="mappa-city-label">{p.label}</span>
+          {/* L'etichetta arriva dalla lib con il piazzamento grezzo dentro
+              («miglior risultato 1° 🏆», C15): il trofeo lo dice già il badge. */}
+          <span className="mappa-city-label">{placementText(p.label)}</span>
         </span>
         {/* Il risultato in chiaro accanto al pallino: il colore non è mai
             l'unico canale (WCAG 1.4.1). */}

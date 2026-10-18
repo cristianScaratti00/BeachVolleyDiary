@@ -18,6 +18,7 @@ const PATHS = {
   person: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM5 20c.8-3.5 3.6-6 7-6s6.2 2.5 7 6',
   'person-plus': 'M10 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM3 20c.8-3.5 3.6-6 7-6 1.4 0 2.7.4 3.8 1.1M18 14v6M15 17h6',
   plus: 'M12 5v14M5 12h14',
+  minus: 'M5 12h14',
   close: 'M6 6l12 12M18 6 6 18',
   'chevron-left': 'M15 5l-7 7 7 7',
   'chevron-right': 'M9 5l7 7-7 7',

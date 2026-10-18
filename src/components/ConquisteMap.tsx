@@ -21,13 +21,15 @@
 // `region` con un riassunto testuale, così chi usa uno screen reader sa cosa
 // sta saltando e dove trovarne il contenuto.
 // ============================================================================
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet.markercluster'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
 import type { MappaPin } from '../lib/derive.mappa'
 import { ITALY_BOUNDS } from '../lib/geo'
+import { MapZoom } from './MapZoom'
+import { placementText } from './ui/Badge'
 import { LIT } from '../lib/theme'
 import './ConquisteMap.css'
 
@@ -114,6 +116,9 @@ export default function ConquisteMap({ pins, selected, onSelect, srSummary, heig
   // ricostruire la mappa (e perdere zoom e posizione) a ogni click.
   const selectRef = useRef(onSelect)
   selectRef.current = onSelect
+  // I limiti dello zoom per i pulsanti +/−; `null` finché la mappa non c'è
+  // (o non può esserci: jsdom, Leaflet che lancia), e allora i pulsanti no.
+  const [zoom, setZoom] = useState<{ canIn: boolean; canOut: boolean } | null>(null)
 
   // ---- La mappa nasce una volta sola. -------------------------------------
   useEffect(() => {
@@ -131,6 +136,8 @@ export default function ConquisteMap({ pins, selected, onSelect, srSummary, heig
         // cattura lo scroll è una trappola. Restano trascinamento, doppio
         // click e i bottoni +/−.
         scrollWheelZoom: false,
+        // Il +/− di Leaflet (26px, in inglese) lascia il posto a MapZoom.
+        zoomControl: false,
         attributionControl: true,
         keyboard: true,
         zoomAnimation: !calm,
@@ -163,6 +170,10 @@ export default function ConquisteMap({ pins, selected, onSelect, srSummary, heig
 
       mapRef.current = map
       gruppoRef.current = gruppo
+      const limiti = () => setZoom({ canIn: map.getZoom() < map.getMaxZoom(), canOut: map.getZoom() > map.getMinZoom() })
+      // Prima di `fitBounds` la mappa non ha ancora uno zoom: i limiti si
+      // leggono dopo l'inquadratura, poi a ogni `zoomend`.
+      map.on('zoomend', limiti)
       // ⚠️ L'ORDINE conta, ed è la differenza fra vedere l'Italia e vedere la
       // riviera romagnola. Il contenitore nasce dentro un layout che si assesta
       // dopo il primo frame (card, toggle di vista): `fitBounds` chiamato prima
@@ -171,6 +182,7 @@ export default function ConquisteMap({ pins, selected, onSelect, srSummary, heig
       raf = requestAnimationFrame(() => {
         map.invalidateSize()
         map.fitBounds(ITALIA)
+        limiti()
       })
     } catch {
       // Ambienti senza layout reale (jsdom) o tile irraggiungibili: la
@@ -182,6 +194,7 @@ export default function ConquisteMap({ pins, selected, onSelect, srSummary, heig
       mapRef.current?.remove()
       mapRef.current = null
       gruppoRef.current = null
+      setZoom(null)
     }
   }, [])
 
@@ -194,8 +207,9 @@ export default function ConquisteMap({ pins, selected, onSelect, srSummary, heig
       const sel = selected === p.key
       const { html, lato } = pinIcona(p, sel)
       const m = L.marker([p.lat, p.lng], {
-        title: p.srLabel,
-        alt: p.srLabel,
+        // Senza l'emoji del valore grezzo (C15): lo screen reader la leggerebbe.
+        title: placementText(p.srLabel),
+        alt: placementText(p.srLabel),
         keyboard: false,
         // I pin migliori stanno sopra ai vicini: stessa regola dell'ordine di
         // disegno di prima, tradotta in z-index.
@@ -210,7 +224,6 @@ export default function ConquisteMap({ pins, selected, onSelect, srSummary, heig
 
   return (
     <div
-      ref={boxRef}
       // `region` e non `application`: la mappa resta esplorabile con i comandi
       // normali dello screen reader, e il riassunto dice subito che l'elenco
       // completo è più sotto.
@@ -218,6 +231,16 @@ export default function ConquisteMap({ pins, selected, onSelect, srSummary, heig
       aria-label={srSummary}
       className="conquiste-map"
       style={height ? { height } : undefined}
-    />
+    >
+      <div ref={boxRef} className="conquiste-map-box" />
+      {zoom && (
+        <MapZoom
+          onIn={() => mapRef.current?.zoomIn()}
+          onOut={() => mapRef.current?.zoomOut()}
+          canIn={zoom.canIn}
+          canOut={zoom.canOut}
+        />
+      )}
+    </div>
   )
 }

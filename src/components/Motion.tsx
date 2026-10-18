@@ -96,9 +96,9 @@ interface MotionRootProps {
  *
  * `reducedMotion="user"` è la ragione principale per cui questo provider
  * esiste: disattiva trasformazioni e movimento per chi ha chiesto meno
- * animazioni nel sistema, lasciando vivi i dissolvenza. Prima l'app rispettava
- * quella preferenza in UN punto solo (`.wrapped-card-anim` in index.css),
- * mentre le altre sette animazioni CSS la ignoravano.
+ * animazioni nel sistema, lasciando vive le dissolvenze. Il lato CSS della
+ * stessa preferenza sta nei token: `--motion-scale` a 0 e le durate lunghe a
+ * 0ms sotto `prefers-reduced-motion` (tokens.css, MOTION.md §11).
  */
 export function MotionRoot({ children }: MotionRootProps) {
   return (

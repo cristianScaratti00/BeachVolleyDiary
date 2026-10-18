@@ -11,9 +11,6 @@
 // (`stroke="var(--x)"` non è affidabile: si usa `style` o `currentColor`), le
 // stringhe HTML di Leaflet. src/styles/tokens.test.ts verifica che i due non
 // divergano.
-//
-// `C`, più sotto, è la palette di prima: resta finché la Fase 6 non toglie
-// l'ultimo uso, poi si cancella. Non usarla nel codice nuovo.
 // ============================================================================
 export const TOKEN = {
   ink: 'var(--ink)',
@@ -93,17 +90,6 @@ export const DATA_TONE: Record<DataTone, 'dataWin' | 'dataPodium' | 'dataRest'> 
   podium: 'dataPodium',
   rest: 'dataRest',
 }
-
-// Central palette + fonts, mirrors the (redesigned) design tokens.
-export const C = {
-  bg: '#FAF8F5',
-  ink: '#1B2A4A',
-  orange: '#FF6B35',
-  orangeSoft: '#F7A883',
-  orangeDeep: '#C4501E',
-  line: 'rgba(27,42,74,.1)',
-  fill: '#F2F0EC',
-} as const
 
 // Color assigned to a partner created on the fly (color is no longer shown in the UI).
 export const NEW_PARTNER_COLOR = '#FF6B35'

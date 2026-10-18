@@ -4,8 +4,11 @@
    pin è misurato sui loro colori veri (ART_DIRECTION §10.3). */
 @layer components {
   .conquiste-map {
+    position: relative;
     height: var(--mappa-h);
     background: var(--fill);
-    isolation: isolate;
   }
+  /* `isolation`: i pannelli di Leaflet (z-index fino a 1000) restano chiusi
+     qui dentro, e MapZoom ci sta sopra per ordine nel DOM. */
+  .conquiste-map-box { position: absolute; inset: 0; isolation: isolate; }
 }
