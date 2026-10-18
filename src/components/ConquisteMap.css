@@ -1,0 +1,11 @@
+/* Il riquadro della mappa delle conquiste: a filo dentro la cornice di Mappa
+   (che ha il raggio da card). Fondo --fill finché le tile non arrivano, e
+   senza rete resta quello. Le tile OSM NON si filtrano: il doppio bordo dei
+   pin è misurato sui loro colori veri (ART_DIRECTION §10.3). */
+@layer components {
+  .conquiste-map {
+    height: var(--mappa-h);
+    background: var(--fill);
+    isolation: isolate;
+  }
+}

@@ -12,8 +12,8 @@
 //
 // NB (privacy): le tile arrivano da tile.openstreetmap.org, quindi aprire la
 // mappa comporta una richiesta a un servizio esterno con il riquadro
-// geografico. Stesso compromesso già accettato in `VenueMap`; la ricerca del
-// luogo, invece, resta senza rete (gazetteer committato + GPS del dispositivo).
+// geografico. Stesso compromesso già accettato in `VenueMap` (e nella ricerca
+// del luogo di VenuePicker, che interroga photon.komoot.io).
 //
 // ⚠️ Accessibilità: i pin NON sono raggiungibili da tastiera, ed è voluto. La
 // superficie accessibile è l'elenco città sotto la mappa, che porta gli stessi
@@ -28,13 +28,15 @@ import 'leaflet.markercluster'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
 import type { MappaPin } from '../lib/derive.mappa'
 import { ITALY_BOUNDS } from '../lib/geo'
-import { INK } from './ui'
+import { LIT } from '../lib/theme'
+import './ConquisteMap.css'
 
 interface ConquisteMapProps {
   pins: MappaPin[]
   selected: string | null
   onSelect: (key: string) => void
   srSummary: string
+  /** Altezza in px; senza, quella del token --mappa-h (UX C3). */
   height?: number
 }
 
@@ -53,9 +55,9 @@ const ITALIA: L.LatLngBoundsExpression = [
 // entrambi i casi — è la soluzione cartografica standard. Togliere uno dei due
 // come "rumore visivo" fa sparire i pin su metà della penisola, in silenzio.
 // I rapporti sono fissati a numero in `src/test/contrast.test.ts`.
-const ALONE = '#fff'
+const ALONE = LIT.surface
 const ALONE_W = 3
-const CONTORNO = INK
+const CONTORNO = LIT.ink
 const CONTORNO_W = 1.6
 
 // ⚠️ `iconSize` va SEMPRE dichiarato, ed è il motivo per cui queste funzioni
@@ -77,12 +79,12 @@ function pinIcona(p: MappaPin, selected: boolean): { html: string; lato: number 
   const html = `
 <svg width="${lato}" height="${lato}" viewBox="0 0 ${lato} ${lato}" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
   ${selected ? `<circle cx="${c}" cy="${c}" r="${r + 5}" fill="none" stroke="${CONTORNO}" stroke-width="1.4" opacity="0.55"/>` : ''}
-  <circle cx="${c}" cy="${c}" r="${r}" fill="${p.hollow ? '#fff' : p.fill}"
+  <circle cx="${c}" cy="${c}" r="${r}" fill="${p.hollow ? LIT.surface : p.fill}"
           stroke="${ALONE}" stroke-width="${ALONE_W + CONTORNO_W * 2}"/>
-  <circle cx="${c}" cy="${c}" r="${r}" fill="${p.hollow ? '#fff' : p.fill}"
+  <circle cx="${c}" cy="${c}" r="${r}" fill="${p.hollow ? LIT.surface : p.fill}"
           stroke="${CONTORNO}" stroke-width="${CONTORNO_W}"
           ${p.shared ? 'stroke-dasharray="3 2"' : ''}/>
-  ${p.inner > 0 ? `<circle cx="${c}" cy="${c}" r="${p.inner}" fill="#fff"/>` : ''}
+  ${p.inner > 0 ? `<circle cx="${c}" cy="${c}" r="${p.inner}" fill="${LIT.surface}"/>` : ''}
 </svg>`
   return { html, lato }
 }
@@ -96,15 +98,15 @@ function clusterIcona(n: number): { html: string; lato: number } {
   const c = lato / 2
   const html = `
 <svg width="${lato}" height="${lato}" viewBox="0 0 ${lato} ${lato}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-  <circle cx="${c}" cy="${c}" r="${r}" fill="#fff" stroke="${ALONE}" stroke-width="${ALONE_W + CONTORNO_W * 2}"/>
-  <circle cx="${c}" cy="${c}" r="${r}" fill="#fff" stroke="${CONTORNO}" stroke-width="${CONTORNO_W}"/>
+  <circle cx="${c}" cy="${c}" r="${r}" fill="${LIT.surface}" stroke="${ALONE}" stroke-width="${ALONE_W + CONTORNO_W * 2}"/>
+  <circle cx="${c}" cy="${c}" r="${r}" fill="${LIT.surface}" stroke="${CONTORNO}" stroke-width="${CONTORNO_W}"/>
   <text x="${c}" y="${c}" text-anchor="middle" dominant-baseline="central"
-        font-family="'Nunito Sans', sans-serif" font-weight="800" font-size="13" fill="${CONTORNO}">${n}</text>
+        style="font: var(--type-footnote); font-weight: 700; font-variant-numeric: tabular-nums" fill="${CONTORNO}">${n}</text>
 </svg>`
   return { html, lato }
 }
 
-export default function ConquisteMap({ pins, selected, onSelect, srSummary, height = 380 }: ConquisteMapProps) {
+export default function ConquisteMap({ pins, selected, onSelect, srSummary, height }: ConquisteMapProps) {
   const boxRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<L.Map | null>(null)
   const gruppoRef = useRef<L.MarkerClusterGroup | null>(null)
@@ -117,9 +119,12 @@ export default function ConquisteMap({ pins, selected, onSelect, srSummary, heig
   useEffect(() => {
     const el = boxRef.current
     if (!el) return
-    // Stessa cortesia del resto dell'app (@media prefers-reduced-motion in
-    // index.css): niente pan/zoom animati per chi ha chiesto meno movimento.
+    // Niente pan/zoom animati per chi ha chiesto meno movimento (MOTION.md E4).
     const calm = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
+    // Il fotogramma dell'inquadratura va annullato allo smontaggio: senza, in
+    // StrictMode (e con un'uscita rapida dalla vista) `fitBounds` girava su una
+    // mappa già rimossa e lanciava.
+    let raf = 0
     try {
       const map = L.map(el, {
         // La rotella scorre la pagina: dentro una scheda lunga una mappa che
@@ -163,7 +168,7 @@ export default function ConquisteMap({ pins, selected, onSelect, srSummary, heig
       // dopo il primo frame (card, toggle di vista): `fitBounds` chiamato prima
       // calcola lo zoom su un riquadro sbagliato e ci resta. Quindi prima
       // `invalidateSize`, che rilegge le misure vere, e solo dopo l'inquadratura.
-      requestAnimationFrame(() => {
+      raf = requestAnimationFrame(() => {
         map.invalidateSize()
         map.fitBounds(ITALIA)
       })
@@ -173,6 +178,7 @@ export default function ConquisteMap({ pins, selected, onSelect, srSummary, heig
       return
     }
     return () => {
+      cancelAnimationFrame(raf)
       mapRef.current?.remove()
       mapRef.current = null
       gruppoRef.current = null
@@ -210,13 +216,8 @@ export default function ConquisteMap({ pins, selected, onSelect, srSummary, heig
       // completo è più sotto.
       role="region"
       aria-label={srSummary}
-      style={{
-        height,
-        borderRadius: 14,
-        overflow: 'hidden',
-        border: '1px solid rgba(27,42,74,.1)',
-        background: '#F2F0EC',
-      }}
+      className="conquiste-map"
+      style={height ? { height } : undefined}
     />
   )
 }

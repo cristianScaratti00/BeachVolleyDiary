@@ -1,0 +1,19 @@
+/* Lo stato "non trovato": stessa forma dell'EmptyState filtrato (ART §8). */
+@layer components {
+  .nontrovato-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    max-width: var(--empty-max);
+    margin: var(--space-8) auto 0;
+  }
+  .nontrovato-icon { color: var(--ink-3); }
+  .nontrovato-text {
+    margin-top: var(--space-3);
+    font: var(--type-subhead);
+    letter-spacing: var(--track-subhead);
+    color: var(--ink-2);
+  }
+  .nontrovato-action { margin-top: var(--space-5); }
+}

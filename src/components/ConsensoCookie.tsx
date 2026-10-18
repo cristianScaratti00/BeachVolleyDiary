@@ -1,6 +1,12 @@
 import { useEffect, useRef } from 'react'
-import type { CSSProperties, KeyboardEvent } from 'react'
+import type { KeyboardEvent, ReactNode, RefObject } from 'react'
+import * as m from 'motion/react-m'
+import { AnimatePresence, useIsPresent, useReducedMotion } from 'motion/react'
 import { decidi, useScelta } from '../lib/consenso'
+import { ENTRATA, SVELTO } from './Motion'
+import { Button } from './ui/Button'
+import { useSheetCentered } from '../hooks/useMedia'
+import './ConsensoCookie.css'
 
 // ============================================================================
 // Banner del consenso ai cookie — bloccante.
@@ -18,19 +24,11 @@ import { decidi, useScelta } from '../lib/consenso'
 //    raggiungerebbe pulsanti che il mouse non può toccare.
 //
 // Finché non si sceglie non parte nessuno strumento: vedi `lib/consenso.ts`.
+//
+// Aspetto (MOTION.md §4.2): la forma del ConfirmDialog su mobile (sale dal
+// basso), centrato da 600px; opaco, sopra a tutto (--z-consent), con il suo
+// velo. Alla scelta esce in SVELTO, e da t0 non riceve più tocchi.
 // ============================================================================
-
-const bottone = (primario: boolean): CSSProperties => ({
-  flex: 1,
-  minWidth: 128,
-  padding: '13px 18px',
-  borderRadius: 12,
-  border: primario ? 'none' : '1px solid rgba(27,42,74,.22)',
-  background: primario ? '#FF6B35' : 'transparent',
-  color: primario ? '#fff' : '#1B2A4A',
-  font: "700 14px 'Nunito Sans'",
-  cursor: 'pointer',
-})
 
 export default function ConsensoCookie() {
   const scelta = useScelta()
@@ -70,8 +68,6 @@ export default function ConsensoCookie() {
     return () => document.removeEventListener('focusin', riporta)
   }, [aperto])
 
-  if (!aperto) return null
-
   // Trappola del fuoco: Tab e Shift+Tab girano fra i due pulsanti invece di
   // uscire nell'app. Sono gli unici due elementi focalizzabili qui dentro,
   // quindi basta rimbalzare agli estremi.
@@ -91,68 +87,78 @@ export default function ConsensoCookie() {
   }
 
   return (
-    <div
+    <AnimatePresence>
+      {aperto && (
+        <Velo key="consenso" onKeyDown={suTasto}>
+          <Pannello cardRef={cardRef} />
+        </Velo>
+      )}
+    </AnimatePresence>
+  )
+}
+
+function Velo({ children, onKeyDown }: { children: ReactNode; onKeyDown: (e: KeyboardEvent<HTMLDivElement>) => void }) {
+  const presente = useIsPresent()
+  return (
+    <m.div
+      className="consenso-velo"
+      data-leaving={presente ? undefined : ''}
+      {...(presente ? {} : { inert: '' })}
       // Nessun `onClick` sul velo: toccarlo fuori non chiude, perché non
       // esisterebbe uno stato "chiuso senza aver scelto".
       //
       // `preventDefault` sul mousedown del solo velo impedisce al browser di
       // spostare il fuoco sul body quando ci si clicca sopra: così il fuoco
       // non esce mai, e la rete di sicurezza qui sopra resta inutilizzata.
-      onMouseDown={(e) => { if (e.target === e.currentTarget) e.preventDefault() }}
-      onKeyDown={suTasto}
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 80, // sopra la bottom nav (40) e sopra i fogli modali (60-70)
-        background: 'rgba(0,0,0,.1)',
-        display: 'flex',
-        alignItems: 'flex-end',
-        justifyContent: 'center',
-        padding: '12px 12px calc(12px + env(safe-area-inset-bottom))',
-        animation: 'overlay .2s ease',
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) e.preventDefault()
       }}
+      onKeyDown={onKeyDown}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1, transition: ENTRATA }}
+      exit={{ opacity: 0, transition: SVELTO }}
     >
-      <div
-        ref={cardRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="consenso-titolo"
-        aria-describedby="consenso-testo"
-        className="card"
-        style={{
-          width: '100%',
-          maxWidth: 460,
-          padding: 20,
-          borderRadius: 18,
-          boxShadow: '0 24px 60px -24px rgba(27,42,74,.5)',
-          animation: 'sheet .3s cubic-bezier(.2,.8,.2,1) both',
-        }}
-      >
-        <div id="consenso-titolo" className="num" style={{ fontSize: 17, fontWeight: 500, letterSpacing: '-.2px' }}>
-          Cookie e statistiche
-        </div>
-        <div id="consenso-testo" style={{ font: "600 13px 'Nunito Sans'", color: 'rgba(27,42,74,.62)', lineHeight: 1.55, marginTop: 8 }}>
-          Il necessario per tenerti collegato è sempre attivo. Ci piacerebbe
-          usare anche strumenti di misura che ci dicono quali schermate si usano
-          e dove ci si blocca — comprese registrazioni anonime delle sessioni.
-          Puoi dire di no e l'app funziona uguale.
-        </div>
+      {children}
+    </m.div>
+  )
+}
 
-        <div style={{ display: 'flex', gap: 10, marginTop: 16, flexWrap: 'wrap' }}>
-          {/* Rifiuta per primo, e della stessa misura: è il punto. */}
-          <button type="button" className="chip" onClick={() => decidi('rifiutato')} style={bottone(false)}>
-            Rifiuta
-          </button>
-          <button type="button" className="chip" onClick={() => decidi('accettato')} style={bottone(true)}>
-            Accetta
-          </button>
-        </div>
+function Pannello({ cardRef }: { cardRef: RefObject<HTMLDivElement> }) {
+  const centrato = useSheetCentered()
+  const ridotto = useReducedMotion()
+  const y = centrato || ridotto ? 0 : 12
+  return (
+    <m.div
+      ref={cardRef}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="consenso-titolo"
+      aria-describedby="consenso-testo"
+      className="consenso-dialog"
+      initial={{ opacity: 0, y, scale: 0.96 }}
+      animate={{ opacity: 1, y: 0, scale: 1, transition: ENTRATA }}
+      exit={{ opacity: 0, y, scale: 0.96, transition: SVELTO }}
+    >
+      <h2 id="consenso-titolo" className="consenso-title">Cookie e statistiche</h2>
+      <p id="consenso-testo" className="consenso-testo">
+        Il necessario per tenerti collegato è sempre attivo. Ci piacerebbe usare anche strumenti di misura che ci
+        dicono quali schermate si usano e dove ci si blocca, comprese registrazioni anonime delle sessioni. Puoi dire
+        di no e l'app funziona uguale.
+      </p>
 
-        <div style={{ font: "600 11.5px 'Nunito Sans'", color: 'rgba(27,42,74,.45)', marginTop: 12, lineHeight: 1.5 }}>
-          Per continuare scegli una delle due. Puoi cambiare idea quando vuoi da{' '}
-          <b>Profilo → Cookie e statistiche</b>.
-        </div>
+      {/* Rifiuta per primo, e della stessa misura: è il punto. */}
+      <div className="consenso-actions">
+        <Button variant="neutral" size="lg" block onClick={() => decidi('rifiutato')}>
+          Rifiuta
+        </Button>
+        <Button variant="filled" size="lg" block onClick={() => decidi('accettato')}>
+          Accetta
+        </Button>
       </div>
-    </div>
+
+      <p className="consenso-nota">
+        Per continuare scegli una delle due. Puoi cambiare idea quando vuoi da <b>Profilo → Cookie e statistiche</b>.
+      </p>
+    </m.div>
   )
 }

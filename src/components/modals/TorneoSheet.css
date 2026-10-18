@@ -1,0 +1,11 @@
+/* Lo sheet del torneo: gruppi opachi sul vetro, passi di 16 fra i campi e 24
+   fra i gruppi (ART_DIRECTION §5.2). */
+@layer components {
+  .torneo-sheet-form { display: grid; gap: var(--space-6); }
+  .torneo-sheet-fields { display: grid; gap: var(--space-4); border: 0; margin: 0; padding: 0; min-width: 0; }
+  .torneo-sheet-partner { display: grid; gap: var(--space-3); }
+  .torneo-sheet-more { margin-top: var(--space-2); }
+  .torneo-sheet-assistant { justify-self: start; white-space: normal; text-align: left; }
+  /* Sul vetro il pulsante «plain» scrive in inchiostro (Button.css): qui è un
+     link d'uscita, e resta leggibile anche nel caso peggiore. */
+}

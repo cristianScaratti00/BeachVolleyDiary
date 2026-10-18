@@ -8,32 +8,37 @@
 //
 // NB (privacy): le tile arrivano da tile.openstreetmap.org, quindi mostrare la
 // mappa comporta una richiesta a un servizio esterno con il riquadro
-// geografico. È il compromesso implicito nell'avere una mappa vera in-app; la
-// ricerca del luogo, invece, resta senza rete (GPS del dispositivo o coordinate
-// incollate a mano) — vedi VenuePicker.
+// geografico. È il compromesso implicito nell'avere una mappa vera in-app.
+// (Anche la ricerca del luogo in VenuePicker usa la rete: photon.komoot.io.)
+//
+// Senza rete, o con OSM giù, la cornice resta e dice «Mappa non disponibile.»:
+// il link «Apri la mappa ↗» accanto al titolo della sezione resta (UX §6.4).
 // ============================================================================
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import { LIT } from '../lib/theme'
+import './VenueMap.css'
 
 // Segnaposto disegnato a mano: nessuna immagine da caricare (le icone di default
-// di Leaflet arrivano da URL che i bundler rompono) e stessa tinta dei pallini
-// piazzamento del resto dell'app.
+// di Leaflet arrivano da URL che i bundler rompono). È una stringa HTML di
+// Leaflet, dove una custom property non arriva: i colori sono i `LIT` dei token,
+// con l'alone bianco come i pin della mappa delle conquiste (ART_DIRECTION §4.5).
 const PIN_HTML = `
 <svg width="28" height="36" viewBox="0 0 28 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-  <path d="M14 35s12-13.2 12-21A12 12 0 1 0 2 14c0 7.8 12 21 12 21Z" fill="#FF6B35" stroke="#fff" stroke-width="2.5"/>
-  <circle cx="14" cy="14" r="4.4" fill="#fff"/>
+  <path d="M14 35s12-13.2 12-21A12 12 0 1 0 2 14c0 7.8 12 21 12 21Z" fill="${LIT.accent}" stroke="${LIT.surface}" stroke-width="2.5"/>
+  <circle cx="14" cy="14" r="4.4" fill="${LIT.surface}"/>
 </svg>`
 
 interface VenueMapProps {
   lat: number
   lng: number
   label: string // nome del luogo, per l'etichetta accessibile e il tooltip
-  height?: number
 }
 
-export default function VenueMap({ lat, lng, label, height = 200 }: VenueMapProps) {
+export default function VenueMap({ lat, lng, label }: VenueMapProps) {
   const boxRef = useRef<HTMLDivElement>(null)
+  const [guasta, setGuasta] = useState(false)
 
   useEffect(() => {
     const el = boxRef.current
@@ -42,6 +47,8 @@ export default function VenueMap({ lat, lng, label, height = 200 }: VenueMapProp
     // index.css): niente pan/zoom animati per chi ha chiesto meno movimento.
     const calm = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
     let map: L.Map | null = null
+    let caricate = 0
+    setGuasta(false)
     try {
       map = L.map(el, {
         center: [lat, lng],
@@ -58,7 +65,17 @@ export default function VenueMap({ lat, lng, label, height = 200 }: VenueMapProp
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         attribution: '© OpenStreetMap',
-      }).addTo(map)
+      })
+        // Nessuna tile arrivata e la prima che fallisce: rete assente o OSM
+        // giù. Basta una tile caricata per considerarla viva.
+        .on('tileload', () => {
+          caricate++
+          setGuasta(false)
+        })
+        .on('tileerror', () => {
+          if (caricate === 0) setGuasta(true)
+        })
+        .addTo(map)
       L.marker([lat, lng], {
         title: label,
         alt: label,
@@ -69,28 +86,30 @@ export default function VenueMap({ lat, lng, label, height = 200 }: VenueMapProp
       // frame (card, immagini): senza questo la mappa resta a metà tile.
       requestAnimationFrame(() => map?.invalidateSize())
     } catch {
-      // Ambienti senza layout reale (o tile irraggiungibili): la scheda resta
-      // leggibile e il link "Apri la mappa" accanto continua a funzionare.
+      // Ambienti senza layout reale: la scheda resta leggibile e il link
+      // "Apri la mappa" accanto continua a funzionare.
+      setGuasta(true)
       return
     }
     return () => { map?.remove() }
   }, [lat, lng, label])
 
   return (
-    <div
-      ref={boxRef}
-      // `region` e non `application`: la mappa resta esplorabile con i comandi
-      // normali dello screen reader, e chi non la può usare ha comunque il link
-      // "Apri la mappa" accanto al titolo della sezione.
-      role="region"
-      aria-label={`Mappa di ${label}`}
-      style={{
-        height,
-        borderRadius: 14,
-        overflow: 'hidden',
-        border: '1px solid rgba(27,42,74,.1)',
-        background: '#F2F0EC',
-      }}
-    />
+    <div className="venuemap">
+      <div
+        ref={boxRef}
+        // `region` e non `application`: la mappa resta esplorabile con i comandi
+        // normali dello screen reader, e chi non la può usare ha comunque il link
+        // "Apri la mappa" accanto al titolo della sezione.
+        role="region"
+        aria-label={`Mappa di ${label}`}
+        className="venuemap-box"
+      />
+      {guasta && (
+        <p className="venuemap-error" role="status">
+          Mappa non disponibile.
+        </p>
+      )}
+    </div>
   )
 }

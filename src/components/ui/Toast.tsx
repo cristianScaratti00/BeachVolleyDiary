@@ -13,7 +13,7 @@
 // - Niente azioni dentro gli avvisi: il tempo limitato le renderebbe
 //   inaccessibili.
 // ============================================================================
-import { useEffect, useRef, useSyncExternalStore } from 'react'
+import { forwardRef, useEffect, useRef, useSyncExternalStore } from 'react'
 import * as m from 'motion/react-m'
 import { AnimatePresence } from 'motion/react'
 import { ENTRATA, MOLLA, SVELTO, TOAST_MS } from '../Motion'
@@ -42,9 +42,15 @@ let nextId = 1
 const subs = new Set<() => void>()
 const emit = () => subs.forEach((f) => f())
 
-function show(type: ToastType, text: string, opts: { key?: string; ms?: number | null } = {}): number {
+/**
+ * `conta: false` è per gli avvisi che descrivono uno STATO (offline, rete
+ * lenta): ripeterli mentre sono già a schermo non è un secondo evento, quindi
+ * niente «×2» e niente cenno.
+ */
+function show(type: ToastType, text: string, opts: { key?: string; ms?: number | null; conta?: boolean } = {}): number {
   const key = opts.key ?? `${type}|${text}`
   const same = items.find((t) => t.key === key)
+  if (same && opts.conta === false) return same.id
   if (same) {
     items = items.map((t) => (t === same ? { ...t, n: t.n + 1, arm: t.arm + 1 } : t))
     emit()
@@ -118,7 +124,8 @@ const ICON: Record<ToastType, IconName> = {
   info: 'info',
 }
 
-function Toast({ t }: { t: ToastItem }) {
+// `forwardRef`: AnimatePresence in `popLayout` misura l'avviso che esce.
+const Toast = forwardRef<HTMLDivElement, { t: ToastItem }>(function Toast({ t }, ref) {
   const ctl = useRef<{ parti: () => void; pausa: () => void } | null>(null)
   const fermo = useRef(false)
 
@@ -161,6 +168,7 @@ function Toast({ t }: { t: ToastItem }) {
 
   return (
     <m.div
+      ref={ref}
       layout="position"
       className="ui-toast"
       data-type={t.type}
@@ -189,7 +197,7 @@ function Toast({ t }: { t: ToastItem }) {
       )}
     </m.div>
   )
-}
+})
 
 /**
  * La regione degli avvisi, una per app (sta nella shell). Si occupa anche
@@ -201,12 +209,12 @@ export function ToastRegion() {
   const slow = useSlowConnection()
 
   useEffect(() => {
-    if (!online) show('offline', 'Sei offline', { key: 'offline', ms: null })
+    if (!online) show('offline', 'Sei offline', { key: 'offline', ms: null, conta: false })
     else dismissKey('offline')
   }, [online])
 
   useEffect(() => {
-    if (slow && online) show('info', "Connessione lenta: potrebbe volerci un po'.", { key: 'lenta', ms: LENTA_MS })
+    if (slow && online) show('info', "Connessione lenta: potrebbe volerci un po'.", { key: 'lenta', ms: LENTA_MS, conta: false })
   }, [slow, online])
 
   const errori = list.filter((t) => t.type === 'error')

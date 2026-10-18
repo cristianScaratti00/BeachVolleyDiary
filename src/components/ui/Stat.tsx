@@ -3,7 +3,7 @@
 // l'etichetta maiuscola sotto; le celle di una griglia sono separate da un
 // filo, non da spazio, come un segnapunti.
 // ============================================================================
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import type { ReactNode } from 'react'
 import { useReducedMotion } from 'motion/react'
 import { Tabellone } from './Tabellone'
@@ -100,20 +100,30 @@ export function MeterRow({ label, pct, sub, valueLabel }: {
 /** Il binario con la barra. `tone` sceglie la tinta del dato (un colore solo). */
 export function Bar({ pct, tone = 'win', size = 'md' }: { pct: number; tone?: 'win' | 'rest' | 'podium'; size?: 'md' | 'lg' }) {
   const ridotto = useReducedMotion()
-  const [arrivata, setArrivata] = useState(!!ridotto)
-  const raf = useRef(0)
-  useEffect(() => {
-    if (arrivata) return
-    raf.current = window.requestAnimationFrame(() => setArrivata(true))
-    return () => window.cancelAnimationFrame(raf.current)
-  }, [arrivata])
+  const fill = useRef<HTMLDivElement>(null)
+  // Al montaggio la barra parte vuota e, al fotogramma dopo, corre al valore
+  // (RACCONTO). Il primo passo si fa sul DOM e non con uno stato: nessun
+  // render in più. Dopo, `pct` cambia lo stile e la transizione fa il resto.
+  const arrivata = useRef(!!ridotto)
   const v = Math.max(0, Math.min(100, pct))
+  const meta = `translateX(${v - 100}%)`
+  useEffect(() => {
+    if (arrivata.current) return
+    const raf = window.requestAnimationFrame(() => {
+      arrivata.current = true
+      if (fill.current) fill.current.style.transform = meta
+    })
+    return () => window.cancelAnimationFrame(raf)
+    // Solo al montaggio.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   return (
     <div className="ui-bar" data-size={size} aria-hidden="true">
       <div
+        ref={fill}
         className="ui-bar-fill"
         data-tone={tone}
-        style={{ transform: `translateX(${(arrivata ? v : 0) - 100}%)` }}
+        style={{ transform: arrivata.current ? meta : 'translateX(-100%)' }}
       />
     </div>
   )

@@ -14,6 +14,7 @@ import { AuthProvider } from './hooks/useAuth'
 import { MotionRoot } from './components/Motion'
 import ConsensoCookie from './components/ConsensoCookie'
 import { avviaTracciamentoSeConsentito, useScelta } from './lib/consenso'
+import { analyticsPath } from './app/routes'
 
 // Riaccende il tracciamento solo se l'utente aveva già detto sì in una visita
 // precedente. Clarity si inietta da dentro `lib/consenso.ts`, che è l'unico
@@ -29,7 +30,9 @@ function Tracciamento() {
   if (scelta !== 'accettato') return null
   return (
     <>
-      <Analytics />
+      {/* Con gli URL veri ogni torneo sarebbe una "pagina" a sé: gli UUID
+          diventano [id] (UX §4.8, Q11). */}
+      <Analytics beforeSend={(e) => ({ ...e, url: analyticsPath(e.url) })} />
       <SpeedInsights />
     </>
   )

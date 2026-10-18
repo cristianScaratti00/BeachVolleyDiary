@@ -1,185 +1,228 @@
-import { Suspense, lazy, useState } from 'react'
-import type { TorneoDetailData } from '../lib/derive'
-import { BackLink, Badge, StatGrid, StatTile, SectionTitle, MatchRow, EmptyCard, InlineLink, MUTED } from '../components/ui'
-import PhotoLightbox, { type Shot } from '../components/PhotoLightbox'
-// La mappa trascina Leaflet + il suo CSS: chunk separato, scaricato solo dai
-// tornei che hanno davvero delle coordinate.
-const VenueMap = lazy(() => import('../components/VenueMap'))
+// ============================================================================
+// Dettaglio torneo `/tornei/:id` (UX §5 F5, §6.4).
+//
+// - NavBar con ‹ Indietro e «⋯» (Modifica · Storia Instagram · Elimina torneo;
+//   sul condiviso solo la Storia): il menu lo costruisce la shell.
+// - [＋ Aggiungi partita] è l'azione principale della schermata (Q8), pieno, e
+//   c'è solo sui tornei propri.
+// - Le 6 statistiche sono un tabellone (MOTION.md §10): salgono da zero una
+//   volta per sessione; quando segni una partita scattano solo le celle
+//   cambiate, dopo SVELTO (quando lo sheet ha liberato la vista).
+// - `t === null` è "non trovato" (eliminato o non più condiviso): mai la lista
+//   al suo posto (C9).
+// ============================================================================
+import type { CSSProperties } from 'react'
+import { Suspense } from 'react'
+import type { TorneoDetailProps } from '../app/contracts'
+import { LazyBoundary, lazyRetry } from '../app/LazyBoundary'
+import { SVELTO } from '../components/Motion'
+import {
+  Badge,
+  Bone,
+  Button,
+  ButtonLink,
+  EmptyState,
+  Icon,
+  IconButton,
+  List,
+  MatchRow,
+  NavBar,
+  Page,
+  PlacementBadge,
+  Section,
+  Skeleton,
+  StatGrid,
+  StatTile,
+} from '../components/ui/index'
+import './TorneoDetail.css'
 
-// Glifo Instagram (line-icon, eredita currentColor).
-function IgGlyph({ size = 14 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <rect x="3" y="3" width="18" height="18" rx="5" />
-      <circle cx="12" cy="12" r="4" />
-      <circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none" />
-    </svg>
-  )
-}
+// Leaflet e il suo CSS: chunk a parte, scaricato solo dai tornei che hanno
+// davvero delle coordinate. «Riprova» se il chunk non arriva.
+const VenueMap = lazyRetry(() => import('../components/VenueMap'))
 
-interface TorneoDetailProps {
-  t: TorneoDetailData
-  goBack: () => void
-  onEdit: () => void
-  onAddPartita: () => void
-  onOpenMatch: (id: string) => void
-  onAddFoto: () => void
-  onDeleteFoto: (photoId: string) => void
-  canAddFoto: boolean
-  onShareStory: () => void
-  canShareStory: boolean
-  readOnly: boolean // torneo condiviso da un altro utente: sola lettura
-}
+/** Il «Punto segnato» parte quando lo sheet è uscito (MOTION.md §10.2). */
+const RITARDO_TABELLONE = SVELTO.duration * 1000
 
-export default function TorneoDetail({ t, goBack, onEdit, onAddPartita, onOpenMatch, onAddFoto, onDeleteFoto, canAddFoto, onShareStory, canShareStory, readOnly }: TorneoDetailProps) {
-  const removeFoto = (id: string) => {
-    if (window.confirm('Vuoi eliminare questa foto? L’operazione non è reversibile.')) onDeleteFoto(id)
-  }
-  // Lightbox: solo le foto con una URL reale sono visualizzabili/scaricabili.
-  const [viewIdx, setViewIdx] = useState<number | null>(null)
-  const shots: Shot[] = t.photos.filter((p) => p.url).map((p) => ({ url: p.url as string, caption: p.caption }))
-  const nameBase = t.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'foto'
-  const openViewer = (url?: string | null) => {
-    const idx = url ? shots.findIndex((s) => s.url === url) : -1
-    if (idx >= 0) setViewIdx(idx)
-  }
-  return (
-    <div style={{ animation: 'pop .32s ease both' }}>
-      <BackLink onClick={goBack}>← Tornei</BackLink>
+export default function TorneoDetail(props: TorneoDetailProps) {
+  const { t, back, traccia, onAddPartita, onOpenMatch, onAddFoto, onOpenFoto, onDeleteFoto, onMenu } = props
 
-      <div style={{ paddingBottom: 22, borderBottom: '1px solid rgba(27,42,74,.1)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 9, flexWrap: 'wrap' }}>
-          <div style={{ width: 9, height: 9, borderRadius: '50%', background: t.dot }} />
-          <div className="lbl" style={{ letterSpacing: '1px' }}>{t.category}</div>
-          <span style={{ font: "800 11px 'Nunito Sans'", letterSpacing: '.3px', padding: '3px 9px', borderRadius: 7, background: t.badgeBg, color: t.badgeColor }}>{t.badge}</span>
-          {readOnly && <Badge tone="dark" size="sm">Condiviso con te</Badge>}
+  if (!t) {
+    return (
+      <Page className="torneo-page">
+        <NavBar title="Torneo non trovato" back={back} />
+        <div className="torneo-missing">
+          <p className="torneo-missing-text">Potrebbe essere stato eliminato, o non è più condiviso con te.</p>
+          <ButtonLink to={{ name: 'tornei', vista: 'lista' }} variant="tinted">Vai ai tornei</ButtonLink>
         </div>
-        <div className="num" style={{ fontSize: 'clamp(24px,4vw,34px)', fontWeight: 500, letterSpacing: '-.5px', marginTop: 8 }}>{t.name}</div>
-        <div style={{ font: "600 13.5px 'Nunito Sans'", color: MUTED, marginTop: 4 }}>{t.meta}</div>
-        {/* Il nome del luogo sta già in `meta`: qui si aggiunge solo ciò che il
-            luogo come entità permette di dire — quante volte ci ho giocato.
-            Testo in navy e non nell'arancione scuro dei badge: su fondo pagina
-            quella coppia si ferma a 4.39:1, sotto AA per un 12.5px (vedi
-            contrast.test.ts). L'accento lo mette il 📍. */}
-        {t.venueHistory && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, font: "700 12.5px 'Nunito Sans'", color: '#1B2A4A', marginTop: 8 }}>
-            <span aria-hidden="true">📍</span> {t.venueHistory}
-          </div>
-        )}
-        {!readOnly && (
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 16 }}>
-            <div className="chip" onClick={onShareStory} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, font: "700 12.5px 'Nunito Sans'", padding: '9px 15px', borderRadius: 10, color: '#fff', cursor: 'pointer', background: 'linear-gradient(45deg,#F58529,#DD2A7B 55%,#8134AF)', boxShadow: '0 4px 14px -5px rgba(221,42,123,.55)' }}>
-              <IgGlyph /> Storia
-              {!canShareStory && <Badge tone="onColor" size="sm">Premium</Badge>}
-            </div>
-            <div className="chip" onClick={onEdit} style={{ display: 'inline-flex', alignItems: 'center', font: "700 12.5px 'Nunito Sans'", padding: '9px 15px', borderRadius: 10, border: '1px solid rgba(27,42,74,.18)', color: '#1B2A4A', cursor: 'pointer' }}>Modifica</div>
-            <div className="chip" onClick={onAddPartita} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, font: "700 12.5px 'Nunito Sans'", padding: '9px 15px', borderRadius: 10, background: '#1B2A4A', color: '#fff', cursor: 'pointer' }}>＋ Partita</div>
-          </div>
-        )}
-      </div>
+      </Page>
+    )
+  }
 
-      <StatGrid min={110}>
-        <StatTile value={t.record} label="record" color="#FF6B35" valueSize={24} pad="16px 18px" />
-        <StatTile value={t.winPct + '%'} label="vittorie" valueSize={24} pad="16px 18px" />
-        <StatTile value={t.played} label="partite" valueSize={24} pad="16px 18px" />
-        <StatTile value={t.setStr} label="set" valueSize={24} pad="16px 18px" />
-        <StatTile value={t.setPct + '%'} label="set vinti" valueSize={24} pad="16px 18px" />
-        <StatTile value={t.diffStr} label="differenziale" valueSize={24} pad="16px 18px" />
-      </StatGrid>
+  const proprio = !t.shared
+  // L'indice del lightbox conta solo le foto che si possono aprire.
+  const apribili = t.photos.filter((p) => p.url)
+  const delay = traccia ? RITARDO_TABELLONE : 0
+
+  return (
+    // La NavBar è sticky: deve essere figlia diretta della pagina, quindi la
+    // traccia dell'intestazione modificata passa da una classe della pagina.
+    <Page className={traccia === t.id ? 'torneo-page torneo-traccia' : 'torneo-page'}>
+        <NavBar
+          title={t.name}
+          back={back}
+          subtitle={t.meta}
+          eyebrow={
+            <>
+              <span className="torneo-eyebrow">
+                <span className="torneo-dot" aria-hidden="true" style={{ background: t.dot }} />
+                {t.category}
+              </span>
+              <PlacementBadge label={t.badge} libBg={t.badgeBg} />
+              {t.shared && <Badge tone="neutral">Condiviso con te · sola lettura</Badge>}
+            </>
+          }
+          actions={
+            <IconButton
+              icon="ellipsis"
+              label="Altre azioni"
+              aria-haspopup="menu"
+              onClick={(e) => onMenu(e.currentTarget)}
+            />
+          }
+        />
+
+        {t.venueHistory && (
+          <p className="torneo-venue">
+            <Icon name="pin" size={16} />
+            <span>{t.venueHistory}</span>
+          </p>
+        )}
+
+        {proprio && (
+          <div className="torneo-cta">
+            <Button variant="filled" icon="plus" onClick={onAddPartita}>Aggiungi partita</Button>
+          </div>
+        )}
+
+        {t.noMatches ? (
+          <EmptyState
+            className="torneo-empty"
+            icon="ball"
+            title="Nessuna partita ancora."
+            text={proprio ? 'Segna il primo risultato: le statistiche del torneo partono da lì.' : 'Chi ha creato il torneo non ha ancora aggiunto partite.'}
+            action={proprio ? <Button variant="tinted" icon="plus" onClick={onAddPartita}>Aggiungi partita</Button> : undefined}
+          />
+        ) : (
+          <StatGrid cols={6} className="torneo-stats" label="Statistiche del torneo">
+            <StatTile value={t.record} label="Record" tone="win" rise={`torneo:${t.id}`} delay={delay} />
+            <StatTile value={`${t.winPct}%`} label="Vittorie" rise={`torneo:${t.id}`} delay={delay} />
+            <StatTile value={t.played} label="Partite" rise={`torneo:${t.id}`} delay={delay} />
+            <StatTile value={t.setStr} label="Set" rise={`torneo:${t.id}`} delay={delay} />
+            <StatTile value={`${t.setPct}%`} label="Set vinti" rise={`torneo:${t.id}`} delay={delay} />
+            <StatTile value={t.diffStr} label="Differenziale" rise={`torneo:${t.id}`} delay={delay} />
+          </StatGrid>
+        )}
 
       {t.venueLat != null && t.venueLng != null && (
-        <>
-          <SectionTitle
-            action={
-              t.venueMapUrl ? (
-                <a
-                  className="chip"
-                  href={t.venueMapUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: 6, font: "700 12px 'Nunito Sans'", padding: '8px 13px', borderRadius: 9, border: '1px solid rgba(27,42,74,.18)', color: '#1B2A4A', textDecoration: 'none' }}
-                >
-                  Apri la mappa ↗
-                </a>
-              ) : undefined
-            }
-          >
-            {t.venueName || 'Luogo'}
-          </SectionTitle>
-          {/* Il fallback ha la stessa altezza della mappa: il contenuto sotto non
-              salta quando il chunk di Leaflet finisce di caricare. */}
-          <Suspense fallback={<div style={{ height: 200, borderRadius: 14, border: '1px solid rgba(27,42,74,.1)', background: '#F2F0EC' }} />}>
-            <VenueMap lat={t.venueLat} lng={t.venueLng} label={t.venueName || t.venueCity} />
-          </Suspense>
-        </>
+        <Section
+          id="torneo-luogo"
+          title={t.venueName || 'Luogo'}
+          action={
+            t.venueMapUrl ? (
+              <a className="ui-button" data-variant="plain" data-size="sm" href={t.venueMapUrl} target="_blank" rel="noreferrer">
+                <span className="ui-button-label">Apri la mappa</span>
+                <Icon name="external" size={16} />
+              </a>
+            ) : undefined
+          }
+        >
+          {/* Il segnaposto ha l'altezza della mappa: quando Leaflet arriva non
+              si sposta niente sotto le dita. */}
+          <LazyBoundary onReset={VenueMap.reset} minHeight="venue">
+            <Suspense
+              fallback={
+                <Skeleton className="torneo-map-skel" label="Carico la mappa…">
+                  <Bone className="torneo-map-bone" />
+                </Skeleton>
+              }
+            >
+              <VenueMap lat={t.venueLat} lng={t.venueLng} label={t.venueName || t.venueCity} />
+            </Suspense>
+          </LazyBoundary>
+        </Section>
       )}
 
-      <SectionTitle>Partite</SectionTitle>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {t.matches.map((m) => (
-          <MatchRow
-            key={m.id}
-            onClick={() => onOpenMatch(m.id)}
-            esitoShort={m.esitoShort}
-            esitoColor={m.esitoColor}
-            primary={`${m.phase} · vs ${m.opponents}`}
-            secondary={`con ${m.partnerName}`}
-            setChips={m.setChips}
-            note={m.hasNote ? m.note : undefined}
-            readOnly={readOnly}
-          />
-        ))}
-        {t.noMatches && (
-          <EmptyCard>
-            Nessuna partita.{!readOnly && <> <InlineLink onClick={onAddPartita}>Aggiungine una →</InlineLink></>}
-          </EmptyCard>
-        )}
-      </div>
+      {!t.noMatches && (
+        <Section id="torneo-partite" title="Partite">
+          <List className="torneo-partite" label="Partite del torneo">
+            {t.matches.map((m) => (
+              <MatchRow
+                key={m.id}
+                esitoShort={m.esitoShort}
+                esitoColor={m.esitoColor}
+                title={`${m.phase} · vs ${m.opponents}`}
+                detail={`con ${m.partnerName}`}
+                sets={m.setChips}
+                note={m.hasNote ? m.note : undefined}
+                onClick={proprio ? () => onOpenMatch(m.id) : undefined}
+                readOnly={!proprio}
+                traccia={traccia === m.id}
+              />
+            ))}
+          </List>
+        </Section>
+      )}
 
-      <SectionTitle
+      <Section
+        id="torneo-foto"
+        title="Foto"
         action={
-          readOnly ? undefined : (
-            <div className="chip" onClick={onAddFoto} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, font: "700 12px 'Nunito Sans'", padding: '8px 13px', borderRadius: 9, border: '1px solid rgba(27,42,74,.18)', color: '#1B2A4A', cursor: 'pointer' }}>
-              ＋ Foto
-              {!canAddFoto && <Badge tone="premium">Premium</Badge>}
-            </div>
-          )
+          proprio && t.hasPhotos ? (
+            <Button variant="tinted" size="sm" icon="plus" onClick={onAddFoto}>Aggiungi foto</Button>
+          ) : undefined
         }
       >
-        Foto
-      </SectionTitle>
-      {t.hasPhotos ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(130px,1fr))', gap: 12 }}>
-          {t.photos.map((ph, i) => (
-            <div key={ph.id || i} onClick={() => openViewer(ph.url)} style={{ aspectRatio: '1', borderRadius: 12, background: ph.color, position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'flex-end', padding: 11, cursor: ph.url ? 'zoom-in' : 'default' }}>
-              {ph.url ? (
-                <img src={ph.url} alt={ph.caption} loading="lazy" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
-              ) : (
-                <div style={{ position: 'absolute', inset: 0, backgroundImage: 'repeating-linear-gradient(45deg,rgba(255,255,255,.1) 0 8px,transparent 8px 16px)' }} />
-              )}
-              {!readOnly && (
-                <div
-                  className="chip"
-                  onClick={(e) => { e.stopPropagation(); removeFoto(ph.id) }}
-                  title="Elimina foto"
-                  style={{ position: 'absolute', top: 8, right: 8, width: 28, height: 28, borderRadius: 8, background: 'rgba(27,42,74,.62)', backdropFilter: 'blur(2px)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
-                >
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13" /></svg>
-                </div>
-              )}
-              {ph.caption && <div style={{ position: 'relative', font: "700 11px 'Nunito Sans'", color: '#fff', textShadow: '0 1px 5px rgba(0,0,0,.6)' }}>{ph.caption}</div>}
-            </div>
-          ))}
-        </div>
-      ) : (
-        <EmptyCard pad={24}>
-          Nessuna foto per questo torneo.{!readOnly && <> <InlineLink onClick={onAddFoto}>Aggiungine una →</InlineLink></>}
-        </EmptyCard>
-      )}
-
-      {viewIdx !== null && (
-        <PhotoLightbox photos={shots} startIndex={viewIdx} nameBase={nameBase} onClose={() => setViewIdx(null)} />
-      )}
-    </div>
+        {t.hasPhotos ? (
+          <ul className="torneo-foto-grid">
+            {t.photos.map((ph, i) => {
+              const n = apribili.findIndex((p) => p.id === ph.id)
+              const nome = ph.caption ? `Foto: ${ph.caption}` : `Foto ${i + 1}`
+              return (
+                <li key={ph.id || i} className="torneo-foto-cell" style={{ '--c': ph.color } as CSSProperties}>
+                  {traccia === ph.id && <span className="traccia" aria-hidden="true" />}
+                  {ph.url ? (
+                    <button type="button" className="torneo-foto" aria-label={nome} onClick={() => onOpenFoto(n)}>
+                      <img src={ph.url} alt="" loading="lazy" />
+                    </button>
+                  ) : (
+                    <div className="torneo-foto" data-legacy="" role="img" aria-label="Foto non disponibile">
+                      <Icon name="camera" size={24} />
+                    </div>
+                  )}
+                  {proprio && (
+                    <button
+                      type="button"
+                      className="torneo-foto-del"
+                      aria-label={ph.caption ? `Elimina foto: ${ph.caption}` : `Elimina foto ${i + 1}`}
+                      onClick={() => onDeleteFoto(ph.id)}
+                    >
+                      <Icon name="trash" size={16} />
+                    </button>
+                  )}
+                </li>
+              )
+            })}
+          </ul>
+        ) : (
+          <EmptyState
+            className="torneo-empty"
+            icon="camera"
+            level={3}
+            title="Nessuna foto per questo torneo."
+            action={proprio ? <Button variant="tinted" icon="plus" onClick={onAddFoto}>Aggiungi foto</Button> : undefined}
+          />
+        )}
+      </Section>
+    </Page>
   )
 }

@@ -3,6 +3,10 @@
 // e collegamento come compagno. La schermata è presentazionale — riceve `own`,
 // `room` e callback e non parla con la rete — quindi si verifica montandola con
 // `vi.fn()` e dati di fabbrica, senza mockare Supabase.
+//
+// Dal refactor: «Termina check-in» (non più «Esci», C19) chiede conferma, e la
+// conferma la apre la shell (`onTerminaCheckIn`); il pulsante di check-in senza
+// città è `aria-disabled` e porta al campo che manca (MOTION.md M15).
 // ============================================================================
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
@@ -28,24 +32,29 @@ type Props = Parameters<typeof ChiCeOggi>[0]
 
 function renderScreen(over: Partial<Props> = {}) {
   const onCheckIn = vi.fn().mockResolvedValue(true)
-  const onCheckOut = vi.fn().mockResolvedValue(true)
+  const onTerminaCheckIn = vi.fn()
   const onRefresh = vi.fn()
   const onAddPartner = vi.fn().mockResolvedValue({ ok: true })
+  const onBack = vi.fn()
   const view = render(
     <ChiCeOggi
       own={null}
       room={[]}
       loading={false}
       cityPrefill=""
+      back={{ label: 'Home', onClick: onBack }}
       onCheckIn={onCheckIn}
-      onCheckOut={onCheckOut}
+      onTerminaCheckIn={onTerminaCheckIn}
       onRefresh={onRefresh}
       onAddPartner={onAddPartner}
       {...over}
     />,
   )
-  return { ...view, onCheckIn, onCheckOut, onRefresh, onAddPartner }
+  return { ...view, onCheckIn, onTerminaCheckIn, onRefresh, onAddPartner, onBack }
 }
+
+// La card di una persona della stanza (un `<li>` con dentro il suo nome).
+const cardDi = (nome: string) => screen.getByText(nome).closest('li') as HTMLElement
 
 // ---------------------------------------------------------------- check-in form
 describe('ChiCeOggi — form di check-in (non in spiaggia)', () => {
@@ -54,16 +63,45 @@ describe('ChiCeOggi — form di check-in (non in spiaggia)', () => {
     expect(screen.getByLabelText('Città')).toHaveValue('Rimini')
   })
 
-  it('senza città il pulsante di check-in è disabilitato', () => {
+  it('senza città il pulsante di check-in è disattivato (aria-disabled) e non invia', async () => {
+    const user = userEvent.setup()
+    const { onCheckIn } = renderScreen({ cityPrefill: '' })
+    const b = screen.getByRole('button', { name: 'Fai check-in' })
+    expect(b).toHaveAttribute('aria-disabled', 'true')
+    await user.click(b)
+    expect(onCheckIn).not.toHaveBeenCalled()
+  })
+
+  it('il tocco sul pulsante disattivato porta al campo città e dice cosa manca', async () => {
+    const user = userEvent.setup()
     renderScreen({ cityPrefill: '' })
-    expect(screen.getByRole('button', { name: 'Fai check-in' })).toBeDisabled()
+    await user.click(screen.getByRole('button', { name: 'Fai check-in' }))
+    expect(screen.getByLabelText('Città')).toHaveFocus()
+    expect(screen.getByRole('alert')).toHaveTextContent('Scrivi la città in cui sei.')
   })
 
   it('digitando una città il pulsante si abilita', async () => {
     const user = userEvent.setup()
     renderScreen({ cityPrefill: '' })
     await user.type(screen.getByLabelText('Città'), 'Cesenatico')
-    expect(screen.getByRole('button', { name: 'Fai check-in' })).toBeEnabled()
+    expect(screen.getByRole('button', { name: 'Fai check-in' })).not.toHaveAttribute('aria-disabled')
+  })
+
+  it('la città propone i suggerimenti del gazetteer (C21)', () => {
+    renderScreen({ cityPrefill: '' })
+    const input = screen.getByLabelText('Città')
+    const lista = document.getElementById(input.getAttribute('list') ?? '')
+    expect(lista?.tagName).toBe('DATALIST')
+    expect(lista?.querySelectorAll('option').length).toBeGreaterThan(0)
+  })
+
+  it('la nota ha il contatore dei caratteri (max 80)', async () => {
+    const user = userEvent.setup()
+    renderScreen({ cityPrefill: 'Rimini' })
+    const nota = screen.getByLabelText(/Nota/)
+    expect(nota).toHaveAttribute('maxlength', '80')
+    await user.type(nota, 'ciao')
+    expect(screen.getByText('4/80')).toBeInTheDocument()
   })
 
   it('il check-in invia città, "cerco compagno" e nota', async () => {
@@ -123,11 +161,12 @@ describe('ChiCeOggi — check-in attivo', () => {
     expect(screen.getByText(/Non stai cercando un compagno\./)).toBeInTheDocument()
   })
 
-  it('"Esci" chiama onCheckOut', async () => {
+  it('"Termina check-in" chiede la conferma alla shell (non "Esci": C19)', async () => {
     const user = userEvent.setup()
-    const { onCheckOut } = renderScreen({ own: makeOwn() })
-    await user.click(screen.getByRole('button', { name: 'Esci' }))
-    expect(onCheckOut).toHaveBeenCalledTimes(1)
+    const { onTerminaCheckIn } = renderScreen({ own: makeOwn() })
+    expect(screen.queryByRole('button', { name: 'Esci' })).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Termina check-in' }))
+    expect(onTerminaCheckIn).toHaveBeenCalledTimes(1)
   })
 
   it('con check-in attivo non mostra più il form', () => {
@@ -148,10 +187,10 @@ describe('ChiCeOggi — la stanza', () => {
     expect(screen.getAllByRole('button', { name: /Aggiungi come compagno/ })).toHaveLength(2)
     // Il badge "Cerca compagno" va cercato dentro la card (stesso testo del chip
     // di filtro, che è presente perché la stanza è mista).
-    const annaCard = screen.getByText('Anna').closest('.card') as HTMLElement
+    const annaCard = cardDi('Anna')
     expect(within(annaCard).getByText('Cerca compagno')).toBeInTheDocument()
     expect(within(annaCard).getByText('Cerco per King')).toBeInTheDocument()
-    const brunoCard = screen.getByText('Bruno').closest('.card') as HTMLElement
+    const brunoCard = cardDi('Bruno')
     expect(within(brunoCard).getByText('In spiaggia')).toBeInTheDocument()
   })
 
@@ -164,17 +203,18 @@ describe('ChiCeOggi — la stanza', () => {
     const user = userEvent.setup()
     const { onAddPartner } = renderScreen({ own: makeOwn(), room })
     // La card di Anna: risalgo dal nome al bottone della stessa card.
-    const card = screen.getByText('Anna').closest('.card') as HTMLElement
+    const card = cardDi('Anna')
     await user.click(within(card).getByRole('button', { name: /Aggiungi come compagno/ }))
     expect(onAddPartner).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ id: 'a' }))
-    expect(await within(card).findByText('Aggiunto ai compagni')).toBeInTheDocument()
+    // L'esito prende il posto del pulsante, annunciato come stato.
+    expect(await within(card).findByRole('status')).toHaveTextContent('Aggiunto ai compagni')
   })
 
   it('se il collegamento fallisce mostra l\'errore e resta ri-tentabile', async () => {
     const user = userEvent.setup()
     const onAddPartner = vi.fn().mockResolvedValue({ ok: false, error: 'Impossibile collegare il socio.' })
     renderScreen({ own: makeOwn(), room, onAddPartner })
-    const card = screen.getByText('Anna').closest('.card') as HTMLElement
+    const card = cardDi('Anna')
     await user.click(within(card).getByRole('button', { name: /Aggiungi come compagno/ }))
     expect(await within(card).findByRole('alert')).toHaveTextContent('Impossibile collegare il socio.')
     // Il bottone resta (non è passato a "Aggiunto"): si può riprovare.
@@ -188,14 +228,25 @@ describe('ChiCeOggi — la stanza', () => {
     expect(onRefresh).toHaveBeenCalled()
   })
 
-  it('stanza vuota: invita ad aggiornare', () => {
-    renderScreen({ own: makeOwn(), room: [] })
+  it('stanza vuota: invita ad aggiornare, con un pulsante vero', async () => {
+    const user = userEvent.setup()
+    const { onRefresh } = renderScreen({ own: makeOwn(), room: [] })
     expect(screen.getByText(/Ancora nessun altro qui/)).toBeInTheDocument()
+    const aggiorna = screen.getAllByRole('button', { name: 'Aggiorna' })
+    expect(aggiorna.length).toBeGreaterThan(0)
+    await user.click(aggiorna[aggiorna.length - 1])
+    expect(onRefresh).toHaveBeenCalled()
   })
 
-  it('in caricamento mostra lo stato "Aggiornamento…"', () => {
-    renderScreen({ own: makeOwn(), room: [], loading: true })
+  it('in caricamento mostra lo stato "Aggiornamento…" e lo skeleton occupato', () => {
+    const { container } = renderScreen({ own: makeOwn(), room: [], loading: true })
     expect(screen.getByRole('status')).toHaveTextContent('Aggiornamento…')
+    expect(container.querySelector('[aria-busy="true"]')).not.toBeNull()
+  })
+
+  it('l\'ora dell\'ultimo aggiornamento, quando la shell la conosce', () => {
+    renderScreen({ own: makeOwn(), room, aggiornatoAlle: '15:42' })
+    expect(screen.getByText('Aggiornato alle 15:42')).toBeInTheDocument()
   })
 })
 
@@ -211,7 +262,12 @@ describe('ChiCeOggi — filtro della stanza', () => {
       ],
     })
     const group = screen.getByRole('group', { name: /Filtra chi c'è oggi/ })
-    expect(within(group).getAllByRole('button').map((b) => b.textContent)).toEqual(['Tutti', 'Cerca compagno'])
+    // Il nome accessibile, non il testo: l'inchiostro della chip è su due
+    // livelli e il secondo (`aria-hidden`) ripete l'etichetta.
+    const chips = within(group).getAllByRole('button')
+    expect(chips).toHaveLength(2)
+    expect(chips[0]).toHaveAccessibleName('Tutti')
+    expect(chips[1]).toHaveAccessibleName('Cerca compagno')
 
     await user.click(within(group).getByRole('button', { name: 'Cerca compagno' }))
     // Resta solo chi cerca: Anna sì, Bruno no.
@@ -249,6 +305,13 @@ describe('ChiCeOggi — filtro della stanza', () => {
 
 // ---------------------------------------------------------------- a11y
 describe('ChiCeOggi — accessibilità', () => {
+  it('‹ Indietro porta alla Home', async () => {
+    const user = userEvent.setup()
+    const { onBack } = renderScreen()
+    await user.click(screen.getByRole('button', { name: 'Home' }))
+    expect(onBack).toHaveBeenCalledTimes(1)
+  })
+
   it('il titolo di pagina è l\'unico h1', () => {
     renderScreen({ own: makeOwn(), room: [makePresentUser()] })
     expect(screen.getAllByRole('heading', { level: 1 }).map((h) => h.textContent)).toEqual(["Chi c'è oggi"])

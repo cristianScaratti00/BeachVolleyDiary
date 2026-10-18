@@ -1,171 +1,218 @@
-import { useEffect, useState } from 'react'
-import type { CSSProperties } from 'react'
-import { createPortal } from 'react-dom'
+// ============================================================================
+// Visore delle foto (MOTION.md §4.2, UX §6.5, §8.2). Lo disegna ModalHost, che
+// lo mette in un portal su `document.body` e blocca lo scroll sotto.
+//
+// - `role="dialog"` «Foto i di n»; il focus va al ✕ a t0 e torna alla
+//   miniatura all'inizio dell'uscita.
+// - Sfoglia: il dito porta la foto 1:1; oltre ¼ della larghezza o 550px/s si
+//   passa alla foto accanto, che arriva con la molla. ← / → e i pulsanti fanno
+//   la stessa cosa. Giù per chiudere: l'immagine rimpicciolisce e il fondo si
+//   schiarisce col dito; oltre 120px o 550px/s si chiude.
+// - Le barre sono `glass-dark` (sopra una foto c'è di tutto) con bersagli da 44.
+// - Lo spinner è solo sull'immagine: è uno dei due posti dove esiste.
+// ============================================================================
+import { useEffect, useRef, useState } from 'react'
+import * as m from 'motion/react-m'
+import { AnimatePresence, useIsPresent, useMotionValue, useTransform } from 'motion/react'
+import type { PanInfo } from 'motion/react'
+import type { LightboxProps } from '../app/contracts'
+import { ENTRATA, MOLLA, SVELTO } from './Motion'
+import { Icon } from './ui/Icon'
+import { useEscape, useFocusTrap, useInitialFocus, useReturnFocus } from './ui/overlay'
+import { isOnline } from '../hooks/useConnection'
+import './PhotoLightbox.css'
 
-export interface Shot {
-  url: string
-  caption?: string
-}
+// Le stesse soglie dello sheet: un gesto deciso basta, uno lento va finito.
+const CHIUDI_OLTRE_PX = 120
+const CHIUDI_OLTRE_VELOCITA = 550
 
-interface PhotoLightboxProps {
-  photos: Shot[]
-  startIndex: number
-  nameBase: string // base del nome file per il download (es. slug del torneo)
-  onClose: () => void
-}
-
-// Ricava l'estensione dal path della URL firmata, con fallback dal MIME.
+// Ricava l'estensione dal path della URL firmata, con ripiego dal MIME.
 function extOf(url: string, mime: string): string {
   const path = url.split('?')[0]
-  const m = path.match(/\.([a-zA-Z0-9]{3,4})$/)
-  if (m) return m[1].toLowerCase()
+  const e = path.match(/\.([a-zA-Z0-9]{3,4})$/)
+  if (e) return e[1].toLowerCase()
   if (mime.includes('png')) return 'png'
   if (mime.includes('webp')) return 'webp'
   if (mime.includes('gif')) return 'gif'
   return 'jpg'
 }
 
-// Visualizzatore foto a schermo intero (lightbox): mostra la foto per intera
-// (object-fit: contain), con navigazione prev/next e download. Chiude con click
-// sullo sfondo, tasto Esc o ✕. Le frecce usano ← → da tastiera.
-export default function PhotoLightbox({ photos, startIndex, nameBase, onClose }: PhotoLightboxProps) {
+type Stato = 'carica' | 'pronta' | 'errore'
+
+export default function PhotoLightbox({ photos, startIndex, nameBase, onClose, top, opener }: LightboxProps) {
   const [i, setI] = useState(startIndex)
-  const [busy, setBusy] = useState(false)
+  const [dir, setDir] = useState(0)
+  const [stato, setStato] = useState<Stato>('carica')
+  const [scarica, setScarica] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  const presente = useIsPresent()
+  const n = photos.length
   const shot = photos[i]
-  const many = photos.length > 1
+  const molte = n > 1
 
-  const prev = () => setI((v) => (v - 1 + photos.length) % photos.length)
-  const next = () => setI((v) => (v + 1) % photos.length)
+  useFocusTrap(ref, presente)
+  useEscape(onClose, top && presente)
+  useInitialFocus(ref, (root) => root.querySelector<HTMLElement>('[data-close]'))
+  useReturnFocus(presente, opener)
 
+  const vai = (d: number) => {
+    if (!molte) return
+    setDir(d)
+    setStato('carica')
+    setI((v) => (v + d + n) % n)
+  }
+
+  // ← / → cambiano foto (solo se il visore è in cima).
   useEffect(() => {
+    if (!top || !presente) return
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-      else if (e.key === 'ArrowLeft') prev()
-      else if (e.key === 'ArrowRight') next()
+      if (e.defaultPrevented) return
+      if (e.key === 'ArrowLeft') vai(-1)
+      else if (e.key === 'ArrowRight') vai(1)
     }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onClose, photos.length])
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  })
 
-  // Blocca lo scroll della pagina di sfondo mentre il lightbox è aperto.
-  useEffect(() => {
-    const prevOverflow = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => { document.body.style.overflow = prevOverflow }
-  }, [])
+  // Giù per chiudere: il fondo si schiarisce e l'immagine rimpicciolisce col dito.
+  const y = useMotionValue(0)
+  const fondo = useTransform(y, (v) => 1 - Math.min(Math.max(v, 0), 300) / 400)
+  const scala = useTransform(y, (v) => 1 - Math.min(Math.max(v, 0), 400) / 1600)
+  const [trascina, setTrascina] = useState(false)
+
+  const fine = (_e: unknown, info: PanInfo) => {
+    setTrascina(false)
+    const { offset, velocity } = info
+    if (offset.y > CHIUDI_OLTRE_PX || velocity.y > CHIUDI_OLTRE_VELOCITA) {
+      onClose()
+      return
+    }
+    const w = ref.current?.clientWidth ?? window.innerWidth
+    if (offset.x < -w / 4 || velocity.x < -CHIUDI_OLTRE_VELOCITA) vai(1)
+    else if (offset.x > w / 4 || velocity.x > CHIUDI_OLTRE_VELOCITA) vai(-1)
+  }
 
   const download = async () => {
-    if (busy || !shot) return
-    setBusy(true)
+    if (scarica || !shot) return
+    setScarica(true)
     try {
       const res = await fetch(shot.url, { mode: 'cors' })
       if (!res.ok) throw new Error('http ' + res.status)
       const blob = await res.blob()
-      const objUrl = URL.createObjectURL(blob)
+      const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
-      a.href = objUrl
+      a.href = url
       a.download = `${nameBase}-${i + 1}.${extOf(shot.url, blob.type)}`
+      a.rel = 'noopener'
+      document.body.appendChild(a)
       a.click()
-      URL.revokeObjectURL(objUrl)
+      a.remove()
+      window.setTimeout(() => URL.revokeObjectURL(url), 60_000)
     } catch (e) {
       // eslint-disable-next-line no-console
       console.error('[foto] download', e)
-      window.open(shot.url, '_blank') // fallback: apri in una nuova scheda
+      window.open(shot.url, '_blank', 'noopener') // ripiego: la foto in una scheda nuova
     } finally {
-      setBusy(false)
+      setScarica(false)
     }
   }
 
   if (!shot) return null
 
-  const arrow = (side: 'left' | 'right'): CSSProperties => ({
-    position: 'absolute',
-    top: '50%',
-    transform: 'translateY(-50%)',
-    left: side === 'left' ? 'max(12px, 2vw)' : undefined,
-    right: side === 'right' ? 'max(12px, 2vw)' : undefined,
-    width: 46,
-    height: 46,
-    borderRadius: '50%',
-    background: 'rgba(255,255,255,.14)',
-    backdropFilter: 'blur(4px)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: '#fff',
-    cursor: 'pointer',
-  })
-
-  // Portal su document.body: evita che una `transform`/`animation` su un
-  // antenato (es. la schermata TorneoDetail) renda il `position: fixed`
-  // relativo a quell'antenato, causando un overlay alto quanto la pagina.
-  return createPortal(
-    <div
-      onClick={onClose}
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'rgba(11,18,33,.92)',
-        backdropFilter: 'blur(6px)',
-        zIndex: 90,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 16,
-        padding: 20,
-        animation: 'overlay .2s ease',
-      }}
+  return (
+    <m.div
+      ref={ref}
+      className="lightbox"
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Foto ${i + 1} di ${n}`}
+      data-surface="dark"
+      {...(presente ? {} : { inert: '' })}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1, transition: ENTRATA }}
+      exit={{ opacity: 0, transition: SVELTO }}
     >
-      {/* chiudi (in alto a destra) */}
-      <div
-        className="chip"
-        onClick={(e) => { e.stopPropagation(); onClose() }}
-        title="Chiudi"
-        style={{ position: 'absolute', top: 16, right: 16, width: 40, height: 40, borderRadius: 12, background: 'rgba(255,255,255,.14)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', cursor: 'pointer' }}
-      >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+      <m.div className="lightbox-bg" aria-hidden="true" style={{ opacity: fondo }} onClick={onClose} />
+
+      <div className="lightbox-bar lightbox-bar-top" data-material="glass-dark" data-hidden={trascina ? '' : undefined}>
+        <button type="button" className="lightbox-btn" data-close="" aria-label="Chiudi" onClick={onClose}>
+          <Icon name="close" size={24} />
+        </button>
+        <p className="lightbox-count" aria-hidden="true">{i + 1} / {n}</p>
+        <span className="lightbox-spacer" />
       </div>
 
-      {/* immagine intera */}
-      <img
-        onClick={(e) => e.stopPropagation()}
-        src={shot.url}
-        alt={shot.caption || ''}
-        style={{ maxWidth: 'min(94vw, 1100px)', maxHeight: '80vh', objectFit: 'contain', borderRadius: 14, boxShadow: '0 30px 80px -20px rgba(0,0,0,.6)', animation: 'sheet .3s cubic-bezier(.2,.8,.2,1) both' }}
-      />
+      <div className="lightbox-stage">
+        <AnimatePresence initial={false} custom={dir} mode="popLayout">
+          <m.div
+            key={shot.url}
+            className="lightbox-frame"
+            custom={dir}
+            variants={{
+              entra: (d: number) => ({ x: `${d * 40}%`, opacity: 0 }),
+              qui: { x: 0, opacity: 1 },
+              esce: (d: number) => ({ x: `${d * -40}%`, opacity: 0 }),
+            }}
+            initial="entra"
+            animate="qui"
+            exit="esce"
+            transition={{ x: MOLLA, opacity: SVELTO }}
+            drag
+            dragDirectionLock
+            dragSnapToOrigin
+            dragTransition={{ bounceStiffness: MOLLA.stiffness, bounceDamping: MOLLA.damping }}
+            onDragStart={() => setTrascina(true)}
+            onDragEnd={fine}
+            style={{ y, scale: scala }}
+          >
+            <img
+              className="lightbox-img"
+              src={shot.url}
+              alt={shot.caption || ''}
+              data-ready={stato === 'pronta' ? '' : undefined}
+              onLoad={() => setStato('pronta')}
+              onError={() => setStato('errore')}
+              draggable={false}
+            />
+            {stato === 'carica' && (
+              <span className="lightbox-spinner" role="status">
+                <span className="ui-spinner" aria-hidden="true" />
+                <span className="sr-only">Carico la foto…</span>
+              </span>
+            )}
+            {stato === 'errore' && (
+              <p className="lightbox-error" role="status">
+                {isOnline() ? 'Foto non disponibile.' : 'Foto non disponibile offline.'}
+              </p>
+            )}
+          </m.div>
+        </AnimatePresence>
+      </div>
 
-      {/* controlli */}
-      <div onClick={(e) => e.stopPropagation()} style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', justifyContent: 'center', maxWidth: '94vw' }}>
-        {shot.caption && (
-          <span style={{ font: "700 13px 'Nunito Sans'", color: 'rgba(255,255,255,.82)' }}>{shot.caption}</span>
-        )}
-        {many && (
-          <span className="num" style={{ font: "700 13px 'Nunito Sans'", color: 'rgba(255,255,255,.55)' }}>{i + 1} / {photos.length}</span>
-        )}
-        <div
-          className="chip"
-          onClick={download}
-          style={{ display: 'flex', alignItems: 'center', gap: 8, font: "700 13.5px 'Nunito Sans'", padding: '11px 20px', borderRadius: 11, background: '#FF6B35', color: '#fff', cursor: 'pointer', opacity: busy ? 0.7 : 1 }}
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" /></svg>
-          {busy ? 'Download…' : 'Scarica'}
+      <div className="lightbox-bar lightbox-bar-bottom" data-material="glass-dark" data-hidden={trascina ? '' : undefined}>
+        {shot.caption && <p className="lightbox-caption">{shot.caption}</p>}
+        <div className="lightbox-actions">
+          {molte && (
+            <button type="button" className="lightbox-btn" aria-label="Precedente" onClick={() => vai(-1)}>
+              <Icon name="chevron-left" size={24} />
+            </button>
+          )}
+          {molte && (
+            <button type="button" className="lightbox-btn" aria-label="Successiva" onClick={() => vai(1)}>
+              <Icon name="chevron-right" size={24} />
+            </button>
+          )}
+          <button
+            type="button"
+            className="lightbox-btn lightbox-download"
+            aria-busy={scarica || undefined}
+            onClick={() => void download()}
+          >
+            <Icon name="download" size={20} />
+            <span>{scarica ? 'Download…' : 'Scarica'}</span>
+          </button>
         </div>
       </div>
-
-      {/* frecce prev/next */}
-      {many && (
-        <>
-          <div className="chip" onClick={(e) => { e.stopPropagation(); prev() }} title="Precedente" style={arrow('left')}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M15 6l-6 6 6 6" /></svg>
-          </div>
-          <div className="chip" onClick={(e) => { e.stopPropagation(); next() }} title="Successiva" style={arrow('right')}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg>
-          </div>
-        </>
-      )}
-    </div>,
-    document.body,
+    </m.div>
   )
 }

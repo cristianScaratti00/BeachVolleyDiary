@@ -389,6 +389,16 @@ describe('Toast', () => {
     expect(screen.getByRole('status')).toHaveTextContent('×2')
   })
 
+  it('un avviso di stato ripetuto non conta: niente «×2» sulla rete lenta', () => {
+    render(<ToastRegion />)
+    act(() => {
+      toast.show('info', "Connessione lenta: potrebbe volerci un po'.", { key: 'lenta', conta: false })
+      toast.show('info', "Connessione lenta: potrebbe volerci un po'.", { key: 'lenta', conta: false })
+    })
+    expect(screen.getAllByText(/Connessione lenta/)).toHaveLength(1)
+    expect(screen.getByRole('status')).not.toHaveTextContent('×')
+  })
+
   it('al massimo due avvisi', async () => {
     render(<ToastRegion />)
     act(() => {

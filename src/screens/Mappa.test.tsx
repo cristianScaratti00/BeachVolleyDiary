@@ -1,7 +1,8 @@
 // ============================================================================
-// Schermata "Mappa delle conquiste". È presentazionale — riceve un `MappaData`
-// già completo e delle callback — quindi si verifica montandola con `vi.fn()` e
-// dati di fabbrica, senza mockare Supabase.
+// Schermata "Mappa delle conquiste" (Tornei · Mappa). È presentazionale —
+// riceve un `MappaData` già completo, la stagione e una callback — quindi si
+// verifica montandola con `vi.fn()` e dati di fabbrica, senza mockare Supabase.
+// I tornei si aprono con link veri (UX §7.6): si verifica indirizzo e router.
 //
 // Il tema ricorrente dei test qui è che la mappa **non può parlare solo con il
 // colore**: ogni cosa che il pin dice deve esistere anche in testo, dentro una
@@ -14,10 +15,11 @@
 // verificare, mentre montarlo davvero renderebbe i test dipendenti dai tempi
 // del suo `import()` in `lazy()`.
 // ============================================================================
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeAll, beforeEach, afterEach } from 'vitest'
 import { render, screen, within, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import Mappa from './Mappa'
+import { __resetRouterForTests } from '../app/router'
 import { makeMappaData, makeMappaPin, makeMappaTorneoRow } from '../test/factories'
 import type { MappaData, MappaPin } from '../lib/derive.mappa'
 import { expectNoA11yViolations } from '../test/axe'
@@ -38,14 +40,35 @@ vi.mock('../components/ConquisteMap', () => ({
   },
 }))
 
-function renderMappa(m: Partial<MappaData> = {}) {
-  const onOpenTorneo = vi.fn()
+function renderMappa(m: Partial<MappaData> = {}, fYear = 'Sempre') {
   const onNewTorneo = vi.fn()
+  const setFYear = vi.fn()
   const view = render(
-    <Mappa m={makeMappaData(m)} onOpenTorneo={onOpenTorneo} onNewTorneo={onNewTorneo} />,
+    <Mappa
+      m={makeMappaData(m)}
+      stagione={{ fYear, setFYear, yearOptions: ['2026', '2025', 'Sempre'] }}
+      onNuovoTorneo={onNewTorneo}
+    />,
   )
-  return { ...view, onOpenTorneo, onNewTorneo }
+  return { ...view, onNewTorneo, setFYear }
 }
+
+// Il riquadro è un `lazy()`: si risolve una volta, dentro `act`, prima dei
+// test, così ognuno lo trova già pronto invece di finire fuori da `act`.
+beforeAll(async () => {
+  let unmount = () => {}
+  await act(async () => {
+    unmount = renderMappa({ pins: [makeMappaPin()] }).unmount
+    await import('../components/ConquisteMap')
+    await new Promise((r) => setTimeout(r, 0))
+  })
+  unmount()
+})
+
+beforeEach(() => {
+  window.history.replaceState(null, '', '/tornei/mappa')
+  __resetRouterForTests()
+})
 
 const cervia = makeMappaPin({ city: 'Cervia', tier: 'vinto', best: '1° 🏆', count: 2 })
 const rimini = makeMappaPin({ city: 'Rimini', tier: 'podio', best: '2°' })
@@ -59,11 +82,20 @@ describe('Mappa — stato vuoto', () => {
     expect(screen.getByText(/Crea un torneo/)).toBeInTheDocument()
   })
 
-  it('l’invito chiama onNewTorneo', async () => {
+  it('l’invito è un pulsante che crea un torneo', async () => {
     const user = userEvent.setup()
     const { onNewTorneo } = renderMappa()
-    await user.click(screen.getByText(/Crea un torneo/))
+    await user.click(screen.getByRole('button', { name: 'Crea un torneo' }))
     expect(onNewTorneo).toHaveBeenCalledOnce()
+  })
+
+  it('una stagione senza città lo dice e offre tutte le stagioni (C10)', async () => {
+    const user = userEvent.setup()
+    const { setFYear } = renderMappa({}, '2025')
+    expect(screen.getByText('Nessuna città in questa stagione.')).toBeInTheDocument()
+    expect(screen.queryByText(/Crea un torneo/)).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Mostra tutte le stagioni' }))
+    expect(setFYear).toHaveBeenCalledExactlyOnceWith('Sempre')
   })
 
   it('con solo città sconosciute la mappa non è vuota', () => {
@@ -107,6 +139,37 @@ describe('Mappa — il riquadro della mappa', () => {
   })
 })
 
+// ---------------------------------------------------------------- stagione
+describe('Mappa — la stagione si vede e si cambia qui (C10)', () => {
+  it('il selettore della stagione sta sopra le statistiche', async () => {
+    const user = userEvent.setup()
+    const { setFYear } = renderMappa({ pins: [rimini] }, '2026')
+    const sel = screen.getByRole('combobox', { name: 'Stagione' })
+    expect(sel).toHaveValue('2026')
+    await user.selectOptions(sel, '2025')
+    expect(setFYear).toHaveBeenCalledWith('2025')
+  })
+})
+
+// ---------------------------------------------------------------- offline
+describe('Mappa — senza rete', () => {
+  let online: PropertyDescriptor | undefined
+  beforeEach(() => {
+    online = Object.getOwnPropertyDescriptor(window.navigator, 'onLine')
+    Object.defineProperty(window.navigator, 'onLine', { configurable: true, get: () => false })
+  })
+  afterEach(() => {
+    if (online) Object.defineProperty(window.navigator, 'onLine', online)
+    else delete (window.navigator as { onLine?: boolean }).onLine
+  })
+
+  it('le tile non arrivano: lo dice dentro il riquadro, l\'elenco resta', () => {
+    renderMappa({ pins: [rimini] })
+    expect(screen.getByText(/Mappa non disponibile senza rete/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Rimini/ })).toBeInTheDocument()
+  })
+})
+
 // ---------------------------------------------------------------- legenda
 describe('Mappa — legenda', () => {
   it('ha sempre le tre voci, in testo, anche a zero', () => {
@@ -135,7 +198,9 @@ describe('Mappa — la lista è la fonte di verità', () => {
   it('il risultato è scritto, non solo colorato', () => {
     renderMappa({ pins: [jesolo, cervia] })
     const riga = screen.getByRole('button', { name: /Cervia/ })
-    expect(within(riga).getByText('1° 🏆')).toBeInTheDocument()
+    // '1° 🏆' diventa «1°» col trofeo SVG e «Primo posto» per gli screen reader (C15).
+    expect(within(riga).getByText('1°')).toBeInTheDocument()
+    expect(within(riga).getByText('Primo posto')).toBeInTheDocument()
     expect(within(screen.getByRole('button', { name: /Jesolo/ })).getByText('Gironi')).toBeInTheDocument()
   })
 
@@ -178,20 +243,33 @@ describe('Mappa — la lista è la fonte di verità', () => {
     })
     renderMappa({ pins: [pin] })
     await user.click(screen.getByRole('button', { name: /Cervia/ }))
-    expect(screen.getByRole('button', { name: 'Apri il torneo Cervia Open' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Apri il torneo Beach Cup' })).toBeInTheDocument()
+    // Link per NOME del torneo (prima erano «Apri il torneo X»).
+    expect(screen.getByRole('link', { name: 'Cervia Open' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Beach Cup' })).toBeInTheDocument()
   })
 
-  it('cliccare un torneo chiama onOpenTorneo con il suo id', async () => {
+  it('aperta, la riga dichiara l\'elenco che controlla', async () => {
+    const user = userEvent.setup()
+    renderMappa({ pins: [cervia] })
+    const riga = screen.getByRole('button', { name: /Cervia/ })
+    await user.click(riga)
+    expect(document.getElementById(riga.getAttribute('aria-controls')!)).toContainElement(
+      screen.getByRole('link', { name: cervia.tornei[0].name }),
+    )
+  })
+
+  it('un torneo è un link vero che apre il suo dettaglio', async () => {
     const user = userEvent.setup()
     const pin = makeMappaPin({
       city: 'Cervia',
       tornei: [makeMappaTorneoRow({ id: 'torneo-42', name: 'Cervia Open' })],
     })
-    const { onOpenTorneo } = renderMappa({ pins: [pin] })
+    renderMappa({ pins: [pin] })
     await user.click(screen.getByRole('button', { name: /Cervia/ }))
-    await user.click(screen.getByRole('button', { name: 'Apri il torneo Cervia Open' }))
-    expect(onOpenTorneo).toHaveBeenCalledExactlyOnceWith('torneo-42')
+    const link = screen.getByRole('link', { name: 'Cervia Open' })
+    expect(link).toHaveAttribute('href', '/tornei/torneo-42')
+    await user.click(link)
+    expect(window.location.pathname).toBe('/tornei/torneo-42')
   })
 
   it('una città fatta solo di tornei condivisi lo dice a parole', () => {
@@ -281,7 +359,7 @@ describe('Mappa — quello che non diventa un pin', () => {
       fuoriItalia: [{ key: 'ibiza', city: 'Ibiza', count: 1, tornei: [makeMappaTorneoRow({ name: 'Ibiza Beach' })] }],
     })
     expect(screen.getByText("Fuori dall'Italia")).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Apri il torneo Ibiza Beach' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Ibiza Beach' })).toBeInTheDocument()
   })
 
   it('mostra le città che il gazetteer non conosce', () => {
@@ -296,6 +374,17 @@ describe('Mappa — quello che non diventa un pin', () => {
   it('conta i tornei senza città con garbo', () => {
     renderMappa({ pins: [rimini], senzaCitta: 3 })
     expect(screen.getByText(/3 tornei non hanno/)).toBeInTheDocument()
+  })
+
+  it('dice come rimediare, senza dare la colpa alla modalità rapida (C5)', () => {
+    renderMappa({ pins: [rimini], senzaCitta: 3 })
+    expect(screen.getByText('3 tornei non hanno un luogo: aggiungilo dal torneo e compariranno qui.')).toBeInTheDocument()
+    expect(screen.queryByText(/modalità rapida/)).not.toBeInTheDocument()
+  })
+
+  it('al singolare con un torneo solo', () => {
+    renderMappa({ pins: [rimini], senzaCitta: 1 })
+    expect(screen.getByText('1 torneo non ha un luogo: aggiungilo dal torneo e comparirà qui.')).toBeInTheDocument()
   })
 
   it('dice che i tornei in corso non sono sulla mappa', () => {

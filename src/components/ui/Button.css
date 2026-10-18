@@ -77,11 +77,11 @@
   .ui-button[aria-busy="true"] { cursor: progress; }
 
   @media (hover: hover) and (pointer: fine) {
-    .ui-button:not([aria-disabled="true"]):not([aria-busy="true"]):hover::before { opacity: 0.08; }
+    .ui-button:not([aria-disabled="true"]):not([aria-busy="true"]):hover::before { opacity: var(--state-hover); }
   }
   .ui-button:not([aria-disabled="true"]):not([aria-busy="true"]):active { transform: scale(var(--press-scale)); }
   .ui-button:not([aria-disabled="true"]):not([aria-busy="true"]):active::before {
-    opacity: 0.12;
+    opacity: var(--state-press);
     transition-duration: 0ms;
   }
 
@@ -115,8 +115,8 @@
   .ui-icon-button[data-variant="quiet"] { color: var(--ink-2); }
   .ui-icon-button[data-variant="glass"] { --material-elev: var(--elev-float); }
   @media (hover: hover) and (pointer: fine) {
-    .ui-icon-button:hover::before { opacity: 0.08; }
+    .ui-icon-button:hover::before { opacity: var(--state-hover); }
   }
   .ui-icon-button:active { transform: scale(var(--press-scale)); }
-  .ui-icon-button:active::before { opacity: 0.12; transition-duration: 0ms; }
+  .ui-icon-button:active::before { opacity: var(--state-press); transition-duration: 0ms; }
 }

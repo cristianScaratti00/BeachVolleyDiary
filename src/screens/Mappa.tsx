@@ -1,140 +1,170 @@
 // ============================================================================
-// "La mappa delle conquiste": una mappa interattiva con un pin per ogni città
-// in cui hai giocato, colorato dal miglior piazzamento ottenuto lì.
+// Tornei · Mappa: "la mappa delle conquiste" (UX §5 F4, §6.3). Un pin per ogni
+// città in cui hai giocato, colorato dal miglior piazzamento ottenuto lì.
 //
 // Presentazionale: riceve un `MappaData` già completo (coordinate comprese) e
-// lo dispone. Nessun calcolo di geometria qui dentro — la stessa divisione di
-// `TrendCard`, che riceve `trendPts`/`trendLine` già pronti.
+// lo dispone. `derive.mappa.ts` non si tocca: l'ordine luogo → gazetteer è un
+// invariante fissato dai suoi test.
 //
 // La mappa vera vive in `ConquisteMap`, caricato in `lazy()`: Leaflet e il
-// plugin cluster stanno in un chunk a parte, che scarica solo chi apre questa
-// vista. Qui resta tutto ciò che funziona SENZA quel chunk — statistiche,
-// legenda, filtro ed elenco città — ed è anche il motivo per cui la schermata
-// resta testabile: jsdom non fa layout, quindi la mappa non si disegna nei
-// test, ma l'elenco sotto sì, e porta gli stessi fatti in testo.
+// plugin cluster stanno in un chunk a parte. Qui resta tutto ciò che funziona
+// SENZA quel chunk (e senza rete): statistiche, stagione, legenda, filtro ed
+// elenco città. L'elenco è la superficie accessibile: i pin non sono fermate
+// di tastiera (decisione di accessibilità esistente).
+//
+// La stagione si vede e si cambia QUI, dove ha effetto (C10): prima pilotava
+// la mappa di nascosto dal filtro della Home.
 // ============================================================================
-import { lazy, Suspense, useRef, useState } from 'react'
+import { lazy, Suspense, useId, useRef, useState } from 'react'
 import * as m from 'motion/react-m'
-import { AnimatePresence } from 'motion/react'
-import type { MappaData, MappaPin, MappaCitta, MappaTier, MappaTorneoRow } from '../lib/derive.mappa'
-import { SectionTitle, FilterChips, Badge, StatGrid, StatTile, EmptyCard, InlineLink, INK, MUTED, LINE } from '../components/ui'
-import { ENTRATA } from '../components/Motion'
+import { AnimatePresence, useReducedMotion } from 'motion/react'
+import type { MappaCitta, MappaData, MappaPin, MappaTier, MappaTorneoRow } from '../lib/derive.mappa'
+import type { TorneiProps } from '../app/contracts'
+import { Link } from '../app/router'
+import { ENTRATA, FLIP_MAX, MOLLA, SVELTO } from '../components/Motion'
+import { useOnline } from '../hooks/useConnection'
+import { Badge, Bone, Button, EmptyState, FilterChips, Icon, Note, PlacementBadge, Section, Select, Skeleton, StatGrid, StatTile } from '../components/ui/index'
+import './Mappa.css'
 
 const ConquisteMap = lazy(() => import('../components/ConquisteMap'))
 
-// Contorno navy dei glifi di legenda: gli stessi colori con cui `ConquisteMap`
-// disegna i pin, così la legenda insegna davvero a leggere la mappa.
-const CONTORNO = INK
-// Altezza del riquadro mappa. Fissa e non in `aspect-ratio`: il segnaposto del
-// caricamento deve occupare esattamente lo spazio della mappa, o al suo arrivo
-// la pagina sobbalza sotto le dita.
-const MAPPA_H = 380
-
 const TUTTE = 'tutte'
 
-interface MappaProps {
+// Colori dei glifi di legenda: gli STESSI letterali con cui `ConquisteMap`
+// disegna i pin (dotForRank, condiviso col mobile), così la legenda insegna
+// davvero a leggere la mappa. I pin non passano dai token (ART_DIRECTION §4.5).
+const PIN = { vinto: '#FF6B35', podio: '#F7A883', giocato: '#FFFFFF', contorno: '#1B2A4A', punto: '#FFFFFF' } as const
+
+export interface MappaProps {
   m: MappaData
-  onOpenTorneo: (id: string) => void
-  onNewTorneo: () => void
+  stagione: TorneiProps['stagione']
+  onNuovoTorneo: () => void
 }
 
-export default function Mappa({ m, onOpenTorneo, onNewTorneo }: MappaProps) {
+export default function Mappa({ m: dati, stagione, onNuovoTorneo }: MappaProps) {
   // Città selezionata: la stessa per il pin e per la riga di lista. Un solo
-  // stato, due superfici — cliccare l'uno evidenzia l'altra.
+  // stato, due superfici — toccare l'uno apre l'altra.
   const [sel, setSel] = useState<string | null>(null)
   const [tier, setTier] = useState<string>(TUTTE)
   const righe = useRef<Record<string, HTMLButtonElement | null>>({})
+  const ridotto = useReducedMotion()
+  const online = useOnline()
 
-  if (!m.citta && !m.sconosciute.length && !m.fuoriItalia.length && !m.senzaCitta) {
+  const filtroStagione = stagione.fYear && stagione.fYear !== 'Sempre'
+  const selettore = (
+    <Select
+      className="mappa-season"
+      label="Stagione"
+      value={stagione.fYear}
+      onChange={stagione.setFYear}
+      options={stagione.yearOptions.map((y) => ({ value: y, label: y }))}
+    />
+  )
+
+  const vuota = !dati.citta && !dati.sconosciute.length && !dati.fuoriItalia.length && !dati.senzaCitta
+  if (vuota) {
     return (
-      <div style={{ marginTop: 22 }}>
-        <EmptyCard>
-          {/* Con dei tornei ancora da giocare la mappa è vuota per un motivo
-              preciso, e dirlo è diverso dal chiedere di aggiungere una città che
-              c'è già: qui il bucket `nonGiocati` è l'unica cosa da raccontare,
-              altrimenti sparirebbe insieme al resto della pagina. */}
-          {m.nonGiocati > 0 ? (
-            <>
-              {m.nonGiocati === 1 ? 'Il tuo unico torneo è' : 'I tuoi tornei sono'} ancora in
-              corso o in programma: la mappa racconta solo quello che hai già giocato.
-              Segna il piazzamento e la città comparirà qui.
-            </>
-          ) : (
-            <>
-              Nessuna città sulla mappa: aggiungi un torneo con la sua città e comincia a
-              riempire il passaporto. <InlineLink onClick={onNewTorneo}>Crea un torneo →</InlineLink>
-            </>
-          )}
-        </EmptyCard>
+      <div className="mappa">
+        <div className="mappa-toolbar">{selettore}</div>
+        {filtroStagione ? (
+          <EmptyState
+            icon="map"
+            title="Nessuna città in questa stagione."
+            action={
+              <Button variant="tinted" onClick={() => stagione.setFYear('Sempre')}>
+                Mostra tutte le stagioni
+              </Button>
+            }
+          />
+        ) : dati.nonGiocati > 0 ? (
+          // Con dei tornei ancora da giocare la mappa è vuota per un motivo
+          // preciso, e dirlo è diverso dal chiedere una città che c'è già.
+          <EmptyState
+            icon="map"
+            title="La mappa racconta quello che hai già giocato."
+            text={`${dati.nonGiocati === 1 ? 'Il tuo unico torneo è' : 'I tuoi tornei sono'} ancora in corso o in programma: segna il piazzamento e la città comparirà qui.`}
+          />
+        ) : (
+          <EmptyState
+            icon="map"
+            title="Nessuna città sulla mappa."
+            text="Aggiungi un torneo con il suo luogo e comincia a riempire il passaporto."
+            action={
+              <Button variant="tinted" onClick={onNuovoTorneo}>
+                Crea un torneo
+              </Button>
+            }
+          />
+        )}
       </div>
     )
   }
 
-  // Le chip ci sono solo se separano qualcosa — la regola di `deriveTorneiSections`.
-  const tierPresenti = m.legenda.filter((l) => l.count > 0)
+  // Le chip ci sono solo se separano qualcosa (la regola di `deriveTorneiSections`).
+  const tierPresenti = dati.legenda.filter((l) => l.count > 0)
   const opzioni = tierPresenti.length > 1 ? tierPresenti : []
   const attivo = opzioni.some((o) => o.tier === tier) ? tier : TUTTE
-  // La lista va dal risultato migliore al peggiore; l'SVG disegna nell'ordine
-  // opposto, così i pin oro finiscono sopra ai vicini. Stesso array, due letture.
-  const inLista = [...m.pins].reverse().filter((p) => attivo === TUTTE || p.tier === attivo)
+  // La lista va dal risultato migliore al peggiore; la mappa disegna
+  // nell'ordine opposto, così i pin oro finiscono sopra ai vicini.
+  const inLista = [...dati.pins].reverse().filter((p) => attivo === TUTTE || p.tier === attivo)
+  // Oltre FLIP_MAX righe che si spostano, il layout cambia senza animazione.
+  const flip = inLista.length <= FLIP_MAX
 
   const seleziona = (key: string) => {
     const next = sel === key ? null : key
     setSel(next)
-    // jsdom non implementa `scrollIntoView`: la chiamata secca lancerebbe nei
-    // test. L'opzionale non è pigrizia, è la guardia.
-    if (next) righe.current[next]?.scrollIntoView?.({ block: 'nearest' })
+    // jsdom non implementa `scrollIntoView`: l'opzionale è la guardia.
+    if (next) righe.current[next]?.scrollIntoView?.({ block: 'nearest', behavior: ridotto ? 'auto' : 'smooth' })
   }
 
   return (
-    <div>
-      <StatGrid min={120} mt={20}>
-        <StatTile value={m.citta} label={m.citta === 1 ? 'città' : 'città'} valueSize={26} />
-        <StatTile value={m.cittaVinte} label="conquistate" color="#FF6B35" valueSize={26} />
-        <StatTile value={m.cittaConPodio} label="con podio" valueSize={26} />
-        <StatTile value={m.tornei} label="tornei" valueSize={26} />
+    <div className="mappa">
+      <div className="mappa-toolbar">{selettore}</div>
+
+      <StatGrid cols={4} className="mappa-stats" label="Le tue città">
+        <StatTile value={dati.citta} label="città" />
+        <StatTile value={dati.cittaVinte} label="conquistate" tone="win" />
+        <StatTile value={dati.cittaConPodio} label="con podio" />
+        <StatTile value={dati.tornei} label="tornei" />
       </StatGrid>
 
-      {m.migliore && (
-        <div style={{ font: "600 13px 'Nunito Sans'", color: MUTED, marginTop: 12 }}>
-          Il tuo posto migliore è <b style={{ color: INK }}>{m.migliore.city}</b> — {m.migliore.best}
-          {m.migliore.count > 1 ? ` in ${m.migliore.count} tornei` : ''}.
-        </div>
+      {dati.migliore && (
+        <p className="mappa-best">
+          Il tuo posto migliore è <strong>{dati.migliore.city}</strong>: {placementTesto(dati.migliore.best)}
+          {dati.migliore.count > 1 ? ` in ${dati.migliore.count} tornei` : ''}.
+        </p>
       )}
 
-      <div className="card" style={{ padding: 16, marginTop: 18 }}>
-        {/* Il segnaposto ha l'altezza esatta della mappa: quando il chunk di
-            Leaflet arriva, non si sposta niente sotto le dita. */}
+      <div className="mappa-frame">
+        {/* Il segnaposto ha l'altezza esatta della mappa: quando arriva il
+            chunk di Leaflet non si sposta niente sotto le dita. */}
         <Suspense
           fallback={
-            <div
-              aria-hidden="true"
-              style={{ height: MAPPA_H, borderRadius: 14, background: '#F2F0EC', border: '1px solid rgba(27,42,74,.1)' }}
-            />
+            <Skeleton className="mappa-skel" label="Carico la mappa…">
+              <Bone className="mappa-skel-box" />
+            </Skeleton>
           }
         >
-          <ConquisteMap
-            pins={m.pins}
-            selected={sel}
-            onSelect={seleziona}
-            srSummary={m.srSummary}
-            height={MAPPA_H}
-          />
+          <ConquisteMap pins={dati.pins} selected={sel} onSelect={seleziona} srSummary={dati.srSummary} />
         </Suspense>
-
-        <Legenda rows={m.legenda} />
-
-        {m.pins.some((p) => !p.preciso) && (
-          <div style={{ font: "600 11.5px 'Nunito Sans'", color: 'rgba(27,42,74,.45)', marginTop: 10, lineHeight: 1.4 }}>
-            Alcuni pin cadono sul centro della città: sono i tornei senza un luogo
-            geolocalizzato. Aggiungi le coordinate al luogo e il pin si sposta sul
-            campo dove hai giocato davvero.
-          </div>
+        {!online && (
+          <p className="mappa-offline" role="note">
+            <Icon name="wifi-off" size={20} />
+            Mappa non disponibile senza rete: l'elenco qui sotto ha tutte le città.
+          </p>
+        )}
+        <Legenda rows={dati.legenda} />
+        {dati.pins.some((p) => !p.preciso) && (
+          <Note className="mappa-approx">
+            Alcuni pin cadono sul centro della città: sono i tornei senza un luogo geolocalizzato.
+            Aggiungi le coordinate al luogo e il pin si sposta sul campo dove hai giocato davvero.
+          </Note>
         )}
       </div>
 
       {opzioni.length > 0 && (
         <FilterChips
+          className="mappa-chips"
           label="Filtra le città per risultato"
           value={attivo}
           onChange={setTier}
@@ -145,60 +175,57 @@ export default function Mappa({ m, onOpenTorneo, onNewTorneo }: MappaProps) {
         />
       )}
 
-      <SectionTitle size={17}>
-        {inLista.length === 1 ? '1 città' : `${inLista.length} città`}
-      </SectionTitle>
+      <Section title={inLista.length === 1 ? '1 città' : `${inLista.length} città`}>
+        {inLista.length === 0 ? (
+          <EmptyState icon="map" level={3} title="Nessuna città con questo risultato." />
+        ) : (
+          <ul className="mappa-list">
+            {inLista.map((p) => (
+              <RigaCitta
+                key={p.key}
+                p={p}
+                open={sel === p.key}
+                flip={flip}
+                onToggle={() => seleziona(p.key)}
+                rowRef={(el) => {
+                  righe.current[p.key] = el
+                }}
+              />
+            ))}
+          </ul>
+        )}
+      </Section>
 
-      {inLista.length === 0 ? (
-        <EmptyCard>Nessuna città con questo risultato.</EmptyCard>
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {inLista.map((p) => (
-            <CittaRow
-              key={p.key}
-              p={p}
-              open={sel === p.key}
-              onToggle={() => seleziona(p.key)}
-              onOpenTorneo={onOpenTorneo}
-              rowRef={(el) => {
-                righe.current[p.key] = el
-              }}
-            />
-          ))}
-        </div>
-      )}
-
-      {m.fuoriItalia.length > 0 && (
+      {dati.fuoriItalia.length > 0 && (
         <FuoriMappa
           title="Fuori dall'Italia"
           nota="Il riquadro resta l'Italia: una trasferta all'estero non deve rimpicciolire il resto della mappa."
-          citta={m.fuoriItalia}
-          onOpenTorneo={onOpenTorneo}
+          citta={dati.fuoriItalia}
         />
       )}
 
-      {m.sconosciute.length > 0 && (
+      {dati.sconosciute.length > 0 && (
         <FuoriMappa
           title="Non ancora sulla mappa"
           nota="Queste città non sono nell'elenco di località conosciute. Un refuso? Correggilo dal torneo. Altrimenti verrà aggiunta."
-          citta={m.sconosciute}
-          onOpenTorneo={onOpenTorneo}
+          citta={dati.sconosciute}
         />
       )}
 
-      {(m.senzaCitta > 0 || m.nonGiocati > 0) && (
-        <div style={{ font: "600 12.5px 'Nunito Sans'", color: MUTED, marginTop: 20, lineHeight: 1.5 }}>
-          {m.senzaCitta > 0 && (
-            <div>
-              {m.senzaCitta === 1 ? '1 torneo non ha' : `${m.senzaCitta} tornei non hanno`} una città:
-              i tornei creati in modalità rapida partono senza. Aggiungendola compaiono qui.
-            </div>
+      {(dati.senzaCitta > 0 || dati.nonGiocati > 0) && (
+        <div className="mappa-notes">
+          {dati.senzaCitta > 0 && (
+            <Note>
+              {dati.senzaCitta === 1
+                ? '1 torneo non ha un luogo: aggiungilo dal torneo e comparirà qui.'
+                : `${dati.senzaCitta} tornei non hanno un luogo: aggiungilo dal torneo e compariranno qui.`}
+            </Note>
           )}
-          {m.nonGiocati > 0 && (
-            <div style={{ marginTop: 4 }}>
-              {m.nonGiocati === 1 ? '1 torneo è' : `${m.nonGiocati} tornei sono`} ancora in corso o in
+          {dati.nonGiocati > 0 && (
+            <Note>
+              {dati.nonGiocati === 1 ? '1 torneo è' : `${dati.nonGiocati} tornei sono`} ancora in corso o in
               programma: la mappa racconta solo quello che hai già giocato.
-            </div>
+            </Note>
           )}
         </div>
       )}
@@ -206,22 +233,37 @@ export default function Mappa({ m, onOpenTorneo, onNewTorneo }: MappaProps) {
   )
 }
 
+/**
+ * Il miglior risultato della città: come PlacementBadge, ma il tono viene dal
+ * tier della città (vinto o podio = accento), non da un letterale della lib.
+ */
+function BadgeRisultato({ best, podio }: { best: string; podio: boolean }) {
+  const testo = placementTesto(best)
+  const primo = testo !== best.trim()
+  return (
+    <Badge tone={podio ? 'accent' : 'neutral'}>
+      {primo && <Icon name="trophy" size={12} />}
+      <span aria-hidden={primo || undefined}>{testo}</span>
+      {primo && <span className="sr-only">{testo.replace('1°', 'Primo posto')}</span>}
+    </Badge>
+  )
+}
+
+/** «1° 🏆» → «1°»: nelle frasi il trofeo è un'emoji di contenuto, non serve. */
+function placementTesto(best: string): string {
+  return best.replace(/\s*🏆\s*/u, '').trim()
+}
+
 // ---------------------------------------------------------------- legenda
-// In DOM reale, mai solo dentro l'SVG: è il testo a dire cosa vuol dire ogni
-// forma. Le tre righe ci sono sempre, anche a zero — il vocabolario della mappa
-// si impara prima di avere una vittoria, non dopo.
+// In DOM reale, mai solo dentro la mappa: è il testo a dire cosa vuol dire
+// ogni forma. Le tre righe ci sono sempre, anche a zero.
 function Legenda({ rows }: { rows: MappaData['legenda'] }) {
   return (
-    <ul
-      style={{
-        display: 'flex', flexWrap: 'wrap', gap: '8px 18px', listStyle: 'none',
-        margin: '14px 0 0', padding: '12px 0 0', borderTop: `1px solid ${LINE}`,
-      }}
-    >
+    <ul className="mappa-legend">
       {rows.map((r) => (
-        <li key={r.tier} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, font: "700 12px 'Nunito Sans'", color: MUTED }}>
+        <li key={r.tier} className="mappa-legend-item">
           <GlifoTier tier={r.tier} />
-          <span style={{ color: INK }}>{r.label}</span>
+          <span className="mappa-legend-label">{r.label}</span>
           <span>· {r.count}</span>
         </li>
       ))}
@@ -229,144 +271,104 @@ function Legenda({ rows }: { rows: MappaData['legenda'] }) {
   )
 }
 
-// Lo stesso disegno del pin, in miniatura: forma e contorno identici, così la
-// legenda insegna davvero a leggere la mappa.
+// Lo stesso disegno del pin, in miniatura: forma e contorno identici.
 function GlifoTier({ tier }: { tier: MappaTier }) {
-  const fill = tier === 'vinto' ? '#FF6B35' : tier === 'podio' ? '#F7A883' : '#fff'
   return (
-    <svg width={16} height={16} viewBox="0 0 16 16" aria-hidden="true" focusable="false" style={{ flex: 'none' }}>
-      <circle cx={8} cy={8} r={6} fill={fill} stroke={CONTORNO} strokeWidth={1.4} />
-      {tier === 'vinto' && <circle cx={8} cy={8} r={2} fill="#fff" />}
+    <svg className="mappa-glyph" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+      <circle cx={8} cy={8} r={6} style={{ fill: PIN[tier], stroke: PIN.contorno }} strokeWidth={1.4} />
+      {tier === 'vinto' && <circle cx={8} cy={8} r={2} style={{ fill: PIN.punto }} />}
     </svg>
   )
 }
 
 // ---------------------------------------------------------------- riga città
-// Un `button` vero, non una card con `role="button"`: qui il pattern nativo
-// basta e porta gratis Invio/Spazio e lo stato annunciato da `aria-expanded`.
-function CittaRow({ p, open, onToggle, onOpenTorneo, rowRef }: {
+// Un `button` vero con `aria-expanded`. Aprirla segue lo schema della pila
+// (MOTION.md §4.3): l'elenco entra al suo posto in ENTRATA, chi esce va fuori
+// dal flusso a t0 (`popLayout`) e svanisce in SVELTO, le righe sotto
+// scivolano in FLIP. Nessuna altezza animata.
+function RigaCitta({ p, open, flip, onToggle, rowRef }: {
   p: MappaPin
   open: boolean
+  flip: boolean
   onToggle: () => void
-  onOpenTorneo: (id: string) => void
   rowRef: (el: HTMLButtonElement | null) => void
 }) {
+  const id = useId()
   return (
-    <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-      <button
-        ref={rowRef}
-        type="button"
-        onClick={onToggle}
-        aria-expanded={open}
-        style={{
-          width: '100%', textAlign: 'left', background: 'transparent', border: 'none',
-          cursor: 'pointer', padding: '15px 18px', display: 'flex', alignItems: 'center',
-          gap: 12, flexWrap: 'wrap',
-        }}
-      >
+    <m.li className="mappa-city" layout={flip ? 'position' : false} transition={MOLLA}>
+      <button ref={rowRef} type="button" className="mappa-city-row" aria-expanded={open} aria-controls={open ? id : undefined} onClick={onToggle}>
         <GlifoTier tier={p.tier} />
-        <span style={{ flex: 1, minWidth: 150 }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-            <span className="num" style={{ fontSize: 16, fontWeight: 500, letterSpacing: '-.2px' }}>{p.city}</span>
-            {p.shared && <Badge tone="dark" size="sm">Condiviso</Badge>}
+        <span className="mappa-city-text">
+          <span className="mappa-city-name">
+            {p.city}
+            {p.shared && <Badge>Condiviso</Badge>}
           </span>
-          <span style={{ display: 'block', font: "600 12px 'Nunito Sans'", color: MUTED, marginTop: 2 }}>
-            {p.label}
-          </span>
+          <span className="mappa-city-label">{p.label}</span>
         </span>
-        {/* Il risultato in chiaro, accanto al pallino: il colore non è mai
+        {/* Il risultato in chiaro accanto al pallino: il colore non è mai
             l'unico canale (WCAG 1.4.1). */}
-        <span style={{ flex: 'none', font: "700 12px 'Nunito Sans'", padding: '5px 11px', borderRadius: 8, background: p.tier === 'giocato' ? '#F2F0EC' : '#FFF1EA', color: p.tier === 'giocato' ? 'rgba(27,42,74,.5)' : '#C4501E' }}>
-          {p.best}
-        </span>
+        <BadgeRisultato best={p.best} podio={p.tier !== 'giocato'} />
+        <Icon name="chevron-down" size={20} className="mappa-city-chev" />
       </button>
-
-      {/* L'elenco scorre fuori invece di apparire di scatto: `height: auto` è
-          animabile da Motion (misura il contenuto), non dal CSS. `overflow:
-          hidden` serve a tagliare i tornei mentre l'altezza cresce, altrimenti
-          traboccherebbero sulla riga successiva per tutta l'animazione. */}
-      <AnimatePresence initial={false}>
+      <AnimatePresence mode="popLayout" initial={false}>
         {open && (
           <m.div
             key="tornei"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={ENTRATA}
-            style={{ overflow: 'hidden' }}
+            id={id}
+            className="mappa-city-tornei"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0, transition: ENTRATA }}
+            exit={{ opacity: 0, transition: SVELTO }}
           >
-            <div style={{ padding: '0 18px 16px', borderTop: `1px solid ${LINE}` }}>
-              <div style={{ font: "700 11px 'Nunito Sans'", color: 'rgba(27,42,74,.45)', letterSpacing: '1px', textTransform: 'uppercase', margin: '13px 0 9px' }}>
-                {p.count === 1 ? '1 torneo qui' : `${p.count} tornei qui`}
-                {p.played > 0 && ` · ${p.record} · ${p.winPct}% vittorie`}
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-                {p.tornei.map((t) => (
-                  <TorneoRow key={t.id} t={t} onOpen={() => onOpenTorneo(t.id)} />
-                ))}
-              </div>
-            </div>
+            <p className="mappa-city-sum">
+              {p.count === 1 ? '1 torneo qui' : `${p.count} tornei qui`}
+              {p.played > 0 && ` · ${p.record} · ${p.winPct}% vittorie`}
+            </p>
+            <ElencoTornei tornei={p.tornei} />
           </m.div>
         )}
       </AnimatePresence>
-    </div>
+    </m.li>
   )
 }
 
-function TorneoRow({ t, onOpen }: { t: MappaTorneoRow; onOpen: () => void }) {
+// I tornei di una città: link veri col NOME del torneo come nome accessibile
+// (prima erano «Apri il torneo X»); data e piazzamento stanno accanto.
+function ElencoTornei({ tornei }: { tornei: MappaTorneoRow[] }) {
   return (
-    <button
-      type="button"
-      onClick={onOpen}
-      aria-label={`Apri il torneo ${t.name}`}
-      style={{
-        width: '100%', textAlign: 'left', cursor: 'pointer',
-        background: '#FAF8F5', border: `1px solid ${LINE}`, borderRadius: 10,
-        padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',
-      }}
-    >
-      <span style={{ flex: 1, minWidth: 130 }}>
-        <span style={{ display: 'block', font: "700 13px 'Nunito Sans'", color: INK }}>{t.name}</span>
-        <span style={{ display: 'block', font: "600 11.5px 'Nunito Sans'", color: MUTED, marginTop: 1 }}>{t.dateLabel}</span>
-      </span>
-      {t.shared && <Badge tone="dark" size="sm">Condiviso</Badge>}
-      <span style={{ flex: 'none', font: "700 11.5px 'Nunito Sans'", padding: '4px 9px', borderRadius: 7, background: t.badgeBg, color: t.badgeColor }}>
-        {t.badge}
-      </span>
-    </button>
+    <ul className="mappa-tornei">
+      {tornei.map((t) => (
+        <li key={t.id} className="mappa-torneo">
+          <Link to={{ name: 'torneo', id: t.id }} className="mappa-torneo-link">
+            {t.name}
+          </Link>
+          <span className="mappa-torneo-date">{t.dateLabel}</span>
+          {t.shared && <Badge>Condiviso</Badge>}
+          <PlacementBadge label={t.badge} libBg={t.badgeBg} />
+        </li>
+      ))}
+    </ul>
   )
 }
 
 // ---------------------------------------------------------------- fuori mappa
 // Le città che non diventano un pin non spariscono: mostrarle è ciò che rende
-// scopribile un buco del gazetteer o un refuso, invece di lasciarlo invisibile.
-function FuoriMappa({ title, nota, citta, onOpenTorneo }: {
-  title: string
-  nota: string
-  citta: MappaCitta[]
-  onOpenTorneo: (id: string) => void
-}) {
+// scopribile un buco del gazetteer o un refuso.
+function FuoriMappa({ title, nota, citta }: { title: string; nota: string; citta: MappaCitta[] }) {
   return (
-    <>
-      <SectionTitle size={16}>{title}</SectionTitle>
-      <div style={{ font: "600 12px 'Nunito Sans'", color: MUTED, marginTop: -6, marginBottom: 10, lineHeight: 1.45 }}>{nota}</div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+    <Section title={title} className="mappa-bucket">
+      <Note className="mappa-bucket-note">{nota}</Note>
+      <ul className="mappa-list">
         {citta.map((c) => (
-          <div key={c.key} className="card" style={{ padding: '14px 18px' }}>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
-              <span className="num" style={{ fontSize: 15, fontWeight: 500 }}>{c.city}</span>
-              <span style={{ font: "600 12px 'Nunito Sans'", color: MUTED }}>
-                {c.count === 1 ? '1 torneo' : `${c.count} tornei`}
-              </span>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 7, marginTop: 10 }}>
-              {c.tornei.map((t) => (
-                <TorneoRow key={t.id} t={t} onOpen={() => onOpenTorneo(t.id)} />
-              ))}
-            </div>
-          </div>
+          <li key={c.key} className="mappa-city mappa-bucket-city">
+            <p className="mappa-bucket-head">
+              <span className="mappa-city-name">{c.city}</span>
+              <span className="mappa-city-label">{c.count === 1 ? '1 torneo' : `${c.count} tornei`}</span>
+            </p>
+            <ElencoTornei tornei={c.tornei} />
+          </li>
         ))}
-      </div>
-    </>
+      </ul>
+    </Section>
   )
 }

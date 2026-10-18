@@ -1,5 +1,6 @@
 import { useId } from 'react'
 import type { CSSProperties } from 'react'
+import { LIT } from '../lib/theme'
 import './Logo.css'
 
 // ============================================================================
@@ -24,8 +25,11 @@ import './Logo.css'
 //
 // L'SVG è in viewBox 0..100, quindi scala a qualsiasi dimensione.
 // ============================================================================
-const INK = '#1B2A4A'
-const ORANGE = '#FF6B35'
+// Il marchio è un disegno, uguale nell'app, nelle icone di public/icons e nel
+// PNG esportato: i colori sono i letterali dei token (`LIT`), e la palla resta
+// della sabbia del marchio, che non è un colore dell'interfaccia.
+const INK = LIT.ink
+const ORANGE = LIT.accent
 const SAND = '#FAF8F5'
 
 // Il pin: goccia che parte dalla punta in basso (50,90) e chiude sul cerchio.

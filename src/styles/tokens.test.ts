@@ -76,7 +76,7 @@ describe('token — tema chiaro: testo', () => {
     ['ink-2', 'surface-pressed'], ['ink-2', 'accent-wash'],
     ['accent-text', 'bg'], ['accent-text', 'bg-glow'], ['accent-text', 'surface'], ['accent-text', 'fill'],
     ['accent-text', 'accent-wash'],
-    ['on-accent', 'accent'], ['on-select', 'select'], ['ink-inverse', 'ink'],
+    ['on-accent', 'accent'], ['on-select', 'select'], ['ink-inverse', 'ink'], ['ink-inverse', 'surface-brand'],
     ['danger', 'surface'], ['danger', 'bg'], ['danger', 'fill'], ['danger', 'danger-wash'], ['on-danger', 'danger'],
     ['success', 'surface'], ['success', 'bg'], ['success', 'success-wash'],
     ['ink-placeholder', 'field'],
@@ -276,6 +276,14 @@ describe('token — un solo vocabolario di movimento', () => {
     expect(ms(L('dur-svelto'))).toBe(SVELTO.duration * 1000)
     expect(bezier(L('ease-standard'))).toEqual([...ENTRATA.ease])
     expect(bezier(L('ease-standard'))).toEqual([...SVELTO.ease])
+  })
+
+  it('lo strato di stato dei pulsanti è .08 in hover e .12 premuto (MOTION.md §4.3)', () => {
+    expect(Number(L('state-hover'))).toBe(0.08)
+    expect(Number(L('state-press'))).toBe(0.12)
+    // Il paio soft resta sotto, mai sopra: è lo stesso gesto su un fondo già tinto.
+    expect(Number(L('state-hover-soft'))).toBeLessThan(Number(L('state-hover')))
+    expect(Number(L('state-press-soft'))).toBeLessThan(Number(L('state-press')))
   })
 
   it('lo skeleton compare a 150ms e respira da 600ms (MOTION.md §2.3)', () => {

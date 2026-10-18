@@ -1,0 +1,125 @@
+/* Accesso: una card opaca al centro; da 900 il pannello del marchio a sinistra. */
+@layer components {
+  .login { min-height: 100dvh; display: flex; }
+  .login-brand {
+    flex: 0 0 44%;
+    max-width: var(--sheet-max);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: var(--space-10);
+    padding: var(--space-12) var(--space-10);
+    background: var(--surface-brand);
+    color: var(--ink);
+  }
+  .login-brand-claim {
+    font: var(--type-title-1);
+    letter-spacing: var(--track-title-1);
+    text-wrap: balance;
+  }
+  .login-brand-text {
+    margin-top: var(--space-3);
+    max-width: var(--empty-max);
+    font: var(--type-body);
+    letter-spacing: var(--track-body);
+    color: var(--ink-2);
+  }
+  .login-brand-features {
+    list-style: none;
+    margin: var(--space-8) 0 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-3);
+  }
+  .login-brand-features li {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    font: var(--type-subhead-strong);
+    letter-spacing: var(--track-subhead);
+  }
+
+  .login-main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: calc(var(--safe-top) + var(--space-6)) var(--gutter) calc(var(--safe-bottom) + var(--space-6));
+    outline: none;
+  }
+  .login-column { width: 100%; max-width: calc(var(--empty-max) + var(--space-16)); }
+  .login-brand-mobile { display: flex; justify-content: center; margin-bottom: var(--space-6); }
+
+  .login-card {
+    padding: var(--space-6) var(--space-5);
+    background: var(--surface);
+    border: var(--border-w) solid var(--edge);
+    border-radius: var(--radius-card);
+  }
+  .login-title { font: var(--type-title-1); letter-spacing: var(--track-title-1); }
+  .login-sub {
+    margin-top: var(--space-1);
+    font: var(--type-subhead);
+    letter-spacing: var(--track-subhead);
+    color: var(--ink-2);
+  }
+  .login-segmented { margin-top: var(--space-5); }
+  .login-form { display: grid; gap: var(--space-4); margin-top: var(--space-5); }
+  .login-name { display: grid; gap: var(--space-1); }
+  .login-name-status {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    min-height: var(--space-5);
+    font: var(--type-footnote);
+    letter-spacing: var(--track-footnote);
+    color: var(--ink-2);
+  }
+  .login-name-status[data-status="available"] { color: var(--success); }
+  .login-name-status[data-status="taken"] { color: var(--danger); }
+
+  .login-notice,
+  .login-error,
+  .login-offline {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    border-radius: var(--radius-control);
+    font: var(--type-footnote);
+    letter-spacing: var(--track-footnote);
+  }
+  .login-notice .ui-icon,
+  .login-error .ui-icon,
+  .login-offline .ui-icon { margin-top: var(--space-0-5); }
+  .login-notice { background: var(--success-wash); color: var(--success); }
+  .login-error { background: var(--danger-wash); color: var(--danger); }
+  .login-offline { margin-top: var(--space-4); background: var(--fill); color: var(--ink); }
+
+  .login-switch {
+    margin-top: var(--space-4);
+    text-align: center;
+    font: var(--type-subhead);
+    letter-spacing: var(--track-subhead);
+    color: var(--ink-2);
+  }
+  /* Un link d'azione: è un `<button>`, con il bersaglio a 44. */
+  .login-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--touch);
+    padding: 0 var(--space-1);
+    color: var(--accent-text);
+    font-weight: 600;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .login-link:hover { text-decoration: underline; text-underline-offset: var(--space-0-5); }
+  }
+  .login-foot {
+    margin-top: var(--space-4);
+    text-align: center;
+    font: var(--type-footnote);
+    letter-spacing: var(--track-footnote);
+    color: var(--ink-2);
+  }
+}

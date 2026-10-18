@@ -1,0 +1,63 @@
+/* Il selettore del luogo. Vive dentro un FormGroup opaco dello sheet: il testo
+   d'errore (--danger) sta quindi su carta, mai sul vetro. */
+@layer components {
+  .venue { min-width: 0; }
+  .venue-hint {
+    font: var(--type-footnote);
+    letter-spacing: var(--track-footnote);
+    color: var(--ink-2);
+  }
+  .venue-hint[data-tone="danger"] { color: var(--danger); }
+  .venue-hint:empty { display: none; }
+
+  /* Il pannello del luogo nuovo: rientrato su --fill, si legge come una
+     dipendenza del select e non come un altro campo. */
+  .venue-panel {
+    display: grid;
+    gap: var(--space-4);
+    margin-top: var(--space-3);
+    padding: var(--space-4);
+    border-radius: var(--radius-control);
+    background: var(--fill);
+  }
+  .venue-results { margin-top: var(--space-2); }
+  .venue-result-name { display: flex; align-items: baseline; flex-wrap: wrap; gap: var(--space-2); }
+
+  .venue-combo { position: relative; }
+  .venue-listbox {
+    position: absolute;
+    top: calc(100% + var(--space-1));
+    left: 0;
+    right: 0;
+    z-index: var(--z-sticky);
+    margin: 0;
+    padding: var(--space-1);
+    list-style: none;
+    max-height: calc(var(--touch) * 5.5);
+    overflow-y: auto;
+    background: var(--surface);
+    border: var(--border-w) solid var(--field-border);
+    border-radius: var(--radius-control);
+    box-shadow: var(--elev-overlay);
+  }
+  .venue-option {
+    display: flex;
+    flex-direction: column;
+    min-height: var(--touch);
+    justify-content: center;
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-chip);
+    cursor: pointer;
+  }
+  .venue-option[aria-selected="true"] { background: var(--fill); }
+  .venue-option-name { font: var(--type-subhead-strong); letter-spacing: var(--track-subhead); }
+  .venue-option-ctx { font: var(--type-footnote); letter-spacing: var(--track-footnote); color: var(--ink-2); }
+
+  .venue-coords-row { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .venue-coords-row > .ui-input { flex: 1; min-width: calc(var(--card-min) / 2); }
+
+  .venue-selected { margin-top: var(--space-2); }
+  .venue-selected-row { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-2) var(--space-3); }
+  .venue-selected-row > .venue-hint { flex: 1; min-width: calc(var(--card-min) / 2); }
+  .venue-merge-text { font: var(--type-subhead); letter-spacing: var(--track-subhead); }
+}

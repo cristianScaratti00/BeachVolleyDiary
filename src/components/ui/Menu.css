@@ -50,9 +50,9 @@
     transition: opacity var(--dur-svelto) var(--ease-standard);
   }
   @media (hover: hover) and (pointer: fine) {
-    .ui-menu-item:hover::before { opacity: 0.06; }
+    .ui-menu-item:hover::before { opacity: var(--state-hover-soft); }
   }
-  .ui-menu-item:active::before { opacity: 0.1; transition-duration: 0ms; }
+  .ui-menu-item:active::before { opacity: var(--state-press-soft); transition-duration: 0ms; }
   .ui-menu-item:focus-visible { outline-offset: -2px; }
   /* Distruttiva: riga opaca, testo --danger (ART_DIRECTION §4.4). */
   .ui-menu-item[data-tone="destructive"] { background: var(--surface); color: var(--danger); margin-top: var(--space-1); }

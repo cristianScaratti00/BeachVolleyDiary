@@ -133,6 +133,9 @@
     --scrim: rgb(14 22 38 / 0.36);
     /* Fondo dei visori a tutto schermo (Wrapped, Storia, lightbox). */
     --viewer-bg: #0B111D;
+    /* Il navy del marchio come SUPERFICIE: il pannello del Login. È lo stesso
+       fondo della palette `navy` dei PNG. Il bianco sopra fa 15.6:1. */
+    --surface-brand: #16233F;
 
     /* ---------------------------------------------------------- Linee */
     --hairline: 1px; /* 0.5px sugli schermi ≥2x, più sotto */
@@ -389,6 +392,14 @@
        Con reduced-motion vale 0 e restano solo le dissolvenze. */
     --motion-scale: 1;
     --press-scale: 0.97;
+    /* Lo strato di stato (MOTION.md §4.3): opacità del livello `currentColor`
+       sotto ciò che si preme. Il paio «soft» è per i livelli tinti d'inchiostro
+       sopra vetro o `--fill` (voci di menu, righe della Mappa), dove
+       `--surface-pressed` opaco cancellerebbe il materiale. */
+    --state-hover: 0.08;
+    --state-press: 0.12;
+    --state-hover-soft: 0.06;
+    --state-press-soft: 0.1;
   }
 
   /* Linee sottili davvero dove i pixel lo permettono. */

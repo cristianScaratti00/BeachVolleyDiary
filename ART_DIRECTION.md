@@ -217,6 +217,7 @@ L'interfaccia usa **un inchiostro** (navy), **due superfici** (sabbia e carta) e
 | `--danger-wash` · `--success-wash` | `#FDE8EE` · `#E4F4EC` | fondi dei badge di stato (danger sopra 4.76, success 4.84) |
 | `--scrim` | `rgb(14 22 38 / .36)` | velo sotto sheet e dialoghi, **senza blur** |
 | `--viewer-bg` | `#0B111D` | fondo di Wrapped, Storia e lightbox |
+| `--surface-brand` | `#16233F` | il navy del marchio come superficie: pannello del Login (bianco sopra 15.6); è il fondo della palette `navy` dei PNG |
 
 | Coppie su riempimento | Rapporto |
 |---|---|
@@ -231,7 +232,7 @@ L'interfaccia usa **un inchiostro** (navy), **due superfici** (sabbia e carta) e
    - Il `#FF6B35` puro non porta mai testo e non disegna mai una linea su fondo chiaro: per quella c'è `--accent-strong`.
 2. **Selezionato = navy pieno, contenuto bianco**, e in più un cambio di forma. Nella TabBar l'icona passa dal contorno al pieno (§10.1), così lo stato non si legge dal solo colore (WCAG 1.4.1).
 3. **Due livelli di testo, non tre.** Testo primario `--ink` e secondario `--ink-2`. `--ink-3` è per le icone e i bordi. Un "terziario" grigio chiaro alla iOS qui non esiste, perché al sole sparisce.
-4. **Il bianco scrive solo su**: `--select` (navy), `--danger`, `--viewer-bg` e il vetro scuro. **Mai sull'arancio.**
+4. **Il bianco scrive solo su**: `--select` (navy), `--surface-brand`, `--danger`, `--viewer-bg` e il vetro scuro. **Mai sull'arancio.**
 5. **Niente giallo, niente "warning".** Un'avvertenza (connessione lenta, offline) usa l'inchiostro e un'icona. Un secondo colore caldo competerebbe con l'accento.
 6. **Sul vetro si scrive solo con l'inchiostro** (§9.2). Accento, danger e success come *testo* vivono solo su superfici opache.
 7. **L'etichetta colore del torneo è contenuto dell'utente**, non palette (`SWATCH_COLORS`: `#FF6B35 #00B4D8 #FFD23F #FF477E #1B2A4A`).
@@ -365,6 +366,8 @@ Un valore fuori scala (14, 18, 22) è il sintomo di un altro errore: di solito u
 | `--mappa-h` · `--venue-map-h` · `--dock-max` | 380 · 200 · 720 px | riquadro Mappa (UX C3), VenueMap, colonna dell'assistente |
 | `--card-min` · `--card-min-narrow` · `--chart-min` · `--stat-min` · `--photo-min` | 300 · 250 · 280 · 110 · 100 px | il minimo delle colonne delle griglie (UX §9.2) |
 | `--timeline-date` · `--empty-max` · `--dialog-w` · `--popover-w` | 64 (78 da 600) · 320 · 320 · 300 px | colonna della data in Timeline, stato vuoto, ConfirmDialog centrato, popover |
+| `--state-hover` · `--state-press` | .08 · .12 | opacità dello strato di stato `currentColor` di pulsanti e chip (MOTION.md §4.3) |
+| `--state-hover-soft` · `--state-press-soft` | .06 · .10 | lo stesso strato, tinto `--ink`, sopra vetro o `--fill` (voci di menu, righe della Mappa) |
 
 ---
 

@@ -1,0 +1,194 @@
+/* ============================================================================
+   L'assistente a tutto schermo: intestazione, trascrizione che scorre, dock
+   fermo in fondo (sopra la tastiera: l'altezza segue il visualViewport). Su
+   desktop è una colonna centrale larga --dock-max, con la Sidebar accanto.
+   ============================================================================ */
+@layer components {
+  .crea {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: var(--dock-max);
+    height: 100dvh;
+    margin: 0 auto;
+  }
+
+  .crea-head {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: calc(var(--safe-top) + var(--space-2)) var(--gutter) var(--space-3);
+    border-bottom: var(--hairline) solid var(--separator);
+  }
+  .crea-head .ui-button { margin-left: calc(-1 * var(--space-3)); }
+  .crea-title { display: flex; align-items: center; gap: var(--space-3); min-width: 0; }
+  .crea-title-text { min-width: 0; }
+  .crea-title h1 { font: var(--type-headline); letter-spacing: var(--track-headline); }
+  .crea-title p {
+    font: var(--type-footnote);
+    letter-spacing: var(--track-footnote);
+    color: var(--ink-2);
+  }
+
+  /* L'avatar dell'assistente: la palla del marchio, decorativa. */
+  .crea-avatar {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: var(--space-10);
+    height: var(--space-10);
+    border-radius: 50%;
+    background: var(--fill);
+    color: var(--ink);
+  }
+  .crea-avatar[data-size="s"] { width: var(--space-8); height: var(--space-8); }
+
+  /* --------------------------------------------------------- trascrizione */
+  .crea-log {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-4) var(--gutter);
+  }
+  .crea-msg {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--space-2);
+    /* L'eco del tocco e la domanda nuova: ENTRATA, 8px che con reduced-motion
+       diventano zero (resta la dissolvenza). */
+    animation: crea-entra var(--dur-entrata) var(--ease-standard) both;
+  }
+  .crea-msg[data-role="user"] { flex-direction: row-reverse; }
+  @keyframes crea-entra {
+    from { opacity: 0; transform: translateY(calc(var(--space-2) * var(--motion-scale))); }
+    to { opacity: 1; transform: none; }
+  }
+  .crea-bubble {
+    max-width: 84%;
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-card);
+    font: var(--type-body);
+    letter-spacing: var(--track-body);
+    overflow-wrap: anywhere;
+  }
+  .crea-msg[data-role="ai"] .crea-bubble {
+    background: var(--surface);
+    border: var(--border-w) solid var(--edge);
+    border-top-left-radius: var(--radius-xs);
+    color: var(--ink);
+  }
+  .crea-msg[data-role="user"] .crea-bubble {
+    background: var(--select);
+    color: var(--on-select);
+    border-top-right-radius: var(--radius-xs);
+  }
+
+  /* I tre puntini: l'unico sfalsamento dell'app (MOTION.md §5 F11), perché è
+     un indicatore e non una lista. Lo scarto fra un puntino e l'altro è metà
+     di MOLLA (160ms). Con reduced-motion l'indicatore non c'è proprio; la
+     regola sotto è la rete. */
+  .crea-typing { display: inline-flex; padding-block: var(--space-4); }
+  .crea-dots { display: inline-flex; gap: var(--space-1); }
+  .crea-dots > span {
+    width: var(--space-2);
+    height: var(--space-2);
+    border-radius: 50%;
+    background: var(--ink-2);
+    animation: crea-puntino var(--dur-respiro) var(--ease-respiro) infinite alternate both;
+    animation-delay: calc(var(--i, 0) * var(--dur-molla) / 2);
+  }
+  @keyframes crea-puntino {
+    from { opacity: 0.22; transform: none; }
+    to { opacity: 1; transform: translateY(calc(-1.5 * var(--space-0-5) * var(--motion-scale))); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .crea-dots > span { animation: none; opacity: 0.6; }
+  }
+
+  /* ----------------------------------------------------------- riepilogo */
+  .crea-recap { display: grid; gap: var(--space-3); min-width: min(100%, var(--card-min-narrow)); }
+  .crea-recap-title {
+    font: var(--type-eyebrow);
+    letter-spacing: var(--track-eyebrow);
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+  .crea-recap-rows { display: grid; gap: var(--space-1); margin: 0; }
+  .crea-recap-rows > div { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-4); }
+  .crea-recap-rows dt { font: var(--type-footnote); letter-spacing: var(--track-footnote); color: var(--ink-2); }
+  .crea-recap-rows dd { margin: 0; font: var(--type-subhead-strong); letter-spacing: var(--track-subhead); text-align: right; }
+  .crea-recap-matches { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-1); }
+  .crea-recap-matches li { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); }
+  .crea-recap-match {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font: var(--type-subhead-strong);
+    letter-spacing: var(--track-subhead);
+  }
+  .crea-recap-phase { color: var(--ink-2); font-weight: 400; }
+  .crea-recap-sets { flex: none; font: var(--type-num-s); font-variant-numeric: tabular-nums; color: var(--accent-text); }
+
+  /* --------------------------------------------------------------- dock */
+  .crea-dock {
+    flex: none;
+    padding: var(--space-3) var(--gutter) calc(var(--space-3) + var(--safe-bottom));
+    border-top: var(--hairline) solid var(--separator);
+    background: var(--bg);
+    transition: opacity var(--dur-svelto) var(--ease-standard);
+  }
+  /* Mentre l'assistente "scrive": montato, attenuato, ancora vivo al tocco. */
+  .crea-dock[data-attesa] { opacity: 0.55; }
+  @media (min-width: 900px) {
+    .crea-dock { padding-bottom: var(--space-4); }
+  }
+  .crea-stack { display: grid; gap: var(--space-3); }
+  .crea-chips { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .crea-chip {
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: var(--touch);
+    padding: 0 var(--space-4);
+    border-radius: var(--radius-capsule);
+    background: var(--surface);
+    box-shadow: inset 0 0 0 var(--border-w) var(--separator);
+    color: var(--ink);
+    font: var(--type-subhead-strong);
+    letter-spacing: var(--track-subhead);
+    transition: transform var(--dur-svelto) var(--ease-standard);
+  }
+  .crea-chip::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: currentColor;
+    opacity: 0;
+    z-index: -1;
+    transition: opacity var(--dur-svelto) var(--ease-standard);
+  }
+  .crea-chip[data-tone="accent"] { background: var(--accent-wash); box-shadow: inset 0 0 0 var(--border-w) var(--accent-edge); color: var(--accent-text); }
+  @media (hover: hover) and (pointer: fine) {
+    .crea-chip:hover::before { opacity: var(--state-hover); }
+  }
+  .crea-chip:active { transform: scale(var(--press-scale)); }
+  .crea-chip:active::before { opacity: var(--state-press); transition-duration: 0ms; }
+
+  .crea-form { display: flex; align-items: center; gap: var(--space-2); }
+  .crea-form .ui-input { flex: 1; min-width: 0; }
+  .crea-send[aria-disabled="true"] { background: var(--fill); color: var(--ink-disabled); cursor: default; }
+
+  .crea-sets { display: grid; gap: var(--space-3); }
+  .crea-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+  .crea-actions > .ui-button[data-block] { flex: 1 1 var(--card-min-narrow); width: auto; }
+  .crea-spacer { flex: 1; }
+}

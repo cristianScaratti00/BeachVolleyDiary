@@ -135,9 +135,30 @@ function dispatch(a: OverlayAction) {
   stackSubs.forEach((f) => f())
 }
 
+// La guardia di una rotta (l'assistente con risposte non salvate, UX F11.6):
+// il tasto indietro equivale a ✕ Esci, con la stessa conferma. Il `popstate`
+// non si annulla: si rimette la voce e si chiede.
+let guardia: { isDirty: () => boolean; onBlocked: () => void; url: string; state: HistoryState } | null = null
+
+/** Protegge la rotta corrente dall'indietro. Restituisce la funzione che la toglie. */
+export function guardRoute(isDirty: () => boolean, onBlocked: () => void): () => void {
+  boot()
+  const g = { isDirty, onBlocked, url: urlNow(), state: readState() }
+  guardia = g
+  return () => {
+    if (guardia === g) guardia = null
+  }
+}
+
 function onPop() {
   const st = readState()
   const urlChanged = urlNow() !== lastUrl
+  if (!expecting && guardia && urlChanged && guardia.url === lastUrl && !stack.length && guardia.isDirty()) {
+    const g = guardia
+    window.history.pushState(g.state, '', g.url)
+    g.onBlocked()
+    return
+  }
   if (expecting) {
     const e = expecting
     expecting = null
@@ -359,9 +380,23 @@ export interface OpenOverlayOptions {
   anchor?: HTMLElement | null
 }
 
+let sostituisciProssimo = false
+/**
+ * La prossima apertura sostituisce l'overlay in cima: la usa il menu quando una
+ * sua voce apre uno sheet o un dialogo (il menu ＋ → sheet, «⋯» → «Elimina»),
+ * così l'indietro dallo sheet non riapre il menu (UX §4.3.5).
+ */
+export function replaceNextOverlay(on = true): void {
+  sostituisciProssimo = on
+}
+
 /** Apre un overlay con la sua voce di history leggera. Restituisce la chiave. */
 export function openOverlay(o: Overlay, opts: OpenOverlayOptions = {}): string {
   boot()
+  if (sostituisciProssimo) {
+    sostituisciProssimo = false
+    opts = { ...opts, replaceTop: true }
+  }
   const key = `o${++keyN}`
   const st = readState()
   const prevTop = stack[stack.length - 1]

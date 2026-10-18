@@ -1,0 +1,122 @@
+/* ============================================================================
+   Il visore di Beach Wrapped: fondo dei visori, barre di vetro scuro da 44px
+   in alto (avanzamento, ✕) e in basso (azioni), la card scalata al centro.
+   La stessa cornice del visore della Storia (UX §11.6).
+   ============================================================================ */
+@layer components {
+  .wrapped {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-viewer);
+    display: flex;
+    flex-direction: column;
+    background: var(--viewer-bg);
+    color: var(--ink);
+  }
+
+  .wrapped-bar {
+    position: relative;
+    z-index: 1;
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    min-height: calc(var(--touch) + 2 * var(--space-2));
+    padding: var(--space-2) var(--gutter);
+  }
+  .wrapped-bar-top { padding-top: calc(var(--safe-top) + var(--space-2)); }
+  .wrapped-bar-bottom { padding-bottom: calc(var(--safe-bottom) + var(--space-2)); }
+  .wrapped-close {
+    position: absolute;
+    right: var(--space-2);
+    bottom: var(--space-2);
+  }
+
+  /* Le barre di avanzamento: un riempimento lineare per la durata della
+     slide. Restano anche con reduced-motion (dicono il tempo), ma lì
+     l'auto-avanzamento è spento e stanno ferme. */
+  .wrapped-progress { display: flex; gap: var(--space-1); max-width: calc(100% - 2 * var(--touch)); }
+  .wrapped-progress-track {
+    flex: 1;
+    height: var(--space-1);
+    border-radius: var(--radius-capsule);
+    overflow: hidden;
+    position: relative;
+  }
+  /* Il binario: il bianco dei visori al 28% (0.72 × 0.4), un livello sotto. */
+  .wrapped-progress-track::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--on-glass-dark-3);
+    opacity: 0.4;
+  }
+  .wrapped-progress-fill { position: relative; }
+  .wrapped-progress-fill {
+    height: 100%;
+    background: var(--on-glass-dark);
+    transform-origin: left center;
+    transform: scaleX(0);
+  }
+  .wrapped-progress-fill[data-filled] { transform: scaleX(1); }
+  .wrapped-progress-fill[data-animating] { animation: wrapped-barra var(--slide-ms) linear both; }
+  @keyframes wrapped-barra { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+  .wrapped-stage {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    place-items: center;
+    padding: var(--space-2) 0;
+  }
+  .wrapped-deck {
+    position: relative;
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    cursor: pointer;
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  /* L'anello di focus si vede (UX §8.2): bianco sulle superfici scure. */
+  .wrapped-deck:focus-visible {
+    outline: var(--focus-width) solid var(--focus-ring);
+    outline-offset: var(--focus-offset);
+  }
+  .wrapped-card {
+    position: absolute;
+    top: 0;
+    left: 0;
+    animation: wrapped-entra var(--dur-entrata) var(--ease-standard) both;
+  }
+  .wrapped-card-scale { width: 1080px; height: 1920px; transform-origin: top left; }
+  @keyframes wrapped-entra {
+    from {
+      opacity: 0;
+      transform: translateY(calc((var(--space-3) + var(--space-0-5)) * var(--motion-scale))) scale(calc(1 - 0.015 * var(--motion-scale)));
+    }
+    to { opacity: 1; transform: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .wrapped-card { animation: none; }
+  }
+
+  .wrapped-empty {
+    flex: 1;
+    display: grid;
+    place-items: center;
+    padding: var(--space-6) var(--gutter);
+  }
+
+  /* Il layer degli export: fuori schermo, a piena risoluzione. */
+  .wrapped-capture {
+    position: fixed;
+    left: -100000px;
+    top: 0;
+    width: 1080px;
+    height: 1920px;
+    pointer-events: none;
+  }
+  .wrapped-capture-card { position: absolute; top: 0; left: 0; width: 1080px; height: 1920px; }
+}

@@ -1,0 +1,57 @@
+/* La bacheca delle segnalazioni: chip per stato, poi una card per segnalazione. */
+@layer components {
+  .segnalazioni-body { margin-top: var(--space-4); display: grid; gap: var(--space-4); }
+  .segnalazioni-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
+  .segnalazioni-li { position: relative; }
+
+  .segnalazioni-card { display: grid; gap: var(--space-3); }
+  .segnalazioni-card-head { display: flex; align-items: flex-start; gap: var(--space-3); }
+  .segnalazioni-card-who { flex: 1; min-width: 0; }
+  .segnalazioni-card-title {
+    font: var(--type-headline);
+    letter-spacing: var(--track-headline);
+    overflow-wrap: anywhere;
+  }
+  .segnalazioni-card-meta {
+    margin-top: var(--space-1);
+    font: var(--type-footnote);
+    letter-spacing: var(--track-footnote);
+    color: var(--ink-2);
+    overflow-wrap: anywhere;
+  }
+  .segnalazioni-card-text {
+    font: var(--type-subhead);
+    letter-spacing: var(--track-subhead);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  .segnalazioni-card-tech summary {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--touch);
+    font: var(--type-footnote);
+    font-weight: 600;
+    color: var(--ink-2);
+    cursor: pointer;
+  }
+  .segnalazioni-card-tech p {
+    font: var(--type-footnote);
+    color: var(--ink-2);
+    word-break: break-word;
+  }
+  .segnalazioni-card-stato { max-width: var(--empty-max); }
+
+  /* Lo skeleton: righe a due righe alte come le card vere, per la prima schermata. */
+  .segnalazioni-skel { display: grid; gap: var(--space-3); }
+  .segnalazioni-skel .ui-skeleton-breathe { display: grid; gap: var(--space-3); }
+  .segnalazioni-skel-row {
+    display: grid;
+    gap: var(--space-2);
+    padding: var(--space-4);
+    background: var(--surface);
+    border: var(--border-w) solid var(--edge);
+    border-radius: var(--radius-card);
+  }
+  .segnalazioni-skel-title { width: 70%; height: var(--space-4); }
+  .segnalazioni-skel-meta { width: 45%; height: var(--space-3); }
+}

@@ -1,0 +1,24 @@
+@layer components {
+  .partita-sheet-form { display: grid; gap: var(--space-6); }
+  .partita-sheet-fields { display: grid; gap: var(--space-4); border: 0; margin: 0; padding: 0; min-width: 0; }
+  .partita-sheet-sets { display: grid; }
+  .partita-sheet-add { justify-self: start; }
+
+  /* E1 (MOTION.md §1.3): la riga di un set cresce e cala dentro lo sheet
+     ancorato in basso, con `grid-template-rows`. Entrata in ENTRATA, uscita in
+     SVELTO; con reduced-motion istantanea (la riga non riceve `data-entra`). */
+  .partita-sheet-set { display: grid; grid-template-rows: 1fr; }
+  .partita-sheet-set + .partita-sheet-set > .partita-sheet-set-inner { padding-top: var(--space-4); }
+  .partita-sheet-set-inner { min-height: 0; overflow: hidden; padding: var(--space-0-5); margin: calc(-1 * var(--space-0-5)); }
+  .partita-sheet-set[data-entra] { animation: partita-cresce var(--dur-entrata) var(--ease-standard) both; }
+  .partita-sheet-set[data-entra] > .partita-sheet-set-inner { animation: partita-compare var(--dur-entrata) var(--ease-standard) both; }
+  .partita-sheet-set[data-esce] { animation: partita-cala var(--dur-svelto) var(--ease-standard) both; pointer-events: none; }
+  .partita-sheet-set[data-esce] > .partita-sheet-set-inner { animation: partita-svanisce var(--dur-svelto) var(--ease-standard) both; }
+  @keyframes partita-cresce { from { grid-template-rows: 0fr; } to { grid-template-rows: 1fr; } }
+  @keyframes partita-cala { from { grid-template-rows: 1fr; } to { grid-template-rows: 0fr; } }
+  @keyframes partita-compare { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes partita-svanisce { from { opacity: 1; } to { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) {
+    .partita-sheet-set, .partita-sheet-set > .partita-sheet-set-inner { animation: none; }
+  }
+}

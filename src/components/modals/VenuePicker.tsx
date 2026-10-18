@@ -1,5 +1,5 @@
 // ============================================================================
-// Selettore del luogo di gioco, condiviso da TorneoModal e QuickTorneoModal.
+// Selettore del luogo di gioco dello sheet «Nuovo torneo» (TorneoSheet).
 //
 // Sostituisce il campo "Città" a testo libero: si sceglie un luogo esistente
 // oppure lo si crea al volo, esattamente come il selettore compagno che gli sta
@@ -14,45 +14,35 @@
 // facoltativa: se non risponde, gli altri due modi restano.
 // ============================================================================
 import { useEffect, useRef, useState } from 'react'
-import type { CSSProperties, ChangeEvent, KeyboardEvent, ReactNode } from 'react'
-import { inputStyle, selectStyle } from './legacy'
+import type { ChangeEvent, KeyboardEvent, ReactNode } from 'react'
 import { venueLabel, parseLatLng, formatLatLng } from '../../lib/derive'
+import { Icon } from '../ui/Icon'
+import { Badge } from '../ui/Badge'
+import './VenuePicker.css'
 import { cercaLuoghi, cercaCitta, MIN_QUERY } from '../../lib/geosearch'
 import type { LuogoTrovato, CittaTrovata } from '../../lib/geosearch'
 import type { AnyForm, SetField, Venue } from '../../lib/models'
 
-const MUTED = 'rgba(27,42,74,.5)'
-const DANGER = '#FF477E'
-
-// `Sheet.Label` è un <div>: qui i campi sono nuovi, quindi usiamo etichette vere
-// associate al controllo (stesso aspetto, classe `.lbl`) — click sull'etichetta
-// che dà il focus e nome accessibile identico a quello che si legge.
+// Etichette vere associate al controllo: un clic sull'etichetta dà il focus e
+// il nome accessibile è quello che si legge.
 function FieldLabel({ htmlFor, children }: { htmlFor: string; children: ReactNode }) {
-  return <label htmlFor={htmlFor} className="lbl" style={{ display: 'block', marginBottom: 6 }}>{children}</label>
+  return <label htmlFor={htmlFor} className="ui-field-label">{children}</label>
 }
 
-// Pannello dei campi del luogo nuovo: rientrato e su fondo pieno, così si legge
-// come una dipendenza del select invece che come un altro campo del form.
-const panelStyle: CSSProperties = {
-  marginTop: 10,
-  padding: 14,
-  borderRadius: 12,
-  background: '#F2F0EC',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: 12,
-}
-const hintStyle: CSSProperties = { font: "600 11.5px 'Nunito Sans'", color: MUTED, marginTop: 6 }
-const miniBtn: CSSProperties = {
-  flex: 'none',
-  border: '1px solid rgba(27,42,74,.16)',
-  background: '#fff',
-  color: '#1B2A4A',
-  borderRadius: 11,
-  padding: '12px 14px',
-  font: "700 13px 'Nunito Sans'",
-  cursor: 'pointer',
-  whiteSpace: 'nowrap',
+// Le note sotto un campo: aiuto (--ink-2) o errore (--danger, solo su fondo opaco).
+function Hint({ id, tone, role, label, children }: { id?: string; tone?: 'danger'; role?: 'alert' | 'status'; label?: string; children?: ReactNode }) {
+  return (
+    <div
+      id={id}
+      className="venue-hint"
+      data-tone={tone}
+      role={role}
+      aria-live={role === 'status' ? 'polite' : undefined}
+      aria-label={label}
+    >
+      {children}
+    </div>
+  )
 }
 
 interface VenuePickerProps {
@@ -81,20 +71,23 @@ export default function VenuePicker({ form, setField, venues, suggestSurface = f
   }
 
   return (
-    <div>
+    <div className="venue ui-field">
       <FieldLabel htmlFor="torneo-venue">Dove hai giocato</FieldLabel>
-      <select
-        id="torneo-venue"
-        value={selected}
-        onChange={(e: ChangeEvent<HTMLSelectElement>) => pick(e.target.value)}
-        style={selectStyle}
-      >
-        <option value="">— Nessun luogo —</option>
-        {venues.map((v) => (
-          <option key={v.id} value={v.id}>{venueLabel(v)}</option>
-        ))}
-        <option value="new">＋ Nuovo luogo</option>
-      </select>
+      <span className="ui-select-wrap">
+        <select
+          id="torneo-venue"
+          className="ui-input ui-select"
+          value={selected}
+          onChange={(e: ChangeEvent<HTMLSelectElement>) => pick(e.target.value)}
+        >
+          <option value="">Nessun luogo</option>
+          {venues.map((v) => (
+            <option key={v.id} value={v.id}>{venueLabel(v)}</option>
+          ))}
+          <option value="new">＋ Nuovo luogo…</option>
+        </select>
+        <Icon name="chevron-down" size={16} className="ui-select-chev" />
+      </span>
 
       {isNew && <NewVenueFields form={form} setField={setField} />}
       {current && <SelectedVenueNote venue={current} venues={venues} onMerge={onMerge} />}
@@ -166,59 +159,45 @@ function RicercaLuogo({ onPick }: { onPick: (l: LuogoTrovato) => void }) {
     : ''
 
   return (
-    <div>
+    <div className="ui-field">
       <FieldLabel htmlFor="venue-search">Cerca il luogo</FieldLabel>
       <input
         id="venue-search"
+        className="ui-input"
         type="search"
         value={q}
         onChange={(e: ChangeEvent<HTMLInputElement>) => setQ(e.target.value)}
         placeholder="es. Bagno 26 Riccione"
         autoComplete="off"
         aria-describedby="venue-search-hint"
-        style={inputStyle}
       />
-      <div id="venue-search-hint" style={hintStyle}>
+      <Hint id="venue-search-hint">
         Cerca la spiaggia o la città su OpenStreetMap e compila nome, città e
         coordinate. Scegliere il posto esatto mette il pin sul campo, non sul
         centro della città.
-      </div>
+      </Hint>
 
       {/* Vive sempre nel DOM, anche vuoto: una regione live inserita solo
           quando ha qualcosa da dire spesso non viene annunciata. Il nome la
           distingue da quella del campo "Città", che sta nello stesso pannello. */}
-      <div role="status" aria-live="polite" aria-label="Esito della ricerca del luogo" style={{ ...hintStyle, color: stato === 'errore' ? DANGER : MUTED }}>
+      <Hint role="status" label="Esito della ricerca del luogo" tone={stato === 'errore' ? 'danger' : undefined}>
         {messaggio}
-      </div>
+      </Hint>
 
       {esiti.length > 0 && (
-        <ul style={{ listStyle: 'none', margin: '8px 0 0', padding: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <ul className="ui-list venue-results">
           {esiti.map((l) => (
-            <li key={l.id}>
-              <button
-                type="button"
-                onClick={() => scegli(l)}
-                style={{
-                  width: '100%', textAlign: 'left', cursor: 'pointer',
-                  border: '1px solid rgba(27,42,74,.16)', background: '#fff',
-                  borderRadius: 11, padding: '10px 12px',
-                }}
-              >
-                <span style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
-                  <span style={{ font: "700 13.5px 'Nunito Sans'", color: '#1B2A4A' }}>{l.nome}</span>
-                  {/* Il tipo distingue lo stabilimento dal ristorante che si
-                      chiama uguale: senza, si sceglie a caso fra otto righe. */}
-                  {l.tipo && (
-                    <span style={{ font: "700 10.5px 'Nunito Sans'", color: MUTED, background: '#F2F0EC', borderRadius: 6, padding: '2px 6px', whiteSpace: 'nowrap' }}>
-                      {l.tipo}
-                    </span>
-                  )}
-                </span>
-                {l.contesto && (
-                  <span style={{ display: 'block', font: "600 11.5px 'Nunito Sans'", color: MUTED, marginTop: 2 }}>
-                    {l.contesto}
+            <li key={l.id} className="ui-list-item">
+              <button type="button" className="ui-row venue-result" onClick={() => scegli(l)}>
+                <span className="ui-row-text">
+                  <span className="venue-result-name">
+                    <span className="ui-row-title">{l.nome}</span>
+                    {/* Il tipo distingue lo stabilimento dal ristorante che si
+                        chiama uguale: senza, si sceglie a caso fra otto righe. */}
+                    {l.tipo && <Badge>{l.tipo}</Badge>}
                   </span>
-                )}
+                  {l.contesto && <span className="ui-row-sub">{l.contesto}</span>}
+                </span>
               </button>
             </li>
           ))}
@@ -244,7 +223,6 @@ function RicercaLuogo({ onPick }: { onPick: (l: LuogoTrovato) => void }) {
 // luogo: quello riempie tre campi ed è il centro del pannello, questo è un
 // campo fra gli altri, e spingere in basso il resto del form ad ogni lettera
 // farebbe ballare tutto ciò che sta sotto.
-const MAX_TENDINA_PX = 240
 
 function CittaAutocomplete({ value, onChange }: { value: string; onChange: (citta: string) => void }) {
   // `q` è solo quello che viene DIGITATO: la ricerca del luogo qui sopra scrive
@@ -346,11 +324,12 @@ function CittaAutocomplete({ value, onChange }: { value: string; onChange: (citt
     : ''
 
   return (
-    <div>
+    <div className="ui-field">
       <FieldLabel htmlFor="venue-city">Città</FieldLabel>
-      <div style={{ position: 'relative' }}>
+      <div className="venue-combo">
         <input
           id="venue-city"
+          className="ui-input"
           value={value}
           onChange={(e: ChangeEvent<HTMLInputElement>) => {
             onChange(e.target.value)
@@ -368,7 +347,6 @@ function CittaAutocomplete({ value, onChange }: { value: string; onChange: (citt
           aria-autocomplete="list"
           aria-activedescendant={aperto && attivo >= 0 ? `venue-city-opt-${attivo}` : undefined}
           aria-describedby="venue-city-hint"
-          style={inputStyle}
         />
 
         {/* Sempre nel DOM anche da chiusa: `aria-controls` deve puntare a
@@ -379,13 +357,7 @@ function CittaAutocomplete({ value, onChange }: { value: string; onChange: (citt
           role="listbox"
           aria-label="Città trovate"
           hidden={!aperto || esiti.length === 0}
-          style={{
-            position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, zIndex: 5,
-            listStyle: 'none', margin: 0, padding: 4,
-            maxHeight: MAX_TENDINA_PX, overflowY: 'auto',
-            background: '#fff', border: '1px solid rgba(27,42,74,.16)', borderRadius: 11,
-            boxShadow: '0 12px 28px -12px rgba(27,42,74,.4)',
-          }}
+          className="venue-listbox ui-scroll"
         >
           {esiti.map((c, i) => (
             <li
@@ -396,33 +368,26 @@ function CittaAutocomplete({ value, onChange }: { value: string; onChange: (citt
               onMouseDown={(e) => e.preventDefault()}
               onMouseEnter={() => setAttivo(i)}
               onClick={() => scegli(c)}
-              style={{
-                cursor: 'pointer', borderRadius: 8, padding: '8px 10px',
-                background: i === attivo ? '#F2F0EC' : 'transparent',
-              }}
+              className="venue-option"
             >
-              <span style={{ display: 'block', font: "700 13.5px 'Nunito Sans'", color: '#1B2A4A' }}>{c.nome}</span>
+              <span className="venue-option-name">{c.nome}</span>
               {/* Senza il contesto le sei "Milano" della lista sono identiche. */}
-              {c.contesto && (
-                <span style={{ display: 'block', font: "600 11.5px 'Nunito Sans'", color: MUTED, marginTop: 2 }}>
-                  {c.contesto}
-                </span>
-              )}
+              {c.contesto && <span className="venue-option-ctx">{c.contesto}</span>}
             </li>
           ))}
         </ul>
       </div>
 
-      <div id="venue-city-hint" style={hintStyle}>
+      <Hint id="venue-city-hint">
         Scrivi le prime lettere e scegli dai suggerimenti: così la stessa città
         resta scritta allo stesso modo ovunque. Se non c'è, scrivila a mano.
-      </div>
+      </Hint>
 
       {/* Separata dall'aiuto, come nella ricerca qui sopra: l'aiuto si legge al
           fuoco e non cambia mai, questa parla solo quando ha una novità. */}
-      <div role="status" aria-live="polite" aria-label="Esito della ricerca della città" style={{ ...hintStyle, color: stato === 'errore' ? DANGER : MUTED }}>
+      <Hint role="status" label="Esito della ricerca della città" tone={stato === 'errore' ? 'danger' : undefined}>
         {messaggio}
-      </div>
+      </Hint>
     </div>
   )
 }
@@ -469,17 +434,17 @@ function NewVenueFields({ form, setField }: { form: AnyForm; setField: SetField 
   }
 
   return (
-    <div style={panelStyle}>
+    <div className="venue-panel">
       <RicercaLuogo onPick={usaRisultato} />
 
-      <div>
+      <div className="ui-field">
         <FieldLabel htmlFor="venue-name">Nome del luogo</FieldLabel>
         <input
           id="venue-name"
+          className="ui-input"
           value={form.newVenueName ?? ''}
           onChange={(e: ChangeEvent<HTMLInputElement>) => setField('newVenueName', e.target.value)}
           placeholder="es. Bagno 26"
-          style={inputStyle}
         />
       </div>
 
@@ -488,11 +453,12 @@ function NewVenueFields({ form, setField }: { form: AnyForm; setField: SetField 
         onChange={(citta) => setField('newVenueCity', citta)}
       />
 
-      <div>
+      <div className="ui-field">
         <FieldLabel htmlFor="venue-coords">Coordinate (facoltative)</FieldLabel>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <div className="venue-coords-row">
           <input
             id="venue-coords"
+            className="ui-input"
             value={coords}
             onChange={(e: ChangeEvent<HTMLInputElement>) => { setGeoErr(''); setField('newVenueCoords', e.target.value) }}
             placeholder="44.00194, 12.65611"
@@ -501,22 +467,30 @@ function NewVenueFields({ form, setField }: { form: AnyForm; setField: SetField 
             // L'id resta lo stesso sull'aiuto e sull'errore: il campo non punta
             // mai a un elemento sparito.
             aria-describedby="venue-coords-hint"
-            style={{ ...inputStyle, flex: 1, minWidth: 150 }}
           />
-          <button type="button" className="chip" onClick={locate} disabled={geo === 'busy'} style={{ ...miniBtn, opacity: geo === 'busy' ? 0.6 : undefined, cursor: geo === 'busy' ? 'default' : 'pointer' }}>
-            {geo === 'busy' ? 'Cerco…' : '📍 Usa la mia posizione'}
+          <button
+            type="button"
+            className="ui-button"
+            data-variant="neutral"
+            data-size="md"
+            onClick={locate}
+            aria-busy={geo === 'busy' || undefined}
+            aria-disabled={geo === 'busy' || undefined}
+          >
+            <Icon name="pin" size={20} />
+            <span className="ui-button-label">{geo === 'busy' ? 'Cerco…' : 'Usa la mia posizione'}</span>
           </button>
         </div>
         {coordsInvalid ? (
-          <div id="venue-coords-hint" role="alert" style={{ ...hintStyle, color: DANGER }}>
+          <Hint id="venue-coords-hint" role="alert" tone="danger">
             Servono due numeri, latitudine e longitudine: «44.00194, 12.65611».
-          </div>
+          </Hint>
         ) : (
-          <div id="venue-coords-hint" style={hintStyle}>
+          <Hint id="venue-coords-hint">
             Servono solo per la mappa. Puoi incollarle da un'altra app o prenderle dal GPS.
-          </div>
+          </Hint>
         )}
-        {geoErr && <div role="alert" style={{ ...hintStyle, color: DANGER }}>{geoErr}</div>}
+        {geoErr && <Hint role="alert" tone="danger">{geoErr}</Hint>}
       </div>
     </div>
   )
@@ -549,49 +523,60 @@ function SelectedVenueNote({ venue, venues, onMerge }: {
   }
 
   return (
-    <div style={{ marginTop: 8 }}>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap', font: "600 11.5px 'Nunito Sans'", color: MUTED }}>
-        <span style={{ flex: 1, minWidth: 140 }}>
+    <div className="venue-selected">
+      <div className="venue-selected-row">
+        <span className="venue-hint">
           {venue.lat != null ? 'Posizione salvata: la mappa compare nel dettaglio del torneo.' : 'Nessuna coordinata: il dettaglio non mostrerà la mappa.'}
         </span>
         {canMerge && (
           <button
             type="button"
-            className="chip"
+            className="ui-button"
+            data-variant="plain"
+            data-size="sm"
             aria-expanded={open}
             onClick={() => setOpen((v) => !v)}
-            style={{ flex: 'none', border: 'none', background: 'transparent', color: '#FF6B35', font: "700 12px 'Nunito Sans'", cursor: 'pointer', padding: 0 }}
           >
-            {open ? 'Annulla' : 'Unisci a…'}
+            <span className="ui-button-label">{open ? 'Annulla' : 'Unisci a…'}</span>
           </button>
         )}
       </div>
 
       {open && canMerge && (
-        <div style={panelStyle}>
-          <div style={{ font: "600 12.5px 'Nunito Sans'", color: '#1B2A4A', lineHeight: 1.45 }}>
+        <div className="venue-panel">
+          <p className="venue-merge-text">
             I tornei di <b>{venueLabel(venue)}</b> passano al luogo scelto e questo viene eliminato.
             Le partite e le statistiche restano: cambia solo il posto a cui sono appese.
-          </div>
-          <div>
+          </p>
+          <div className="ui-field">
             <FieldLabel htmlFor="venue-merge-target">Luogo da tenere</FieldLabel>
-            <select id="venue-merge-target" value={target} onChange={(e: ChangeEvent<HTMLSelectElement>) => setTarget(e.target.value)} style={selectStyle}>
-              <option value="">— Scegli il luogo da tenere —</option>
-              {others.map((v) => (
-                <option key={v.id} value={v.id}>{venueLabel(v)}</option>
-              ))}
-            </select>
+            <span className="ui-select-wrap">
+              <select
+                id="venue-merge-target"
+                className="ui-input ui-select"
+                value={target}
+                onChange={(e: ChangeEvent<HTMLSelectElement>) => setTarget(e.target.value)}
+              >
+                <option value="">Scegli il luogo da tenere</option>
+                {others.map((v) => (
+                  <option key={v.id} value={v.id}>{venueLabel(v)}</option>
+                ))}
+              </select>
+              <Icon name="chevron-down" size={16} className="ui-select-chev" />
+            </span>
           </div>
           <button
             type="button"
-            className="chip"
+            className="ui-button"
+            data-variant="neutral"
+            data-size="md"
             onClick={merge}
-            disabled={!target || busy}
-            style={{ ...miniBtn, background: '#1B2A4A', color: '#fff', border: 'none', opacity: !target || busy ? 0.5 : undefined, cursor: !target || busy ? 'default' : 'pointer' }}
+            aria-disabled={!target || busy || undefined}
+            aria-busy={busy || undefined}
           >
-            {busy ? 'Unisco…' : 'Unisci i due luoghi'}
+            <span className="ui-button-label">{busy ? 'Unisco…' : 'Unisci i due luoghi'}</span>
           </button>
-          {err && <div role="alert" style={{ ...hintStyle, marginTop: 0, color: DANGER }}>{err}</div>}
+          {err && <Hint role="alert" tone="danger">{err}</Hint>}
         </div>
       )}
     </div>

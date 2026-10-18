@@ -13,6 +13,9 @@
   .ui-tabellone[data-size="s"] { --lh: 1.25rem; }
   .ui-odo {
     display: inline-flex;
+    /* In cima alla riga: con un prefisso vuoto la linea di base dell'inline-flex
+       cadeva sul suo primo figlio (alto 0) e il numero scendeva di un'ascendente. */
+    vertical-align: top;
     align-items: flex-start;
     height: var(--lh);
     line-height: var(--lh);
@@ -27,6 +30,7 @@
   .ui-odo-strip > span { display: block; height: var(--lh); }
   .ui-odo-strip > span::before { content: attr(data-d); }
   .ui-odo-t::before, .ui-odo-cols > [data-t]::before { content: attr(data-t); }
+  .ui-odo-t[data-t=""] { display: none; }
   @media (prefers-reduced-motion: reduce) {
     .ui-odo-strip, .ui-odo-d { transition: none !important; }
   }

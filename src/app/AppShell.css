@@ -1,0 +1,43 @@
+/* ============================================================================
+   La colonna del contenuto. Sotto i 900px scorre la pagina e il fondo lascia
+   spazio alla TabBar (--tabbar-clearance); dai 900 scorre `<main>`, staccato
+   dalla Sidebar flottante (ART_DIRECTION §5.2).
+   ============================================================================ */
+@layer components {
+  .app-main {
+    display: block;
+    min-height: 100dvh;
+    padding: 0 var(--gutter) var(--tabbar-clearance);
+    outline: none;
+  }
+  @media (min-width: 900px) {
+    .app-main {
+      height: 100dvh;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      margin-left: calc(var(--sidebar-w) + 2 * var(--sidebar-inset));
+      padding-bottom: var(--space-12);
+    }
+  }
+  /* L'assistente e Wrapped occupano tutto lo schermo. */
+  .app-main[data-fullscreen] { padding: 0; }
+  @media (min-width: 900px) {
+    .app-main[data-fullscreen] { overflow: hidden; }
+  }
+
+  .app-lazy-area { display: contents; }
+  /* Gli skeleton dei chunk lazy a tutta pagina: la cornice vera c'è subito,
+     la forma dice cosa sta arrivando (MOTION.md §6.3). */
+  .app-skel-viewer {
+    width: min(80vw, calc(80dvh * 9 / 16));
+    aspect-ratio: 9 / 16;
+    margin: var(--space-12) auto 0;
+    border-radius: var(--radius-card);
+  }
+  .app-skel-bubble {
+    width: 70%;
+    height: var(--space-16);
+    margin: var(--space-16) var(--gutter) 0;
+    border-radius: var(--radius-card);
+  }
+}

@@ -32,7 +32,7 @@ const TROFEO = /\s*🏆\s*/u
  */
 export function PlacementBadge({ label, libBg }: { label: string; libBg?: string }) {
   const primo = TROFEO.test(label)
-  const visibile = label.replace(TROFEO, '').trim()
+  const visibile = placementText(label)
   const tone: BadgeTone = libBg && dataTone(libBg) === 'win' ? 'accent' : 'neutral'
   if (!primo) return <Badge tone={tone}>{visibile}</Badge>
   return (
@@ -46,5 +46,6 @@ export function PlacementBadge({ label, libBg }: { label: string; libBg?: string
 
 /** «1° 🏆» → «1°»: per i testi che non sono un badge (sottotitoli, meta). */
 export function placementText(label: string): string {
-  return label.replace(TROFEO, '').trim()
+  // «1° 🏆 · Gold» → «1° · Gold»: il trofeo esce, gli spazi intorno no.
+  return label.replace(TROFEO, ' ').replace(/\s+/g, ' ').trim()
 }

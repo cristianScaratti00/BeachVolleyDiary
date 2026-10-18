@@ -1,1023 +1,400 @@
-import { useState, useEffect, useMemo, useRef, Suspense, lazy } from "react";
-import { AnimatePresence } from "motion/react";
-import { useDiary } from "./hooks/useDiary";
-import { useIsWide } from "./hooks/useMedia";
-import { useAuth } from "./hooks/useAuth";
-import {
-  deriveDashboard,
-  deriveDashboardServer,
-  deriveTorneiList,
-  deriveTorneoDetail,
-  deriveCompagni,
-  deriveCompagno,
-  deriveDiary,
-  deriveStory,
-  deriveWrapped,
-  wrappedRangeForYear,
-  deriveTorneiListServer,
-  deriveCompagniServer,
-  deriveTorneoDetailServer,
-  deriveCompagnoDetailServer,
-  tournamentOptions,
-  partnerOptions,
-  venueOptions,
-  yearOptions,
-} from "./lib/derive";
-// Mappa delle conquiste: selettore in un modulo suo (si porta dietro il
-// gazetteer e il tracciato dell'Italia, ~17 KB grezzi). Vive dentro la
-// schermata Tornei come seconda vista, quindi viaggia con lei.
-import { deriveMappa } from "./lib/derive.mappa";
-import type {
-  Screen,
-  ModalKind,
-  AnyForm,
-  SetField,
-  SetsApi,
-} from "./lib/models";
-import type { WrappedRange } from "./lib/derive";
-import { permissionsFor } from "./lib/permissions";
-import { getDashboardStats } from "./lib/dashboard";
-import type { ServerDashboard } from "./lib/dashboard";
-import {
-  getTorneiList,
-  getCompagniList,
-  getTorneoDetail,
-  getCompagnoDetail,
-} from "./lib/serverviews";
-import type {
-  SvTorneiList,
-  SvCompagno,
-  SvTorneoDetail,
-  SvCompagnoDetail,
-} from "./lib/serverviews";
+// ============================================================================
+// L'app autenticata: compone router, dati, azioni e schermate. Lo stato e gli
+// effetti che stavano qui (1023 righe) vivono ora in:
+//   src/app/router.ts        rotte, history, pila degli overlay
+//   src/app/useScreenData.ts effetti RPC per rotta + derivate, primo carico
+//   src/app/useActions.ts    salvataggi, eliminazioni, permessi, analytics
+//   src/app/ModalHost.tsx    sheet, menu, dialoghi e visori
+//   src/app/AppShell.tsx     Sidebar/TabBar, main, focus e titolo per rotta
+// ============================================================================
+import { Suspense, useEffect, useRef, useState } from 'react'
+import { track } from '@vercel/analytics'
+import { useDiary } from './hooks/useDiary'
+import type { UseDiary } from './hooks/useDiary'
+import { useAuth } from './hooks/useAuth'
+import { useCheckIn } from './hooks/useCheckIn'
+import type { UseCheckIn } from './hooks/useCheckIn'
+import { useOnline } from './hooks/useConnection'
+import { permissionsFor } from './lib/permissions'
+import { partnerOptions, venueOptions, todayISO, wrappedDisponibile, wrappedRangeForYear, deriveWrapped, WRAPPED_MIN_MATCHES } from './lib/derive'
+import { inviaSegnalazione, elencoSegnalazioni, aggiornaStato } from './lib/segnalazioni'
+import { useScelta } from './lib/consenso'
+import { backLabel, goBack, guardRoute, navigate, useNav } from './app/router'
+import { OGGI_ATTIVO, routeParent, routeTitle } from './app/routes'
+import type { Route, TorneiVista } from './app/routes'
+import { useScreenData } from './app/useScreenData'
+import { useActions } from './app/useActions'
+import { AppShell } from './app/AppShell'
+import { ModalHost } from './app/ModalHost'
+import { deriveAdesso, etichettaStagione } from './app/selectors'
+import Splash from './components/Splash'
+import { ErrorState, Skeleton, Bone } from './components/ui/Feedback'
+import { Page } from './components/ui/Page'
+import { ButtonLink } from './components/ui/Button'
+import { toast } from './components/ui/Toast'
+import { LazyBoundary, lazyRetry } from './app/LazyBoundary'
+import Home from './screens/Home'
+import Statistiche from './screens/Statistiche'
+import Tornei from './screens/Tornei'
+import TorneoDetail from './screens/TorneoDetail'
+import Compagni from './screens/Compagni'
+import CompagnoDetail from './screens/CompagnoDetail'
+import ChiCeOggi from './screens/ChiCeOggi'
+import Profilo from './screens/Profilo'
+import Segnala from './screens/Segnala'
+import Segnalazioni from './screens/Segnalazioni'
+import NonTrovato from './screens/NonTrovato'
 
-import Sidebar from "./components/Sidebar";
-import BottomNav from "./components/BottomNav";
-import ConnectionSnackbar from "./components/ConnectionSnackbar";
-import Splash from "./components/Splash";
-import { BrandLockup } from "./components/Logo";
-import { Avatar } from "./components/ui";
-import { track } from "@vercel/analytics";
-import Home from "./screens/Home";
-import Tornei from "./screens/Tornei";
-import type { TorneiVista } from "./screens/Tornei";
-import TorneoDetail from "./screens/TorneoDetail";
-import Compagni from "./screens/Compagni";
-import CompagnoDetail from "./screens/CompagnoDetail";
-import Profilo from "./screens/Profilo";
-import ChiCeOggi from "./screens/ChiCeOggi";
-import Segnala from "./screens/Segnala";
-import { inviaSegnalazione } from "./lib/segnalazioni";
-import { useCheckIn } from "./hooks/useCheckIn";
-// Lazy: schermate/modali pesanti caricate solo quando servono (code-splitting).
-// CreaChat = wizard AI; StoryModal trascina `html-to-image`.
-const Diario = lazy(() => import("./screens/Diario"));
-const CreaChat = lazy(() => import("./screens/CreaChat"));
-import TorneoModal from "./components/modals/TorneoModal";
-import PartitaModal from "./components/modals/PartitaModal";
-import FotoModal from "./components/modals/FotoModal";
-import CompagnoModal from "./components/modals/CompagnoModal";
-import QuickTorneoModal from "./components/modals/QuickTorneoModal";
-const StoryModal = lazy(() => import("./components/modals/StoryModal"));
-// Beach Wrapped: recap di stagione sfogliabile. Come StoryModal trascina
-// `html-to-image`, quindi lazy + Suspense (caricato solo quando lo si apre).
-const WrappedModal = lazy(() => import("./components/wrapped/WrappedModal"));
+// Lazy: l'assistente (1600 righe di copione) e Wrapped (trascina html-to-image).
+// Con «Riprova» se il chunk non arriva (deploy nuovo, rete): UX §6.0.
+const CreaChat = lazyRetry(() => import('./screens/CreaChat'))
+const Wrapped = lazyRetry(() => import('./screens/Wrapped'))
+
+/** Quanto resta la traccia sull'entità appena toccata: SVELTO + RACCONTO, più un margine. */
+const TRACCIA_MS = 1200
+
+const bannerKey = (uid: string) => `bvd_alpha_chiuso:${uid}`
+function leggiBanner(uid: string): boolean {
+  try {
+    return window.localStorage.getItem(bannerKey(uid)) === '1'
+  } catch {
+    return false
+  }
+}
 
 export default function App() {
-  const wide = useIsWide();
-  const { session, logout } = useAuth();
-  const {
-    data,
-    loading: dataLoading,
-    error: diaryError,
-    clearError,
-    reload,
-    saveTorneo,
-    quickCreateTorneo,
-    createGuidedTorneo,
-    deleteTorneo,
-    savePartita,
-    deletePartita,
-    saveFoto,
-    deleteFoto,
-    saveCompagno,
-    deleteCompagno,
-    searchUsers,
-    linkPartner,
-    unlinkPartner,
-    unlinkMe,
-    mergeVenues,
-  } = useDiary();
-
-  // "Chi c'è oggi?": stato del check-in di giornata + stanza live. Tiene i dati
-  // transitori fuori da useDiary; il link-up riusa saveCompagno + linkPartner.
+  const auth = useAuth()
+  const diary = useDiary()
   const check = useCheckIn({
-    tournaments: data.tournaments,
-    venues: data.venues,
-    saveCompagno,
-    linkPartner,
-  });
+    tournaments: diary.data.tournaments,
+    venues: diary.data.venues,
+    saveCompagno: diary.saveCompagno,
+    linkPartner: diary.linkPartner,
+  })
+  return <AppView diary={diary} auth={auth} check={check} />
+}
 
-  const [screen, setScreen] = useState<Screen>("home");
-  const [selT, setSelT] = useState<string | null>(null);
-  const [selP, setSelP] = useState<string | null>(null);
-  const [modal, setModal] = useState<ModalKind>(null);
-  const [storyT, setStoryT] = useState<string | null>(null);
-  // Intervallo del Beach Wrapped, impostato all'apertura dal filtro stagione.
-  // Non è più modificabile dentro il modale: il selettore di periodo è stato
-  // tolto per lasciare tutto lo spazio alla card.
-  const [wrappedRange, setWrappedRange] = useState<WrappedRange | null>(null);
-  const [editId, setEditId] = useState<string | null>(null);
-  const [fabOpen, setFabOpen] = useState(false);
-  const [fPartner, setFPartner] = useState("all");
-  const [fYear, setFYear] = useState("Sempre");
-  // Lista o mappa dentro la schermata Tornei. Sta qui e non lì perché aprire un
-  // torneo dalla mappa cambia `screen` e smonta Tornei: con lo stato locale il
-  // ritorno indietro riportava sempre alla lista, buttando via la vista da cui
-  // si era partiti.
-  const [torneiVista, setTorneiVista] = useState<TorneiVista>("lista");
-  const [form, setForm] = useState<AnyForm>({});
-  const [notice, setNotice] = useState<string | null>(null);
-  const [serverDash, setServerDash] = useState<ServerDashboard | null>(null);
-  const [srvTornei, setSrvTornei] = useState<SvTorneiList | null>(null);
-  const [srvCompagni, setSrvCompagni] = useState<SvCompagno[] | null>(null);
-  const [srvTorneo, setSrvTorneo] = useState<SvTorneoDetail | null>(null);
-  const [srvCompagno, setSrvCompagno] = useState<SvCompagnoDetail | null>(null);
+export interface AppDeps {
+  diary: UseDiary
+  auth: Pick<ReturnType<typeof useAuth>, 'session' | 'logout' | 'refresh'>
+  check: UseCheckIn
+}
 
-  // ---------- permessi in base al piano + conteggi correnti ----------
+/**
+ * La composizione vera, con i dati e la rete iniettati: App la usa con gli hook
+ * di Supabase, l'anteprima (docs/preview) e i test con dati di fabbrica.
+ */
+export function AppView({ diary, auth, check }: AppDeps) {
+  const { session, logout, refresh } = auth
+  const { data, loading, error, reload } = diary
+  const nav = useNav()
+  const route = nav.route
+  const online = useOnline()
+  const consenso = useScelta()
+
   // Piani sospesi (limits.PLANS_ENABLED = false): oggi ogni check passa. La
-  // struttura resta in piedi per quando torneranno i piani a pagamento.
-  // Conteggi per i limiti: solo i propri (i tornei/soci CONDIVISI non contano).
+  // struttura resta per quando torneranno; un diniego è un Toast (C11).
   const perm = permissionsFor(session?.plan, session?.role, {
     tournaments: data.tournaments.filter((t) => !t.shared).length,
     partners: data.partners.filter((p) => !p.shared).length,
-  });
-  const canFilter = perm.canUseFilters;
+  })
 
-  // La mappa lavora sui dati client grezzi: le servono `city` (che i view-model
-  // appiattiscono dentro `meta`) e i tornei condivisi, che le RPC escludono.
-  // Segue lo stesso filtro stagione della lista, senza aggiungere stato.
-  //
-  // Sta quassù, e non in fondo con le altre derivate, perché è un hook: sotto il
-  // return anticipato dello splash sarebbe una chiamata condizionale. Ed è
-  // memoizzata perché è l'unica derivata cara — geocodifica, declustering e le
-  // partite città per città — mentre App si ri-renderizza a ogni tasto battuto
-  // nei modali, che tengono il form qui. Le dipendenze sono i dati e il filtro:
-  // nient'altro può cambiarne il risultato. ("Oggi" viene ricalcolato ad ogni
-  // `reload()`, cioè ad ogni cambio schermata e ritorno sulla tab.)
-  const mappaData = useMemo(
-    () => deriveMappa(data, canFilter ? fYear : "Sempre"),
-    [data, canFilter, fYear],
-  );
-  // Azione non consentita dal piano → messaggio in cima (nessun paywall attivo).
-  const denyByPlan = (v: { title?: string; message?: string }) =>
-    setNotice(v.message ?? "Funzione non disponibile con il tuo piano.");
-  // Un torneo condiviso da un altro utente è di sola lettura: modificabile solo
-  // dal creatore (il DB blocca comunque ogni scrittura via RLS).
-  const isSharedTorneo = (id: string | null | undefined) =>
-    !!id && !!data.tournaments.find((t) => t.id === id)?.shared;
-  const denySharedEdit = () =>
-    setNotice(
-      "Questo torneo è condiviso da un altro utente: solo chi l'ha creato può modificarlo.",
-    );
-  const banner = notice;
-  const dismissBanner = () => setNotice(null);
-  // Apre la storia Instagram di un torneo — genera un'immagine 1080×1920 scaricabile.
-  const openStory = (id: string) => {
-    const v = perm.check("shareStory");
-    if (!v.allowed) {
-      denyByPlan(v);
-      return;
+  // La vista di Tornei ricordata: la tab Tornei e l'indietro dal dettaglio ci tornano.
+  const [vista, setVista] = useState<TorneiVista>(route.name === 'tornei' ? route.vista : 'lista')
+  useEffect(() => {
+    if (route.name === 'tornei') setVista(route.vista)
+  }, [route])
+  const vistaRef = useRef(vista)
+  vistaRef.current = vista
+
+  const screen = useScreenData({
+    data,
+    loading,
+    error,
+    reload,
+    route,
+    canFilter: perm.canUseFilters,
+    onOggi: check.refresh,
+  })
+
+  const actions = useActions({
+    diary,
+    data,
+    route,
+    session,
+    perm,
+    check,
+    caricamento: screen.caricamento,
+    logout,
+    refreshSession: refresh,
+    torneiVista: () => ({ name: 'tornei', vista: vistaRef.current }),
+  })
+
+  // La traccia arriva con la navigazione (state.traccia) e si spegne da sola.
+  const [traccia, setTraccia] = useState<string | undefined>(undefined)
+  useEffect(() => {
+    const t = nav.state.traccia
+    if (!t) return
+    setTraccia(t)
+    const id = window.setTimeout(() => setTraccia(undefined), TRACCIA_MS)
+    return () => window.clearTimeout(id)
+  }, [nav.seq, nav.state.traccia])
+
+  // Analytics che scattano all'ingresso nella rotta (UX §13).
+  const prevRoute = useRef<Route | null>(null)
+  useEffect(() => {
+    const prima = prevRoute.current
+    prevRoute.current = route
+    if (route.name === 'tornei' && route.vista === 'mappa' && !(prima?.name === 'tornei' && prima.vista === 'mappa')) track('mappa_aperta')
+    if (route.name === 'wrapped' && prima?.name !== 'wrapped') track('wrapped_aperto')
+  }, [route])
+
+  // /profilo/segnalazioni senza ruolo admin → Profilo (solo UI: il cancello è la RPC).
+  const admin = session?.role === 'admin'
+  useEffect(() => {
+    if (route.name === 'segnalazioni' && session && !admin) navigate({ name: 'profilo' }, { replace: true })
+  }, [route, session, admin])
+
+  // Le segnalazioni nuove, per la riga del Profilo (solo admin).
+  const [nuove, setNuove] = useState<number | null>(null)
+  useEffect(() => {
+    if (!admin || route.name !== 'profilo') return
+    let vivo = true
+    elencoSegnalazioni()
+      .then((l) => {
+        if (vivo && l) setNuove(l.filter((s) => s.stato === 'nuovo').length)
+      })
+      .catch(() => undefined)
+    return () => {
+      vivo = false
     }
-    track("storia_aperta");
-    setStoryT(id);
-    setFabOpen(false);
-    setModal("story");
-  };
-  // Apre il Beach Wrapped: recap di stagione multi-slide. L'intervallo iniziale
-  // segue il filtro stagione della Home (o "Sempre" quando i filtri sono bloccati).
-  const openWrapped = () => {
-    const v = perm.check("shareStory");
-    if (!v.allowed) {
-      denyByPlan(v);
-      return;
-    }
-    track("wrapped_aperto");
-    setWrappedRange(wrappedRangeForYear(data, canFilter ? fYear : "Sempre"));
-    setFabOpen(false);
-    setModal("wrapped");
-  };
+  }, [admin, route.name])
 
-  // Gli errori del DB finiscono nel toast in alto.
-  useEffect(() => {
-    if (!diaryError) return;
-    setNotice(diaryError);
-    clearError();
-  }, [diaryError, clearError]);
-
-  // I dati client (useDiary) si aggiornano solo dopo una mutazione: qui li
-  // ricarichiamo ad ogni cambio schermata e al ritorno sulla tab, così le liste
-  // non restano "in cache" quando i dati cambiano (es. tornei condivisi da altri).
-  useEffect(() => {
-    reload();
-  }, [screen, reload]);
-  useEffect(() => {
-    const onVisible = () => {
-      if (document.visibilityState === "visible") reload();
-    };
-    window.addEventListener("focus", reload);
-    document.addEventListener("visibilitychange", onVisible);
-    return () => {
-      window.removeEventListener("focus", reload);
-      document.removeEventListener("visibilitychange", onVisible);
-    };
-  }, [reload]);
-
-  // Dashboard aggregata dal server (gating per piano autoritativo).
-  // Fallback al calcolo client mentre carica / in caso di errore.
-  useEffect(() => {
-    if (screen !== "home") return;
-    let alive = true;
-    setServerDash(null);
-    getDashboardStats(fPartner, fYear).then((s) => {
-      if (alive) setServerDash(s);
-    });
-    return () => {
-      alive = false;
-    };
-  }, [screen, fPartner, fYear, data]);
-
-  // Aggregazioni server per gli altri screen (fallback client mentre caricano).
-  useEffect(() => {
-    if (screen !== "tornei" && screen !== "torneo") return;
-    let alive = true;
-    getTorneiList().then((r) => {
-      if (alive) setSrvTornei(r);
-    });
-    return () => {
-      alive = false;
-    };
-  }, [screen, data]);
-  useEffect(() => {
-    if (screen !== "compagni" && screen !== "compagno") return;
-    let alive = true;
-    getCompagniList().then((r) => {
-      if (alive) setSrvCompagni(r);
-    });
-    return () => {
-      alive = false;
-    };
-  }, [screen, data]);
-  useEffect(() => {
-    if (screen !== "torneo" || !selT) {
-      setSrvTorneo(null);
-      return;
-    }
-    let alive = true;
-    setSrvTorneo(null);
-    getTorneoDetail(selT).then((r) => {
-      if (alive) setSrvTorneo(r);
-    });
-    return () => {
-      alive = false;
-    };
-  }, [screen, selT, data]);
-  useEffect(() => {
-    if (screen !== "compagno" || !selP) {
-      setSrvCompagno(null);
-      return;
-    }
-    let alive = true;
-    setSrvCompagno(null);
-    getCompagnoDetail(selP).then((r) => {
-      if (alive) setSrvCompagno(r);
-    });
-    return () => {
-      alive = false;
-    };
-  }, [screen, selP, data]);
-
-  // "Chi c'è oggi": ricarica la stanza ogni volta che si apre la schermata
-  // (fetch-on-open, Q4). No-op se non sei in check-in; il resto è manuale
-  // (pulsante "Aggiorna") o automatico dopo un check-in.
-  useEffect(() => {
-    if (screen === "oggi") check.refresh();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [screen]);
-
-  // Su desktop scrolla il <main>; su mobile la pagina. Reset ad ogni navigazione.
-  const mainRef = useRef<HTMLElement>(null);
-  const scrollTop = () => {
+  // Banner alpha chiuso: per utente e per dispositivo (Q5).
+  const uid = session?.id ?? ''
+  const [bannerChiuso, setBannerChiuso] = useState(() => leggiBanner(uid))
+  const chiudiBanner = () => {
+    setBannerChiuso(true)
     try {
-      mainRef.current?.scrollTo(0, 0);
-      window.scrollTo(0, 0);
+      window.localStorage.setItem(bannerKey(uid), '1')
     } catch {
-      /* ignore */
+      /* navigazione privata: resta chiuso per questa sessione */
     }
-  };
+  }
 
-  // ---------- navigation ----------
-  const go = (s: Screen) => {
-    setScreen(s);
-    setFabOpen(false);
-    scrollTop();
-  };
-  const openTorneoDetail = (id: string) => {
-    setSelT(id);
-    setScreen("torneo");
-    setFabOpen(false);
-    scrollTop();
-  };
-  const openCompagnoDetail = (id: string) => {
-    setSelP(id);
-    setScreen("compagno");
-    setFabOpen(false);
-    scrollTop();
-  };
-  // Cambio di vista dentro Tornei. L'evento si registra solo sul passaggio alla
-  // mappa (come `wrapped_aperto`): serve a sapere se la mappa viene usata, non
-  // quante volte si rimbalza fra le due viste.
-  const setVistaTornei = (v: TorneiVista) => {
-    if (v === "mappa" && torneiVista !== "mappa") track("mappa_aperta");
-    setTorneiVista(v);
-  };
+  // Lo splash è uno solo dall'autenticazione ai dati (UX F0).
+  if (loading) return <Splash />
 
-  // ---------- form helpers ----------
-  const setField: SetField = (k, v) =>
-    setForm((f) => ({ ...f, [k]: v }) as AnyForm);
-  const setRows: SetsApi = {
-    rows: form.sets || [],
-    canAdd: (form.sets || []).length < 3,
-    addSet: () =>
-      setForm((f) => ({
-        ...f,
-        sets: [...(f.sets || []), { us: "", them: "" }],
-      })),
-    updateSet: (i, key, value) =>
-      setForm((f) => ({
-        ...f,
-        sets: (f.sets || []).map((x, j) =>
-          j === i ? { ...x, [key]: value } : x,
-        ),
-      })),
-    removeSet: (i) =>
-      setForm((f) => ({
-        ...f,
-        sets: (f.sets || []).filter((_, j) => j !== i),
-      })),
-  };
-  const closeModal = () => setModal(null);
+  const parent = routeParent(route, vista)
+  const back = {
+    label: backLabel(parent ? routeTitle(parent).split(' · ')[0] : 'Home'),
+    onClick: () => goBack(parent),
+  }
 
-  // ---------- modal openers ----------
-  const openTorneo = (id: string | null) => {
-    if (isSharedTorneo(id)) {
-      denySharedEdit();
-      return;
+  const dataScreen = !['segnala', 'segnalazioni', 'profilo', 'nonTrovato', 'crea'].includes(route.name)
+  const fallito = screen.caricamento === 'fallito' && dataScreen
+
+  const anno = perm.canUseFilters ? screen.filtri.fYear : 'Sempre'
+  const s = screen.dashboard.s
+  const wrappedPronto = wrappedDisponibile() && s.played >= WRAPPED_MIN_MATCHES
+  const wrappedTitolo = anno !== 'Sempre' ? `Beach Wrapped ${anno}` : 'Beach Wrapped'
+
+  const render = () => {
+    if (fallito) {
+      return (
+        <Page>
+          <ErrorState
+            title="Non riesco a caricare il diario"
+            text={online ? 'Qualcosa non ha risposto. I tuoi dati sono al sicuro.' : 'Sei offline. Il diario si carica quando torni in linea.'}
+            onRetry={reload}
+            autoRetryOnline
+          />
+        </Page>
+      )
     }
-    if (!id) {
-      const v = perm.check("createTournament");
-      if (!v.allowed) {
-        denyByPlan(v);
-        return;
+    switch (route.name) {
+      case 'home':
+        return (
+          <Home
+            nome={session?.name ?? ''}
+            today={todayISO()}
+            adesso={deriveAdesso(data)}
+            numeri={s.played > 0 ? s : null}
+            hasTornei={data.tournaments.length > 0}
+            stagione={etichettaStagione(anno)}
+            wrapped={{ visibile: wrappedPronto, titolo: wrappedTitolo }}
+            banner={{ visibile: !bannerChiuso, onChiudi: chiudiBanner }}
+            checkIn={OGGI_ATTIVO ? { own: check.own } : null}
+            onNuovoTorneo={() => actions.nuovoTorneo()}
+            onAggiungiPartita={(id) => actions.nuovaPartita(id)}
+            onAggiornaPiazzamento={(id) => actions.modificaTorneo(id)}
+            onStoria={actions.apriStoria}
+          />
+        )
+      case 'statistiche':
+        return <Statistiche s={s} filtri={screen.filtri} back={back} wrapped={{ visibile: wrappedPronto, titolo: wrappedTitolo }} />
+      case 'wrapped': {
+        const motivo = !wrappedDisponibile() ? 'stagione' : s.played < WRAPPED_MIN_MATCHES ? 'dati' : null
+        const wrapped = motivo ? null : deriveWrapped(data, wrappedRangeForYear(data, anno), perm.canUseFilters ? screen.filtri.fPartner : 'all')
+        return (
+          <LazyBoundary onReset={Wrapped.reset}>
+            <Suspense fallback={<Skeleton label="Preparo il recap…"><Bone className="app-skel-viewer" /></Skeleton>}>
+              <Wrapped
+                wrapped={wrapped}
+                motivo={motivo}
+                onClose={() => goBack({ name: 'home' })}
+                onNotice={(msg, type = 'error') => toast.show(type, msg)}
+              />
+            </Suspense>
+          </LazyBoundary>
+        )
       }
-    }
-    const t = id ? data.tournaments.find((x) => x.id === id) : null;
-    const today = new Date().toISOString().slice(0, 10);
-    setEditId(id || null);
-    setFabOpen(false);
-    setForm(
-      t
-        ? {
-            ...t,
-            partnerId: t.partnerId ?? undefined,
-            newPartnerName: "",
-            venueId: t.venueId ?? "",
-            newVenueName: "",
-            newVenueCity: "",
-            newVenueCoords: "",
-            bracket: t.bracket ?? "",
-          }
-        : {
-            name: "",
-            date: today,
-            city: "",
-            venueId: "",
-            newVenueName: "",
-            newVenueCity: "",
-            newVenueCoords: "",
-            category: "Amatoriale",
-            format: "2vs2",
-            surface: "Sabbia outdoor",
-            placement: "Gironi",
-            bracket: "",
-            color: "#FF6B35",
-            emoji: "🏖️",
-            partnerId: "",
-            newPartnerName: "",
-          },
-    );
-    setModal("torneo");
-  };
-  const openPartita = (tid: string | null) => {
-    if (isSharedTorneo(tid)) {
-      denySharedEdit();
-      return;
-    }
-    const own = data.tournaments.filter((t) => !t.shared);
-    setEditId(null);
-    setFabOpen(false);
-    setForm({
-      tournamentId: tid || own[0]?.id || "",
-      opponents: "",
-      phase: "Girone",
-      sets: [
-        { us: "", them: "" },
-        { us: "", them: "" },
-      ],
-      note: "",
-    });
-    setModal("partita");
-  };
-  const openMatch = (id: string) => {
-    const m = data.matches.find((x) => x.id === id);
-    if (!m) return;
-    if (isSharedTorneo(m.tournamentId)) {
-      denySharedEdit();
-      return;
-    }
-    setEditId(id);
-    setFabOpen(false);
-    setForm({
-      tournamentId: m.tournamentId,
-      opponents: m.opponents,
-      phase: m.phase,
-      sets: m.sets.map((s) => ({ us: s.us, them: s.them })),
-      note: m.note || "",
-    });
-    setModal("partita");
-  };
-  // Aggiunge una foto legata a uno specifico torneo (funzione Premium).
-  const openFotoForTorneo = (tid: string) => {
-    if (isSharedTorneo(tid)) {
-      denySharedEdit();
-      return;
-    }
-    const v = perm.check("uploadPhoto");
-    if (!v.allowed) {
-      denyByPlan(v);
-      return;
-    }
-    setEditId(null);
-    setFabOpen(false);
-    setForm({ caption: "", tournamentId: tid, color: "#FF6B35" });
-    setModal("foto");
-  };
-  const openCompagno = () => {
-    const v = perm.check("createPartner");
-    if (!v.allowed) {
-      denyByPlan(v);
-      return;
-    }
-    setEditId(null);
-    setFabOpen(false);
-    setForm({ name: "" });
-    setModal("socio");
-  };
-  const openQuickTorneo = () => {
-    const t = perm.check("createTournament");
-    if (!t.allowed) {
-      denyByPlan(t);
-      return;
-    }
-    const P = data.partners;
-    const today = new Date().toISOString().slice(0, 10);
-    setEditId(null);
-    setFabOpen(false);
-    setForm({
-      name: "",
-      city: "",
-      partnerId: (P[0] && P[0].id) || "new",
-      newPartnerName: "",
-      venueId: "",
-      newVenueName: "",
-      newVenueCity: "",
-      newVenueCoords: "",
-      date: today,
-      category: "Amatoriale",
-      placement: "In corso",
-      bracket: "",
-    });
-    setModal("torneoRapido");
-  };
-  // Apre l'assistente guidato in stile chat (creazione conversazionale del torneo).
-  // Funzione Premium: i piani base vedono la bottom-sheet di upgrade.
-  const openCrea = () => {
-    const ai = perm.check("useAiAssistant");
-    if (!ai.allowed) {
-      denyByPlan(ai);
-      return;
-    }
-    const t = perm.check("createTournament");
-    if (!t.allowed) {
-      denyByPlan(t);
-      return;
-    }
-    setFabOpen(false);
-    setModal(null);
-    setScreen("crea");
-    scrollTop();
-  };
-
-  // ---------- save/delete actions (async: scrivono su Supabase) ----------
-  const doSaveTorneo = async () => {
-    if (await saveTorneo(form, editId)) {
-      if (editId) track("torneo_modificato");
-      else track("torneo_creato", { via: "completo" });
-      closeModal();
-    }
-  };
-  const doDeleteTorneo = async () => {
-    if (await deleteTorneo(editId)) track("torneo_eliminato");
-    setModal(null);
-    setScreen("tornei");
-  };
-  const doSavePartita = async () => {
-    if (await savePartita(form, editId)) {
-      if (editId) track("partita_modificata");
-      else track("partita_aggiunta");
-      closeModal();
-    }
-  };
-  const doDeletePartita = async () => {
-    if (await deletePartita(editId)) track("partita_eliminata");
-    closeModal();
-  };
-  const doSaveFoto = async (file: File | null) => {
-    if (await saveFoto(form, file)) {
-      track("foto_aggiunta");
-      closeModal();
-    }
-  };
-  const doDeleteFoto = async (photoId: string) => {
-    if (await deleteFoto(photoId)) track("foto_eliminata");
-  };
-  const doLinkPartner = async (userId: string) => {
-    const r = await linkPartner(selP as string, userId);
-    if (r.ok) track("socio_collegato");
-    return r;
-  };
-  const doUnlinkPartner = async () => {
-    if (selP && (await unlinkPartner(selP))) track("socio_scollegato");
-  };
-  const doDeleteCompagno = async () => {
-    if (selP && (await deleteCompagno(selP))) {
-      track("socio_eliminato");
-      go("compagni");
-    }
-  };
-  const doSaveCompagno = async () => {
-    if (await saveCompagno(form)) {
-      track("socio_creato");
-      closeModal();
-    }
-  };
-  const doSaveQuickTorneo = async () => {
-    const id = await quickCreateTorneo(form);
-    if (id) {
-      track("torneo_creato", { via: "rapido" });
-      closeModal();
-      openTorneoDetail(id);
-    }
-  };
-
-  // Mostra lo splash mentre si caricano i dati iniziali dal DB.
-  if (dataLoading) return <Splash />;
-
-  // ---------- derived render data ----------
-  const mainPad = wide ? "30px 34px 48px" : "20px 16px 120px";
-  // L'assistente chat occupa tutto lo schermo con scroll interno: niente
-  // padding/top-bar/bottom-nav e pagina bloccata (scorre solo la chat).
-  const isCrea = screen === "crea";
-  // Con tornei condivisi presenti, usiamo il calcolo client (che li include);
-  // le RPC server restano scoped al proprio user_id.
-  const hasShared = data.tournaments.some((t) => t.shared);
-  const torneiList =
-    srvTornei && !hasShared
-      ? deriveTorneiListServer(srvTornei, data)
-      : deriveTorneiList(data, fYear);
-  const compagniList = srvCompagni
-    ? deriveCompagniServer(srvCompagni)
-    : deriveCompagni(data);
-  const torneoData =
-    screen === "torneo"
-      ? srvTorneo
-        ? deriveTorneoDetailServer(srvTorneo, data)
-        : selT
-          ? deriveTorneoDetail(data, selT)
-          : null
-      : null;
-  const compagnoData =
-    screen === "compagno"
-      ? srvCompagno
-        ? deriveCompagnoDetailServer(srvCompagno)
-        : selP
-          ? deriveCompagno(data, selP)
-          : null
-      : null;
-  const storyData =
-    modal === "story" && storyT ? deriveStory(data, storyT) : null;
-  const wrappedData =
-    modal === "wrapped" && wrappedRange
-      ? deriveWrapped(data, wrappedRange, canFilter ? fPartner : "all")
-      : null;
-
-  // La schermata Tornei è anche il fallback di `torneo` finché il dettaglio non
-  // è pronto: un elemento solo, così le due strade non possono divergere nei
-  // prop (la vista lista/mappa in particolare deve essere la stessa).
-  const torneiScreen = (
-    <Tornei
-      list={torneiList}
-      mappa={mappaData}
-      vista={torneiVista}
-      onVista={setVistaTornei}
-      onOpenTorneo={openTorneoDetail}
-      onNewTorneo={() => openTorneo(null)}
-      onAssistant={openCrea}
-      canAssistant={perm.canUseAi}
-    />
-  );
-
-  const renderScreen = () => {
-    switch (screen) {
-      case "tornei":
-        return torneiScreen;
-      case "torneo":
-        if (!torneoData) return torneiScreen;
-        return (
-          <TorneoDetail
-            t={torneoData}
-            goBack={() => go("tornei")}
-            onEdit={() => selT && openTorneo(selT)}
-            onAddPartita={() => openPartita(selT)}
-            onOpenMatch={openMatch}
-            onAddFoto={() => selT && openFotoForTorneo(selT)}
-            onDeleteFoto={doDeleteFoto}
-            canAddFoto={perm.canUploadPhoto}
-            onShareStory={() => selT && openStory(selT)}
-            canShareStory={perm.canShareStory}
-            readOnly={torneoData.shared}
-          />
-        );
-      case "compagni":
-        return (
-          <Compagni
-            compagni={compagniList}
-            onOpenCompagno={openCompagnoDetail}
-            onNewCompagno={openCompagno}
-          />
-        );
-      case "compagno":
-        if (!compagnoData)
-          return (
-            <Compagni
-              compagni={compagniList}
-              onOpenCompagno={openCompagnoDetail}
-              onNewCompagno={openCompagno}
-            />
-          );
-        return (
-          <CompagnoDetail
-            cp={compagnoData}
-            goBack={() => go("compagni")}
-            onOpenMatch={openMatch}
-            linked={
-              data.partners.find((p) => p.id === selP)?.linkedUserId != null
-            }
-            onSearchUsers={searchUsers}
-            onLink={doLinkPartner}
-            onUnlink={doUnlinkPartner}
-            onDelete={doDeleteCompagno}
-          />
-        );
-      case "diario":
-        return (
-          <Diario
-            entries={deriveDiary(data)}
-            onOpenTorneo={openTorneoDetail}
-            onInstagramStory={openStory}
-            onNewTorneo={() => openTorneo(null)}
-          />
-        );
-      case "oggi":
+      case 'oggi':
         return (
           <ChiCeOggi
             own={check.own}
             room={check.room}
             loading={check.loading}
             cityPrefill={check.cityPrefill}
-            onCheckIn={check.checkIn}
-            onCheckOut={check.checkOut}
+            back={back}
+            onCheckIn={actions.fareCheckIn}
+            onTerminaCheckIn={actions.terminaCheckIn}
             onRefresh={check.refresh}
             onAddPartner={check.addAsPartner}
           />
-        );
-      case "profilo":
+        )
+      case 'tornei':
+        return (
+          <Tornei
+            vista={route.vista}
+            q={route.q ?? ''}
+            onVista={(v) => navigate({ name: 'tornei', vista: v, q: route.q }, { replace: true, keepFocus: true, keepScroll: true })}
+            onQuery={(q) => navigate({ name: 'tornei', vista: route.vista, q: q || undefined }, { replace: true, keepFocus: true, keepScroll: true })}
+            list={screen.torneiList}
+            entries={screen.entries}
+            mappa={screen.mappa}
+            stagione={{ fYear: screen.filtri.fYear, setFYear: screen.filtri.setFYear, yearOptions: screen.filtri.yearOptions }}
+            onNuovoTorneo={() => actions.nuovoTorneo()}
+            onStoria={actions.apriStoria}
+            traccia={traccia}
+          />
+        )
+      case 'torneo': {
+        const t = screen.torneo
+        return (
+          <TorneoDetail
+            key={route.id}
+            t={t}
+            back={back}
+            traccia={traccia}
+            onAddPartita={() => actions.nuovaPartita(route.id)}
+            onOpenMatch={actions.modificaPartita}
+            onAddFoto={() => actions.aggiungiFoto(route.id)}
+            onOpenFoto={(i) => actions.apriFoto(route.id, i)}
+            onDeleteFoto={actions.eliminaFoto}
+            onStoria={() => actions.apriStoria(route.id)}
+            onMenu={(anchor) =>
+              actions.apriMenu(
+                t?.name ?? 'Torneo',
+                t && !t.shared
+                  ? [
+                      { key: 'modifica', label: 'Modifica', icon: 'pencil', onSelect: () => actions.modificaTorneo(route.id) },
+                      { key: 'storia', label: 'Storia Instagram', icon: 'share', onSelect: () => actions.apriStoria(route.id) },
+                      { key: 'elimina', label: 'Elimina torneo', icon: 'trash', tone: 'destructive', onSelect: () => actions.eliminaTorneo(route.id) },
+                    ]
+                  : [{ key: 'storia', label: 'Storia Instagram', icon: 'share', onSelect: () => actions.apriStoria(route.id) }],
+                anchor,
+              )
+            }
+          />
+        )
+      }
+      case 'compagni':
+        return <Compagni compagni={screen.compagniList} traccia={traccia} onNuovoCompagno={actions.nuovoCompagno} />
+      case 'compagno': {
+        const p = data.partners.find((x) => x.id === route.id)
+        return (
+          <CompagnoDetail
+            key={route.id}
+            cp={p && !p.shared ? screen.compagno : null}
+            linked={p?.linkedUserId != null}
+            back={back}
+            traccia={traccia}
+            onOpenMatch={actions.modificaPartita}
+            onCollega={() => actions.collegaCompagno(route.id)}
+            onScollega={() => actions.scollegaCompagno(route.id)}
+            onMenu={(anchor) =>
+              actions.apriMenu(
+                p?.name ?? 'Compagno',
+                [{ key: 'elimina', label: 'Elimina compagno', icon: 'trash', tone: 'destructive', onSelect: () => actions.eliminaCompagno(route.id) }],
+                anchor,
+              )
+            }
+          />
+        )
+      }
+      case 'profilo':
         return (
           <Profilo
             session={session!}
-            onLogout={logout}
-            // Un socio `shared` è una riga creata da un ALTRO utente e resa
-            // visibile perché ci ha collegati: è esattamente una condivisione
-            // ricevuta.
-            condivisioniRicevute={data.partners.filter((p) => p.shared).length}
-            onRimuoviCondivisioni={() => unlinkMe()}
+            // Un compagno `shared` è una riga creata da un ALTRO utente e resa
+            // visibile perché ci ha collegati: è una condivisione ricevuta.
+            condivisioni={data.partners.filter((p) => p.shared).length}
+            consenso={consenso}
+            segnalazioniNuove={admin ? nuove ?? 0 : null}
+            onSalvaNome={actions.salvaNome}
+            onCaricaAvatar={actions.caricaAvatar}
+            onPassword={actions.cambiaPassword}
+            onTogliCondivisioni={actions.togliCondivisioni}
+            onCookie={actions.cookie}
+            onEsci={actions.esci}
           />
-        );
-      case "segnala":
-        // La rete sta in `lib/segnalazioni`: qui si passa solo la funzione.
-        return <Segnala onBack={() => go("home")} onInvia={inviaSegnalazione} />;
-      case "crea":
+        )
+      case 'segnala':
+        return <Segnala back={back} onBack={() => goBack({ name: 'profilo' })} onInvia={inviaSegnalazione} />
+      case 'segnalazioni':
+        return admin ? <Segnalazioni back={back} carica={elencoSegnalazioni} aggiorna={aggiornaStato} /> : null
+      case 'crea':
         return (
-          <CreaChat
-            wide={wide}
-            partners={partnerOptions(data)}
-            venues={venueOptions(data)}
-            onCreate={async (f, matches) => {
-              const id = await createGuidedTorneo(f, matches);
-              if (id) {
-                track("assistente_ai_usato");
-                track("torneo_creato", { via: "assistente" });
-              }
-              return id;
-            }}
-            onDone={openTorneoDetail}
-            onExit={() => go("tornei")}
-          />
-        );
-      case "home":
-      default: {
-        const dash =
-          serverDash && !hasShared
-            ? deriveDashboardServer(
-                serverDash,
-                data,
-                canFilter ? fPartner : "all",
-                canFilter ? fYear : "Sempre",
-              )
-            : deriveDashboard(
-                data,
-                canFilter ? fPartner : "all",
-                canFilter ? fYear : "Sempre",
-              );
+          <LazyBoundary onReset={CreaChat.reset}>
+            <Suspense fallback={<Skeleton label="Preparo l'assistente…"><Bone className="app-skel-bubble" /></Skeleton>}>
+              <CreaChat
+                partners={partnerOptions(data)}
+                venues={venueOptions(data)}
+                onCreate={actions.creaGuidato}
+                onDone={(id) => navigate({ name: 'torneo', id }, { replace: true })}
+                onExit={actions.esciDallAssistente}
+                registerExitGuard={(isDirty) => guardRoute(isDirty, () => actions.esciDallAssistente(true))}
+              />
+            </Suspense>
+          </LazyBoundary>
+        )
+      case 'nonTrovato':
         return (
-          <Home
-            s={dash.s}
-            recent={dash.recent}
-            filters={{
-              fPartner,
-              fYear,
-              partnerOptions: partnerOptions(data),
-              yearOptions: yearOptions(data),
-              setFPartner,
-              setFYear,
-              canFilter,
-              onLockedFilter: () =>
-                denyByPlan({
-                  message:
-                    "I filtri per compagno e anno non sono disponibili con il tuo piano.",
-                }),
-            }}
-            onOpenTorneo={openTorneoDetail}
-            onQuickTorneo={openQuickTorneo}
-            onAiCreate={openCrea}
-            canAiCreate={perm.canUseAi}
-            onOpenWrapped={openWrapped}
-            onSegnala={() => go("segnala")}
-            goTornei={() => go("tornei")}
-            goCompagni={() => go("compagni")}
+          <NonTrovato
+            titolo="Pagina non trovata"
+            testo="L'indirizzo non porta da nessuna parte nel diario."
+            azione={<ButtonLink to={{ name: 'home' }} variant="tinted">Vai alla Home</ButtonLink>}
           />
-        );
-      }
+        )
     }
-  };
+  }
+
+  const entityTitle =
+    route.name === 'torneo' ? screen.torneo?.name ?? 'Torneo non trovato' : route.name === 'compagno' ? screen.compagno?.name ?? 'Compagno non trovato' : undefined
 
   return (
-    <div
-      style={{
-        display: "flex",
-        height: isCrea ? "100dvh" : wide ? "100vh" : undefined,
-        minHeight: isCrea ? undefined : wide ? undefined : "100vh",
-        overflow: isCrea || wide ? "hidden" : undefined,
-        background: "#FFF8F0",
-      }}
-    >
-      {banner && (
-        <div
-          style={{
-            position: "fixed",
-            top: 14,
-            left: "50%",
-            transform: "translateX(-50%)",
-            zIndex: 80,
-            maxWidth: "min(92vw, 470px)",
-            background: "#1B2A4A",
-            color: "#fff",
-            padding: "12px 16px",
-            borderRadius: 12,
-            boxShadow: "0 12px 30px -8px rgba(27,42,74,.55)",
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
-            font: "700 13px 'Nunito Sans'",
-          }}
-        >
-          <span style={{ flex: 1, lineHeight: 1.35 }}>{banner}</span>
-          <span
-            onClick={dismissBanner}
-            style={{
-              cursor: "pointer",
-              opacity: 0.7,
-              fontSize: 18,
-              lineHeight: 1,
-              flex: "none",
-            }}
-          >
-            ×
-          </span>
-        </div>
-      )}
-      {wide && (
-        <Sidebar
-          screen={screen}
-          onNavigate={go}
-          onNewPartita={() => openPartita(null)}
-          onNewTorneo={() => openTorneo(null)}
-          onAssistant={openCrea}
-          canAssistant={perm.canUseAi}
-        />
-      )}
-
-      <main
-        ref={mainRef}
-        style={{
-          flex: 1,
-          minWidth: 0,
-          padding: isCrea ? 0 : mainPad,
-          maxWidth: isCrea ? "none" : 1120,
-          margin: isCrea ? 0 : "0 auto",
-          width: "100%",
-          height: wide ? "100vh" : isCrea ? "100dvh" : undefined,
-          overflowY: isCrea ? "hidden" : wide ? "auto" : undefined,
-          display: isCrea ? "flex" : undefined,
-          flexDirection: isCrea ? "column" : undefined,
-        }}
+    <>
+      <AppShell
+        vista={vista}
+        user={{ name: session?.name ?? '', email: session?.email ?? '', avatar: session?.avatarUrl ?? null, admin }}
+        entityTitle={entityTitle}
+        onPlus={(anchor) => actions.apriAzioni(anchor)}
+        fullscreen={route.name === 'crea' || route.name === 'wrapped'}
       >
-        {!wide && !isCrea && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginBottom: 18,
-            }}
-          >
-            <BrandLockup size={30} textSize={15} gap={9} />
-            <div
-              className="chip"
-              onClick={() => go("profilo")}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                cursor: "pointer",
-              }}
-            >
-              <span
-                style={{
-                  font: "700 12px 'Nunito Sans'",
-                  color: "rgba(27,42,74,.55)",
-                }}
-              >
-                Profilo
-              </span>
-              <Avatar
-                initial={session?.name?.[0]?.toUpperCase() || "?"}
-                size={28}
-                font={12}
-                uri={session?.avatarUrl}
-              />
-            </div>
-          </div>
-        )}
-        <Suspense fallback={<div style={{ padding: 24 }} />}>
-          {renderScreen()}
-        </Suspense>
-      </main>
-
-      {!wide && !isCrea && (
-        <BottomNav
-          screen={screen}
-          onNavigate={go}
-          fabOpen={fabOpen}
-          onToggleFab={() => setFabOpen((v) => !v)}
-          onNewTorneo={() => openTorneo(null)}
-          onQuickTorneo={openQuickTorneo}
-          onNewPartita={() => openPartita(null)}
-          onAssistant={openCrea}
-          canAssistant={perm.canUseAi}
-        />
-      )}
-
-      {/* I bottom-sheet vivono dentro `AnimatePresence` per un motivo solo:
-          senza, React li smonta all'istante e l'uscita non esiste. Entravano
-          animati e sparivano di colpo. Story e Wrapped restano fuori: sono
-          visori a schermo intero, non usano `Sheet` e non hanno un'uscita da
-          animare. */}
-      <AnimatePresence>
-        {modal === "torneo" && (
-        <TorneoModal
-          key="torneo"
-          form={form}
-          editId={editId}
-          setField={setField}
-          partnerOptions={partnerOptions(data)}
-          canAddPartner={perm.canCreatePartner}
-          venues={data.venues}
-          onMergeVenues={mergeVenues}
-          onClose={closeModal}
-          onSave={doSaveTorneo}
-          onDelete={doDeleteTorneo}
-        />
-      )}
-      {modal === "partita" && (
-        <PartitaModal
-          key="partita"
-          form={form}
-          editId={editId}
-          setField={setField}
-          tournOptions={tournamentOptions(data)}
-          sets={setRows}
-          onClose={closeModal}
-          onSave={doSavePartita}
-          onDelete={doDeletePartita}
-        />
-      )}
-      {modal === "foto" && (
-        <FotoModal
-          key="foto"
-          form={form}
-          setField={setField}
-          tournOptions={tournamentOptions(data)}
-          onClose={closeModal}
-          onSave={doSaveFoto}
-          lockTournamentName={
-            data.tournaments.find((t) => t.id === form.tournamentId)?.name
-          }
-        />
-      )}
-      {modal === "socio" && (
-        <CompagnoModal
-          key="socio"
-          form={form}
-          setField={setField}
-          onClose={closeModal}
-          onSave={doSaveCompagno}
-        />
-      )}
-      {modal === "torneoRapido" && (
-        <QuickTorneoModal
-          key="torneoRapido"
-          form={form}
-          setField={setField}
-          partnerOptions={partnerOptions(data)}
-          canAddPartner={perm.canCreatePartner}
-          venues={data.venues}
-          onClose={closeModal}
-          onSave={doSaveQuickTorneo}
-        />
-        )}
-      </AnimatePresence>
-
-      {modal === "story" && storyData && (
-        <Suspense fallback={null}>
-          <StoryModal
-            story={storyData}
-            onClose={closeModal}
-            onNotice={setNotice}
-          />
-        </Suspense>
-      )}
-      {modal === "wrapped" && wrappedData && (
-        <Suspense fallback={null}>
-          <WrappedModal
-            wrapped={wrappedData}
-            onClose={closeModal}
-            onNotice={setNotice}
-          />
-        </Suspense>
-      )}
-      {/* Avviso momentaneo quando la connessione internet non è ottimale. */}
-      <ConnectionSnackbar />
-    </div>
-  );
+        {render()}
+      </AppShell>
+      <ModalHost data={data} route={route} diary={diary} check={check} actions={actions} canAddPartner={perm.canCreatePartner} />
+    </>
+  )
 }

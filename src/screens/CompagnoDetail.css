@@ -1,0 +1,14 @@
+@layer components {
+  .compagno-share { margin-top: var(--space-6); }
+  .compagno-stats { margin-top: var(--space-6); }
+  .compagno-vuoto {
+    margin-top: var(--space-6);
+    padding: var(--space-6) var(--space-4);
+    text-align: center;
+    font: var(--type-subhead);
+    letter-spacing: var(--track-subhead);
+    background: var(--surface);
+    border: var(--border-w) solid var(--edge);
+    border-radius: var(--radius-card);
+  }
+}

@@ -1,0 +1,129 @@
+/* ============================================================================
+   Home (UX §6.1, §9.2). *Adesso*: una colonna sotto i 600, due fino ai 900,
+   fino a tre da lì. Numeri chiave 2×2, poi 4×1 (lo fa StatGrid).
+   ============================================================================ */
+@layer components {
+  .home-adesso {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-3);
+  }
+  .home-adesso > li { min-width: 0; display: grid; }
+  @media (min-width: 600px) {
+    .home-adesso { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
+  }
+  @media (min-width: 900px) {
+    .home-adesso { grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--card-min-narrow)), 1fr)); }
+  }
+
+  .home-eyebrow {
+    margin-bottom: var(--space-1);
+    font: var(--type-eyebrow);
+    letter-spacing: var(--track-eyebrow);
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+  .home-meta {
+    margin-top: var(--space-1);
+    font: var(--type-footnote);
+    letter-spacing: var(--track-footnote);
+    color: var(--ink-2);
+  }
+  .home-badges { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-3); }
+  .home-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-4); }
+  .home-link {
+    font-weight: 600;
+    color: var(--accent-text);
+    text-decoration: underline;
+    text-underline-offset: var(--space-0-5);
+  }
+  .home-solo { max-width: var(--sheet-max); margin: 0 auto; }
+  /* Il BrandMark rimette il marchio nella chrome mobile (Q22, C6); dai 900 lo
+     porta già la Sidebar e due marchi a 400px di distanza sono un doppione. */
+  .home-brand { display: inline-flex; }
+  @media (min-width: 900px) {
+    .home-brand { display: none; }
+  }
+  .home-section { margin-top: var(--space-8); }
+
+  /* --------------------------------------------------------- Beach Wrapped */
+  /* Il disco del sole tagliato in alto a destra: un cerchio pieno dietro al
+     testo, che il bordo della card taglia. Ogni testo regge anche sopra di
+     lui (ART_DIRECTION §4.7). */
+  .home-wrapped { padding-top: var(--space-6); padding-bottom: var(--space-6); }
+  .home-wrapped-disc {
+    position: absolute;
+    top: calc(-1 * var(--space-20));
+    right: calc(-1 * var(--space-12));
+    width: calc(var(--space-20) * 2.5);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: var(--png-disc);
+    z-index: -1;
+    pointer-events: none;
+  }
+  .home-wrapped-eyebrow {
+    font: var(--type-eyebrow);
+    letter-spacing: var(--track-eyebrow);
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+  .ui-card-title.home-wrapped-title {
+    margin-top: var(--space-1);
+    font: var(--type-title-2);
+    letter-spacing: var(--track-title-2);
+  }
+  .home-wrapped-text {
+    margin-top: var(--space-1);
+    max-width: var(--empty-max);
+    font: var(--type-subhead);
+    letter-spacing: var(--track-subhead);
+    color: var(--ink-2);
+  }
+  .home-wrapped-n {
+    margin-top: var(--space-4);
+    font: var(--type-num-xl);
+    letter-spacing: var(--track-num-xl);
+    font-variant-numeric: tabular-nums;
+    color: var(--png-accent);
+  }
+  .home-wrapped-n-l {
+    font: var(--type-subhead);
+    letter-spacing: var(--track-subhead);
+    color: var(--ink-2);
+  }
+
+  /* ---------------------------------------------------------- Numeri chiave */
+  /* La card è solo il bersaglio del link (hover e pressione): il disegno è la
+     griglia dei numeri, che ha già il suo bordo. */
+  .ui-card.home-numeri {
+    padding: 0;
+    background: transparent;
+    border-color: transparent;
+  }
+  .home-numeri-foot {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-1);
+    min-height: var(--touch);
+    padding: 0 var(--space-2);
+    font: var(--type-subhead-strong);
+    letter-spacing: var(--track-subhead);
+    color: var(--accent-text);
+  }
+  .home-nonumeri {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+  .home-nonumeri-text {
+    font: var(--type-subhead);
+    letter-spacing: var(--track-subhead);
+    color: var(--ink-2);
+  }
+}

@@ -1,49 +1,59 @@
-import type { CompagnoCard } from '../lib/derive'
-import { PageHeader, Button, Avatar, StatFooter, EmptyCard, InlineLink, MUTED } from '../components/ui'
+// ============================================================================
+// Compagni (UX §5 F7, §6.6): la griglia delle persone con cui giochi. Ogni
+// card è un `<article>` col nome come link (UX §7.6): tutta la card si tocca,
+// una sola fermata di Tab, il contenuto resta leggibile.
+// ============================================================================
+import type { CompagniProps } from '../app/contracts'
+import { Avatar, Button, Card, CardGrid, CardLink, EmptyState, IconButton, NavBar, Page, StatFooter } from '../components/ui/index'
+import './Compagni.css'
 
-interface CompagniProps {
-  compagni: CompagnoCard[]
-  onOpenCompagno: (id: string) => void
-  onNewCompagno: () => void
-}
-
-export default function Compagni({ compagni, onOpenCompagno, onNewCompagno }: CompagniProps) {
+export default function Compagni({ compagni, traccia, onNuovoCompagno }: CompagniProps) {
   return (
-    <div style={{ animation: 'pop .32s ease both' }}>
-      <PageHeader
+    <Page>
+      <NavBar
         title="Compagni"
-        subtitle="Con chi giochi meglio"
-        actions={<Button variant="dark" onClick={onNewCompagno}>＋ Nuovo compagno</Button>}
+        subtitle={compagni.length ? 'Con chi giochi meglio' : undefined}
+        actions={<IconButton icon="plus" label="Nuovo compagno" onClick={onNuovoCompagno} />}
       />
-
       {compagni.length === 0 ? (
-        <div style={{ marginTop: 22 }}>
-          <EmptyCard>Nessun compagno ancora. <InlineLink onClick={onNewCompagno}>Aggiungi un compagno →</InlineLink></EmptyCard>
-        </div>
+        <EmptyState
+          variant="primo"
+          zero="Compagni"
+          title="Nessun compagno ancora."
+          text="Aggiungi le persone con cui giochi: vedrai con chi vinci di più."
+          action={<Button variant="filled" icon="plus" onClick={onNuovoCompagno}>Aggiungi un compagno</Button>}
+        />
       ) : (
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(min(100%,250px),1fr))', gap: 14, marginTop: 22 }}>
-        {compagni.map((p) => (
-          <div key={p.id} className="card lift" onClick={() => onOpenCompagno(p.id)} style={{ padding: 22, cursor: 'pointer' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 13 }}>
-              <Avatar initial={p.initial} />
-              <div>
-                <div style={{ font: "700 16px 'Nunito Sans'" }}>{p.name}</div>
-                <div style={{ font: "600 12px 'Nunito Sans'", color: MUTED }}>{p.played} partite insieme</div>
-              </div>
-            </div>
-            <StatFooter
-              gap={20}
-              mt={18}
-              items={[
-                { value: p.winPct + '%', label: 'vittorie', color: '#FF6B35' },
-                { value: p.won, label: 'vinte' },
-                { value: p.lost, label: 'perse', color: 'rgba(27,42,74,.4)' },
-              ]}
-            />
-          </div>
-        ))}
-      </div>
+        <CardGrid min="narrow" className="compagni-grid" label="I tuoi compagni">
+          {compagni.map((p) => {
+            const meta = `compagno-meta-${p.id}`
+            return (
+              <li key={p.id} className="compagni-item">
+                <Card traccia={traccia === p.id}>
+                  <div className="compagni-head">
+                    <Avatar name={p.name} size={48} />
+                    <div className="compagni-who">
+                      <CardLink to={{ name: 'compagno', id: p.id }} describedBy={meta}>
+                        {p.name}
+                      </CardLink>
+                      <p id={meta} className="compagni-meta">
+                        {p.played === 1 ? '1 partita insieme' : `${p.played} partite insieme`}
+                      </p>
+                    </div>
+                  </div>
+                  <StatFooter
+                    items={[
+                      { value: `${p.winPct}%`, label: 'vittorie', tone: p.played > 0 ? 'win' : undefined },
+                      { value: p.won, label: 'vinte' },
+                      { value: p.lost, label: 'perse' },
+                    ]}
+                  />
+                </Card>
+              </li>
+            )
+          })}
+        </CardGrid>
       )}
-    </div>
+    </Page>
   )
 }

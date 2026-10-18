@@ -1,0 +1,153 @@
+/* ============================================================================
+   Dettaglio torneo (UX §5 F5, §9.2; ART_DIRECTION §8, §10.3).
+   ============================================================================ */
+@layer components {
+  .torneo-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font: var(--type-eyebrow);
+    letter-spacing: var(--track-eyebrow);
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+  /* Il pallino del piazzamento: decorativo accanto al testo, quindi resta il
+     letterale della lib (ART_DIRECTION §4.5). */
+  .torneo-dot {
+    flex: none;
+    width: var(--space-2);
+    height: var(--space-2);
+    border-radius: 50%;
+  }
+
+  /* La traccia dell'intestazione modificata (MOTION.md §10.4): un fondo
+     --accent-wash sotto il large title che svanisce, solo opacità. */
+  .torneo-traccia .ui-largetitle { position: relative; isolation: isolate; }
+  .torneo-traccia .ui-largetitle::after {
+    content: "";
+    position: absolute;
+    inset: calc(-1 * var(--space-1)) calc(-1 * var(--space-3));
+    border-radius: var(--radius-control);
+    background: var(--accent-wash);
+    z-index: -1;
+    pointer-events: none;
+    animation: traccia var(--dur-racconto) var(--ease-respiro) var(--dur-svelto) both;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .torneo-traccia .ui-largetitle::after { animation-duration: var(--dur-entrata); }
+  }
+
+  /* «3° torneo qui · 1 podio»: inchiostro e non arancio, perché sul fondo
+     pagina l'arancio dei badge non regge AA (contrast.test.ts). */
+  .torneo-venue {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    margin-top: var(--space-2);
+    font: var(--type-footnote);
+    letter-spacing: var(--track-footnote);
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .torneo-venue .ui-icon { color: var(--ink-2); }
+
+  .torneo-cta { margin-top: var(--space-4); }
+  .torneo-stats { margin-top: var(--space-6); }
+  .torneo-empty { padding-top: var(--space-6); padding-bottom: var(--space-6); }
+
+  /* Segnaposto della mappa: alto e arrotondato come la mappa vera. */
+  .torneo-map-bone {
+    height: var(--venue-map-h);
+    border-radius: var(--radius-card);
+  }
+
+  /* ------------------------------------------------------------- Foto */
+  /* Come Foto di Apple: celle quadrate, gap 4, raggio dei controlli. */
+  .torneo-foto-grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(var(--photo-min), 1fr));
+    gap: var(--space-1);
+  }
+  .torneo-foto-cell {
+    position: relative;
+    isolation: isolate;
+    aspect-ratio: 1;
+    border-radius: var(--radius-control);
+  }
+  .torneo-foto {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-radius: inherit;
+    background: var(--c, var(--fill));
+    color: var(--ink-3);
+    cursor: zoom-in;
+  }
+  .torneo-foto[data-legacy] { cursor: default; }
+  /* Il filo interno stacca una foto di sabbia bianca dalla carta bianca. */
+  .torneo-foto::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: var(--photo-ring);
+    pointer-events: none;
+  }
+  .torneo-foto img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .torneo-foto:focus-visible { outline-offset: var(--focus-offset); }
+  @media (hover: hover) and (pointer: fine) {
+    .torneo-foto:not([data-legacy]):hover::after { box-shadow: var(--photo-ring), inset 0 0 0 var(--border-w) var(--edge-strong); }
+  }
+  /* Elimina: un bersaglio da 44 nell'angolo, opaco (niente vetro sopra le
+     foto: con trenta celle il budget delle sfocature salterebbe). */
+  .torneo-foto-del {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    width: var(--touch);
+    height: var(--touch);
+    color: var(--ink);
+  }
+  .torneo-foto-del::before {
+    content: "";
+    position: absolute;
+    top: var(--space-1);
+    right: var(--space-1);
+    width: var(--space-8);
+    height: var(--space-8);
+    border-radius: 50%;
+    background: var(--surface);
+    box-shadow: var(--elev-float);
+    z-index: -1;
+  }
+  /* L'icona al centro del cerchio, che sta nell'angolo del bersaglio. */
+  .torneo-foto-del .ui-icon { transform: translate(var(--space-0-5), calc(-1 * var(--space-0-5))); }
+  .torneo-foto-del:active::before { background: var(--surface-pressed); }
+
+  .torneo-missing {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-4);
+    margin-top: var(--space-4);
+  }
+  .torneo-missing-text {
+    font: var(--type-body);
+    letter-spacing: var(--track-body);
+    color: var(--ink-2);
+  }
+}

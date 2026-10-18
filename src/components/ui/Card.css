@@ -73,11 +73,11 @@
   /* La card di Beach Wrapped: l'unica card scura del contenuto, anteprima del
      PNG. Navy piatto (niente gradiente). I colori sono quelli della palette
      `navy` dei PNG (wrapped/palette.ts, l'unica fonte dei letterali della
-     tela): li passa chi usa la card, come --png-*. */
+     tela): li passa chi usa la card, come --png-*. L'anello di focus resta
+     navy: è disegnato FUORI dalla card, sul fondo chiaro della pagina. */
   .ui-card[data-tone="navy"] {
     --ink: var(--png-fg);
     --ink-2: var(--png-muted);
-    --focus-ring: var(--png-fg);
     background: var(--png-bg);
     color: var(--ink);
     border-color: transparent;

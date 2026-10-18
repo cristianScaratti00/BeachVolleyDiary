@@ -1,0 +1,14 @@
+/* Compagni: 1 colonna sotto i 600, 2 fino ai 900, 3–4 sopra (UX §9.2): la
+   griglia `narrow` (--card-min-narrow) lo fa da sé. */
+@layer components {
+  .compagni-grid { margin-top: var(--space-4); }
+  .compagni-item { display: grid; min-width: 0; }
+  .compagni-head { display: flex; align-items: center; gap: var(--space-3); min-width: 0; }
+  .compagni-who { min-width: 0; display: flex; flex-direction: column; }
+  .compagni-meta {
+    margin-top: var(--space-0-5);
+    font: var(--type-footnote);
+    letter-spacing: var(--track-footnote);
+    color: var(--ink-2);
+  }
+}
