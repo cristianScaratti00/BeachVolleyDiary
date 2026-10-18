@@ -2,6 +2,11 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/react'
+// Prima i token: il primo foglio dichiara l'ordine dei livelli CSS. Da soli
+// non disegnano niente (solo custom properties e `[data-material]`), quindi
+// convivono con index.css finché la migrazione non lo assorbe.
+import './styles/tokens.css'
+import './styles/materials.css'
 import './index.css'
 import Root from './Root'
 import { AuthProvider } from './hooks/useAuth'
