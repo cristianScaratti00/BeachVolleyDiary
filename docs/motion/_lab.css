@@ -1,0 +1,388 @@
+/* ============================================================================
+   Laboratorio del movimento: base comune delle demo di MOTION.md.
+
+   RIFERIMENTO, NON CODICE DI PRODUZIONE. Le demo leggono i token veri
+   (`src/styles/tokens.css`, `src/styles/materials.css`) e mostrano COME si
+   muove ogni cosa. Le primitive vere (`src/components/ui/*`, Fase 2) prendono
+   da qui i tempi, le proprietà animate e i fallback, non il markup.
+
+   Due classi sull'<html> le mette `_lab.js`:
+     .rm        = `@media (prefers-reduced-motion: reduce)` nell'app vera.
+                  Vale sia con la preferenza di sistema sia con ?reduce.
+     .lab-slow  = tutto cinque volte più lento (?slow), per guardare la
+                  coreografia fotogramma per fotogramma. Solo laboratorio.
+   ============================================================================ */
+
+@layer tokens {
+  /* Moviola: le curve restano le stesse (sono normalizzate sul tempo), cambia
+     solo la durata. `--ease-molla` è campionata sulla durata, quindi regge. */
+  :root.lab-slow {
+    --dur-svelto: 900ms;
+    --dur-entrata: 1300ms;
+    --dur-molla: 1600ms;
+    --dur-racconto: 4000ms;
+    --dur-respiro: 7000ms;
+  }
+  /* Gli stessi valori del blocco `prefers-reduced-motion` di tokens.css, così
+     ?reduce simula la preferenza senza toccare il sistema. Viene DOPO
+     `.lab-slow` di proposito: a parità di specificità vince, e i numeri
+     ridotti restano a zero anche in moviola. */
+  :root.rm {
+    --motion-scale: 0;
+    --press-scale: 1;
+    --dur-racconto: 0ms;
+    --dur-respiro: 0ms;
+  }
+}
+
+@layer base {
+  :root { color-scheme: light; }
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    min-height: 100dvh;
+    background-color: var(--bg);
+    background-image: var(--bg-canvas);
+    background-repeat: no-repeat;
+    color: var(--ink);
+    font: var(--type-body);
+    letter-spacing: var(--track-body);
+    -webkit-font-smoothing: antialiased;
+    /* Il lampo grigio di WebKit al tocco raddoppierebbe il feedback di
+       pressione, che è nostro (MOTION.md §4.3). */
+    -webkit-tap-highlight-color: transparent;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  h1, h2, h3, p { margin: 0; }
+  button { font: inherit; letter-spacing: inherit; color: inherit; background: none; border: 0; padding: 0; margin: 0; cursor: pointer; }
+  a { color: inherit; text-decoration: none; }
+  input, select, textarea { font: var(--type-body); letter-spacing: var(--track-body); color: var(--ink); }
+  /* L'anello compare ISTANTANEO: nessuna `transition` delle demo nomina
+     `outline` (e nessuna usa `transition: all`). */
+  :focus-visible { outline: var(--focus-width) solid var(--focus-ring); outline-offset: var(--focus-offset); }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+  svg.i { width: var(--icon-24); height: var(--icon-24); flex: none; fill: none; stroke: currentColor; stroke-width: var(--icon-stroke-24); stroke-linecap: round; stroke-linejoin: round; }
+  svg.i[data-size="20"] { width: var(--icon-20); height: var(--icon-20); stroke-width: var(--icon-stroke-20); }
+  svg.i[data-size="16"] { width: var(--icon-16); height: var(--icon-16); stroke-width: var(--icon-stroke-16); }
+  svg.i.fill { fill: currentColor; stroke: none; }
+}
+
+@layer components {
+  /* ------------------------------------------------------------ Pagina */
+  .lab-page {
+    padding: calc(var(--safe-top) + var(--space-2)) var(--gutter) var(--tabbar-clearance);
+    max-width: var(--content-max);
+    margin: 0 auto;
+  }
+  .lab-page.no-tabbar { padding-bottom: var(--space-12); }
+  .large-title { font: var(--type-large-title); letter-spacing: var(--track-large-title); text-wrap: balance; }
+  .subtitle { font: var(--type-subhead); letter-spacing: var(--track-subhead); color: var(--ink-2); margin-top: var(--space-0-5); }
+  .section-title { font: var(--type-title-3); letter-spacing: var(--track-title-3); margin: var(--space-8) 0 var(--space-3); }
+  .eyebrow { font: var(--type-eyebrow); letter-spacing: var(--track-eyebrow); text-transform: uppercase; color: var(--ink-2); }
+  .footnote { font: var(--type-footnote); letter-spacing: var(--track-footnote); color: var(--ink-2); }
+  /* La spiegazione della demo: carta opaca, non fa parte dell'app. */
+  .lab-note {
+    margin-top: var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-control);
+    background: var(--surface);
+    border: 1px dashed var(--separator);
+    font: var(--type-footnote);
+    letter-spacing: var(--track-footnote);
+    color: var(--ink-2);
+  }
+  .lab-note b { color: var(--ink); font-weight: 600; }
+  .lab-row { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-3); }
+
+  /* ------------------------------------------------- Strato di stato */
+  /* Lo stesso schema per tutto ciò che si preme: un livello sotto il
+     contenuto che cambia SOLO opacità. Niente colore animato, niente ombra
+     animata. `currentColor` sui pulsanti (la tinta segue l'etichetta, nessun
+     token nuovo), `--surface-pressed` su righe e card. */
+  .state { position: relative; isolation: isolate; }
+  .state::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--state-tint, currentColor);
+    opacity: 0;
+    z-index: -1;
+    pointer-events: none;
+    transition: opacity var(--dur-svelto) var(--ease-standard);
+  }
+
+  /* ----------------------------------------------------------- Button */
+  .ui-button {
+    display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+    min-height: var(--control-md);
+    padding: 0 var(--space-5);
+    border-radius: var(--radius-capsule);
+    font: var(--type-headline);
+    letter-spacing: var(--track-headline);
+    white-space: nowrap;
+    /* Pressione: la scala si ferma in SVELTO sia all'andata sia al ritorno.
+       Un tocco di 60ms mostra un cenno, non un salto (MOTION.md §4.3). */
+    transition: transform var(--dur-svelto) var(--ease-standard);
+  }
+  .ui-button[data-size="lg"] { min-height: var(--control-lg); padding: 0 var(--space-6); }
+  .ui-button[data-size="sm"] { min-height: var(--control-sm); padding: 0 var(--space-3); font: var(--type-subhead-strong); }
+  .ui-button[data-variant="filled"] { background: var(--accent); color: var(--on-accent); }
+  .ui-button[data-variant="tinted"] { background: var(--accent-wash); color: var(--accent-text); }
+  .ui-button[data-variant="plain"] { color: var(--accent-text); padding: 0 var(--space-3); }
+  .ui-button[data-variant="neutral"] { background: var(--fill); color: var(--ink); }
+  .ui-button[data-variant="destructive"] { background: var(--danger); color: var(--on-danger); }
+  .ui-button[data-variant="glass"] { color: var(--on-glass); }
+  .ui-button[data-variant="glass"][data-material="glass-dark"] { color: var(--on-glass-dark); }
+  .ui-button[aria-disabled="true"] { background: var(--fill); color: var(--ink-disabled); cursor: default; }
+  .ui-button[aria-busy="true"] { cursor: progress; }
+  @media (hover: hover) and (pointer: fine) {
+    .ui-button:not([aria-disabled="true"]):not([aria-busy="true"]):hover::before { opacity: 0.08; }
+  }
+  .ui-button:not([aria-disabled="true"]):not([aria-busy="true"]):active { transform: scale(var(--press-scale)); }
+  .ui-button:not([aria-disabled="true"]):not([aria-busy="true"]):active::before { opacity: 0.12; transition-duration: 0ms; }
+
+  .ui-icon-button {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: var(--touch); height: var(--touch);
+    border-radius: 50%;
+    color: var(--ink);
+    transition: transform var(--dur-svelto) var(--ease-standard);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .ui-icon-button:hover::before { opacity: 0.08; }
+  }
+  .ui-icon-button:active { transform: scale(var(--press-scale)); }
+  .ui-icon-button:active::before { opacity: 0.12; transition-duration: 0ms; }
+
+  /* ------------------------------------------------------------- Card */
+  .ui-card {
+    position: relative;
+    isolation: isolate;
+    background: var(--surface);
+    border: 1px solid var(--edge);
+    border-radius: var(--radius-card);
+    padding: var(--space-4);
+  }
+  /* Il bordo "più forte" dell'hover è un anello in un livello a parte, che
+     cambia solo opacità: scorrendo con la rotella sotto un puntatore fermo
+     le card passano in hover una dopo l'altra, e un `border-color` animato
+     ridipingerebbe ogni card che passa. */
+  .ui-card::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    box-shadow: inset 0 0 0 1px var(--edge-strong);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--dur-svelto) var(--ease-standard);
+  }
+  .ui-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--surface-pressed);
+    opacity: 0;
+    z-index: -1;
+    pointer-events: none;
+    transition: opacity var(--dur-svelto) var(--ease-standard);
+  }
+  /* Card di entità: il link del titolo copre la card (UX §7.6). */
+  .ui-card .stretch::after { content: ""; position: absolute; inset: 0; border-radius: inherit; z-index: 1; }
+  .ui-card .stretch:focus-visible { outline: none; }
+  .ui-card:has(.stretch:focus-visible) { outline: var(--focus-width) solid var(--focus-ring); outline-offset: var(--focus-offset); }
+  .ui-card .above { position: relative; z-index: 2; }
+  @media (hover: hover) and (pointer: fine) {
+    .ui-card:has(.stretch:hover)::after { opacity: 1; }
+  }
+  /* Premuta: il fondo arriva SUBITO (0ms all'andata), torna in SVELTO. */
+  .ui-card:has(.stretch:active)::before { opacity: 1; transition-duration: 0ms; }
+  .ui-card h3 { font: var(--type-headline); letter-spacing: var(--track-headline); text-wrap: balance; }
+  .ui-card .meta { font: var(--type-footnote); letter-spacing: var(--track-footnote); color: var(--ink-2); margin-top: var(--space-1); }
+
+  /* --------------------------------------------------------- ListGroup */
+  .ui-list { list-style: none; margin: 0; padding: 0; background: var(--surface); border: 1px solid var(--edge); border-radius: var(--radius-card); overflow: hidden; }
+  /* Separatore rientrato di 16 (ART_DIRECTION §8), disegnato come filo e
+     non come bordo della riga: il fondo premuto copre la riga intera. */
+  .ui-list > li + li::before { content: ""; display: block; height: var(--hairline); margin-left: var(--space-4); background: var(--separator); }
+  .ui-row {
+    --state-tint: var(--surface-pressed);
+    display: flex; align-items: center; gap: var(--space-3);
+    width: 100%;
+    min-height: var(--touch);
+    padding: var(--space-3) var(--space-4);
+    text-align: left;
+    font: var(--type-body);
+    letter-spacing: var(--track-body);
+  }
+  .ui-row .grow { flex: 1; min-width: 0; }
+  .ui-row .value { color: var(--ink-2); }
+  .ui-row .chev { color: var(--ink-3); }
+  .ui-row[data-tone="danger"] { color: var(--danger); }
+  @media (hover: hover) and (pointer: fine) {
+    .ui-row:is(a, button):hover::before { opacity: 1; }
+  }
+  .ui-row:is(a, button):active::before { opacity: 1; transition-duration: 0ms; }
+
+  /* ---------------------------------------------------------- Skeleton */
+  /* Forme ferme SUBITO, alte quanto il contenuto vero; la pulsazione parte
+     solo dopo 400ms, così un caricamento veloce non lampeggia. */
+  .ui-skeleton { background: var(--fill); border-radius: var(--radius-xs); }
+  .ui-skeleton-group { animation: respiro var(--dur-respiro) var(--ease-respiro) 400ms infinite alternate both; }
+  @keyframes respiro { from { opacity: 1; } to { opacity: 0.55; } }
+  /* Non basta `--dur-respiro: 0ms`: un'animazione infinita a durata zero è
+     un caso limite della specifica. Si spegne a mano e si ferma a .75. */
+  .rm .ui-skeleton-group { animation: none; opacity: 0.75; }
+
+  /* ----------------------------------------------------------- Scrim */
+  .ui-scrim {
+    position: fixed; inset: 0;
+    background: var(--scrim);
+    z-index: var(--z-scrim);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--dur-svelto) var(--ease-standard), visibility 0s linear var(--dur-svelto);
+  }
+  .ui-scrim.is-open {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity var(--dur-entrata) var(--ease-standard), visibility 0s;
+  }
+
+  /* ----------------------------------------------------------- Toast */
+  .ui-toasts {
+    position: fixed;
+    top: calc(var(--safe-top) + var(--space-2));
+    left: var(--gutter); right: var(--gutter);
+    z-index: var(--z-toast);
+    display: flex; flex-direction: column; align-items: center; gap: var(--space-2);
+    pointer-events: none;
+  }
+  .ui-toasts > [role] { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); width: 100%; }
+  .ui-toasts > [role]:empty { display: none; }
+  .ui-toast {
+    pointer-events: auto;
+    display: flex; align-items: center; gap: var(--space-2);
+    min-height: var(--touch);
+    max-width: min(100%, 420px);
+    padding: 0 0 0 var(--space-4);
+    border-radius: var(--radius-capsule);
+    background: var(--surface);
+    box-shadow: var(--elev-toast);
+    font: var(--type-subhead-strong);
+    letter-spacing: var(--track-subhead);
+    /* Entrata: dall'alto di 8px, in ENTRATA. L'uscita è solo opacità. */
+    animation: toast-in var(--dur-entrata) var(--ease-standard) both;
+  }
+  .ui-toast.is-leaving { animation: toast-out var(--dur-svelto) var(--ease-standard) both; pointer-events: none; }
+  .ui-toast .ic { flex: none; }
+  .ui-toast[data-type="success"] .ic { color: var(--success); }
+  .ui-toast[data-type="error"] .ic { color: var(--danger); }
+  .ui-toast[data-type="offline"] .ic, .ui-toast[data-type="info"] .ic { color: var(--ink); }
+  .ui-toast .txt { flex: 1; min-width: 0; padding: var(--space-3) 0; }
+  .ui-toast .count {
+    display: inline-block;
+    margin-left: var(--space-1);
+    font: var(--type-caption-1);
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-2);
+  }
+  .ui-toast .count.bump { animation: bump var(--dur-molla) var(--ease-molla); }
+  .ui-toast .x { flex: none; width: var(--touch); height: var(--touch); display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; color: var(--ink-2); }
+  @keyframes toast-in {
+    from { opacity: 0; transform: translateY(calc(-8px * var(--motion-scale))); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes toast-out { from { opacity: 1; } to { opacity: 0; } }
+  /* Il contatore «×2» dice "è successo di nuovo" con un cenno di scala,
+     non con un secondo avviso. Con reduced-motion: niente cenno, il numero
+     cambia e basta. */
+  @keyframes bump { from { transform: scale(1.25); } to { transform: none; } }
+  .rm .ui-toast .count.bump { animation: none; }
+
+  /* ------------------------------------------------------------ TabBar */
+  .tabbar {
+    position: fixed;
+    left: var(--tabbar-side); right: var(--tabbar-side);
+    bottom: var(--tabbar-bottom);
+    max-width: var(--tabbar-max);
+    margin: 0 auto;
+    height: var(--tabbar-h);
+    padding: var(--space-1);
+    border-radius: var(--radius-capsule);
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    z-index: var(--z-tabbar);
+  }
+  /* Mentre il menu ＋ è aperto la barra sta SOPRA il velo: il ＋ resta
+     acceso, ed è da lì che il menu nasce. Si riabbassa quando il velo è
+     sparito (o quando uno sheet l'ha coperta), così il cambio non si vede. */
+  .tabbar.is-lifted { z-index: calc(var(--z-scrim) + 1); }
+
+  /* La pillola è UNA, e scivola: si vede da dove a dove. Solo transform. */
+  .tabbar .pill {
+    position: absolute;
+    top: var(--space-1); bottom: var(--space-1); left: var(--space-1);
+    width: calc((100% - 2 * var(--space-1)) / 5);
+    border-radius: var(--radius-capsule);
+    background: var(--select);
+    transform: translateX(calc(var(--i, 0) * 100%));
+    transition: transform var(--dur-molla) var(--ease-molla);
+  }
+  /* La pillola si sposta fra due stati DI RIPOSO: con reduced-motion salta,
+     non si azzera (--motion-scale vale per gli scostamenti di entrata). */
+  .rm .tabbar .pill { transition: none; }
+  .tabbar.no-pill .pill { opacity: 0; }
+
+  .tab { position: relative; z-index: 1; display: grid; place-items: center; border-radius: var(--radius-capsule); }
+  .tab > .layer {
+    grid-area: 1 / 1;
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    font: var(--type-caption-2); letter-spacing: var(--track-caption-2);
+    /* Contorno→pieno e grigio→bianco sono DUE livelli che si scambiano
+       l'opacità: nessun colore animato. Con il tempo della pillola (MOLLA),
+       non SVELTO: l'etichetta bianca deve arrivare INSIEME al fondo navy,
+       o per un attimo è bianco su vetro. */
+    transition: opacity var(--dur-molla) var(--ease-molla);
+  }
+  .tab > .ink { color: var(--ink-2); }
+  .tab > .ink svg { color: var(--ink-3); }
+  .tab > .on { color: var(--on-select); opacity: 0; }
+  .tab[aria-current="page"] > .ink { opacity: 0; }
+  .tab[aria-current="page"] > .on { opacity: 1; }
+
+  .plus-slot { display: grid; place-items: center; position: relative; z-index: 1; }
+  .plus {
+    width: 56px; height: 56px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: var(--accent); color: var(--on-accent);
+    box-shadow: var(--elev-float);
+    transition: transform var(--dur-svelto) var(--ease-standard);
+  }
+  .plus:active { transform: scale(var(--press-scale)); }
+  /* Niente rotazione in ×: il nome del pulsante sotto il dito non cambia
+     (ART_DIRECTION §11.3). Lo stato aperto si legge da aria-expanded. */
+
+  /* ---------------------------------------------- Badge di laboratorio */
+  /* In basso a sinistra, sopra la tab bar: in alto coprirebbe le azioni
+     della NavBar, che sono proprio ciò che si guarda. */
+  .lab-badge {
+    position: fixed;
+    left: 6px;
+    bottom: calc(var(--tabbar-clearance) + 4px);
+    z-index: 2147483647;
+    pointer-events: none;
+    display: none;
+    flex-direction: column; gap: 2px; align-items: flex-start;
+    font: 600 11px/14px ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  .lab-audit .lab-badge { display: flex; }
+  .lab-badge span { padding: 2px 6px; border-radius: 6px; background: #0B111D; color: #FFFFFF; white-space: nowrap; }
+  .lab-badge .ko { background: #C81F52; }
+  .lab-badge .warn { background: #6B4A00; }
+}

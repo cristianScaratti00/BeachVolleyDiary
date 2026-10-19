@@ -1,0 +1,25 @@
+/* Il velo dell'host: un colore, MAI uno sfocato (UX §10). */
+@layer components {
+  .ui-scrim {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-scrim);
+    background: var(--scrim);
+  }
+  /* Il clic fuori da un popover lo chiude, senza velo. */
+  .ui-catcher { position: fixed; inset: 0; z-index: var(--z-scrim); }
+  .ui-viewer-loading {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-viewer);
+    display: grid;
+    place-items: center;
+    background: var(--viewer-bg);
+  }
+  .ui-viewer-loading-card {
+    width: min(80vw, calc(80dvh * 9 / 16));
+    aspect-ratio: 9 / 16;
+    border-radius: var(--radius-card);
+    background: var(--ink-3);
+  }
+}

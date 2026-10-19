@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Laboratorio del movimento · Beach Diary</title>
+<link rel="stylesheet" href="../../src/styles/tokens.css">
+<link rel="stylesheet" href="../../src/styles/materials.css">
+<link rel="stylesheet" href="./_lab.css">
+<style>
+@layer components {
+  .lab-index { max-width: 1400px; margin: 0 auto; padding: var(--space-6) var(--gutter) var(--space-12); }
+  .controls { position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; gap: var(--space-4); align-items: center; padding: var(--space-3) 0; background: var(--bg); border-bottom: var(--hairline) solid var(--separator); }
+  .controls label { display: inline-flex; gap: var(--space-2); align-items: center; font: var(--type-subhead-strong); min-height: var(--touch); }
+  .demos { display: grid; grid-template-columns: repeat(auto-fill, minmax(410px, 1fr)); gap: var(--space-8); margin-top: var(--space-6); }
+  .demo h2 { font: var(--type-title-3); letter-spacing: var(--track-title-3); }
+  .demo p { font: var(--type-footnote); color: var(--ink-2); margin: var(--space-1) 0 var(--space-3); min-height: 54px; }
+  .demo a { color: var(--accent-text); font-weight: 600; }
+  .phone { width: 390px; height: 720px; border: 0; border-radius: 28px; background: var(--bg); box-shadow: 0 0 0 1px var(--edge), var(--elev-float); display: block; }
+  .phone.wide { width: 720px; max-width: 100%; }
+  /* Il form sheet esiste solo da 600px in su: la sua cornice occupa la riga intera. */
+  .demo.wide { grid-column: 1 / -1; }
+}
+</style>
+</head>
+<body>
+<main class="lab-index">
+  <h1 class="large-title">Laboratorio del movimento</h1>
+  <p class="subtitle">Le demo di riferimento di <code>MOTION.md</code>. Usano i token veri (<code>src/styles/tokens.css</code>, <code>materials.css</code>); non sono codice di produzione.</p>
+  <div class="lab-note">
+    Servile via HTTP dalla radice del repo: <code>npx vite</code> (poi <code>/docs/motion/</code>) oppure <code>python3 -m http.server</code>. Da <code>file://</code> le singole demo funzionano, questa pagina no (gli iframe non si possono pilotare).
+    Ogni demo accetta <code>?reduce</code>, <code>?slow</code> e <code>?audit</code> anche da sola: è il modo per provarle su un iPhone vero, che è il punto (il vetro su Safari non si verifica in Chrome).
+  </div>
+  <div class="controls" role="group" aria-label="Simulazioni">
+    <label><input type="checkbox" id="reduce"> Riduci movimento</label>
+    <label><input type="checkbox" id="slow"> Moviola ×5</label>
+    <label><input type="checkbox" id="audit" checked> Audit (proprietà animate e vetro)</label>
+  </div>
+  <div class="demos">
+    <section class="demo"><h2>1 · Crea dalla tab bar</h2><p>Il menu ＋ nasce dal ＋; il passaggio menu → sheet sotto un unico velo; pillola delle tab; nessuna transizione di rotta. <a href="01-crea.html">Apri da sola</a></p><iframe class="phone" src="01-crea.html" title="Demo: crea dalla tab bar"></iframe></section>
+    <section class="demo"><h2>2 · Sheet</h2><p>Trascinamento con la velocità del dito, guardia sulle modifiche, «Altri dettagli», occupato ed errore. <a href="02-sheet.html">Apri da sola</a></p><iframe class="phone" src="02-sheet.html" title="Demo: sheet"></iframe></section>
+    <section class="demo wide"><h2>2b · Form sheet (≥ 600)</h2><p>Lo stesso sheet centrato: opacità e scala da .96, niente trascinamento.</p><iframe class="phone wide" src="02-sheet.html" title="Demo: form sheet"></iframe></section>
+    <section class="demo"><h2>3 · NavBar e scroll</h2><p>Vetro a soglia, titolo compatto, lente, segmented, ritocco della tab. <a href="03-navbar.html">Apri da sola</a></p><iframe class="phone" src="03-navbar.html" title="Demo: navbar"></iframe></section>
+    <section class="demo"><h2>4 · Punto segnato</h2><p>Il momento firmato: il tabellone scatta, la riga nuova lascia una traccia. <a href="04-punto-segnato.html">Apri da sola</a></p><iframe class="phone" src="04-punto-segnato.html" title="Demo: punto segnato"></iframe></section>
+    <section class="demo"><h2>5 · Caricamento ed errori</h2><p>Skeleton a tre tempi, errore d'area con «Riprova», regione degli avvisi. <a href="05-caricamento.html">Apri da sola</a></p><iframe class="phone" src="05-caricamento.html" title="Demo: caricamento"></iframe></section>
+    <section class="demo"><h2>6 · Tocco</h2><p>Strato di stato, pressione, hover, focus, pillola a tre pezzi, interruttore. <a href="06-tocco.html">Apri da sola</a></p><iframe class="phone" src="06-tocco.html" title="Demo: tocco"></iframe></section>
+    <section class="demo"><h2>7 · Visore foto</h2><p>Zoom dalla miniatura, sfoglia col dito, giù per chiudere, eliminazione con FLIP. <a href="07-visore.html">Apri da sola</a></p><iframe class="phone" src="07-visore.html" title="Demo: visore"></iframe></section>
+  </div>
+</main>
+<script>
+(function () {
+  // Le tre simulazioni sono classi sull'<html> di ogni iframe: `_lab.js`
+  // le osserva e aggiorna `.rm` da sé.
+  const frames = () => Array.from(document.querySelectorAll('iframe'))
+  const apply = () => {
+    for (const f of frames()) {
+      try {
+        const r = f.contentDocument.documentElement
+        r.classList.toggle('lab-reduce', document.getElementById('reduce').checked)
+        r.classList.toggle('lab-slow', document.getElementById('slow').checked)
+        r.classList.toggle('lab-audit', document.getElementById('audit').checked)
+      } catch (e) { /* file:// — vedi la nota in alto */ }
+    }
+  }
+  for (const id of ['reduce', 'slow', 'audit']) document.getElementById(id).addEventListener('change', apply)
+  for (const f of frames()) f.addEventListener('load', apply)
+})()
+</script>
+</body>
+</html>

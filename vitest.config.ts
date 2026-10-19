@@ -14,5 +14,10 @@ export default defineConfig({
     // timer reale, "oggi" sempre iniettato. Se uno diventa lento è un sintomo.
     testTimeout: 5000,
     restoreMocks: true,
+    // Vitest svuota ogni import di CSS, anche `?raw`. I due fogli dei token
+    // fanno eccezione perché src/styles/tokens.test.ts li legge come testo per
+    // ricalcolare il contrasto: senza questa riga il test vedrebbe "".
+    // Solo loro: il CSS dei componenti resta fuori da jsdom come prima.
+    css: { include: [/src\/styles\/(tokens|materials)\.css/] },
   },
 })

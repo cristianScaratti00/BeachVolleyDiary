@@ -12,8 +12,8 @@
 //
 // NB (privacy): le tile arrivano da tile.openstreetmap.org, quindi aprire la
 // mappa comporta una richiesta a un servizio esterno con il riquadro
-// geografico. Stesso compromesso già accettato in `VenueMap`; la ricerca del
-// luogo, invece, resta senza rete (gazetteer committato + GPS del dispositivo).
+// geografico. Stesso compromesso già accettato in `VenueMap` (e nella ricerca
+// del luogo di VenuePicker, che interroga photon.komoot.io).
 //
 // ⚠️ Accessibilità: i pin NON sono raggiungibili da tastiera, ed è voluto. La
 // superficie accessibile è l'elenco città sotto la mappa, che porta gli stessi
@@ -21,20 +21,24 @@
 // `region` con un riassunto testuale, così chi usa uno screen reader sa cosa
 // sta saltando e dove trovarne il contenuto.
 // ============================================================================
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet.markercluster'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
 import type { MappaPin } from '../lib/derive.mappa'
 import { ITALY_BOUNDS } from '../lib/geo'
-import { INK } from './ui'
+import { MapZoom } from './MapZoom'
+import { placementText } from './ui/Badge'
+import { LIT } from '../lib/theme'
+import './ConquisteMap.css'
 
 interface ConquisteMapProps {
   pins: MappaPin[]
   selected: string | null
   onSelect: (key: string) => void
   srSummary: string
+  /** Altezza in px; senza, quella del token --mappa-h (UX C3). */
   height?: number
 }
 
@@ -53,9 +57,9 @@ const ITALIA: L.LatLngBoundsExpression = [
 // entrambi i casi — è la soluzione cartografica standard. Togliere uno dei due
 // come "rumore visivo" fa sparire i pin su metà della penisola, in silenzio.
 // I rapporti sono fissati a numero in `src/test/contrast.test.ts`.
-const ALONE = '#fff'
+const ALONE = LIT.surface
 const ALONE_W = 3
-const CONTORNO = INK
+const CONTORNO = LIT.ink
 const CONTORNO_W = 1.6
 
 // ⚠️ `iconSize` va SEMPRE dichiarato, ed è il motivo per cui queste funzioni
@@ -77,34 +81,36 @@ function pinIcona(p: MappaPin, selected: boolean): { html: string; lato: number 
   const html = `
 <svg width="${lato}" height="${lato}" viewBox="0 0 ${lato} ${lato}" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
   ${selected ? `<circle cx="${c}" cy="${c}" r="${r + 5}" fill="none" stroke="${CONTORNO}" stroke-width="1.4" opacity="0.55"/>` : ''}
-  <circle cx="${c}" cy="${c}" r="${r}" fill="${p.hollow ? '#fff' : p.fill}"
+  <circle cx="${c}" cy="${c}" r="${r}" fill="${p.hollow ? LIT.surface : p.fill}"
           stroke="${ALONE}" stroke-width="${ALONE_W + CONTORNO_W * 2}"/>
-  <circle cx="${c}" cy="${c}" r="${r}" fill="${p.hollow ? '#fff' : p.fill}"
+  <circle cx="${c}" cy="${c}" r="${r}" fill="${p.hollow ? LIT.surface : p.fill}"
           stroke="${CONTORNO}" stroke-width="${CONTORNO_W}"
           ${p.shared ? 'stroke-dasharray="3 2"' : ''}/>
-  ${p.inner > 0 ? `<circle cx="${c}" cy="${c}" r="${p.inner}" fill="#fff"/>` : ''}
+  ${p.inner > 0 ? `<circle cx="${c}" cy="${c}" r="${p.inner}" fill="${LIT.surface}"/>` : ''}
 </svg>`
   return { html, lato }
 }
 
 // Il cerchio del cluster riusa il vocabolario dei pin: fondo bianco, contorno
 // navy, alone. Dentro il numero di città raggruppate — non di tornei, o
-// direbbe una cosa diversa da quella che si apre cliccando.
+// direbbe una cosa diversa da quella che si apre cliccando. Il cluster è un
+// `role="button"` che si raggiunge col Tab (markercluster): l'SVG è muto, il
+// nome glielo dà lo `<span class="sr-only">`.
 function clusterIcona(n: number): { html: string; lato: number } {
   const r = n > 9 ? 17 : 15
   const lato = Math.ceil((r + ALONE_W + CONTORNO_W) * 2)
   const c = lato / 2
   const html = `
 <svg width="${lato}" height="${lato}" viewBox="0 0 ${lato} ${lato}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-  <circle cx="${c}" cy="${c}" r="${r}" fill="#fff" stroke="${ALONE}" stroke-width="${ALONE_W + CONTORNO_W * 2}"/>
-  <circle cx="${c}" cy="${c}" r="${r}" fill="#fff" stroke="${CONTORNO}" stroke-width="${CONTORNO_W}"/>
+  <circle cx="${c}" cy="${c}" r="${r}" fill="${LIT.surface}" stroke="${ALONE}" stroke-width="${ALONE_W + CONTORNO_W * 2}"/>
+  <circle cx="${c}" cy="${c}" r="${r}" fill="${LIT.surface}" stroke="${CONTORNO}" stroke-width="${CONTORNO_W}"/>
   <text x="${c}" y="${c}" text-anchor="middle" dominant-baseline="central"
-        font-family="'Nunito Sans', sans-serif" font-weight="800" font-size="13" fill="${CONTORNO}">${n}</text>
-</svg>`
+        style="font: var(--type-footnote); font-weight: 700; font-variant-numeric: tabular-nums" fill="${CONTORNO}">${n}</text>
+</svg><span class="sr-only">${n} città vicine: ingrandisci</span>`
   return { html, lato }
 }
 
-export default function ConquisteMap({ pins, selected, onSelect, srSummary, height = 380 }: ConquisteMapProps) {
+export default function ConquisteMap({ pins, selected, onSelect, srSummary, height }: ConquisteMapProps) {
   const boxRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<L.Map | null>(null)
   const gruppoRef = useRef<L.MarkerClusterGroup | null>(null)
@@ -112,20 +118,28 @@ export default function ConquisteMap({ pins, selected, onSelect, srSummary, heig
   // ricostruire la mappa (e perdere zoom e posizione) a ogni click.
   const selectRef = useRef(onSelect)
   selectRef.current = onSelect
+  // I limiti dello zoom per i pulsanti +/−; `null` finché la mappa non c'è
+  // (o non può esserci: jsdom, Leaflet che lancia), e allora i pulsanti no.
+  const [zoom, setZoom] = useState<{ canIn: boolean; canOut: boolean } | null>(null)
 
   // ---- La mappa nasce una volta sola. -------------------------------------
   useEffect(() => {
     const el = boxRef.current
     if (!el) return
-    // Stessa cortesia del resto dell'app (@media prefers-reduced-motion in
-    // index.css): niente pan/zoom animati per chi ha chiesto meno movimento.
+    // Niente pan/zoom animati per chi ha chiesto meno movimento (MOTION.md E4).
     const calm = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
+    // Il fotogramma dell'inquadratura va annullato allo smontaggio: senza, in
+    // StrictMode (e con un'uscita rapida dalla vista) `fitBounds` girava su una
+    // mappa già rimossa e lanciava.
+    let raf = 0
     try {
       const map = L.map(el, {
         // La rotella scorre la pagina: dentro una scheda lunga una mappa che
         // cattura lo scroll è una trappola. Restano trascinamento, doppio
         // click e i bottoni +/−.
         scrollWheelZoom: false,
+        // Il +/− di Leaflet (26px, in inglese) lascia il posto a MapZoom.
+        zoomControl: false,
         attributionControl: true,
         keyboard: true,
         zoomAnimation: !calm,
@@ -158,14 +172,19 @@ export default function ConquisteMap({ pins, selected, onSelect, srSummary, heig
 
       mapRef.current = map
       gruppoRef.current = gruppo
+      const limiti = () => setZoom({ canIn: map.getZoom() < map.getMaxZoom(), canOut: map.getZoom() > map.getMinZoom() })
+      // Prima di `fitBounds` la mappa non ha ancora uno zoom: i limiti si
+      // leggono dopo l'inquadratura, poi a ogni `zoomend`.
+      map.on('zoomend', limiti)
       // ⚠️ L'ORDINE conta, ed è la differenza fra vedere l'Italia e vedere la
       // riviera romagnola. Il contenitore nasce dentro un layout che si assesta
       // dopo il primo frame (card, toggle di vista): `fitBounds` chiamato prima
       // calcola lo zoom su un riquadro sbagliato e ci resta. Quindi prima
       // `invalidateSize`, che rilegge le misure vere, e solo dopo l'inquadratura.
-      requestAnimationFrame(() => {
+      raf = requestAnimationFrame(() => {
         map.invalidateSize()
         map.fitBounds(ITALIA)
+        limiti()
       })
     } catch {
       // Ambienti senza layout reale (jsdom) o tile irraggiungibili: la
@@ -173,9 +192,11 @@ export default function ConquisteMap({ pins, selected, onSelect, srSummary, heig
       return
     }
     return () => {
+      cancelAnimationFrame(raf)
       mapRef.current?.remove()
       mapRef.current = null
       gruppoRef.current = null
+      setZoom(null)
     }
   }, [])
 
@@ -188,8 +209,9 @@ export default function ConquisteMap({ pins, selected, onSelect, srSummary, heig
       const sel = selected === p.key
       const { html, lato } = pinIcona(p, sel)
       const m = L.marker([p.lat, p.lng], {
-        title: p.srLabel,
-        alt: p.srLabel,
+        // Senza l'emoji del valore grezzo (C15): lo screen reader la leggerebbe.
+        title: placementText(p.srLabel),
+        alt: placementText(p.srLabel),
         keyboard: false,
         // I pin migliori stanno sopra ai vicini: stessa regola dell'ordine di
         // disegno di prima, tradotta in z-index.
@@ -204,19 +226,23 @@ export default function ConquisteMap({ pins, selected, onSelect, srSummary, heig
 
   return (
     <div
-      ref={boxRef}
       // `region` e non `application`: la mappa resta esplorabile con i comandi
       // normali dello screen reader, e il riassunto dice subito che l'elenco
       // completo è più sotto.
       role="region"
       aria-label={srSummary}
-      style={{
-        height,
-        borderRadius: 14,
-        overflow: 'hidden',
-        border: '1px solid rgba(27,42,74,.1)',
-        background: '#F2F0EC',
-      }}
-    />
+      className="conquiste-map"
+      style={height ? { height } : undefined}
+    >
+      <div ref={boxRef} className="conquiste-map-box" />
+      {zoom && (
+        <MapZoom
+          onIn={() => mapRef.current?.zoomIn()}
+          onOut={() => mapRef.current?.zoomOut()}
+          canIn={zoom.canIn}
+          canOut={zoom.canOut}
+        />
+      )}
+    </div>
   )
 }

@@ -1,0 +1,22 @@
+/* Statistiche (UX §9.2): filtri su una riga (vanno a capo sotto i 360), card
+   a una colonna sul telefono, poi `auto-fit minmax(280px)`. */
+@layer components {
+  .stat-filtri {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--card-min-narrow)), 1fr));
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+    max-width: var(--reading-max);
+  }
+  .stat-wrapped { margin-top: var(--space-4); }
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--chart-min)), 1fr));
+    gap: var(--space-3);
+    margin-top: var(--space-6);
+  }
+  @media (min-width: 600px) {
+    .stat-grid { gap: var(--space-4); }
+  }
+  .stat-key { grid-column: 1 / -1; min-width: 0; }
+}

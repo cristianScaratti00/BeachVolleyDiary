@@ -1,0 +1,50 @@
+/* Il dialogo del consenso: la forma del ConfirmDialog (ART_DIRECTION §8),
+   opaco, sopra a tutto tranne il salto al contenuto (--z-consent). */
+@layer components {
+  .consenso-velo {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-consent);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: var(--space-2) var(--space-2) calc(var(--space-2) + var(--safe-bottom));
+    background: var(--scrim);
+  }
+  .consenso-velo[data-leaving] { pointer-events: none; }
+  .consenso-dialog {
+    width: 100%;
+    max-width: var(--sheet-max);
+    padding: var(--space-5) var(--space-4) var(--space-4);
+    background: var(--surface);
+    border-radius: var(--radius-sheet);
+    box-shadow: var(--elev-dialog);
+    color: var(--ink);
+    transform-origin: 50% 100%;
+  }
+  @media (min-width: 600px) {
+    .consenso-velo { align-items: center; }
+    .consenso-dialog { padding: var(--space-6); transform-origin: 50% 50%; }
+  }
+  .consenso-title { font: var(--type-headline); letter-spacing: var(--track-headline); }
+  .consenso-testo {
+    margin-top: var(--space-2);
+    font: var(--type-subhead);
+    letter-spacing: var(--track-subhead);
+    color: var(--ink-2);
+  }
+  /* Rifiuta e Accetta della stessa misura, uno accanto all'altro. */
+  .consenso-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-2);
+    margin-top: var(--space-5);
+  }
+  .consenso-nota {
+    margin-top: var(--space-3);
+    font: var(--type-footnote);
+    letter-spacing: var(--track-footnote);
+    color: var(--ink-2);
+  }
+  .consenso-nota b { font-weight: 600; color: var(--ink); }
+}

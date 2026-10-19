@@ -1,0 +1,136 @@
+/* ============================================================================
+   Pulsanti: capsule (ART_DIRECTION §6.3: "capsula = si preme"), testo
+   Headline, altezze sm 32 / md 44 / lg 52.
+
+   Lo strato di stato (MOTION.md §4.3): un livello sotto l'etichetta che cambia
+   SOLO opacità, tinta `currentColor`. Hover .08 (solo con un puntatore vero),
+   premuto .12 a 0ms all'andata e SVELTO al ritorno, più la scala
+   `--press-scale` (1 con reduced-motion: lo strato resta, la scala no).
+   ============================================================================ */
+@layer components {
+  .ui-button {
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    min-height: var(--control-md);
+    padding: 0 var(--space-5);
+    border-radius: var(--radius-capsule);
+    font: var(--type-headline);
+    letter-spacing: var(--track-headline);
+    white-space: nowrap;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: transform var(--dur-svelto) var(--ease-standard);
+  }
+  .ui-button::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: currentColor;
+    opacity: 0;
+    z-index: -1;
+    pointer-events: none;
+    transition: opacity var(--dur-svelto) var(--ease-standard);
+  }
+  .ui-button-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+
+  .ui-button[data-size="sm"] {
+    min-height: var(--control-sm);
+    padding: 0 var(--space-3);
+    font: var(--type-subhead-strong);
+    letter-spacing: var(--track-subhead);
+  }
+  /* Il bersaglio resta 44 anche quando il disegno è 32 (UX §8.6). */
+  .ui-button[data-size="sm"]::after {
+    content: "";
+    position: absolute;
+    inset: calc((var(--control-sm) - var(--touch)) / 2) 0;
+  }
+  .ui-button[data-size="lg"] { min-height: var(--control-lg); padding: 0 var(--space-6); }
+  .ui-button[data-block] { display: flex; width: 100%; }
+
+  .ui-button[data-variant="filled"] { background: var(--accent); color: var(--on-accent); }
+  /* `--label-state`: il tono dell'etichetta in hover e premuto. Lo strato è
+     `currentColor` e scurisce il fondo verso il testo: l'arancio e il danger
+     scendono di un tono per restare ≥ 4.5 (tokens.css, `-state`). */
+  .ui-button[data-variant="tinted"] { background: var(--accent-wash); color: var(--accent-text); --label-state: var(--accent-text-state); }
+  .ui-button[data-variant="plain"] { color: var(--accent-text); padding: 0 var(--space-3); --label-state: var(--accent-text-state); }
+  .ui-button[data-variant="quiet"] { color: var(--ink); padding: 0 var(--space-3); }
+  .ui-button[data-variant="neutral"] { background: var(--fill); color: var(--ink); }
+  .ui-button[data-variant="destructive"] { background: var(--danger); color: var(--on-danger); }
+  .ui-button[data-variant="destructive-plain"] { color: var(--danger); padding: 0 var(--space-3); --label-state: var(--danger-state); }
+  /* Sul vetro si scrive solo con l'inchiostro (ART_DIRECTION §4.4): il
+     materiale ridefinisce --ink, e --ink sul vetro scuro è il bianco. */
+  .ui-button[data-variant="glass"] { color: var(--ink); --material-elev: var(--elev-float); }
+  [data-material] .ui-button[data-variant="plain"] { color: var(--ink); --label-state: var(--ink); }
+
+  /* Disattivato: niente opacità sul pulsante intero (sul vetro mostrerebbe
+     quello che c'è sotto), fondo --fill ed etichetta --ink-disabled. */
+  .ui-button[aria-disabled="true"] { cursor: default; color: var(--ink-disabled); }
+  .ui-button[aria-disabled="true"]:is([data-variant="filled"], [data-variant="tinted"], [data-variant="neutral"], [data-variant="destructive"]) {
+    background: var(--fill);
+  }
+  .ui-button[aria-busy="true"] { cursor: progress; }
+
+  @media (hover: hover) and (pointer: fine) {
+    .ui-button:not([aria-disabled="true"]):not([aria-busy="true"]):hover::before { opacity: var(--state-hover); }
+    .ui-button:is([data-variant="tinted"], [data-variant="plain"], [data-variant="destructive-plain"]):not([aria-disabled="true"]):not([aria-busy="true"]):hover {
+      color: var(--label-state);
+    }
+  }
+  .ui-button:not([aria-disabled="true"]):not([aria-busy="true"]):active { transform: scale(var(--press-scale)); }
+  .ui-button:not([aria-disabled="true"]):not([aria-busy="true"]):active::before {
+    opacity: var(--state-press);
+    transition-duration: 0ms;
+  }
+  .ui-button:is([data-variant="tinted"], [data-variant="plain"], [data-variant="destructive-plain"]):not([aria-disabled="true"]):not([aria-busy="true"]):active {
+    color: var(--label-state);
+  }
+
+  /* ------------------------------------------------------------ IconButton */
+  .ui-icon-button {
+    position: relative;
+    isolation: isolate;
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--touch);
+    height: var(--touch);
+    border-radius: 50%;
+    color: var(--ink);
+    cursor: pointer;
+    transition: transform var(--dur-svelto) var(--ease-standard);
+  }
+  .ui-icon-button::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: currentColor;
+    opacity: 0;
+    z-index: -1;
+    pointer-events: none;
+    transition: opacity var(--dur-svelto) var(--ease-standard);
+  }
+  .ui-icon-button[data-variant="filled"] { background: var(--accent); color: var(--on-accent); }
+  .ui-icon-button[data-variant="quiet"] { color: var(--ink-2); }
+  .ui-icon-button[data-variant="glass"] { --material-elev: var(--elev-float); }
+  @media (hover: hover) and (pointer: fine) {
+    .ui-icon-button:not([aria-disabled="true"]):hover::before { opacity: var(--state-hover); }
+  }
+  .ui-icon-button:not([aria-disabled="true"]):active { transform: scale(var(--press-scale)); }
+  .ui-icon-button:not([aria-disabled="true"]):active::before { opacity: var(--state-press); transition-duration: 0ms; }
+  /* Disattivato come il Button: niente strato, niente scala, fondo --fill se
+     era pieno. Resta raggiungibile (`aria-disabled`). Il colore dell'icona lo
+     sceglie il contesto quando serve (MapZoom: --ink-3 sul vetro). */
+  .ui-icon-button[aria-disabled="true"] { cursor: default; color: var(--ink-disabled); }
+  .ui-icon-button[aria-disabled="true"][data-variant="filled"] { background: var(--fill); }
+}

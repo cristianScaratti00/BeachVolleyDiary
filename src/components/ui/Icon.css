@@ -1,0 +1,17 @@
+/* Icone: misure e tratti dai token (ART_DIRECTION.md §10.1). */
+@layer components {
+  .ui-icon {
+    flex: none;
+    width: var(--icon-20);
+    height: var(--icon-20);
+    fill: none;
+    stroke: currentColor;
+    stroke-width: var(--icon-stroke-20);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .ui-icon[data-size="12"] { width: var(--icon-12); height: var(--icon-12); stroke-width: var(--icon-stroke-12); }
+  .ui-icon[data-size="16"] { width: var(--icon-16); height: var(--icon-16); stroke-width: var(--icon-stroke-16); }
+  .ui-icon[data-size="24"] { width: var(--icon-24); height: var(--icon-24); stroke-width: var(--icon-stroke-24); }
+  .ui-icon[data-filled] { fill: currentColor; stroke: none; }
+}

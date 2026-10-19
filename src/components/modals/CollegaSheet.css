@@ -1,0 +1,11 @@
+@layer components {
+  .collega-stato {
+    margin-top: var(--space-3);
+    font: var(--type-footnote);
+    letter-spacing: var(--track-footnote);
+    color: var(--ink-2);
+  }
+  .collega-risultati { margin-top: var(--space-3); }
+  .collega-risultati .ui-row-value { color: var(--accent-text); font: var(--type-subhead-strong); }
+  .collega-errore { margin-top: var(--space-3); }
+}

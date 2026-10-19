@@ -1,705 +1,527 @@
-import { useEffect, useRef, useState } from "react";
-import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
-import { toBlob } from "html-to-image";
-import { track } from "@vercel/analytics";
-import type { WrappedData } from "../../lib/derive";
-import { wrappedPalette } from "./palette";
-import WrappedSlideCard from "./WrappedSlideCard";
-
 // ============================================================================
-// Beach Wrapped — visore a schermo intero, sfogliabile stile storia Instagram.
-// Riusa la pipeline di StoryModal (card fissa 1080×1920 → toBlob dopo
-// document.fonts.ready, foto CORS inlinate come data-URL) e aggiunge:
-//  · barre di avanzamento IG + navigazione tap/swipe/tastiera + auto-avanzamento
-//  · sull'ultima slide due azioni sul riepilogo: "Condividi" (share sheet
-//    nativo col PNG: Instagram, WhatsApp, "Salva immagine"; dove non c'è,
-//    copia negli appunti) e "Scarica". "Scarica tutte" resta fuori: un
-//    pulsante per slide moltiplicava i comandi senza servire a nessuno.
+// Beach Wrapped: il visore a tutto schermo, sfogliabile come una storia
+// (UX §5 F8, §6.5, §11; MOTION.md §4.2). La cornice è la stessa della Storia:
+// ✕, `role="dialog"`, Esc, focus, blocco dello scroll, barre di vetro scuro
+// da 44px sopra il fondo dei visori.
+//
+// Riusa la pipeline della Storia (card fissa 1080×1920 → toBlob, foto CORS
+// inlinate come data-URL) e aggiunge:
+//  · barre di avanzamento + navigazione tap/swipe/tastiera + auto-avanzamento;
+//  · sull'ultima slide due azioni sul riepilogo: «Condividi» (share sheet
+//    nativo col PNG; dove non c'è, copia negli appunti) e «Scarica».
 // Il nodo catturato NON è quello scalato dell'anteprima: c'è un layer nascosto a
-// piena risoluzione (una card per slide) così l'immagine esce sempre pixel-perfect.
+// piena risoluzione (una card per slide), così l'immagine esce pixel-perfect.
 // ============================================================================
+import { useEffect, useRef, useState } from 'react'
+import type { CSSProperties, PointerEvent as ReactPointerEvent, ReactNode } from 'react'
+import { toBlob } from 'html-to-image'
+import { track } from '@vercel/analytics'
+import { useReducedMotion } from 'motion/react'
+import type { WrappedData } from '../../lib/derive'
+import { Button, IconButton } from '../ui/Button'
+import { Icon } from '../ui/Icon'
+import { EmptyState } from '../ui/Feedback'
+import { useEscape, useFocusTrap, useInitialFocus, useScrollLock } from '../ui/overlay'
+import { caricaFontExport, wrappedPalette } from './palette'
+import WrappedSlideCard from './WrappedSlideCard'
+import './WrappedModal.css'
 
-const SLIDE_MS = 5200; // durata dell'auto-avanzamento per slide
-const pad2 = (n: number) => String(n).padStart(2, "0");
+/** Durata dell'auto-avanzamento per slide: è anche la durata delle barre. */
+const SLIDE_MS = 5200
+/** Spazio dell'anteprima occupato dalle barre e dalle azioni, sopra e sotto. */
+const CORNICE_PX = 230
+const pad2 = (n: number) => String(n).padStart(2, '0')
+
+export type TipoAvviso = 'info' | 'error' | 'success'
 
 interface WrappedModalProps {
-  wrapped: WrappedData;
-  onClose: () => void;
-  onNotice?: (msg: string) => void;
+  wrapped: WrappedData
+  onClose: () => void
+  onNotice?: (msg: string, type?: TipoAvviso) => void
 }
 
-export default function WrappedModal({
-  wrapped,
-  onClose,
-  onNotice,
-}: WrappedModalProps) {
-  const slides = wrapped.slides;
-  const n = slides.length;
-  const [idx, setIdx] = useState(0);
-  const [busy, setBusy] = useState(false);
-  const [autoplay, setAutoplay] = useState(true);
-  // Dito premuto sulla card. Tolto il tasto pausa, questo è il modo di fermare
-  // l'auto-avanzamento — lo stesso gesto delle storie, e l'unica ragione per cui
-  // toglierlo non è una regressione: un contenuto che scorre da solo deve poter
-  // essere fermato da chi lo guarda.
-  const [held, setHeld] = useState(false);
-  const [vh, setVh] = useState(() =>
-    typeof window !== "undefined" ? window.innerHeight : 900,
-  );
-  const [photos, setPhotos] = useState<Record<string, string>>({});
-  const [reduceMotion] = useState(
-    () =>
-      typeof window !== "undefined" &&
-      !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches,
-  );
+/** La cornice comune: il visore, con il ✕ in alto e il fondo dei visori. */
+function Cornice({ children, onClose, label = 'Beach Wrapped' }: { children: ReactNode; onClose: () => void; label?: string }) {
+  const ref = useRef<HTMLDivElement>(null)
+  useScrollLock(true)
+  useFocusTrap(ref)
+  useEscape(onClose)
+  // Il focus va al ✕ a t0 (MOTION.md §3.5): è il primo comando del visore.
+  useInitialFocus(ref, (root) => root.querySelector<HTMLElement>('[data-chiudi]'))
+  return (
+    <div ref={ref} className="wrapped" role="dialog" aria-modal="true" aria-label={label} data-surface="dark" onClick={onClose}>
+      {children}
+    </div>
+  )
+}
+
+function Chiudi({ onClose }: { onClose: () => void }) {
+  return (
+    <IconButton
+      icon="close"
+      label="Chiudi"
+      className="wrapped-close"
+      data-chiudi=""
+      onClick={(e) => {
+        e.stopPropagation()
+        onClose()
+      }}
+    />
+  )
+}
+
+/**
+ * Wrapped non disponibile (UX §6.5): fuori stagione o con pochi dati. Mai una
+ * pagina vuota: il motivo e un [Ho capito] che chiude.
+ */
+export function WrappedNonDisponibile({ motivo, onClose }: { motivo: 'stagione' | 'dati'; onClose: () => void }) {
+  return (
+    <Cornice onClose={onClose}>
+      <div className="wrapped-bar wrapped-bar-top" data-material="glass-dark" onClick={(e) => e.stopPropagation()}>
+        <Chiudi onClose={onClose} />
+      </div>
+      <div className="wrapped-empty" onClick={(e) => e.stopPropagation()}>
+        <EmptyState
+          icon="sun"
+          title="Beach Wrapped in arrivo"
+          text={
+            motivo === 'stagione'
+              ? 'Il recap arriva a fine stagione, da settembre.'
+              : 'Servono almeno qualche partita in questo periodo per generare il tuo recap di stagione. Aggiungi tornei e partite e torna a trovarci.'
+          }
+          action={
+            <Button variant="filled" onClick={onClose}>
+              Ho capito
+            </Button>
+          }
+        />
+      </div>
+    </Cornice>
+  )
+}
+
+export default function WrappedModal({ wrapped, onClose, onNotice }: WrappedModalProps) {
+  const slides = wrapped.slides
+  const n = slides.length
+  const [idx, setIdx] = useState(0)
+  const [busy, setBusy] = useState(false)
+  const [autoplay, setAutoplay] = useState(true)
+  // Dito premuto sulla card: è la pausa, lo stesso gesto delle storie. Un
+  // contenuto che scorre da solo deve poter essere fermato da chi lo guarda.
+  const [held, setHeld] = useState(false)
+  const [vista, setVista] = useState(() => ({
+    h: typeof window !== 'undefined' ? window.innerHeight : 900,
+    w: typeof window !== 'undefined' ? window.innerWidth : 390,
+  }))
+  const [photos, setPhotos] = useState<Record<string, string>>({})
+  // Una fonte sola per la preferenza (MOTION.md §11.1): con reduced-motion
+  // l'auto-avanzamento è spento e le barre stanno ferme.
+  const reduceMotion = !!useReducedMotion()
   // Cosa sa fare questo browser con un'immagine. Share sheet con file: i
   // telefoni (e qualche desktop). Altrimenti gli appunti, dove ci sono.
   const [canShareFiles] = useState(() => {
     try {
-      const probe = new File([new Blob()], "probe.png", { type: "image/png" });
-      return !!navigator.canShare?.({ files: [probe] });
+      const probe = new File([new Blob()], 'probe.png', { type: 'image/png' })
+      return !!navigator.canShare?.({ files: [probe] })
     } catch {
-      return false;
+      return false
     }
-  });
+  })
   const [canCopyImage] = useState(
-    () =>
-      typeof ClipboardItem !== "undefined" &&
-      typeof navigator.clipboard?.write === "function",
-  );
-  const canShare = canShareFiles || canCopyImage;
-  const captureRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const downX = useRef<number | null>(null);
+    () => typeof ClipboardItem !== 'undefined' && typeof navigator.clipboard?.write === 'function',
+  )
+  const canShare = canShareFiles || canCopyImage
+  const captureRefs = useRef<(HTMLDivElement | null)[]>([])
+  const downX = useRef<number | null>(null)
 
-  // Se l'intervallo cambia (nuovi slide), riparte dall'inizio.
-  const rangeKey =
-    wrapped.range.from + "|" + wrapped.range.to + "|" + wrapped.partnerName;
+  // Se l'intervallo cambia (nuove slide), riparte dall'inizio.
+  const rangeKey = wrapped.range.from + '|' + wrapped.range.to + '|' + wrapped.partnerName
   useEffect(() => {
-    setIdx(0);
-  }, [rangeKey]);
+    setIdx(0)
+  }, [rangeKey])
 
   useEffect(() => {
-    const onResize = () => setVh(window.innerHeight);
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
-
-  // Escape chiude (come il click sul backdrop).
-  useEffect(() => {
-    const h = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", h);
-    return () => window.removeEventListener("keydown", h);
-  }, [onClose]);
+    const onResize = () => setVista({ h: window.innerHeight, w: window.innerWidth })
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
 
   // Foto delle slide (intro/podio): scaricate e inlinate come data-URL, così
-  // html-to-image le incorpora nel PNG senza canvas "tainted" (come StoryModal).
-  const photoUrls = Array.from(
-    new Set(slides.map((s) => s.photoUrl).filter((u): u is string => !!u)),
-  );
-  const photoKey = photoUrls.join("|");
+  // html-to-image le incorpora nel PNG senza canvas "tainted".
+  const photoUrls = Array.from(new Set(slides.map((s) => s.photoUrl).filter((u): u is string => !!u)))
+  const photoKey = photoUrls.join('|')
   useEffect(() => {
-    let alive = true;
+    let alive = true
     if (!photoUrls.length) {
-      setPhotos({});
-      return;
+      setPhotos({})
+      return
     }
     const toDataUrl = (u: string) =>
-      fetch(u, { mode: "cors" })
-        .then((r) =>
-          r.ok ? r.blob() : Promise.reject(new Error("http " + r.status)),
-        )
+      fetch(u, { mode: 'cors' })
+        .then((r) => (r.ok ? r.blob() : Promise.reject(new Error('http ' + r.status))))
         .then(
           (blob) =>
             new Promise<[string, string]>((resolve, reject) => {
-              const fr = new FileReader();
-              fr.onload = () => resolve([u, fr.result as string]);
-              fr.onerror = reject;
-              fr.readAsDataURL(blob);
+              const fr = new FileReader()
+              fr.onload = () => resolve([u, fr.result as string])
+              fr.onerror = reject
+              fr.readAsDataURL(blob)
             }),
         )
         .catch((e) => {
-          console.warn("[wrapped] foto", e);
-          return null;
-        });
+          console.warn('[wrapped] foto', e)
+          return null
+        })
     Promise.all(photoUrls.map(toDataUrl)).then((pairs) => {
-      if (!alive) return;
-      const map: Record<string, string> = {};
+      if (!alive) return
+      const map: Record<string, string> = {}
       pairs.forEach((p) => {
-        if (p) map[p[0]] = p[1];
-      });
-      setPhotos(map);
-    });
+        if (p) map[p[0]] = p[1]
+      })
+      setPhotos(map)
+    })
     return () => {
-      alive = false;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [photoKey]);
-
-  const photoFor = (url?: string | null): string | null =>
-    url ? (photos[url] ?? null) : null;
-
-  // Auto-avanzamento: timer come unica fonte di verità (la barra CSS è solo
-  // decorativa). Si ferma su ultima slide, in pausa, durante l'export o con
-  // "riduci animazioni" attivo.
-  useEffect(() => {
-    if (!autoplay || held || busy || reduceMotion || idx >= n - 1) return;
-    const t = setTimeout(() => setIdx((i) => Math.min(n - 1, i + 1)), SLIDE_MS);
-    return () => clearTimeout(t);
-  }, [autoplay, held, busy, reduceMotion, idx, n]);
-
-  const go = (i: number) => setIdx(Math.max(0, Math.min(n - 1, i)));
-  const next = () => go(idx + 1);
-  const prev = () => go(idx - 1);
-
-  // Un solo handler pointer copre mouse/touch/pen: swipe se lo spostamento è
-  // ampio, altrimenti tap (terzo sinistro = indietro, resto = avanti).
-  const onPointerDown = (e: ReactPointerEvent) => {
-    downX.current = e.clientX;
-    setHeld(true);
-  };
-  const onPointerUp = (e: ReactPointerEvent) => {
-    const sx = downX.current;
-    downX.current = null;
-    setHeld(false);
-    if (sx == null) return;
-    const dx = e.clientX - sx;
-    if (Math.abs(dx) > 60) {
-      if (dx < 0) next();
-      else prev();
-      return;
+      alive = false
     }
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    if (e.clientX - rect.left < rect.width * 0.32) prev();
-    else next();
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [photoKey])
+
+  const photoFor = (url?: string | null): string | null => (url ? photos[url] ?? null : null)
+
+  // Auto-avanzamento: il timer è l'unica fonte di verità (la barra è solo la
+  // sua immagine). Si ferma sull'ultima slide, in pausa, durante l'export e
+  // con reduced-motion.
+  useEffect(() => {
+    if (!autoplay || held || busy || reduceMotion || idx >= n - 1) return
+    const t = setTimeout(() => setIdx((i) => Math.min(n - 1, i + 1)), SLIDE_MS)
+    return () => clearTimeout(t)
+  }, [autoplay, held, busy, reduceMotion, idx, n])
+
+  const go = (i: number) => setIdx(Math.max(0, Math.min(n - 1, i)))
+  const next = () => go(idx + 1)
+  const prev = () => go(idx - 1)
+
+  // Un solo gestore pointer per mouse, dito e penna: swipe se lo spostamento è
+  // ampio, altrimenti tap (terzo sinistro = indietro, il resto = avanti).
+  const onPointerDown = (e: ReactPointerEvent) => {
+    downX.current = e.clientX
+    setHeld(true)
+  }
+  const onPointerUp = (e: ReactPointerEvent) => {
+    const sx = downX.current
+    downX.current = null
+    setHeld(false)
+    if (sx == null) return
+    const dx = e.clientX - sx
+    if (Math.abs(dx) > 60) {
+      if (dx < 0) next()
+      else prev()
+      return
+    }
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+    if (e.clientX - rect.left < rect.width * 0.32) prev()
+    else next()
+  }
   // Il dito che esce dalla card senza rilasciare lascerebbe il mazzo fermo per
   // sempre: qualunque uscita dal gesto rimette in moto.
   const onPointerCancel = () => {
-    downX.current = null;
-    setHeld(false);
-  };
+    downX.current = null
+    setHeld(false)
+  }
 
-  // Sotto la card è rimasto solo lo scarico, e solo sull'ultima slide: il
-  // margine da sottrarre all'altezza è quindi molto minore di prima (era 340,
-  // con una riga azioni piena, il tasto Chiudi e il selettore di periodo), e la
-  // card può crescere di conseguenza.
-  const scale = Math.max(0.22, Math.min(0.56, (vh - 230) / 1920));
-  const boxW = Math.round(1080 * scale);
-  const boxH = Math.round(1920 * scale);
-
-  // `document.fonts.ready` non ha timeout: se un font non arriva mai — rete che
-  // non risponde, un'estensione che blocca Google Fonts — la promessa resta
-  // pendente per sempre e il pulsante si ferma su "Genero…" senza errore e
-  // senza via d'uscita. È una protezione, non la cura di un difetto osservato:
-  // il caso che l'ha suggerita (`document.fonts.status` fermo su "loading") si
-  // è poi rivelato un artefatto del browser automatizzato in cui stavo
-  // provando. Resta perché il costo è nullo e lo scarico è l'unica azione.
-  const fontsPronti = () =>
-    Promise.race([
-      document.fonts?.ready ?? Promise.resolve(),
-      new Promise((r) => setTimeout(r, 3000)),
-    ]);
+  // L'anteprima si scala sull'altezza visibile (e sulla larghezza su schermi
+  // stretti); da 900px la card resta entro l'80% dell'altezza (UX §9.2).
+  const perAltezza = (vista.h - CORNICE_PX) / 1920
+  const perLarghezza = (vista.w - 32) / 1080
+  const tetto = vista.w >= 900 ? (vista.h * 0.8) / 1920 : 0.56
+  const scale = Math.max(0.22, Math.min(0.56, tetto, perAltezza, perLarghezza))
+  const boxW = Math.round(1080 * scale)
+  const boxH = Math.round(1920 * scale)
 
   const renderBlob = async (i: number): Promise<Blob> => {
-    const node = captureRefs.current[i];
-    if (!node) throw new Error("card non montata");
-    await fontsPronti();
+    const node = captureRefs.current[i]
+    if (!node) throw new Error('card non montata')
+    // Su iPhone e Mac l'interfaccia usa SF e Inter non è mai scaricato: senza
+    // questo il PNG esce in Arial. Dentro il tetto di 3s (UX §6.5): oltre, si
+    // genera con quel che c'è.
+    await caricaFontExport()
     // pixelRatio 2 → PNG 2160×3840: nitido su schermi retina e dopo l'upload IG.
-    const opts = { pixelRatio: 2, cacheBust: true, width: 1080, height: 1920 };
+    const opts = { pixelRatio: 2, cacheBust: true, width: 1080, height: 1920 }
     // WebKit disegna l'SVG intermedio prima di aver decodificato font e foto
     // inlinati, e la prima immagine esce senza (difetto noto di html-to-image
-    // su Safari/iOS). Una passata a vuoto li mette in cache; costa poco perché
-    // gira in sottofondo, mentre si guarda l'ultima slide.
-    await toBlob(node, opts).catch(() => null);
-    const blob = await toBlob(node, opts);
-    if (!blob) throw new Error("immagine vuota");
-    return blob;
-  };
+    // su Safari/iOS). Una passata a vuoto li mette in cache.
+    await toBlob(node, opts).catch(() => null)
+    const blob = await toBlob(node, opts)
+    if (!blob) throw new Error('immagine vuota')
+    return blob
+  }
 
-  const fileName = (i: number) => `${wrapped.slug}-${pad2(i + 1)}.png`;
+  const fileName = (i: number) => `${wrapped.slug}-${pad2(i + 1)}.png`
 
-  // Quale card finisce nel PNG. NON quella che si sta guardando: sull'ultima
-  // slide si legge "Grazie", e scaricare quella sarebbe portarsi a casa un
-  // saluto. L'immagine che vale è il riepilogo, che è la card costruita per
-  // essere salvata e condivisa. Se per qualche motivo non c'è (recap assente
-  // sotto soglia), si ripiega sulla slide corrente.
-  const recapIdx = slides.findIndex((s) => s.kind === "recap");
-  const exportIdx = recapIdx >= 0 ? recapIdx : idx;
+  // Quale card finisce nel PNG: il RIEPILOGO, non la slide che si guarda
+  // (sull'ultima si legge "Grazie"). Senza riepilogo, la slide corrente.
+  const recapIdx = slides.findIndex((s) => s.kind === 'recap')
+  const exportIdx = recapIdx >= 0 ? recapIdx : idx
 
-  // L'immagine si prepara PRIMA del tocco, appena si arriva all'ultima slide.
-  // Non è solo velocità: iOS concede `navigator.share` solo a ridosso del
-  // gesto, e generare il PNG dopo il tocco (secondi, su un telefono) faceva
-  // scadere il permesso. Con il Blob già pronto, il tocco condivide subito.
-  // La chiave cambia se cambiano la card o le foto caricate: niente PNG vecchi.
-  const shotKey = `${rangeKey}|${exportIdx}|${Object.keys(photos).length}`;
-  const shotRef = useRef<{ key: string; promise: Promise<Blob> } | null>(null);
-  const blobRef = useRef<{ key: string; blob: Blob } | null>(null);
-  const [readyKey, setReadyKey] = useState<string | null>(null);
-  const ready = readyKey === shotKey;
+  // L'immagine si prepara PRIMA del tocco, appena si arriva all'ultima slide:
+  // iOS concede `navigator.share` solo a ridosso del gesto, e generare il PNG
+  // dopo il tocco (secondi, su un telefono) faceva scadere il permesso.
+  const shotKey = `${rangeKey}|${exportIdx}|${Object.keys(photos).length}`
+  const shotRef = useRef<{ key: string; promise: Promise<Blob> } | null>(null)
+  const blobRef = useRef<{ key: string; blob: Blob } | null>(null)
+  const [readyKey, setReadyKey] = useState<string | null>(null)
+  const ready = readyKey === shotKey
+  // «Preparo…» sul pulsante mentre il PNG si sta generando (UX §6.5); se la
+  // preparazione fallisce torna l'etichetta di sempre, e il tocco riprova.
+  const [inCorso, setInCorso] = useState(false)
 
   const prepare = (): Promise<Blob> => {
-    if (shotRef.current?.key === shotKey) return shotRef.current.promise;
-    const key = shotKey;
-    // Tetto all'intera generazione. Il timeout sui font qui sopra copre solo
-    // la NOSTRA attesa: html-to-image aspetta i font per conto suo, e se non
-    // arrivano mai resta appeso. Senza tetto il pulsante resterebbe su
-    // "Preparo…" per sempre, senza errore e senza modo di riprovare.
+    if (shotRef.current?.key === shotKey) return shotRef.current.promise
+    const key = shotKey
+    // Tetto all'intera generazione: se html-to-image resta appeso su un font
+    // che non arriva, il pulsante non deve restare su «Preparo…» per sempre.
     const promise = Promise.race([
       renderBlob(exportIdx),
-      new Promise<never>((_, rej) =>
-        setTimeout(() => rej(new Error("timeout generazione")), 20000),
-      ),
-    ]);
-    shotRef.current = { key, promise };
+      new Promise<never>((_, rej) => setTimeout(() => rej(new Error('timeout generazione')), 20000)),
+    ])
+    shotRef.current = { key, promise }
+    setInCorso(true)
     promise.then(
       (blob) => {
-        blobRef.current = { key, blob };
-        setReadyKey(key);
+        blobRef.current = { key, blob }
+        setReadyKey(key)
+        setInCorso(false)
       },
       // Un errore non resta in cache: il tocco successivo riprova.
       () => {
-        if (shotRef.current?.promise === promise) shotRef.current = null;
+        if (shotRef.current?.promise === promise) shotRef.current = null
+        setInCorso(false)
       },
-    );
-    return promise;
-  };
+    )
+    return promise
+  }
 
-  const atEnd = idx === n - 1;
+  const atEnd = idx === n - 1
   useEffect(() => {
-    if (!atEnd || !wrapped.hasEnoughData) return;
+    if (!atEnd || !wrapped.hasEnoughData) return
     // In sottofondo: un fallimento qui non si mostra, lo dirà il tocco.
-    prepare().catch(() => {});
+    prepare().catch(() => {})
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [atEnd, shotKey, wrapped.hasEnoughData]);
+  }, [atEnd, shotKey, wrapped.hasEnoughData])
 
   // Il Blob pronto, oppure lo genera adesso (tocco arrivato prima della fine
   // della preparazione). `busy` copre solo l'attesa visibile.
   const getBlob = async (): Promise<Blob> => {
-    const pronto = blobRef.current;
-    if (pronto?.key === shotKey) return pronto.blob;
-    setBusy(true);
+    const pronto = blobRef.current
+    if (pronto?.key === shotKey) return pronto.blob
+    setBusy(true)
     try {
-      return await prepare();
+      return await prepare()
     } finally {
-      setBusy(false);
+      setBusy(false)
     }
-  };
+  }
 
   const failed = (e: unknown) => {
     // eslint-disable-next-line no-console
-    console.error("[wrapped] immagine", e);
-    onNotice?.("Impossibile generare l’immagine. Riprova.");
-  };
-
-  // Scarico via Blob URL e ancora agganciata al documento. Prima era un
-  // `data:` da qualche MB cliccato su un'ancora staccata: su iOS (e nell'app
-  // installata) spesso non partiva niente, senza errore.
-  const download = async () => {
-    if (busy) return;
-    try {
-      const blob = await getBlob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = fileName(exportIdx);
-      a.rel = "noopener";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 60_000);
-      track("wrapped_scaricato");
-    } catch (e) {
-      failed(e);
-    }
-  };
-
-  const share = async () => {
-    if (busy) return;
-    let blob: Blob;
-    try {
-      blob = await getBlob();
-    } catch (e) {
-      failed(e);
-      return;
-    }
-    const file = new File([blob], fileName(exportIdx), { type: "image/png" });
-    if (canShareFiles) {
-      try {
-        // Solo il file, niente `text`: con un testo allegato alcune app
-        // (Instagram in testa) ricevono la didascalia e perdono l'immagine.
-        await navigator.share({ files: [file], title: "Il mio Beach Wrapped" });
-        track("wrapped_condiviso", { via: "share" });
-      } catch (e) {
-        const name = (e as { name?: string })?.name;
-        // Share sheet chiuso senza scegliere: non è un errore.
-        if (name === "AbortError") return;
-        // Permesso del gesto scaduto (l'immagine non era ancora pronta al
-        // tocco): adesso lo è, quindi il secondo tocco funziona.
-        if (name === "NotAllowedError") {
-          onNotice?.("Immagine pronta: tocca di nuovo “Condividi”.");
-          return;
-        }
-        failed(e);
-      }
-      return;
-    }
-    // Desktop senza share sheet: l'immagine negli appunti, da incollare nel
-    // post o nella chat.
-    try {
-      await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
-      track("wrapped_condiviso", { via: "appunti" });
-      onNotice?.("Immagine copiata: incollala nel post o nella chat.");
-    } catch (e) {
-      failed(e);
-    }
-  };
-
-  // ---- empty state: pochi dati, il recap non ha senso ----
-  if (!wrapped.hasEnoughData) {
-    return (
-      <div onClick={onClose} style={overlayStyle}>
-        <div
-          onClick={(e) => e.stopPropagation()}
-          className="card"
-          style={{
-            maxWidth: 420,
-            width: "100%",
-            padding: 32,
-            textAlign: "center",
-            background: "#16233F",
-            border: "1px solid rgba(255,255,255,.14)",
-            borderRadius: 22,
-          }}
-        >
-          <div style={{ fontSize: 64, lineHeight: 1 }}>🏖️</div>
-          <div
-            className="num"
-            style={{
-              fontSize: 24,
-              fontWeight: 500,
-              color: "#fff",
-              marginTop: 16,
-            }}
-          >
-            Beach Wrapped in arrivo
-          </div>
-          <div
-            style={{
-              font: "600 14px 'Nunito Sans'",
-              color: "rgba(255,255,255,.7)",
-              marginTop: 10,
-              lineHeight: 1.45,
-            }}
-          >
-            Servono almeno qualche partita in questo periodo per generare il tuo
-            recap di stagione. Aggiungi tornei e partite e torna a trovarci!
-          </div>
-          <div
-            className="chip"
-            onClick={onClose}
-            style={{
-              display: "inline-block",
-              marginTop: 22,
-              font: "700 14px 'Nunito Sans'",
-              padding: "11px 22px",
-              borderRadius: 11,
-              background: "#FF6B35",
-              color: "#fff",
-              cursor: "pointer",
-            }}
-          >
-            Ho capito
-          </div>
-        </div>
-      </div>
-    );
+    console.error('[wrapped] immagine', e)
+    onNotice?.('Impossibile generare l’immagine. Riprova.', 'error')
   }
 
-  const chip = (bg: string, color = "#fff"): CSSProperties => ({
-    display: "inline-flex",
-    alignItems: "center",
-    gap: 7,
-    font: "700 13.5px 'Nunito Sans'",
-    padding: "10px 18px",
-    borderRadius: 11,
-    background: bg,
-    color,
-    cursor: busy ? "default" : "pointer",
-    opacity: busy ? 0.7 : 1,
-  });
+  // Scarico via Blob URL e ancora agganciata al documento: un `data:` da
+  // qualche MB su un'ancora staccata, su iOS, spesso non partiva.
+  const download = async () => {
+    if (busy) return
+    try {
+      const blob = await getBlob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = fileName(exportIdx)
+      a.rel = 'noopener'
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      setTimeout(() => URL.revokeObjectURL(url), 60_000)
+      track('wrapped_scaricato')
+    } catch (e) {
+      failed(e)
+    }
+  }
+
+  const share = async () => {
+    if (busy) return
+    let blob: Blob
+    try {
+      blob = await getBlob()
+    } catch (e) {
+      failed(e)
+      return
+    }
+    const file = new File([blob], fileName(exportIdx), { type: 'image/png' })
+    if (canShareFiles) {
+      try {
+        // Solo il file, niente `text`: con una didascalia alcune app
+        // (Instagram in testa) perdono l'immagine.
+        await navigator.share({ files: [file], title: 'Il mio Beach Wrapped' })
+        track('wrapped_condiviso', { via: 'share' })
+      } catch (e) {
+        const name = (e as { name?: string })?.name
+        // Share sheet chiuso senza scegliere: non è un errore.
+        if (name === 'AbortError') return
+        // Permesso del gesto scaduto (l'immagine non era ancora pronta al
+        // tocco): adesso lo è, quindi il secondo tocco funziona.
+        if (name === 'NotAllowedError') {
+          onNotice?.('Immagine pronta: tocca di nuovo “Condividi”.', 'info')
+          return
+        }
+        failed(e)
+      }
+      return
+    }
+    // Desktop senza share sheet: l'immagine negli appunti.
+    try {
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
+      track('wrapped_condiviso', { via: 'appunti' })
+      onNotice?.('Immagine copiata: incollala nel post o nella chat.', 'success')
+    } catch (e) {
+      failed(e)
+    }
+  }
+
+  // ---- pochi dati: il recap non ha senso ----
+  if (!wrapped.hasEnoughData) return <WrappedNonDisponibile motivo="dati" onClose={onClose} />
+
+  const ferma = (e: { stopPropagation: () => void }) => e.stopPropagation()
 
   return (
-    <div onClick={onClose} style={overlayStyle}>
-      {/* Chiusura in un angolo e non fra i comandi: è navigazione, non
-          un'azione sul recap, e lì non ruba una riga all'anteprima. */}
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          onClose();
-        }}
-        aria-label="Chiudi"
-        style={{
-          position: "absolute",
-          top: "calc(12px + env(safe-area-inset-top))",
-          right: 12,
-          width: 40,
-          height: 40,
-          borderRadius: "50%",
-          border: "none",
-          zIndex: 2,
-          background: "rgba(255,255,255,.16)",
-          color: "#fff",
-          font: "700 17px 'Nunito Sans'",
-          lineHeight: 1,
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        ✕
-      </button>
-
-      {/* barre di avanzamento (fuori dalla card per contrasto costante) */}
-      <div
-        onClick={(e) => e.stopPropagation()}
-        style={{ width: boxW, display: "flex", gap: 6 }}
-      >
-        {slides.map((_, i) => {
-          const animating = i === idx && autoplay && !busy && !reduceMotion;
-          const filled = i < idx || (i === idx && !animating);
-          return (
-            <div
-              key={i}
-              style={{
-                flex: 1,
-                height: 4,
-                borderRadius: 4,
-                background: "rgba(255,255,255,.28)",
-                overflow: "hidden",
-              }}
-            >
-              <div
-                key={i === idx ? "active-" + idx : "seg-" + i}
-                style={{
-                  height: "100%",
-                  background: "#fff",
-                  transformOrigin: "left center",
-                  transform: filled ? "scaleX(1)" : "scaleX(0)",
-                  // In pausa la barra si ferma dov'è invece di sparire: se
-                  // togliessimo l'animazione salterebbe a piena, dicendo il
-                  // falso su quanto manca.
-                  ...(animating
-                    ? {
-                        animation: `wrappedbar ${SLIDE_MS}ms linear both`,
-                        animationPlayState: held ? "paused" : "running",
-                      }
-                    : {}),
-                }}
-              />
-            </div>
-          );
-        })}
+    <Cornice onClose={onClose}>
+      {/* La barra alta: avanzamento e chiusura. Il ✕ è navigazione, non
+          un'azione sul recap: sta nell'angolo, non fra i comandi. */}
+      <div className="wrapped-bar wrapped-bar-top" data-material="glass-dark" onClick={ferma}>
+        <div className="wrapped-progress" style={{ width: boxW }} aria-hidden="true">
+          {slides.map((_, i) => {
+            const animating = i === idx && autoplay && !busy && !reduceMotion
+            const filled = i < idx || (i === idx && !animating)
+            return (
+              <div key={i} className="wrapped-progress-track">
+                <div
+                  key={i === idx ? 'active-' + idx : 'seg-' + i}
+                  className="wrapped-progress-fill"
+                  data-filled={filled ? '' : undefined}
+                  data-animating={animating ? '' : undefined}
+                  // In pausa la barra si ferma dov'è: saltare a piena direbbe
+                  // il falso su quanto manca.
+                  style={
+                    animating
+                      ? ({ '--slide-ms': `${SLIDE_MS}ms`, animationPlayState: held ? 'paused' : 'running' } as CSSProperties)
+                      : undefined
+                  }
+                />
+              </div>
+            )
+          })}
+        </div>
+        <Chiudi onClose={onClose} />
       </div>
 
-      {/* anteprima scalata sfogliabile */}
-      <div
-        onClick={(e) => e.stopPropagation()}
-        onPointerDown={onPointerDown}
-        onPointerUp={onPointerUp}
-        onPointerCancel={onPointerCancel}
-        onPointerLeave={onPointerCancel}
-        onKeyDown={(e) => {
-          if (e.key === "ArrowRight") {
-            e.preventDefault();
-            next();
-          } else if (e.key === "ArrowLeft") {
-            e.preventDefault();
-            prev();
-          } else if (e.key === " ") {
-            e.preventDefault();
-            setAutoplay((a) => !a);
-          }
-        }}
-        tabIndex={0}
-        role="group"
-        aria-label={`Beach Wrapped, slide ${idx + 1} di ${n}`}
-        style={{
-          width: boxW,
-          height: boxH,
-          position: "relative",
-          borderRadius: 20,
-          overflow: "hidden",
-          boxShadow: "0 30px 80px -20px rgba(0,0,0,.6)",
-          cursor: "pointer",
-          touchAction: "pan-y",
-          outline: "none",
-          userSelect: "none",
-        }}
-      >
-        {/* Due layer separati: quello ESTERNO fa l'animazione d'entrata
-            (fade+slide), quello INTERNO tiene lo scale d'anteprima. Sono divisi
-            perché `wrappedin` termina con `transform: none` e, se fosse sullo
-            stesso nodo dello scale, con fill-mode `both` sovrascriverebbe lo
-            `scale(${scale})` facendo esplodere la card a piena risoluzione. */}
+      {/* L'anteprima scalata sfogliabile. */}
+      <div className="wrapped-stage">
         <div
-          key={idx}
-          className="wrapped-card-anim"
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: boxW,
-            height: boxH,
-            animation: reduceMotion
-              ? undefined
-              : "wrappedin .4s cubic-bezier(.2,.8,.2,1) both",
+          onClick={ferma}
+          onPointerDown={onPointerDown}
+          onPointerUp={onPointerUp}
+          onPointerCancel={onPointerCancel}
+          onPointerLeave={onPointerCancel}
+          onKeyDown={(e) => {
+            if (e.key === 'ArrowRight') {
+              e.preventDefault()
+              next()
+            } else if (e.key === 'ArrowLeft') {
+              e.preventDefault()
+              prev()
+            } else if (e.key === ' ') {
+              e.preventDefault()
+              setAutoplay((a) => !a)
+            }
           }}
+          tabIndex={0}
+          role="group"
+          aria-roledescription="slide"
+          aria-label={`Beach Wrapped, slide ${idx + 1} di ${n}`}
+          className="wrapped-deck"
+          style={{ width: boxW, height: boxH }}
         >
-          <div
-            style={{
-              width: 1080,
-              height: 1920,
-              transform: `scale(${scale})`,
-              transformOrigin: "top left",
-            }}
-          >
-            <WrappedSlideCard
-              slide={slides[idx]}
-              pal={wrappedPalette(idx)}
-              index={idx}
-              total={n}
-              photoSrc={photoFor(slides[idx].photoUrl)}
-            />
+          {/* Due livelli: quello ESTERNO entra (opacità e 14px), quello
+              INTERNO tiene la scala dell'anteprima. Sullo stesso nodo,
+              l'entrata che finisce con `transform: none` cancellerebbe la scala. */}
+          <div key={idx} className="wrapped-card" style={{ width: boxW, height: boxH }}>
+            <div className="wrapped-card-scale" style={{ transform: `scale(${scale})` }}>
+              <WrappedSlideCard slide={slides[idx]} pal={wrappedPalette(idx)} index={idx} total={n} photoSrc={photoFor(slides[idx].photoUrl)} />
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Sotto la card non c'è più una pulsantiera: il mazzo si sfoglia con il
-          dito (tap ai lati, swipe) e le barre in cima dicono a che punto siamo,
-          esattamente come una storia. Avanti/indietro/pausa erano copie di
-          gesti che si fanno già sulla card, e stavano lì solo a fare rumore.
-          Le frecce e la barra spaziatrice continuano a funzionare da tastiera. */}
-      <div
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 12,
-          width: "100%",
-          maxWidth: 520,
-        }}
-      >
-        {/* Condividi/Scarica compaiono SOLO sull'ultima: il recap si condivide
-            alla fine, e prima di allora quei pulsanti invitavano a portarsi via
-            una slide qualsiasi invece di guardarle. Lo spazio resta riservato
-            anche quando sono nascosti, o la card ballerebbe all'ultimo passaggio. */}
-        <div
-          style={{
-            minHeight: 44,
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-            flexWrap: "wrap",
-            justifyContent: "center",
-          }}
-        >
-          {atEnd && (canShare ? (
+      {/* Sotto la card nessuna pulsantiera di navigazione: il mazzo si sfoglia
+          con il dito e con le frecce. Condividi/Scarica solo sull'ultima slide;
+          lo spazio resta riservato, o la card ballerebbe all'ultimo passaggio. */}
+      <div className="wrapped-bar wrapped-bar-bottom" data-material="glass-dark" onClick={ferma}>
+        {atEnd &&
+          (canShare ? (
             <>
               <button
                 type="button"
-                className="chip"
+                className="ui-button"
+                data-variant="filled"
                 onClick={share}
                 aria-busy={busy || !ready}
-                style={{ ...chip("#FF6B35"), border: "none" }}
+                aria-disabled={busy || undefined}
               >
-                {busy ? "Preparo…" : "Condividi"}
+                <Icon name="share" size={20} />
+                <span className="ui-button-label">{inCorso || busy ? 'Preparo…' : 'Condividi'}</span>
               </button>
               <button
                 type="button"
-                className="chip"
+                className="ui-button"
+                data-variant="quiet"
                 onClick={download}
-                style={{ ...chip("rgba(255,255,255,.16)"), border: "none" }}
+                aria-disabled={busy || undefined}
               >
-                ↓ Scarica
+                <Icon name="download" size={20} />
+                <span className="ui-button-label">Scarica</span>
               </button>
             </>
           ) : (
             <button
               type="button"
-              className="chip"
+              className="ui-button"
+              data-variant="filled"
               onClick={download}
               aria-busy={busy || !ready}
-              style={{ ...chip("#FF6B35"), border: "none" }}
+              aria-disabled={busy || undefined}
             >
-              {busy
-                ? "Preparo…"
-                : recapIdx >= 0
-                  ? "↓ Scarica il riepilogo"
-                  : "↓ Scarica"}
+              <Icon name="download" size={20} />
+              <span className="ui-button-label">{inCorso || busy ? 'Preparo…' : recapIdx >= 0 ? 'Scarica il riepilogo' : 'Scarica'}</span>
             </button>
           ))}
-        </div>
-
-        {/* intervallo stagione configurabile */}
       </div>
 
-      {/* layer nascosto a piena risoluzione: una card per slide, sorgente degli
-          export (mai scalata, quindi immagine pixel-perfect a 1080×1920) */}
-      <div
-        aria-hidden
-        style={{
-          position: "fixed",
-          left: -100000,
-          top: 0,
-          width: 1080,
-          height: 1920,
-          pointerEvents: "none",
-        }}
-      >
+      {/* Il layer nascosto a piena risoluzione: una card per slide, sorgente
+          degli export (mai scalata, quindi immagine pixel-perfect). */}
+      <div aria-hidden="true" className="wrapped-capture">
         {slides.map((sl, i) => (
           <div
             key={i}
             ref={(el) => {
-              captureRefs.current[i] = el;
+              captureRefs.current[i] = el
             }}
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: 1080,
-              height: 1920,
-            }}
+            className="wrapped-capture-card"
           >
-            <WrappedSlideCard
-              slide={sl}
-              pal={wrappedPalette(i)}
-              index={i}
-              total={n}
-              photoSrc={photoFor(sl.photoUrl)}
-            />
+            <WrappedSlideCard slide={sl} pal={wrappedPalette(i)} index={i} total={n} photoSrc={photoFor(sl.photoUrl)} />
           </div>
         ))}
       </div>
-    </div>
-  );
+    </Cornice>
+  )
 }
-
-const overlayStyle: CSSProperties = {
-  position: "fixed",
-  inset: 0,
-  background: "rgba(11,18,33,.82)",
-  backdropFilter: "blur(6px)",
-  zIndex: 70,
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  justifyContent: "center",
-  gap: 16,
-  padding: 20,
-  animation: "overlay .2s ease",
-};

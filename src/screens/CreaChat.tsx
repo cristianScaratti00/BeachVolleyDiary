@@ -1,1629 +1,530 @@
-import { useEffect, useRef, useState } from "react";
-import type { CSSProperties, ReactNode, ChangeEvent, FormEvent } from "react";
-import { CATEGORIES, FORMATS, SURFACES, PHASES, BRACKETS } from "../lib/db.enums";
-import { MONTHS_SHORT } from "../lib/theme";
-import type {
-  AnyForm,
-  Option,
-  GuidedMatch,
-  Category,
-  Format,
-  Surface,
-  Phase,
-  Placement,
-  Bracket,
-} from "../lib/models";
-
 // ============================================================================
-// Assistente guidato in stile chat AI per creare un torneo.
-// Non c'è nessun modello linguistico: è una conversazione scriptata con una
-// macchina a stati (`Step`). Gli step si adattano ai dati esistenti (propone i
-// compagni già salvati) e chiedono se il torneo è finito o in corso e se
-// registrare subito i risultati delle partite.
+// L'assistente guidato (UX §5 F11, §6.10; MOTION.md §5 F11): la creazione del
+// torneo come conversazione. È un percorso FACOLTATIVO (risposta 6): ci si
+// arriva dallo sheet «Nuovo torneo», dagli stati vuoti e da `/crea`.
+//
+// Il copione sta in `crea/copione.ts`, lo stato in `crea/useAssistente.ts`;
+// qui la vista. Le correzioni obbligatorie di UX F11: ogni scelta è un
+// `<button>`, dopo ogni domanda il focus va al primo controllo del dock, i
+// campi hanno un nome (la domanda), il pulsante d'invio si chiama «Invia».
 // ============================================================================
+import { useEffect, useRef, useState } from 'react'
+import type { CSSProperties, FormEvent, ReactNode } from 'react'
+import { useReducedMotion } from 'motion/react'
+import { BRACKETS, CATEGORIES, FORMATS, PHASES, SURFACES } from '../lib/db.enums'
+import type { Option, Placement } from '../lib/models'
+import type { CreaChatProps } from '../app/contracts'
+import { Button } from '../components/ui/Button'
+import { Icon } from '../components/ui/Icon'
+import type { IconName } from '../components/ui/Icon'
+import { SetRow } from '../components/ui/Field'
+import { focusables } from '../components/ui/overlay'
+import { FINISHED_PLACEMENTS, fmtSets, righeRiepilogo, shiftISO, todayISO } from './crea/copione'
+import type { Draft, Step } from './crea/copione'
+import { useAssistente } from './crea/useAssistente'
+import type { Assistente, Msg } from './crea/useAssistente'
+import './CreaChat.css'
 
-const INK = "#1B2A4A";
-const ORANGE = "#FF6B35";
+/** Si segue il fondo della trascrizione solo se ci si è già vicini (MOTION.md §5 F11). */
+const VICINO_AL_FONDO = 80
 
-// Colori scelti dall'assistente per l'etichetta, così ogni torneo è un po' diverso.
-const LABEL_COLORS = ["#FF6B35", "#00B4D8", "#FFD23F", "#FF477E", "#1B2A4A"];
-
-type Step =
-  | "boot"
-  | "name"
-  | "partner"
-  | "partnerName"
-  | "date"
-  | "venue"
-  | "venueName"
-  | "category"
-  | "format"
-  | "surface"
-  | "status"
-  | "placement"
-  | "bracket"
-  | "askResults"
-  | "resultsPartner"
-  | "resultsPartnerName"
-  | "matchOpponents"
-  | "matchPhase"
-  | "matchScore"
-  | "matchMore"
-  | "recap"
-  | "saving"
-  | "done";
-
-interface Draft {
-  name: string;
-  partnerId: string; // '' = nessuno, 'new', oppure un id compagno
-  newPartnerName: string;
-  date: string;
-  venueId: string; // '' = saltato, 'new', oppure un id luogo
-  newVenueName: string; // nome del luogo digitato quando venueId === 'new'
-  city: string; // snapshot testuale, tenuto allineato al luogo scelto
-  category: Category;
-  format: Format;
-  surface: Surface;
-  status: "finished" | "ongoing" | "";
-  placement: Placement;
-  bracket: Bracket | ""; // '' = nessun tabellone
-  color: string;
-  matches: GuidedMatch[];
-}
-
-interface Msg {
-  id: number;
-  role: "ai" | "user";
-  text?: string;
-  card?: ReactNode;
-}
-
-interface CreaChatProps {
-  wide: boolean;
-  partners: Option[];
-  venues: Option[]; // luoghi già salvati, proposti come chip nello step "dove"
-  onCreate: (form: AnyForm, matches: GuidedMatch[]) => Promise<string | null>;
-  onDone: (tournamentId: string) => void;
-  onExit: () => void;
-}
-
-const wait = (ms: number) => new Promise<void>((res) => setTimeout(res, ms));
-const todayISO = () => new Date().toISOString().slice(0, 10);
-const shiftISO = (days: number) => {
-  const d = new Date();
-  d.setDate(d.getDate() + days);
-  return d.toISOString().slice(0, 10);
-};
-const fmtDate = (iso: string) => {
-  if (!iso) return "—";
-  const [y, m, d] = iso.split("-").map(Number);
-  if (!y || !m || !d) return iso;
-  return `${d} ${MONTHS_SHORT[m - 1]} ${y}`;
-};
-const fmtSets = (sets: GuidedMatch["sets"]) =>
-  sets.length
-    ? sets.map((s) => `${s.us}–${s.them}`).join(" · ")
-    : "senza punteggio";
-
-const initialDraft = (): Draft => ({
-  name: "",
-  partnerId: "",
-  newPartnerName: "",
-  date: todayISO(),
-  venueId: "",
-  newVenueName: "",
-  city: "",
-  category: "Amatoriale",
-  format: "2vs2",
-  surface: "Sabbia outdoor",
-  status: "",
-  placement: "In corso",
-  bracket: "",
-  color: LABEL_COLORS[0],
-  matches: [],
-});
-
-export default function CreaChat({
-  wide,
-  partners,
-  venues,
-  onCreate,
-  onDone,
-  onExit,
-}: CreaChatProps) {
-  const [messages, setMessages] = useState<Msg[]>([]);
-  const [typing, setTyping] = useState(true);
-  const [step, setStep] = useState<Step>("boot");
-  const [createdId, setCreatedId] = useState<string | null>(null);
-
-  // Stati locali del "dock" di input (input attivo in basso).
-  const [text, setText] = useState("");
-  const [dateVal, setDateVal] = useState(todayISO());
-  const [scoreRows, setScoreRows] = useState<{ us: string; them: string }[]>([
-    { us: "", them: "" },
-    { us: "", them: "" },
-  ]);
-
-  // La bozza vive in un ref: l'UI è guidata dai messaggi/step, non dalla bozza
-  // (il riepilogo è uno snapshot), quindi non serve uno state reattivo.
-  const draftRef = useRef<Draft>(initialDraft());
-  const pendingMatch = useRef<{
-    opponents: string;
-    phase: Phase;
-    sets: GuidedMatch["sets"];
-  } | null>(null);
-  const idRef = useRef(0);
-  const alive = useRef(true);
-  const started = useRef(false);
-  const endRef = useRef<HTMLDivElement>(null);
-  const transcriptRef = useRef<HTMLDivElement>(null);
-
-  const patch = (p: Partial<Draft>) => {
-    draftRef.current = { ...draftRef.current, ...p };
-  };
-  const nextId = () => ++idRef.current;
-  const pushUser = (t: string) =>
-    setMessages((m) => [...m, { id: nextId(), role: "user", text: t }]);
-
-  // Bolla dell'assistente preceduta dal "sta scrivendo…". La durata scala con la
-  // lunghezza del testo (più naturale e non troppo veloce); si può forzare.
-  const say = async (
-    content: string | { text?: string; card?: ReactNode },
-    delay?: number,
-  ) => {
-    if (!alive.current) return;
-    const payload = typeof content === "string" ? { text: content } : content;
-    const textLen = (payload.text ?? "").length;
-    const d = delay ?? Math.min(1700, 780 + textLen * 17);
-    setTyping(true);
-    await wait(d);
-    if (!alive.current) return;
-    setTyping(false);
-    setMessages((m) => [...m, { id: nextId(), role: "ai", ...payload }]);
-  };
-
+/** iOS non ridimensiona il layout con la tastiera: la colonna segue il visualViewport. */
+function useAltezzaVisibile(): number | null {
+  const [h, setH] = useState<number | null>(null)
   useEffect(() => {
-    alive.current = true;
+    const vv = typeof window !== 'undefined' ? window.visualViewport : null
+    if (!vv) return
+    const on = () => setH(Math.abs(window.innerHeight - vv.height) > 80 ? vv.height : null)
+    vv.addEventListener('resize', on)
+    on()
+    return () => vv.removeEventListener('resize', on)
+  }, [])
+  return h
+}
+
+export default function CreaChat({ partners, venues, onCreate, onDone, onExit, registerExitGuard }: CreaChatProps) {
+  const a = useAssistente({ partners, venues, onCreate })
+  const ridotto = useReducedMotion()
+  const logRef = useRef<HTMLDivElement>(null)
+  const dockRef = useRef<HTMLDivElement>(null)
+  const vicino = useRef(true)
+  const altezza = useAltezzaVisibile()
+
+  // Il tasto indietro equivale a ✕ Esci, con la stessa conferma (UX F11.6).
+  const isDirty = useRef(a.isDirty)
+  isDirty.current = a.isDirty
+  useEffect(() => {
+    const off = registerExitGuard?.(() => isDirty.current()) as unknown
     return () => {
-      alive.current = false;
-    };
-  }, []);
+      if (typeof off === 'function') (off as () => void)()
+    }
+  }, [registerExitGuard])
 
-  // Intro (una volta sola, resistente al doppio-mount di StrictMode).
+  // Dopo ogni domanda il focus va al primo controllo del dock, quando la bolla
+  // è già nel DOM (non a fine animazione).
   useEffect(() => {
-    if (started.current) return;
-    started.current = true;
-    (async () => {
-      await say("Ciao! 🏐 Sono l’assistente di Beach Diary.");
-      await say(
-        "Creiamo insieme un nuovo torneo — ti faccio due domande al volo. 😎",
-      );
-      await say("Come si chiama il torneo?");
-      setStep("name");
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    const dock = dockRef.current
+    if (!dock) return
+    // Il campo di testo, se c'è; altrimenti il primo pulsante (UX F11.2).
+    const campo = dock.querySelector<HTMLElement>('input:not([type="date"])')
+    ;(campo ?? focusables(dock)[0])?.focus({ preventScroll: true })
+  }, [a.focusTick])
 
-  // Auto-scroll: scorre SOLO il contenitore della chat (non la pagina) fino in
-  // fondo ad ogni nuovo messaggio, cambio di "typing" o di step (il dock cambia
-  // altezza), così la vista segue sempre l'ultimo messaggio.
+  // In fondo alla trascrizione solo se l'utente era già lì: chi sta rileggendo
+  // più su non viene strappato via.
   useEffect(() => {
-    const el = transcriptRef.current;
-    if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
-  }, [messages, typing, step]);
+    const el = logRef.current
+    if (!el || !vicino.current) return
+    // jsdom (e qualche browser incorporato) non ha `scrollTo` sugli elementi.
+    if (typeof el.scrollTo === 'function') el.scrollTo({ top: el.scrollHeight, behavior: ridotto ? 'auto' : 'smooth' })
+    else el.scrollTop = el.scrollHeight
+  }, [a.messages, a.typing, a.step, ridotto])
 
-  // ---------------------------------------------------------------- prompts
-  // Manda il/i messaggio/i dell'assistente per lo step di destinazione e poi
-  // abilita il dock corrispondente. Il dock resta nascosto durante il "typing".
-  const goStep = async (target: Step) => {
-    const d = draftRef.current;
-    switch (target) {
-      case "partner":
-        if (partners.length)
-          await say(`Perfetto, «${d.name}». Con chi hai giocato?`);
-        else
-          await say(
-            `Perfetto, «${d.name}». Con chi hai giocato? Scrivi il nome del tuo compagno.`,
-          );
-        break;
-      case "partnerName":
-      case "resultsPartnerName":
-        await say("Come si chiama il compagno?");
-        break;
-      case "resultsPartner":
-        await say("Con quale compagno registriamo le partite?");
-        break;
-      case "date":
-        await say("Quando si è svolto? 📅");
-        break;
-      case "venue":
-        if (venues.length) await say("Dove avete giocato? (puoi saltare)");
-        else
-          await say("Dove avete giocato? Scrivi il nome del posto — o salta.");
-        break;
-      case "venueName":
-        await say("Come si chiama il posto? 📍");
-        break;
-      case "category":
-        await say("Che categoria era?");
-        break;
-      case "format":
-        await say("Con che formato avete giocato?");
-        break;
-      case "surface":
-        await say("E su che superficie?");
-        break;
-      case "status":
-        await say("Il torneo è già finito o è ancora in corso?");
-        break;
-      case "placement":
-        await say("Ottimo! Che piazzamento hai ottenuto? 🏆");
-        break;
-      case "bracket":
-        await say("In che tabellone? (se il torneo li aveva)");
-        break;
-      case "askResults":
-        if (d.status === "ongoing")
-          await say("Vuoi già registrare le partite giocate finora?");
-        else await say("Vuoi aggiungere anche i risultati delle partite?");
-        break;
-      case "matchOpponents":
-        await say(
-          d.matches.length
-            ? "Contro chi era la prossima partita?"
-            : "Iniziamo con le partite. Contro chi era la prima? (coppia avversaria)",
-        );
-        break;
-      case "matchPhase":
-        await say("In che fase del torneo?");
-        break;
-      case "matchScore":
-        await say("Come è finita? Inserisci il punteggio dei set.");
-        break;
-      case "matchMore":
-        await say("Partita registrata ✅. Vuoi aggiungerne un’altra?");
-        break;
-      case "recap":
-        await say({
-          card: (
-            <Recap d={draftRef.current} partners={partners} venues={venues} />
-          ),
-        });
-        await say("Ecco il riepilogo. Confermo la creazione? 👇");
-        break;
-      default:
-        break;
-    }
-    if (alive.current) setStep(target);
-  };
+  const conDock = a.step !== 'saving' && a.step !== 'boot'
 
-  // ---------------------------------------------------------------- handlers
-  const submitName = (raw: string) => {
-    const v = raw.trim();
-    if (!v) return;
-    pushUser(v);
-    setText("");
-    patch({ name: v, color: LABEL_COLORS[v.length % LABEL_COLORS.length] });
-    goStep("partner");
-  };
-
-  const pickPartner = (p: Option) => {
-    pushUser(p.name);
-    patch({ partnerId: p.id, newPartnerName: "" });
-    goStep("date");
-  };
-  const pickNoPartner = () => {
-    pushUser("Ho giocato da solo");
-    patch({ partnerId: "", newPartnerName: "" });
-    goStep("date");
-  };
-  const chooseNewPartner = () => {
-    // Passa all'input testuale per il nome (nessun messaggio utente).
-    setText("");
-    goStep("partnerName");
-  };
-  const submitPartnerName = (raw: string, fromResults: boolean) => {
-    const v = raw.trim();
-    if (!v) return;
-    pushUser(v);
-    setText("");
-    patch({ partnerId: "new", newPartnerName: v });
-    goStep(fromResults ? "matchOpponents" : "date");
-  };
-
-  const pickDate = (iso: string, label: string) => {
-    pushUser(label);
-    patch({ date: iso });
-    goStep("venue");
-  };
-  // Luogo già salvato: il torneo ci si aggancia. `city` resta vuota, la scrive
-  // il data layer dal luogo scelto (unica fonte, niente doppia verità).
-  const pickVenue = (v: Option) => {
-    pushUser(v.name);
-    patch({ venueId: v.id, newVenueName: "", city: "" });
-    goStep("category");
-  };
-  const chooseNewVenue = () => {
-    setText("");
-    goStep("venueName");
-  };
-  // Luogo nuovo: qui si chiede una riga sola (la chat non è un form), quindi il
-  // nome vale anche da città. Nel modale torneo i due campi restano separati.
-  const submitVenueName = (raw: string) => {
-    const v = raw.trim();
-    if (!v) return;
-    pushUser(v);
-    setText("");
-    patch({ venueId: "new", newVenueName: v, city: v });
-    goStep("category");
-  };
-  const skipVenue = () => {
-    pushUser("Salto il luogo");
-    setText("");
-    patch({ venueId: "", newVenueName: "", city: "" });
-    goStep("category");
-  };
-  const pickCategory = (c: Category) => {
-    pushUser(c);
-    patch({ category: c });
-    goStep("format");
-  };
-  const pickFormat = (f: Format) => {
-    pushUser(f);
-    patch({ format: f });
-    goStep("surface");
-  };
-  const pickSurface = (s: Surface) => {
-    pushUser(s);
-    patch({ surface: s });
-    goStep("status");
-  };
-  const pickStatus = (s: "finished" | "ongoing") => {
-    if (s === "ongoing") {
-      pushUser("⏳ È ancora in corso");
-      patch({ status: "ongoing", placement: "In corso" });
-      goStep("askResults");
-    } else {
-      pushUser("🏁 È finito");
-      patch({ status: "finished" });
-      goStep("placement");
-    }
-  };
-  const pickPlacement = (p: Placement) => {
-    pushUser(p);
-    patch({ placement: p });
-    goStep("bracket");
-  };
-  const pickBracket = (b: Bracket | "") => {
-    pushUser(b || "Nessun tabellone");
-    patch({ bracket: b });
-    goStep("askResults");
-  };
-
-  const answerResults = (yes: boolean) => {
-    if (!yes) {
-      pushUser("No, va bene così");
-      goStep("recap");
-      return;
-    }
-    pushUser("Sì, aggiungiamole");
-    const d = draftRef.current;
-    const hasPartner =
-      d.partnerId === "new" ? !!d.newPartnerName : d.partnerId !== "";
-    // Le partite hanno bisogno di un compagno: se il torneo è "da solo",
-    // chiediamolo ora (proponendo i compagni esistenti se ce ne sono).
-    if (hasPartner) goStep("matchOpponents");
-    else if (partners.length) goStep("resultsPartner");
-    else goStep("resultsPartnerName");
-  };
-  const pickResultsPartner = (p: Option) => {
-    pushUser(p.name);
-    patch({ partnerId: p.id, newPartnerName: "" });
-    goStep("matchOpponents");
-  };
-
-  const submitOpponents = (raw: string) => {
-    const v = raw.trim();
-    pushUser(v || "Avversari");
-    setText("");
-    // Bozza in costruzione: la salvo temporaneamente sull'ultimo slot.
-    pendingMatch.current = {
-      opponents: v || "Avversari",
-      phase: "Girone",
-      sets: [],
-    };
-    goStep("matchPhase");
-  };
-  const pickPhase = (ph: Phase) => {
-    pushUser(ph);
-    if (pendingMatch.current) pendingMatch.current.phase = ph;
-    setScoreRows([
-      { us: "", them: "" },
-      { us: "", them: "" },
-    ]);
-    goStep("matchScore");
-  };
-  const submitScore = (rows: { us: string; them: string }[]) => {
-    const sets = rows
-      .filter((r) => r.us !== "" && r.them !== "")
-      .map((r) => ({ us: Number(r.us), them: Number(r.them) }))
-      .filter((s) => Number.isFinite(s.us) && Number.isFinite(s.them));
-    const m: GuidedMatch = {
-      opponents: pendingMatch.current?.opponents || "Avversari",
-      phase: pendingMatch.current?.phase || "Girone",
-      sets,
-    };
-    pushUser(fmtSets(sets));
-    patch({ matches: [...draftRef.current.matches, m] });
-    pendingMatch.current = null;
-    goStep("matchMore");
-  };
-  const answerMore = (yes: boolean) => {
-    if (yes) {
-      pushUser("➕ Aggiungi un’altra");
-      goStep("matchOpponents");
-    } else {
-      pushUser("✅ Ho finito con le partite");
-      goStep("recap");
-    }
-  };
-
-  const confirmCreate = async () => {
-    pushUser("✅ Crea torneo");
-    setStep("saving");
-    setTyping(false);
-    const d = draftRef.current;
-    await say("Sto creando il torneo… ⏳", 500);
-    const form: AnyForm = {
-      name: d.name,
-      partnerId: d.partnerId,
-      newPartnerName: d.newPartnerName,
-      date: d.date,
-      venueId: d.venueId,
-      newVenueName: d.newVenueName,
-      newVenueCity: d.newVenueName, // una riga sola: il nome vale anche da città
-      city: d.city,
-      category: d.category,
-      format: d.format,
-      surface: d.surface,
-      placement: d.placement,
-      bracket: d.bracket,
-      color: d.color,
-      emoji: "🏖️",
-    };
-    setTyping(true);
-    const id = await onCreate(form, d.matches);
-    if (!alive.current) return;
-    if (id) {
-      setCreatedId(id);
-      await say(`🎉 Fatto! Ho creato «${d.name}».`);
-      if (d.matches.length)
-        await say(
-          `Ho registrato anche ${d.matches.length} ${d.matches.length === 1 ? "partita" : "partite"}. 💪`,
-        );
-      setStep("done");
-    } else {
-      await say(
-        "Ops, qualcosa è andato storto nel salvataggio. Puoi riprovare. 🙏",
-      );
-      setStep("recap");
-    }
-  };
-
-  const restart = () => {
-    draftRef.current = initialDraft();
-    pendingMatch.current = null;
-    idRef.current = 0;
-    started.current = false;
-    setCreatedId(null);
-    setText("");
-    setDateVal(todayISO());
-    setMessages([]);
-    setTyping(true);
-    setStep("boot");
-    (async () => {
-      started.current = true;
-      await say("Ripartiamo da capo! ✨");
-      await say("Come si chiama il torneo?");
-      setStep("name");
-    })();
-  };
-
-  // ---------------------------------------------------------------- render
-  // Colonna a tutta altezza: header e dock fissi, la trascrizione è l'UNICO
-  // elemento scrollabile (la pagina non scorre).
   return (
-    <div
-      style={{
-        flex: 1,
-        minHeight: 0,
-        display: "flex",
-        flexDirection: "column",
-        width: "100%",
-        maxWidth: 720,
-        margin: "0 auto",
-        padding: wide ? "16px 20px 0" : "10px 12px 0",
-      }}
-    >
-      {/* header */}
-      <div
-        style={{
-          flex: "none",
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
-          paddingBottom: 14,
-          borderBottom: "1px solid rgba(27,42,74,.1)",
-        }}
-      >
-        <div
-          onClick={onExit}
-          className="chip"
-          style={{
-            cursor: "pointer",
-            width: 34,
-            height: 34,
-            borderRadius: 10,
-            border: "1px solid rgba(27,42,74,.16)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flex: "none",
-          }}
-          title="Indietro"
-        >
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke={INK}
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M15 5l-7 7 7 7" />
-          </svg>
-        </div>
-        <div
-          style={{
-            width: 38,
-            height: 38,
-            borderRadius: "50%",
-            background: `linear-gradient(135deg, ${ORANGE}, #FF9558)`,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: 19,
-            flex: "none",
-            boxShadow: "0 6px 16px -6px rgba(255,107,53,.7)",
-          }}
-        >
-          ✨
-        </div>
-        <div style={{ minWidth: 0 }}>
-          <div
-            className="num"
-            style={{ fontSize: 17, fontWeight: 500, letterSpacing: "-.2px" }}
-          >
-            Assistente torneo
-          </div>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 6,
-              font: "700 12px 'Nunito Sans'",
-              color: "rgba(27,42,74,.5)",
-            }}
-          >
-            <span
-              style={{
-                width: 7,
-                height: 7,
-                borderRadius: "50%",
-                background: "#2FBF71",
-              }}
-            />
-            Creazione guidata
+    <div className="crea" style={altezza ? { height: altezza } : undefined}>
+      <header className="crea-head">
+        <Button variant="quiet" icon="close" onClick={() => onExit(a.isDirty())}>
+          Esci
+        </Button>
+        <div className="crea-title">
+          <span className="crea-avatar" aria-hidden="true">
+            <Icon name="ball" size={20} />
+          </span>
+          <div className="crea-title-text">
+            <h1 tabIndex={-1}>Assistente torneo</h1>
+            <p>Creazione guidata</p>
           </div>
         </div>
-      </div>
+      </header>
 
-      {/* transcript — unico elemento con scroll interno */}
       <div
-        ref={transcriptRef}
-        style={{
-          flex: 1,
-          minHeight: 0,
-          overflowY: "auto",
-          display: "flex",
-          flexDirection: "column",
-          gap: 12,
-          padding: "18px 2px",
+        ref={logRef}
+        className="crea-log ui-scroll"
+        role="log"
+        aria-live="polite"
+        aria-label="Conversazione con l’assistente"
+        onScroll={(e) => {
+          const el = e.currentTarget
+          vicino.current = el.scrollHeight - el.scrollTop - el.clientHeight <= VICINO_AL_FONDO
         }}
       >
-        {messages.map((m) => (
-          <Bubble key={m.id} role={m.role}>
-            {m.card ?? m.text}
-          </Bubble>
+        {a.messages.map((m) => (
+          <Bubble key={m.id} m={m} partners={partners} venues={venues} />
         ))}
-        {typing && <Typing />}
-        <div ref={endRef} />
+        {a.typing && <Typing />}
       </div>
 
-      {/* dock (input attivo) — sempre fisso in basso */}
-      <div
-        style={{
-          flex: "none",
-          borderTop: "1px solid rgba(27,42,74,.08)",
-          paddingTop: 12,
-          paddingBottom: wide ? 16 : "max(14px, env(safe-area-inset-bottom))",
-          background: "#FFF8F0",
-        }}
-      >
-        {typing ? (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              color: "rgba(27,42,74,.42)",
-              font: "700 12.5px 'Nunito Sans'",
-              padding: "6px 2px",
-            }}
-          >
-            <span
-              style={{ display: "inline-flex", gap: 4, alignItems: "center" }}
-            >
-              {[0, 1, 2].map((i) => (
-                <span
-                  key={i}
-                  style={{
-                    width: 5,
-                    height: 5,
-                    borderRadius: "50%",
-                    background: "rgba(27,42,74,.4)",
-                    animation: `blink 1.1s ${i * 0.16}s infinite ease-in-out`,
-                  }}
-                />
-              ))}
-            </span>
-            l’assistente sta scrivendo…
-          </div>
-        ) : (
-          <Dock
-            step={step}
-            partners={partners}
-            venues={venues}
-            text={text}
-            setText={setText}
-            dateVal={dateVal}
-            setDateVal={setDateVal}
-            scoreRows={scoreRows}
-            setScoreRows={setScoreRows}
-            createdId={createdId}
-            handlers={{
-              submitName,
-              pickPartner,
-              pickNoPartner,
-              chooseNewPartner,
-              submitPartnerName,
-              pickDate,
-              pickVenue,
-              chooseNewVenue,
-              submitVenueName,
-              skipVenue,
-              pickCategory,
-              pickFormat,
-              pickSurface,
-              pickStatus,
-              pickPlacement,
-              pickBracket,
-              answerResults,
-              pickResultsPartner,
-              submitOpponents,
-              pickPhase,
-              submitScore,
-              answerMore,
-              confirmCreate,
-              restart,
-              onDone,
-            }}
-          />
-        )}
-      </div>
-    </div>
-  );
-}
-
-// =============================================================== sub-components
-
-function Bubble({
-  role,
-  children,
-}: {
-  role: "ai" | "user";
-  children: ReactNode;
-}) {
-  const isAi = role === "ai";
-  return (
-    <div
-      style={{
-        display: "flex",
-        gap: 9,
-        alignItems: "flex-end",
-        flexDirection: isAi ? "row" : "row-reverse",
-      }}
-    >
-      {isAi && (
+      {conDock && (
         <div
-          style={{
-            width: 28,
-            height: 28,
-            borderRadius: "50%",
-            background: `linear-gradient(135deg, ${ORANGE}, #FF9558)`,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: 14,
-            flex: "none",
-          }}
+          ref={dockRef}
+          className="crea-dock"
+          // Mentre l'assistente "scrive" il dock resta montato (smontarlo faceva
+          // cadere il focus sul body) e attenuato; qualunque input lo sveglia.
+          data-attesa={a.typing ? '' : undefined}
+          aria-busy={a.typing || undefined}
+          onPointerDownCapture={a.interrompi}
+          onKeyDownCapture={a.interrompi}
         >
-          ✨
+          <Dock a={a} partners={partners} venues={venues} onDone={onDone} />
         </div>
       )}
-      <div
-        style={{
-          maxWidth: "84%",
-          padding: "11px 14px",
-          borderRadius: isAi ? "4px 16px 16px 16px" : "16px 4px 16px 16px",
-          background: isAi ? "#fff" : INK,
-          color: isAi ? INK : "#fff",
-          border: isAi ? "1px solid rgba(27,42,74,.1)" : "none",
-          font: "600 14.5px 'Nunito Sans'",
-          lineHeight: 1.45,
-          animation: "bubble .28s cubic-bezier(.2,.8,.2,1) both",
-          boxShadow: isAi
-            ? "0 4px 14px -10px rgba(27,42,74,.4)"
-            : "0 6px 16px -8px rgba(27,42,74,.5)",
-        }}
-      >
-        {children}
-      </div>
     </div>
-  );
+  )
 }
 
+// =============================================================== trascrizione
+
+function Bubble({ m, partners, venues }: { m: Msg; partners: Option[]; venues: Option[] }) {
+  const ai = m.role === 'ai'
+  return (
+    <div className="crea-msg" data-role={m.role}>
+      {ai && (
+        <span className="crea-avatar" data-size="s" aria-hidden="true">
+          <Icon name="ball" size={16} />
+        </span>
+      )}
+      <div className="crea-bubble">
+        {!ai && <span className="sr-only">Tu: </span>}
+        {m.recap ? <Recap d={m.recap} partners={partners} venues={venues} /> : m.text}
+      </div>
+    </div>
+  )
+}
+
+/** L'unico indicatore "sta scrivendo" (UX §6.10): la bolla nella trascrizione. */
 function Typing() {
   return (
-    <div style={{ display: "flex", gap: 9, alignItems: "flex-end" }}>
-      <div
-        style={{
-          width: 28,
-          height: 28,
-          borderRadius: "50%",
-          background: `linear-gradient(135deg, ${ORANGE}, #FF9558)`,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: 14,
-          flex: "none",
-        }}
-      >
-        ✨
-      </div>
-      <div
-        style={{
-          padding: "13px 16px",
-          borderRadius: "4px 16px 16px 16px",
-          background: "#fff",
-          border: "1px solid rgba(27,42,74,.1)",
-          display: "flex",
-          gap: 5,
-          animation: "bubble .28s ease both",
-        }}
-      >
-        {[0, 1, 2].map((i) => (
-          <span
-            key={i}
-            style={{
-              width: 7,
-              height: 7,
-              borderRadius: "50%",
-              background: "rgba(27,42,74,.5)",
-              animation: `blink 1.1s ${i * 0.16}s infinite ease-in-out`,
-            }}
-          />
-        ))}
+    <div className="crea-msg" data-role="ai">
+      <span className="crea-avatar" data-size="s" aria-hidden="true">
+        <Icon name="ball" size={16} />
+      </span>
+      <div className="crea-bubble crea-typing">
+        <span className="crea-dots" aria-hidden="true">
+          <span style={{ '--i': 0 } as CSSProperties} />
+          <span style={{ '--i': 1 } as CSSProperties} />
+          <span style={{ '--i': 2 } as CSSProperties} />
+        </span>
+        <span className="sr-only">L’assistente sta scrivendo</span>
       </div>
     </div>
-  );
+  )
 }
 
-function Recap({
-  d,
-  partners,
-  venues,
-}: {
-  d: Draft;
-  partners: Option[];
-  venues: Option[];
-}) {
-  const partnerName =
-    d.partnerId === ""
-      ? "Da solo"
-      : d.partnerId === "new"
-        ? d.newPartnerName || "Nuovo compagno"
-        : partners.find((p) => p.id === d.partnerId)?.name || "—";
-  const venueName =
-    d.venueId === ""
-      ? "—"
-      : d.venueId === "new"
-        ? d.newVenueName || "Nuovo luogo"
-        : venues.find((v) => v.id === d.venueId)?.name || "—";
-  const rows: [string, string][] = [
-    ["Nome", d.name],
-    ["Compagno", partnerName],
-    ["Data", fmtDate(d.date)],
-    ["Luogo", venueName],
-    ["Categoria", d.category],
-    ["Formato", d.format],
-    ["Superficie", d.surface],
-    [
-      "Stato",
-      d.status === "ongoing"
-        ? "In corso ⏳"
-        : `Finito · ${d.placement}${d.bracket ? " · " + d.bracket : ""}`,
-    ],
-  ];
+function Recap({ d, partners, venues }: { d: Draft; partners: Option[]; venues: Option[] }) {
   return (
-    <div style={{ minWidth: 240 }}>
-      <div
-        style={{
-          font: "800 12px 'Nunito Sans'",
-          letterSpacing: 1,
-          textTransform: "uppercase",
-          color: "rgba(27,42,74,.45)",
-          marginBottom: 10,
-        }}
-      >
-        Riepilogo torneo
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
-        {rows.map(([k, v]) => (
-          <div
-            key={k}
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              gap: 14,
-              alignItems: "baseline",
-            }}
-          >
-            <span
-              style={{
-                font: "700 12.5px 'Nunito Sans'",
-                color: "rgba(27,42,74,.5)",
-              }}
-            >
-              {k}
-            </span>
-            <span
-              style={{ font: "700 13.5px 'Nunito Sans'", textAlign: "right" }}
-            >
-              {v}
-            </span>
+    <div className="crea-recap">
+      <p className="crea-recap-title">Riepilogo torneo</p>
+      <dl className="crea-recap-rows">
+        {righeRiepilogo(d, { partners, venues }).map(([k, v]) => (
+          <div key={k}>
+            <dt>{k}</dt>
+            <dd>{v}</dd>
           </div>
         ))}
-      </div>
+      </dl>
       {d.matches.length > 0 && (
-        <div
-          style={{
-            marginTop: 12,
-            paddingTop: 12,
-            borderTop: "1px solid rgba(27,42,74,.1)",
-          }}
-        >
-          <div
-            style={{
-              font: "800 12px 'Nunito Sans'",
-              letterSpacing: 1,
-              textTransform: "uppercase",
-              color: "rgba(27,42,74,.45)",
-              marginBottom: 8,
-            }}
-          >
-            {d.matches.length} {d.matches.length === 1 ? "partita" : "partite"}
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+        <>
+          <p className="crea-recap-title">{d.matches.length === 1 ? '1 partita' : `${d.matches.length} partite`}</p>
+          <ul className="crea-recap-matches">
             {d.matches.map((m, i) => (
-              <div
-                key={i}
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  gap: 12,
-                  alignItems: "baseline",
-                }}
-              >
-                <span
-                  style={{
-                    font: "700 12.5px 'Nunito Sans'",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  <span style={{ color: "rgba(27,42,74,.45)" }}>
-                    {m.phase} ·{" "}
-                  </span>
+              <li key={i}>
+                <span className="crea-recap-match">
+                  <span className="crea-recap-phase">{m.phase} · </span>
                   {m.opponents}
                 </span>
-                <span
-                  className="num"
-                  style={{ fontSize: 13, color: ORANGE, flex: "none" }}
-                >
-                  {fmtSets(m.sets)}
-                </span>
-              </div>
+                <span className="crea-recap-sets">{fmtSets(m.sets)}</span>
+              </li>
             ))}
-          </div>
-        </div>
+          </ul>
+        </>
       )}
     </div>
-  );
+  )
 }
 
-// ------------------------------------------------------------------- the dock
+// =============================================================== il dock
 
-interface Handlers {
-  submitName: (v: string) => void;
-  pickPartner: (p: Option) => void;
-  pickNoPartner: () => void;
-  chooseNewPartner: () => void;
-  submitPartnerName: (v: string, fromResults: boolean) => void;
-  pickDate: (iso: string, label: string) => void;
-  pickVenue: (v: Option) => void;
-  chooseNewVenue: () => void;
-  submitVenueName: (v: string) => void;
-  skipVenue: () => void;
-  pickCategory: (c: Category) => void;
-  pickFormat: (f: Format) => void;
-  pickSurface: (s: Surface) => void;
-  pickStatus: (s: "finished" | "ongoing") => void;
-  pickPlacement: (p: Placement) => void;
-  pickBracket: (b: Bracket | "") => void;
-  answerResults: (yes: boolean) => void;
-  pickResultsPartner: (p: Option) => void;
-  submitOpponents: (v: string) => void;
-  pickPhase: (ph: Phase) => void;
-  submitScore: (rows: { us: string; them: string }[]) => void;
-  answerMore: (yes: boolean) => void;
-  confirmCreate: () => void;
-  restart: () => void;
-  onDone: (id: string) => void;
-}
-
-interface DockProps {
-  step: Step;
-  partners: Option[];
-  venues: Option[];
-  text: string;
-  setText: (v: string) => void;
-  dateVal: string;
-  setDateVal: (v: string) => void;
-  scoreRows: { us: string; them: string }[];
-  setScoreRows: (r: { us: string; them: string }[]) => void;
-  createdId: string | null;
-  handlers: Handlers;
-}
-
-// Piazzamenti proposti quando il torneo è finito (senza "In corso").
-const FINISHED_PLACEMENTS: Placement[] = [
-  "1° 🏆",
-  "2°",
-  "3°",
-  "Semifinale",
-  "Quarti",
-  "Ottavi",
-  "Gironi",
-];
-
-function Dock(props: DockProps) {
-  const {
-    step,
-    partners,
-    venues,
-    text,
-    setText,
-    dateVal,
-    setDateVal,
-    scoreRows,
-    setScoreRows,
-    createdId,
-    handlers: h,
-  } = props;
+function Dock({ a, partners, venues, onDone }: { a: Assistente; partners: Option[]; venues: Option[]; onDone: (id: string) => void }) {
+  const h = a.handlers
+  const q = a.domandaCorrente ?? ''
+  const step: Step = a.step
 
   switch (step) {
-    case "name":
-      return (
-        <TextDock
-          value={text}
-          setValue={setText}
-          placeholder="es. Summer Cup Rimini"
-          onSubmit={() => h.submitName(text)}
-        />
-      );
+    case 'name':
+      return <TextDock a={a} label={q} placeholder="es. Summer Cup Rimini" onSubmit={() => h.submitName(a.text)} />
 
-    case "partner":
-      // Senza compagni salvati non ha senso una lista: si chiede il nome (o "Da solo").
+    case 'partner':
+      // Senza compagni salvati una lista non ha senso: si chiede il nome (o "Da solo").
       if (!partners.length)
         return (
           <TextDock
-            value={text}
-            setValue={setText}
+            a={a}
+            label={q}
             placeholder="es. Giulia"
-            skipLabel="🙋 Ho giocato da solo"
-            onSkip={h.pickNoPartner}
-            onSubmit={() => h.submitPartnerName(text, false)}
+            skip={{ label: 'Ho giocato da solo', onClick: h.pickNoPartner }}
+            onSubmit={() => h.submitPartnerName(a.text, false)}
           />
-        );
+        )
       return (
-        <ChipsDock>
+        <Chips label={q}>
           {partners.map((p) => (
-            <Chip key={p.id} onClick={() => h.pickPartner(p)}>
-              {p.name}
-            </Chip>
+            <Chip key={p.id} onClick={() => h.pickPartner(p)}>{p.name}</Chip>
           ))}
-          <Chip tone="primary" onClick={h.chooseNewPartner}>
-            ➕ Nuovo compagno
-          </Chip>
-          <Chip onClick={h.pickNoPartner}>🙋 Da solo</Chip>
-        </ChipsDock>
-      );
+          <Chip tone="accent" icon="plus" onClick={h.chooseNewPartner}>Nuovo compagno</Chip>
+          <Chip onClick={h.pickNoPartner}>Da solo</Chip>
+        </Chips>
+      )
 
-    case "partnerName":
-      return (
-        <TextDock
-          value={text}
-          setValue={setText}
-          placeholder="es. Giulia"
-          onSubmit={() => h.submitPartnerName(text, false)}
-        />
-      );
-    case "resultsPartnerName":
-      return (
-        <TextDock
-          value={text}
-          setValue={setText}
-          placeholder="es. Giulia"
-          onSubmit={() => h.submitPartnerName(text, true)}
-        />
-      );
+    case 'partnerName':
+      return <TextDock a={a} label={q} placeholder="es. Giulia" onSubmit={() => h.submitPartnerName(a.text, false)} />
+    case 'resultsPartnerName':
+      return <TextDock a={a} label={q} placeholder="es. Giulia" onSubmit={() => h.submitPartnerName(a.text, true)} />
 
-    case "resultsPartner":
+    case 'resultsPartner':
       return (
-        <ChipsDock>
+        <Chips label={q}>
           {partners.map((p) => (
-            <Chip key={p.id} onClick={() => h.pickResultsPartner(p)}>
-              {p.name}
-            </Chip>
+            <Chip key={p.id} onClick={() => h.pickResultsPartner(p)}>{p.name}</Chip>
           ))}
-        </ChipsDock>
-      );
+        </Chips>
+      )
 
-    case "date":
+    case 'date':
       return (
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          <ChipsDock>
-            <Chip tone="primary" onClick={() => h.pickDate(todayISO(), "Oggi")}>
-              Oggi
-            </Chip>
-            <Chip onClick={() => h.pickDate(shiftISO(-1), "Ieri")}>Ieri</Chip>
-            <Chip
-              onClick={() => h.pickDate(shiftISO(-7), "La scorsa settimana")}
-            >
-              Settimana scorsa
-            </Chip>
-          </ChipsDock>
-          <div style={{ display: "flex", gap: 8 }}>
-            <input
-              type="date"
-              value={dateVal}
-              onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                setDateVal(e.target.value)
-              }
-              style={{ ...fieldStyle, flex: 1 }}
-            />
-            <SendBtn
-              label="Usa"
-              onClick={() => h.pickDate(dateVal, fmtDate(dateVal))}
-            />
-          </div>
+        <div className="crea-stack">
+          <Chips label={q}>
+            <Chip tone="accent" onClick={() => h.pickDate(todayISO(), 'Oggi')}>Oggi</Chip>
+            <Chip onClick={() => h.pickDate(shiftISO(-1), 'Ieri')}>Ieri</Chip>
+            <Chip onClick={() => h.pickDate(shiftISO(-7), 'La scorsa settimana')}>Settimana scorsa</Chip>
+          </Chips>
+          <form
+            className="crea-form"
+            onSubmit={(e: FormEvent) => {
+              e.preventDefault()
+              h.pickDateValue()
+            }}
+          >
+            <label className="sr-only" htmlFor="crea-data">Un altro giorno</label>
+            <input id="crea-data" type="date" className="ui-input" value={a.dateVal} onChange={(e) => a.setDateVal(e.target.value)} />
+            <Button type="submit" variant="neutral">Usa questa data</Button>
+          </form>
         </div>
-      );
+      )
 
-    case "venue":
-      // Senza luoghi salvati una lista di chip sarebbe vuota: si chiede il nome
-      // (stesso ragionamento dello step compagno).
+    case 'venue':
       if (!venues.length)
         return (
           <TextDock
-            value={text}
-            setValue={setText}
+            a={a}
+            label={q}
             placeholder="es. Bagno 26 Riccione"
-            skipLabel="Salta"
-            onSkip={h.skipVenue}
-            onSubmit={() => h.submitVenueName(text)}
+            skip={{ label: 'Salta', onClick: h.skipVenue }}
+            onSubmit={() => h.submitVenueName(a.text)}
           />
-        );
+        )
       return (
-        <ChipsDock>
+        <Chips label={q}>
           {venues.map((v) => (
-            <Chip key={v.id} onClick={() => h.pickVenue(v)}>
-              {v.name}
-            </Chip>
+            <Chip key={v.id} onClick={() => h.pickVenue(v)}>{v.name}</Chip>
           ))}
-          <Chip tone="primary" onClick={h.chooseNewVenue}>
-            📍 Nuovo luogo
-          </Chip>
+          <Chip tone="accent" icon="pin" onClick={h.chooseNewVenue}>Nuovo luogo</Chip>
           <Chip onClick={h.skipVenue}>Salta</Chip>
-        </ChipsDock>
-      );
+        </Chips>
+      )
 
-    case "venueName":
-      return (
-        <TextDock
-          value={text}
-          setValue={setText}
-          placeholder="es. Bagno 26 Riccione"
-          onSubmit={() => h.submitVenueName(text)}
-        />
-      );
+    case 'venueName':
+      return <TextDock a={a} label={q} placeholder="es. Bagno 26 Riccione" onSubmit={() => h.submitVenueName(a.text)} />
 
-    case "category":
+    case 'category':
       return (
-        <ChipsDock>
+        <Chips label={q}>
           {CATEGORIES.map((c) => (
-            <Chip key={c} onClick={() => h.pickCategory(c)}>
-              {c}
-            </Chip>
+            <Chip key={c} onClick={() => h.pickCategory(c)}>{c}</Chip>
           ))}
-        </ChipsDock>
-      );
+        </Chips>
+      )
 
-    case "format":
+    case 'format':
       return (
-        <ChipsDock>
+        <Chips label={q}>
           {FORMATS.map((f) => (
-            <Chip key={f} onClick={() => h.pickFormat(f)}>
-              {f}
-            </Chip>
+            <Chip key={f} onClick={() => h.pickFormat(f)}>{f}</Chip>
           ))}
-        </ChipsDock>
-      );
+        </Chips>
+      )
 
-    case "surface":
+    case 'surface':
       return (
-        <ChipsDock>
+        <Chips label={q}>
           {SURFACES.map((s) => (
-            <Chip key={s} onClick={() => h.pickSurface(s)}>
-              {s}
-            </Chip>
+            <Chip key={s} onClick={() => h.pickSurface(s)}>{s}</Chip>
           ))}
-        </ChipsDock>
-      );
+        </Chips>
+      )
 
-    case "status":
+    case 'status':
       return (
-        <ChipsDock>
-          <Chip tone="primary" onClick={() => h.pickStatus("finished")}>
-            🏁 È finito
-          </Chip>
-          <Chip onClick={() => h.pickStatus("ongoing")}>
-            ⏳ È ancora in corso
-          </Chip>
-        </ChipsDock>
-      );
+        <Chips label={q}>
+          <Chip tone="accent" onClick={() => h.pickStatus('finished')}>È finito</Chip>
+          <Chip onClick={() => h.pickStatus('ongoing')}>È ancora in corso</Chip>
+        </Chips>
+      )
 
-    case "placement":
+    case 'placement':
       return (
-        <ChipsDock>
+        <Chips label={q}>
           {FINISHED_PLACEMENTS.map((p) => (
             <Chip key={p} onClick={() => h.pickPlacement(p)}>
-              {p}
+              <Piazzamento p={p} />
             </Chip>
           ))}
-        </ChipsDock>
-      );
+        </Chips>
+      )
 
-    case "bracket":
+    case 'bracket':
       return (
-        <ChipsDock>
+        <Chips label={q}>
           {BRACKETS.map((b) => (
-            <Chip key={b} onClick={() => h.pickBracket(b)}>
-              {b}
-            </Chip>
+            <Chip key={b} onClick={() => h.pickBracket(b)}>{b}</Chip>
           ))}
-          <Chip onClick={() => h.pickBracket("")}>Nessun tabellone</Chip>
-        </ChipsDock>
-      );
+          <Chip onClick={() => h.pickBracket('')}>Nessun tabellone</Chip>
+        </Chips>
+      )
 
-    case "askResults":
+    case 'askResults':
       return (
-        <ChipsDock>
-          <Chip tone="primary" onClick={() => h.answerResults(true)}>
-            ✅ Sì, aggiungiamole
-          </Chip>
+        <Chips label={q}>
+          <Chip tone="accent" onClick={() => h.answerResults(true)}>Sì, aggiungiamole</Chip>
           <Chip onClick={() => h.answerResults(false)}>No, va bene così</Chip>
-        </ChipsDock>
-      );
+        </Chips>
+      )
 
-    case "matchOpponents":
+    case 'matchOpponents':
       return (
         <TextDock
-          value={text}
-          setValue={setText}
+          a={a}
+          label={q}
           placeholder="es. Bianchi / Verdi"
-          skipLabel="Senza nome"
-          onSkip={() => h.submitOpponents("")}
-          onSubmit={() => h.submitOpponents(text)}
+          skip={{ label: 'Senza nome', onClick: () => h.submitOpponents('') }}
+          onSubmit={() => h.submitOpponents(a.text)}
+          submitEmpty
         />
-      );
+      )
 
-    case "matchPhase":
+    case 'matchPhase':
       return (
-        <ChipsDock>
+        <Chips label={q}>
           {PHASES.map((ph) => (
-            <Chip key={ph} onClick={() => h.pickPhase(ph)}>
-              {ph}
-            </Chip>
+            <Chip key={ph} onClick={() => h.pickPhase(ph)}>{ph}</Chip>
           ))}
-        </ChipsDock>
-      );
+        </Chips>
+      )
 
-    case "matchScore":
-      return (
-        <ScoreDock
-          rows={scoreRows}
-          setRows={setScoreRows}
-          onSave={() => h.submitScore(scoreRows)}
-          onSkip={() => h.submitScore([])}
-        />
-      );
+    case 'matchScore':
+      return <ScoreDock a={a} />
 
-    case "matchMore":
+    case 'matchMore':
       return (
-        <ChipsDock>
-          <Chip tone="primary" onClick={() => h.answerMore(true)}>
-            ➕ Aggiungi partita
-          </Chip>
-          <Chip onClick={() => h.answerMore(false)}>✅ Ho finito</Chip>
-        </ChipsDock>
-      );
+        <Chips label={q}>
+          <Chip tone="accent" icon="plus" onClick={() => h.answerMore(true)}>Aggiungi partita</Chip>
+          <Chip onClick={() => h.answerMore(false)}>Ho finito</Chip>
+        </Chips>
+      )
 
-    case "recap":
+    case 'recap':
       return (
-        <ChipsDock>
-          <Chip tone="dark" onClick={h.confirmCreate}>
-            ✅ Crea torneo
-          </Chip>
-          <Chip onClick={h.restart}>✏️ Ricomincia</Chip>
-        </ChipsDock>
-      );
-
-    case "done":
-      return (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-          <div
-            className="chip"
-            onClick={() => createdId && h.onDone(createdId)}
-            style={{
-              flex: 1,
-              minWidth: 180,
-              textAlign: "center",
-              background: ORANGE,
-              color: "#fff",
-              padding: "14px 18px",
-              borderRadius: 12,
-              font: "700 14px 'Nunito Sans'",
-              cursor: "pointer",
-              boxShadow: "0 8px 20px -8px rgba(255,107,53,.6)",
-            }}
-          >
-            Apri il torneo →
-          </div>
-          <div
-            className="chip"
-            onClick={h.restart}
-            style={{
-              flex: 1,
-              minWidth: 160,
-              textAlign: "center",
-              border: "1px solid rgba(27,42,74,.18)",
-              color: INK,
-              padding: "14px 18px",
-              borderRadius: 12,
-              font: "700 14px 'Nunito Sans'",
-              cursor: "pointer",
-            }}
-          >
-            Crea un altro
-          </div>
+        <div className="crea-actions" role="group" aria-label={q}>
+          <Button variant="filled" onClick={() => void h.confirmCreate()}>Crea torneo</Button>
+          <Button variant="plain" onClick={h.restart}>Ricomincia</Button>
         </div>
-      );
+      )
 
-    // 'boot' | 'saving' | fallback: nessun input mentre l'assistente lavora.
+    case 'done':
+      return (
+        <div className="crea-actions">
+          <Button variant="filled" block onClick={() => a.createdId && onDone(a.createdId)}>Apri il torneo</Button>
+          <Button variant="tinted" block onClick={h.restart}>Crea un altro</Button>
+        </div>
+      )
+
     default:
-      return null;
+      return null
   }
 }
 
-// ---------------------------------------------------------------- dock atoms
-
-const fieldStyle: CSSProperties = {
-  width: "100%",
-  border: "1px solid rgba(27,42,74,.16)",
-  borderRadius: 13,
-  padding: "13px 15px",
-  font: "600 15px 'Nunito Sans'",
-  background: "#fff",
-};
-
-// Id del `<datalist>` dei suggerimenti. Fisso perché nella chat c'è un solo
-// input alla volta: lo step corrente decide cosa montare, quindi due liste non
-// possono coesistere.
-const SUGGERIMENTI_ID = "crea-suggerimenti";
-
-function TextDock({
-  value,
-  setValue,
-  placeholder,
-  onSubmit,
-  onSkip,
-  skipLabel,
-  suggerimenti,
-}: {
-  value: string;
-  setValue: (v: string) => void;
-  placeholder: string;
-  onSubmit: () => void;
-  onSkip?: () => void;
-  skipLabel?: string;
-  suggerimenti?: readonly string[];
-}) {
-  const submit = (e: FormEvent) => {
-    e.preventDefault();
-    onSubmit();
-  };
+function Piazzamento({ p }: { p: Placement }) {
+  if (!/🏆/u.test(p)) return <>{p}</>
+  const v = p.replace(/\s*🏆\s*/u, '')
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-      {onSkip && (
-        <ChipsDock>
-          <Chip onClick={onSkip}>{skipLabel || "Salta"}</Chip>
-        </ChipsDock>
-      )}
-      <form onSubmit={submit} style={{ display: "flex", gap: 8 }}>
-        <input
-          autoFocus
-          value={value}
-          onChange={(e: ChangeEvent<HTMLInputElement>) =>
-            setValue(e.target.value)
-          }
-          placeholder={placeholder}
-          // Suggerisce senza vincolare: il campo resta testo libero, come lo
-          // schema (`tournaments.city` è `text` senza CHECK).
-          list={suggerimenti ? SUGGERIMENTI_ID : undefined}
-          autoComplete="off"
-          style={{ ...fieldStyle, flex: 1 }}
-        />
-        {suggerimenti && (
-          <datalist id={SUGGERIMENTI_ID}>
-            {suggerimenti.map((s) => (
-              <option key={s} value={s} />
-            ))}
-          </datalist>
-        )}
-        <SendBtn onClick={onSubmit} disabled={!value.trim() && !onSkip} />
-      </form>
-    </div>
-  );
+    <>
+      <Icon name="trophy" size={16} />
+      <span aria-hidden="true">{v}</span>
+      <span className="sr-only">{v.replace('1°', 'Primo posto')}</span>
+    </>
+  )
 }
 
-function SendBtn({
-  onClick,
-  disabled,
-  label,
-}: {
-  onClick: () => void;
-  disabled?: boolean;
-  label?: string;
-}) {
-  return (
-    <button
-      type="submit"
-      onClick={onClick}
-      disabled={disabled}
-      style={{
-        flex: "none",
-        border: "none",
-        background: disabled ? "rgba(27,42,74,.18)" : ORANGE,
-        color: "#fff",
-        borderRadius: 13,
-        padding: label ? "0 18px" : 0,
-        width: label ? undefined : 48,
-        height: 48,
-        cursor: disabled ? "default" : "pointer",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 6,
-        font: "700 14px 'Nunito Sans'",
-        transition: "background .15s ease",
-      }}
-    >
-      {label || (
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="#fff"
-          strokeWidth={2}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M5 12h14M13 6l6 6-6 6" />
-        </svg>
-      )}
-    </button>
-  );
-}
+// ---------------------------------------------------------------- atomi
 
-function ChipsDock({ children }: { children: ReactNode }) {
+function Chips({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div style={{ display: "flex", flexWrap: "wrap", gap: 9 }}>{children}</div>
-  );
-}
-
-function Chip({
-  children,
-  onClick,
-  tone = "light",
-}: {
-  children: ReactNode;
-  onClick: () => void;
-  tone?: "light" | "primary" | "dark";
-}) {
-  const styles: Record<string, CSSProperties> = {
-    light: {
-      background: "#fff",
-      color: INK,
-      border: "1px solid rgba(27,42,74,.16)",
-    },
-    primary: {
-      background: "rgba(255,107,53,.12)",
-      color: "#C4501E",
-      border: "1px solid rgba(255,107,53,.35)",
-    },
-    dark: { background: INK, color: "#fff", border: "1px solid " + INK },
-  };
-  return (
-    <div
-      className="chip"
-      onClick={onClick}
-      style={{
-        ...styles[tone],
-        padding: "11px 16px",
-        borderRadius: 12,
-        font: "700 13.5px 'Nunito Sans'",
-        cursor: "pointer",
-      }}
-    >
+    <div className="crea-chips" role="group" aria-label={label}>
       {children}
     </div>
-  );
+  )
 }
 
-function ScoreDock({
-  rows,
-  setRows,
-  onSave,
-  onSkip,
-}: {
-  rows: { us: string; them: string }[];
-  setRows: (r: { us: string; them: string }[]) => void;
-  onSave: () => void;
-  onSkip: () => void;
-}) {
-  const update = (i: number, key: "us" | "them", v: string) =>
-    setRows(rows.map((r, j) => (j === i ? { ...r, [key]: v } : r)));
-  const removeRow = (i: number) => setRows(rows.filter((_, j) => j !== i));
-  const addRow = () =>
-    rows.length < 3 && setRows([...rows, { us: "", them: "" }]);
-  const setInput: CSSProperties = {
-    flex: 1,
-    minWidth: 0,
-    border: "1px solid rgba(27,42,74,.16)",
-    borderRadius: 11,
-    padding: 12,
-    font: "600 17px 'Space Grotesk'",
-    textAlign: "center",
-    background: "#fff",
-  };
+function Chip({ children, onClick, tone, icon }: { children: ReactNode; onClick: () => void; tone?: 'accent'; icon?: IconName }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-      {rows.map((st, i) => (
-        <div key={i} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div className="lbl" style={{ width: 42, flex: "none" }}>
-            Set {i + 1}
-          </div>
-          <input
-            type="number"
-            inputMode="numeric"
-            value={st.us}
-            onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              update(i, "us", e.target.value)
-            }
-            placeholder="21"
-            style={setInput}
-          />
-          <span className="num" style={{ color: "rgba(27,42,74,.3)" }}>
-            –
-          </span>
-          <input
-            type="number"
-            inputMode="numeric"
-            value={st.them}
-            onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              update(i, "them", e.target.value)
-            }
-            placeholder="18"
-            style={setInput}
-          />
-          {rows.length > 1 && (
-            <div
-              onClick={() => removeRow(i)}
-              style={{
-                font: "700 18px 'Nunito Sans'",
-                color: "rgba(27,42,74,.3)",
-                cursor: "pointer",
-                padding: "0 2px",
-                flex: "none",
-              }}
-            >
-              ×
-            </div>
-          )}
-        </div>
-      ))}
-      <div
-        style={{
-          display: "flex",
-          gap: 8,
-          alignItems: "center",
-          flexWrap: "wrap",
+    <button type="button" className="crea-chip" data-tone={tone} onClick={onClick}>
+      {icon && <Icon name={icon} size={16} />}
+      {children}
+    </button>
+  )
+}
+
+function TextDock({ a, label, placeholder, onSubmit, skip, submitEmpty = false }: {
+  a: Assistente
+  /** Il nome del campo: la domanda (UX F11.3). */
+  label: string
+  placeholder: string
+  onSubmit: () => void
+  skip?: { label: string; onClick: () => void }
+  /** Il campo vuoto si può inviare (gli avversari diventano «Avversari»). */
+  submitEmpty?: boolean
+}) {
+  const vuoto = !a.text.trim()
+  return (
+    <div className="crea-stack">
+      {skip && (
+        <Chips label="Alternative">
+          <Chip onClick={skip.onClick}>{skip.label}</Chip>
+        </Chips>
+      )}
+      <form
+        className="crea-form"
+        onSubmit={(e: FormEvent) => {
+          e.preventDefault()
+          if (vuoto && !submitEmpty) return
+          onSubmit()
         }}
       >
-        {rows.length < 3 && <Chip onClick={addRow}>＋ Aggiungi set</Chip>}
-        <div style={{ flex: 1 }} />
-        <Chip onClick={onSkip}>Senza punteggio</Chip>
-        <div
-          className="chip"
-          onClick={onSave}
-          style={{
-            background: ORANGE,
-            color: "#fff",
-            padding: "11px 18px",
-            borderRadius: 12,
-            font: "700 13.5px 'Nunito Sans'",
-            cursor: "pointer",
-          }}
+        <input
+          className="ui-input crea-input"
+          value={a.text}
+          onChange={(e) => a.setText(e.target.value)}
+          placeholder={placeholder}
+          aria-label={label}
+          autoComplete="off"
+          enterKeyHint="send"
+        />
+        <button
+          type="submit"
+          className="ui-icon-button crea-send"
+          data-variant="filled"
+          aria-label="Invia"
+          aria-disabled={vuoto && !submitEmpty ? true : undefined}
         >
-          Salva partita
-        </div>
+          <Icon name="send" size={20} />
+        </button>
+      </form>
+    </div>
+  )
+}
+
+function ScoreDock({ a }: { a: Assistente }) {
+  const rows = a.scoreRows
+  const h = a.handlers
+  const update = (i: number, key: 'us' | 'them', v: string) =>
+    a.setScoreRows(rows.map((r, j) => (j === i ? { ...r, [key]: v } : r)))
+  const removeRow = (i: number) => a.setScoreRows(rows.filter((_, j) => j !== i))
+  const addRow = () => {
+    if (rows.length < 3) a.setScoreRows([...rows, { us: '', them: '' }])
+  }
+  return (
+    <div className="crea-stack">
+      <div className="crea-sets">
+        {rows.map((r, i) => (
+          <SetRow
+            key={i}
+            index={i}
+            us={r.us}
+            them={r.them}
+            onChange={(k, v) => update(i, k, v)}
+            onRemove={rows.length > 1 ? () => removeRow(i) : undefined}
+          />
+        ))}
+      </div>
+      <div className="crea-actions" data-wrap="">
+        {rows.length < 3 && (
+          <Chip icon="plus" onClick={addRow}>Aggiungi set</Chip>
+        )}
+        <span className="crea-spacer" />
+        <Chip onClick={() => h.submitScore([])}>Senza punteggio</Chip>
+        <Button variant="filled" onClick={() => h.submitScore(rows)}>Salva partita</Button>
       </div>
     </div>
-  );
+  )
 }

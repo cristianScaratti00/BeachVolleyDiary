@@ -1,23 +1,38 @@
+// ============================================================================
+// Win rate per compagno: i primi 6 (UX §6.2), poi «Vedi tutti» porta alla tab
+// Compagni. Una riga con barra per compagno, ordinata dal win rate più alto.
+// ============================================================================
 import type { DashboardStats } from '../../lib/derive'
-import { MeterRow, EmptyNote } from '../ui'
+import { Link } from '../../app/router'
+import { MeterRow } from '../ui/Stat'
+import { ChartCard, EmptyNote } from './Chart'
 
-// Win rate per compagno (card a larghezza piena) + link "Vedi tutti".
-export function PartnerCard({ s, goCompagni }: { s: DashboardStats; goCompagni: () => void }) {
+const PRIMI = 6
+const partite = (n: number) => (n === 1 ? '1 partita' : `${n} partite`)
+
+export function PartnerCard({ s }: { s: DashboardStats }) {
+  const righe = s.partnerRows.slice(0, PRIMI)
   return (
-    <div className="card" style={{ padding: 22, marginTop: 16 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <div className="lbl">Win rate per compagno</div>
-        <div className="chip" style={{ font: "700 12px 'Nunito Sans'", color: '#FF6B35', cursor: 'pointer' }} onClick={goCompagni}>Vedi tutti</div>
-      </div>
-      {s.partnerRows.length ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,240px),1fr))', gap: 18 }}>
-          {s.partnerRows.map((p) => (
-            <MeterRow key={p.id} label={p.name} pct={p.winPct} barW={p.barW} sub={`${p.played} partite · ${p.won} vinte`} />
+    <ChartCard
+      title="Per compagno"
+      wide
+      extra={
+        s.partnerRows.length > 0 ? (
+          <Link to={{ name: 'compagni' }} className="dash-link">
+            Vedi tutti
+          </Link>
+        ) : undefined
+      }
+    >
+      {righe.length ? (
+        <div className="dash-partners">
+          {righe.map((p) => (
+            <MeterRow key={p.id} label={p.name} pct={p.winPct} sub={`${partite(p.played)} · ${p.won} vinte`} />
           ))}
         </div>
       ) : (
         <EmptyNote>Aggiungi partite con i tuoi compagni per vedere il win rate.</EmptyNote>
       )}
-    </div>
+    </ChartCard>
   )
 }

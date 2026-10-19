@@ -2,12 +2,18 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/react'
-import './index.css'
+// Prima i token: il primo foglio dichiara l'ordine dei livelli CSS. Poi i
+// materiali (`[data-material]`) e la base degli elementi nudi. Ogni altro
+// foglio è di un componente e sta nel livello `components`.
+import './styles/tokens.css'
+import './styles/materials.css'
+import './styles/base.css'
 import Root from './Root'
 import { AuthProvider } from './hooks/useAuth'
 import { MotionRoot } from './components/Motion'
 import ConsensoCookie from './components/ConsensoCookie'
 import { avviaTracciamentoSeConsentito, useScelta } from './lib/consenso'
+import { analyticsPath } from './app/routes'
 
 // Riaccende il tracciamento solo se l'utente aveva già detto sì in una visita
 // precedente. Clarity si inietta da dentro `lib/consenso.ts`, che è l'unico
@@ -23,7 +29,9 @@ function Tracciamento() {
   if (scelta !== 'accettato') return null
   return (
     <>
-      <Analytics />
+      {/* Con gli URL veri ogni torneo sarebbe una "pagina" a sé: gli UUID
+          diventano [id] (UX §4.8, Q11). */}
+      <Analytics beforeSend={(e) => ({ ...e, url: analyticsPath(e.url) })} />
       <SpeedInsights />
     </>
   )

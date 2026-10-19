@@ -1,0 +1,60 @@
+@layer components {
+  /* La dropzone: un gruppo opaco dentro lo sheet di vetro (ART_DIRECTION D6). */
+  .foto-sheet-drop {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    min-height: calc(var(--space-20) * 2);
+    overflow: hidden;
+    border-radius: var(--radius-card);
+    background: var(--surface);
+    box-shadow: inset 0 0 0 var(--border-w) var(--field-border);
+    color: var(--ink);
+  }
+  .foto-sheet-drop::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--surface-pressed);
+    opacity: 0;
+    z-index: -1;
+    transition: opacity var(--dur-svelto) var(--ease-standard);
+  }
+  .foto-sheet-drop:active::before { opacity: 1; transition-duration: 0ms; }
+  .foto-sheet-drop[data-busy] { cursor: progress; }
+  .foto-sheet-empty { display: grid; justify-items: center; gap: var(--space-2); padding: var(--space-6); }
+  .foto-sheet-empty .ui-icon { color: var(--ink-2); }
+  .foto-sheet-cta { font: var(--type-headline); letter-spacing: var(--track-headline); }
+  .foto-sheet-preview {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity var(--dur-svelto) var(--ease-standard);
+  }
+  /* Mentre carica, l'anteprima sta al 60% (MOTION.md §7). */
+  .foto-sheet-drop[data-busy] .foto-sheet-preview { opacity: 0.6; }
+  .foto-sheet-change {
+    position: absolute;
+    right: var(--space-2);
+    bottom: var(--space-2);
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--control-sm);
+    padding: 0 var(--space-3);
+    border-radius: var(--radius-capsule);
+    background: var(--surface);
+    box-shadow: var(--elev-float);
+    font: var(--type-subhead-strong);
+    letter-spacing: var(--track-subhead);
+  }
+  .foto-sheet-hint {
+    margin-top: calc(-1 * var(--space-2));
+    font: var(--type-footnote);
+    letter-spacing: var(--track-footnote);
+    color: var(--ink-2);
+  }
+}

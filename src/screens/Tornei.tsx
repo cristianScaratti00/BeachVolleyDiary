@@ -1,197 +1,308 @@
-import { useState } from 'react'
-import { deriveTorneiSections, TORNEI_FILTER_ALL } from '../lib/derive'
-import type { TorneiListData, TorneoCard } from '../lib/derive'
-import { PageHeader, SectionTitle, FilterChips, SegmentedControl, Button, Badge, StatFooter, EmptyCard, InlineLink, MUTED } from '../components/ui'
+// ============================================================================
+// Tornei (UX §5 F4, §6.3): l'archivio, con tre viste degli stessi tornei —
+// Lista · Timeline (l'ex Diario) · Mappa — sotto UNA ricerca.
+//
+// - Il sottotitolo descrive ciò che si vede ed è l'unica live region della
+//   schermata (`role="status"`): sulla Lista conta le card visibili col
+//   formato attivo (difetto #1), in Timeline le voci del diario, con la
+//   ricerca i risultati.
+// - La ricerca vale per tutte le viste: con un testo, segmented e chip
+//   spariscono e al loro posto ci sono i risultati, stile Timeline. Il testo
+//   vive qui (i risultati cambiano nello stesso fotogramma del tasto) e sale
+//   all'URL (`?q=`, in replace) dopo 250ms.
+// - Il cambio di vista dal segmented lascia il focus sul segmento (M4).
+// - Niente "Nuovo torneo" nell'intestazione: si crea dal ＋ e dalla Sidebar.
+// ============================================================================
+import { Suspense, useEffect, useId, useRef, useState } from 'react'
+import { deriveDiarySearch, deriveTorneiSections, TORNEI_FILTER_ALL } from '../lib/derive'
+import type { TorneoCard } from '../lib/derive'
+import { mappaSubtitle } from '../lib/derive.mappa'
+import type { TorneiProps } from '../app/contracts'
+import type { TorneiVista } from '../app/routes'
+import { Link, scrollToTop } from '../app/router'
+import { LazyBoundary, lazyRetry } from '../app/LazyBoundary'
+import { sottotitoloTornei } from '../app/selectors'
+import {
+  Badge,
+  Bone,
+  Button,
+  Card,
+  CardGrid,
+  CardLink,
+  EmptyState,
+  FilterChips,
+  IconButton,
+  NavBar,
+  Page,
+  PlacementBadge,
+  SearchField,
+  Section,
+  SegmentedControl,
+  Skeleton,
+  StatFooter,
+} from '../components/ui/index'
 import Mappa from './Mappa'
-import type { MappaData } from '../lib/derive.mappa'
+import './Tornei.css'
 
-// Le due viste della schermata. Non è una voce di navigazione in più: la bottom
-// nav è una pill di 6 slot da 46px (6·46 + 5·6 + 14 = 320px, che sta in un
-// viewport da 360) — un settimo slot la porterebbe a 372px e sforerebbe su
-// iPhone SE/mini. La mappa vive quindi dentro Tornei, dove i suoi dati stanno
-// già di casa.
-export type TorneiVista = 'lista' | 'mappa'
+// La Timeline (e i risultati della ricerca, che hanno la sua forma) sta in un
+// chunk a parte, come il Diario di prima.
+const Timeline = lazyRetry(() => import('./Timeline'))
 
-interface TorneiProps {
-  list: TorneiListData
-  mappa: MappaData
-  // Vista controllata da App, unica eccezione al "lo stato di presentazione
-  // resta qui": aprire un torneo dalla mappa porta su `screen === 'torneo'`, che
-  // smonta questa schermata. Con lo stato locale si tornava indietro sulla lista
-  // dopo essere partiti dalla mappa — la navigazione perdeva il punto di
-  // partenza. Vive dove sopravvive al viaggio di andata e ritorno.
-  vista: TorneiVista
-  onVista: (v: TorneiVista) => void
-  onOpenTorneo: (id: string) => void
-  onNewTorneo: () => void
-  onAssistant: () => void
-  canAssistant: boolean
-}
+/** Quanto aspetta la ricerca prima di scrivere `?q=` nell'URL (UX §4.2). */
+const DEBOUNCE_MS = 250
 
-export default function Tornei({ list, mappa, vista, onVista, onOpenTorneo, onNewTorneo, onAssistant, canAssistant }: TorneiProps) {
-  const { tornei, tPlayed, podi, bestPlacement } = list
-  // Il filtro è puramente di presentazione: vive qui, non risale ad App. Quale
-  // valore sia lecito e cosa mostrare di conseguenza lo decide `derive`.
-  const [format, setFormat] = useState<string>(TORNEI_FILTER_ALL)
-  const { active, options, upcoming, groups } = deriveTorneiSections(tornei, format)
+const plurale = (n: number, uno: string, tanti: string) => (n === 1 ? `1 ${uno}` : `${n} ${tanti}`)
+
+export default function Tornei({ vista, q, onVista, onQuery, list, entries, mappa, stagione, onNuovoTorneo, onStoria, traccia }: TorneiProps) {
+  // ------------------------------------------------------------ ricerca
+  const [testo, setTesto] = useState(q)
+  const inviato = useRef(q)
+  const campo = useRef<HTMLInputElement>(null)
+
+  // Il testo arriva anche da fuori (indietro, link con ?q=): si riallinea.
+  useEffect(() => {
+    if (q !== inviato.current) {
+      inviato.current = q
+      setTesto(q)
+    }
+  }, [q])
+  useEffect(() => {
+    if (testo === inviato.current) return
+    const t = window.setTimeout(() => {
+      inviato.current = testo
+      onQuery(testo)
+    }, DEBOUNCE_MS)
+    return () => window.clearTimeout(t)
+  }, [testo, onQuery])
+
+  // «/» porta nel campo di ricerca (desktop, Q13).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey || e.defaultPrevented) return
+      const t = e.target as HTMLElement | null
+      if (t && (t.closest('input, textarea, select, [contenteditable="true"]') || t.closest('[role="dialog"], [role="alertdialog"]'))) return
+      e.preventDefault()
+      campo.current?.focus()
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [])
+
+  const ricerca = deriveDiarySearch(entries, testo)
+  const termine = testo.trim()
+
+  // ------------------------------------------------------------ filtro
+  // Il filtro per formato è di presentazione: vive qui. Quando il formato
+  // sparisce dai dati si torna a "Tutti" e il valore salvato si azzera, così
+  // non si riattiva da solo se quel formato ritorna (difetto #2).
+  const [formato, setFormato] = useState<string>(TORNEI_FILTER_ALL)
+  const sezioni = deriveTorneiSections(list.tornei, formato)
+  useEffect(() => {
+    if (formato !== TORNEI_FILTER_ALL && sezioni.active !== formato) setFormato(TORNEI_FILTER_ALL)
+  }, [formato, sezioni.active])
+
+  const vuoto = list.tornei.length === 0 && entries.length === 0
+  const visibili: TorneoCard[] = [...sezioni.upcoming, ...sezioni.groups.flatMap((g) => g.tornei)]
+
+  const sottotitolo = vuoto
+    ? undefined
+    : ricerca.active
+      ? ricerca.results.length === 0
+        ? `Nessun risultato per «${termine}»`
+        : `${plurale(ricerca.results.length, 'risultato', 'risultati')} per «${termine}»`
+      : vista === 'timeline'
+        ? `${plurale(entries.length, 'torneo', 'tornei')} nel diario`
+        : vista === 'mappa'
+          ? mappaSubtitle(mappa)
+          : sottotitoloTornei(visibili)
+
+  const lente = (visibile: boolean) => (
+    <IconButton
+      icon="search"
+      label="Cerca"
+      className="tornei-lens"
+      data-visible={visibile ? '' : undefined}
+      tabIndex={visibile ? 0 : -1}
+      aria-hidden={visibile ? undefined : true}
+      onClick={() => {
+        // I tasti battuti finiscono nel campo mentre la pagina sale (MOTION.md §4.1).
+        campo.current?.focus({ preventScroll: true })
+        scrollToTop(true)
+      }}
+    />
+  )
 
   return (
-    <div style={{ animation: 'pop .32s ease both' }}>
-      <PageHeader
-        title="Tornei"
-        subtitle={`${tPlayed} tornei · ${podi} podi · miglior piazzamento ${bestPlacement}`}
-        // Due azioni e non tre: con "⚡ Rapido" in mezzo la riga andava a capo
-        // su qualunque telefono, e la fascia vuota sopra la lista costava più
-        // di quanto valesse una terza porta d'ingresso. La creazione rapida
-        // resta dove serve davvero, sul + della barra di navigazione.
-        actions={
-          <>
-            <Button variant="assistant" onClick={onAssistant} style={{ padding: '11px 15px', gap: 6 }}>
-              ✨ Assistente
-              {!canAssistant && <Badge tone="onColor" size="sm" />}
-            </Button>
-            <Button variant="dark" onClick={onNewTorneo}>＋ Nuovo torneo</Button>
-          </>
-        }
-      />
+    <Page>
+      <NavBar title="Tornei" subtitle={sottotitolo} subtitleLive scrolledActions={vuoto ? undefined : lente}>
+        {!vuoto && (
+          <SearchField
+            ref={campo}
+            className="tornei-search"
+            label="Cerca nei tornei"
+            placeholder="Cerca un torneo, una città, un avversario…"
+            value={testo}
+            onChange={setTesto}
+          />
+        )}
+      </NavBar>
 
-      {tornei.length === 0 ? (
-        <div style={{ marginTop: 22 }}>
-          <EmptyCard>Nessun torneo ancora. <InlineLink onClick={onNewTorneo}>Crea il primo torneo →</InlineLink></EmptyCard>
-        </div>
+      {vuoto ? (
+        <EmptyState
+          variant="primo"
+          zero="Tornei"
+          title="Nessun torneo ancora."
+          action={<Button onClick={onNuovoTorneo}>Crea il primo torneo</Button>}
+          secondary={
+            <>
+              Preferisci farti guidare?{' '}
+              <Link to={{ name: 'crea' }} className="tornei-link">Usa l'assistente</Link>
+            </>
+          }
+        />
+      ) : ricerca.active ? (
+        ricerca.results.length === 0 ? (
+          <EmptyState
+            icon="search"
+            title={`Nessun torneo contiene «${termine}».`}
+            action={
+              <Button
+                variant="tinted"
+                onClick={() => {
+                  setTesto('')
+                  campo.current?.focus()
+                }}
+              >
+                Cancella la ricerca
+              </Button>
+            }
+          />
+        ) : (
+          <TimelineArea results={ricerca.results} onStoria={onStoria} traccia={traccia} />
+        )
       ) : (
         <>
-          {/* Lista o mappa: stesso insieme di tornei, due modi di leggerlo.
-              Segmentato e non a chip — cambia la VISTA, mentre le chip qui
-              sotto scelgono QUALI tornei: due gesti diversi meritavano due
-              forme diverse, prima erano indistinguibili. */}
           <SegmentedControl
+            className="tornei-segmented"
             label="Come vedere i tornei"
             value={vista}
             onChange={(v) => onVista(v as TorneiVista)}
             options={[
               { value: 'lista', label: 'Lista' },
-              { value: 'mappa', label: `Mappa${mappa.citta ? ` · ${mappa.citta}` : ''}` },
+              { value: 'timeline', label: 'Timeline' },
+              { value: 'mappa', label: mappa.citta ? `Mappa · ${mappa.citta}` : 'Mappa' },
             ]}
           />
 
           {vista === 'mappa' ? (
-            <Mappa m={mappa} onOpenTorneo={onOpenTorneo} onNewTorneo={onNewTorneo} />
+            <Mappa m={mappa} stagione={stagione} onNuovoTorneo={onNuovoTorneo} />
+          ) : vista === 'timeline' ? (
+            <TimelineArea results={ricerca.results} onStoria={onStoria} traccia={traccia} />
           ) : (
             <>
-              {options.length > 0 && (
+              {sezioni.options.length > 0 && (
                 <FilterChips
+                  className="tornei-chips"
                   label="Filtra i tornei per formato"
-                  value={active}
-                  onChange={setFormat}
-                  options={[{ value: TORNEI_FILTER_ALL, label: 'Tutti' }, ...options.map((f) => ({ value: f, label: f }))]}
+                  value={sezioni.active}
+                  onChange={setFormato}
+                  options={[{ value: TORNEI_FILTER_ALL, label: 'Tutti' }, ...sezioni.options.map((f) => ({ value: f, label: f }))]}
                 />
               )}
-
-              {upcoming.length > 0 && (
-                <TorneiSection title="Prossimi tornei" tornei={upcoming} onOpenTorneo={onOpenTorneo} accent />
+              {sezioni.upcoming.length > 0 && (
+                <SezioneTornei titolo="Prossimi tornei" tornei={sezioni.upcoming} accent traccia={traccia} />
               )}
-
-              {groups.map((g) => (
-                <TorneiSection key={g.key} title={g.label} tornei={g.tornei} onOpenTorneo={onOpenTorneo} />
+              {sezioni.groups.map((g) => (
+                <SezioneTornei key={g.key} titolo={g.label} tornei={g.tornei} traccia={traccia} />
               ))}
             </>
           )}
         </>
       )}
-    </div>
+    </Page>
   )
 }
 
-// Intestazione + contatore + griglia. Il contatore sta accanto al titolo, non
-// nello slot `action` di SectionTitle: quello allinea a destra (giusto per
-// un'azione tipo "Vedi tutti"), e a 1120px staccherebbe il numero dal titolo che
-// descrive. Stando dentro all'h2 finisce anche nel nome annunciato dagli
-// screen reader ("2vs2, 4 tornei").
-function TorneiSection({ title, tornei, onOpenTorneo, accent = false }: {
-  title: string
-  tornei: TorneoCard[]
-  onOpenTorneo: (id: string) => void
-  accent?: boolean
-}) {
+function TimelineArea(props: Parameters<typeof Timeline>[0]) {
   return (
-    <>
-      <SectionTitle size={17}>
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-          {title}
-          <SectionCount n={tornei.length} accent={accent} />
-        </span>
-      </SectionTitle>
-      <TorneiGrid tornei={tornei} onOpenTorneo={onOpenTorneo} />
-    </>
+    <LazyBoundary onReset={Timeline.reset}>
+      <Suspense fallback={<TimelineSkeleton />}>
+        <Timeline {...props} />
+      </Suspense>
+    </LazyBoundary>
   )
 }
 
-// `accent` riprende i colori del badge da podio per dare risalto ai tornei
-// ancora da giocare.
-function SectionCount({ n, accent = false }: { n: number; accent?: boolean }) {
+/** Lo skeleton della Timeline: le stesse misure della voce vera (MOTION.md §6.3). */
+function TimelineSkeleton() {
   return (
-    <span style={{
-      flex: 'none',
-      font: "700 12px 'Nunito Sans'",
-      padding: '4px 10px',
-      borderRadius: 8,
-      background: accent ? '#FFF1EA' : '#F2F0EC',
-      color: accent ? '#C4501E' : MUTED,
-    }}>
-      {n === 1 ? '1 torneo' : `${n} tornei`}
-    </span>
-  )
-}
-
-// Griglia responsive, riusata da ogni sezione. Le colonne scendono a una sola
-// sotto i 300px + gutter, quindi su mobile non c'è mai scroll orizzontale.
-// Niente marginTop: i 12px sotto a SectionTitle sono già la distanza voluta.
-function TorneiGrid({ tornei, onOpenTorneo }: { tornei: TorneoCard[]; onOpenTorneo: (id: string) => void }) {
-  return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(min(100%,300px),1fr))', gap: 14 }}>
-      {tornei.map((t) => (
-        <TorneoCardView key={t.id} t={t} onOpen={() => onOpenTorneo(t.id)} />
-      ))}
-    </div>
-  )
-}
-
-// Card torneo: pallino categoria, badge piazzamento, nome, meta e footer stats.
-function TorneoCardView({ t, onOpen }: { t: TorneoCard; onOpen: () => void }) {
-  return (
-    <div
-      className="card lift"
-      role="button"
-      tabIndex={0}
-      aria-label={`Apri il torneo ${t.name}`}
-      onClick={onOpen}
-      onKeyDown={(e) => {
-        // Una card non è un `button`: Invio e Spazio vanno gestiti a mano,
-        // altrimenti da tastiera la pagina si attraversa senza poterla aprire.
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onOpen() }
-      }}
-      style={{ padding: 20, cursor: 'pointer' }}
-    >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 9, flexWrap: 'wrap' }}>
-          <div style={{ width: 8, height: 8, borderRadius: '50%', background: t.dot }} />
-          <div className="lbl" style={{ letterSpacing: '1px' }}>{t.category}</div>
-          {t.shared && <Badge tone="dark" size="sm">Condiviso</Badge>}
+    <Skeleton className="tornei-skel" label="Carico la timeline…">
+      {[0, 1, 2].map((i) => (
+        <div key={i} className="tornei-skel-entry">
+          <div className="tornei-skel-date">
+            <Bone className="tornei-skel-day" />
+            <Bone className="tornei-skel-month" />
+          </div>
+          <div className="tornei-skel-body">
+            <Bone className="tornei-skel-title" />
+            <Bone className="tornei-skel-meta" />
+            {i % 2 === 0 && <Bone className="tornei-skel-cover" />}
+          </div>
         </div>
-        <span style={{ font: "700 12px 'Nunito Sans'", padding: '5px 11px', borderRadius: 8, background: t.badgeBg, color: t.badgeColor }}>{t.badge}</span>
-      </div>
-      <div className="num" style={{ fontSize: 19, fontWeight: 500, marginTop: 14, letterSpacing: '-.3px' }}>{t.name}</div>
-      <div style={{ font: "600 12.5px 'Nunito Sans'", color: MUTED, marginTop: 3 }}>{t.meta}</div>
-      <StatFooter
-        gap={22}
-        valueSize={17}
-        items={[
-          { value: t.record, label: 'record', color: '#FF6B35' },
-          { value: t.winPct + '%', label: 'vittorie' },
-          { value: t.matchCount, label: 'partite' },
-        ]}
-      />
-    </div>
+      ))}
+    </Skeleton>
+  )
+}
+
+function SezioneTornei({ titolo, tornei, accent = false, traccia }: {
+  titolo: string
+  tornei: TorneoCard[]
+  accent?: boolean
+  traccia?: string
+}) {
+  const id = useId()
+  return (
+    <Section
+      id={id}
+      title={titolo}
+      count={<Badge tone={accent ? 'accent' : 'neutral'}>{plurale(tornei.length, 'torneo', 'tornei')}</Badge>}
+    >
+      <CardGrid>
+        {tornei.map((t) => (
+          <CardTorneo key={t.id} t={t} traccia={traccia === t.id} />
+        ))}
+      </CardGrid>
+    </Section>
+  )
+}
+
+/** Card torneo: un `<article>` con il titolo-link esteso (UX §7.6). */
+function CardTorneo({ t, traccia }: { t: TorneoCard; traccia: boolean }) {
+  const meta = useId()
+  return (
+    <li className="tornei-item">
+      <Card traccia={traccia} className="tornei-card">
+        <div className="tornei-card-top">
+          <span className="tornei-card-cat">
+            {/* Il pallino è il letterale della lib: decorativo, accanto al testo. */}
+            <span className="tornei-dot" style={{ background: t.dot }} aria-hidden="true" />
+            <span className="tornei-eyebrow">{t.category}</span>
+            {t.shared && <Badge>Condiviso</Badge>}
+          </span>
+          <PlacementBadge label={t.badge} libBg={t.badgeBg} />
+        </div>
+        <CardLink to={{ name: 'torneo', id: t.id }} describedBy={meta} className="tornei-card-title">
+          {t.name}
+        </CardLink>
+        <p id={meta} className="tornei-meta">{t.meta}</p>
+        <StatFooter
+          items={[
+            { value: t.record, label: 'record', tone: 'win' },
+            { value: `${t.winPct}%`, label: 'vittorie' },
+            { value: t.matchCount, label: 'partite' },
+          ]}
+        />
+      </Card>
+    </li>
   )
 }

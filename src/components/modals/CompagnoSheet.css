@@ -1,0 +1,5 @@
+@layer components {
+  .compagno-sheet-row { display: flex; align-items: flex-start; gap: var(--space-3); }
+  .compagno-sheet-row .ui-avatar { margin-top: var(--space-5); }
+  .compagno-sheet-field { flex: 1; }
+}

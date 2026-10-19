@@ -1,0 +1,112 @@
+/* Statistiche e barre (ART_DIRECTION §3.2, §8; MOTION.md §4.4). */
+@layer components {
+  .ui-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--border-w);
+    background: var(--edge);
+    border: var(--border-w) solid var(--edge);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+  }
+  .ui-stat-grid[data-cols="3"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  /* Sei numeri: 3×2 dai 360px; sotto, 2×3 (celle da 95px non reggono
+     un'etichetta da tabellone nemmeno sillabata). */
+  @media (min-width: 360px) {
+    .ui-stat-grid[data-cols="6"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+  @media (min-width: 600px) {
+    .ui-stat-grid[data-cols="4"] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .ui-stat-grid[data-cols="6"] { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  }
+
+  .ui-stat {
+    min-width: 0;
+    background: var(--surface);
+    padding: var(--space-4);
+  }
+  .ui-stat-value {
+    font: var(--type-num-l);
+    letter-spacing: var(--track-num-l);
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .ui-stat[data-size="xl"] .ui-stat-value { font: var(--type-num-xl); letter-spacing: var(--track-num-xl); }
+  .ui-stat[data-size="hero"] .ui-stat-value { font: var(--type-num-hero); letter-spacing: var(--track-num-hero); }
+  .ui-stat-value[data-tone="win"] { color: var(--accent-text); }
+  .ui-stat-label {
+    margin-top: var(--space-1);
+    font: var(--type-eyebrow);
+    letter-spacing: var(--track-eyebrow);
+    text-transform: uppercase;
+    color: var(--ink-2);
+    /* In tre colonne a 390px la cella lascia 86px e «DIFFERENZIALE» ne
+       misura 103: usciva dalla card e copriva il filo. Va a capo in sillabe
+       (lang="it"), e se il browser non sa sillabare spezza la parola. */
+    -webkit-hyphens: auto;
+    hyphens: auto;
+    hyphenate-limit-chars: 6 3 3;
+    overflow-wrap: break-word;
+  }
+
+  /* -------------------------------------------------------- StatFooter */
+  .ui-stat-footer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-5);
+    margin: var(--space-4) 0 0;
+    padding-top: var(--space-4);
+    border-top: var(--hairline) solid var(--separator);
+  }
+  .ui-stat-footer > div { display: flex; flex-direction: column-reverse; min-width: 0; }
+  .ui-stat-footer-value {
+    margin: 0;
+    font: var(--type-num-m);
+    letter-spacing: var(--track-num-m);
+    font-variant-numeric: tabular-nums;
+  }
+  .ui-stat-footer-value[data-tone="win"] { color: var(--accent-text); }
+  .ui-stat-footer-label {
+    font: var(--type-eyebrow);
+    letter-spacing: var(--track-eyebrow);
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+
+  /* ------------------------------------------------------------ Meter */
+  .ui-meter { min-width: 0; }
+  .ui-meter-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); }
+  .ui-meter-label { font: var(--type-subhead-strong); letter-spacing: var(--track-subhead); min-width: 0; overflow-wrap: anywhere; }
+  .ui-meter-value { font: var(--type-num-s); font-variant-numeric: tabular-nums; flex: none; }
+  .ui-meter-sub {
+    margin-top: var(--space-1);
+    font: var(--type-footnote);
+    letter-spacing: var(--track-footnote);
+    color: var(--ink-2);
+  }
+  .ui-meter .ui-bar { margin-top: var(--space-2); }
+
+  .ui-bar {
+    position: relative;
+    height: var(--space-2);
+    background: var(--data-track);
+    border-radius: var(--radius-capsule);
+    overflow: hidden;
+  }
+  .ui-bar[data-size="lg"] { height: var(--space-3); }
+  .ui-bar-fill {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--data-win);
+    transition: transform var(--dur-racconto) var(--ease-racconto);
+  }
+  .ui-bar-fill[data-tone="rest"] { background: var(--data-rest); }
+  .ui-bar-fill[data-tone="podium"] { background: var(--data-podium); }
+  @media (prefers-reduced-motion: reduce) {
+    .ui-bar-fill { transition: none; }
+  }
+}

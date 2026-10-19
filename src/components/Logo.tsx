@@ -1,5 +1,7 @@
 import { useId } from 'react'
 import type { CSSProperties } from 'react'
+import { LIT } from '../lib/theme'
+import './Logo.css'
 
 // ============================================================================
 // Logo "Beach Diary" — pin arancione con palla sabbia (Claude Design, opzione
@@ -23,8 +25,11 @@ import type { CSSProperties } from 'react'
 //
 // L'SVG è in viewBox 0..100, quindi scala a qualsiasi dimensione.
 // ============================================================================
-const INK = '#1B2A4A'
-const ORANGE = '#FF6B35'
+// Il marchio è un disegno, uguale nell'app, nelle icone di public/icons e nel
+// PNG esportato: i colori sono i letterali dei token (`LIT`), e la palla resta
+// della sabbia del marchio, che non è un colore dell'interfaccia.
+const INK = LIT.ink
+const ORANGE = LIT.accent
 const SAND = '#FAF8F5'
 
 // Il pin: goccia che parte dalla punta in basso (50,90) e chiude sul cerchio.
@@ -105,15 +110,25 @@ export function BrandMark({ size = 40, bare = false, style }: BrandMarkProps) {
   )
 }
 
-// Marchio + wordmark "Beach Diary" (per header, sidebar, splash, login).
-// `light` = testo bianco su fondo scuro; `bare` = marchio senza quadrato navy.
-export function BrandLockup({ size = 38, textSize = 18, gap = 12, light = false, bare = false }: { size?: number; textSize?: number; gap?: number; light?: boolean; bare?: boolean }) {
+// Marchio + wordmark "Beach Diary" (Sidebar, Splash, Login). Il wordmark è
+// nel font dell'interfaccia a 700 con tracking −0.02em; «Diary» a 400 e in
+// --ink-2 (ART_DIRECTION §10.2). `light` = su fondo scuro; `bare` = marchio
+// senza quadrato navy. La taglia del testo segue quella del marchio.
+export function BrandLockup({ size = 40, light = false, bare = false }: {
+  size?: number
+  light?: boolean
+  bare?: boolean
+  /** @deprecated la taglia del testo segue `size`. */
+  textSize?: number
+  /** @deprecated lo spazio viene dai token. */
+  gap?: number
+}) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap }}>
+    <span className="ui-brand" data-size={size >= 72 ? 'l' : size >= 40 ? 'm' : 's'} data-light={light ? '' : undefined}>
       <BrandMark size={size} bare={bare} />
-      <span style={{ font: `700 ${textSize}px 'Space Grotesk'`, letterSpacing: '-.4px', color: light ? '#fff' : INK, whiteSpace: 'nowrap' }}>
-        Beach<span style={{ fontWeight: 400, color: light ? 'rgba(255,255,255,.6)' : 'rgba(27,42,74,.55)' }}> Diary</span>
+      <span className="ui-brand-word">
+        Beach<span className="ui-brand-word-2"> Diary</span>
       </span>
-    </div>
+    </span>
   )
 }

@@ -70,6 +70,23 @@ export const SVELTO = { duration: 0.18, ease: [0.2, 0.8, 0.2, 1] } as const
  */
 export const MOLLA = { type: 'spring', stiffness: 460, damping: 38, mass: 0.9 } as const
 
+/**
+ * Oltre questo numero di elementi che si spostano insieme, il layout cambia
+ * senza animazione (MOTION.md §12): misurare e muovere quaranta nodi su un
+ * Android economico costa più di quanto il movimento chiarisca.
+ */
+export const FLIP_MAX = 24
+
+/**
+ * Durata minima visibile dello stato occupato, SOLO per i «Riprova»
+ * (MOTION.md §8.4): un tentativo che fallisce in un fotogramma (offline) non si
+ * vede, e il pulsante sembra non funzionare. Mai per i salvataggi riusciti.
+ */
+export const BUSY_MIN_MS = 300
+
+/** Chiusura automatica di avvisi informativi e di successo (UX §7.8). */
+export const TOAST_MS = 4000
+
 interface MotionRootProps {
   children: ReactNode
 }
@@ -79,9 +96,9 @@ interface MotionRootProps {
  *
  * `reducedMotion="user"` è la ragione principale per cui questo provider
  * esiste: disattiva trasformazioni e movimento per chi ha chiesto meno
- * animazioni nel sistema, lasciando vivi i dissolvenza. Prima l'app rispettava
- * quella preferenza in UN punto solo (`.wrapped-card-anim` in index.css),
- * mentre le altre sette animazioni CSS la ignoravano.
+ * animazioni nel sistema, lasciando vive le dissolvenze. Il lato CSS della
+ * stessa preferenza sta nei token: `--motion-scale` a 0 e le durate lunghe a
+ * 0ms sotto `prefers-reduced-motion` (tokens.css, MOTION.md §11).
  */
 export function MotionRoot({ children }: MotionRootProps) {
   return (

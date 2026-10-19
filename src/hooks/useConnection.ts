@@ -48,3 +48,22 @@ function subscribe(cb: () => void): () => void {
 export function useSlowConnection(): boolean {
   return useSyncExternalStore(subscribe, computeSlow, () => false)
 }
+
+function subscribeOnline(cb: () => void): () => void {
+  window.addEventListener('online', cb)
+  window.addEventListener('offline', cb)
+  return () => {
+    window.removeEventListener('online', cb)
+    window.removeEventListener('offline', cb)
+  }
+}
+
+// false quando il browser sa di essere senza rete. Dove la proprietà manca si
+// assume la rete: meglio un errore vero che un "sei offline" falso.
+export function useOnline(): boolean {
+  return useSyncExternalStore(subscribeOnline, () => navigator.onLine !== false, () => true)
+}
+
+export function isOnline(): boolean {
+  return typeof navigator === 'undefined' || navigator.onLine !== false
+}

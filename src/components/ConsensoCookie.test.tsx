@@ -12,7 +12,7 @@
 // decisione del primo.
 // ============================================================================
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent, within } from '@testing-library/react'
+import { render, screen, fireEvent, within, waitFor } from '@testing-library/react'
 import ConsensoCookie from './ConsensoCookie'
 import { riapriScelta, sceltaCorrente } from '../lib/consenso'
 import { expectNoA11yViolations } from '../test/axe'
@@ -30,20 +30,23 @@ beforeEach(() => {
 
 describe('ConsensoCookie — blocca finché non si sceglie', () => {
   it('il velo copre tutto lo schermo e non lascia passare i click', () => {
+    // Lo stile è in ConsensoCookie.css (jsdom non lo applica): il contratto è
+    // la classe del velo, che è `position: fixed; inset: 0`, più l'assenza di
+    // qualunque `pointer-events: none` mentre il dialogo è aperto — è la riga
+    // che trasformerebbe un velo in una decorazione.
     render(<ConsensoCookie />)
     const v = velo()
-    expect(v).toHaveStyle({ position: 'fixed' })
-    // `inset` letto dallo stile inline e non da `toHaveStyle`: jsdom non
-    // normalizza lo shorthand e lo lascia senza unità ("0", non "0px").
-    expect(v.style.inset).toBe('0')
-    // `pointer-events: none` qui rimetterebbe l'app sotto a portata di click:
-    // è la riga che trasforma un velo in una decorazione.
+    expect(v).toHaveClass('consenso-velo')
     expect(v.style.pointerEvents).not.toBe('none')
+    expect(v).not.toHaveAttribute('data-leaving')
+    expect(v).not.toHaveAttribute('inert')
   })
 
-  it('lo sfondo è nero trasparente, non opaco: l’app resta leggibile dietro', () => {
+  it('lo sfondo è il velo dei token, non uno stile opaco scritto a mano: l’app resta leggibile dietro', () => {
+    // Il colore è --scrim (navy al 36%, tokens.css): nessun fondo in linea.
     render(<ConsensoCookie />)
-    expect(velo()).toHaveStyle({ background: 'rgba(0, 0, 0, 0.1)' })
+    expect(velo().style.background).toBe('')
+    expect(velo().style.backgroundColor).toBe('')
   })
 
   it('blocca lo scorrimento della pagina, e lo restituisce dopo la scelta', () => {
@@ -110,20 +113,31 @@ describe('ConsensoCookie — da tastiera non si esce dal dialog', () => {
 })
 
 describe('ConsensoCookie — la scelta', () => {
-  it('rifiutando sparisce e resta registrato il no', () => {
+  // Alla scelta il dialogo esce in SVELTO (MOTION.md §4.2): la scelta è già
+  // registrata e il velo non riceve più tocchi da t0; il nodo sparisce a fine
+  // uscita.
+  it('rifiutando sparisce e resta registrato il no', async () => {
     const { rerender } = render(<ConsensoCookie />)
     fireEvent.click(screen.getByRole('button', { name: 'Rifiuta' }))
     rerender(<ConsensoCookie />)
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(sceltaCorrente()).toBe('rifiutato')
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
   })
 
-  it('accettando sparisce e resta registrato il sì', () => {
+  it('accettando sparisce e resta registrato il sì', async () => {
     const { rerender } = render(<ConsensoCookie />)
     fireEvent.click(screen.getByRole('button', { name: 'Accetta' }))
     rerender(<ConsensoCookie />)
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(sceltaCorrente()).toBe('accettato')
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+  })
+
+  it('mentre esce non riceve più tocchi', () => {
+    const { rerender } = render(<ConsensoCookie />)
+    const v = velo()
+    fireEvent.click(screen.getByRole('button', { name: 'Accetta' }))
+    rerender(<ConsensoCookie />)
+    if (v.isConnected) expect(v).toHaveAttribute('data-leaving')
   })
 })
 

@@ -1,0 +1,97 @@
+@layer components {
+  /* ------------------------------------------------------------ Vuoto */
+  .ui-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    max-width: var(--empty-max);
+    margin: 0 auto;
+    padding: var(--space-8) 0;
+  }
+  .ui-empty-zero { display: flex; flex-direction: column; align-items: center; margin-bottom: var(--space-4); }
+  .ui-empty-zero-n {
+    font: var(--type-num-hero);
+    letter-spacing: var(--track-num-hero);
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+  }
+  .ui-empty-zero-l {
+    margin-top: var(--space-1);
+    font: var(--type-eyebrow);
+    letter-spacing: var(--track-eyebrow);
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+  .ui-empty-icon { color: var(--ink-3); margin-bottom: var(--space-3); }
+  .ui-empty-title { font: var(--type-title-2); letter-spacing: var(--track-title-2); }
+  .ui-empty-text {
+    margin-top: var(--space-2);
+    font: var(--type-subhead);
+    letter-spacing: var(--track-subhead);
+    color: var(--ink-2);
+  }
+  .ui-empty-action { margin-top: var(--space-5); }
+  .ui-empty-secondary {
+    margin-top: var(--space-3);
+    font: var(--type-subhead);
+    letter-spacing: var(--track-subhead);
+    color: var(--ink-2);
+  }
+
+  /* ----------------------------------------------------------- Errore */
+  .ui-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--space-2);
+    max-width: var(--empty-max);
+    margin: 0 auto;
+    padding: var(--space-8) 0;
+  }
+  /* A tutta pagina compare senza animazione (è il contenuto della pagina);
+     l'errore di un'area entra in ENTRATA al posto dello skeleton. Dopo ogni
+     tentativo fallito la comparsa riparte. */
+  .ui-area-error .ui-error:not([data-n]),
+  .ui-error[data-n="0"] { animation: ui-appare var(--dur-entrata) var(--ease-standard) both; }
+  .ui-error[data-n="1"] { animation: ui-appare-bis var(--dur-entrata) var(--ease-standard) both; }
+  .ui-error-icon { color: var(--ink-3); }
+  .ui-error-title { font: var(--type-title-2); letter-spacing: var(--track-title-2); }
+  h3.ui-error-title { font: var(--type-headline); letter-spacing: var(--track-headline); }
+  .ui-error-text { font: var(--type-subhead); letter-spacing: var(--track-subhead); color: var(--ink-2); }
+  .ui-error .ui-button { margin-top: var(--space-3); }
+  @keyframes ui-appare { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes ui-appare-bis { from { opacity: 0; } to { opacity: 1; } }
+
+  .ui-area-error {
+    display: grid;
+    place-items: center;
+    background: var(--surface);
+    border: var(--border-w) solid var(--edge);
+    border-radius: var(--radius-card);
+    padding: var(--space-4);
+  }
+  .ui-area-error[data-min="map"] { min-height: var(--mappa-h); }
+  .ui-area-error[data-min="venue"] { min-height: var(--venue-map-h); }
+
+  /* --------------------------------------------------------- Skeleton */
+  .ui-skeleton { position: relative; }
+  .ui-skeleton-appear {
+    animation: ui-appare var(--dur-entrata) var(--ease-standard) var(--delay-skeleton) both;
+  }
+  .ui-skeleton-breathe {
+    animation: ui-respiro var(--dur-respiro) var(--ease-respiro) var(--delay-respiro) infinite alternate both;
+  }
+  @keyframes ui-respiro { from { opacity: 1; } to { opacity: 0.55; } }
+  .ui-bone {
+    display: block;
+    background: var(--fill);
+    border-radius: var(--radius-xs);
+  }
+  /* Un'animazione infinita a durata zero non è "spenta": si spegne a mano e
+     si ferma a .75 (MOTION.md §6.2). */
+  @media (prefers-reduced-motion: reduce) {
+    .ui-skeleton-breathe { animation: none; opacity: 0.75; }
+  }
+}

@@ -1,0 +1,45 @@
+/* Cornice della mappa del luogo (ART_DIRECTION §10.3): raggio delle card,
+   bordo --edge, alta --venue-map-h. Le tile NON si filtrano: il contrasto dei
+   pin è misurato sui colori veri di OSM. */
+@layer components {
+  .venuemap {
+    position: relative;
+    height: var(--venue-map-h);
+    border-radius: var(--radius-card);
+    border: var(--border-w) solid var(--edge);
+    background: var(--fill);
+    overflow: hidden;
+  }
+  /* `isolation`: i pannelli di Leaflet (z-index 400) restano chiusi qui
+     dentro, e l'avviso qui sotto ci sta sopra per ordine nel DOM. */
+  .venuemap-box { position: absolute; inset: 0; isolation: isolate; }
+  /* Mappa a fuoco: l'anello di Leaflet esce di 1px e l'`overflow` lo taglia.
+     Si disegna qui, rientrato, sopra le tile (come in ConquisteMap.css). */
+  .venuemap-box:focus-visible { outline: none; }
+  .venuemap:has(> .venuemap-box:focus-visible)::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    border-radius: inherit;
+    outline: var(--focus-width) solid var(--focus-ring);
+    outline-offset: calc(-1 * var(--focus-width));
+  }
+  /* Il link «Leaflet» dell'attribuzione sta nell'angolo: con l'anello fuori
+     dal bordo l'`overflow` del riquadro lo mozzava. Leaflet non dichiara
+     l'offset dei link, quindi qui non si sovrascrive niente di suo. */
+  .venuemap .leaflet-control-attribution a:focus-visible { outline-offset: calc(-1 * var(--focus-width)); }
+  .venuemap-error {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: var(--space-4);
+    text-align: center;
+    background: var(--fill);
+    font: var(--type-subhead-strong);
+    letter-spacing: var(--track-subhead);
+    color: var(--ink-2);
+  }
+}

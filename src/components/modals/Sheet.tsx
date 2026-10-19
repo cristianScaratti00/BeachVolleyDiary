@@ -1,204 +1,288 @@
-import type { CSSProperties, ChangeEvent, PointerEvent as ReactPointerEvent, ReactNode } from 'react'
+// ============================================================================
+// Bottom sheet (UX §7.5, MOTION.md §4.2), restyle di quello che c'era.
+//
+// Da conservare (lo fissa Sheet.test.tsx):
+// - il trascinamento parte SOLO dalla maniglia (`dragListener={false}`): con
+//   `drag` attivo sul foglio Motion gli scrive sopra `touch-action: pan-x`, e
+//   il dito non poteva più scorrere il contenuto («Salva» restava sotto il
+//   bordo dello schermo);
+// - si chiude oltre 120px oppure oltre 550px/s;
+// - l'area che scorre ha `overflow-y: auto` e `overscroll-behavior: contain`;
+// - `max-height` in `dvh` (sul telefono `vh` conta anche la barra
+//   dell'indirizzo);
+// - la maniglia sta fuori dall'area che scorre ed è `aria-hidden`;
+// - il tocco sullo sfondo chiude, quello dentro no.
+//
+// Da aggiungere (UX §7.5): `role="dialog"` con il titolo `<h2>`; focus a t0
+// (primo campo da tastiera e mouse, il titolo da tocco: M3); trappola del
+// focus e ritorno a chi ha aperto; Esc; resistenza e conferma con il modulo
+// sporco; tastiera virtuale (`visualViewport`); piè delle azioni sempre in
+// vista; da 600px form sheet centrato senza trascinamento.
+//
+// Il VELO non è dello sheet: è di ModalHost e resta fermo quando uno overlay
+// ne sostituisce un altro (MOTION.md §3.4.3). Qui c'è solo lo strato
+// trasparente che raccoglie il tocco fuori dal foglio. Il portal su
+// `document.body` lo fa ModalHost: da solo (nei test) lo sheet resta dove lo
+// si monta.
+// ============================================================================
+import { createContext, useContext, useEffect, useId, useRef, useState } from 'react'
+import type { ChangeEvent, CSSProperties, PointerEvent as ReactPointerEvent, ReactNode } from 'react'
 import * as m from 'motion/react-m'
-import { useDragControls } from 'motion/react'
+import { useDragControls, useIsPresent, useReducedMotion } from 'motion/react'
 import type { PanInfo } from 'motion/react'
 import { CITTA_SUGGERITE } from '../../lib/geo'
-import { ENTRATA, MOLLA } from '../Motion'
-
-interface SheetProps {
-  maxWidth?: number
-  scroll?: boolean
-  onClose: () => void
-  children: ReactNode
-}
+import { ENTRATA, MOLLA, SVELTO } from '../Motion'
+import { useSheetCentered } from '../../hooks/useMedia'
+import { firstField, useEscape, useFocusTrap, useInitialFocus, useReturnFocus } from '../ui/overlay'
+import './Sheet.css'
 
 // Quanto in basso va portato il foglio perché il rilascio lo chiuda, e quanto
-// veloce deve andare il dito perché la distanza non conti più.
-//
-// I due criteri servono entrambi: 120px da soli obbligherebbero a un gesto
-// lungo, e la sola velocità chiuderebbe il foglio su una sfiorata. Insieme
-// danno il comportamento che si conosce dai bottom-sheet di sistema — una
-// buttata giù decisa basta, un trascinamento lento va portato a termine.
+// veloce deve andare il dito perché la distanza non conti più. Insieme danno
+// il comportamento dei bottom sheet di sistema: una buttata giù decisa basta,
+// un trascinamento lento va portato a termine.
 const CHIUDI_OLTRE_PX = 120
 const CHIUDI_OLTRE_VELOCITA = 550
+// Elasticità verso il basso: con il modulo sporco il foglio cede meno del
+// dito, e anticipa il "no" prima del rilascio (MOTION.md §2.3).
+const ELASTICO = 0.9
+const ELASTICO_SPORCO = 0.35
 
-// Shared bottom-sheet modal shell used by all forms.
-export function Sheet({ maxWidth = 520, scroll = true, onClose, children }: SheetProps) {
-  // Il gesto di chiusura parte SOLO dalla maniglia, non da tutto il foglio.
-  //
-  // Non è una preferenza: con `drag` attivo sull'elemento, Motion gli scrive
-  // sopra `touch-action: pan-x` ("Disable scrolling on the draggable
-  // direction", render/html/use-props). Su questo foglio quell'elemento è anche
-  // il contenitore che scorre — quindi il dito non poteva più scorrere il
-  // contenuto: il modale del torneo, che è il più alto, restava tagliato con
-  // "Salva" irraggiungibile. Col mouse la rotellina funzionava, ed è per questo
-  // che il difetto è arrivato fin qui.
-  //
-  // `dragListener={false}` toglie quello stile (Motion lo applica solo se il
-  // listener è attivo) e il gesto si avvia a mano da `controls.start` sulla
-  // maniglia. La chiusura per trascinamento resta identica.
+interface SheetCtx {
+  titleId: string
+}
+const Ctx = createContext<SheetCtx | null>(null)
+
+export interface SheetProps {
+  /** Chiede la chiusura: chi ospita lo sheet decide (guardia "sporco"). */
+  onClose: () => void
+  children: ReactNode
+  /** Le azioni, sempre in vista in fondo allo sheet. */
+  footer?: ReactNode
+  /** Con `false` niente area che scorre (sheet corti). */
+  scroll?: boolean
+  /** Il modulo ha almeno un campo cambiato: più resistenza al trascinamento. */
+  dirty?: boolean
+  /** Salvataggio in corso: il gesto non chiude. */
+  busy?: boolean
+  /** Aperto da un dito: il focus va al titolo, non al primo campo (M3). */
+  byTouch?: boolean
+  /** Chi l'ha aperto: il focus ci torna all'inizio dell'uscita. */
+  opener?: HTMLElement | null
+  /** È l'overlay in cima: solo lui risponde a Esc. */
+  top?: boolean
+  /** Nome accessibile se lo sheet non ha un `SheetTitle`. */
+  label?: string
+  /** @deprecated la larghezza la decide il CSS (--sheet-max). */
+  maxWidth?: number
+}
+
+function useTastiera(enabled: boolean) {
+  // iOS non ridimensiona il layout quando sale la tastiera: si guarda il
+  // `visualViewport` e lo sheet ci sta dentro, SENZA transizione (iOS anima
+  // la tastiera da sé: qualunque transizione nostra le correrebbe dietro).
+  const [kb, setKb] = useState<{ h: number; gap: number } | null>(null)
+  useEffect(() => {
+    const vv = typeof window !== 'undefined' ? window.visualViewport : null
+    if (!vv || !enabled) return
+    const on = () => {
+      const gap = window.innerHeight - vv.height - vv.offsetTop
+      setKb(gap > 80 ? { h: vv.height, gap } : null)
+    }
+    vv.addEventListener('resize', on)
+    vv.addEventListener('scroll', on)
+    on()
+    return () => {
+      vv.removeEventListener('resize', on)
+      vv.removeEventListener('scroll', on)
+    }
+  }, [enabled])
+  return kb
+}
+
+export function Sheet({
+  onClose,
+  children,
+  footer,
+  scroll = true,
+  dirty = false,
+  busy = false,
+  byTouch = false,
+  opener,
+  top = true,
+  label,
+}: SheetProps) {
   const trascinamento = useDragControls()
+  const centrato = useSheetCentered()
+  const ridotto = useReducedMotion()
+  const presente = useIsPresent()
+  const titleId = useId()
+  const ref = useRef<HTMLDivElement>(null)
+  const [velocitaUscita, setVelocitaUscita] = useState<number | null>(null)
+  const kb = useTastiera(!centrato)
 
-  const inner: CSSProperties = {
-    background: '#FAF8F5', width: '100%', maxWidth,
-    borderRadius: '22px 22px 0 0', padding: 24,
-  }
-  if (scroll) {
-    // Quando c'è da scorrere il foglio diventa una colonna: maniglia ferma in
-    // cima, contenuto che scorre sotto. Prima erano la stessa cosa — un unico
-    // elemento trascinabile E scorrevole — ed è da lì che nasceva il difetto.
-    // I fogli corti (`scroll={false}`) restano com'erano: non hanno niente da
-    // impaginare in colonna, e cambiarli non ripagherebbe il rischio.
-    inner.display = 'flex'
-    inner.flexDirection = 'column'
-    // `dvh` e non `vh`: sui telefoni `vh` è il viewport a barra dell'indirizzo
-    // nascosta, cioè più alto di quello che si vede davvero. Stessa unità già
-    // usata dalla schermata a tutto schermo in App.
-    inner.maxHeight = '92dvh'
-    inner.overflow = 'hidden' // scorre la colonna interna, non il foglio
-  }
-
-  // I margini negativi riportano l'area scorrevole fino ai bordi del foglio e
-  // il padding rimette lo spazio dentro: il contenuto resta allineato com'era,
-  // ma la barra di scorrimento corre sul bordo e l'ultima riga ha i suoi 24px
-  // di respiro dentro l'area che scorre, non fuori.
-  const area: CSSProperties = scroll
-    ? {
-        flex: 1, minHeight: 0,
-        overflowY: 'auto',
-        // Arrivati in fondo, il gesto non prosegue sulla pagina dietro.
-        overscrollBehavior: 'contain',
-        margin: '0 -24px -24px', padding: '0 24px 24px',
-      }
-    : {}
+  useFocusTrap(ref, presente)
+  useEscape(onClose, top && presente)
+  useInitialFocus(ref, (root) => {
+    const titolo = root.querySelector<HTMLElement>(`[id="${titleId}"]`)
+    if (byTouch) return titolo
+    return firstField(root) ?? titolo
+  })
+  useReturnFocus(presente, opener, ref)
 
   const fineTrascinamento = (_e: unknown, info: PanInfo) => {
-    if (info.offset.y > CHIUDI_OLTRE_PX || info.velocity.y > CHIUDI_OLTRE_VELOCITA) onClose()
-    // Se non basta, non serve fare niente: senza `dragSnapToOrigin` Motion
-    // riporta da sé il foglio a `y: 0` con la molla.
+    const oltre = info.offset.y > CHIUDI_OLTRE_PX || info.velocity.y > CHIUDI_OLTRE_VELOCITA
+    // Sotto soglia, o durante un salvataggio, Motion riporta da sé il foglio
+    // a 0 con la molla, partendo dalla velocità del dito.
+    if (!oltre || busy) return
+    // Modulo sporco: il foglio torna su e nello stesso istante si chiede.
+    if (dirty) {
+      onClose()
+      return
+    }
+    // Pulito: l'uscita continua il gesto con la velocità del dito (M7).
+    setVelocitaUscita(info.velocity.y)
+    onClose()
+  }
+
+  const motion = centrato
+    ? {
+        initial: { opacity: 0, scale: 0.96 },
+        animate: { opacity: 1, scale: 1, transition: ENTRATA },
+        exit: { opacity: 0, scale: 0.96, transition: SVELTO },
+      }
+    : ridotto
+      ? {
+          initial: { opacity: 0 },
+          animate: { opacity: 1, transition: SVELTO },
+          exit: { opacity: 0, transition: SVELTO },
+        }
+      : {
+          initial: { y: '100%' },
+          animate: { y: 0, transition: MOLLA },
+          exit: {
+            y: '100%',
+            transition: velocitaUscita != null ? { ...MOLLA, velocity: velocitaUscita } : SVELTO,
+          },
+        }
+
+  const stile: CSSProperties & Record<string, string> = {
+    maxHeight: kb ? `${Math.round(kb.h * 0.92)}px` : '92dvh',
+    '--material-elev': centrato ? 'var(--elev-dialog)' : 'var(--elev-overlay)',
   }
 
   return (
-    <m.div
-      onClick={onClose}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.2 }}
-      style={{ position: 'fixed', inset: 0, background: 'rgba(27,42,74,.35)', backdropFilter: 'blur(3px)', zIndex: 60, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
-    >
-      <m.div
-        onClick={(e) => e.stopPropagation()}
-        initial={{ y: 24, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        // L'uscita esce di scena per intero invece di dissolversi sul posto:
-        // il foglio "torna da dove è venuto", ed è la metà che finora mancava
-        // (React lo smontava di colpo, senza modo di animarlo).
-        exit={{ y: '100%', opacity: 0, transition: { duration: 0.2, ease: [0.4, 0, 1, 1] } }}
-        transition={ENTRATA}
-        drag="y"
-        // Vedi il commento in testa: senza questo, il foglio non scorre.
-        dragListener={false}
-        dragControls={trascinamento}
-        // Solo verso il basso: tirare in su un foglio già appoggiato al fondo
-        // non vuol dire niente. L'elasticità lascia comunque un cenno di
-        // resistenza, così il gesto non sembra bloccato.
-        dragConstraints={{ top: 0, bottom: 0 }}
-        dragElastic={{ top: 0.02, bottom: 0.9 }}
-        dragMomentum={false}
-        dragTransition={{ bounceStiffness: 460, bounceDamping: 38 }}
-        onDragEnd={fineTrascinamento}
-        whileDrag={{ cursor: 'grabbing' }}
-        style={inner}
-      >
-        {/* La maniglia è l'unica presa del gesto, e sta FUORI dall'area che
-            scorre: è l'unico modo perché resti sempre raggiungibile senza che
-            il contenuto le passi sopra. La barretta resta di 4px — è il segno,
-            non il bersaglio: la zona sensibile è questo involucro, largo quanto
-            il foglio e alto una quarantina di pixel.
-
-            `touchAction: 'none'` va scritto qui a mano: prima lo metteva Motion
-            sul foglio intero, e portava con sé il difetto che questo commit
-            ripara. */}
-        <div
-          onPointerDown={(e: ReactPointerEvent) => trascinamento.start(e)}
-          aria-hidden="true"
-          style={{
-            flex: 'none',
-            display: 'flex', justifyContent: 'center',
-            margin: '-24px -24px 0', padding: '24px 0 18px',
-            touchAction: 'none', cursor: 'grab',
-          }}
+    <Ctx.Provider value={{ titleId }}>
+      {/* Lo strato che raccoglie il tocco fuori dal foglio. */}
+      <div className="ui-sheet-layer" onClick={onClose} style={kb ? { bottom: kb.gap } : undefined}>
+        <m.div
+          ref={ref}
+          className="ui-sheet"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={label ? undefined : titleId}
+          aria-label={label}
+          aria-busy={busy || undefined}
+          // Chi esce smette di sfocare a t0 (MOTION.md §3.4): il budget di 3
+          // superfici vale anche nei 180ms in cui un overlay esce e un altro entra.
+          data-material={presente ? 'glass-thick' : 'frost'}
+          {...(presente ? {} : { inert: '' })}
+          onClick={(e) => e.stopPropagation()}
+          {...motion}
+          drag={centrato ? false : 'y'}
+          dragListener={false}
+          dragControls={trascinamento}
+          // Solo verso il basso: tirare in su un foglio appoggiato al fondo
+          // non vuol dire niente; l'elasticità lascia un cenno di resistenza.
+          dragConstraints={{ top: 0, bottom: 0 }}
+          dragElastic={{ top: 0.02, bottom: dirty || busy ? ELASTICO_SPORCO : ELASTICO }}
+          dragMomentum={false}
+          dragTransition={{ bounceStiffness: MOLLA.stiffness, bounceDamping: MOLLA.damping }}
+          onDragEnd={fineTrascinamento}
+          style={stile}
         >
-          <m.div
-            layout="position"
-            transition={MOLLA}
-            style={{ width: 40, height: 4, background: 'rgba(27,42,74,.15)', borderRadius: 4 }}
-          />
-        </div>
-        {scroll ? <div style={area}>{children}</div> : children}
-      </m.div>
-    </m.div>
+          {/* La maniglia è l'unica presa del gesto e sta FUORI dall'area che
+              scorre. La barretta è il segno; il bersaglio è l'involucro alto
+              44. `touch-action: none` solo qui. */}
+          {!centrato && (
+            <div
+              className="ui-sheet-handle"
+              aria-hidden="true"
+              onPointerDown={(e: ReactPointerEvent) => trascinamento.start(e)}
+              style={{ cursor: 'grab', touchAction: 'none' }}
+            >
+              <span />
+            </div>
+          )}
+          {scroll ? (
+            <div className="ui-sheet-area ui-scroll" style={{ overflowY: 'auto', overscrollBehavior: 'contain' }}>
+              {children}
+            </div>
+          ) : (
+            <div className="ui-sheet-body">{children}</div>
+          )}
+          {footer && <div className="ui-sheet-footer">{footer}</div>}
+        </m.div>
+      </div>
+    </Ctx.Provider>
   )
 }
 
-export function Title({ children }: { children: ReactNode }) {
-  return <div className="num" style={{ fontSize: 21, fontWeight: 500, marginBottom: 18 }}>{children}</div>
+/** Il titolo dello sheet: `<h2>` che dà il nome al dialogo. */
+export function SheetTitle({ children, sub }: { children: ReactNode; sub?: ReactNode }) {
+  const ctx = useContext(Ctx)
+  return (
+    <div className="ui-sheet-head">
+      <h2 id={ctx?.titleId} tabIndex={-1} className="ui-sheet-title">
+        {children}
+      </h2>
+      {sub && <p className="ui-sheet-sub">{sub}</p>}
+    </div>
+  )
 }
 
-export function Label({ children, mb = 6 }: { children: ReactNode; mb?: number }) {
-  return <div className="lbl" style={{ marginBottom: mb }}>{children}</div>
+/**
+ * Le azioni dello sheet (UX §7.5.8): veri `<button>`, in ordine
+ * [distruttivo a sinistra] · spazio · [Annulla] · [primario].
+ */
+export function SheetActions({ children, destructive }: { children: ReactNode; destructive?: ReactNode }) {
+  return (
+    <div className="ui-sheet-actions">
+      {destructive && <div className="ui-sheet-actions-danger">{destructive}</div>}
+      <div className="ui-sheet-actions-main">{children}</div>
+    </div>
+  )
 }
 
-export const inputStyle: CSSProperties = { width: '100%', border: '1px solid rgba(27,42,74,.16)', borderRadius: 11, padding: '12px 14px', font: "700 14px 'Nunito Sans'", background: '#fff' }
-export const selectStyle: CSSProperties = { ...inputStyle, cursor: 'pointer' }
-
-// Campo città con suggerimenti. Condiviso da TorneoModal e QuickTorneoModal,
-// che non sono mai aperti insieme: l'id del `<datalist>` può essere fisso.
-//
-// `<datalist>` e non un `<select>`: la città resta testo libero (lo schema non
-// ha CHECK e la gente gioca anche dove il gazetteer non arriva), ma chi scrive
-// "Rimini" invece di "rimini " ottiene un pin sulla mappa invece di una riga in
-// "Non ancora sulla mappa". È il punto in cui i refusi si prevengono, non si curano.
+// ---------------------------------------------------------------------------
+// Campo città con suggerimenti (C21): `<datalist>` e non un `<select>`: la
+// città resta testo libero, ma chi scrive "Rimini" invece di "rimini " ottiene
+// un pin sulla mappa. Usato dal check-in di "Chi c'è oggi".
+// ---------------------------------------------------------------------------
 const CITTA_LIST_ID = 'citta-suggerite'
 
-export function CityInput({ value, onChange }: {
+export function CityInput({ id, value, onChange, describedBy }: {
+  id?: string
   value: string
   onChange: (city: string) => void
+  describedBy?: string
 }) {
   return (
     <>
       <input
+        id={id}
+        className="ui-input"
         value={value}
         onChange={(e: ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
         placeholder="es. Rimini"
         list={CITTA_LIST_ID}
         autoComplete="off"
-        style={inputStyle}
+        aria-describedby={describedBy}
       />
       <datalist id={CITTA_LIST_ID}>
-        {CITTA_SUGGERITE.map((c) => <option key={c} value={c} />)}
+        {CITTA_SUGGERITE.map((c) => (
+          <option key={c} value={c} />
+        ))}
       </datalist>
     </>
-  )
-}
-
-interface ActionsProps {
-  onDelete?: (() => void) | null
-  deleteLabel?: string
-  onCancel: () => void
-  onSave: () => void
-  saveLabel?: string
-}
-
-// footer action buttons
-export function Actions({ onDelete, deleteLabel = 'Elimina', onCancel, onSave, saveLabel = 'Salva' }: ActionsProps) {
-  return (
-    <div style={{ display: 'flex', gap: 10, marginTop: 24, alignItems: 'center' }}>
-      {onDelete && <div className="chip" onClick={onDelete} style={{ font: "700 14px 'Nunito Sans'", padding: '12px 16px', borderRadius: 11, border: '1px solid rgba(255,71,126,.4)', color: '#FF477E', cursor: 'pointer' }}>{deleteLabel}</div>}
-      <div style={{ flex: 1 }} />
-      <div className="chip" onClick={onCancel} style={{ font: "700 14px 'Nunito Sans'", padding: '12px 20px', borderRadius: 11, border: '1px solid rgba(27,42,74,.16)', color: '#1B2A4A', cursor: 'pointer' }}>Annulla</div>
-      <div className="chip" onClick={onSave} style={{ font: "700 14px 'Nunito Sans'", padding: '12px 24px', borderRadius: 11, background: '#FF6B35', color: '#fff', cursor: 'pointer' }}>{saveLabel}</div>
-    </div>
   )
 }

@@ -1,0 +1,78 @@
+/* ============================================================================
+   Sheet (ART_DIRECTION §9: `glass-thick`, raggio 28; MOTION.md §4.2). Sotto i
+   600px sale dal basso; da 600 è un form sheet centrato (max 560, raggio su
+   tutti gli angoli, niente maniglia né trascinamento).
+   ============================================================================ */
+@layer components {
+  .ui-sheet-layer {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-sheet);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .ui-sheet {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: var(--sheet-max);
+    border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+    color: var(--ink);
+    outline: none;
+  }
+  @media (min-width: 600px) {
+    .ui-sheet-layer { align-items: center; padding: var(--space-6) var(--gutter); }
+    .ui-sheet { border-radius: var(--radius-sheet); }
+  }
+
+  .ui-sheet-handle {
+    flex: none;
+    display: grid;
+    place-items: center;
+    height: var(--touch);
+  }
+  .ui-sheet-handle > span {
+    width: var(--handle-w);
+    height: var(--handle-h);
+    border-radius: var(--radius-capsule);
+    background: var(--ink-3);
+  }
+
+  .ui-sheet-area,
+  .ui-sheet-body {
+    flex: 1;
+    min-height: 0;
+    padding: 0 var(--gutter) var(--space-4);
+  }
+  @media (min-width: 600px) {
+    .ui-sheet-area, .ui-sheet-body { padding-top: var(--space-6); }
+  }
+
+  .ui-sheet-head { margin-bottom: var(--space-4); }
+  .ui-sheet-title { font: var(--type-title-3); letter-spacing: var(--track-title-3); }
+  .ui-sheet-sub {
+    margin-top: var(--space-1);
+    font: var(--type-subhead);
+    letter-spacing: var(--track-subhead);
+    color: var(--ink-2);
+  }
+
+  /* Il piè delle azioni: fuori dall'area che scorre, sempre in vista anche con
+     la tastiera aperta (UX §7.5.7). */
+  .ui-sheet-footer {
+    flex: none;
+    padding: var(--space-3) var(--gutter) calc(var(--space-3) + var(--safe-bottom));
+    border-top: var(--hairline) solid var(--separator);
+  }
+  @media (min-width: 600px) {
+    .ui-sheet-footer { padding-bottom: var(--space-4); }
+  }
+  .ui-sheet-actions { display: flex; align-items: center; gap: var(--space-2); }
+  /* Fra un bersaglio distruttivo e uno no almeno 8px (UX §8.6). */
+  .ui-sheet-actions-danger { margin-right: auto; }
+  .ui-sheet-actions-main { display: flex; align-items: center; gap: var(--space-2); margin-left: auto; }
+
+  /* Lo stack dei moduli dentro lo sheet. */
+  .ui-sheet-stack { display: grid; gap: var(--space-4); }
+}

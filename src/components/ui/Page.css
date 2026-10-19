@@ -1,0 +1,29 @@
+@layer components {
+  .ui-page { width: 100%; max-width: var(--content-max); margin: 0 auto; min-width: 0; }
+  .ui-page[data-width="reading"] { max-width: var(--reading-max); }
+  .ui-page[data-width="timeline"] { max-width: var(--timeline-max); }
+
+  /* Fra sezioni 32, titolo → contenuto 12 (ART_DIRECTION §5.2). */
+  .ui-section { margin-top: var(--space-8); min-width: 0; }
+  .ui-section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-bottom: var(--space-3);
+  }
+  .ui-section-title {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    font: var(--type-title-3);
+    letter-spacing: var(--track-title-3);
+  }
+  .ui-section-action { flex: none; }
+  .ui-note {
+    font: var(--type-footnote);
+    letter-spacing: var(--track-footnote);
+    color: var(--ink-2);
+  }
+}

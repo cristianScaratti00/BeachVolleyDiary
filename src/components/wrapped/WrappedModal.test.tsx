@@ -9,6 +9,10 @@
 // role="group") e un layer nascosto a piena risoluzione (aria-hidden) usato solo
 // per l'export. Per sapere "su quale slide siamo" si legge quindi il gruppo
 // visibile, non un testo qualsiasi (che comparirebbe anche nel layer nascosto).
+//
+// Dal refactor (UX §6.5): mentre il PNG si prepara il pulsante dice
+// «Preparo…», quindi i pulsanti si cercano con `findBy` (si aspetta la fine
+// della preparazione); `onNotice` riceve anche il tipo dell'avviso.
 // ============================================================================
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, within, fireEvent, act, waitFor } from '@testing-library/react'
@@ -116,15 +120,29 @@ describe('WrappedModal — auto-avanzamento', () => {
 })
 
 describe('WrappedModal — azioni', () => {
-  it('lo scarico compare solo sull’ultima slide', () => {
+  it('lo scarico compare solo sull’ultima slide', async () => {
     // È il recap che si porta via, non una slide qualsiasi: prima della fine
     // quel pulsante invitava ad andarsene invece di guardare.
+    await pngPronto()
     renderModal()
-    expect(screen.queryByRole('button', { name: /scarica/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /scarica|preparo/i })).not.toBeInTheDocument()
     fireEvent.keyDown(deck(), { key: 'ArrowRight' })
-    expect(screen.queryByRole('button', { name: /scarica/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /scarica|preparo/i })).not.toBeInTheDocument()
     fireEvent.keyDown(deck(), { key: 'ArrowRight' })
-    expect(screen.getByRole('button', { name: /scarica/i })).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: /scarica/i })).toBeInTheDocument()
+  })
+
+  it('mentre il PNG si prepara il pulsante dice «Preparo…» ed è occupato', async () => {
+    const toBlob = await pngPronto()
+    let fine: (b: Blob) => void = () => {}
+    toBlob.mockImplementation(() => new Promise<Blob>((r) => { fine = r }))
+    renderModal({ slides: CON_RECAP })
+    vaiAllUltima()
+    const b = await screen.findByRole('button', { name: 'Preparo…' })
+    expect(b).toHaveAttribute('aria-busy', 'true')
+    await act(async () => fine(new Blob(['png'], { type: 'image/png' })))
+    await act(async () => fine(new Blob(['png'], { type: 'image/png' })))
+    expect(await screen.findByRole('button', { name: /scarica il riepilogo/i })).toHaveAttribute('aria-busy', 'false')
   })
 
   it('scarica il RIEPILOGO, non la slide che si sta guardando', async () => {
@@ -135,7 +153,7 @@ describe('WrappedModal — azioni', () => {
     vaiAllUltima()
     expect(deck()).toHaveAccessibleName(/slide 3 di 3/i)
 
-    fireEvent.click(screen.getByRole('button', { name: /scarica/i }))
+    fireEvent.click(await screen.findByRole('button', { name: /scarica/i }))
     await waitFor(() => expect(ancore).toHaveLength(1))
 
     // Il nodo catturato è quello del recap (indice 1), non della slide corrente.
@@ -222,7 +240,7 @@ describe('WrappedModal — scarica', () => {
     await pngPronto()
     renderModal({ slides: CON_RECAP })
     vaiAllUltima()
-    fireEvent.click(screen.getByRole('button', { name: /scarica/i }))
+    fireEvent.click(await screen.findByRole('button', { name: /scarica/i }))
     await waitFor(() => expect(ancore).toHaveLength(1))
     expect(ancore[0]).toEqual({
       href: 'blob:http://localhost/png',
@@ -239,8 +257,8 @@ describe('WrappedModal — scarica', () => {
     const onNotice = vi.fn()
     renderModal({ slides: CON_RECAP }, { onNotice })
     vaiAllUltima()
-    fireEvent.click(screen.getByRole('button', { name: /scarica/i }))
-    await waitFor(() => expect(onNotice).toHaveBeenCalledWith(expect.stringMatching(/impossibile generare/i)))
+    fireEvent.click(await screen.findByRole('button', { name: /scarica/i }))
+    await waitFor(() => expect(onNotice).toHaveBeenCalledWith(expect.stringMatching(/impossibile generare/i), 'error'))
     expect(ancore).toHaveLength(0)
   })
 })
@@ -251,7 +269,7 @@ describe('WrappedModal — condividi', () => {
     renderModal()
     vaiAllUltima()
     expect(screen.queryByRole('button', { name: /condividi/i })).not.toBeInTheDocument()
-    const scarica = screen.getByRole('button', { name: /scarica/i })
+    const scarica = await screen.findByRole('button', { name: /scarica/i })
     // Pronto quando la preparazione in sottofondo ha finito.
     await waitFor(() => expect(scarica).toHaveAttribute('aria-busy', 'false'))
   })
@@ -265,7 +283,7 @@ describe('WrappedModal — condividi', () => {
     expect(screen.queryByRole('button', { name: /condividi/i })).not.toBeInTheDocument()
     vaiAllUltima()
 
-    fireEvent.click(screen.getByRole('button', { name: /condividi/i }))
+    fireEvent.click(await screen.findByRole('button', { name: /condividi/i }))
     await waitFor(() => expect(share).toHaveBeenCalledTimes(1))
     const data = share.mock.calls[0][0] as ShareData
     const file = data.files?.[0] as File
@@ -284,7 +302,7 @@ describe('WrappedModal — condividi', () => {
     const onNotice = vi.fn()
     renderModal({ slides: CON_RECAP }, { onNotice })
     vaiAllUltima()
-    fireEvent.click(screen.getByRole('button', { name: /condividi/i }))
+    fireEvent.click(await screen.findByRole('button', { name: /condividi/i }))
     await act(async () => {})
     await act(async () => {})
     expect(onNotice).not.toHaveBeenCalled()
@@ -297,8 +315,8 @@ describe('WrappedModal — condividi', () => {
     const onNotice = vi.fn()
     renderModal({ slides: CON_RECAP }, { onNotice })
     vaiAllUltima()
-    fireEvent.click(screen.getByRole('button', { name: /condividi/i }))
-    await waitFor(() => expect(onNotice).toHaveBeenCalledWith(expect.stringMatching(/tocca di nuovo/i)))
+    fireEvent.click(await screen.findByRole('button', { name: /condividi/i }))
+    await waitFor(() => expect(onNotice).toHaveBeenCalledWith(expect.stringMatching(/tocca di nuovo/i), 'info'))
   })
 
   it('senza share sheet ma con gli appunti copia l’immagine', async () => {
@@ -309,11 +327,11 @@ describe('WrappedModal — condividi', () => {
     const onNotice = vi.fn()
     renderModal({ slides: CON_RECAP }, { onNotice })
     vaiAllUltima()
-    fireEvent.click(screen.getByRole('button', { name: /condividi/i }))
+    fireEvent.click(await screen.findByRole('button', { name: /condividi/i }))
     await waitFor(() => expect(write).toHaveBeenCalledTimes(1))
     const [item] = write.mock.calls[0][0] as Array<{ items: Record<string, Blob> }>
     expect(item.items['image/png']).toBeInstanceOf(Blob)
-    expect(onNotice).toHaveBeenCalledWith(expect.stringMatching(/copiata/i))
+    expect(onNotice).toHaveBeenCalledWith(expect.stringMatching(/copiata/i), 'success')
   })
 })
 
@@ -329,6 +347,29 @@ describe('WrappedModal — dati insufficienti', () => {
     const { onClose } = renderModal({ hasEnoughData: false })
     await user.click(screen.getByText('Ho capito'))
     expect(onClose).toHaveBeenCalled()
+  })
+})
+
+describe('WrappedModal — cornice del visore', () => {
+  it('è un dialogo modale con il nome «Beach Wrapped» e il focus parte dal ✕', () => {
+    renderModal()
+    const d = screen.getByRole('dialog', { name: 'Beach Wrapped' })
+    expect(d).toHaveAttribute('aria-modal', 'true')
+    expect(screen.getByRole('button', { name: 'Chiudi' })).toHaveFocus()
+  })
+
+  it('Esc chiude', () => {
+    const { onClose } = renderModal()
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(onClose).toHaveBeenCalled()
+  })
+
+  it('la card si raggiunge con Tab (anello di focus visibile, non spento)', async () => {
+    const user = userEvent.setup()
+    renderModal()
+    await user.tab()
+    expect(deck()).toHaveFocus()
+    expect(deck().style.outline).toBe('')
   })
 })
 

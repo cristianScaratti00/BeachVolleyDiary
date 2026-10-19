@@ -1,287 +1,227 @@
-import { useRef, useState } from 'react'
-import type { ChangeEvent, CSSProperties } from 'react'
-import type { Session } from '../lib/auth'
-import { updateDisplayName, updatePassword } from '../lib/auth'
-import { supabase } from '../lib/supabase'
-import { useAuth } from '../hooks/useAuth'
-import { useScelta, riapriScelta } from '../lib/consenso'
-import { Avatar, Badge, MUTED } from '../components/ui'
-import { Label, inputStyle } from '../components/modals/Sheet'
-import SegnalazioniAdmin from '../components/SegnalazioniAdmin'
+// ============================================================================
+// Profilo (UX §5 F9, §6.8): liste raggruppate stile iOS. Presentazionale: la
+// foto, il nome e la password passano dalle callback (useActions), che parlano
+// con Supabase; qui restano il modulo, l'anteprima della foto e gli esiti.
+//
+// Le righe distruttive (togliere le condivisioni, uscire) sono testo --danger
+// e aprono SEMPRE un ConfirmDialog (lo fa la shell). «Esci» vuol dire solo
+// logout (UX C19).
+// ============================================================================
+import { useEffect, useRef, useState } from 'react'
+import type { ChangeEvent } from 'react'
+import type { ProfiloProps } from '../app/contracts'
+import { NavBar, Page, ListGroup, ListItem, ListRow, Avatar, Badge, Button, Icon, TextField } from '../components/ui/index'
+import './Profilo.css'
 
-interface ProfiloProps {
-  session: Session
-  onLogout: () => void
-  /** Quanti altri utenti ti hanno collegato come loro socio. */
-  condivisioniRicevute: number
-  /** Toglie TUTTE le condivisioni ricevute. Ritorna quante ne ha tolte. */
-  onRimuoviCondivisioni: () => Promise<number>
+type Esito = { ok: boolean; text: string } | null
+
+const NOME_MAX = 40
+
+const ETICHETTA_CONSENSO = {
+  accettato: 'Accettati',
+  rifiutato: 'Rifiutati',
+  nessuno: 'Da scegliere',
+} as const
+
+function anteprima(file: File): string | null {
+  return typeof URL !== 'undefined' && typeof URL.createObjectURL === 'function' ? URL.createObjectURL(file) : null
+}
+function rilascia(url: string | null) {
+  if (url && typeof URL.revokeObjectURL === 'function') URL.revokeObjectURL(url)
 }
 
-// Esito dell'ultima azione di un riquadro (verde = fatto, rosso = errore).
-type Msg = { ok: boolean; text: string } | null
-
-function Feedback({ msg }: { msg: Msg }) {
-  if (!msg) return null
-  return (
-    <div style={{ font: "700 12.5px 'Nunito Sans'", color: msg.ok ? '#14B87A' : '#FF477E', marginTop: 12 }}>
-      {msg.text}
-    </div>
-  )
-}
-
-const hintStyle: CSSProperties = { font: "600 12px 'Nunito Sans'", color: 'rgba(27,42,74,.45)', marginTop: 7 }
-const readOnlyStyle: CSSProperties = { ...inputStyle, background: '#F7F5F1', color: MUTED, cursor: 'not-allowed' }
-
-function SaveButton({ label, disabled, onClick }: { label: string; disabled: boolean; onClick: () => void }) {
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className="chip"
-      style={{
-        marginTop: 16, padding: '12px 22px', borderRadius: 11, border: 'none',
-        background: '#FF6B35', color: '#fff', font: "700 13.5px 'Nunito Sans'",
-        cursor: disabled ? 'default' : 'pointer', opacity: disabled ? 0.45 : 1,
-      }}
-    >
-      {label}
-    </button>
-  )
-}
-
-export default function Profilo({ session, onLogout, condivisioniRicevute, onRimuoviCondivisioni }: ProfiloProps) {
-  const initial = session.name?.[0]?.toUpperCase() || '?'
-  const { refresh } = useAuth()
+export default function Profilo({
+  session,
+  condivisioni,
+  consenso,
+  segnalazioniNuove,
+  onSalvaNome,
+  onCaricaAvatar,
+  onPassword,
+  onTogliCondivisioni,
+  onCookie,
+  onEsci,
+}: ProfiloProps) {
   const fileRef = useRef<HTMLInputElement>(null)
-
-  const [busyAvatar, setBusyAvatar] = useState(false)
   const [name, setName] = useState(session.name)
-  const [busyName, setBusyName] = useState(false)
-  const [nameMsg, setNameMsg] = useState<Msg>(null)
-  const [pw, setPw] = useState('')
-  const [pw2, setPw2] = useState('')
-  const [busyPw, setBusyPw] = useState(false)
-  const consenso = useScelta()
-  const [busyCond, setBusyCond] = useState(false)
-  const [condMsg, setCondMsg] = useState<Msg>(null)
+  const [nameBusy, setNameBusy] = useState(false)
+  const [nameMsg, setNameMsg] = useState<Esito>(null)
+  const [avatarBusy, setAvatarBusy] = useState(false)
+  const [preview, setPreview] = useState<string | null>(null)
+  const [avatarErr, setAvatarErr] = useState<string | null>(null)
 
-  const rimuoviCondivisioni = async () => {
-    if (busyCond) return
-    if (!window.confirm('Togliere tutte le condivisioni ricevute? I tornei degli altri spariranno dal tuo diario e dalle tue statistiche.')) return
-    setBusyCond(true)
-    setCondMsg(null)
-    const n = await onRimuoviCondivisioni()
-    setBusyCond(false)
-    setCondMsg(
-      n > 0
-        ? { ok: true, text: n === 1 ? 'Condivisione rimossa.' : `${n} condivisioni rimosse.` }
-        : { ok: false, text: 'Non è stato possibile rimuoverle. Riprova.' },
-    )
-  }
-  const [pwMsg, setPwMsg] = useState<Msg>(null)
+  // L'anteprima locale vive finché serve: si rilascia quando cambia o si esce.
+  useEffect(() => () => rilascia(preview), [preview])
 
   const nameDirty = name.trim() !== session.name.trim()
+  const admin = session.role === 'admin'
 
-  // Cambia foto profilo: upload sul bucket pubblico `avatars`, poi RPC set_avatar
-  // e refresh della sessione. Pulisce i vecchi avatar (best-effort).
-  const onPickAvatar = async (e: ChangeEvent<HTMLInputElement>) => {
+  const scegliFoto = () => {
+    if (avatarBusy) return
+    fileRef.current?.click()
+  }
+
+  const onPick = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    e.target.value = '' // reset: permette di riselezionare lo stesso file
-    if (!file || busyAvatar) return
-    setBusyAvatar(true)
-    setNameMsg(null)
-    try {
-      const { data: auth } = await supabase.auth.getUser()
-      const uid = auth.user?.id
-      if (!uid) throw new Error('Sessione non valida.')
-      const ext = (file.name.split('.').pop() || 'jpg').replace(/[^a-z0-9]/gi, '').toLowerCase() || 'jpg'
-      const newPath = `${uid}/${crypto.randomUUID()}.${ext}`
-      const { error: upErr } = await supabase.storage.from('avatars').upload(newPath, file, { contentType: file.type || 'image/jpeg', upsert: false })
-      if (upErr) throw upErr
-      const { data: pub } = supabase.storage.from('avatars').getPublicUrl(newPath)
-      const { error: rpcErr } = await supabase.rpc('set_avatar', { p_url: pub.publicUrl })
-      if (rpcErr) throw rpcErr
-      try {
-        const { data: existing } = await supabase.storage.from('avatars').list(uid)
-        const stale = (existing ?? []).map((f) => `${uid}/${f.name}`).filter((p) => p !== newPath)
-        if (stale.length) await supabase.storage.from('avatars').remove(stale)
-      } catch { /* ignore cleanup errors */ }
-      await refresh()
-    } catch (err) {
-      setNameMsg({ ok: false, text: 'Impossibile aggiornare la foto: ' + (err instanceof Error ? err.message : String(err)) })
-    } finally {
-      setBusyAvatar(false)
-    }
+    e.target.value = '' // si può riscegliere lo stesso file
+    if (!file || avatarBusy) return
+    setAvatarErr(null)
+    // Anteprima subito, al 60% con lo spinner (MOTION.md §4.3): il salvataggio
+    // aspetta il server, la risposta no.
+    setPreview(anteprima(file))
+    setAvatarBusy(true)
+    const r = await onCaricaAvatar(file)
+    setAvatarBusy(false)
+    setPreview(null)
+    if (!r.ok) setAvatarErr(r.error ?? 'Impossibile aggiornare la foto. Riprova tra poco.')
   }
 
-  const saveName = async () => {
-    if (busyName || !nameDirty) return
-    setBusyName(true)
+  const salvaNome = async () => {
+    if (nameBusy || !nameDirty) return
+    setNameBusy(true)
     setNameMsg(null)
-    const res = await updateDisplayName(name, session.name)
-    if (res.ok) await refresh()
-    else setName(session.name) // nome rifiutato: torna a quello in sessione
+    const res = await onSalvaNome(name)
+    setNameBusy(false)
+    // Nome rifiutato: si torna a quello in sessione (comportamento di prima).
+    if (!res.ok) setName(session.name)
     setNameMsg({ ok: res.ok, text: res.ok ? res.notice ?? 'Nome aggiornato.' : res.error ?? 'Operazione non riuscita.' })
-    setBusyName(false)
   }
 
-  const savePassword = async () => {
-    if (busyPw) return
-    setBusyPw(true)
-    setPwMsg(null)
-    const res = await updatePassword(pw, pw2)
-    if (res.ok) { setPw(''); setPw2('') }
-    setPwMsg({ ok: res.ok, text: res.ok ? res.notice ?? 'Password aggiornata.' : res.error ?? 'Operazione non riuscita.' })
-    setBusyPw(false)
-  }
+  const consensoLabel = ETICHETTA_CONSENSO[consenso ?? 'nessuno']
+  const nuove = segnalazioniNuove ?? 0
 
   return (
-    <div style={{ animation: 'pop .32s ease both' }}>
-      <div className="num" style={{ fontSize: 'clamp(26px,4vw,34px)', fontWeight: 500, letterSpacing: '-.5px' }}>Profilo</div>
+    <Page width="reading">
+      <NavBar title="Profilo" />
 
-      {/* utente */}
-      <div className="card" style={{ padding: 22, marginTop: 20, display: 'flex', alignItems: 'center', gap: 14 }}>
-        <div
-          onClick={() => { if (!busyAvatar) fileRef.current?.click() }}
-          title="Cambia foto profilo"
-          style={{ position: 'relative', flex: 'none', cursor: busyAvatar ? 'default' : 'pointer', opacity: busyAvatar ? 0.6 : 1 }}
+      <section className="profilo-head" aria-label="Il tuo account">
+        <button
+          type="button"
+          className="profilo-avatar"
+          aria-label="Cambia foto profilo"
+          aria-busy={avatarBusy || undefined}
+          aria-disabled={avatarBusy || undefined}
+          onClick={scegliFoto}
         >
-          <Avatar initial={initial} size={54} font={22} uri={session.avatarUrl} />
-          <div style={{ position: 'absolute', right: -2, bottom: -2, width: 22, height: 22, borderRadius: '50%', background: '#FF6B35', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #fff', fontSize: 10 }}>📷</div>
-          <input ref={fileRef} type="file" accept="image/*" onChange={onPickAvatar} style={{ display: 'none' }} />
+          <Avatar name={session.name} src={preview ?? session.avatarUrl} size={64} busy={avatarBusy} />
+          <span className="profilo-avatar-badge" aria-hidden="true">
+            <Icon name="camera" size={16} />
+          </span>
+        </button>
+        <input ref={fileRef} type="file" accept="image/*" hidden onChange={onPick} data-testid="profilo-file" />
+        <div className="profilo-who">
+          <p className="profilo-name">
+            <span>{session.name}</span>
+            {admin && <Badge tone="select">Admin</Badge>}
+          </p>
+          <p className="profilo-email">{session.email}</p>
         </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-            <div style={{ font: "700 17px 'Nunito Sans'" }}>{session.name}</div>
-            {session.role === 'admin' && <Badge tone="dark" size="lg">Admin</Badge>}
-          </div>
-          <div style={{ font: "600 13px 'Nunito Sans'", color: 'rgba(27,42,74,.55)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{session.email}</div>
-        </div>
-      </div>
-
-      {/* informazioni account */}
-      <div className="lbl" style={{ marginTop: 26, marginBottom: 12 }}>Informazioni account</div>
-      <div className="card" style={{ padding: 22 }}>
-        <Label>Nome</Label>
-        <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          maxLength={40}
-          autoComplete="nickname"
-          style={inputStyle}
-        />
-        <div style={hintStyle}>Con questo nome ti trovano gli altri giocatori quando ti collegano come compagno.</div>
-
-        <div style={{ marginTop: 18 }}>
-          <Label>Email</Label>
-          <input value={session.email} readOnly disabled style={readOnlyStyle} />
-          <div style={hintStyle}>L’email dell’account non è modificabile.</div>
-        </div>
-
-        <Feedback msg={nameMsg} />
-        {nameDirty && (
-          <SaveButton label={busyName ? 'Salvataggio…' : 'Salva nome'} disabled={busyName} onClick={saveName} />
-        )}
-      </div>
-
-      {/* sicurezza */}
-      <div className="lbl" style={{ marginTop: 26, marginBottom: 12 }}>Sicurezza</div>
-      {session.hasPassword ? (
-        <div className="card" style={{ padding: 22 }}>
-          <Label>Nuova password</Label>
-          <input type="password" value={pw} onChange={(e) => setPw(e.target.value)} autoComplete="new-password" placeholder="Almeno 6 caratteri" style={inputStyle} />
-          <div style={{ marginTop: 18 }}>
-            <Label>Conferma password</Label>
-            <input type="password" value={pw2} onChange={(e) => setPw2(e.target.value)} autoComplete="new-password" placeholder="Ripeti la nuova password" style={inputStyle} />
-          </div>
-          <Feedback msg={pwMsg} />
-          <SaveButton
-            label={busyPw ? 'Aggiornamento…' : 'Aggiorna password'}
-            disabled={busyPw || !pw || !pw2}
-            onClick={savePassword}
-          />
-        </div>
-      ) : (
-        <div className="card" style={{ padding: 22, font: "600 13px 'Nunito Sans'", color: MUTED, lineHeight: 1.5 }}>
-          Hai effettuato l’accesso con Google o Apple: la password si gestisce direttamente dal tuo account, non da qui.
-        </div>
+      </section>
+      {avatarErr && (
+        <p className="profilo-avatar-err" role="alert">
+          <Icon name="alert" size={16} />
+          <span>{avatarErr}</span>
+        </p>
       )}
 
-      {/* Chi ti collega come suo socio ti riversa i propri tornei nel diario e
-          nelle statistiche, senza chiedere. Questa è la via d'uscita: prima
-          non esisteva, e il collegamento era a senso unico e definitivo. */}
-      <div className="lbl" style={{ marginTop: 26, marginBottom: 12 }}>Condivisioni ricevute</div>
-      <div className="card" style={{ padding: 22 }}>
-        {condivisioniRicevute === 0 ? (
-          <div style={{ font: "600 13px 'Nunito Sans'", color: MUTED, lineHeight: 1.5 }}>
-            Nessuno ti ha collegato come suo compagno. Quando succede, i tornei
-            che avete giocato insieme compaiono nel tuo diario in sola lettura.
-          </div>
-        ) : (
-          <>
-            <div style={{ font: "600 13px 'Nunito Sans'", lineHeight: 1.5 }}>
-              {condivisioniRicevute === 1
-                ? 'Un altro giocatore ti ha collegato come suo compagno.'
-                : `${condivisioniRicevute} giocatori ti hanno collegato come loro compagno.`}{' '}
-              I loro tornei compaiono nel tuo diario e contano nelle tue statistiche.
-            </div>
-            <div style={hintStyle}>
-              Togliendo la condivisione spariscono dal tuo diario. I tuoi tornei
-              non vengono toccati, e chi ti aveva collegato può rifarlo.
-            </div>
-            <Feedback msg={condMsg} />
-            <button
-              onClick={rimuoviCondivisioni}
-              disabled={busyCond}
-              className="chip"
-              style={{
-                marginTop: 16, padding: '12px 22px', borderRadius: 11,
-                border: '1px solid rgba(255,71,126,.4)', background: 'transparent',
-                color: '#FF477E', font: "700 13.5px 'Nunito Sans'",
-                cursor: busyCond ? 'default' : 'pointer', opacity: busyCond ? 0.45 : 1,
+      <div className="profilo-groups">
+        <ListGroup title="Account" id="profilo-account">
+          <ListItem className="profilo-name-item">
+            <TextField
+              label="Nome"
+              value={name}
+              onChange={(v) => {
+                setName(v)
+                setNameMsg(null)
               }}
-            >
-              {busyCond ? 'Rimozione…' : 'Togli tutte le condivisioni'}
-            </button>
-          </>
-        )}
-      </div>
+              maxLength={NOME_MAX}
+              autoComplete="nickname"
+              readOnly={nameBusy}
+              hint="Con questo nome ti trovano gli altri giocatori quando ti collegano come compagno."
+            />
+            {/* Lo spazio del pulsante è riservato: comparendo non sposta il campo. */}
+            <div className="profilo-name-save" data-visible={nameDirty || nameBusy ? '' : undefined}>
+              {(nameDirty || nameBusy) && (
+                <Button variant="tinted" size="sm" busy={nameBusy} busyLabel="Salvataggio…" onClick={() => void salvaNome()}>
+                  Salva nome
+                </Button>
+              )}
+            </div>
+            {nameMsg && (
+              <p className="profilo-esito" data-ok={nameMsg.ok ? '' : undefined} role={nameMsg.ok ? 'status' : 'alert'}>
+                <Icon name={nameMsg.ok ? 'check-circle' : 'alert'} size={16} />
+                <span>{nameMsg.text}</span>
+              </p>
+            )}
+          </ListItem>
+          <ListRow title="Email" value={session.email} />
+          {session.hasPassword ? (
+            <ListRow
+              icon="lock"
+              title="Password"
+              value={<Icon name="chevron-right" size={20} className="ui-row-chev" />}
+              onClick={onPassword}
+            />
+          ) : (
+            <ListRow
+              icon="lock"
+              title="Password"
+              subtitle="Hai effettuato l'accesso con Google o Apple: la password si gestisce dal tuo account, non da qui."
+            />
+          )}
+        </ListGroup>
 
-      {/* Ritirare il consenso deve essere facile quanto darlo, altrimenti non
-          è un consenso: da qui si torna alla domanda iniziale. */}
-      <div className="lbl" style={{ marginTop: 26, marginBottom: 12 }}>Cookie e statistiche</div>
-      <div className="card" style={{ padding: 22 }}>
-        <div style={{ font: "600 13px 'Nunito Sans'", lineHeight: 1.5 }}>
-          {consenso === 'accettato'
-            ? 'Hai accettato gli strumenti di misura: ci aiutano a capire quali schermate si usano e dove ci si blocca.'
-            : consenso === 'rifiutato'
-              ? 'Hai rifiutato gli strumenti di misura. Non raccogliamo statistiche sull’uso dell’app.'
-              : 'Non hai ancora scelto: finché non decidi non raccogliamo nessuna statistica.'}
-        </div>
-        <div style={hintStyle}>
-          Quello che serve a tenerti collegato resta sempre attivo, ed è escluso da questa scelta.
-        </div>
-        <button
-          onClick={riapriScelta}
-          className="chip"
-          style={{
-            marginTop: 16, padding: '12px 22px', borderRadius: 11,
-            border: '1px solid rgba(27,42,74,.2)', background: 'transparent',
-            color: '#1B2A4A', font: "700 13.5px 'Nunito Sans'", cursor: 'pointer',
-          }}
+        <ListGroup
+          title="Condivisioni"
+          id="profilo-condivisioni"
+          footer={
+            condivisioni === 0
+              ? 'Nessuno ti ha collegato come suo compagno. Quando succede, i tornei che avete giocato insieme compaiono nel tuo diario in sola lettura.'
+              : `${condivisioni === 1 ? 'Un altro giocatore ti ha collegato come suo compagno' : `${condivisioni} giocatori ti hanno collegato come loro compagno`}: i loro tornei compaiono nel tuo diario e contano nelle tue statistiche. Togliendo la condivisione spariscono; i tuoi tornei non vengono toccati.`
+          }
         >
-          Cambia scelta
-        </button>
+          <ListRow icon="people" title="Condivisioni ricevute" value={String(condivisioni)} />
+          {condivisioni > 0 && <ListRow title="Togli tutte le condivisioni" tone="danger" onClick={onTogliCondivisioni} />}
+        </ListGroup>
+
+        {/* Ritirare il consenso deve essere facile quanto darlo: da qui si
+            torna alla domanda iniziale. */}
+        <ListGroup
+          title="Privacy"
+          id="profilo-privacy"
+          footer="Quello che serve a tenerti collegato resta sempre attivo, ed è escluso da questa scelta."
+        >
+          <ListRow
+            icon="shield"
+            title="Cookie e statistiche"
+            value={
+              <span className="profilo-value">
+                {consensoLabel}
+                <Icon name="chevron-right" size={20} className="ui-row-chev" />
+              </span>
+            }
+            onClick={onCookie}
+          />
+        </ListGroup>
+
+        <ListGroup title="Supporto" id="profilo-supporto">
+          <ListRow icon="flag" title="Segnala un problema" to={{ name: 'segnala' }} />
+          {segnalazioniNuove !== null && (
+            <ListRow
+              icon="inbox"
+              title="Segnalazioni ricevute"
+              value={nuove > 0 ? `${nuove} ${nuove === 1 ? 'nuova' : 'nuove'}` : undefined}
+              to={{ name: 'segnalazioni' }}
+            />
+          )}
+        </ListGroup>
+
+        <ListGroup id="profilo-esci">
+          <ListRow title="Esci" tone="danger" onClick={onEsci} />
+        </ListGroup>
       </div>
 
-      {/* Bacheca dei problemi segnalati dagli utenti (app in alpha). Sta in
-          fondo perché è l'unica sezione che può diventare lunga, e sotto non
-          spinge giù nulla. Il `role === 'admin'` qui è solo UI: la RPC che la
-          alimenta è gated su `is_admin()` lato DB. */}
-      {session.role === 'admin' && <SegnalazioniAdmin />}
-
-      <div className="chip" onClick={onLogout} style={{ display: 'inline-flex', marginTop: 26, padding: '11px 18px', borderRadius: 11, border: '1px solid rgba(255,71,126,.4)', color: '#FF477E', cursor: 'pointer', font: "700 13.5px 'Nunito Sans'" }}>Esci</div>
-    </div>
+      <p className="profilo-foot">Beach Diary · versione alpha</p>
+    </Page>
   )
 }

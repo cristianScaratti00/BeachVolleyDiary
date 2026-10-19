@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NavBar e scroll · laboratorio del movimento</title>
+<link rel="stylesheet" href="../../src/styles/tokens.css">
+<link rel="stylesheet" href="../../src/styles/materials.css">
+<link rel="stylesheet" href="./_lab.css">
+<style>
+@layer components {
+  /* ------------------------------------------------------------ NavBar */
+  .navbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: calc(var(--safe-top) + var(--navbar-h));
+    padding-top: var(--safe-top);
+    z-index: var(--z-navbar);
+    display: grid;
+    grid-template-columns: var(--touch) 1fr var(--touch);
+    align-items: center;
+    padding-inline: var(--space-2);
+    /* La barra in sé è trasparente: il vetro è un livello sotto. */
+    pointer-events: none;
+  }
+  .navbar > * { pointer-events: auto; }
+  /* Il vetro c'è sempre, a opacità 0, e quando è a 0 è anche `hidden`:
+     una superficie sfocata trasparente costa lo stesso, e conta nel budget. */
+  .navbar .glass {
+    position: absolute; inset: 0;
+    border-radius: 0;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity var(--dur-svelto) var(--ease-standard), visibility 0s linear var(--dur-svelto);
+  }
+  /* Il filo inferiore arriva insieme al vetro (ART_DIRECTION §7). */
+  .navbar .glass::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: var(--hairline); background: var(--separator); }
+  .navbar .compact {
+    grid-column: 2;
+    text-align: center;
+    font: var(--type-headline); letter-spacing: var(--track-headline);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    position: relative;
+    opacity: 0;
+    transform: translateY(calc(4px * var(--motion-scale)));
+    transition: opacity var(--dur-svelto) var(--ease-standard), transform var(--dur-svelto) var(--ease-standard);
+  }
+  .navbar .trail {
+    grid-column: 3;
+    position: relative;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--dur-svelto) var(--ease-standard), transform var(--dur-svelto) var(--ease-standard), visibility 0s linear var(--dur-svelto);
+  }
+  /* Scattato: tutto insieme, in SVELTO, in entrambe le direzioni. È un
+     cambio di stato, non un'entrata: niente asimmetria fra andata e ritorno. */
+  .navbar.is-scrolled .glass,
+  .navbar.is-scrolled .trail { opacity: 1; visibility: visible; transition: opacity var(--dur-svelto) var(--ease-standard), transform var(--dur-svelto) var(--ease-standard), visibility 0s; }
+  .navbar.is-scrolled .compact { opacity: 1; transform: none; }
+
+  .lab-page.with-nav { padding-top: calc(var(--safe-top) + var(--navbar-h)); }
+  .sentinel { height: 1px; margin-top: -1px; }
+
+  /* ----------------------------------------------------------- Ricerca */
+  .search {
+    display: flex; align-items: center; gap: var(--space-2);
+    height: 40px; margin-top: var(--space-4);
+    padding: 0 0 0 var(--space-3);
+    border: 1px solid var(--field-border); border-radius: var(--radius-capsule);
+    background: var(--field);
+  }
+  .search:focus-within { outline: var(--focus-width) solid var(--focus-ring); outline-offset: var(--focus-offset); }
+  .search input { flex: 1; min-width: 0; border: 0; background: none; outline: none; font: var(--type-callout); letter-spacing: var(--track-callout); height: 100%; }
+  .search input::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
+  .search .lens { color: var(--ink-3); }
+  /* Lo spazio del ✕ è riservato: compare senza spostare il testo. */
+  .search .clear { flex: none; width: var(--touch); height: var(--touch); display: grid; place-items: center; color: var(--ink-3); opacity: 0; visibility: hidden; transition: opacity var(--dur-svelto) var(--ease-standard), visibility 0s linear var(--dur-svelto); }
+  .search.has-value .clear { opacity: 1; visibility: visible; transition: opacity var(--dur-svelto) var(--ease-standard), visibility 0s; }
+
+  /* -------------------------------------------------------- Segmented */
+  .segmented {
+    position: relative;
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    max-width: var(--segmented-max);
+    margin-top: var(--space-4);
+    padding: var(--space-1);
+    background: var(--fill);
+    border-radius: var(--radius-control);
+  }
+  .segmented .pill {
+    position: absolute; top: var(--space-1); bottom: var(--space-1); left: var(--space-1);
+    width: calc((100% - 2 * var(--space-1)) / 3);
+    border-radius: var(--radius-chip);
+    background: var(--select);
+    transform: translateX(calc(var(--i, 0) * 100%));
+    transition: transform var(--dur-molla) var(--ease-molla);
+  }
+  .rm .segmented .pill { transition: none; }
+  .segmented button { position: relative; height: 36px; border-radius: var(--radius-chip); font: var(--type-subhead-strong); letter-spacing: var(--track-subhead); display: grid; }
+  /* L'inchiostro della selezione viaggia con la pillola (MOLLA). */
+  .segmented button > span { grid-area: 1 / 1; display: grid; place-items: center; transition: opacity var(--dur-molla) var(--ease-molla); }
+  .segmented button > .ink { color: var(--ink-2); }
+  .segmented button > .on { color: var(--on-select); opacity: 0; }
+  .segmented button[aria-pressed="true"] > .ink { opacity: 0; }
+  .segmented button[aria-pressed="true"] > .on { opacity: 1; }
+
+  .cards { display: grid; gap: var(--space-3); margin-top: var(--space-4); }
+  .empty { text-align: center; padding: var(--space-8) 0; }
+  .empty h3 { font: var(--type-title-2); letter-spacing: var(--track-title-2); }
+}
+</style>
+</head>
+<body>
+<header class="navbar" id="navbar">
+  <div class="glass" data-material="glass-regular" aria-hidden="true"></div>
+  <span class="compact" aria-hidden="true">Tornei</span>
+  <button type="button" class="ui-icon-button state trail" id="lente" aria-label="Cerca nei tornei" tabindex="-1">
+    <svg class="i" aria-hidden="true"><use href="#i-search"/></svg>
+  </button>
+</header>
+
+<main class="lab-page with-nav" id="contenuto">
+  <h1 class="large-title" id="titolo" tabindex="-1">Tornei</h1>
+  <div class="sentinel" id="sentinella" aria-hidden="true"></div>
+  <p class="subtitle" id="sottotitolo" role="status">60 tornei · 9 podi</p>
+
+  <div class="search" id="ricerca" role="search">
+    <svg class="i lens" data-size="20" aria-hidden="true"><use href="#i-search"/></svg>
+    <label class="sr-only" for="q">Cerca nei tornei</label>
+    <input id="q" type="search" placeholder="Cerca un torneo, una città, un avversario…" autocomplete="off">
+    <button type="button" class="clear" id="pulisci" aria-label="Cancella la ricerca" tabindex="-1"><svg class="i" data-size="20" aria-hidden="true"><use href="#i-close"/></svg></button>
+  </div>
+
+  <div class="segmented" role="group" aria-label="Vista dei tornei" id="seg" style="--i: 0">
+    <span class="pill" aria-hidden="true"></span>
+    <button type="button" aria-pressed="true" data-i="0"><span class="ink">Lista</span><span class="on" aria-hidden="true">Lista</span></button>
+    <button type="button" aria-pressed="false" data-i="1"><span class="ink">Timeline</span><span class="on" aria-hidden="true">Timeline</span></button>
+    <button type="button" aria-pressed="false" data-i="2"><span class="ink">Mappa</span><span class="on" aria-hidden="true">Mappa</span></button>
+  </div>
+
+  <div class="lab-note">
+    <b>Scorri:</b> quando il large title esce da sotto la barra, il vetro compare <b>a soglia</b> (IntersectionObserver), non legato allo scroll: opacità in SVELTO, titolo compatto da 4px. Il large title non si rimpicciolisce.
+    <b>La lente</b> nella barra compatta riporta in cima e mette subito il focus nella ricerca. <b>Il segmented</b> cambia vista senza animare il contenuto, e il focus resta sul segmento.
+  </div>
+
+  <div class="cards" id="lista"></div>
+</main>
+
+<nav class="tabbar" id="tabbar" aria-label="Principale" data-material="glass-regular" style="--material-elev: var(--elev-float); --i: 1">
+  <span class="pill" aria-hidden="true"></span>
+  <a class="tab" href="#home" data-i="0"><span class="layer ink"><svg class="i" aria-hidden="true"><use href="#i-home"/></svg>Home</span><span class="layer on" aria-hidden="true"><svg class="i fill" aria-hidden="true"><use href="#i-home-fill"/></svg>Home</span></a>
+  <a class="tab" href="#tornei" data-i="1" aria-current="page"><span class="layer ink"><svg class="i" aria-hidden="true"><use href="#i-trophy"/></svg>Tornei</span><span class="layer on" aria-hidden="true"><svg class="i fill" aria-hidden="true"><use href="#i-trophy-fill"/></svg>Tornei</span></a>
+  <span class="plus-slot"><button type="button" class="plus" aria-label="Crea" aria-haspopup="menu" aria-expanded="false"><svg class="i" aria-hidden="true" style="stroke-width: 2.2"><use href="#i-plus"/></svg></button></span>
+  <a class="tab" href="#compagni" data-i="3"><span class="layer ink"><svg class="i" aria-hidden="true"><use href="#i-people"/></svg>Compagni</span><span class="layer on" aria-hidden="true"><svg class="i fill" aria-hidden="true"><use href="#i-people-fill"/></svg>Compagni</span></a>
+  <a class="tab" href="#profilo" data-i="4"><span class="layer ink"><svg class="i" aria-hidden="true"><use href="#i-person"/></svg>Profilo</span><span class="layer on" aria-hidden="true"><svg class="i fill" aria-hidden="true"><use href="#i-person-fill"/></svg>Profilo</span></a>
+</nav>
+
+<script src="./_lab.js"></script>
+<script>
+(function () {
+  const $ = (s) => document.querySelector(s)
+  const navbar = $('#navbar'), q = $('#q'), lista = $('#lista'), sub = $('#sottotitolo')
+  const CITTA = ['Rimini', 'Riccione', 'Cervia', 'Cesenatico', 'Bellaria', 'Cattolica']
+  const tornei = Array.from({ length: 60 }, (_, i) => ({
+    nome: ['Rimini Open', 'Summer Cup', 'Coppa del Bagnino', "Torneo dell'Alba", 'Notturno', 'Memorial Sabbia'][i % 6] + ' ' + (2026 - Math.floor(i / 12)),
+    meta: ['Pro', 'Amatoriale'][i % 2] + ' · ' + ['1°', 'Quarti', 'Gironi', '3°', 'Ottavi'][i % 5] + ' · ' + CITTA[i % CITTA.length],
+  }))
+
+  function disegna() {
+    const t = q.value.trim().toLowerCase()
+    const vis = t ? tornei.filter((x) => (x.nome + ' ' + x.meta).toLowerCase().includes(t)) : tornei
+    // I risultati SOSTITUISCONO la lista nello stesso fotogramma: chi scrive
+    // non deve aspettare un'animazione per leggere (MOTION.md §4.3, ricerca).
+    lista.innerHTML = vis.length
+      ? vis.map((x) => `<article class="ui-card"><h3><a class="stretch" href="#t">${x.nome}</a></h3><p class="meta">${x.meta}</p></article>`).join('')
+      : `<div class="empty"><h3>Nessun torneo contiene «${q.value}»</h3><div class="lab-row" style="justify-content:center"><button type="button" class="ui-button state" data-variant="tinted" id="cancella">Cancella la ricerca</button></div></div>`
+    sub.textContent = t ? `${vis.length} risultati per «${q.value}»` : '60 tornei · 9 podi'
+    $('#ricerca').classList.toggle('has-value', !!q.value)
+    $('#pulisci').tabIndex = q.value ? 0 : -1
+    const c = $('#cancella')
+    if (c) c.addEventListener('click', () => { q.value = ''; disegna(); q.focus() })
+  }
+  q.addEventListener('input', disegna)
+  q.addEventListener('keydown', (e) => { if (e.key === 'Escape') { if (q.value) { q.value = ''; disegna() } else q.blur() } })
+  $('#pulisci').addEventListener('click', () => { q.value = ''; disegna(); q.focus() })
+  disegna()
+
+  // ------------------------------------------------ Soglia della NavBar
+  // Una sentinella sotto il large title. Quando esce da sotto la barra, la
+  // barra "scatta". Nessun listener di scroll, nessun valore per fotogramma.
+  const navH = navbar.getBoundingClientRect().height
+  const io = new IntersectionObserver(([e]) => {
+    const scattata = !e.isIntersecting && e.boundingClientRect.top < navH
+    navbar.classList.toggle('is-scrolled', scattata)
+    $('#lente').tabIndex = scattata ? 0 : -1
+  }, { rootMargin: `-${navH}px 0px 0px 0px`, threshold: 0 })
+  io.observe($('#sentinella'))
+
+  // La lente: in cima e focus nella ricerca SUBITO (preventScroll), così i
+  // tasti battuti durante lo scorrimento finiscono nel campo.
+  $('#lente').addEventListener('click', () => {
+    if (scrollY > 3 * innerHeight) window.scrollTo({ top: innerHeight, behavior: 'auto' })
+    window.scrollTo({ top: 0, behavior: Lab.reduced() ? 'auto' : 'smooth' })
+    q.focus({ preventScroll: true })
+  })
+
+  // ------------------------------------------------------ Segmented
+  // La pillola scivola (MOLLA). Il contenuto cambia nello stesso istante e
+  // NON si anima (il cambio di vista è un `replace` di rotta). Il focus resta
+  // sul segmento: è un controllo della pagina (MOTION.md M4).
+  for (const b of document.querySelectorAll('#seg button')) {
+    b.addEventListener('click', () => {
+      for (const x of document.querySelectorAll('#seg button')) x.setAttribute('aria-pressed', String(x === b))
+      $('#seg').style.setProperty('--i', b.dataset.i)
+      lista.style.display = b.dataset.i === '2' ? 'none' : ''
+      if (b.dataset.i === '2') {
+        if (!$('#mappa')) lista.insertAdjacentHTML('afterend', '<div id="mappa" class="lab-note" style="height:380px;display:grid;place-items:center">Vista Mappa (segnaposto alto 380)</div>')
+      } else $('#mappa')?.remove()
+    })
+  }
+
+  // Ritocco della tab attiva: in cima.
+  document.querySelector('.tab[aria-current]').addEventListener('click', (e) => {
+    e.preventDefault()
+    if (scrollY > 3 * innerHeight) window.scrollTo({ top: innerHeight, behavior: 'auto' })
+    window.scrollTo({ top: 0, behavior: Lab.reduced() ? 'auto' : 'smooth' })
+  })
+})()
+</script>
+</body>
+</html>

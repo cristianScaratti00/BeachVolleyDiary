@@ -1,26 +1,51 @@
+// ============================================================================
+// Piazzamenti: quante volte ogni risultato, una barra per riga. Il colore
+// della barra arriva dalla lib (`placementDist[].color`, letterali della
+// palette di prima) e si legge come SEGNALE con `dataTone`: 1° = --data-win,
+// podio = --data-podium, il resto = --data-rest (ART_DIRECTION §4.5).
+// «1° 🏆» è un valore del DB: si mostra «1°» e si legge «Primo posto» (C15).
+// ============================================================================
 import type { DashboardStats } from '../../lib/derive'
-import { EmptyNote } from '../ui'
+import { dataTone } from '../../lib/theme'
+import { Bar } from '../ui/Stat'
+import { placementText } from '../ui/Badge'
+import { ChartCard, EmptyNote } from './Chart'
 
-// Distribuzione dei piazzamenti nei tornei (barre orizzontali colorate).
+const tono = (c: string) => {
+  const t = dataTone(c)
+  return t === 'win' ? 'win' : t === 'podium' ? 'podium' : 'rest'
+}
+
+function Etichetta({ label }: { label: string }) {
+  const testo = placementText(label)
+  if (testo === label) return <>{testo}</>
+  return (
+    <>
+      <span aria-hidden="true">{testo}</span>
+      <span className="sr-only">{testo.replace('1°', 'Primo posto')}</span>
+    </>
+  )
+}
+
 export function PlacementCard({ s }: { s: DashboardStats }) {
   return (
-    <div className="card" style={{ padding: 22 }}>
-      <div className="lbl" style={{ marginBottom: 16 }}>Piazzamenti nei tornei</div>
+    <ChartCard title="Piazzamenti">
       {s.placementDist.length ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 13 }}>
+        <ul className="dash-placements">
           {s.placementDist.map((pl) => (
-            <div key={pl.label} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <span style={{ font: "700 13px 'Nunito Sans'", width: 92, flex: 'none' }}>{pl.label}</span>
-              <div style={{ flex: 1, height: 10, background: '#F2F0EC', borderRadius: 6, overflow: 'hidden' }}>
-                <div style={{ height: '100%', width: pl.barW, background: pl.color, borderRadius: 6, transition: 'width .6s ease' }} />
-              </div>
-              <span className="num" style={{ fontSize: 13, width: 16, textAlign: 'right', flex: 'none' }}>{pl.count}</span>
-            </div>
+            <li key={pl.label} className="dash-placement">
+              <span className="dash-row-label"><Etichetta label={pl.label} /></span>
+              <Bar pct={Number.parseInt(pl.barW, 10) || 0} tone={tono(pl.color)} />
+              <span className="dash-row-n">
+                {pl.count}
+                <span className="sr-only">{pl.count === 1 ? ' torneo' : ' tornei'}</span>
+              </span>
+            </li>
           ))}
-        </div>
+        </ul>
       ) : (
-        <EmptyNote>Ancora nessun torneo nel periodo.</EmptyNote>
+        <EmptyNote>Nessun torneo in questo periodo.</EmptyNote>
       )}
-    </div>
+    </ChartCard>
   )
 }

@@ -1,0 +1,243 @@
+/* ============================================================================
+   Visore della Storia: la cornice (token) e la TELA del PNG (letterali).
+   ============================================================================ */
+@layer components {
+  /* ------------------------------------------------------------ cornice */
+  .storia {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-viewer);
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    background: var(--viewer-bg);
+    color: var(--ink);
+  }
+  .storia-bar {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-1) var(--space-2);
+  }
+  .storia-bar-top { padding-top: calc(var(--safe-top) + var(--space-1)); }
+  .storia-bar-bottom {
+    justify-content: center;
+    padding-bottom: calc(var(--safe-bottom) + var(--space-2));
+  }
+  .storia-title {
+    flex: 1;
+    text-align: center;
+    font: var(--type-headline);
+    letter-spacing: var(--track-headline);
+  }
+  .storia-spacer { width: var(--touch); flex: none; }
+  .storia-btn {
+    position: relative;
+    isolation: isolate;
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    min-width: var(--touch);
+    height: var(--touch);
+    border-radius: var(--radius-capsule);
+    color: var(--ink);
+    font: var(--type-headline);
+    letter-spacing: var(--track-headline);
+    transition: transform var(--dur-svelto) var(--ease-standard);
+  }
+  .storia-btn::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: currentColor;
+    opacity: 0;
+    z-index: -1;
+    transition: opacity var(--dur-svelto) var(--ease-standard);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .storia-btn:not([aria-disabled]):hover::before { opacity: var(--state-hover); }
+  }
+  .storia-btn:not([aria-disabled]):active { transform: scale(var(--press-scale)); }
+  .storia-btn:not([aria-disabled]):active::before { opacity: var(--state-press); transition-duration: 0ms; }
+  .storia-action { padding: 0 var(--space-5); }
+  /* L'azione principale: il salvagente, etichetta navy (mai bianco sull'arancio). */
+  .storia-action[data-primary] { background: var(--accent); color: var(--on-accent); }
+  .storia-action[aria-disabled] {
+    background: transparent;
+    color: var(--ink-3);
+    box-shadow: inset 0 0 0 var(--border-w) var(--ink-3);
+    cursor: default;
+  }
+  .storia-action[aria-busy] { cursor: progress; }
+
+  .storia-stage {
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-4);
+    padding: var(--space-2) var(--space-4);
+  }
+  .storia-palette { display: flex; gap: var(--space-3); padding: var(--space-0-5); }
+  .storia-swatch {
+    display: grid;
+    place-items: center;
+    width: var(--touch);
+    height: var(--touch);
+    border-radius: 50%;
+    background: var(--c);
+    box-shadow: var(--swatch-ring);
+    color: var(--on-accent);
+  }
+  .storia-swatch[data-dark] { color: var(--ink); box-shadow: inset 0 0 0 var(--border-w) var(--ink-3); }
+  .storia-swatch .ui-icon { opacity: 0; transition: opacity var(--dur-svelto) var(--ease-standard); }
+  .storia-swatch[aria-checked="true"] {
+    outline: var(--focus-width) solid var(--focus-ring);
+    outline-offset: var(--focus-offset);
+  }
+  .storia-swatch[aria-checked="true"] .ui-icon { opacity: 1; }
+
+  .storia-preview {
+    position: relative;
+    flex: none;
+    border-radius: var(--radius-card);
+    overflow: hidden;
+  }
+
+  /* -------------------------------------------------------------- tela */
+  /* Da qui in giù: misure della tela 1080×1920 in px LETTERALI (ART_DIRECTION
+     §10.4). È ciò che html-to-image fotografa; i colori arrivano in linea da
+     wrapped/palette.ts. Solo Inter, che si incorpora nel PNG. */
+  .storia-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+    transform-origin: top left;
+    font-family: var(--font-export);
+    -webkit-font-smoothing: antialiased;
+  }
+  .storia-disc {
+    position: absolute;
+    left: 740px;
+    top: -580px;
+    width: 920px;
+    height: 920px;
+    border-radius: 50%;
+  }
+  .storia-content {
+    position: absolute;
+    left: 88px;
+    right: 88px;
+    top: 264px;
+    bottom: 250px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .storia-eyebrow {
+    margin: 0;
+    font-weight: 700;
+    font-size: 28px;
+    line-height: 36px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .storia-name {
+    margin: 24px 0 0;
+    font-weight: 800;
+    font-size: 88px;
+    line-height: 92px;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .storia-meta {
+    margin: 20px 0 0;
+    font-weight: 600;
+    font-size: 34px;
+    line-height: 44px;
+  }
+  .storia-hero { margin-top: 56px; display: flex; flex-direction: column; }
+  .storia-hero-n {
+    font-weight: 800;
+    font-size: 320px;
+    line-height: 0.86;
+    letter-spacing: -0.055em;
+    font-variant-numeric: tabular-nums;
+  }
+  .storia-hero-l,
+  .storia-cell-l {
+    font-weight: 700;
+    font-size: 26px;
+    line-height: 32px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .storia-hero-l { margin-top: 12px; }
+  .storia-cells {
+    margin-top: 48px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-top: 2px solid;
+  }
+  .storia-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+    padding: 28px 0;
+    border-bottom: 2px solid;
+  }
+  .storia-cell:nth-child(odd) { border-right: 2px solid; padding-right: 32px; }
+  .storia-cell:nth-child(even) { padding-left: 40px; }
+  .storia-cell-n {
+    font-weight: 800;
+    font-size: 112px;
+    line-height: 112px;
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .storia-photos {
+    margin-top: 48px;
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: 300px;
+    display: flex;
+    gap: 16px;
+  }
+  .storia-photo {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 28px;
+    border: 2px solid;
+    display: block;
+  }
+  .storia-foot {
+    position: absolute;
+    left: 88px;
+    bottom: 88px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+  .storia-brand {
+    font-weight: 700;
+    font-size: 34px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+}

@@ -1,0 +1,26 @@
+/* La capsula dei pulsanti +/− (ART_DIRECTION §10.3): glass-thin, galleggia
+   (`--elev-float`), in alto a sinistra come il controllo di Leaflet che
+   sostituisce. Sta sopra la mappa per ordine nel DOM: il riquadro di Leaflet
+   ha `isolation`, i suoi z-index restano chiusi lì dentro. */
+@layer components {
+  .mapzoom {
+    --material-elev: var(--elev-float);
+    position: absolute;
+    top: var(--space-3);
+    left: var(--space-3);
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius: var(--radius-capsule);
+  }
+  .mapzoom-sep {
+    width: calc(var(--touch) - var(--space-4));
+    height: var(--hairline);
+    background: var(--separator);
+  }
+  /* Al limite dello zoom: resta raggiungibile (aria-disabled); strato e
+     scala li spegne la primitiva (Button.css). Sul vetro --ink-disabled
+     sparirebbe: qui il segno resta --ink-3. */
+  .mapzoom .ui-icon-button[aria-disabled="true"] { color: var(--ink-3); }
+}

@@ -1,360 +1,377 @@
 // ============================================================================
-// "Chi c'è oggi?" — schermata presentazionale (props + callbacks, niente rete).
-// Fai check-in per città+giorno e, in reciprocità (Q3), vedi chi altro è in
-// spiaggia oggi e ti colleghi come compagno sul posto (Q2).
+// "Chi c'è oggi" (UX §5 F6, §6.7; MOTION.md §5 F6). Presentazionale: il
+// proprio check-in, la stanza già ordinata e le callback arrivano dalla shell
+// (useCheckIn via App). Qui vivono solo il modulo, il filtro della stanza e gli
+// stati dei pulsanti.
 //
-// Tutta la logica dati sta a monte: il proprio check-in, la stanza già ordinata
-// e i callback arrivano da `useCheckIn` via App. Qui vivono solo: form di
-// check-in, stato di check-in, lista stanza, filtro di presentazione e stati
-// (idle/busy/done/error) dei pulsanti.
+// - Reciprocità (Q3): la stanza si vede solo dopo il check-in.
+// - Il modulo che diventa la card «Sei a X oggi» (e ritorno) segue lo schema
+//   della pila (MOTION.md §4.3): chi esce va fuori dal flusso a t0 e svanisce,
+//   chi entra compare al suo posto, la stanza sotto scivola (FLIP). Nessuna
+//   altezza animata.
+// - «Termina check-in» chiede conferma (UX §7.7): la conferma la apre la shell.
 // ============================================================================
-import { useEffect, useState } from 'react'
-import type { CSSProperties, ReactNode } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
+import * as m from 'motion/react-m'
+import { AnimatePresence } from 'motion/react'
+import type { ChiCeOggiProps } from '../app/contracts'
 import type { CheckIn, CheckInInput, PresentUser } from '../lib/models'
+import { ENTRATA, MOLLA, SVELTO } from '../components/Motion'
+import { CityInput } from '../components/modals/Sheet'
 import {
-  PageHeader,
-  SectionTitle,
-  FilterChips,
-  Badge,
   Avatar,
-  EmptyCard,
-  INK,
-  ORANGE,
-  MUTED,
-} from '../components/ui'
+  Badge,
+  Bone,
+  Button,
+  Card,
+  FilterChips,
+  Icon,
+  NavBar,
+  Note,
+  Page,
+  Section,
+  Skeleton,
+  Switch,
+  TextField,
+} from '../components/ui/index'
+import './ChiCeOggi.css'
 
-const GREEN = '#2FBF71' // stesso "collegato" del dettaglio compagno
-const DANGER = '#FF477E'
+const NOTA_MAX = 80
 
-// Stile campo di form, coerente con il picker di CompagnoDetail.
-const fieldStyle: CSSProperties = {
-  width: '100%',
-  border: '1px solid rgba(27,42,74,.16)',
-  borderRadius: 10,
-  padding: '11px 13px',
-  font: "600 14px 'Nunito Sans'",
-  background: '#fff',
-  color: INK,
-}
-const labelStyle: CSSProperties = {
-  display: 'block',
-  font: "700 12px 'Nunito Sans'",
-  color: MUTED,
-  marginBottom: 7,
-}
-
-const btnBase: CSSProperties = {
-  display: 'inline-flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  gap: 7,
-  border: 'none',
-  borderRadius: 11,
-  padding: '12px 18px',
-  font: "700 14px 'Nunito Sans'",
-  cursor: 'pointer',
-}
-const primaryBtn: CSSProperties = { ...btnBase, background: ORANGE, color: '#fff' }
-const darkBtn: CSSProperties = { ...btnBase, background: INK, color: '#fff' }
-const dangerBtn: CSSProperties = {
-  ...btnBase,
-  background: 'transparent',
-  color: DANGER,
-  border: '1px solid rgba(255,71,126,.4)',
-  padding: '10px 16px',
-  font: "700 13px 'Nunito Sans'",
-}
-
-interface ChiCeOggiProps {
-  own: CheckIn | null // il proprio check-in di oggi (null = non in spiaggia)
-  room: PresentUser[] // gli altri presenti oggi, già ordinati a monte
-  loading: boolean // fetch della stanza in corso
-  cityPrefill: string // città suggerita (torneo più recente)
-  onCheckIn: (input: CheckInInput) => Promise<boolean>
-  onCheckOut: () => Promise<boolean>
-  onRefresh: () => void
-  onAddPartner: (u: PresentUser) => Promise<{ ok: boolean; error?: string }>
-}
-
-export default function ChiCeOggi({ own, room, loading, cityPrefill, onCheckIn, onCheckOut, onRefresh, onAddPartner }: ChiCeOggiProps) {
+export default function ChiCeOggi({
+  own,
+  room,
+  loading,
+  cityPrefill,
+  back,
+  onCheckIn,
+  onTerminaCheckIn,
+  onRefresh,
+  onAddPartner,
+  aggiornatoAlle,
+}: ChiCeOggiProps) {
   return (
-    <div style={{ animation: 'pop .32s ease both' }}>
-      <PageHeader title="Chi c'è oggi" subtitle="Chi è in spiaggia oggi e cerca compagno" />
-
-      {own ? (
-        <CheckedInCard own={own} onCheckOut={onCheckOut} />
-      ) : (
-        <CheckInForm cityPrefill={cityPrefill} onCheckIn={onCheckIn} />
-      )}
-
-      <RoomSection own={own} room={room} loading={loading} onRefresh={onRefresh} onAddPartner={onAddPartner} />
-    </div>
+    <Page>
+      <NavBar title="Chi c'è oggi" subtitle="Chi è in spiaggia oggi e cerca compagno" back={back} />
+      <div className="oggi-layout">
+        {/* Il modulo e la card si scambiano sul posto: chi esce va fuori dal
+            flusso (popLayout), la stanza sotto scivola con un FLIP. */}
+        <div className="oggi-slot">
+          <AnimatePresence mode="popLayout" initial={false}>
+            {own ? (
+              <m.div
+                key="qui"
+                className="oggi-swap"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0, transition: ENTRATA }}
+                exit={{ opacity: 0, transition: SVELTO }}
+              >
+                <CheckedInCard own={own} onTermina={onTerminaCheckIn} />
+              </m.div>
+            ) : (
+              <m.div
+                key="modulo"
+                className="oggi-swap"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0, transition: ENTRATA }}
+                exit={{ opacity: 0, transition: SVELTO }}
+              >
+                <CheckInForm cityPrefill={cityPrefill} onCheckIn={onCheckIn} />
+              </m.div>
+            )}
+          </AnimatePresence>
+        </div>
+        <m.div layout="position" transition={MOLLA} className="oggi-room-wrap">
+          <RoomSection
+            own={own}
+            room={room}
+            loading={loading}
+            onRefresh={onRefresh}
+            onAddPartner={onAddPartner}
+            aggiornatoAlle={aggiornatoAlle}
+          />
+        </m.div>
+      </div>
+    </Page>
   )
 }
 
-// ---------------------------------------------------------------- CheckInForm
+// ---------------------------------------------------------------- modulo
 function CheckInForm({ cityPrefill, onCheckIn }: { cityPrefill: string; onCheckIn: (input: CheckInInput) => Promise<boolean> }) {
+  const id = useId()
+  const cityRef = useRef<HTMLInputElement | null>(null)
   const [city, setCity] = useState(cityPrefill)
   const [looking, setLooking] = useState(true)
   const [note, setNote] = useState('')
   const [busy, setBusy] = useState(false)
+  const [errore, setErrore] = useState(false)
 
-  // Il prefill può arrivare dopo il primo render (dati in caricamento): lo
-  // adottiamo solo finché il campo è vuoto, senza mai sovrascrivere ciò che si
-  // sta digitando.
+  // Il prefill può arrivare dopo il primo disegno (dati in caricamento): lo si
+  // adotta solo finché il campo è vuoto, senza sovrascrivere ciò che si scrive.
   useEffect(() => {
     if (cityPrefill) setCity((c) => c || cityPrefill)
   }, [cityPrefill])
 
-  const canSubmit = city.trim().length > 0 && !busy
+  const vuota = city.trim().length === 0
   const submit = async () => {
-    if (!canSubmit) return
+    if (busy || vuota) return
     setBusy(true)
-    // Al successo il parent passa `own` e questa card diventa lo stato "sei qui".
+    // Al successo la shell passa `own` e il modulo diventa la card «Sei a X oggi».
     await onCheckIn({ city: city.trim(), lookingForPartner: looking, note: note.trim() })
     setBusy(false)
   }
 
   return (
-    <div className="card" style={{ marginTop: 22, padding: 20 }}>
-      <h2 className="num" style={{ fontSize: 18, fontWeight: 500, margin: 0 }}>Fai check-in</h2>
-      <p style={{ font: "600 13px 'Nunito Sans'", color: MUTED, margin: '5px 0 0' }}>Segnala che sei in spiaggia oggi e scopri chi altro c'è.</p>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 18 }}>
-        <div>
-          <label htmlFor="oggi-city" style={labelStyle}>Città</label>
-          <input id="oggi-city" value={city} onChange={(e) => setCity(e.target.value)} placeholder="Es. Rimini" autoComplete="off" style={fieldStyle} />
-        </div>
-
-        <div>
-          <span id="oggi-date-label" style={labelStyle}>Giorno</span>
-          <div aria-labelledby="oggi-date-label" style={{ ...fieldStyle, display: 'flex', alignItems: 'center', gap: 8, color: MUTED, background: '#FBFAF8' }}>
-            <span style={{ width: 7, height: 7, borderRadius: '50%', background: ORANGE, flex: 'none' }} /> Oggi
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-          <div style={{ minWidth: 0 }}>
-            <div style={{ font: "700 14px 'Nunito Sans'" }}>Cerco compagno</div>
-            <div style={{ font: "600 12px 'Nunito Sans'", color: MUTED, marginTop: 2 }}>Fatti trovare da chi cerca un partner.</div>
-          </div>
-          <Switch checked={looking} onChange={setLooking} label="Cerco compagno" />
-        </div>
-
-        <div>
-          <label htmlFor="oggi-note" style={labelStyle}>Nota <span style={{ fontWeight: 600 }}>(facoltativa)</span></label>
-          <input id="oggi-note" value={note} onChange={(e) => setNote(e.target.value)} maxLength={80} placeholder={'Es. "Cerco per King of the Beach, 2vs2"'} style={fieldStyle} />
-        </div>
-      </div>
-
-      <button
-        type="button"
-        className="chip"
-        onClick={submit}
-        disabled={!canSubmit}
-        style={{ ...primaryBtn, marginTop: 18, width: '100%', opacity: canSubmit ? undefined : 0.5, cursor: canSubmit ? 'pointer' : 'default' }}
+    <Card as="section" className="oggi-form" aria-labelledby={`${id}-t`}>
+      <h2 id={`${id}-t`} className="oggi-card-title">Fai check-in</h2>
+      <p className="oggi-card-text">Segnala che sei in spiaggia oggi e scopri chi altro c'è.</p>
+      <form
+        className="oggi-fields"
+        onSubmit={(e) => {
+          e.preventDefault()
+          void submit()
+        }}
       >
-        {busy ? 'Check-in…' : 'Fai check-in'}
-      </button>
-    </div>
+        <div className="ui-field" data-invalid={errore && vuota ? '' : undefined}>
+          <label htmlFor={`${id}-city`} className="ui-field-label">Città</label>
+          <span
+            ref={(el) => {
+              cityRef.current = el?.querySelector('input') ?? null
+            }}
+            className="oggi-city"
+          >
+            <CityInput
+              id={`${id}-city`}
+              value={city}
+              onChange={(v) => {
+                setCity(v)
+                if (v.trim()) setErrore(false)
+              }}
+              describedBy={errore && vuota ? `${id}-city-e` : undefined}
+            />
+          </span>
+          {errore && vuota && (
+            <p id={`${id}-city-e`} className="ui-field-error" role="alert">
+              <Icon name="alert" size={16} />
+              <span>Scrivi la città in cui sei.</span>
+            </p>
+          )}
+        </div>
+
+        <div className="ui-field">
+          <span className="ui-field-label">Giorno</span>
+          <p className="oggi-giorno">
+            <Icon name="calendar" size={20} />
+            Oggi
+          </p>
+        </div>
+
+        <Switch label="Cerco compagno" hint="Fatti trovare da chi cerca un partner." checked={looking} onChange={setLooking} />
+
+        <TextField
+          label="Nota (facoltativa)"
+          value={note}
+          onChange={setNote}
+          maxLength={NOTA_MAX}
+          placeholder="es. Cerco per King of the Beach, 2vs2"
+          hint={`${note.length}/${NOTA_MAX}`}
+          autoComplete="off"
+        />
+
+        <Button
+          type="submit"
+          variant="filled"
+          block
+          disabled={vuota}
+          busy={busy}
+          busyLabel="Check-in…"
+          onDisabledClick={() => {
+            // Un pulsante che non risponde sembra rotto: porta al campo che manca.
+            setErrore(true)
+            cityRef.current?.focus()
+          }}
+        >
+          Fai check-in
+        </Button>
+      </form>
+    </Card>
   )
 }
 
-// ---------------------------------------------------------------- CheckedInCard
-function CheckedInCard({ own, onCheckOut }: { own: CheckIn; onCheckOut: () => Promise<boolean> }) {
-  const [leaving, setLeaving] = useState(false)
-  const leave = async () => {
-    if (leaving) return
-    setLeaving(true)
-    await onCheckOut()
-    setLeaving(false)
-  }
+// ---------------------------------------------------------------- sei qui
+function CheckedInCard({ own, onTermina }: { own: CheckIn; onTermina: () => void }) {
+  const id = useId()
   return (
-    <div className="card" style={{ marginTop: 22, padding: 20 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-        <div style={{ flex: 1, minWidth: 200 }}>
-          <div style={{ font: "700 15px 'Nunito Sans'", display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ width: 9, height: 9, borderRadius: '50%', background: GREEN, flex: 'none' }} /> Sei a {own.city} oggi
-          </div>
-          <div style={{ font: "600 13px 'Nunito Sans'", color: MUTED, marginTop: 5 }}>
+    <Card as="section" className="oggi-qui" aria-labelledby={`${id}-t`}>
+      <div className="oggi-qui-head">
+        <Icon name="pin" size={24} className="oggi-qui-icon" />
+        <div className="oggi-qui-text">
+          <h2 id={`${id}-t`} className="oggi-card-title">Sei a {own.city} oggi</h2>
+          <p className="oggi-card-text">
             {own.lookingForPartner ? 'Stai cercando un compagno.' : 'Non stai cercando un compagno.'}
             {own.note ? ` · ${own.note}` : ''}
-          </div>
+          </p>
         </div>
-        <button type="button" className="chip" onClick={leave} disabled={leaving} style={{ ...dangerBtn, flex: 'none', opacity: leaving ? 0.6 : undefined, cursor: leaving ? 'default' : 'pointer' }}>
-          {leaving ? 'Uscita…' : 'Esci'}
-        </button>
       </div>
-    </div>
+      <div className="oggi-qui-actions">
+        <Button variant="destructive-plain" onClick={onTermina}>Termina check-in</Button>
+      </div>
+    </Card>
   )
 }
 
-// ---------------------------------------------------------------- RoomSection
-const ROOM_ALL = 'all'
-const ROOM_LOOKING = 'looking'
+// ---------------------------------------------------------------- stanza
+const TUTTI = 'all'
+const CERCANO = 'looking'
 
-function RoomSection({ own, room, loading, onRefresh, onAddPartner }: {
+function RoomSection({ own, room, loading, onRefresh, onAddPartner, aggiornatoAlle }: {
   own: CheckIn | null
   room: PresentUser[]
   loading: boolean
   onRefresh: () => void
   onAddPartner: (u: PresentUser) => Promise<{ ok: boolean; error?: string }>
+  aggiornatoAlle?: string | null
 }) {
-  const [filter, setFilter] = useState<string>(ROOM_ALL)
+  const [filtro, setFiltro] = useState<string>(TUTTI)
 
   // Reciprocità (Q3): la stanza si vede solo se sei in check-in.
   if (!own) {
     return (
-      <>
-        <SectionTitle>In spiaggia oggi</SectionTitle>
-        <EmptyCard>Fai check-in per vedere chi c'è oggi e metterti in contatto.</EmptyCard>
-      </>
+      <Section title="In spiaggia oggi" id="oggi-stanza">
+        <Card as="div" className="oggi-bloccata">
+          <Icon name="lock" size={24} className="oggi-bloccata-icon" />
+          <p>Fai check-in per vedere chi c'è oggi e metterti in contatto.</p>
+        </Card>
+      </Section>
     )
   }
 
-  const visible = filter === ROOM_LOOKING ? room.filter((u) => u.lookingForPartner) : room
-  const hasLooking = room.some((u) => u.lookingForPartner)
-  // Le chip servono solo se filtrano davvero qualcosa (mix di stati, ≥2 persone).
-  const showChips = room.length > 1 && hasLooking && !room.every((u) => u.lookingForPartner)
-  const topGap = showChips ? 14 : 0
+  const cercano = room.some((u) => u.lookingForPartner)
+  // Le chip ci sono solo se separano davvero qualcosa.
+  const conChip = room.length > 1 && cercano && !room.every((u) => u.lookingForPartner)
+  const attivo = conChip ? filtro : TUTTI
+  const visibili = attivo === CERCANO ? room.filter((u) => u.lookingForPartner) : room
 
   return (
-    <>
-      <SectionTitle action={<GhostButton onClick={onRefresh}>↻ Aggiorna</GhostButton>}>
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-          In spiaggia oggi
-          {room.length > 0 && <RoomCount n={room.length} />}
-        </span>
-      </SectionTitle>
-
-      {showChips && (
-        <FilterChips
-          label="Filtra chi c'è oggi"
-          value={filter}
-          onChange={setFilter}
-          mt={0}
-          options={[
-            { value: ROOM_ALL, label: 'Tutti' },
-            { value: ROOM_LOOKING, label: 'Cerca compagno' },
-          ]}
-        />
+    <Section
+      title="In spiaggia oggi"
+      id="oggi-stanza"
+      count={room.length > 0 ? <Badge tone="accent">{room.length === 1 ? '1 persona' : `${room.length} persone`}</Badge> : undefined}
+      action={
+        <Button variant="plain" size="sm" icon="refresh" onClick={onRefresh}>
+          Aggiorna
+        </Button>
+      }
+    >
+      {aggiornatoAlle && <Note className="oggi-aggiornato">Aggiornato alle {aggiornatoAlle}</Note>}
+      {conChip && (
+        <div className="oggi-chips">
+          <FilterChips
+            label="Filtra chi c'è oggi"
+            value={attivo}
+            onChange={setFiltro}
+            options={[
+              { value: TUTTI, label: 'Tutti' },
+              { value: CERCANO, label: 'Cerca compagno' },
+            ]}
+          />
+        </div>
       )}
 
       {loading ? (
-        <div role="status" style={{ font: "600 13px 'Nunito Sans'", color: MUTED, padding: '18px 2px', marginTop: topGap }}>Aggiornamento…</div>
-      ) : visible.length === 0 ? (
-        <div style={{ marginTop: topGap }}>
-          <EmptyCard>
-            {room.length === 0 ? (
-              <>Ancora nessun altro qui. <GhostButton onClick={onRefresh}>Aggiorna →</GhostButton></>
-            ) : (
-              'Nessuno sta cercando un compagno al momento.'
-            )}
-          </EmptyCard>
-        </div>
+        <>
+          <p role="status" className="oggi-stato">Aggiornamento…</p>
+          <Skeleton className="oggi-skeleton">
+            {[0, 1].map((i) => (
+              <div key={i} className="oggi-skel-card">
+                <Bone className="oggi-skel-avatar" />
+                <span className="oggi-skel-lines">
+                  <Bone className="oggi-skel-name" />
+                  <Bone className="oggi-skel-meta" />
+                </span>
+              </div>
+            ))}
+          </Skeleton>
+        </>
+      ) : room.length === 0 ? (
+        <Card as="div" className="oggi-vuota">
+          <p>Ancora nessun altro qui.</p>
+          <Button variant="tinted" icon="refresh" onClick={onRefresh}>Aggiorna</Button>
+        </Card>
+      ) : visibili.length === 0 ? (
+        <Card as="div" className="oggi-vuota">
+          <p>Nessuno sta cercando un compagno al momento.</p>
+        </Card>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(min(100%,260px),1fr))', gap: 14, marginTop: topGap }}>
-          {visible.map((u) => (
+        <ul className="oggi-persone">
+          {visibili.map((u) => (
             <PresentCard key={u.id} u={u} onAddPartner={onAddPartner} />
           ))}
-        </div>
+        </ul>
       )}
-    </>
+    </Section>
   )
 }
 
-// ---------------------------------------------------------------- PresentCard
+// ---------------------------------------------------------------- persona
 function PresentCard({ u, onAddPartner }: { u: PresentUser; onAddPartner: (u: PresentUser) => Promise<{ ok: boolean; error?: string }> }) {
-  const [state, setState] = useState<'idle' | 'busy' | 'done'>('idle')
+  const id = useId()
+  const [stato, setStato] = useState<'idle' | 'busy' | 'done'>('idle')
   const [err, setErr] = useState('')
 
-  const add = async () => {
-    if (state !== 'idle') return
+  const aggiungi = async () => {
+    if (stato !== 'idle') return
     setErr('')
-    setState('busy')
+    setStato('busy')
     const r = await onAddPartner(u)
-    if (r.ok) setState('done')
+    if (r.ok) setStato('done')
     else {
-      setState('idle')
+      setStato('idle')
       setErr(r.error || 'Operazione non riuscita.')
     }
   }
 
-  const initial = (u.name.trim()[0] || '?').toUpperCase()
+  const fatto = stato === 'done'
   return (
-    <div className="card" style={{ padding: 18, display: 'flex', flexDirection: 'column', gap: 14 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 13 }}>
-        <Avatar initial={initial} uri={u.avatarUrl} size={46} font={19} />
-        <div style={{ minWidth: 0, flex: 1 }}>
-          <div style={{ font: "700 15px 'Nunito Sans'", whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{u.name}</div>
-          <div style={{ marginTop: 5 }}>
-            {u.lookingForPartner ? (
-              <Badge tone="premium" size="md">Cerca compagno</Badge>
-            ) : (
-              <span style={{ font: "600 12px 'Nunito Sans'", color: MUTED }}>In spiaggia</span>
-            )}
-          </div>
+    <Card as="li" className="oggi-persona">
+      <div className="oggi-persona-head">
+        <Avatar name={u.name} src={u.avatarUrl} size={40} />
+        <div className="oggi-persona-who">
+          <h3 id={`${id}-n`} className="oggi-persona-name">{u.name}</h3>
+          {u.lookingForPartner ? <Badge tone="accent">Cerca compagno</Badge> : <span className="oggi-persona-stato">In spiaggia</span>}
         </div>
       </div>
-
-      {u.note && <div style={{ font: "600 13px 'Nunito Sans'", color: 'rgba(27,42,74,.7)', lineHeight: 1.4 }}>{u.note}</div>}
-
-      {state === 'done' ? (
-        <div role="status" style={{ display: 'flex', alignItems: 'center', gap: 7, font: "700 13px 'Nunito Sans'", color: INK }}>
-          <span style={{ width: 8, height: 8, borderRadius: '50%', background: GREEN, flex: 'none' }} /> Aggiunto ai compagni
-        </div>
-      ) : (
-        <button
-          type="button"
-          className="chip"
-          onClick={add}
-          disabled={state === 'busy'}
-          style={{ ...darkBtn, width: '100%', padding: '11px 16px', font: "700 13px 'Nunito Sans'", opacity: state === 'busy' ? 0.6 : undefined, cursor: state === 'busy' ? 'default' : 'pointer' }}
-        >
-          {state === 'busy' ? 'Aggiungo…' : '＋ Aggiungi come compagno'}
-        </button>
+      {u.note && <p className="oggi-persona-note">{u.note}</p>}
+      {/* Pulsante ed esito si scambiano SUL POSTO, nella stessa altezza
+          riservata: dissolvenza incrociata, niente salto (MOTION.md §5 F6). */}
+      <div className="oggi-add" data-done={fatto ? '' : undefined}>
+        <span className="oggi-add-btn" {...(fatto ? { inert: '' } : {})}>
+          <Button
+            variant="neutral"
+            icon="person-plus"
+            block
+            busy={stato === 'busy'}
+            busyLabel="Aggiungo…"
+            onClick={() => void aggiungi()}
+          >
+            Aggiungi come compagno
+          </Button>
+        </span>
+        <span className="oggi-add-done" role="status">
+          {fatto && (
+            <>
+              <Icon name="check-circle" size={20} className="oggi-add-ok" />
+              Aggiunto ai compagni
+            </>
+          )}
+        </span>
+      </div>
+      {err && (
+        <p role="alert" className="ui-field-error">
+          <Icon name="alert" size={16} />
+          <span>{err}</span>
+        </p>
       )}
-
-      {err && <div role="alert" style={{ font: "700 12px 'Nunito Sans'", color: DANGER }}>{err}</div>}
-    </div>
-  )
-}
-
-// ---------------------------------------------------------------- primitives
-// Contatore accanto al titolo (stesso linguaggio del contatore sezioni Tornei),
-// in tinta "live" arancione per la stanza di oggi.
-function RoomCount({ n }: { n: number }) {
-  return (
-    <span style={{ flex: 'none', font: "700 12px 'Nunito Sans'", padding: '4px 10px', borderRadius: 8, background: '#FFF1EA', color: '#C4501E' }}>
-      {n === 1 ? '1 persona' : `${n} persone`}
-    </span>
-  )
-}
-
-// Toggle accessibile "Cerco compagno": <button role="switch"> raggiungibile da
-// tastiera (Invio/Spazio nativi) e annunciato come premuto/non premuto.
-function Switch({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label: string }) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      aria-label={label}
-      onClick={() => onChange(!checked)}
-      className="chip"
-      style={{ position: 'relative', width: 46, height: 27, borderRadius: 999, border: 'none', padding: 0, cursor: 'pointer', flex: 'none', background: checked ? INK : '#E4E1DB', transition: 'background .2s ease' }}
-    >
-      <span style={{ position: 'absolute', top: 3, left: checked ? 22 : 3, width: 21, height: 21, borderRadius: '50%', background: '#fff', boxShadow: '0 1px 3px rgba(27,42,74,.3)', transition: 'left .2s ease' }} />
-    </button>
-  )
-}
-
-// Link-azione arancione, ma <button> vero (raggiungibile da tastiera) per le
-// azioni di refresh.
-function GhostButton({ children, onClick }: { children: ReactNode; onClick: () => void }) {
-  return (
-    <button type="button" className="chip" onClick={onClick} style={{ border: 'none', background: 'transparent', color: ORANGE, cursor: 'pointer', font: "700 13px 'Nunito Sans'", padding: 0 }}>
-      {children}
-    </button>
+    </Card>
   )
 }

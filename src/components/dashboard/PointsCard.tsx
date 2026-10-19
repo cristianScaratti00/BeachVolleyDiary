@@ -1,34 +1,47 @@
+// ============================================================================
+// Punti fatti e subiti: due barre nello stesso binario (un colore per il dato,
+// --data-win; uno per il confronto, --data-rest) e le medie sotto. Le barre
+// traslano dentro il binario (MOTION.md §4.4): `width` faceva layout a ogni
+// fotogramma.
+// ============================================================================
 import type { DashboardStats } from '../../lib/derive'
+import { Bar, StatFooter } from '../ui/Stat'
+import { ChartCard, EmptyNote } from './Chart'
 
-// Barre punti fatti vs subiti + medie.
+const pct = (w: string) => Number.parseInt(w, 10) || 0
+
 export function PointsCard({ s }: { s: DashboardStats }) {
+  if (s.played === 0) {
+    return (
+      <ChartCard title="Punti">
+        <EmptyNote>Nessuna partita in questo periodo.</EmptyNote>
+      </ChartCard>
+    )
+  }
   return (
-    <div className="card" style={{ padding: 22 }}>
-      <div className="lbl" style={{ marginBottom: 16 }}>Punti fatti vs subiti</div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-        <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', font: "700 12px 'Nunito Sans'", marginBottom: 6 }}>
-            <span style={{ color: 'rgba(27,42,74,.55)' }}>Fatti</span>
-            <span className="num">{s.pf}</span>
+    <ChartCard title="Punti">
+      <div className="dash-rows">
+        <div className="dash-points-row">
+          <div className="dash-row-head">
+            <span className="dash-row-label">Fatti</span>
+            <span className="dash-row-n">{s.pf}</span>
           </div>
-          <div className="barwrap" style={{ height: 14, background: '#F2F0EC', borderRadius: 4, overflow: 'hidden' }}>
-            <div className="bar" style={{ height: '100%', width: s.barForW, background: '#FF6B35', borderRadius: 4, opacity: 0.92, transition: 'width .7s ease' }} />
-          </div>
+          <Bar pct={pct(s.barForW)} tone="win" size="lg" />
         </div>
-        <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', font: "700 12px 'Nunito Sans'", marginBottom: 6 }}>
-            <span style={{ color: 'rgba(27,42,74,.55)' }}>Subiti</span>
-            <span className="num">{s.pa}</span>
+        <div className="dash-points-row">
+          <div className="dash-row-head">
+            <span className="dash-row-label">Subiti</span>
+            <span className="dash-row-n">{s.pa}</span>
           </div>
-          <div className="barwrap" style={{ height: 14, background: '#F2F0EC', borderRadius: 4, overflow: 'hidden' }}>
-            <div className="bar" style={{ height: '100%', width: s.barAgW, background: '#1B2A4A', borderRadius: 4, opacity: 0.85, transition: 'width .7s ease' }} />
-          </div>
-        </div>
-        <div style={{ display: 'flex', gap: 26, paddingTop: 14, borderTop: '1px solid rgba(27,42,74,.08)' }}>
-          <div><div className="num" style={{ fontSize: 20 }}>{s.avgFor}</div><div className="lbl">media fatti</div></div>
-          <div><div className="num" style={{ fontSize: 20 }}>{s.avgAg}</div><div className="lbl">media subiti</div></div>
+          <Bar pct={pct(s.barAgW)} tone="rest" size="lg" />
         </div>
       </div>
-    </div>
+      <StatFooter
+        items={[
+          { value: s.avgFor, label: 'Media fatti' },
+          { value: s.avgAg, label: 'Media subiti' },
+        ]}
+      />
+    </ChartCard>
   )
 }

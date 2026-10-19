@@ -1,0 +1,80 @@
+/* Tornei (UX §5 F4): intestazione, viste, Lista. Solo token. */
+@layer components {
+  .tornei-search { margin-top: var(--space-4); }
+  .tornei-segmented { margin-top: var(--space-4); }
+  .tornei-chips { margin-top: var(--space-4); }
+
+  /* La lente della NavBar compatta: compare solo dopo lo scroll, in SVELTO. */
+  .tornei-lens {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--dur-svelto) var(--ease-standard), visibility 0s linear var(--dur-svelto);
+  }
+  .tornei-lens[data-visible] {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity var(--dur-svelto) var(--ease-standard), visibility 0s;
+  }
+
+  .tornei-link {
+    color: var(--accent-text);
+    font: var(--type-subhead-strong);
+    letter-spacing: var(--track-subhead);
+    text-decoration: underline;
+    text-underline-offset: var(--space-0-5);
+  }
+
+  /* ---------------------------------------------------------- card */
+  .tornei-item { list-style: none; min-width: 0; display: flex; }
+  .tornei-card { flex: 1; display: flex; flex-direction: column; }
+  .tornei-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-2);
+  }
+  .tornei-card-cat { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-2); min-width: 0; }
+  .tornei-dot {
+    flex: none;
+    width: var(--space-2);
+    height: var(--space-2);
+    border-radius: 50%;
+  }
+  .tornei-eyebrow {
+    font: var(--type-eyebrow);
+    letter-spacing: var(--track-eyebrow);
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+  .tornei-card-title { margin-top: var(--space-3); }
+  .tornei-meta {
+    margin-top: var(--space-1);
+    font: var(--type-footnote);
+    letter-spacing: var(--track-footnote);
+    color: var(--ink-2);
+  }
+  .tornei-card .ui-stat-footer { margin-top: auto; }
+  .tornei-card .tornei-meta + .ui-stat-footer { margin-top: var(--space-4); }
+
+  /* ----------------------------------------------- skeleton Timeline */
+  /* Le stesse misure della voce vera: la colonna della data e le barre
+     alte quanto le interlinee che sostituiscono (MOTION.md §6.3). */
+  .tornei-skel { margin-top: var(--space-4); }
+  .tornei-skel-entry {
+    display: grid;
+    grid-template-columns: var(--timeline-date) minmax(0, 1fr);
+    gap: var(--space-3);
+    padding: var(--space-4);
+    margin-bottom: var(--space-3);
+    border-radius: var(--radius-card);
+    background: var(--surface);
+    border: var(--border-w) solid var(--edge);
+  }
+  .tornei-skel-date { display: grid; justify-items: center; gap: var(--space-1); align-content: start; }
+  .tornei-skel-day { width: var(--space-10); height: var(--space-5); }
+  .tornei-skel-month { width: calc(var(--space-6) + var(--space-1)); height: var(--space-3); }
+  .tornei-skel-body { display: grid; gap: var(--space-2); align-content: start; }
+  .tornei-skel-title { width: 70%; height: var(--space-4); }
+  .tornei-skel-meta { width: 45%; height: var(--space-3); }
+  .tornei-skel-cover { aspect-ratio: 16 / 10; border-radius: var(--radius-control); margin-top: var(--space-1); }
+}

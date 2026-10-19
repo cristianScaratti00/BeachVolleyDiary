@@ -1,0 +1,40 @@
+@layer components {
+  .ui-dialog-layer {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-dialog);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: var(--space-2) var(--space-2) calc(var(--space-2) + var(--safe-bottom));
+  }
+  .ui-dialog-scrim {
+    position: absolute;
+    inset: 0;
+    background: var(--scrim);
+  }
+  .ui-dialog {
+    position: relative;
+    width: 100%;
+    max-width: var(--sheet-max);
+    padding: var(--space-5) var(--space-4) var(--space-4);
+    background: var(--surface);
+    border-radius: var(--radius-sheet);
+    box-shadow: var(--elev-dialog);
+    text-align: center;
+    color: var(--ink);
+    transform-origin: 50% 100%;
+  }
+  @media (min-width: 600px) {
+    .ui-dialog-layer { align-items: center; }
+    .ui-dialog { width: var(--dialog-w); transform-origin: 50% 50%; }
+  }
+  .ui-dialog-title { font: var(--type-headline); letter-spacing: var(--track-headline); }
+  .ui-dialog-text {
+    margin-top: var(--space-1);
+    font: var(--type-subhead);
+    letter-spacing: var(--track-subhead);
+    color: var(--ink-2);
+  }
+  .ui-dialog-actions { display: grid; gap: var(--space-2); margin-top: var(--space-5); }
+}

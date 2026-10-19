@@ -1,0 +1,146 @@
+/* "Chi c'è oggi": modulo (o card «Sei a X oggi») e stanza. Da 900px i due
+   blocchi stanno affiancati (UX §9.2). */
+@layer components {
+  .oggi-layout {
+    display: grid;
+    gap: var(--space-2);
+    margin-top: var(--space-4);
+    min-width: 0;
+  }
+  @media (min-width: 900px) {
+    .oggi-layout {
+      grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+      gap: var(--space-6);
+      align-items: start;
+    }
+    .oggi-layout .ui-section { margin-top: 0; }
+  }
+  .oggi-slot { position: relative; min-width: 0; }
+  .oggi-swap { min-width: 0; }
+  .oggi-room-wrap { min-width: 0; }
+
+  .oggi-card-title { font: var(--type-title-3); letter-spacing: var(--track-title-3); }
+  .oggi-card-text {
+    margin-top: var(--space-1);
+    font: var(--type-subhead);
+    letter-spacing: var(--track-subhead);
+    color: var(--ink-2);
+  }
+
+  /* ------------------------------------------------------------ modulo */
+  .oggi-fields { display: grid; gap: var(--space-4); margin-top: var(--space-5); }
+  .oggi-city { display: block; min-width: 0; }
+  .oggi-giorno {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: var(--control-md);
+    padding: 0 var(--space-3);
+    border-radius: var(--radius-control);
+    background: var(--fill);
+    color: var(--ink);
+  }
+  .oggi-giorno .ui-icon { color: var(--ink-2); }
+
+  /* ------------------------------------------------------------ sei qui */
+  .oggi-qui-head { display: flex; align-items: flex-start; gap: var(--space-3); }
+  .oggi-qui-icon { color: var(--accent-text); margin-top: var(--space-0-5); }
+  .oggi-qui-text { min-width: 0; }
+  .oggi-qui-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: var(--space-3);
+    padding-top: var(--space-2);
+    border-top: var(--hairline) solid var(--separator);
+  }
+
+  /* ------------------------------------------------------------ stanza */
+  .oggi-bloccata,
+  .oggi-vuota {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3);
+    text-align: center;
+    font: var(--type-subhead);
+    letter-spacing: var(--track-subhead);
+    color: var(--ink-2);
+  }
+  .oggi-bloccata-icon { color: var(--ink-3); }
+  .oggi-aggiornato { margin-bottom: var(--space-3); }
+  .oggi-chips { margin-bottom: var(--space-3); }
+  .oggi-stato {
+    font: var(--type-footnote);
+    letter-spacing: var(--track-footnote);
+    color: var(--ink-2);
+    margin-bottom: var(--space-3);
+  }
+
+  .oggi-persone {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--card-min-narrow)), 1fr));
+    gap: var(--space-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .oggi-persona { display: flex; flex-direction: column; gap: var(--space-3); }
+  .oggi-persona-head { display: flex; align-items: center; gap: var(--space-3); min-width: 0; }
+  .oggi-persona-who { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-1); min-width: 0; }
+  .oggi-persona-name {
+    max-width: 100%;
+    font: var(--type-headline);
+    letter-spacing: var(--track-headline);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .oggi-persona-stato { font: var(--type-footnote); letter-spacing: var(--track-footnote); color: var(--ink-2); }
+  .oggi-persona-note { font: var(--type-subhead); letter-spacing: var(--track-subhead); color: var(--ink-2); }
+
+  /* Pulsante ed esito nella stessa cella: si scambiano in opacità (SVELTO). */
+  .oggi-add { display: grid; }
+  .oggi-add > * { grid-area: 1 / 1; min-width: 0; }
+  .oggi-add-btn {
+    transition: opacity var(--dur-svelto) var(--ease-standard), visibility 0s;
+  }
+  .oggi-add-done {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    min-height: var(--control-md);
+    font: var(--type-subhead-strong);
+    letter-spacing: var(--track-subhead);
+    color: var(--ink);
+    opacity: 0;
+    transition: opacity var(--dur-svelto) var(--ease-standard);
+  }
+  .oggi-add[data-done] .oggi-add-btn {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--dur-svelto) var(--ease-standard), visibility 0s linear var(--dur-svelto);
+  }
+  .oggi-add[data-done] .oggi-add-done { opacity: 1; }
+  .oggi-add-ok { color: var(--success); }
+
+  /* -------------------------------------------------------- skeleton */
+  .oggi-skeleton .ui-skeleton-breathe {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--card-min-narrow)), 1fr));
+    gap: var(--space-3);
+  }
+  .oggi-skel-card {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border: var(--border-w) solid var(--edge);
+    border-radius: var(--radius-card);
+    background: var(--surface);
+  }
+  .oggi-skel-avatar { width: var(--space-10); height: var(--space-10); border-radius: 50%; flex: none; }
+  .oggi-skel-lines { display: grid; gap: var(--space-2); flex: 1; }
+  .oggi-skel-name { height: var(--space-4); width: 60%; }
+  .oggi-skel-meta { height: var(--space-3); width: 40%; }
+}

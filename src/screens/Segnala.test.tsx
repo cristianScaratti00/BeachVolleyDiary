@@ -6,9 +6,12 @@
 // che si spedisce è quello che si è scritto (ripulito), un errore di rete non
 // fa sparire il testo appena battuto, e dopo l'invio il form non resta lì a
 // invitare al doppio invio.
+//
+// «Invia segnalazione» incompleta è `aria-disabled`, non `disabled` (MOTION.md
+// M15): resta annunciata e il tocco porta al campo che manca.
 // ============================================================================
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { act, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import Segnala from './Segnala'
 import { expectNoA11yViolations } from '../test/axe'
@@ -17,10 +20,13 @@ type Props = Parameters<typeof Segnala>[0]
 
 function renderScreen(over: Partial<Props> = {}) {
   const onBack = vi.fn()
+  const onNavBack = vi.fn()
   const onInvia = vi.fn().mockResolvedValue({ ok: true })
-  const view = render(<Segnala onBack={onBack} onInvia={onInvia} {...over} />)
-  return { ...view, onBack, onInvia }
+  const view = render(<Segnala back={{ label: 'Profilo', onClick: onNavBack }} onBack={onBack} onInvia={onInvia} {...over} />)
+  return { ...view, onBack, onNavBack, onInvia }
 }
+
+const invia = () => screen.getByRole('button', { name: 'Invia segnalazione' })
 
 const DESCRIZIONE = 'Ho salvato un torneo e non compare nella lista dei tornei.'
 
@@ -31,23 +37,35 @@ async function compila(user: ReturnType<typeof userEvent.setup>) {
 }
 
 describe('Segnala — cosa può partire', () => {
-  it('a form vuoto il pulsante di invio è disabilitato', () => {
+  it('a form vuoto il pulsante di invio è disattivo', () => {
     renderScreen()
-    expect(screen.getByRole('button', { name: 'Invia segnalazione' })).toBeDisabled()
+    expect(invia()).toHaveAttribute('aria-disabled', 'true')
   })
 
   it('col solo titolo non basta: serve anche la descrizione', async () => {
     const user = userEvent.setup()
     renderScreen()
     await user.type(screen.getByLabelText('Il problema in una riga'), 'Qualcosa non va')
-    expect(screen.getByRole('button', { name: 'Invia segnalazione' })).toBeDisabled()
+    expect(invia()).toHaveAttribute('aria-disabled', 'true')
   })
 
   it('con titolo e descrizione il pulsante si abilita', async () => {
     const user = userEvent.setup()
     renderScreen()
     await compila(user)
-    expect(screen.getByRole('button', { name: 'Invia segnalazione' })).toBeEnabled()
+    expect(invia()).not.toHaveAttribute('aria-disabled')
+  })
+
+  it('il tocco sul pulsante disattivo non spedisce: porta al campo che manca e dice perché', async () => {
+    const user = userEvent.setup()
+    const { onInvia } = renderScreen()
+    await user.type(screen.getByLabelText('Il problema in una riga'), 'Qualcosa non va')
+    await user.click(invia())
+    expect(onInvia).not.toHaveBeenCalled()
+    const descr = screen.getByLabelText('Cosa è successo')
+    expect(descr).toHaveFocus()
+    expect(descr).toHaveAttribute('aria-invalid', 'true')
+    expect(screen.getByRole('alert')).toHaveTextContent(/Descrivi il problema/)
   })
 })
 
@@ -107,16 +125,47 @@ describe('Segnala — quando va storto', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('Sessione non valida.')
     // Il punto: una segnalazione scritta di getto non si riscrive volentieri.
     expect(screen.getByLabelText('Cosa è successo')).toHaveValue(DESCRIZIONE)
-    expect(screen.getByRole('button', { name: 'Invia segnalazione' })).toBeEnabled()
+    expect(invia()).not.toHaveAttribute('aria-disabled')
+    expect(invia()).not.toHaveAttribute('aria-busy')
+  })
+
+  it('durante l\'invio il pulsante è occupato e un secondo tocco non spedisce due volte', async () => {
+    const user = userEvent.setup()
+    let fine: (v: { ok: boolean }) => void = () => {}
+    const onInvia = vi.fn(() => new Promise<{ ok: boolean }>((r) => { fine = r }))
+    renderScreen({ onInvia })
+    await compila(user)
+    await user.click(invia())
+    const occupato = screen.getByRole('button', { name: 'Invio…' })
+    expect(occupato).toHaveAttribute('aria-busy', 'true')
+    await user.click(occupato)
+    expect(onInvia).toHaveBeenCalledTimes(1)
+    await act(async () => fine({ ok: true }))
+    expect(screen.getByRole('heading', { name: "Grazie, l'abbiamo ricevuta" })).toHaveFocus()
   })
 })
 
 describe('Segnala — navigazione e accessibilità', () => {
-  it('il link indietro riporta alla home', async () => {
+  it('‹ Indietro nella barra torna da dove si è arrivati', async () => {
+    const user = userEvent.setup()
+    const { onNavBack } = renderScreen()
+    await user.click(screen.getByRole('button', { name: 'Profilo' }))
+    expect(onNavBack).toHaveBeenCalledOnce()
+  })
+
+  it('dopo l\'invio «Torna indietro» (non più «Torna alla home»: ci si arriva da due posti)', async () => {
     const user = userEvent.setup()
     const { onBack } = renderScreen()
-    await user.click(screen.getByText('← Torna alla home'))
+    await compila(user)
+    await user.click(invia())
+    await user.click(screen.getByRole('button', { name: 'Torna indietro' }))
     expect(onBack).toHaveBeenCalledOnce()
+    expect(screen.queryByText(/Torna alla home/)).not.toBeInTheDocument()
+  })
+
+  it('il titolo della pagina è l\'unico h1', () => {
+    renderScreen()
+    expect(screen.getAllByRole('heading', { level: 1 }).map((h) => h.textContent)).toEqual(['Segnala un problema'])
   })
 
   it('il form non ha violazioni di accessibilità', async () => {

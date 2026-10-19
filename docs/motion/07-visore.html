@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Visore foto · laboratorio del movimento</title>
+<link rel="stylesheet" href="../../src/styles/tokens.css">
+<link rel="stylesheet" href="../../src/styles/materials.css">
+<link rel="stylesheet" href="./_lab.css">
+<style>
+@layer components {
+  .grid { position: relative; display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: var(--space-1); margin-top: var(--space-4); }
+  .thumb {
+    aspect-ratio: 1; border-radius: var(--radius-control);
+    background: var(--g); background-size: cover;
+    box-shadow: inset 0 0 0 1px rgb(27 42 74 / .06);
+    position: relative;
+  }
+  .thumb.is-leaving { position: absolute; pointer-events: none; animation: via var(--dur-svelto) var(--ease-standard) both; }
+  @keyframes via { to { opacity: 0; transform: scale(calc(1 - 0.04 * var(--motion-scale))); } }
+
+  /* ============================================================ Visore */
+  /* `visibility` scatta a fine uscita, non all'inizio: altrimenti l'uscita
+     non si vedrebbe. */
+  .viewer { position: fixed; inset: 0; z-index: var(--z-viewer); visibility: hidden; transition: visibility 0s linear var(--dur-svelto); }
+  .viewer.is-open { visibility: visible; transition: visibility 0s; }
+  .viewer .bg {
+    position: absolute; inset: 0; background: var(--viewer-bg);
+    opacity: 0;
+    transition: opacity var(--dur-svelto) var(--ease-standard);
+  }
+  .viewer.is-open .bg { opacity: var(--bg-o, 1); transition-duration: var(--dur-entrata); }
+  .viewer.dragging .bg { transition: none; }
+  .track { position: absolute; inset: 0; touch-action: none; }
+  .slide { position: absolute; inset: 0; display: grid; place-items: center; }
+  .slide .img { width: var(--w); height: var(--h); background: var(--g); background-size: cover; border-radius: var(--radius-control); }
+  .bar {
+    position: absolute; left: var(--space-2); right: var(--space-2);
+    display: flex; align-items: center; justify-content: space-between;
+    min-height: var(--touch); padding: 0 var(--space-1);
+    border-radius: var(--radius-capsule);
+    opacity: 0;
+    transition: opacity var(--dur-svelto) var(--ease-standard);
+  }
+  .bar.top { top: calc(var(--safe-top) + var(--space-2)); }
+  .bar.bottom { bottom: calc(var(--safe-bottom) + var(--space-2)); justify-content: center; }
+  .viewer.is-open .bar { opacity: 1; transition-duration: var(--dur-entrata); }
+  .viewer.dragging-y .bar { opacity: 0; transition-duration: var(--dur-svelto); }
+  .bar .count { font: var(--type-subhead-strong); color: var(--ink); font-variant-numeric: tabular-nums; }
+  .bar .ui-icon-button { color: var(--ink); }
+}
+</style>
+</head>
+<body>
+<main class="lab-page no-tabbar" id="contenuto">
+  <h1 class="large-title">Foto</h1>
+  <p class="subtitle">Il visore nasce dalla miniatura che hai toccato</p>
+  <div class="grid" id="grid"></div>
+  <div class="lab-row">
+    <button type="button" class="ui-button state" data-variant="neutral" data-size="sm" id="elimina">Elimina la prima foto</button>
+  </div>
+  <div class="lab-note">
+    <b>Tocca una foto:</b> il fondo scuro sale in ENTRATA e l'immagine cresce dalla miniatura con la molla. Versione economica, solo transform e opacità: una scala uniforme più una dissolvenza nasconde la differenza fra il ritaglio quadrato e la foto intera.
+    <b>Trascina di lato</b>: la foto segue il dito, oltre un quarto di larghezza o 550px/s passa alla successiva con la velocità del dito. <b>Trascina in giù</b>: rimpicciolisce, il fondo si schiarisce; oltre 120px o 550px/s torna nella sua miniatura.
+    Con reduced-motion: niente zoom, solo dissolvenze; il dito comanda comunque.
+    <b>Elimina</b>: la cella svanisce, le altre scalano al loro posto (FLIP, massimo 24 celle che si muovono).
+  </div>
+</main>
+
+<div class="viewer" id="viewer" role="dialog" aria-modal="true" aria-label="Foto" data-surface="dark" inert>
+  <div class="bg"></div>
+  <div class="track" id="track"></div>
+  <div class="bar top" data-material="glass-dark">
+    <button type="button" class="ui-icon-button state" id="chiudi" aria-label="Chiudi"><svg class="i" aria-hidden="true"><use href="#i-close"/></svg></button>
+    <span class="count" id="count" aria-live="polite"></span>
+    <span style="width: var(--touch)"></span>
+  </div>
+  <div class="bar bottom" data-material="glass-dark">
+    <button type="button" class="ui-icon-button state" id="prec" aria-label="Precedente"><svg class="i" aria-hidden="true"><use href="#i-chevron-left"/></svg></button>
+    <button type="button" class="ui-icon-button state" aria-label="Scarica"><svg class="i" aria-hidden="true"><use href="#i-download"/></svg></button>
+    <button type="button" class="ui-icon-button state" id="succ" aria-label="Successiva"><svg class="i" aria-hidden="true"><use href="#i-chevron-right"/></svg></button>
+  </div>
+</div>
+
+<script src="./_lab.js"></script>
+<script>
+(function () {
+  const $ = (s) => document.querySelector(s)
+  const G = [
+    ['linear-gradient(160deg,#AAD3DF,#F2EFE9 55%,#E8C9A0)', 4 / 3],
+    ['linear-gradient(200deg,#FF8657,#FFE4D5 60%,#F6F1E8)', 3 / 4],
+    ['linear-gradient(120deg,#1B2A4A,#3F4960 50%,#FF6B35)', 4 / 3],
+    ['linear-gradient(180deg,#00B4D8,#AAD3DF 50%,#F2EFE9)', 3 / 4],
+    ['linear-gradient(90deg,#F7C59F,#FF8657)', 4 / 3],
+    ['linear-gradient(30deg,#16233F,#22325A 60%,#A9B1C2)', 1],
+    ['linear-gradient(150deg,#FFD23F,#FF8657 60%,#C75A37)', 3 / 4],
+    ['linear-gradient(10deg,#E4F4EC,#AAD3DF)', 4 / 3],
+    ['linear-gradient(250deg,#FF477E,#FFE8DC)', 4 / 3],
+  ]
+  let foto = G.map((g, i) => ({ id: 'f' + i, g: g[0], r: g[1] }))
+  const grid = $('#grid'), viewer = $('#viewer'), track = $('#track')
+  function disegnaGriglia() {
+    grid.replaceChildren(...foto.map((f, i) => {
+      const b = document.createElement('button')
+      b.type = 'button'; b.className = 'thumb'; b.dataset.id = f.id
+      b.style.setProperty('--g', f.g)
+      b.setAttribute('aria-label', `Foto ${i + 1} di ${foto.length}`)
+      b.addEventListener('click', () => apri(foto.findIndex((x) => x.id === f.id), b))
+      return b
+    }))
+  }
+  disegnaGriglia()
+
+  // Rettangolo finale: la foto intera dentro lo schermo, fra le due barre.
+  function finale(f) {
+    const W = innerWidth, H = innerHeight - 2 * 64
+    let w = W, h = W / f.r
+    if (h > H) { h = H; w = H * f.r }
+    return { w, h, x: (innerWidth - w) / 2, y: (innerHeight - h) / 2 }
+  }
+
+  let idx = 0, opener = null, rilascia = null
+  function slides() {
+    track.replaceChildren(...[-1, 0, 1].map((o) => {
+      const f = foto[idx + o]
+      const s = document.createElement('div')
+      s.className = 'slide'
+      s.style.transform = `translateX(${o * 100}%)`
+      if (f) {
+        const r = finale(f)
+        s.innerHTML = '<div class="img" role="img"></div>'
+        const im = s.firstChild
+        im.style.setProperty('--g', f.g); im.style.setProperty('--w', r.w + 'px'); im.style.setProperty('--h', r.h + 'px')
+        im.setAttribute('aria-label', `Foto ${idx + o + 1} di ${foto.length}`)
+      }
+      return s
+    }))
+    $('#count').textContent = `${idx + 1} di ${foto.length}`
+    viewer.setAttribute('aria-label', `Foto ${idx + 1} di ${foto.length}`)
+  }
+  const corrente = () => track.children[1].querySelector('.img')
+  const miniatura = () => grid.querySelector(`[data-id="${foto[idx].id}"]`)
+
+  // Da dove a dove: scala UNIFORME che copre la miniatura (niente
+  // deformazioni) + traslazione fra i centri.
+  function daMiniatura(img, th) {
+    const a = th.getBoundingClientRect(), b = img.getBoundingClientRect()
+    const s = Math.max(a.width / b.width, a.height / b.height)
+    return { dx: a.left + a.width / 2 - (b.left + b.width / 2), dy: a.top + a.height / 2 - (b.top + b.height / 2), s }
+  }
+
+  function apri(i, th) {
+    idx = i; opener = th
+    slides()
+    viewer.inert = false
+    viewer.style.setProperty('--bg-o', 1)
+    viewer.classList.add('is-open')
+    document.body.style.overflow = 'hidden'
+    rilascia = Lab.trap(viewer)
+    $('#chiudi').focus({ preventScroll: true }) // UX §8.2: [✕] è la prima fermata
+    const img = corrente()
+    if (Lab.reduced()) { img.animate([{ opacity: 0 }, { opacity: 1 }], { duration: Lab.dur('svelto'), easing: Lab.ease('standard') }); return }
+    const { dx, dy, s } = daMiniatura(img, th)
+    th.style.opacity = '0' // la miniatura "è" l'immagine che vola: non due copie
+    img.animate([{ transform: `translate(${dx}px, ${dy}px) scale(${s})` }, { transform: 'none' }], { duration: Lab.dur('molla'), easing: Lab.ease('molla') })
+    // La dissolvenza copre il primo terzo del volo: nasconde il passaggio
+    // dal ritaglio quadrato alla foto intera.
+    img.animate([{ opacity: 0 }, { opacity: 1 }], { duration: Lab.dur('svelto') * 0.6, easing: Lab.ease('standard') })
+  }
+
+  function chiudi() {
+    if (!viewer.classList.contains('is-open')) return
+    rilascia && rilascia()
+    const img = corrente(), th = miniatura()
+    viewer.inert = true
+    viewer.classList.remove('is-open', 'dragging', 'dragging-y')
+    document.body.style.overflow = ''
+    const fine = () => { viewer.style.removeProperty('--bg-o'); track.replaceChildren(); for (const t of grid.children) t.style.opacity = ''; (th || opener)?.focus({ preventScroll: true }) }
+    if (!img || !th || Lab.reduced()) {
+      img?.animate([{ opacity: 1 }, { opacity: 0 }], { duration: Lab.dur('svelto'), fill: 'forwards' })
+      return setTimeout(fine, Lab.dur('svelto'))
+    }
+    // Torna nella SUA miniatura (anche se nel frattempo hai sfogliato), in
+    // SVELTO, dal punto in cui il dito l'ha lasciata.
+    const cur = getComputedStyle(img).transform
+    img.style.transform = 'none'
+    const { dx, dy, s } = daMiniatura(img, th)
+    for (const t of grid.children) t.style.opacity = t === th ? '0' : ''
+    img.animate([{ transform: cur === 'none' ? 'none' : cur }, { transform: `translate(${dx}px, ${dy}px) scale(${s})` }], { duration: Lab.dur('svelto'), easing: Lab.ease('standard'), fill: 'forwards' })
+    img.animate([{ opacity: 1, offset: 0.6 }, { opacity: 0 }], { duration: Lab.dur('svelto'), fill: 'forwards' })
+    setTimeout(() => { th.style.opacity = ''; fine() }, Lab.dur('svelto'))
+  }
+
+  // ------------------------------------------------------- Gesti
+  let g = null
+  track.addEventListener('pointerdown', (e) => {
+    track.setPointerCapture(e.pointerId)
+    Lab.stop(track)
+    g = { id: e.pointerId, x0: e.clientX, y0: e.clientY, asse: null, punti: [[e.timeStamp, e.clientX, e.clientY]], tx: 0 }
+  })
+  track.addEventListener('pointermove', (e) => {
+    if (!g || e.pointerId !== g.id) return
+    const dx = e.clientX - g.x0, dy = e.clientY - g.y0
+    if (!g.asse && Math.hypot(dx, dy) > 8) g.asse = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y'
+    g.punti.push([e.timeStamp, e.clientX, e.clientY]); if (g.punti.length > 6) g.punti.shift()
+    if (g.asse === 'x') {
+      // Ai bordi (prima e ultima foto) resiste: 0.2.
+      const bordo = (dx > 0 && idx === 0) || (dx < 0 && idx === foto.length - 1)
+      g.tx = bordo ? dx * 0.2 : dx
+      track.style.transform = `translateX(${g.tx}px)`
+    } else if (g.asse === 'y' && dy > 0) {
+      viewer.classList.add('dragging', 'dragging-y')
+      const img = corrente()
+      img.style.transform = `translate(${dx * 0.5}px, ${dy}px) scale(${1 - Math.min(dy, 400) / 1600})`
+      viewer.style.setProperty('--bg-o', String(1 - Math.min(dy, 300) / 400))
+    }
+  })
+  const fine = (e) => {
+    if (!g || e.pointerId !== g.id) return
+    const [t0, x0, y0] = g.punti[0]
+    const dt = Math.max(1, e.timeStamp - t0)
+    const vx = ((e.clientX - x0) / dt) * 1000, vy = ((e.clientY - y0) / dt) * 1000
+    const dy = e.clientY - g.y0
+    const asse = g.asse, tx = g.tx
+    g = null
+    if (asse === 'x') {
+      const W = innerWidth
+      let verso = 0
+      if ((tx < -W / 4 || vx < -550) && idx < foto.length - 1) verso = 1
+      if ((tx > W / 4 || vx > 550) && idx > 0) verso = -1
+      Lab.spring(track, {
+        from: tx, to: -verso * W, v0: vx,
+        render: (v) => ({ transform: `translateX(${v}px)` }),
+        onDone: () => { if (verso) { idx += verso; slides() } track.style.transform = '' },
+      })
+    } else if (asse === 'y') {
+      viewer.classList.remove('dragging')
+      if (dy > 120 || vy > 550) return chiudi()
+      viewer.classList.remove('dragging-y')
+      viewer.style.setProperty('--bg-o', 1)
+      const img = corrente()
+      const parti = getComputedStyle(img).transform
+      img.style.transform = ''
+      img.animate([{ transform: parti }, { transform: 'none' }], { duration: Lab.dur('molla'), easing: Lab.ease('molla') })
+    }
+  }
+  track.addEventListener('pointerup', fine)
+  track.addEventListener('pointercancel', fine)
+  track.addEventListener('click', (e) => { if (e.target === track || e.target.classList.contains('slide')) chiudi() })
+
+  function vai(verso) {
+    const n = idx + verso
+    if (n < 0 || n >= foto.length) return
+    Lab.spring(track, { from: 0, to: -verso * innerWidth, render: (v) => ({ transform: `translateX(${v}px)` }), onDone: () => { idx = n; slides(); track.style.transform = '' } })
+  }
+  $('#prec').addEventListener('click', () => vai(-1))
+  $('#succ').addEventListener('click', () => vai(1))
+  $('#chiudi').addEventListener('click', chiudi)
+  viewer.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') chiudi()
+    if (e.key === 'ArrowRight') vai(1)
+    if (e.key === 'ArrowLeft') vai(-1)
+  })
+
+  // ------------------------------------------------------- Elimina
+  $('#elimina').addEventListener('click', () => {
+    if (!foto.length) return
+    const via = foto.shift()
+    const cella = grid.querySelector(`[data-id="${via.id}"]`)
+    const resto = Array.from(grid.children).filter((c) => c !== cella)
+    Lab.flip(resto, () => {
+      const r = cella.getBoundingClientRect(), gb = grid.getBoundingClientRect()
+      cella.style.left = r.left - gb.left + 'px'; cella.style.top = r.top - gb.top + 'px'; cella.style.width = r.width + 'px'
+      cella.classList.add('is-leaving')
+    })
+    setTimeout(() => { cella.remove(); resto.forEach((c, i) => c.setAttribute('aria-label', `Foto ${i + 1} di ${foto.length}`)) }, Lab.dur('svelto') + 40)
+    Lab.toast({ type: 'success', text: 'Foto eliminata' })
+  })
+})()
+</script>
+</body>
+</html>

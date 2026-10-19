@@ -1,0 +1,297 @@
+/* ============================================================================
+   Campi (ART_DIRECTION §8): --field bianco, bordo --field-border (3.81:1),
+   raggio 14, alto 44. Etichetta → campo 6px, campo → campo 16px.
+   ============================================================================ */
+@layer components {
+  .ui-field { display: grid; gap: calc(var(--space-1) + var(--space-0-5)); min-width: 0; }
+  .ui-field-label {
+    font: var(--type-footnote);
+    letter-spacing: var(--track-footnote);
+    color: var(--ink-2);
+  }
+  .ui-field-row { display: flex; gap: var(--space-2); align-items: center; min-width: 0; }
+  .ui-field-row > :first-child { flex: 1; min-width: 0; }
+  .ui-field-hint {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-2);
+    font: var(--type-footnote);
+    letter-spacing: var(--track-footnote);
+    color: var(--ink-2);
+  }
+  .ui-field-counter { margin-left: auto; font-variant-numeric: tabular-nums; }
+  .ui-field-error {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-1);
+    font: var(--type-footnote);
+    letter-spacing: var(--track-footnote);
+    color: var(--danger);
+    animation: ui-compari var(--dur-entrata) var(--ease-standard) both;
+  }
+  .ui-field-error .ui-icon { margin-top: var(--space-0-5); }
+  @keyframes ui-compari {
+    from { opacity: 0; transform: translateY(calc(-4px * var(--motion-scale))); }
+    to { opacity: 1; transform: none; }
+  }
+
+  .ui-input {
+    width: 100%;
+    min-height: var(--control-md);
+    padding: 0 var(--space-3);
+    border: var(--border-w) solid var(--field-border);
+    border-radius: var(--radius-control);
+    background: var(--field);
+    color: var(--ink);
+    font: var(--type-body);
+    letter-spacing: var(--track-body);
+    /* Un segnaposto o un valore più lunghi del campo finiscono in «…» invece
+       di essere tagliati a metà parola. */
+    text-overflow: ellipsis;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .ui-input[aria-invalid="true"] { border-color: var(--danger); }
+  .ui-input[readonly] { color: var(--ink-2); }
+  .ui-input:disabled { color: var(--ink-disabled); }
+  .ui-textarea { min-height: calc(var(--control-md) * 2.5); padding: var(--space-3); resize: vertical; }
+  input[type="date"].ui-input { padding-right: var(--space-2); }
+
+  .ui-select-wrap { position: relative; display: block; min-width: 0; }
+  .ui-select { padding-right: calc(var(--space-3) + var(--icon-16) + var(--space-2)); cursor: pointer; }
+  .ui-select-chev {
+    position: absolute;
+    right: var(--space-3);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--ink-3);
+    pointer-events: none;
+  }
+
+  /* ------------------------------------------------------------- Ricerca */
+  /* Capsula: la ricerca è un controllo di navigazione, non un dato
+     (ART_DIRECTION §6.3). */
+  .ui-search {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    height: var(--search-h);
+    padding-left: var(--space-3);
+    border: var(--border-w) solid var(--field-border);
+    border-radius: var(--radius-capsule);
+    background: var(--field);
+  }
+  .ui-search:focus-within {
+    outline: var(--focus-width) solid var(--focus-ring);
+    outline-offset: var(--focus-offset);
+  }
+  .ui-search-lens { color: var(--ink-3); }
+  .ui-search-input {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    border: 0;
+    background: none;
+    outline: none;
+    font: var(--type-callout);
+    letter-spacing: var(--track-callout);
+    color: var(--ink);
+    text-overflow: ellipsis;
+  }
+  /* Il bersaglio è 44 anche se il campo è alto 40. */
+  .ui-search-clear {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: var(--touch);
+    height: var(--touch);
+    border-radius: 50%;
+    color: var(--ink-3);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--dur-svelto) var(--ease-standard), visibility 0s linear var(--dur-svelto);
+  }
+  .ui-search[data-has-value] .ui-search-clear {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity var(--dur-svelto) var(--ease-standard), visibility 0s;
+  }
+
+  /* -------------------------------------------------------------- Switch */
+  .ui-switch-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    min-height: var(--touch);
+  }
+  .ui-switch-text { display: flex; flex-direction: column; min-width: 0; }
+  .ui-switch-label { font: var(--type-body); letter-spacing: var(--track-body); cursor: pointer; }
+  .ui-switch-hint { font: var(--type-footnote); letter-spacing: var(--track-footnote); color: var(--ink-2); }
+  .ui-switch {
+    position: relative;
+    isolation: isolate;
+    flex: none;
+    width: var(--switch-w);
+    height: var(--switch-h);
+    border-radius: var(--radius-capsule);
+    background: var(--fill);
+    box-shadow: inset 0 0 0 var(--border-w) var(--field-border);
+  }
+  /* Il fondo navy è un livello che cambia opacità; il pomello trasla. */
+  .ui-switch::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--select);
+    opacity: 0;
+    z-index: -1;
+    transition: opacity var(--dur-svelto) var(--ease-standard);
+  }
+  .ui-switch-knob {
+    position: absolute;
+    top: var(--space-0-5);
+    left: var(--space-0-5);
+    width: calc(var(--switch-h) - 2 * var(--space-0-5));
+    height: calc(var(--switch-h) - 2 * var(--space-0-5));
+    border-radius: 50%;
+    background: var(--surface);
+    box-shadow: var(--elev-float);
+    transition: transform var(--dur-molla) var(--ease-molla);
+  }
+  .ui-switch[aria-checked="true"]::before { opacity: 1; }
+  /* Il pomello è alto 31: il bersaglio arriva a 44 (UX §8.6). */
+  .ui-switch::after {
+    content: "";
+    position: absolute;
+    inset: calc((var(--switch-h) - var(--touch)) / 2) calc(-1 * var(--space-1));
+  }
+  .ui-switch[aria-checked="true"] .ui-switch-knob {
+    transform: translateX(calc(var(--switch-w) - var(--switch-h)));
+  }
+  .ui-switch[aria-disabled="true"] { opacity: 1; cursor: default; }
+  @media (prefers-reduced-motion: reduce) {
+    .ui-switch-knob { transition: none; }
+  }
+
+  /* ----------------------------------------------------- Campioni colore */
+  .ui-swatches { display: flex; flex-wrap: wrap; gap: var(--space-3); padding: var(--space-0-5); }
+  .ui-swatch {
+    display: grid;
+    place-items: center;
+    width: var(--touch);
+    height: var(--touch);
+    border-radius: 50%;
+    background: var(--c);
+    box-shadow: var(--swatch-ring);
+    color: var(--ink);
+  }
+  .ui-swatch[data-dark] { color: var(--ink-inverse); }
+  .ui-swatch .ui-icon { opacity: 0; transition: opacity var(--dur-svelto) var(--ease-standard); }
+  /* Il selezionato: l'anello navy (istantaneo) e la spunta. */
+  .ui-swatch[aria-checked="true"] {
+    outline: var(--focus-width) solid var(--focus-ring);
+    outline-offset: var(--focus-offset);
+  }
+  .ui-swatch[aria-checked="true"] .ui-icon { opacity: 1; }
+
+  /* ---------------------------------------------------------- Disclosure */
+  .ui-disclosure-toggle {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    width: 100%;
+    min-height: var(--touch);
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-card);
+    background: var(--surface);
+    text-align: left;
+  }
+  .ui-disclosure-toggle::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--surface-pressed);
+    opacity: 0;
+    z-index: -1;
+    transition: opacity var(--dur-svelto) var(--ease-standard);
+  }
+  .ui-disclosure-toggle:active::before { opacity: 1; transition-duration: 0ms; }
+  .ui-disclosure-chev { color: var(--ink-3); transition: transform var(--dur-entrata) var(--ease-standard); }
+  .ui-disclosure-toggle[aria-expanded="true"] .ui-disclosure-chev { transform: rotate(90deg); }
+  .ui-disclosure-title { font: var(--type-headline); letter-spacing: var(--track-headline); flex: none; }
+  .ui-disclosure-summary {
+    margin-left: auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font: var(--type-footnote);
+    letter-spacing: var(--track-footnote);
+    color: var(--ink-2);
+    transition: opacity var(--dur-svelto) var(--ease-standard);
+  }
+  .ui-disclosure-toggle[aria-expanded="true"] .ui-disclosure-summary { opacity: 0; }
+
+  /* E1 (MOTION.md §1.3): l'unica altezza animata, marcata
+     `data-motion-exception`. Apertura in ENTRATA, chiusura in SVELTO. */
+  .ui-grow {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows var(--dur-svelto) var(--ease-standard);
+  }
+  .ui-grow[data-open] { grid-template-rows: 1fr; transition-duration: var(--dur-entrata); }
+  .ui-grow-inner {
+    min-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--dur-svelto) var(--ease-standard), visibility 0s linear var(--dur-svelto);
+  }
+  .ui-grow[data-open] > .ui-grow-inner {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity var(--dur-entrata) var(--ease-standard), visibility 0s;
+  }
+  /* L'anello di focus dei campi dentro non va tagliato dall'`overflow`:
+     serve tutto lo spazio che l'anello prende fuori dal bordo (--focus-reach). */
+  .ui-grow[data-open] > .ui-grow-inner { padding: var(--focus-reach); margin: calc(-1 * var(--focus-reach)); }
+  @media (prefers-reduced-motion: reduce) {
+    .ui-grow, .ui-grow-inner, .ui-disclosure-chev { transition: none; }
+  }
+
+  /* ----------------------------------------------------------- Riga set */
+  .ui-setrow { border: 0; margin: 0; padding: 0; min-width: 0; display: grid; gap: var(--space-2); }
+  .ui-setrow-legend {
+    padding: 0;
+    font: var(--type-subhead-strong);
+    letter-spacing: var(--track-subhead);
+    margin-bottom: var(--space-2);
+  }
+  .ui-setrow-fields { display: flex; align-items: flex-end; gap: var(--space-2); }
+  .ui-setrow-field { flex: 1; min-width: 0; display: grid; gap: calc(var(--space-1) + var(--space-0-5)); }
+  .ui-setrow-field .ui-input { text-align: center; font: var(--type-num-m); font-variant-numeric: tabular-nums; }
+  .ui-setrow-dash { padding-bottom: var(--space-3); color: var(--ink-2); }
+  .ui-setrow-remove { color: var(--ink-2); }
+
+  /* ---------------------------------------------------------- FormGroup */
+  /* Dentro gli sheet di vetro i contenuti stanno su gruppi OPACHI
+     (ART_DIRECTION D6): accento e danger come testo sul vetro falliscono. */
+  .ui-form-group {
+    display: grid;
+    gap: var(--space-4);
+    padding: var(--space-4);
+    background: var(--surface);
+    border-radius: var(--radius-card);
+  }
+  .ui-form-group-title {
+    font: var(--type-eyebrow);
+    letter-spacing: var(--track-eyebrow);
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+}

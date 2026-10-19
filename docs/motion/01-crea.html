@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Crea dalla tab bar · laboratorio del movimento</title>
+<link rel="stylesheet" href="../../src/styles/tokens.css">
+<link rel="stylesheet" href="../../src/styles/materials.css">
+<link rel="stylesheet" href="./_lab.css">
+<style>
+@layer components {
+  /* ------------------------------------------------------- Menu del ＋ */
+  .menu {
+    position: fixed;
+    left: var(--tabbar-side); right: var(--tabbar-side);
+    bottom: calc(var(--tabbar-bottom) + var(--tabbar-h) + var(--space-2));
+    max-width: var(--tabbar-max);
+    margin: 0 auto;
+    padding: var(--space-2);
+    border-radius: var(--radius-sheet);
+    z-index: var(--z-sheet);
+    /* L'origine è il CENTRO DEL ＋: il menu esce da ciò che hai toccato. */
+    transform-origin: 50% calc(100% + var(--space-2) + var(--tabbar-h) / 2);
+    /* Stato di partenza (e di arrivo dell'uscita). */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(calc(12px * var(--motion-scale))) scale(calc(1 - 0.04 * var(--motion-scale)));
+    transition:
+      opacity var(--dur-svelto) var(--ease-standard),
+      transform var(--dur-svelto) var(--ease-standard),
+      visibility 0s linear var(--dur-svelto);
+  }
+  .menu.is-open {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition:
+      opacity var(--dur-entrata) var(--ease-standard),
+      transform var(--dur-molla) var(--ease-molla),
+      visibility 0s;
+  }
+  .menu-title { font: var(--type-footnote); letter-spacing: var(--track-footnote); color: var(--ink-2); text-align: center; padding: var(--space-2) 0 var(--space-1); }
+  .menu [role="menuitem"] {
+    --state-tint: var(--ink);
+    display: flex; align-items: center; gap: var(--space-3);
+    width: 100%;
+    min-height: 56px;
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-control);
+    text-align: left;
+  }
+  .menu [role="menuitem"] .ic { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--fill); color: var(--ink); flex: none; }
+  .menu [role="menuitem"] b { display: block; font: var(--type-headline); letter-spacing: var(--track-headline); }
+  .menu [role="menuitem"] small { display: block; font: var(--type-footnote); letter-spacing: var(--track-footnote); color: var(--ink-2); }
+  @media (hover: hover) and (pointer: fine) {
+    .menu [role="menuitem"]:hover::before { opacity: 0.06; }
+  }
+  .menu [role="menuitem"]:active::before { opacity: 0.1; transition-duration: 0ms; }
+  .menu [role="menuitem"]:focus-visible { outline-offset: -2px; }
+  .menu hr { border: 0; height: var(--hairline); background: var(--separator); margin: var(--space-2) var(--space-3); }
+  .menu .cancel { justify-content: center; min-height: var(--touch); }
+  .menu .cancel b { font: var(--type-headline); }
+
+  /* ------------------------------------------------------------- Sheet */
+  .sheet {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    max-width: 560px; margin: 0 auto;
+    max-height: 92dvh;
+    padding: var(--space-2) var(--gutter) calc(var(--space-6) + var(--safe-bottom));
+    border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+    z-index: var(--z-sheet);
+    visibility: hidden;
+    transform: translateY(calc(100% * var(--motion-scale)));
+    transition:
+      transform var(--dur-svelto) var(--ease-standard),
+      opacity var(--dur-svelto) var(--ease-standard),
+      visibility 0s linear var(--dur-svelto);
+  }
+  .sheet.is-open {
+    visibility: visible;
+    transform: none;
+    transition:
+      transform var(--dur-molla) var(--ease-molla),
+      opacity var(--dur-svelto) var(--ease-standard),
+      visibility 0s;
+  }
+  /* Con reduced-motion lo sheet non sale: compare in dissolvenza. */
+  .rm .sheet:not(.is-open) { opacity: 0; }
+  .sheet .grab { display: block; width: 36px; height: 5px; border-radius: 3px; background: var(--ink-3); margin: 0 auto var(--space-3); }
+  .sheet h2 { font: var(--type-title-3); letter-spacing: var(--track-title-3); margin-bottom: var(--space-4); }
+  .sheet h2:focus { outline: none; }
+  .group { background: var(--surface); border-radius: var(--radius-card); padding: var(--space-4); display: grid; gap: var(--space-4); }
+  label.field { display: grid; gap: 6px; font: var(--type-footnote); letter-spacing: var(--track-footnote); color: var(--ink-2); }
+  .field input { height: var(--control-md); border: 1px solid var(--field-border); border-radius: var(--radius-control); background: var(--field); padding: 0 var(--space-3); }
+  .sheet .actions { display: flex; gap: var(--space-2); justify-content: flex-end; margin-top: var(--space-4); }
+
+  /* ------------------------------------------------------------ Pagina */
+  .cards { display: grid; gap: var(--space-3); }
+  .wrapped-card { background: #16233F; color: #FFFFFF; border: 0; overflow: hidden; }
+  .wrapped-card .meta { color: #A9B1C2; }
+  .wrapped-card .n { font: var(--type-num-xl); letter-spacing: var(--track-num-xl); font-variant-numeric: tabular-nums; color: #FF6B35; margin-top: var(--space-2); }
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--edge); border: 1px solid var(--edge); border-radius: var(--radius-card); overflow: hidden; }
+  .stat-grid > div { background: var(--surface); padding: var(--space-4); }
+  .stat-grid .n { font: var(--type-num-xl); letter-spacing: var(--track-num-xl); font-variant-numeric: tabular-nums; }
+  .chosen { font: var(--type-footnote); color: var(--ink-2); margin-top: var(--space-2); min-height: 18px; }
+}
+</style>
+</head>
+<body>
+<a class="sr-only" href="#contenuto">Vai al contenuto</a>
+<main class="lab-page" id="contenuto">
+  <h1 class="large-title" id="titolo" tabindex="-1">Ciao, Giulia</h1>
+  <p class="subtitle">sabato 18 ottobre</p>
+
+  <div class="lab-note">
+    <b>Prova:</b> tocca il <b>＋</b>. Il menu nasce dal centro del ＋ (scala e 12px, MOLLA), la barra resta accesa sopra il velo.
+    Scegli <b>Nuovo torneo</b>: il menu esce in SVELTO e <b>nello stesso istante</b> lo sheet sale, sotto lo stesso velo (nessuno sfarfallio).
+    Cambia tab: la pillola scivola, il contenuto cambia <b>senza animazione</b> e il focus va all'h1. Ritocca la tab attiva: si torna in cima.
+    <span id="esito-focus" class="chosen" aria-live="polite"></span>
+  </div>
+
+  <div id="vista">
+    <h2 class="section-title">Adesso</h2>
+    <div class="cards">
+      <article class="ui-card">
+        <h3><a class="stretch" href="#torneo">Oggi giochi · Rimini Open</a></h3>
+        <p class="meta">Pro · 2vs2 · Bagno 26, Rimini</p>
+        <div class="lab-row above"><button type="button" class="ui-button state" data-variant="tinted" data-size="sm"><svg class="i" data-size="20" aria-hidden="true"><use href="#i-plus"/></svg>Partita</button></div>
+      </article>
+      <article class="ui-card">
+        <h3><a class="stretch" href="#torneo">Ultimo risultato · Summer Cup</a></h3>
+        <p class="meta">1° · 12 lug · Riccione</p>
+      </article>
+      <article class="ui-card wrapped-card">
+        <h3>Beach Wrapped 2026</h3>
+        <p class="meta">La tua stagione in sei schermate</p>
+        <p class="n">58%</p>
+      </article>
+    </div>
+    <h2 class="section-title">Numeri chiave</h2>
+    <div class="stat-grid">
+      <div><div class="n">24</div><div class="eyebrow">Partite</div></div>
+      <div><div class="n">14</div><div class="eyebrow">Vinte</div></div>
+      <div><div class="n">7</div><div class="eyebrow">Tornei</div></div>
+      <div><div class="n">2</div><div class="eyebrow">Podi</div></div>
+    </div>
+    <h2 class="section-title">Approfondisci</h2>
+    <ul class="ui-list">
+      <li><a class="ui-row state" href="#statistiche"><span class="grow">Tutte le statistiche</span><svg class="i chev" data-size="20" aria-hidden="true"><use href="#i-chevron-right"/></svg></a></li>
+      <li><a class="ui-row state" href="#wrapped"><span class="grow">Beach Wrapped</span><svg class="i chev" data-size="20" aria-hidden="true"><use href="#i-chevron-right"/></svg></a></li>
+    </ul>
+    <div class="cards" style="margin-top: var(--space-8)">
+      <article class="ui-card"><h3><a class="stretch" href="#t">Coppa del Bagnino</a></h3><p class="meta">Amatoriale · 3° · 5 lug · Cesenatico</p></article>
+      <article class="ui-card wrapped-card"><h3>Fondo scuro</h3><p class="meta">Il caso peggiore sotto il vetro: scorrilo sotto la barra.</p></article>
+      <article class="ui-card"><h3><a class="stretch" href="#t">Torneo dell'Alba</a></h3><p class="meta">Pro · Quarti · 28 giu · Cervia</p></article>
+      <article class="ui-card"><h3><a class="stretch" href="#t">Notturno di Milano Marittima</a></h3><p class="meta">Amatoriale · Gironi · 21 giu</p></article>
+    </div>
+  </div>
+</main>
+
+<nav class="tabbar" id="tabbar" aria-label="Principale" data-material="glass-regular" style="--material-elev: var(--elev-float); --i: 0">
+  <span class="pill" aria-hidden="true"></span>
+  <a class="tab" href="#home" data-i="0" aria-current="page">
+    <span class="layer ink"><svg class="i" aria-hidden="true"><use href="#i-home"/></svg>Home</span>
+    <span class="layer on" aria-hidden="true"><svg class="i fill" aria-hidden="true"><use href="#i-home-fill"/></svg>Home</span>
+  </a>
+  <a class="tab" href="#tornei" data-i="1">
+    <span class="layer ink"><svg class="i" aria-hidden="true"><use href="#i-trophy"/></svg>Tornei</span>
+    <span class="layer on" aria-hidden="true"><svg class="i fill" aria-hidden="true"><use href="#i-trophy-fill"/></svg>Tornei</span>
+  </a>
+  <span class="plus-slot">
+    <button type="button" class="plus" id="plus" aria-label="Crea" aria-haspopup="menu" aria-expanded="false" aria-controls="menu">
+      <svg class="i" aria-hidden="true" style="stroke-width: 2.2"><use href="#i-plus"/></svg>
+    </button>
+  </span>
+  <a class="tab" href="#compagni" data-i="3">
+    <span class="layer ink"><svg class="i" aria-hidden="true"><use href="#i-people"/></svg>Compagni</span>
+    <span class="layer on" aria-hidden="true"><svg class="i fill" aria-hidden="true"><use href="#i-people-fill"/></svg>Compagni</span>
+  </a>
+  <a class="tab" href="#profilo" data-i="4">
+    <span class="layer ink"><svg class="i" aria-hidden="true"><use href="#i-person"/></svg>Profilo</span>
+    <span class="layer on" aria-hidden="true"><svg class="i fill" aria-hidden="true"><use href="#i-person-fill"/></svg>Profilo</span>
+  </a>
+</nav>
+
+<div class="ui-scrim" id="scrim"></div>
+
+<div class="menu" id="menu" role="menu" aria-labelledby="menu-titolo" data-material="glass-thick" style="--material-elev: var(--elev-overlay)" inert>
+  <p class="menu-title" id="menu-titolo">Crea</p>
+  <button type="button" role="menuitem" class="state" data-azione="torneo">
+    <span class="ic"><svg class="i" data-size="20" aria-hidden="true"><use href="#i-trophy"/></svg></span>
+    <span><b>Nuovo torneo</b><small>Nome, data e luogo: il resto dopo</small></span>
+  </button>
+  <button type="button" role="menuitem" class="state" data-azione="partita">
+    <span class="ic"><svg class="i" data-size="20" aria-hidden="true"><use href="#i-plus"/></svg></span>
+    <span><b>Aggiungi partita</b><small>a «Rimini Open»</small></span>
+  </button>
+  <button type="button" role="menuitem" class="state" data-azione="oggi">
+    <span class="ic"><svg class="i" data-size="20" aria-hidden="true"><use href="#i-pin"/></svg></span>
+    <span><b>Check-in oggi</b><small>Chi c'è in spiaggia</small></span>
+  </button>
+  <hr>
+  <button type="button" role="menuitem" class="state cancel" data-azione="annulla"><b>Annulla</b></button>
+</div>
+
+<section class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-titolo" data-material="glass-thick" style="--material-elev: var(--elev-overlay)" inert>
+  <span class="grab" aria-hidden="true"></span>
+  <h2 id="sheet-titolo" tabindex="-1">Nuovo torneo</h2>
+  <div class="group">
+    <label class="field">Nome torneo<input id="nome" autocomplete="off" placeholder="es. Summer Cup Rimini"></label>
+    <label class="field">Data<input type="date" value="2026-10-18"></label>
+  </div>
+  <div class="actions">
+    <button type="button" class="ui-button state" data-variant="plain" id="sheet-annulla">Annulla</button>
+    <button type="button" class="ui-button state" data-variant="filled" id="sheet-crea">Crea torneo</button>
+  </div>
+</section>
+
+<script src="./_lab.js"></script>
+<script>
+(function () {
+  const $ = (s) => document.querySelector(s)
+  const tabbar = $('#tabbar'), plus = $('#plus'), menu = $('#menu'), scrim = $('#scrim'), sheet = $('#sheet')
+  const titolo = $('#titolo'), vista = $('#vista'), esito = $('#esito-focus')
+  const home = vista.innerHTML
+  const NOMI = ['Home', 'Tornei', null, 'Compagni', 'Profilo']
+  let aperto = null // 'menu' | 'sheet' | null
+  let rilascia = null
+
+  // ------------------------------------------------------------- Tab
+  // Un cambio di tab NON si anima: il contenuto cambia nello stesso
+  // fotogramma, la pillola scivola, il focus va sull'h1 (UX §4.4).
+  for (const tab of document.querySelectorAll('.tab')) {
+    tab.addEventListener('click', (e) => {
+      e.preventDefault()
+      const i = Number(tab.dataset.i)
+      if (tab.getAttribute('aria-current') === 'page') return inCima()
+      document.querySelector('.tab[aria-current]')?.removeAttribute('aria-current')
+      tab.setAttribute('aria-current', 'page')
+      tabbar.style.setProperty('--i', i)
+      titolo.textContent = i === 0 ? 'Ciao, Giulia' : NOMI[i]
+      vista.innerHTML = i === 0 ? home : '<p class="lab-note">Contenuto di «' + NOMI[i] + '»: è comparso senza transizione. Ritocca la tab per tornare in cima.</p>' + home.replace(/<h2[^>]*>Adesso<\/h2>/, '')
+      window.scrollTo(0, 0)
+      titolo.focus({ preventScroll: true })
+    })
+  }
+
+  // Ritocco della tab attiva: in cima. Da lontano prima un salto secco a
+  // una schermata dalla cima, poi lo scorrimento morbido: da 20.000px lo
+  // smooth di Chrome dura secondi, e l'utente aspetta (MOTION.md §9).
+  function inCima() {
+    if (scrollY > 3 * innerHeight) window.scrollTo({ top: innerHeight, behavior: 'auto' })
+    window.scrollTo({ top: 0, behavior: Lab.reduced() ? 'auto' : 'smooth' })
+  }
+
+  // ------------------------------------------------------------- Menu
+  function apriMenu() {
+    aperto = 'menu'
+    plus.setAttribute('aria-expanded', 'true')
+    tabbar.classList.add('is-lifted')
+    scrim.classList.add('is-open')
+    menu.dataset.material = 'glass-thick'
+    menu.inert = false
+    menu.classList.add('is-open')
+    // Il focus va alla prima voce SUBITO, non a fine animazione: chi preme
+    // Invio e poi freccia giù non deve perdere il tasto.
+    menu.querySelector('[role="menuitem"]').focus({ preventScroll: true })
+    rilascia = Lab.trap(menu)
+    history.pushState({ overlay: 'azioni' }, '')
+  }
+
+  function chiudiMenu({ passaggio = false, rendiFocus = true, daIndietro = false } = {}) {
+    if (aperto !== 'menu') return
+    aperto = passaggio ? 'sheet' : null
+    rilascia && rilascia()
+    // Chi esce smette subito di sfocare (frost): così durante il passaggio
+    // allo sheet le superfici sfocate restano al massimo tre.
+    menu.dataset.material = 'frost'
+    menu.inert = true
+    menu.classList.remove('is-open')
+    plus.setAttribute('aria-expanded', 'false')
+    if (!passaggio) {
+      scrim.classList.remove('is-open')
+      setTimeout(() => tabbar.classList.remove('is-lifted'), Lab.dur('svelto'))
+      if (!daIndietro) history.back()
+    }
+    if (rendiFocus) plus.focus({ preventScroll: true })
+    setTimeout(() => { if (!menu.classList.contains('is-open')) menu.dataset.material = 'glass-thick' }, Lab.dur('svelto'))
+  }
+
+  plus.addEventListener('click', () => (aperto === 'menu' ? chiudiMenu() : apriMenu()))
+  scrim.addEventListener('click', () => (aperto === 'menu' ? chiudiMenu() : aperto === 'sheet' ? chiudiSheet() : null))
+
+  menu.addEventListener('keydown', (e) => {
+    const voci = Array.from(menu.querySelectorAll('[role="menuitem"]'))
+    const i = voci.indexOf(document.activeElement)
+    if (e.key === 'ArrowDown') { e.preventDefault(); voci[(i + 1) % voci.length].focus() }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); voci[(i - 1 + voci.length) % voci.length].focus() }
+    else if (e.key === 'Home') { e.preventDefault(); voci[0].focus() }
+    else if (e.key === 'End') { e.preventDefault(); voci[voci.length - 1].focus() }
+    else if (e.key === 'Escape') { e.preventDefault(); chiudiMenu() }
+  })
+
+  menu.addEventListener('click', (e) => {
+    const voce = e.target.closest('[role="menuitem"]')
+    if (!voce) return
+    const azione = voce.dataset.azione
+    if (azione === 'torneo') {
+      // Il passaggio: il menu esce, lo sheet sale NELLO STESSO ISTANTE e il
+      // velo non si muove. La voce di history del menu viene SOSTITUITA da
+      // quella dello sheet (UX §4.3.5): l'indietro non riapre il menu.
+      chiudiMenu({ passaggio: true, rendiFocus: false })
+      apriSheet()
+      history.replaceState({ overlay: 'torneo' }, '')
+    } else {
+      chiudiMenu()
+      if (azione !== 'annulla') Lab.toast({ type: 'info', text: 'Qui si aprirebbe «' + voce.querySelector('b').textContent + '»' })
+    }
+  })
+
+  // ------------------------------------------------------------ Sheet
+  function apriSheet() {
+    aperto = 'sheet'
+    sheet.dataset.material = 'glass-thick'
+    sheet.inert = false
+    sheet.classList.add('is-open')
+    document.body.style.overflow = 'hidden'
+    // Focus (MOTION.md §3.5, M3): da tastiera o mouse il primo campo, SUBITO;
+    // da un dito il titolo, perché alzare la tastiera mentre lo sheet sale
+    // ridimensiona il viewport a metà corsa (e iOS non la alza comunque per
+    // un focus dato fuori dal gesto).
+    if (Lab.openedByTouch()) {
+      $('#sheet-titolo').focus({ preventScroll: true })
+      esito.textContent = 'Aperto col dito: focus sul titolo dello sheet.'
+    } else {
+      $('#nome').focus({ preventScroll: true })
+      esito.textContent = 'Aperto da tastiera o mouse: focus sul campo Nome, già all\'istante zero.'
+    }
+    rilascia = Lab.trap(sheet)
+    // La barra torna sotto il velo quando lo sheet l'ha coperta: il cambio
+    // di livello avviene dove nessuno lo vede.
+    setTimeout(() => tabbar.classList.remove('is-lifted'), Lab.dur('molla'))
+  }
+
+  function chiudiSheet({ daIndietro = false } = {}) {
+    if (aperto !== 'sheet') return
+    aperto = null
+    rilascia && rilascia()
+    sheet.dataset.material = 'frost'
+    sheet.inert = true
+    sheet.classList.remove('is-open')
+    scrim.classList.remove('is-open')
+    document.body.style.overflow = ''
+    // Il focus torna a chi ha aperto la catena: la voce del menu non esiste
+    // più, quindi il ＋ (UX §8.3.3).
+    plus.focus({ preventScroll: true })
+    if (!daIndietro) history.back()
+    setTimeout(() => { if (!sheet.classList.contains('is-open')) sheet.dataset.material = 'glass-thick' }, Lab.dur('svelto'))
+  }
+
+  $('#sheet-annulla').addEventListener('click', () => chiudiSheet())
+  $('#sheet-crea').addEventListener('click', () => { chiudiSheet(); Lab.toast({ type: 'success', text: 'Torneo creato' }) })
+  sheet.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.preventDefault(); chiudiSheet() } })
+
+  // Indietro (telefono o browser) = la stessa uscita di Annulla.
+  addEventListener('popstate', () => {
+    if (aperto === 'menu') chiudiMenu({ daIndietro: true })
+    else if (aperto === 'sheet') chiudiSheet({ daIndietro: true })
+  })
+})()
+</script>
+</body>
+</html>

@@ -1,0 +1,157 @@
+/* ============================================================================
+   Le card di Statistiche. Carta opaca, un colore di serie per grafico
+   (--data-win), il confronto in --data-rest, la griglia in --data-grid
+   (ART_DIRECTION §4.5). Nessun testo sotto gli 11px: le etichette dei grafici
+   sono HTML, non testo SVG scalato (UX §8.1).
+   ============================================================================ */
+@layer components {
+  .dash-card { display: flex; flex-direction: column; min-width: 0; }
+  .dash-card[data-wide] { grid-column: 1 / -1; }
+  .dash-figure { margin: 0; display: flex; flex-direction: column; gap: var(--space-4); min-width: 0; }
+  .dash-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  .dash-title { font: var(--type-headline); letter-spacing: var(--track-headline); }
+  .dash-extra { font: var(--type-footnote); letter-spacing: var(--track-footnote); }
+  .dash-empty {
+    padding: var(--space-4) 0;
+    text-align: center;
+    font: var(--type-subhead);
+    letter-spacing: var(--track-subhead);
+    color: var(--ink-2);
+  }
+  .dash-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font: var(--type-eyebrow);
+    letter-spacing: var(--track-eyebrow);
+    text-transform: uppercase;
+    color: var(--ink-2);
+  }
+  .dash-link {
+    font: var(--type-subhead-strong);
+    letter-spacing: var(--track-subhead);
+    color: var(--accent-text);
+    text-decoration: underline;
+    text-underline-offset: var(--space-0-5);
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--touch);
+  }
+
+  .dash-rows { display: grid; gap: var(--space-4); }
+  .dash-row-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); margin-bottom: var(--space-2); }
+  .dash-row-label {
+    font: var(--type-subhead-strong);
+    letter-spacing: var(--track-subhead);
+    min-width: 0;
+  }
+  .dash-row-n { font: var(--type-num-s); font-variant-numeric: tabular-nums; flex: none; }
+
+  /* ------------------------------------------------------------ Andamento */
+  /* Il disegno scala uniforme (cerchi tondi); le etichette HTML stanno sopra
+     in percentuale e restano a 11–12px veri. */
+  .dash-trend-delta[data-tone="win"] { color: var(--accent-text); font-weight: 600; }
+  .dash-trend-delta[data-tone="rest"] { color: var(--ink-2); font-weight: 600; }
+  .dash-trend-plot {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 340 / 152;
+    margin-bottom: var(--space-5);
+  }
+  .dash-trend-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .dash-trend-labels { position: absolute; inset: 0; pointer-events: none; }
+  .dash-trend-labels > span { position: absolute; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .dash-trend-axis {
+    transform: translateY(-50%);
+    font: var(--type-caption-2);
+    letter-spacing: var(--track-caption-2);
+    color: var(--ink-2);
+  }
+  .dash-trend-value {
+    transform: translate(-50%, calc(-100% - var(--space-2)));
+    font: var(--type-caption-1);
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .dash-trend-month {
+    top: 100%;
+    transform: translate(-50%, var(--space-1));
+    font: var(--type-caption-1);
+    color: var(--ink-2);
+  }
+  /* E2: al primo montaggio la linea si disegna (stroke-dashoffset, RACCONTO);
+     ai cambi di filtro vecchia e nuova si scambiano in dissolvenza. */
+  .dash-trend-g[data-modo="disegna"] .dash-trend-line {
+    stroke-dasharray: 100;
+    animation: dash-disegna var(--dur-racconto) var(--ease-racconto) both;
+  }
+  .dash-trend-g[data-modo="compare"] { animation: dash-compare var(--dur-svelto) var(--ease-standard) both; }
+  .dash-trend-g[data-modo="esce"] { animation: dash-esce var(--dur-svelto) var(--ease-standard) both; }
+  @keyframes dash-disegna { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
+  @keyframes dash-compare { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes dash-esce { from { opacity: 1; } to { opacity: 0; } }
+
+  /* ------------------------------------------------------- Vinte e perse */
+  .dash-wl { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-6); }
+  .dash-ring {
+    position: relative;
+    flex: none;
+    width: calc(var(--space-16) + var(--space-12));
+    aspect-ratio: 1;
+  }
+  .dash-ring > svg { width: 100%; height: 100%; display: block; }
+  /* E2 (`data-motion-exception="grafico"`): l'arco passa dal valore di prima al
+     nuovo, una volta per causa. */
+  .dash-ring-arc { transition: stroke-dasharray var(--dur-racconto) var(--ease-racconto); }
+  .dash-ring-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .dash-ring-n { font: var(--type-num-m); letter-spacing: var(--track-num-m); font-variant-numeric: tabular-nums; }
+  .dash-legend { display: grid; gap: var(--space-3); margin: 0; }
+  .dash-legend > div { display: flex; flex-direction: column-reverse; }
+  .dash-legend dd { margin: 0; }
+  .dash-legend-n { font: var(--type-num-m); letter-spacing: var(--track-num-m); font-variant-numeric: tabular-nums; }
+  .dash-legend-sep { padding-top: var(--space-3); border-top: var(--hairline) solid var(--separator); }
+  .dash-swatch {
+    width: var(--space-2);
+    height: var(--space-2);
+    border-radius: var(--radius-capsule);
+    background: var(--data-win);
+  }
+  .dash-swatch[data-tone="rest"] { background: var(--data-rest); }
+
+  /* --------------------------------------------------------- Piazzamenti */
+  .dash-placements { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
+  .dash-placement {
+    display: grid;
+    grid-template-columns: minmax(var(--space-20), auto) minmax(0, 1fr) var(--space-6);
+    align-items: center;
+    gap: var(--space-3);
+  }
+  .dash-placement .dash-row-n { text-align: right; }
+
+  /* --------------------------------------------------------- Per compagno */
+  .dash-partners {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--chart-min)), 1fr));
+    gap: var(--space-5);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dash-trend-g,
+    .dash-trend-g .dash-trend-line { animation: none !important; }
+    .dash-trend-g[data-modo="esce"] { display: none; }
+    .dash-ring-arc { transition: none; }
+  }
+}
