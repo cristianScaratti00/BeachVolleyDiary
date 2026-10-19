@@ -16,17 +16,17 @@ import { useCheckIn } from './hooks/useCheckIn'
 import type { UseCheckIn } from './hooks/useCheckIn'
 import { useOnline } from './hooks/useConnection'
 import { permissionsFor } from './lib/permissions'
-import { partnerOptions, venueOptions, todayISO, wrappedDisponibile, wrappedRangeForYear, deriveWrapped, WRAPPED_MIN_MATCHES } from './lib/derive'
+import { partnerOptions, venueOptions, todayISO, wrappedRangeForYear, deriveWrapped, WRAPPED_MIN_MATCHES } from './lib/derive'
 import { inviaSegnalazione, elencoSegnalazioni, aggiornaStato } from './lib/segnalazioni'
-import { useScelta } from './lib/consenso'
+import { decidi, useScelta } from './lib/consenso'
 import { backLabel, goBack, guardRoute, navigate, useNav } from './app/router'
-import { OGGI_ATTIVO, routeParent, routeTitle } from './app/routes'
+import { routeFullscreen, routeParent, routeTitle } from './app/routes'
 import type { Route, TorneiVista } from './app/routes'
 import { useScreenData } from './app/useScreenData'
 import { useActions } from './app/useActions'
 import { AppShell } from './app/AppShell'
 import { ModalHost } from './app/ModalHost'
-import { deriveAdesso, etichettaStagione } from './app/selectors'
+import { deriveAdesso, deriveHome, metaDiario, wrappedAOttobre } from './app/selectors'
 import Splash from './components/Splash'
 import { ErrorState, Skeleton, Bone } from './components/ui/Feedback'
 import { Page } from './components/ui/Page'
@@ -36,6 +36,7 @@ import { LazyBoundary, lazyRetry } from './app/LazyBoundary'
 import Home from './screens/Home'
 import Statistiche from './screens/Statistiche'
 import Tornei from './screens/Tornei'
+import Diario from './screens/Diario'
 import TorneoDetail from './screens/TorneoDetail'
 import Compagni from './screens/Compagni'
 import CompagnoDetail from './screens/CompagnoDetail'
@@ -48,19 +49,11 @@ import NonTrovato from './screens/NonTrovato'
 // Lazy: l'assistente (1600 righe di copione) e Wrapped (trascina html-to-image).
 // Con «Riprova» se il chunk non arriva (deploy nuovo, rete): UX §6.0.
 const CreaChat = lazyRetry(() => import('./screens/CreaChat'))
+const PartitaLive = lazyRetry(() => import('./screens/PartitaLive'))
 const Wrapped = lazyRetry(() => import('./screens/Wrapped'))
 
 /** Quanto resta la traccia sull'entità appena toccata: SVELTO + RACCONTO, più un margine. */
 const TRACCIA_MS = 1200
-
-const bannerKey = (uid: string) => `bvd_alpha_chiuso:${uid}`
-function leggiBanner(uid: string): boolean {
-  try {
-    return window.localStorage.getItem(bannerKey(uid)) === '1'
-  } catch {
-    return false
-  }
-}
 
 export default function App() {
   const auth = useAuth()
@@ -170,18 +163,6 @@ export function AppView({ diary, auth, check }: AppDeps) {
     }
   }, [admin, route.name])
 
-  // Banner alpha chiuso: per utente e per dispositivo (Q5).
-  const uid = session?.id ?? ''
-  const [bannerChiuso, setBannerChiuso] = useState(() => leggiBanner(uid))
-  const chiudiBanner = () => {
-    setBannerChiuso(true)
-    try {
-      window.localStorage.setItem(bannerKey(uid), '1')
-    } catch {
-      /* navigazione privata: resta chiuso per questa sessione */
-    }
-  }
-
   // Lo splash è uno solo dall'autenticazione ai dati (UX F0).
   if (loading) return <Splash />
 
@@ -196,7 +177,7 @@ export function AppView({ diary, auth, check }: AppDeps) {
 
   const anno = perm.canUseFilters ? screen.filtri.fYear : 'Sempre'
   const s = screen.dashboard.s
-  const wrappedPronto = wrappedDisponibile() && s.played >= WRAPPED_MIN_MATCHES
+  const wrappedPronto = wrappedAOttobre() && s.played >= WRAPPED_MIN_MATCHES
   const wrappedTitolo = anno !== 'Sempre' ? `Beach Wrapped ${anno}` : 'Beach Wrapped'
 
   const render = () => {
@@ -213,28 +194,31 @@ export function AppView({ diary, auth, check }: AppDeps) {
       )
     }
     switch (route.name) {
-      case 'home':
+      case 'home': {
+        // Il banner alpha e «Chi c'è oggi» non stanno più in Home (il
+        // redesign): «Segnala un problema» è nel Profilo, «Chi c'è oggi» in
+        // Compagni.
+        const oggi = todayISO()
         return (
           <Home
+            {...deriveHome(data, { nome: session?.name ?? '', today: oggi, wrapped: wrappedPronto })}
             nome={session?.name ?? ''}
-            today={todayISO()}
-            adesso={deriveAdesso(data)}
+            avatar={session?.avatarUrl ?? null}
+            today={oggi}
             numeri={s.played > 0 ? s : null}
-            hasTornei={data.tournaments.length > 0}
-            stagione={etichettaStagione(anno)}
+            filtri={screen.filtri}
             wrapped={{ visibile: wrappedPronto, titolo: wrappedTitolo }}
-            banner={{ visibile: !bannerChiuso, onChiudi: chiudiBanner }}
-            checkIn={OGGI_ATTIVO ? { own: check.own } : null}
             onNuovoTorneo={() => actions.nuovoTorneo()}
             onAggiungiPartita={(id) => actions.nuovaPartita(id)}
             onAggiornaPiazzamento={(id) => actions.modificaTorneo(id)}
             onStoria={actions.apriStoria}
           />
         )
+      }
       case 'statistiche':
         return <Statistiche s={s} filtri={screen.filtri} back={back} wrapped={{ visibile: wrappedPronto, titolo: wrappedTitolo }} />
       case 'wrapped': {
-        const motivo = !wrappedDisponibile() ? 'stagione' : s.played < WRAPPED_MIN_MATCHES ? 'dati' : null
+        const motivo = !wrappedAOttobre() ? 'stagione' : s.played < WRAPPED_MIN_MATCHES ? 'dati' : null
         const wrapped = motivo ? null : deriveWrapped(data, wrappedRangeForYear(data, anno), perm.canUseFilters ? screen.filtri.fPartner : 'all')
         return (
           <LazyBoundary onReset={Wrapped.reset}>
@@ -279,12 +263,51 @@ export function AppView({ diary, auth, check }: AppDeps) {
             traccia={traccia}
           />
         )
+      case 'diario':
+        return (
+          <Diario
+            q={route.q ?? ''}
+            onQuery={(q) => navigate({ name: 'diario', q: q || undefined }, { replace: true, keepFocus: true, keepScroll: true })}
+            entries={screen.entries}
+            meta={(id) => metaDiario(data, id)}
+            onNuovoTorneo={() => actions.nuovoTorneo()}
+            onStoria={actions.apriStoria}
+            traccia={traccia}
+          />
+        )
+      case 'live': {
+        const miei = data.tournaments.filter((x) => !x.shared).slice().sort((a, b) => b.date.localeCompare(a.date))
+        const diOggi = deriveAdesso(data).oggi
+        return (
+          <LazyBoundary onReset={PartitaLive.reset}>
+            <Suspense fallback={<Skeleton label="Preparo il segnapunti…"><Bone className="app-skel-bubble" /></Skeleton>}>
+              <PartitaLive
+                tornei={miei.map((x) => ({ id: x.id, name: x.name, partner: data.partners.find((p) => p.id === x.partnerId)?.name ?? '' }))}
+                torneoDefault={diOggi?.id ?? miei[0]?.id ?? null}
+                // Senza un torneo oggi si apre su «Tra amici».
+                torneoOggi={!!diOggi}
+                utente={session?.id ?? null}
+                onSave={(form) => actions.salvaPartita(form, null)}
+                onDone={(id) => navigate({ name: 'torneo', id }, { replace: true })}
+                // La conferma («Uscire dalla partita?») è della schermata:
+                // qui arriva solo l'uscita già decisa.
+                onExit={() => goBack({ name: 'home' })}
+                onNuovoTorneo={() => actions.nuovoTorneo()}
+                registerExitGuard={(isDirty, onBlocked) => guardRoute(isDirty, onBlocked)}
+              />
+            </Suspense>
+          </LazyBoundary>
+        )
+      }
       case 'torneo': {
-        const t = screen.torneo
+        // Il redesign non ha più il menu «⋯»: Storia e Modifica stanno nella
+        // capsula in cima, «Elimina torneo» nello sheet di modifica.
+        const raw = data.tournaments.find((x) => x.id === route.id)
         return (
           <TorneoDetail
             key={route.id}
-            t={t}
+            t={screen.torneo}
+            scheda={raw ? { date: raw.date, format: raw.format, surface: raw.surface } : null}
             back={back}
             traccia={traccia}
             onAddPartita={() => actions.nuovaPartita(route.id)}
@@ -293,24 +316,19 @@ export function AppView({ diary, auth, check }: AppDeps) {
             onOpenFoto={(i) => actions.apriFoto(route.id, i)}
             onDeleteFoto={actions.eliminaFoto}
             onStoria={() => actions.apriStoria(route.id)}
-            onMenu={(anchor) =>
-              actions.apriMenu(
-                t?.name ?? 'Torneo',
-                t && !t.shared
-                  ? [
-                      { key: 'modifica', label: 'Modifica', icon: 'pencil', onSelect: () => actions.modificaTorneo(route.id) },
-                      { key: 'storia', label: 'Storia Instagram', icon: 'share', onSelect: () => actions.apriStoria(route.id) },
-                      { key: 'elimina', label: 'Elimina torneo', icon: 'trash', tone: 'destructive', onSelect: () => actions.eliminaTorneo(route.id) },
-                    ]
-                  : [{ key: 'storia', label: 'Storia Instagram', icon: 'share', onSelect: () => actions.apriStoria(route.id) }],
-                anchor,
-              )
-            }
+            onModifica={() => actions.modificaTorneo(route.id)}
           />
         )
       }
       case 'compagni':
-        return <Compagni compagni={screen.compagniList} traccia={traccia} onNuovoCompagno={actions.nuovoCompagno} />
+        return (
+          <Compagni
+            compagni={screen.compagniList}
+            collegati={new Set(data.partners.filter((p) => p.linkedUserId != null).map((p) => p.id))}
+            traccia={traccia}
+            onNuovoCompagno={actions.nuovoCompagno}
+          />
+        )
       case 'compagno': {
         const p = data.partners.find((x) => x.id === route.id)
         return (
@@ -323,13 +341,7 @@ export function AppView({ diary, auth, check }: AppDeps) {
             onOpenMatch={actions.modificaPartita}
             onCollega={() => actions.collegaCompagno(route.id)}
             onScollega={() => actions.scollegaCompagno(route.id)}
-            onMenu={(anchor) =>
-              actions.apriMenu(
-                p?.name ?? 'Compagno',
-                [{ key: 'elimina', label: 'Elimina compagno', icon: 'trash', tone: 'destructive', onSelect: () => actions.eliminaCompagno(route.id) }],
-                anchor,
-              )
-            }
+            onElimina={() => actions.eliminaCompagno(route.id)}
           />
         )
       }
@@ -346,8 +358,9 @@ export function AppView({ diary, auth, check }: AppDeps) {
             onCaricaAvatar={actions.caricaAvatar}
             onPassword={actions.cambiaPassword}
             onTogliCondivisioni={actions.togliCondivisioni}
-            onCookie={actions.cookie}
+            onConsenso={decidi}
             onEsci={actions.esci}
+            onClose={() => goBack({ name: 'home' })}
           />
         )
       case 'segnala':
@@ -374,7 +387,7 @@ export function AppView({ diary, auth, check }: AppDeps) {
           <NonTrovato
             titolo="Pagina non trovata"
             testo="L'indirizzo non porta da nessuna parte nel diario."
-            azione={<ButtonLink to={{ name: 'home' }} variant="tinted">Vai alla Home</ButtonLink>}
+            azione={<ButtonLink to={{ name: 'home' }}>Vai alla Home</ButtonLink>}
           />
         )
     }
@@ -390,7 +403,7 @@ export function AppView({ diary, auth, check }: AppDeps) {
         user={{ name: session?.name ?? '', email: session?.email ?? '', avatar: session?.avatarUrl ?? null, admin }}
         entityTitle={entityTitle}
         onPlus={(anchor) => actions.apriAzioni(anchor)}
-        fullscreen={route.name === 'crea' || route.name === 'wrapped'}
+        fullscreen={routeFullscreen(route)}
       >
         {render()}
       </AppShell>

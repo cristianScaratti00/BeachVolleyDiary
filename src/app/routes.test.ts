@@ -1,10 +1,10 @@
 // ============================================================================
 // Le rotte (UX §4.1, §14.2): andata e ritorno percorso ⇄ rotta per ognuna,
-// parole riservate prima di :id, redirect di /diario, hash ignorato, il resto
-// "non trovato".
+// parole riservate prima di :id, redirect di /tornei/timeline, hash ignorato,
+// il resto "non trovato".
 // ============================================================================
 import { describe, it, expect } from 'vitest'
-import { analyticsPath, parseLocation, routeHref, routeParent, routeTab, routeTitle, isRedirect } from './routes'
+import { analyticsPath, parseLocation, routeFullscreen, routeHasTabBar, routeHref, routeParent, routeTab, routeTitle, isRedirect } from './routes'
 import type { Route } from './routes'
 
 const ID = '0b6f6a4e-3f6b-4b2a-9a51-1c2d3e4f5a6b'
@@ -15,8 +15,8 @@ const TUTTE: [string, Route][] = [
   ['/wrapped', { name: 'wrapped' }],
   ['/oggi', { name: 'oggi' }],
   ['/tornei', { name: 'tornei', vista: 'lista' }],
-  ['/tornei/timeline', { name: 'tornei', vista: 'timeline' }],
   ['/tornei/mappa', { name: 'tornei', vista: 'mappa' }],
+  ['/diario', { name: 'diario' }],
   [`/tornei/${ID}`, { name: 'torneo', id: ID }],
   ['/compagni', { name: 'compagni' }],
   [`/compagni/${ID}`, { name: 'compagno', id: ID }],
@@ -24,6 +24,7 @@ const TUTTE: [string, Route][] = [
   ['/profilo/segnala', { name: 'segnala' }],
   ['/profilo/segnalazioni', { name: 'segnalazioni' }],
   ['/crea', { name: 'crea' }],
+  ['/live', { name: 'live' }],
 ]
 
 describe('rotte — andata e ritorno', () => {
@@ -33,9 +34,12 @@ describe('rotte — andata e ritorno', () => {
   })
 
   it('la ricerca sta in ?q= e torna uguale', () => {
-    const r = parseLocation('/tornei/timeline', '?q=rimini%20open')
-    expect(r).toEqual({ name: 'tornei', vista: 'timeline', q: 'rimini open' })
-    expect(routeHref(r)).toBe('/tornei/timeline?q=rimini%20open')
+    const r = parseLocation('/tornei/mappa', '?q=rimini%20open')
+    expect(r).toEqual({ name: 'tornei', vista: 'mappa', q: 'rimini open' })
+    expect(routeHref(r)).toBe('/tornei/mappa?q=rimini%20open')
+    const d = parseLocation('/diario', '?q=cervia')
+    expect(d).toEqual({ name: 'diario', q: 'cervia' })
+    expect(routeHref(d)).toBe('/diario?q=cervia')
   })
 
   it('una ricerca vuota non è una ricerca', () => {
@@ -44,9 +48,8 @@ describe('rotte — andata e ritorno', () => {
 })
 
 describe('rotte — regole di parsing', () => {
-  it('timeline e mappa sono parole riservate, non id', () => {
+  it('mappa è una parola riservata, non un id', () => {
     expect(parseLocation('/tornei/mappa', '').name).toBe('tornei')
-    expect(parseLocation('/tornei/timeline', '').name).toBe('tornei')
   })
 
   it('un segmento che non è un UUID né una parola riservata è "non trovato"', () => {
@@ -61,10 +64,11 @@ describe('rotte — regole di parsing', () => {
     expect(parseLocation('/profilo/segnala/', '')).toEqual({ name: 'segnala' })
   })
 
-  it('/diario porta alla Timeline (redirect)', () => {
-    expect(isRedirect('/diario')).toBe(true)
-    expect(isRedirect('/diario/')).toBe(true)
-    expect(parseLocation('/diario', '')).toEqual({ name: 'tornei', vista: 'timeline' })
+  it('la vecchia Timeline di Tornei porta al Diario (redirect)', () => {
+    expect(isRedirect('/tornei/timeline')).toBe(true)
+    expect(isRedirect('/tornei/timeline/')).toBe(true)
+    expect(parseLocation('/tornei/timeline', '')).toEqual({ name: 'diario' })
+    expect(isRedirect('/diario')).toBe(false)
     expect(isRedirect('/tornei')).toBe(false)
   })
 })
@@ -74,14 +78,33 @@ describe('rotte — tab, genitori, titoli', () => {
     expect(routeTab({ name: 'statistiche' })).toBe('home')
     expect(routeTab({ name: 'torneo', id: ID })).toBe('tornei')
     expect(routeTab({ name: 'compagno', id: ID })).toBe('compagni')
-    expect(routeTab({ name: 'segnalazioni' })).toBe('profilo')
+    expect(routeTab({ name: 'oggi' })).toBe('compagni')
+    expect(routeTab({ name: 'diario' })).toBe('diario')
+    // Il Profilo non è più una tab: ci si arriva dall'avatar in Home.
+    expect(routeTab({ name: 'profilo' })).toBeNull()
+    expect(routeTab({ name: 'segnalazioni' })).toBeNull()
     expect(routeTab({ name: 'crea' })).toBeNull()
+    expect(routeTab({ name: 'live' })).toBeNull()
     expect(routeTab({ name: 'nonTrovato' })).toBeNull()
+  })
+
+  it('la TabBar c\'è solo sulle schermate di passaggio', () => {
+    expect(routeHasTabBar({ name: 'home' })).toBe(true)
+    expect(routeHasTabBar({ name: 'diario' })).toBe(true)
+    expect(routeHasTabBar({ name: 'compagno', id: ID })).toBe(true)
+    expect(routeHasTabBar({ name: 'torneo', id: ID })).toBe(false)
+    expect(routeHasTabBar({ name: 'profilo' })).toBe(false)
+    expect(routeHasTabBar({ name: 'oggi' })).toBe(false)
+    expect(routeFullscreen({ name: 'live' })).toBe(true)
+    expect(routeFullscreen({ name: 'crea' })).toBe(true)
+    expect(routeFullscreen({ name: 'tornei', vista: 'lista' })).toBe(false)
   })
 
   it('il genitore del dettaglio torneo è Tornei alla vista ricordata', () => {
     expect(routeParent({ name: 'torneo', id: ID }, 'mappa')).toEqual({ name: 'tornei', vista: 'mappa' })
     expect(routeParent({ name: 'segnala' })).toEqual({ name: 'profilo' })
+    expect(routeParent({ name: 'profilo' })).toEqual({ name: 'home' })
+    expect(routeParent({ name: 'oggi' })).toEqual({ name: 'compagni' })
     expect(routeParent({ name: 'home' })).toBeNull()
   })
 

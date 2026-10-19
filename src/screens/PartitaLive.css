@@ -1,0 +1,410 @@
+/* ============================================================================
+   Partita live (schermata 17): il tabellone a tutta altezza. In cima il × di
+   vetro e il set; due pannelli bianchi di raggio grande (loro in alto, noi in
+   basso col filo d'inchiostro) che sono interi il pulsante «+1»; Pallo con la
+   nuvoletta a cavallo fra i due; «Timeout» e «Chiudi il set» in fondo.
+   Su desktop la colonna resta larga quanto uno sheet, al centro.
+   L'impostazione è un modulo come «Nuova partita», con «Torneo · Tra amici»
+   sotto il titolo e, tra amici, le ultime partite in una lista raggruppata.
+   ============================================================================ */
+@layer components {
+  .live-root { min-height: 100dvh; }
+
+  .live {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    width: 100%;
+    max-width: var(--sheet-max);
+    min-height: 100dvh;
+    margin: 0 auto;
+    padding: calc(var(--safe-top) + var(--bar-top)) var(--gutter) calc(var(--safe-bottom) + var(--space-6));
+  }
+  .live[data-vista="gioco"] { height: 100dvh; }
+
+  /* ----------------------------------------------------------- testa */
+  .live-head { flex: none; display: flex; align-items: center; gap: var(--space-3); }
+  .live-head-text { flex: 1; min-width: 0; }
+  .live-kicker {
+    font: var(--type-num-s);
+    letter-spacing: var(--track-num-s);
+    color: var(--ink-2);
+    overflow-wrap: anywhere;
+  }
+  .live-title {
+    font: 700 1.125rem/1.25 var(--font-ui);
+    letter-spacing: var(--track-title-3);
+    font-variant-numeric: tabular-nums;
+  }
+  /* Il set appena chiuso, a destra: una pastiglia col filo. */
+  .live-pill {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1-5);
+    height: var(--segment-h);
+    padding: 0 var(--space-3);
+    border-radius: var(--radius-capsule);
+    border: var(--border-w) solid var(--edge);
+    background: var(--surface);
+    font: var(--type-num-s);
+    color: var(--ink-2);
+    white-space: nowrap;
+  }
+  .live-pill-n {
+    font: 700 0.875rem/1 var(--font-ui);
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------------------------------------------------------- campo */
+  .live-campo { position: relative; flex: 0 1 auto; min-height: 0; display: flex; flex-direction: column; }
+  .live-gioco { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+
+  .live-panel {
+    position: relative;
+    isolation: isolate;
+    flex: 0 1 250px;
+    min-height: 168px;
+    border-radius: var(--radius-sheet);
+    background: var(--surface);
+    border: var(--border-w) solid var(--edge);
+  }
+  .live-panel[data-chi="noi"] {
+    /* 52 fra i due pannelli: lo spazio di Pallo (12 + 12 + 28 nel design). */
+    margin-top: calc(var(--space-12) + var(--space-1));
+    border: 2px solid var(--ink);
+  }
+
+  /* Il «+1»: tutto il pannello. */
+  .live-punto {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-0-5);
+    border-radius: inherit;
+    color: var(--ink);
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .live-nome {
+    max-width: calc(100% - 2 * var(--touch) - var(--space-4));
+    font: 600 0.9375rem/1.3 var(--font-ui);
+    letter-spacing: var(--track-callout);
+    color: var(--ink-2);
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .live-panel[data-chi="noi"] .live-nome { color: var(--ink-label); }
+  .live-num {
+    display: block;
+    font: 800 7rem/1 var(--font-ui);
+    letter-spacing: -0.045em;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-2);
+  }
+  .live-panel[data-chi="noi"] .live-num { color: var(--ink); }
+  /* Il numero che segna fa il «pop»: sale a 1.16 e torna col rimbalzo. Due
+     nomi per la stessa animazione, alternati, così ripartono anche quando
+     segna di nuovo la stessa coppia. */
+  .live-num[data-pop="a"] { animation: live-pop-a var(--dur-press) var(--ease-press); }
+  .live-num[data-pop="b"] { animation: live-pop-b var(--dur-press) var(--ease-press); }
+  @keyframes live-pop-a { 0% { transform: scale(1); } 40% { transform: scale(1.16); } 100% { transform: scale(1); } }
+  @keyframes live-pop-b { 0% { transform: scale(1); } 40% { transform: scale(1.16); } 100% { transform: scale(1); } }
+
+  /* Il «−1»: un cerchio di vetro nell'angolo, sopra il «+1». */
+  .live-meno {
+    position: absolute;
+    top: var(--space-3);
+    right: var(--space-3);
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: var(--touch);
+    height: var(--touch);
+    border-radius: 50%;
+    color: var(--ink);
+    font: 600 0.9375rem/1 var(--font-ui);
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  .live-meno[aria-disabled="true"] { color: var(--ink-disabled); cursor: default; }
+  .live-meno[aria-disabled="true"]:active { transform: none; }
+
+  /* Pallo a cavallo dei due pannelli, con la nuvoletta che tocca il nostro. */
+  .live-pallo {
+    position: relative;
+    z-index: 2;
+    height: 0;
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+  }
+  .live-pallo-in {
+    position: absolute;
+    /* Pallo scende di 38 sul pannello di sopra; la nuvoletta tocca quello sotto. */
+    top: calc(var(--space-3) - var(--space-12) - var(--space-0-5));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .live-bolla {
+    margin-top: calc(-1 * var(--space-1));
+    max-width: calc(100vw - 2 * var(--gutter));
+    padding: var(--space-1-5) var(--space-3);
+    border-radius: var(--radius-control);
+    border: var(--border-w) solid var(--edge);
+    background: var(--surface);
+    font: var(--type-eyebrow);
+    letter-spacing: var(--track-eyebrow);
+    color: var(--ink);
+    text-align: center;
+    text-wrap: balance;
+    animation: live-bolla var(--dur-press) var(--ease-press) both;
+  }
+  @keyframes live-bolla {
+    from { opacity: 0; transform: translateY(calc(4px * var(--motion-scale))) scale(calc(1 - 0.08 * var(--motion-scale))); }
+    to { opacity: 1; transform: none; }
+  }
+
+  /* --------------------------------------------------------- timeout */
+  .live-timeout {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-6) var(--space-5);
+    border-radius: var(--radius-sheet);
+    background: var(--surface);
+    border: 2px solid var(--ink);
+    text-align: center;
+    animation: live-entra var(--dur-rise) var(--ease-rise) both;
+  }
+  @keyframes live-entra {
+    from { opacity: 0; transform: translateY(calc(var(--rise-y) * var(--motion-scale))) scale(calc(1 - 0.02 * var(--motion-scale))); }
+    to { opacity: 1; transform: none; }
+  }
+  .live-timeout-t {
+    font: 600 0.9375rem/1.3 var(--font-ui);
+    color: var(--ink-2);
+  }
+  .live-timeout-n {
+    font: 800 7rem/1 var(--font-ui);
+    letter-spacing: -0.045em;
+    font-variant-numeric: tabular-nums;
+  }
+  .live-timeout-u {
+    display: block;
+    margin-top: var(--space-1);
+    font: var(--type-headline);
+    letter-spacing: var(--track-headline);
+    color: var(--ink-2);
+  }
+  .live-timeout-bar {
+    width: min(100%, 240px);
+    height: var(--space-1-5);
+    margin-bottom: var(--space-3);
+    border-radius: var(--radius-capsule);
+    background: var(--fill);
+    overflow: hidden;
+  }
+  .live-timeout-bar > span {
+    display: block;
+    height: 100%;
+    background: var(--ink);
+    transform-origin: left center;
+    transition: transform 250ms linear;
+  }
+
+  /* ---------------------------------------------------------- azioni */
+  .live-azioni {
+    flex: none;
+    display: flex;
+    gap: var(--space-2-5);
+    margin-top: auto;
+  }
+  .live-azioni .ui-button { min-width: 0; }
+  .live-timeout-btn { flex: 1; }
+  .live-chiudi { flex: 1.6; }
+  /* Il set è finito: «Chiudi il set» lo propone, con un anello che pulsa. */
+  .live-chiudi[data-pronto] { animation: live-pronto 1.6s var(--ease-respiro) infinite; }
+  @keyframes live-pronto {
+    0%, 100% { box-shadow: inset 0 0 0 var(--border-w) var(--accent-strong), 0 0 0 0 var(--accent-edge-tint); }
+    50% { box-shadow: inset 0 0 0 var(--border-w) var(--accent-strong), 0 0 0 var(--space-2) var(--accent-edge-tint); }
+  }
+
+  /* ---------------------------------------------------- impostazione */
+  .live-setup { min-height: 100dvh; padding: 0 var(--gutter) calc(var(--safe-bottom) + var(--space-8)); }
+  /* «Torneo · Tra amici»: sotto il titolo, come le viste di Tornei. */
+  .live-modo { margin-top: var(--stack); --rise-i: 1; }
+  .live-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    margin-top: var(--space-6);
+  }
+  .live-scelta { display: flex; flex-direction: column; gap: var(--space-1-5); min-width: 0; }
+  .live-label {
+    font: 600 0.8125rem/1.25 var(--font-ui);
+    color: var(--ink-label);
+  }
+  .live-inizia { margin-top: var(--space-2); }
+
+  /* Tra amici: set e punti affiancati, le regole dette sotto per intero. */
+  .live-formato { display: flex; flex-direction: column; gap: var(--space-2); }
+  .live-formato-scelte {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+  }
+  .live-regole {
+    font: var(--type-footnote);
+    letter-spacing: var(--track-footnote);
+    color: var(--ink-2);
+  }
+
+  .live-vuoto {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3);
+    max-width: var(--empty-max);
+    margin: var(--space-10) auto 0;
+    text-align: center;
+  }
+  .live-vuoto-t { font: var(--type-title-2); letter-spacing: var(--track-title-2); }
+  .live-vuoto-p {
+    font: var(--type-subhead);
+    letter-spacing: var(--track-subhead);
+    color: var(--ink-2);
+    margin-bottom: var(--space-2);
+  }
+  .live-vuoto-azioni {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2-5);
+    width: 100%;
+  }
+
+  /* ---------------------------------------------- partite tra amici */
+  /* Le righe parlano come la riga partita del diario: cerchio V/P, chi ha
+     giocato e quando, le pastiglie dei set; il cestino a destra. */
+  /* Senza lista la nota parte dal titolo; sotto la lista, come il piede di
+     un ListGroup. */
+  .live-storico-nota { padding: 0 var(--space-1); }
+  .live-storico-lista + .live-storico-nota { padding: var(--space-2) var(--space-4) 0; }
+  .live-riga {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: calc(var(--touch) + var(--space-2));
+    padding: var(--space-2-5) var(--space-1) var(--space-2-5) var(--space-3-5);
+  }
+  .live-riga-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+  .live-esito {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: var(--esito-size);
+    height: var(--esito-size);
+    border-radius: 50%;
+    border: 1.5px solid var(--edge-strong);
+    color: var(--ink-2);
+    font: 700 0.8125rem/1 var(--font-ui);
+  }
+  .live-esito[data-esito="vinta"] { border-color: var(--ink); background: var(--ink); color: var(--ink-inverse); }
+  .live-riga-testo { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--space-1); }
+  .live-riga-sotto {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-1) var(--space-2);
+  }
+  .live-riga-chi {
+    font: 600 0.90625rem/1.3 var(--font-ui);
+    letter-spacing: var(--track-subhead);
+    overflow-wrap: anywhere;
+  }
+  .live-riga-quando {
+    font: var(--type-footnote);
+    letter-spacing: var(--track-footnote);
+    color: var(--ink-2);
+  }
+  .live-riga-set { flex: none; display: flex; gap: var(--space-1); }
+  .live-set {
+    display: inline-flex;
+    align-items: center;
+    height: 24px;
+    padding: 0 7px;
+    border-radius: var(--radius-xs);
+    border: var(--border-w) solid var(--line-strong);
+    font: var(--type-num-s);
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-2);
+    white-space: nowrap;
+  }
+  .live-set[data-vinto] { border-color: var(--ink); color: var(--ink); }
+
+  /* ------------------------------------------------------- riepilogo */
+  .live-fine { gap: var(--stack); }
+  .live-fine-pallo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: var(--space-2);
+  }
+  .live-fine-set { margin-top: 0; }
+  .live-fine-set .ui-row-value { font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .live-fine-azioni {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2-5);
+    margin-top: auto;
+    padding-top: var(--space-2);
+  }
+
+  /* Tra amici, «Salva in un torneo…»: il pannello prende il posto dei
+     pulsanti, nello stile del modulo d'impostazione. */
+  .live-salva {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    padding-top: var(--space-2);
+  }
+  .live-salva .live-fine-azioni { margin-top: 0; padding-top: 0; }
+  .live-salva-t { font: var(--type-title-3); letter-spacing: var(--track-title-3); }
+  .live-salva-p {
+    margin-top: var(--space-1);
+    font: var(--type-subhead);
+    letter-spacing: var(--track-subhead);
+    color: var(--ink-2);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .live-num[data-pop],
+    .live-bolla,
+    .live-timeout,
+    .live-chiudi[data-pronto] { animation: none; }
+    .live-chiudi[data-pronto] { box-shadow: inset 0 0 0 var(--border-w) var(--accent-strong), 0 0 0 var(--space-1) var(--accent-edge-tint); }
+    .live-timeout-bar > span { transition: none; }
+  }
+}

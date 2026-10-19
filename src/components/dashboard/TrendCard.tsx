@@ -64,7 +64,7 @@ function Disegno({ s, modo, onUscita }: { s: DashboardStats; modo: 'disegna' | '
   )
 }
 
-export function TrendCard({ s }: { s: DashboardStats }) {
+export function TrendCard({ s, rise }: { s: DashboardStats; rise?: number }) {
   // La linea con cui la card è nata si disegna; le successive compaiono.
   const [cambiata, setCambiata] = useState(false)
   const [vecchia, setVecchia] = useState<DashboardStats | null>(null)
@@ -83,6 +83,7 @@ export function TrendCard({ s }: { s: DashboardStats }) {
   return (
     <ChartCard
       title="Andamento"
+      rise={rise}
       extra={s.trendHasData ? <span className="dash-trend-delta" data-tone={tono}>{s.trendLabel}</span> : undefined}
       summary={s.trendHasData ? riassunto(s.trendPts) : null}
     >

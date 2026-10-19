@@ -20,13 +20,11 @@ export interface CardProps extends HTMLAttributes<HTMLElement> {
   as?: 'article' | 'div' | 'section' | 'li'
   /** L'entità è appena stata creata o cambiata da te (MOTION.md §10.4). */
   traccia?: boolean
-  /** Variante scura: la card di Beach Wrapped, anteprima del PNG. */
-  tone?: 'paper' | 'navy'
 }
 
-export function Card({ as: Tag = 'article', traccia, tone, className, children, ...rest }: CardProps) {
+export function Card({ as: Tag = 'article', traccia, className, children, ...rest }: CardProps) {
   return (
-    <Tag {...rest} className={className ? `ui-card ${className}` : 'ui-card'} data-tone={tone === 'navy' ? 'navy' : undefined}>
+    <Tag {...rest} className={className ? `ui-card ${className}` : 'ui-card'}>
       {traccia && <span className="traccia" aria-hidden="true" />}
       {children}
     </Tag>

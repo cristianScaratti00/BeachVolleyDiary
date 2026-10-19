@@ -8,7 +8,10 @@
 //   passa alla foto accanto, che arriva con la molla. ← / → e i pulsanti fanno
 //   la stessa cosa. Giù per chiudere: l'immagine rimpicciolisce e il fondo si
 //   schiarisce col dito; oltre 120px o 550px/s si chiude.
-// - Le barre sono `glass-dark` (sopra una foto c'è di tutto) con bersagli da 44.
+// - I comandi (il redesign) sono pezzi di vetro scuro che galleggiano, non
+//   più barre intere: il × e le frecce tondi, il contatore e «Scarica» in
+//   capsula, la didascalia in una capsula sua. Vetro scuro perché sopra una
+//   foto c'è di tutto; bersagli da 44.
 // - Lo spinner è solo sull'immagine: è uno dei due posti dove esiste.
 // ============================================================================
 import { useEffect, useRef, useState } from 'react'
@@ -17,7 +20,7 @@ import { AnimatePresence, useIsPresent, useMotionValue, useTransform } from 'mot
 import type { PanInfo } from 'motion/react'
 import type { LightboxProps } from '../app/contracts'
 import { ENTRATA, MOLLA, SVELTO } from './Motion'
-import { Icon } from './ui/Icon'
+import { Button, IconButton } from './ui/Button'
 import { useEscape, useFocusTrap, useInitialFocus, useReturnFocus } from './ui/overlay'
 import { isOnline } from '../hooks/useConnection'
 import './PhotoLightbox.css'
@@ -134,11 +137,11 @@ export default function PhotoLightbox({ photos, startIndex, nameBase, onClose, t
     >
       <m.div className="lightbox-bg" aria-hidden="true" style={{ opacity: fondo }} onClick={onClose} />
 
-      <div className="lightbox-bar lightbox-bar-top" data-material="glass-dark" data-hidden={trascina ? '' : undefined}>
-        <button type="button" className="lightbox-btn" data-close="" aria-label="Chiudi" onClick={onClose}>
-          <Icon name="close" size={24} />
-        </button>
-        <p className="lightbox-count" aria-hidden="true">{i + 1} / {n}</p>
+      <div className="lightbox-bar lightbox-bar-top" data-hidden={trascina ? '' : undefined}>
+        <IconButton icon="close" label="Chiudi" variant="glass" material="glass-dark" iconSize={20} data-close="" onClick={onClose} />
+        <p className="lightbox-count" data-material="glass-dark" aria-hidden="true">
+          {i + 1} / {n}
+        </p>
         <span className="lightbox-spacer" />
       </div>
 
@@ -189,28 +192,18 @@ export default function PhotoLightbox({ photos, startIndex, nameBase, onClose, t
         </AnimatePresence>
       </div>
 
-      <div className="lightbox-bar lightbox-bar-bottom" data-material="glass-dark" data-hidden={trascina ? '' : undefined}>
-        {shot.caption && <p className="lightbox-caption">{shot.caption}</p>}
+      <div className="lightbox-bar lightbox-bar-bottom" data-hidden={trascina ? '' : undefined}>
+        {shot.caption && (
+          <p className="lightbox-caption" data-material="glass-dark">
+            {shot.caption}
+          </p>
+        )}
         <div className="lightbox-actions">
-          {molte && (
-            <button type="button" className="lightbox-btn" aria-label="Precedente" onClick={() => vai(-1)}>
-              <Icon name="chevron-left" size={24} />
-            </button>
-          )}
-          {molte && (
-            <button type="button" className="lightbox-btn" aria-label="Successiva" onClick={() => vai(1)}>
-              <Icon name="chevron-right" size={24} />
-            </button>
-          )}
-          <button
-            type="button"
-            className="lightbox-btn lightbox-download"
-            aria-busy={scarica || undefined}
-            onClick={() => void download()}
-          >
-            <Icon name="download" size={20} />
-            <span>{scarica ? 'Download…' : 'Scarica'}</span>
-          </button>
+          {molte && <IconButton icon="chevron-left" label="Precedente" variant="glass" material="glass-dark" onClick={() => vai(-1)} />}
+          <Button variant="glass" material="glass-dark" icon="download" busy={scarica} busyLabel="Download…" onClick={() => void download()}>
+            Scarica
+          </Button>
+          {molte && <IconButton icon="chevron-right" label="Successiva" variant="glass" material="glass-dark" onClick={() => vai(1)} />}
         </div>
       </div>
     </m.div>

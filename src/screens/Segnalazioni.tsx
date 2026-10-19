@@ -8,12 +8,16 @@
 // chiunque altro restituisce zero righe. Il controllo del ruolo che decide se
 // montarla (App) è solo interfaccia.
 //
+// Il linguaggio è quello di Segnala: titolo 30/800, card bianche col filo,
+// lo stato come pastiglia, le chip per filtrare.
+//
 // Cambio di stato OTTIMISTICO (MOTION.md §7, §8.3): la riga cambia subito e,
 // se il filtro la esclude, esce dalla lista mentre quelle sotto salgono. Se la
 // scrittura fallisce torna com'era con la stessa molla, porta la traccia e si
 // rilegge tutto: a schermo non resta uno stato che il DB non ha.
 // ============================================================================
 import { useCallback, useEffect, useState } from 'react'
+import type { CSSProperties } from 'react'
 import * as m from 'motion/react-m'
 import { AnimatePresence } from 'motion/react'
 import { STATI, etichettaArea, etichettaStato } from '../lib/segnalazioni'
@@ -110,10 +114,11 @@ export default function Segnalazioni({ back, carica, aggiorna }: SegnalazioniPro
   const visibili = filtro === TUTTE ? tutte : tutte.filter((r) => r.stato === filtro)
 
   return (
-    <Page width="reading">
-      <NavBar title="Segnalazioni" subtitle="Quello che gli utenti dell'alpha hanno segnalato." back={back} />
+    <Page width="reading" className="segnalazioni">
+      <NavBar title="Segnalazioni" subtitle="Quello che gli utenti dell’alpha hanno segnalato." back={back} />
 
-      <div className="segnalazioni-body">
+      {/* Sale come i blocchi del redesign; dentro le righe si spostano con Motion. */}
+      <div className="segnalazioni-body rise" style={{ '--rise-i': 1 } as CSSProperties}>
         {righe === null ? (
           <Skeleton label="Carico le segnalazioni…" className="segnalazioni-skel">
             {[0, 1, 2].map((i) => (

@@ -12,7 +12,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { scroller, takeKeepScroll, useNav, useOverlays } from './router'
-import { routeTab, routeTitle } from './routes'
+import { routeHasTabBar, routeTab, routeTitle } from './routes'
 import type { Route, TabKey, TorneiVista } from './routes'
 import { useIsWide } from '../hooks/useMedia'
 import { Sidebar } from '../components/ui/Sidebar'
@@ -26,13 +26,14 @@ export function tabsFor(vista: TorneiVista): TabDef[] {
     { key: 'home', label: 'Home', icon: 'home', to: { name: 'home' } },
     { key: 'tornei', label: 'Tornei', icon: 'trophy', to: { name: 'tornei', vista } },
     { key: 'compagni', label: 'Compagni', icon: 'people', to: { name: 'compagni' } },
-    { key: 'profilo', label: 'Profilo', icon: 'person', to: { name: 'profilo' } },
+    { key: 'diario', label: 'Diario', icon: 'book', to: { name: 'diario' } },
   ]
 }
 
 function radiceDellaTab(r: Route, tab: TabKey | null): boolean {
   if (!tab) return false
   if (tab === 'tornei') return r.name === 'tornei' && !r.q
+  if (tab === 'diario') return r.name === 'diario' && !r.q
   return r.name === tab
 }
 
@@ -68,7 +69,7 @@ export function AppShell({ children, vista, user, entityTitle, onPlus, fullscree
   entityTitle?: string
   /** Il ＋ (TabBar) e «＋ Nuovo» (Sidebar): apre il menu delle azioni. */
   onPlus: (anchor: HTMLElement | null) => void
-  /** `/crea` e `/wrapped`: niente TabBar, niente margini. */
+  /** `/crea`, `/live` e `/wrapped`: niente TabBar, niente margini. */
   fullscreen: boolean
 }) {
   const nav = useNav()
@@ -142,7 +143,7 @@ export function AppShell({ children, vista, user, entityTitle, onPlus, fullscree
       >
         {children}
       </main>
-      {!wide && !fullscreen && (
+      {!wide && !fullscreen && routeHasTabBar(route) && (
         <TabBar
           ref={plusRef}
           tabs={tabs}
@@ -151,7 +152,6 @@ export function AppShell({ children, vista, user, entityTitle, onPlus, fullscree
           menuOpen={menuAperto}
           lifted={sollevata}
           onPlus={() => onPlus(null)}
-          avatar={{ name: user.name, src: user.avatar }}
         />
       )}
       <ToastRegion />

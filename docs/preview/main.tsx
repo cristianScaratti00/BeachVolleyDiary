@@ -17,6 +17,7 @@
 import { StrictMode, useCallback, useMemo, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import '../../src/styles/tokens.css'
+import '@fontsource-variable/geist'
 import '../../src/styles/materials.css'
 import '../../src/styles/base.css'
 import { MotionRoot } from '../../src/components/Motion'

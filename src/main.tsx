@@ -6,6 +6,9 @@ import { SpeedInsights } from '@vercel/speed-insights/react'
 // materiali (`[data-material]`) e la base degli elementi nudi. Ogni altro
 // foglio è di un componente e sta nel livello `components`.
 import './styles/tokens.css'
+// Geist variabile, servito dall'app: niente Google Fonts, e i PNG di Storia e
+// Wrapped lo incorporano dallo stesso dominio (html-to-image legge le regole).
+import '@fontsource-variable/geist'
 import './styles/materials.css'
 import './styles/base.css'
 import Root from './Root'

@@ -1,10 +1,12 @@
 /* Statistiche e barre (ART_DIRECTION §3.2, §8; MOTION.md §4.4). */
 @layer components {
+  /* La griglia del redesign: una card bianca col suo filo, le celle divise
+     da fili --separator (il gap da 1px lascia vedere il fondo della griglia). */
   .ui-stat-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--border-w);
-    background: var(--edge);
+    background: var(--separator);
     border: var(--border-w) solid var(--edge);
     border-radius: var(--radius-card);
     overflow: hidden;
@@ -23,7 +25,7 @@
   .ui-stat {
     min-width: 0;
     background: var(--surface);
-    padding: var(--space-4);
+    padding: var(--space-3) var(--space-3-5);
   }
   .ui-stat-value {
     font: var(--type-num-l);
@@ -37,11 +39,12 @@
   .ui-stat[data-size="xl"] .ui-stat-value { font: var(--type-num-xl); letter-spacing: var(--track-num-xl); }
   .ui-stat[data-size="hero"] .ui-stat-value { font: var(--type-num-hero); letter-spacing: var(--track-num-hero); }
   .ui-stat-value[data-tone="win"] { color: var(--accent-text); }
+  /* L'etichetta sotto il numero: minuscola, 12 a peso 500 («record»,
+     «vittorie»), come nel redesign. */
   .ui-stat-label {
-    margin-top: var(--space-1);
-    font: var(--type-eyebrow);
-    letter-spacing: var(--track-eyebrow);
-    text-transform: uppercase;
+    margin-top: var(--space-0-5);
+    font: var(--type-caption-1);
+    letter-spacing: var(--track-caption-1);
     color: var(--ink-2);
     /* In tre colonne a 390px la cella lascia 86px e «DIFFERENZIALE» ne
        misura 103: usciva dalla card e copriva il filo. Va a capo in sillabe
@@ -56,9 +59,9 @@
   .ui-stat-footer {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-5);
-    margin: var(--space-4) 0 0;
-    padding-top: var(--space-4);
+    gap: var(--space-6);
+    margin: var(--space-3-5) 0 0;
+    padding-top: var(--space-3);
     border-top: var(--hairline) solid var(--separator);
   }
   .ui-stat-footer > div { display: flex; flex-direction: column-reverse; min-width: 0; }
@@ -70,9 +73,8 @@
   }
   .ui-stat-footer-value[data-tone="win"] { color: var(--accent-text); }
   .ui-stat-footer-label {
-    font: var(--type-eyebrow);
-    letter-spacing: var(--track-eyebrow);
-    text-transform: uppercase;
+    font: var(--type-caption-1);
+    letter-spacing: var(--track-caption-1);
     color: var(--ink-2);
   }
 
@@ -105,6 +107,7 @@
     transition: transform var(--dur-racconto) var(--ease-racconto);
   }
   .ui-bar-fill[data-tone="rest"] { background: var(--data-rest); }
+  .ui-bar-fill[data-tone="ink"] { background: var(--data-ink); }
   .ui-bar-fill[data-tone="podium"] { background: var(--data-podium); }
   @media (prefers-reduced-motion: reduce) {
     .ui-bar-fill { transition: none; }

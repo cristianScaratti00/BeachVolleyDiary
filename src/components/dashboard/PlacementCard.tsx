@@ -1,41 +1,27 @@
 // ============================================================================
-// Piazzamenti: quante volte ogni risultato, una barra per riga. Il colore
-// della barra arriva dalla lib (`placementDist[].color`, letterali della
-// palette di prima) e si legge come SEGNALE con `dataTone`: 1° = --data-win,
-// podio = --data-podium, il resto = --data-rest (ART_DIRECTION §4.5).
-// «1° 🏆» è un valore del DB: si mostra «1°» e si legge «Primo posto» (C15).
+// Piazzamenti: quante volte ogni risultato. Ogni riga comincia con la medaglia
+// del redesign (la stessa delle righe dei tornei: 1° arancio, podio col filo
+// d'inchiostro, il resto grigia), poi la barra nel colore del suo gradino —
+// 1° --data-win, podio --data-ink, il resto --data-rest — e il conteggio.
+// La medaglia dice il piazzamento a parole agli screen reader («Primo
+// posto»): «1° 🏆» è un valore del DB e il trofeo non si legge (C15).
 // ============================================================================
 import type { DashboardStats } from '../../lib/derive'
-import { dataTone } from '../../lib/theme'
 import { Bar } from '../ui/Stat'
-import { placementText } from '../ui/Badge'
+import { Medal, medalTier } from '../ui/Medal'
 import { ChartCard, EmptyNote } from './Chart'
 
-const tono = (c: string) => {
-  const t = dataTone(c)
-  return t === 'win' ? 'win' : t === 'podium' ? 'podium' : 'rest'
-}
+const TONO = { win: 'win', podium: 'ink', rest: 'rest', open: 'rest' } as const
 
-function Etichetta({ label }: { label: string }) {
-  const testo = placementText(label)
-  if (testo === label) return <>{testo}</>
+export function PlacementCard({ s, rise }: { s: DashboardStats; rise?: number }) {
   return (
-    <>
-      <span aria-hidden="true">{testo}</span>
-      <span className="sr-only">{testo.replace('1°', 'Primo posto')}</span>
-    </>
-  )
-}
-
-export function PlacementCard({ s }: { s: DashboardStats }) {
-  return (
-    <ChartCard title="Piazzamenti">
+    <ChartCard title="Piazzamenti" rise={rise}>
       {s.placementDist.length ? (
         <ul className="dash-placements">
           {s.placementDist.map((pl) => (
             <li key={pl.label} className="dash-placement">
-              <span className="dash-row-label"><Etichetta label={pl.label} /></span>
-              <Bar pct={Number.parseInt(pl.barW, 10) || 0} tone={tono(pl.color)} />
+              <Medal placement={pl.label} size="md" />
+              <Bar pct={Number.parseInt(pl.barW, 10) || 0} tone={TONO[medalTier(pl.label)]} />
               <span className="dash-row-n">
                 {pl.count}
                 <span className="sr-only">{pl.count === 1 ? ' torneo' : ' tornei'}</span>

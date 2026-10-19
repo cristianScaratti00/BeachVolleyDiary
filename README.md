@@ -23,18 +23,32 @@ npm run preview        # anteprima della build
 
 ## Funzionalità
 
-- **Accesso** — Supabase Auth (email + password). In registrazione il nickname è verificato
-  live dalla Edge Function `check-name`. Gate in `Root.tsx`: splash → login → app.
-- **Home** — dice cosa serve adesso: il torneo di oggi (o il prossimo), l'ultimo risultato, il
-  check-in di oggi; poi i numeri chiave della stagione e i link a Statistiche e Beach Wrapped.
+- **Accesso** — Supabase Auth (email + password). Benvenuto con la scena del tramonto e un
+  carosello di tre messaggi, Accedi, Registrati in due passi (nickname verificato live dalla Edge
+  Function `check-name`, poi email e password). Gate in `Root.tsx`: splash → login → app.
+- **Home** — una frase su come stai andando, periodo (Sempre / stagioni) e filtro per compagno;
+  **Pallo**, la mascotte, dà un consiglio alla volta calcolato dai dati (oggi si gioca → aggiungi
+  partita, piazzamento da aggiornare, serie record, posto migliore, Wrapped pronto…); poi la % di
+  partite vinte (link a Statistiche), Beach Wrapped, tornei vinti, serie record, ultimi tornei.
+  L'avatar in alto apre il Profilo.
 - **Statistiche** (`/statistiche`) — win rate, differenziale, andamento vittorie per mese, anello
   vinte/perse, punti fatti vs subiti, piazzamenti, win rate per fase e per compagno. Filtri per
   compagno e stagione, visibili. Aggregazione server-side (RPC `dashboard_stats`) con fallback al
   calcolo client.
-- **Tornei** — tre viste sotto un'unica ricerca: **Lista** (i tornei da oggi in poi restano in cima
-  sotto "Prossimi tornei", i passati sono raggruppati per formato con filtro a chip), **Timeline**
-  (l'ex Diario: cronologia con foto e storia Instagram) e **Mappa**. La ricerca fuzzy trova per
-  nome, città, avversario, nota o didascalia. Dettaglio con record, set, differenziale, partite e foto.
+- **Tornei** — due viste sotto un'unica ricerca: **Lista** (i tornei da oggi in poi restano in cima
+  sotto "Prossimi tornei", i passati sono raggruppati per formato con filtro a chip; ogni riga ha la
+  medaglia del piazzamento) e **Mappa**. La ricerca fuzzy trova per nome, città, avversario, nota o
+  didascalia. Dettaglio con medaglia, record, set, differenziale, luogo, partite e foto, e in fondo
+  le azioni «Storia» e «Aggiungi partita».
+- **Diario** (`/diario`, tab) — la stagione mese per mese, dal torneo più recente, con foto, nota
+  e storia Instagram; ha la sua ricerca (`?q=`). `/tornei/timeline` porta qui.
+- **Partita live** (`/live`) — segnapunti da bordo campo, **in torneo o tra amici**. In torneo si
+  sceglie torneo, fase e avversari e a fine partita si salva come una partita normale; tra amici
+  non serve un torneo (squadre e formato facoltativi: 1 set o 2 su 3, a 21 o a 15) e il risultato
+  resta nello **storico locale** delle ultime 20 partite (`localStorage`, per account), da cui si può
+  anche salvare in un torneo dopo. Ogni tocco su un pannello è un punto (−1 per correggere), due
+  punti di scarto, timeout da 30", Pallo che tifa. La partita in corso vive in `sessionStorage` (un
+  refresh non la perde) e lo schermo resta acceso dove si può.
   Accanto al piazzamento si può indicare il **tabellone** in cui è arrivato (Gold / Silver / Bronze /
   Girone unico, facoltativo): compare nel badge ("2° · Silver"), nella story e nella ricerca del diario, ma non
   cambia le statistiche — un 1° nel Bronze resta un 1° per podi e miglior piazzamento.
@@ -57,19 +71,23 @@ npm run preview        # anteprima della build
   vedono gli altri presenti oggi (RPC `who_is_here`) e li si aggiunge come compagno sul posto.
 - **Compagni** — statistiche per compagno + dettaglio. Un compagno può essere collegato a un
   utente dell'app, che vede i tornei condivisi in sola lettura.
-- **Beach Wrapped** — recap di stagione sfogliabile stile storia IG (intervallo configurabile),
-  con export PNG per slide, "scarica tutte" e condivisione nativa.
-- **Storia Instagram** — immagine 1080×1920 del singolo torneo, generata con `html-to-image` e scaricabile.
-- **Assistente guidato** — creazione conversazionale del torneo in stile chat. Nessun modello
-  linguistico: è una macchina a stati scriptata (`src/screens/CreaChat.tsx`).
-- **Profilo** — nome visualizzato, password, foto profilo (bucket `avatars` + RPC `set_avatar`),
-  condivisioni ricevute, consenso ai cookie, «Segnala un problema», bacheca delle segnalazioni
-  (solo admin), logout con conferma.
-- **CRUD completo** — dal ＋ della TabBar (o «＋ Nuovo» della Sidebar): *Nuovo torneo* apre UN
-  solo sheet con i campi essenziali e «Altri dettagli» espandibile (l'assistente guidato resta un
-  percorso facoltativo), *Aggiungi partita* sa già in quale torneo, *Check-in oggi*. Partite con
-  punteggi per set, foto e compagni negli sheet; ogni eliminazione chiede conferma. Un compagno
-  nuovo si crea al volo dal torneo; la partita eredita il compagno del torneo.
+- **Beach Wrapped** — recap di stagione sfogliabile stile storia IG, **solo a ottobre**
+  (`wrappedAOttobre` in `src/app/selectors.ts`), con export PNG per slide, "scarica tutte" e
+  condivisione nativa; le foto non vengono mai ritagliate.
+- **Storia Instagram** — immagine 1080×1920 del singolo torneo, generata con `html-to-image` e
+  scaricabile: **3 layout** (Tabellone, Foto, Polaroid) × 3 colori, scelta ricordata per dispositivo;
+  le foto restano sempre intere, con la loro proporzione.
+- **Assistente guidato («Raccontalo a Pallo»)** — creazione conversazionale del torneo in stile
+  chat. Nessun modello linguistico: è una macchina a stati scriptata (`src/screens/CreaChat.tsx`).
+- **Profilo** — si apre dall'avatar in Home (o dalla Sidebar) e si chiude col ×: nome visualizzato,
+  password, foto profilo (bucket `avatars` + RPC `set_avatar`), condivisioni ricevute, l'interruttore
+  «Statistiche d'uso anonime» (lo stesso consenso del dialogo dei cookie), «Segnala un problema»,
+  bacheca delle segnalazioni (solo admin), logout con conferma.
+- **CRUD completo** — dal ＋ (o «Nuovo» della Sidebar) si apre «Cosa registriamo?»: *Partita
+  live*, *Torneo* (il modulo completo), *Partita* (sa già in quale torneo), *Torneo rapido* (nome,
+  data e piazzamento; il resto dopo) e *Raccontalo a Pallo*. Partite con punteggi per set, foto e
+  compagni negli sheet; ogni eliminazione chiede conferma (il torneo si elimina dal suo sheet di
+  modifica). Un compagno nuovo si crea al volo dal torneo; la partita eredita il compagno del torneo.
 - **URL vere** — ogni schermata e ogni dettaglio ha il suo percorso (`/tornei/:id`,
   `/compagni/:id`…): il tasto indietro chiude gli sheet, il refresh e i link diretti funzionano.
   Router senza dipendenze in `src/app/router.ts`; rewrite SPA in `vercel.json`.
@@ -79,12 +97,14 @@ npm run preview        # anteprima della build
 - **Piani e permessi** — `limits.ts` (cosa sblocca ciascun piano) + `permissions.ts` ("posso fare X
   adesso?"), con enforcement autoritativo lato DB. **Oggi sospesi**: `PLANS_ENABLED = false`
   (`src/lib/limits.ts`), quindi ogni utente ha tutto sbloccato.
-- **Responsive** — Sidebar flottante su desktop (≥900px), TabBar di vetro a capsula su mobile
-  (Home · Tornei · ＋ · Compagni · Profilo); da 600px gli sheet diventano form sheet centrati.
+- **Responsive** — Sidebar flottante su desktop (≥900px), su mobile la TabBar: una capsula di vetro
+  liquido (Home · Tornei · Compagni · Diario) con il ＋ arancio staccato; da 600px gli sheet
+  diventano form sheet centrati.
   Avvisi in alto (Toast) per salvataggi, errori, rete lenta o assente.
 - **Telemetria e performance** — Vercel Analytics + Speed Insights; eventi `track(...)` sulle azioni
   principali (nomi invariati); i percorsi con un UUID arrivano come `/tornei/[id]`. Code-splitting
-  di Timeline, assistente, storia, Wrapped, visore foto e mappe (Leaflet).
+  di Timeline del Diario, assistente, partita live, storia, Wrapped, visore foto, mappe (Leaflet)
+  e vetro liquido (solo Blink).
 
 ## Struttura
 
@@ -142,8 +162,8 @@ src/
 │   ├── modals/           # Sheet + sheet: torneo (unico), partita, foto, compagno,
 │   │                     #   collega, password; StoryModal; VenuePicker
 │   ├── wrapped/          # visore Beach Wrapped + palette delle slide
-│   └── …                 # Logo, Splash, PhotoLightbox, BannerAlpha, mappe
-├── screens/              # Home, Statistiche, Tornei (+ Timeline, Mappa), TorneoDetail,
+│   └── …                 # Logo, Splash, Pallo, PhotoLightbox, mappe
+├── screens/              # Home, Statistiche, Tornei (+ Mappa), Diario (+ Timeline), TorneoDetail,
 │                         # Compagni, CompagnoDetail, ChiCeOggi, Profilo, Segnala,
 │                         # Segnalazioni, CreaChat, Wrapped, Login, NonTrovato
 └── test/                 # setup Vitest, factories, wrapper axe, contrasto WCAG
@@ -182,22 +202,30 @@ verificato ogni stato dell'interfaccia.
 ## Design tokens
 
 Il sistema visivo si chiama **"Bagnasciuga"** ed è descritto in [`ART_DIRECTION.md`](ART_DIRECTION.md)
-(il movimento in [`MOTION.md`](MOTION.md)). In breve:
+(il movimento in [`MOTION.md`](MOTION.md)); i valori di oggi sono quelli della **versione D**, il
+redesign Liquid Glass (prima sezione di ART_DIRECTION.md). In breve:
 
 - **Token** solo in `src/styles/tokens.css` (custom properties). I componenti usano i ruoli
   semantici (`--ink`, `--ink-2`, `--accent`, `--accent-text`, `--select`…), mai un esadecimale; in
   JS ci sono `TOKEN` (riferimenti `var(--…)`) e `LIT` (letterali per canvas e SVG) in
   `src/lib/theme.ts`. `src/styles/tokens.test.ts` ricalcola ogni contrasto citato nel documento.
-- **Font**: SF Pro su Apple, Inter altrove (`--font-ui`); i PNG esportati usano solo Inter.
-  Scala tipografica `--type-*` + `--track-*`; numeri tabellari `--type-num-*`.
-- **Colore**: un inchiostro (navy `#1B2A4A`), due superfici (sabbia e carta), un accento (arancio
-  `#FF6B35`, come riempimento; come testo `--accent-text`). Il CTA è arancio con l'etichetta navy;
-  il selezionato è una pillola navy con il contenuto bianco.
-- **Vetro** solo sui livelli di navigazione e controllo, via `data-material` (`materials.css`):
-  TabBar, NavBar dopo lo scroll, sheet, menu, toolbar dei visori; al massimo tre superfici
-  sfocate. Il contenuto (card, liste, grafici) è carta opaca.
-- **Movimento**: `ENTRATA` / `SVELTO` / `MOLLA` (`src/components/Motion.tsx`) = `--dur-*` +
-  `--ease-*`; solo `transform` e `opacity`; tutto rispetta `prefers-reduced-motion`.
+- **Font**: Geist variabile, servito dall'app (`@fontsource-variable/geist`), anche nei PNG
+  esportati. Scala tipografica `--type-*` + `--track-*` (titoli a 800); numeri tabellari ovunque.
+- **Colore**: un inchiostro neutro (`#1C1C1E`), il fondo piatto `#F6F6F4`, la carta bianca col filo
+  `#E2E2DE`, un accento (arancio `#FF6B1A` col filo `#E05A10`; come testo `--accent-text`). Il CTA
+  è arancio con l'etichetta d'inchiostro; la tab accesa è una pillola arancio tenue; la chip scelta
+  è d'inchiostro pieno.
+- **Vetro liquido** sui livelli che galleggiano, via `data-material` (`materials.css`) e
+  `LiquidGlass` (`src/components/ui/LiquidGlass.tsx`): bianco al 55% che sfoca e satura, bordo
+  bianco e riflesso; sui browser Blink anche la **rifrazione** vera (`@samasante/liquid-glass`,
+  caricata in lazy solo lì). Il contenuto (card, liste, grafici) è carta opaca.
+- **Movimento**: `ENTRATA` / `SVELTO` / `MOLLA` (`src/components/Motion.tsx`, libreria Motion) =
+  `--dur-*` + `--ease-*`, più la SALITA sfalsata (`.rise`) e la PRESSIONE a molla (`.press`) del
+  redesign; solo `transform` e `opacity`; tutto rispetta `prefers-reduced-motion`.
+- **Pallo** (`src/components/Pallo.tsx`): la mascotte, decorativa, con 14 espressioni animate
+  (saluta, esulta, contento, preoccupato, sbircia, testa, festa, triste, pensa, dorme, sorpreso,
+  occhiolino, cool, cuori), lo sguardo che segue il dito, le reazioni al tocco e un paio di
+  sorprese; tutto fermo con reduced-motion.
 - **Primitive** in `src/components/ui/*`: un file `.tsx` e uno `.css` per componente, classi con il
   prefisso `ui-`, varianti come `data-variant` / `data-size`. Le schermate hanno il loro `.css`
   accanto, con il prefisso della schermata.

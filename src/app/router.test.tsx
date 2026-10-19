@@ -54,11 +54,11 @@ describe('router — navigazione', () => {
     expect(window.history.length).toBe(lunghezza)
   })
 
-  it('/diario viene sostituito da /tornei/timeline all\'avvio', () => {
-    avvia('/diario')
+  it('/tornei/timeline (la vecchia Timeline) viene sostituito da /diario all\'avvio', () => {
+    avvia('/tornei/timeline')
     render(<Dove />)
-    expect(window.location.pathname).toBe('/tornei/timeline')
-    expect(screen.getByTestId('rotta')).toHaveTextContent('"timeline"')
+    expect(window.location.pathname).toBe('/diario')
+    expect(screen.getByTestId('rotta')).toHaveTextContent('"diario"')
   })
 
   it('<Link> è un <a href> vero che naviga senza ricaricare', async () => {

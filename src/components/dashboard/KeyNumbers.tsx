@@ -1,8 +1,10 @@
 // ============================================================================
-// I numeri chiave (Home e Statistiche): win rate, differenziale, tornei vinti,
-// serie record. Numeri da tabellone (ART_DIRECTION §2.4.3) che salgono da zero
-// una volta per sessione e per schermata (`rise`, MOTION.md M1), poi scattano
-// solo se cambiano. Si colora solo il win rate: è una vittoria (§3.3.8).
+// I numeri chiave di Statistiche: win rate, differenziale, tornei vinti, serie
+// record, in una card sola divisa dai fili (StatGrid, il redesign). Numeri da
+// tabellone (ART_DIRECTION §2.4.3) che salgono da zero una volta per sessione
+// e per schermata (`rise`, MOTION.md M1), poi scattano solo se cambiano. Si
+// colora solo il win rate: è una vittoria (§3.3.8). La Home ha i suoi (la card
+// «Partite vinte»), nella stessa grammatica.
 // ============================================================================
 import type { DashboardStats } from '../../lib/derive'
 import { StatGrid, StatTile } from '../ui/Stat'

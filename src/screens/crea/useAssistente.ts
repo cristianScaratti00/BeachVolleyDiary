@@ -304,6 +304,22 @@ export function useAssistente({ partners, venues, onCreate }: Deps) {
     }
   }
 
+  /**
+   * Una risposta scritta che non corrisponde a nessuna scelta dello step:
+   * l'eco resta in trascrizione e Pallo lo dice, senza cambiare step. Le
+   * scelte restano lì sotto.
+   */
+  const nonCapito = (raw: string) => {
+    const v = raw.trim()
+    if (!v) return
+    pushUser(v)
+    setText('')
+    void (async () => {
+      await say({ text: `Non ho capito «${v}». Scegli una delle risposte qui sotto.` })
+      if (alive.current) setFocusTick((t) => t + 1)
+    })()
+  }
+
   const confirmCreate = async () => {
     pushUser('Crea torneo')
     setStep('saving')
@@ -400,6 +416,7 @@ export function useAssistente({ partners, venues, onCreate }: Deps) {
       answerMore,
       confirmCreate,
       restart,
+      nonCapito,
     },
   }
 }

@@ -5,9 +5,9 @@ import { ChartCard, EmptyNote } from './Chart'
 
 const partite = (n: number) => (n === 1 ? '1 partita' : `${n} partite`)
 
-export function PhaseCard({ s }: { s: DashboardStats }) {
+export function PhaseCard({ s, rise }: { s: DashboardStats; rise?: number }) {
   return (
-    <ChartCard title="Per fase">
+    <ChartCard title="Per fase" rise={rise}>
       {s.phaseRows.length ? (
         <div className="dash-rows">
           {s.phaseRows.map((p) => (

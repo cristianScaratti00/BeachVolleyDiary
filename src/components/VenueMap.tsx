@@ -4,7 +4,8 @@
 // Presentazionale: riceve già le coordinate, non geocodifica nulla. È l'unico
 // punto dell'app che carica Leaflet, ed è importato in `lazy()` dal dettaglio
 // torneo: la libreria e il suo CSS finiscono in un chunk a parte, scaricato solo
-// da chi apre un torneo che ha davvero una posizione.
+// quando si apre la mappa dalla card del luogo («Mappa») di un torneo che ha
+// davvero una posizione.
 //
 // NB (privacy): le tile arrivano da tile.openstreetmap.org, quindi mostrare la
 // mappa comporta una richiesta a un servizio esterno con il riquadro
@@ -12,7 +13,7 @@
 // (Anche la ricerca del luogo in VenuePicker usa la rete: photon.komoot.io.)
 //
 // Senza rete, o con OSM giù, la cornice resta e dice «Mappa non disponibile.»:
-// il link «Apri la mappa ↗» accanto al titolo della sezione resta (UX §6.4).
+// il link «Apri la mappa ↗» sotto la mappa resta (UX §6.4).
 // ============================================================================
 import { useEffect, useRef, useState } from 'react'
 import L from 'leaflet'
@@ -101,7 +102,7 @@ export default function VenueMap({ lat, lng, label }: VenueMapProps) {
       raf = requestAnimationFrame(() => map?.invalidateSize())
     } catch {
       // Ambienti senza layout reale: la scheda resta leggibile e il link
-      // "Apri la mappa" accanto continua a funzionare.
+      // "Apri la mappa" sotto continua a funzionare.
       setGuasta(true)
       return
     }
@@ -119,7 +120,7 @@ export default function VenueMap({ lat, lng, label }: VenueMapProps) {
         ref={boxRef}
         // `region` e non `application`: la mappa resta esplorabile con i comandi
         // normali dello screen reader, e chi non la può usare ha comunque il link
-        // "Apri la mappa" accanto al titolo della sezione.
+        // "Apri la mappa" subito sotto.
         role="region"
         aria-label={`Mappa di ${label}`}
         className="venuemap-box"

@@ -21,7 +21,6 @@ import { contrast, over, parseColor, AA_TEXT, AA_NON_TEXT } from '../test/wcag'
 import { TOKEN, LIT, dataTone } from '../lib/theme'
 import { ENTRATA, SVELTO, MOLLA } from '../components/Motion'
 
-const BLACK = '#000000'
 const WHITE = '#FFFFFF'
 
 // ---------------------------------------------------------------- parsing
@@ -74,8 +73,9 @@ describe('token — tema chiaro: testo', () => {
     ['ink', 'surface-pressed'], ['ink', 'accent-wash'],
     ['ink-2', 'bg'], ['ink-2', 'bg-top'], ['ink-2', 'bg-glow'], ['ink-2', 'surface'], ['ink-2', 'fill'],
     ['ink-2', 'surface-pressed'], ['ink-2', 'accent-wash'],
-    ['accent-text', 'bg'], ['accent-text', 'bg-glow'], ['accent-text', 'surface'], ['accent-text', 'fill'],
+    ['accent-text', 'bg'], ['accent-text', 'bg-glow'], ['accent-text', 'surface'],
     ['accent-text', 'accent-wash'],
+    ['ink-label', 'surface'], ['ink-label', 'bg'],
     ['on-accent', 'accent'], ['on-select', 'select'], ['ink-inverse', 'ink'], ['ink-inverse', 'surface-brand'],
     ['danger', 'surface'], ['danger', 'bg'], ['danger', 'fill'], ['danger', 'danger-wash'], ['on-danger', 'danger'],
     ['success', 'surface'], ['success', 'bg'], ['success', 'success-wash'],
@@ -84,24 +84,30 @@ describe('token — tema chiaro: testo', () => {
     expect(cr(L, fg, bg)).toBeGreaterThanOrEqual(AA_TEXT)
   })
 
-  it('i numeri citati in ART_DIRECTION.md §4.2', () => {
-    expect(cr(L, 'ink', 'surface')).toBe(14.22)
-    expect(cr(L, 'ink', 'bg')).toBe(12.61)
-    expect(cr(L, 'ink-2', 'surface')).toBe(6.4)
-    expect(cr(L, 'ink-2', 'bg')).toBe(5.68)
-    expect(cr(L, 'ink-2', 'fill')).toBe(5.34)
-    expect(cr(L, 'accent-text', 'surface')).toBe(5.55)
-    expect(cr(L, 'accent-text', 'bg')).toBe(4.92)
-    expect(cr(L, 'accent-text', 'accent-wash')).toBe(4.71)
-    expect(cr(L, 'on-accent', 'accent')).toBe(5.5)
-    expect(cr(L, 'danger', 'surface')).toBe(5.56)
+  it('i numeri citati in tokens.css e ART_DIRECTION.md §0', () => {
+    expect(cr(L, 'ink', 'surface')).toBe(17.01)
+    expect(cr(L, 'ink', 'bg')).toBe(15.72)
+    expect(cr(L, 'ink-2', 'surface')).toBe(5.35)
+    expect(cr(L, 'ink-2', 'bg')).toBe(4.94)
+    expect(cr(L, 'ink-2', 'fill')).toBe(4.56)
+    expect(cr(L, 'ink-label', 'surface')).toBe(11.4)
+    expect(cr(L, 'accent-text', 'surface')).toBe(5.18)
+    expect(cr(L, 'accent-text', 'bg')).toBe(4.79)
+    expect(cr(L, 'accent-text', 'accent-wash')).toBe(4.66)
+    expect(cr(L, 'on-accent', 'accent')).toBe(5.97)
+    expect(cr(L, 'danger', 'surface')).toBe(6.57)
     expect(cr(L, 'success', 'surface')).toBe(5.51)
-    expect(cr(L, 'ink-placeholder', 'field')).toBe(4.81)
+    expect(cr(L, 'ink-placeholder', 'field')).toBe(4.56)
+    expect(cr(L, 'ink-inverse', 'surface-brand')).toBe(19.11)
   })
 
   it('il bianco sull\'arancio del marchio NON basta: il CTA usa --on-accent', () => {
-    // La ragione per cui il pulsante pieno ha il testo navy (UX C16).
-    expect(contrast(WHITE, L('accent'))).toBe(2.84)
+    // La ragione per cui il pulsante pieno ha l'etichetta d'inchiostro (UX C16).
+    expect(contrast(WHITE, L('accent'))).toBe(2.85)
+  })
+
+  it('PROVA NEGATIVA: l\'arancio-testo sulla guida --fill non basta, e lì non ci va', () => {
+    expect(cr(L, 'accent-text', 'fill')).toBeLessThan(AA_TEXT)
   })
 
   it('il grigio secondario di iOS NON basterebbe: --ink-2 è più scuro di proposito', () => {
@@ -112,7 +118,6 @@ describe('token — tema chiaro: testo', () => {
 describe('token — tema chiaro: grafica e stati (≥ 3)', () => {
   it.each([
     ['ink-3', 'surface'], ['ink-3', 'bg'], ['ink-3', 'fill'],
-    ['field-border', 'field'],
     ['accent-strong', 'surface'], ['accent-strong', 'bg'], ['accent-strong', 'fill'],
     ['data-win', 'surface'], ['data-podium', 'surface'], ['data-rest', 'surface'],
     ['focus-ring', 'bg'], ['focus-ring', 'surface'], ['focus-ring', 'fill'],
@@ -122,9 +127,18 @@ describe('token — tema chiaro: grafica e stati (≥ 3)', () => {
   })
 
   it('l\'arancio del marchio da solo non porta grafica significativa', () => {
-    // 2.84 sul bianco: per linee, barre e anelli serve --accent-strong.
+    // 2.85 sul bianco: per linee, barre e anelli serve --accent-strong.
     expect(cr(L, 'accent', 'surface')).toBeLessThan(AA_NON_TEXT)
-    expect(cr(L, 'accent-strong', 'surface')).toBe(4.06)
+    expect(cr(L, 'accent-strong', 'surface')).toBe(3.72)
+  })
+
+  it('PROVA NEGATIVA: il filo leggero dei campi è una scelta del redesign', () => {
+    // Il campo si riconosce dall'etichetta sopra, dal fondo bianco e, al
+    // focus, dal filo arancio con l'anello d'inchiostro. Chi chiede più
+    // contrasto al sistema (`prefers-contrast: more`) riceve un filo vero.
+    expect(cr(L, 'field-border', 'field')).toBeLessThan(AA_NON_TEXT)
+    const piu = dichiarazioni(blocco(tokensCss, ':root:not([data-theme="dark"])'))
+    expect(contrast(piu.get('field-border')!, L('field'))).toBeGreaterThanOrEqual(AA_NON_TEXT)
   })
 
   it('--ink-3 non è un colore da testo', () => {
@@ -163,21 +177,20 @@ describe('token — lo strato di stato non porta il testo sotto AA', () => {
     },
   )
 
-  it('PROVA NEGATIVA: con l\'arancio e il danger di riposo il premuto scende sotto AA', () => {
-    // Il motivo per cui esistono i toni «-state». Se un giorno passa, si tolgono.
-    expect(contrast(L('accent-text'), strato(L, 'accent-text', 'accent-wash', 'state-press'))).toBe(4.01)
-    expect(contrast(L('accent-text'), strato(L, 'accent-text', 'bg', 'state-press'))).toBe(4.17)
-    expect(contrast(L('danger'), strato(L, 'danger', 'bg', 'state-press'))).toBeLessThan(AA_TEXT)
+  it('PROVA NEGATIVA: con l\'arancio di riposo il premuto scende sotto AA', () => {
+    // Il motivo per cui esiste il tono «-state». Se un giorno passa, si toglie.
+    expect(contrast(L('accent-text'), strato(L, 'accent-text', 'accent-wash', 'state-press'))).toBe(3.95)
+    expect(contrast(L('accent-text'), strato(L, 'accent-text', 'bg', 'state-press'))).toBe(4.04)
   })
 
-  it('i numeri citati in ART_DIRECTION.md §4.2 e §8 (strato di stato)', () => {
-    expect(cr(L, 'accent-text-state', 'surface')).toBe(6.7)
-    expect(cr(L, 'accent-text-state', 'bg')).toBe(5.94)
-    expect(cr(L, 'accent-text-state', 'accent-wash')).toBe(5.69)
-    expect(cr(L, 'danger-state', 'surface')).toBe(6.78)
-    expect(cr(L, 'danger-state', 'bg')).toBe(6.01)
-    expect(contrast(L('accent-text-state'), strato(L, 'accent-text-state', 'fill', 'state-press'))).toBe(4.69)
-    expect(contrast(L('danger-state'), strato(L, 'danger-state', 'fill', 'state-press'))).toBe(4.66)
+  it('i numeri citati in tokens.css (strato di stato)', () => {
+    expect(cr(L, 'accent-text-state', 'surface')).toBe(7.32)
+    expect(cr(L, 'accent-text-state', 'bg')).toBe(6.76)
+    expect(cr(L, 'accent-text-state', 'accent-wash')).toBe(6.58)
+    expect(cr(L, 'danger-state', 'surface')).toBe(8.66)
+    expect(cr(L, 'danger-state', 'bg')).toBe(8.01)
+    expect(contrast(L('accent-text-state'), strato(L, 'accent-text-state', 'fill', 'state-press'))).toBe(5.18)
+    expect(contrast(L('danger-state'), strato(L, 'danger-state', 'fill', 'state-press'))).toBe(6.03)
   })
 
   it('a riposo il tono «-state» regge da solo (il passaggio non fa sparire niente)', () => {
@@ -189,11 +202,15 @@ describe('token — lo strato di stato non porta il testo sotto AA', () => {
 })
 
 // ============================================================================
-// Testo sul vetro: il vetro si compone sul NERO (il fondo peggiore, UX §8.5),
-// poi si misura l'inchiostro sopra il risultato.
+// Testo sul vetro: il vetro si compone sul fondo PEGGIORE che può davvero
+// passarci sotto — il grigio medio di una foto in ombra (#8C8C8C), non il nero:
+// sotto le barre di vetro del redesign scorrono card bianche, la mappa e le
+// foto del torneo. Poi si misura l'inchiostro sopra il risultato.
 // ============================================================================
+const OMBRA = '#8C8C8C'
+
 describe('token — vetro chiaro, caso peggiore', () => {
-  const vetro = (name: string) => over(L(name), BLACK)
+  const vetro = (name: string) => over(L(name), OMBRA)
 
   it.each(['glass-regular', 'glass-thick'])('su %s il testo regge AA', (g) => {
     expect(contrast(L('on-glass'), vetro(g))).toBeGreaterThanOrEqual(AA_TEXT)
@@ -202,42 +219,45 @@ describe('token — vetro chiaro, caso peggiore', () => {
     expect(contrast(L('focus-ring'), vetro(g))).toBeGreaterThanOrEqual(AA_NON_TEXT)
   })
 
-  it('i numeri citati in ART_DIRECTION.md §9.2', () => {
-    expect(contrast(L('on-glass'), vetro('glass-regular'))).toBe(7.04)
-    expect(contrast(L('on-glass-2'), vetro('glass-regular'))).toBe(5.2)
-    expect(contrast(L('on-glass-3'), vetro('glass-regular'))).toBe(3.92)
-    expect(contrast(L('on-glass'), vetro('glass-thick'))).toBe(10.15)
-    expect(contrast(L('on-glass-2'), vetro('glass-thick'))).toBe(6.91)
-    expect(contrast(L('on-glass-3'), vetro('glass-thick'))).toBe(4.85)
+  it('i numeri citati in tokens.css (vetro)', () => {
+    expect(contrast(L('on-glass'), vetro('glass-regular'))).toBe(7.92)
+    expect(contrast(L('on-glass-2'), vetro('glass-regular'))).toBe(5.07)
+    expect(contrast(L('on-glass-3'), vetro('glass-regular'))).toBe(3.49)
+    expect(contrast(L('on-glass'), vetro('glass-thick'))).toBe(14.58)
   })
 
-  it('il vetro thin non porta testo, solo icone', () => {
-    expect(contrast(L('on-glass'), vetro('glass-thin'))).toBeLessThan(AA_TEXT)
-    expect(contrast(L('on-glass'), vetro('glass-thin'))).toBeGreaterThanOrEqual(AA_NON_TEXT)
+  it('la tab accesa: arancio-testo sulla pillola tinta, sul vetro sopra la carta', () => {
+    const pillola = over(L('accent-tint'), over(L('glass-regular'), WHITE))
+    expect(contrast(L('accent-text'), pillola)).toBe(4.56)
   })
 
-  it('--ink-2 PIENO sul vetro fallisce: per questo materials.css lo ridefinisce', () => {
-    expect(contrast(L('ink-2'), vetro('glass-regular'))).toBeLessThan(AA_TEXT)
+  it('PROVA NEGATIVA: lo stesso arancio-testo sopra un\'ombra non basta', () => {
+    // Per questo l'arancio come testo sul vetro c'è solo nella tab accesa,
+    // che galleggia su carta e mappa, e mai sopra le foto (dettaglio torneo:
+    // lì la TabBar non c'è).
+    const pillola = over(L('accent-tint'), over(L('glass-regular'), OMBRA))
+    expect(contrast(L('accent-text'), pillola)).toBeLessThan(AA_TEXT)
+  })
+
+  it('--ink-2 PIENO sul vetro è più chiaro dell\'inchiostro al 78%: materials.css lo ridefinisce', () => {
+    expect(contrast(L('ink-2'), vetro('glass-regular'))).toBeLessThan(contrast(L('on-glass-2'), vetro('glass-regular')))
     expect(materialsCss).toMatch(/--ink-2:\s*var\(--on-glass-2\)/)
   })
 
-  it('accento e danger come testo sul vetro falliscono: stanno su superfici opache', () => {
-    expect(contrast(L('accent-text'), vetro('glass-regular'))).toBe(2.75)
-    expect(contrast(L('danger'), vetro('glass-regular'))).toBe(2.75)
-    expect(contrast(L('accent-text'), vetro('glass-thick'))).toBeLessThan(AA_TEXT)
-    expect(contrast(L('danger'), vetro('glass-thick'))).toBeLessThan(AA_TEXT)
+  it('il rosso di «Elimina» sul vetro sopra il fondo pagina regge AA', () => {
+    expect(contrast(L('danger'), over(L('glass-regular'), L('bg')))).toBe(6.23)
   })
 
   it('vetro scuro dei visori: caso peggiore sul BIANCO', () => {
     const scuro = over(L('glass-dark'), WHITE)
-    expect(contrast(L('on-glass-dark'), scuro)).toBe(6.13)
+    expect(contrast(L('on-glass-dark'), scuro)).toBe(6.1)
     expect(contrast(L('on-glass-dark-2'), scuro)).toBeGreaterThanOrEqual(AA_TEXT)
     expect(contrast(L('on-glass-dark-3'), scuro)).toBeGreaterThanOrEqual(AA_NON_TEXT)
   })
 
-  it('il fallback opaco è la stessa tinta del vetro ad alpha 1', () => {
-    expect(L('glass-solid')).toBe('#FFFDFA')
-    for (const g of ['glass-thin', 'glass-regular', 'glass-thick']) expect(L(g)).toMatch(/^rgb\(255 253 250 \/ /)
+  it('il fallback opaco è il bianco della carta', () => {
+    expect(L('glass-solid')).toBe('#FFFFFF')
+    for (const g of ['glass-thin', 'glass-regular']) expect(L(g)).toMatch(/^rgb\(255 255 255 \/ /)
   })
 })
 

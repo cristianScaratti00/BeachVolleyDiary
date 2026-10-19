@@ -209,7 +209,7 @@ const riccia: CittaTrovata = {
 const campoCitta = () => screen.getByLabelText('Città')
 // Chiusa, la tendina esce dall'albero di accessibilità: `queryByRole` torna
 // null, ed è esattamente la prova che serve. Le voci si cercano DENTRO di lei —
-// il select "Dove hai giocato" è pieno di <option>, che hanno lo stesso ruolo.
+// il select «Luogo» è pieno di <option>, che hanno lo stesso ruolo.
 const tendina = () => screen.queryByRole('listbox', { name: 'Città trovate' })
 const voci = () => {
   const t = tendina()

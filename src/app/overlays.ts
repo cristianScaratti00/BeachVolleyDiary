@@ -3,9 +3,10 @@
 // tipi e il riduttore, puri. La pila vera e la sua voce di history stanno in
 // `router.ts`; chi li disegna è `ModalHost`.
 //
-// Decisione presa una volta per tutte (UX §4.3 lasciava la scelta): l'action
-// sheet del ＋ si chiama `azioni`, non `crea`, perché `crea` è già la rotta
-// dell'assistente.
+// Decisione presa una volta per tutte (UX §4.3 lasciava la scelta): lo sheet
+// del ＋ («Cosa registriamo?») si chiama `azioni`, non `crea`, perché `crea`
+// è già la rotta dell'assistente. `anchor: 'tabbar'` è lo sheet che sale dal
+// fondo (mobile), `'popover'` il menu accanto a «Nuovo» della Sidebar.
 // ============================================================================
 import type { ReactNode } from 'react'
 
@@ -36,7 +37,8 @@ export interface MenuItem {
   label: string
   sub?: string
   icon?: import('../components/ui/Icon').IconName
-  tone?: 'destructive'
+  /** `accent`: la voce in evidenza (la partita live nel ＋). */
+  tone?: 'destructive' | 'accent'
   onSelect: () => void
 }
 
@@ -48,7 +50,7 @@ export interface MenuSpec {
 export type Overlay =
   | { kind: 'azioni'; anchor?: 'tabbar' | 'popover' }
   | { kind: 'menu'; spec: MenuSpec }
-  | { kind: 'torneo'; mode: 'nuovo' }
+  | { kind: 'torneo'; mode: 'nuovo'; rapido?: boolean }
   | { kind: 'torneo'; mode: 'modifica'; id: string }
   | { kind: 'partita'; mode: 'nuova'; tournamentId: string | null }
   | { kind: 'partita'; mode: 'modifica'; matchId: string }

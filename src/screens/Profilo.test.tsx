@@ -1,8 +1,9 @@
 // ============================================================================
-// Profilo (UX §5 F9, §6.8): presentazionale, le azioni arrivano come callback.
-// Si verifica che ogni riga sia il controllo giusto (link che naviga, pulsante
-// che agisce, riga che mostra e basta), gli stati del nome e della foto, e le
-// varianti: account Google/Apple, admin, nessuna condivisione.
+// Profilo (UX §5 F9, §6.8), il redesign: presentazionale, le azioni arrivano
+// come callback. Si verifica che ogni riga sia il controllo giusto (link che
+// naviga, pulsante che agisce, riga che mostra e basta, interruttore), il
+// nome che si apre nella riga, la foto, e le varianti: account Google/Apple,
+// admin, nessuna condivisione.
 // ============================================================================
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { act, render, screen, within } from '@testing-library/react'
@@ -27,19 +28,22 @@ function renderProfilo(over: Partial<ProfiloProps> = {}) {
   const props: ProfiloProps = {
     session: SESSION,
     condivisioni: 0,
-    consenso: null,
+    consenso: 'rifiutato',
     segnalazioniNuove: null,
     onSalvaNome: vi.fn().mockResolvedValue({ ok: true, notice: 'Nome aggiornato.' }),
     onCaricaAvatar: vi.fn().mockResolvedValue({ ok: true }),
     onPassword: vi.fn(),
     onTogliCondivisioni: vi.fn(),
-    onCookie: vi.fn(),
+    onConsenso: vi.fn(),
     onEsci: vi.fn(),
+    onClose: vi.fn(),
     ...over,
   }
   const view = render(<Profilo {...props} />)
   return { ...view, props }
 }
+
+const rigaNome = () => screen.getByRole('button', { name: /^Nome visualizzato/ })
 
 beforeEach(() => {
   window.history.replaceState(null, '', '/profilo')
@@ -47,10 +51,21 @@ beforeEach(() => {
 })
 
 describe('Profilo — struttura', () => {
-  it('un h1 e i gruppi come h2', () => {
+  it('il nome è l\'unico h1; i gruppi sono h2', () => {
     renderProfilo()
-    expect(screen.getAllByRole('heading', { level: 1 }).map((h) => h.textContent)).toEqual(['Profilo'])
-    expect(screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent)).toEqual(['Account', 'Condivisioni', 'Privacy', 'Supporto'])
+    expect(screen.getAllByRole('heading', { level: 1 }).map((h) => h.textContent)).toEqual(['Marta'])
+    expect(screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent)).toEqual([
+      'Account',
+      'Condivisione e privacy',
+      'Versione alpha',
+    ])
+  })
+
+  it('non è una tab: il × in alto lo chiude', async () => {
+    const user = userEvent.setup()
+    const { props } = renderProfilo()
+    await user.click(screen.getByRole('button', { name: 'Chiudi' }))
+    expect(props.onClose).toHaveBeenCalledOnce()
   })
 
   it('«Segnala un problema» è un link a /profilo/segnala', () => {
@@ -71,43 +86,47 @@ describe('Profilo — struttura', () => {
     expect(riga).toHaveAttribute('href', '/profilo/segnalazioni')
   })
 
-  it('il piè dice la versione', () => {
+  it('l\'email è una riga che mostra e basta', () => {
     renderProfilo()
-    expect(screen.getByText('Beach Diary · versione alpha')).toBeInTheDocument()
+    expect(screen.getByText('marta@example.com')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Email/ })).not.toBeInTheDocument()
   })
 })
 
 describe('Profilo — righe d\'azione', () => {
-  it('Password apre lo sheet', async () => {
+  it('«Cambia password» apre lo sheet', async () => {
     const user = userEvent.setup()
     const { props } = renderProfilo()
-    await user.click(screen.getByRole('button', { name: 'Password' }))
+    await user.click(screen.getByRole('button', { name: 'Cambia password' }))
     expect(props.onPassword).toHaveBeenCalledOnce()
   })
 
   it('account Google/Apple: al posto della voce c\'è una riga informativa', () => {
     renderProfilo({ session: { ...SESSION, hasPassword: false } })
-    expect(screen.queryByRole('button', { name: 'Password' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Cambia password' })).not.toBeInTheDocument()
     expect(screen.getByText(/Google o Apple/)).toBeInTheDocument()
   })
 
-  it('il consenso mostra la scelta corrente e riapre il dialogo', async () => {
+  it('«Statistiche d\'uso anonime» è lo switch del consenso, nei due versi', async () => {
     const user = userEvent.setup()
     const { props, rerender } = renderProfilo()
-    const riga = screen.getByRole('button', { name: /Cookie e statistiche\s*Da scegliere/ })
-    await user.click(riga)
-    expect(props.onCookie).toHaveBeenCalledOnce()
+    const sw = screen.getByRole('switch', { name: "Statistiche d'uso anonime" })
+    expect(sw).toHaveAttribute('aria-checked', 'false')
+    await user.click(sw)
+    expect(props.onConsenso).toHaveBeenLastCalledWith('accettato')
     rerender(<Profilo {...props} consenso="accettato" />)
-    expect(screen.getByRole('button', { name: /Cookie e statistiche\s*Accettati/ })).toBeInTheDocument()
+    expect(sw).toHaveAttribute('aria-checked', 'true')
+    await user.click(sw)
+    expect(props.onConsenso).toHaveBeenLastCalledWith('rifiutato')
   })
 
   it('«Togli tutte le condivisioni» c\'è solo quando ce n\'è almeno una', async () => {
     const user = userEvent.setup()
     const { props, rerender } = renderProfilo()
+    expect(screen.getByText('Condivisioni ricevute').closest('.ui-row')).toHaveTextContent('0')
     expect(screen.queryByRole('button', { name: 'Togli tutte le condivisioni' })).not.toBeInTheDocument()
-    expect(screen.getByText(/Nessuno ti ha collegato/)).toBeInTheDocument()
     rerender(<Profilo {...props} condivisioni={2} />)
-    expect(screen.getByText(/2 giocatori ti hanno collegato/)).toBeInTheDocument()
+    expect(screen.getByText('Condivisioni ricevute').closest('.ui-row')).toHaveTextContent('2')
     await user.click(screen.getByRole('button', { name: 'Togli tutte le condivisioni' }))
     expect(props.onTogliCondivisioni).toHaveBeenCalledOnce()
   })
@@ -121,20 +140,39 @@ describe('Profilo — righe d\'azione', () => {
 })
 
 describe('Profilo — nome', () => {
-  it('«Salva nome» compare solo dopo una modifica', async () => {
+  it('la riga mostra il nome e si apre (disclosure): il fuoco va nel campo', async () => {
     const user = userEvent.setup()
     renderProfilo()
-    expect(screen.queryByRole('button', { name: 'Salva nome' })).not.toBeInTheDocument()
-    await user.type(screen.getByRole('textbox', { name: 'Nome' }), 'tina')
-    expect(screen.getByRole('button', { name: 'Salva nome' })).toBeInTheDocument()
+    const riga = rigaNome()
+    expect(riga).toHaveAccessibleName(/Nome visualizzato\s*Marta/)
+    expect(riga).toHaveAttribute('aria-expanded', 'false')
+    await user.click(riga)
+    expect(riga).toHaveAttribute('aria-expanded', 'true')
+    const campo = screen.getByRole('textbox', { name: 'Nome visualizzato' })
+    expect(document.getElementById(riga.getAttribute('aria-controls')!)).toContainElement(campo)
+    expect(campo).toHaveFocus()
+    expect(campo).toHaveValue('Marta')
   })
 
-  it('salvando: occupato, poi l\'esito in linea', async () => {
+  it('«Annulla» richiude senza salvare e torna alla riga', async () => {
+    const user = userEvent.setup()
+    const { props } = renderProfilo()
+    await user.click(rigaNome())
+    await user.type(screen.getByRole('textbox', { name: 'Nome visualizzato' }), 'tina')
+    await user.click(screen.getByRole('button', { name: 'Annulla' }))
+    expect(props.onSalvaNome).not.toHaveBeenCalled()
+    expect(rigaNome()).toHaveAttribute('aria-expanded', 'false')
+    expect(rigaNome()).toHaveFocus()
+    expect(screen.getByRole('textbox', { name: 'Nome visualizzato', hidden: true })).toHaveValue('Marta')
+  })
+
+  it('salvando: occupato e in sola lettura, poi si richiude e l\'esito è annunciato', async () => {
     const user = userEvent.setup()
     let fine: (v: { ok: boolean; notice?: string }) => void = () => {}
     const onSalvaNome = vi.fn(() => new Promise<{ ok: boolean; notice?: string }>((r) => { fine = r }))
     renderProfilo({ onSalvaNome })
-    const campo = screen.getByRole('textbox', { name: 'Nome' })
+    await user.click(rigaNome())
+    const campo = screen.getByRole('textbox', { name: 'Nome visualizzato' })
     await user.clear(campo)
     await user.type(campo, 'Martina')
     await user.click(screen.getByRole('button', { name: 'Salva nome' }))
@@ -143,18 +181,30 @@ describe('Profilo — nome', () => {
     expect(campo).toHaveAttribute('readonly')
     await act(async () => fine({ ok: true, notice: 'Nome aggiornato.' }))
     expect(screen.getByRole('status')).toHaveTextContent('Nome aggiornato.')
+    expect(rigaNome()).toHaveAttribute('aria-expanded', 'false')
+    expect(rigaNome()).toHaveFocus()
   })
 
-  it('un nome rifiutato torna a quello in sessione e lo dice', async () => {
+  it('Invio nel campo salva come il pulsante', async () => {
+    const user = userEvent.setup()
+    const { props } = renderProfilo()
+    await user.click(rigaNome())
+    await user.type(screen.getByRole('textbox', { name: 'Nome visualizzato' }), 'tina{Enter}')
+    expect(props.onSalvaNome).toHaveBeenCalledWith('Martatina')
+  })
+
+  it('un nome rifiutato torna a quello in sessione e lo dice, a riga aperta', async () => {
     const user = userEvent.setup()
     const onSalvaNome = vi.fn().mockResolvedValue({ ok: false, error: 'Questo nome è già in uso, scegline un altro.' })
     renderProfilo({ onSalvaNome })
-    const campo = screen.getByRole('textbox', { name: 'Nome' })
+    await user.click(rigaNome())
+    const campo = screen.getByRole('textbox', { name: 'Nome visualizzato' })
     await user.clear(campo)
     await user.type(campo, 'Giulia')
     await user.click(screen.getByRole('button', { name: 'Salva nome' }))
     expect(await screen.findByRole('alert')).toHaveTextContent('già in uso')
     expect(campo).toHaveValue('Marta')
+    expect(rigaNome()).toHaveAttribute('aria-expanded', 'true')
   })
 })
 
@@ -176,11 +226,14 @@ describe('Profilo — foto', () => {
 })
 
 describe('Profilo — accessibilità', () => {
-  it('nessuna violazione axe (utente e admin)', async () => {
+  it('nessuna violazione axe (utente, admin, nome aperto)', async () => {
+    const user = userEvent.setup()
     const { container, rerender, props } = renderProfilo({ condivisioni: 1 })
     await expectNoA11yViolations(container)
     rerender(<Profilo {...props} session={{ ...SESSION, role: 'admin' }} segnalazioniNuove={0} />)
     expect(within(container).getByRole('link', { name: 'Segnalazioni ricevute' })).toBeInTheDocument()
+    await expectNoA11yViolations(container)
+    await user.click(rigaNome())
     await expectNoA11yViolations(container)
   })
 })

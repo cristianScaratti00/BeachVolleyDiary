@@ -1,7 +1,9 @@
 // ============================================================================
-// Statistiche (UX §6.2): filtri in vista, un annuncio solo dopo un cambio,
-// ogni card con il suo stato vuoto (niente zeri), «Vedi tutti» verso
-// Compagni. Le statistiche arrivano da `deriveDashboard` vero.
+// Statistiche (il redesign; UX §6.2): i due filtri di vetro (select veri) in
+// vista, un annuncio solo dopo un cambio, le card che salgono in fila, ogni
+// card con il suo stato vuoto (niente zeri), la medaglia nei piazzamenti,
+// «Vedi tutti» verso Compagni, Beach Wrapped quando è pronto. Le statistiche
+// arrivano da `deriveDashboard` vero.
 // ============================================================================
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { useState } from 'react'
@@ -23,7 +25,10 @@ beforeEach(() => {
 
 const back = { label: 'Home', onClick: vi.fn() }
 
-function Harness({ data }: { data: DiaryData }) {
+/** Quello che si legge sui pulsanti di vetro (il select sotto è trasparente). */
+const scritte = (el: HTMLElement) => Array.from(el.querySelectorAll('.dash-select-text')).map((x) => x.textContent)
+
+function Harness({ data, wrapped = false }: { data: DiaryData; wrapped?: boolean }) {
   const [fPartner, setFPartner] = useState('all')
   const [fYear, setFYear] = useState('Sempre')
   const filtri: Filtri = {
@@ -36,7 +41,7 @@ function Harness({ data }: { data: DiaryData }) {
     canFilter: true,
   }
   const s = deriveDashboard(data, fPartner, fYear).s
-  return <Statistiche s={s} filtri={filtri} back={back} wrapped={{ visibile: false, titolo: 'Beach Wrapped' }} />
+  return <Statistiche s={s} filtri={filtri} back={back} wrapped={{ visibile: wrapped, titolo: 'Beach Wrapped' }} />
 }
 
 const pieno = makeData({
@@ -53,11 +58,21 @@ const pieno = makeData({
 })
 
 describe('Statistiche', () => {
-  it('h1, ‹ Indietro e i due filtri con l\'etichetta vera', () => {
+  it('h1, la pillola «‹ Home», il sottotitolo e i due filtri di vetro (select veri)', async () => {
+    const user = userEvent.setup()
     render(<Harness data={pieno} />)
     expect(screen.getByRole('heading', { level: 1, name: 'Statistiche' })).toBeInTheDocument()
-    expect(screen.getByRole('combobox', { name: 'Compagno' })).toHaveValue('all')
-    expect(screen.getByRole('combobox', { name: 'Stagione' })).toHaveValue('Sempre')
+    expect(screen.getByText('3 partite · Sempre')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Home' }))
+    expect(back.onClick).toHaveBeenCalled()
+    const filtri = screen.getByRole('group', { name: 'Filtri delle statistiche' })
+    const stagione = screen.getByRole('combobox', { name: 'Stagione' })
+    expect(stagione).toHaveValue('Sempre')
+    // «Sempre» per prima, poi TUTTE le stagioni (la Home ne mostra solo due).
+    expect(Array.from((stagione as HTMLSelectElement).options).map((o) => o.value)).toEqual(['Sempre', '2026', '2025'])
+    expect(screen.getByRole('combobox', { name: 'Compagni' })).toHaveValue('all')
+    // Sul pulsante si legge la scelta, o il nome del filtro a riposo.
+    expect(scritte(filtri)).toEqual(['Sempre', 'Compagni'])
   })
 
   it('un solo annuncio, e solo dopo un cambio di filtro', async () => {
@@ -67,8 +82,9 @@ describe('Statistiche', () => {
     expect(stato).toBeEmptyDOMElement()
     await user.selectOptions(screen.getByRole('combobox', { name: 'Stagione' }), '2026')
     expect(stato).toHaveTextContent('Statistiche aggiornate: Stagione 2026')
-    await user.selectOptions(screen.getByRole('combobox', { name: 'Compagno' }), 'p1')
+    await user.selectOptions(screen.getByRole('combobox', { name: 'Compagni' }), 'p1')
     expect(stato).toHaveTextContent('Statistiche aggiornate: Stagione 2026 con Giulia')
+    expect(scritte(screen.getByRole('group', { name: 'Filtri delle statistiche' }))).toEqual(['2026', 'Giulia'])
   })
 
   it('i grafici sono figure con il titolo h2 e un riassunto a parole', () => {
@@ -85,9 +101,25 @@ describe('Statistiche', () => {
     expect(container.querySelectorAll('[data-motion-exception="grafico"]').length).toBeGreaterThanOrEqual(2)
   })
 
-  it('«1° 🏆» nei piazzamenti si legge «Primo posto»', () => {
-    render(<Harness data={pieno} />)
+  it('i piazzamenti con la medaglia: «1° 🏆» si legge «Primo posto», senza trofeo', () => {
+    const { container } = render(<Harness data={pieno} />)
+    const piazzamenti = screen.getByRole('figure', { name: 'Piazzamenti' })
     expect(screen.getByText('Primo posto')).toBeInTheDocument()
+    expect(piazzamenti.querySelectorAll('.ui-medal')).toHaveLength(2)
+    expect(piazzamenti.textContent).not.toContain('🏆')
+    expect(container.querySelector('.ui-medal[data-tier="win"]')).not.toBeNull()
+  })
+
+  it('le card salgono una dopo l\'altra', () => {
+    const { container } = render(<Harness data={pieno} />)
+    const passi = Array.from(container.querySelectorAll<HTMLElement>('.rise')).map((el) => Number(el.style.getPropertyValue('--rise-i')))
+    expect(passi.length).toBeGreaterThanOrEqual(8)
+    expect(passi).toEqual([...passi].sort((a, b) => a - b))
+  })
+
+  it('Beach Wrapped, quando è pronto, è la riga con «Apri»', () => {
+    render(<Harness data={pieno} wrapped />)
+    expect(screen.getByRole('link', { name: 'Apri Beach Wrapped' })).toHaveAttribute('href', '/wrapped')
   })
 
   it('«Vedi tutti» porta alla tab Compagni', () => {
@@ -97,6 +129,7 @@ describe('Statistiche', () => {
 
   it('0 partite nel periodo: le frasi vuote al posto degli zeri', () => {
     render(<Harness data={makeData({ tournaments: [makeTournament({ date: '2026-06-01' })] })} />)
+    expect(screen.getByText('Nessuna partita · Sempre')).toBeInTheDocument()
     expect(screen.getAllByText('Nessuna partita in questo periodo.').length).toBeGreaterThanOrEqual(4)
     expect(screen.queryByRole('group', { name: 'Numeri chiave' })).toBeNull()
     expect(screen.getByText(/Servono partite in almeno due mesi diversi/)).toBeInTheDocument()

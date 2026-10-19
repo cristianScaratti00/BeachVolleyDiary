@@ -1,6 +1,8 @@
 /* ============================================================================
-   Visore delle foto: fondo --viewer-bg, barre di vetro scuro, bersagli 44.
-   Le barre spariscono in SVELTO mentre si trascina (MOTION.md §4.2).
+   Visore delle foto: fondo --viewer-bg e, sopra, i comandi di vetro scuro che
+   galleggiano (il redesign: niente più barre intere). Il × e le frecce tondi
+   da 44, il contatore e la didascalia in capsula, «Scarica» fra le frecce.
+   I comandi spariscono in SVELTO mentre si trascina (MOTION.md §4.2).
    ============================================================================ */
 @layer components {
   .lightbox {
@@ -19,66 +21,41 @@
     display: flex;
     align-items: center;
     gap: var(--space-2);
-    padding: var(--space-1) var(--space-2);
+    padding: var(--space-2) var(--gutter);
     transition: opacity var(--dur-svelto) var(--ease-standard);
   }
   .lightbox-bar[data-hidden] { opacity: 0; pointer-events: none; }
-  .lightbox-bar-top { padding-top: calc(var(--safe-top) + var(--space-1)); }
+  .lightbox-bar-top { padding-top: calc(var(--safe-top) + var(--space-2)); }
   .lightbox-bar-bottom {
     flex-direction: column;
-    align-items: stretch;
-    padding-bottom: calc(var(--safe-bottom) + var(--space-2));
+    align-items: center;
+    gap: var(--space-3);
+    padding-bottom: calc(var(--safe-bottom) + var(--space-5));
   }
   .lightbox-spacer { width: var(--touch); flex: none; }
+  /* Il vetro scuro sul fondo dei visori è nero su nero: il filo del vetro sul
+     buio (lo stesso del Benvenuto) ne disegna il bordo. */
+  .lightbox-bar [data-material="glass-dark"] { border: var(--border-w) solid var(--glass-clear-border); }
+  /* Il contatore: una capsula di vetro scuro al centro, in alto. */
   .lightbox-count {
-    flex: 1;
-    text-align: center;
+    margin: 0 auto;
+    padding: var(--space-1-5) var(--space-3-5);
+    border-radius: var(--radius-capsule);
     font: var(--type-subhead-strong);
     letter-spacing: var(--track-subhead);
     font-variant-numeric: tabular-nums;
-    color: var(--ink-2);
+    color: var(--ink);
   }
   .lightbox-caption {
+    max-width: min(100%, var(--reading-max));
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-control);
     text-align: center;
     font: var(--type-subhead);
     letter-spacing: var(--track-subhead);
     color: var(--ink);
-    padding: var(--space-1) var(--space-3) 0;
   }
-  .lightbox-actions { display: flex; justify-content: center; align-items: center; gap: var(--space-2); }
-
-  .lightbox-btn {
-    position: relative;
-    isolation: isolate;
-    flex: none;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-2);
-    min-width: var(--touch);
-    height: var(--touch);
-    border-radius: var(--radius-capsule);
-    color: var(--ink);
-    font: var(--type-headline);
-    letter-spacing: var(--track-headline);
-    transition: transform var(--dur-svelto) var(--ease-standard);
-  }
-  .lightbox-btn::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background: currentColor;
-    opacity: 0;
-    z-index: -1;
-    transition: opacity var(--dur-svelto) var(--ease-standard);
-  }
-  @media (hover: hover) and (pointer: fine) {
-    .lightbox-btn:hover::before { opacity: var(--state-hover); }
-  }
-  .lightbox-btn:active { transform: scale(var(--press-scale)); }
-  .lightbox-btn:active::before { opacity: var(--state-press); transition-duration: 0ms; }
-  .lightbox-download { padding: 0 var(--space-4); }
+  .lightbox-actions { display: flex; justify-content: center; align-items: center; gap: var(--space-2-5); }
 
   .lightbox-stage {
     position: relative;
@@ -104,7 +81,7 @@
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
-    border-radius: var(--radius-control);
+    border-radius: var(--radius-card);
     opacity: 0;
     transition: opacity var(--dur-svelto) var(--ease-standard);
     user-select: none;

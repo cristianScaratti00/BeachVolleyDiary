@@ -21,7 +21,7 @@ import './Button.css'
 export type ButtonVariant =
   | 'filled' // l'azione principale: arancio, etichetta navy (5.50). Una per vista
   | 'tinted' // secondaria importante: --accent-wash + --accent-text
-  | 'glass' // sopra foto, mappe e visori
+  | 'glass' // il secondario del redesign: vetro chiaro, etichetta d'inchiostro
   | 'plain' // terziaria: solo testo --accent-text (--ink sul vetro)
   | 'quiet' // terziaria in inchiostro: «Annulla» dentro sheet e dialoghi
   | 'neutral' // --fill + --ink: azione neutra su carta
@@ -30,7 +30,7 @@ export type ButtonVariant =
 
 export type ButtonSize = 'sm' | 'md' | 'lg'
 
-type Material = 'glass-regular' | 'glass-dark' | 'glass-thin'
+type Material = 'glass-regular' | 'glass-dark' | 'glass-thin' | 'glass-clear'
 
 interface CommonProps {
   variant?: ButtonVariant
@@ -40,6 +40,8 @@ interface CommonProps {
   block?: boolean
   /** Solo per `variant="glass"`: il materiale (default `glass-regular`). */
   material?: Material
+  /** Solo per `variant="glass"`: l'etichetta rossa di «Elimina», «Esci». */
+  tone?: 'danger'
 }
 
 export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'disabled' | 'type'>, CommonProps {
@@ -63,6 +65,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     icon,
     block,
     material,
+    tone,
     disabled,
     onDisabledClick,
     busy,
@@ -111,6 +114,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       data-size={size}
       data-block={block ? '' : undefined}
       data-material={variant === 'glass' ? material ?? 'glass-regular' : undefined}
+      data-tone={tone}
       aria-disabled={disabled || undefined}
       aria-busy={busy || undefined}
       onClick={handle}
@@ -128,7 +132,7 @@ export interface ButtonLinkProps extends Omit<LinkProps, 'children'>, CommonProp
 
 /** Un pulsante che porta a una rotta: è un link vero, vestito da pulsante. */
 export const ButtonLink = forwardRef<HTMLAnchorElement, ButtonLinkProps>(function ButtonLink(
-  { variant = 'filled', size = 'md', icon, block, material, children, className, ...rest },
+  { variant = 'filled', size = 'md', icon, block, material, tone, children, className, ...rest },
   ref,
 ) {
   return (
@@ -140,6 +144,7 @@ export const ButtonLink = forwardRef<HTMLAnchorElement, ButtonLinkProps>(functio
       data-size={size}
       data-block={block ? '' : undefined}
       data-material={variant === 'glass' ? material ?? 'glass-regular' : undefined}
+      data-tone={tone}
     >
       {icon && <Icon name={icon} size={size === 'sm' ? 16 : 20} />}
       <span className="ui-button-label">{children}</span>
@@ -169,7 +174,7 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(functio
       aria-label={label}
       className={className ? `ui-icon-button ${className}` : 'ui-icon-button'}
       data-variant={variant}
-      data-material={variant === 'glass' ? material ?? 'glass-thin' : undefined}
+      data-material={variant === 'glass' ? material ?? 'glass-regular' : undefined}
     >
       <Icon name={icon} size={iconSize} />
     </button>

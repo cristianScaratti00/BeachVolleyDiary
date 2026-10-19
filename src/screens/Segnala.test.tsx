@@ -11,9 +11,10 @@
 // M15): resta annunciata e il tocco porta al campo che manca.
 // ============================================================================
 import { describe, it, expect, vi } from 'vitest'
-import { act, render, screen } from '@testing-library/react'
+import { act, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import Segnala from './Segnala'
+import { AREE } from '../lib/segnalazioni'
 import { expectNoA11yViolations } from '../test/axe'
 
 type Props = Parameters<typeof Segnala>[0]
@@ -70,11 +71,22 @@ describe('Segnala — cosa può partire', () => {
 })
 
 describe('Segnala — invio', () => {
+  it('«Dove succede» sono chip a scelta singola (aria-pressed), le aree vere della lib', async () => {
+    const user = userEvent.setup()
+    renderScreen()
+    const gruppo = screen.getByRole('group', { name: 'Dove succede' })
+    const chip = within(gruppo).getAllByRole('button')
+    expect(chip.map((c) => c.textContent)).toEqual(AREE.map((a) => a.label))
+    expect(chip.filter((c) => c.getAttribute('aria-pressed') === 'true').map((c) => c.textContent)).toEqual(['Altro / non so dire'])
+    await user.click(within(gruppo).getByRole('button', { name: 'Tornei e partite' }))
+    expect(chip.filter((c) => c.getAttribute('aria-pressed') === 'true').map((c) => c.textContent)).toEqual(['Tornei e partite'])
+  })
+
   it('spedisce titolo, descrizione e area scelta', async () => {
     const user = userEvent.setup()
     const { onInvia } = renderScreen()
     await compila(user)
-    await user.selectOptions(screen.getByLabelText('Dove succede'), 'tornei')
+    await user.click(screen.getByRole('button', { name: 'Tornei e partite' }))
     await user.click(screen.getByRole('button', { name: 'Invia segnalazione' }))
 
     expect(onInvia).toHaveBeenCalledExactlyOnceWith({
@@ -99,18 +111,44 @@ describe('Segnala — invio', () => {
     await user.click(screen.getByRole('button', { name: 'Invia segnalazione' }))
 
     expect(screen.queryByRole('button', { name: 'Invia segnalazione' })).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Segnala un altro problema' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 2, name: 'Grazie, l’abbiamo ricevuta' })).toBeInTheDocument()
+    expect(screen.getByText('La leggiamo e ti aggiorniamo quando è sistemata.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Segnala altro' })).toBeInTheDocument()
   })
 
-  it('“Segnala un altro problema” riparte da un form vuoto', async () => {
+  it('all’invio Pallo fa festa fra i coriandoli, poi resta contento', async () => {
+    const user = userEvent.setup()
+    const { container } = renderScreen()
+    await compila(user)
+    vi.useFakeTimers()
+    try {
+      await act(async () => {
+        invia().click()
+      })
+      const pallo = container.querySelector('svg.pallo')!
+      expect(pallo).toHaveAttribute('data-umore', 'festa')
+      expect(pallo).toHaveAttribute('aria-hidden', 'true')
+      act(() => {
+        vi.advanceTimersByTime(2400)
+      })
+      expect(pallo).toHaveAttribute('data-umore', 'contento')
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('«Segnala altro» riparte da un form vuoto, col fuoco sul primo campo', async () => {
     const user = userEvent.setup()
     renderScreen()
     await compila(user)
+    await user.click(screen.getByRole('button', { name: 'Tornei e partite' }))
     await user.click(screen.getByRole('button', { name: 'Invia segnalazione' }))
-    await user.click(screen.getByRole('button', { name: 'Segnala un altro problema' }))
+    await user.click(screen.getByRole('button', { name: 'Segnala altro' }))
 
     expect(screen.getByLabelText('Il problema in una riga')).toHaveValue('')
+    expect(screen.getByLabelText('Il problema in una riga')).toHaveFocus()
     expect(screen.getByLabelText('Cosa è successo')).toHaveValue('')
+    expect(screen.getByRole('button', { name: 'Altro / non so dire' })).toHaveAttribute('aria-pressed', 'true')
   })
 })
 
@@ -141,7 +179,7 @@ describe('Segnala — quando va storto', () => {
     await user.click(occupato)
     expect(onInvia).toHaveBeenCalledTimes(1)
     await act(async () => fine({ ok: true }))
-    expect(screen.getByRole('heading', { name: "Grazie, l'abbiamo ricevuta" })).toHaveFocus()
+    expect(screen.getByRole('heading', { name: 'Grazie, l’abbiamo ricevuta' })).toHaveFocus()
   })
 })
 
@@ -168,8 +206,12 @@ describe('Segnala — navigazione e accessibilità', () => {
     expect(screen.getAllByRole('heading', { level: 1 }).map((h) => h.textContent)).toEqual(['Segnala un problema'])
   })
 
-  it('il form non ha violazioni di accessibilità', async () => {
+  it('il form e il ringraziamento non hanno violazioni di accessibilità', async () => {
+    const user = userEvent.setup()
     const { container } = renderScreen()
+    await expectNoA11yViolations(container)
+    await compila(user)
+    await user.click(invia())
     await expectNoA11yViolations(container)
   })
 })

@@ -1,6 +1,73 @@
-/* Segnala un problema: modulo su un gruppo opaco, colonna di lettura. */
+/* ============================================================================
+   Segnala un problema, il redesign: titolo 30/800, poi il modulo in una card
+   (padding 16, 16 fra i campi), le aree come chip che vanno a capo, «Invia»
+   arancio largo. Inviata: la card col Pallo contento.
+   ============================================================================ */
 @layer components {
-  .segnala-form { margin-top: var(--space-4); display: grid; gap: var(--space-4); }
+  /* Il titolo di questa schermata è un passo sotto le radici (30 e non 34):
+     è un modulo, non un elenco. Lo stesso in Segnalazioni e Non trovato. */
+  .segnala .ui-largetitle-h1 {
+    font: 800 1.875rem/1.05 var(--font-ui);
+    letter-spacing: -0.033em;
+  }
+
+  .segnala-form,
+  .segnala-grazie {
+    margin-top: var(--stack);
+    background: var(--surface);
+    border: var(--border-w) solid var(--edge);
+    border-radius: var(--radius-card);
+  }
+  .segnala-form {
+    display: grid;
+    gap: var(--space-4);
+    padding: var(--space-4);
+  }
+
+  /* ------------------------------------------------------------ Aree */
+  .segnala-aree { border: 0; margin: 0; padding: 0; min-width: 0; }
+  .segnala-label {
+    padding: 0;
+    margin-bottom: var(--space-2);
+    font: var(--type-eyebrow);
+    letter-spacing: var(--track-eyebrow);
+    color: var(--ink-label);
+  }
+  /* Le righe stanno a 8 una dall'altra: con l'estensione del bersaglio
+     (4 sopra, 4 sotto) ogni chip arriva a 44 senza rubare la vicina. */
+  .segnala-chips { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-1-5); }
+  .segnala-chip {
+    position: relative;
+    height: calc(var(--chip-h) + var(--space-0-5));
+    padding: 0 var(--space-3);
+    border-radius: var(--radius-capsule);
+    background: var(--surface);
+    box-shadow: inset 0 0 0 var(--border-w) var(--edge);
+    font: 600 0.84375rem/1 var(--font-ui);
+    letter-spacing: var(--track-subhead);
+    color: var(--ink);
+    white-space: nowrap;
+    transition:
+      background-color var(--dur-svelto) var(--ease-standard),
+      color var(--dur-svelto) var(--ease-standard),
+      box-shadow var(--dur-svelto) var(--ease-standard),
+      transform var(--dur-press) var(--ease-press);
+  }
+  .segnala-chip::after {
+    content: "";
+    position: absolute;
+    inset: calc((var(--chip-h) + var(--space-0-5) - var(--touch)) / 2) 0;
+  }
+  .segnala-chip:active { transform: scale(var(--press-scale)); }
+  .segnala-chip[aria-pressed="true"] {
+    background: var(--select);
+    box-shadow: inset 0 0 0 var(--border-w) var(--select);
+    color: var(--on-select);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .segnala-chip:not([aria-pressed="true"]):hover { box-shadow: inset 0 0 0 var(--border-w) var(--edge-strong); }
+  }
+
   .segnala-errore {
     display: flex;
     align-items: flex-start;
@@ -9,40 +76,36 @@
     letter-spacing: var(--track-footnote);
     color: var(--danger);
   }
-  .segnala-errore .ui-icon { margin-top: var(--space-0-5); }
+  .segnala-errore .ui-icon { flex: none; margin-top: var(--space-0-5); }
 
-  /* Il pannello di ringraziamento entra al posto del modulo, in ENTRATA. */
+  /* «Invia segnalazione»: il pieno arancio a tutta larghezza, alto 52. */
+  .segnala-invia { min-height: calc(var(--touch) + var(--space-2)); }
+
+  /* --------------------------------------------------------- Inviata */
   .segnala-grazie {
-    margin-top: var(--space-4);
-    padding: var(--space-5) var(--space-4);
-    background: var(--surface);
-    border: var(--border-w) solid var(--edge);
-    border-radius: var(--radius-card);
-    animation: segnala-entra var(--dur-entrata) var(--ease-standard) both;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2-5);
+    padding: calc(var(--space-6) + var(--space-0-5)) var(--space-5);
+    text-align: center;
   }
-  @media (min-width: 600px) {
-    .segnala-grazie { padding: var(--space-6) var(--space-5); }
-  }
-  .segnala-grazie-icon { color: var(--success); }
-  .segnala-grazie-title {
-    margin-top: var(--space-2);
-    font: var(--type-title-2);
-    letter-spacing: var(--track-title-2);
-  }
+  .segnala-grazie-title { font: var(--type-title-2); letter-spacing: var(--track-title-2); }
   .segnala-grazie-text {
-    margin-top: var(--space-2);
     font: var(--type-subhead);
+    line-height: 1.45;
     letter-spacing: var(--track-subhead);
     color: var(--ink-2);
   }
   .segnala-grazie-actions {
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
     gap: var(--space-2);
-    margin-top: var(--space-5);
+    margin-top: var(--space-1-5);
   }
-  @keyframes segnala-entra {
-    from { opacity: 0; transform: translateY(calc(var(--space-2) * var(--motion-scale))); }
-    to { opacity: 1; transform: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .segnala-chip { transition: none; }
   }
 }

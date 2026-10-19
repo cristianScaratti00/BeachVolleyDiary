@@ -6,28 +6,31 @@
    ============================================================================ */
 @layer components {
   /* ------------------------------------------------------------ Segmented */
-  /* Guida opaca --fill (ART_DIRECTION D1): le etichette dei segmenti inattivi
-     ci stanno sopra, e sul vetro thin sarebbero testo a 3.29:1. */
+  /* Guida opaca --fill con il suo filo; la pillola è CARTA bianca con un
+     filo più deciso (--line-strong): la vista scelta "sta sopra" alle altre. */
   .ui-segmented {
     position: relative;
     isolation: isolate;
     display: grid;
     grid-template-columns: repeat(var(--n, 2), minmax(0, 1fr));
+    gap: var(--space-0-5);
     max-width: var(--segmented-max);
-    padding: var(--space-1);
+    padding: var(--segment-pad);
     background: var(--fill);
-    border-radius: var(--radius-control);
+    border-radius: var(--radius-track);
+    box-shadow: inset 0 0 0 var(--border-w) var(--edge);
   }
   .ui-segmented-pill {
     position: absolute;
-    top: var(--space-1);
-    bottom: var(--space-1);
-    left: var(--space-1);
-    width: calc((100% - 2 * var(--space-1)) / var(--n, 2));
+    top: var(--segment-pad);
+    bottom: var(--segment-pad);
+    left: var(--segment-pad);
+    width: calc((100% - 2 * var(--segment-pad) - (var(--n, 2) - 1) * var(--space-0-5)) / var(--n, 2));
     border-radius: var(--radius-chip);
-    background: var(--select);
-    transform: translateX(calc(var(--i, 0) * 100%));
-    transition: transform var(--dur-molla) var(--ease-molla);
+    background: var(--surface);
+    box-shadow: inset 0 0 0 var(--border-w) var(--line-strong);
+    transform: translateX(calc(var(--i, 0) * (100% + var(--space-0-5))));
+    transition: transform var(--dur-molla) var(--ease-press);
     pointer-events: none;
   }
   .ui-segmented-pill[data-hidden] { opacity: 0; }
@@ -38,7 +41,7 @@
     min-width: 0;
     height: var(--segment-h);
     border-radius: var(--radius-chip);
-    font: var(--type-subhead-strong);
+    font: 600 0.8125rem/1.2 var(--font-ui);
     letter-spacing: var(--track-subhead);
   }
   .ui-segment > span,
@@ -55,11 +58,12 @@
   }
   .ui-segment > .ui-ink { color: var(--ink-2); }
   .ui-ink-on { color: var(--on-select); opacity: 0; }
+  .ui-segment > .ui-ink-on { color: var(--ink); }
   :is(.ui-segment, .ui-chip)[aria-pressed="true"] > .ui-ink { opacity: 0; }
   :is(.ui-segment, .ui-chip)[aria-pressed="true"] > .ui-ink-on { opacity: 1; }
   .ui-segment:focus-visible { outline-offset: 0; }
-  /* Il segmento è alto 36 dentro una guida da 44: il bersaglio prende anche
-     i 4px di guida sopra e sotto (UX §8.6, 44 sempre). */
+  /* Il segmento è alto 32 dentro una guida da 38: il bersaglio arriva a 44
+     prendendo anche la guida sopra e sotto (UX §8.6, 44 sempre). */
   .ui-segment::after {
     content: "";
     position: absolute;
@@ -91,8 +95,8 @@
     position: relative;
     flex: none;
     display: grid;
-    height: var(--segment-h);
-    padding: 0 var(--space-2);
+    height: var(--chip-h);
+    padding: 0 var(--space-1-5);
     border-radius: var(--radius-capsule);
     font: var(--type-subhead-strong);
     letter-spacing: var(--track-subhead);
@@ -105,7 +109,7 @@
     inset: 0;
     border-radius: inherit;
     background: var(--surface);
-    box-shadow: inset 0 0 0 var(--border-w) var(--separator);
+    box-shadow: inset 0 0 0 var(--border-w) var(--edge);
     z-index: -1;
     transition: opacity var(--dur-svelto) var(--ease-standard);
   }
@@ -115,8 +119,9 @@
   .ui-chip::after {
     content: "";
     position: absolute;
-    inset: calc((var(--segment-h) - var(--touch)) / 2) 0;
+    inset: calc((var(--chip-h) - var(--touch)) / 2) 0;
   }
+  .ui-chip { transition: transform var(--dur-press) var(--ease-press); }
   .ui-chip:active { transform: scale(var(--press-scale)); }
   @media (hover: hover) and (pointer: fine) {
     .ui-chip:not([aria-pressed="true"]):hover::before { box-shadow: inset 0 0 0 var(--border-w) var(--edge-strong); }
@@ -126,7 +131,7 @@
     position: absolute;
     left: 0;
     top: var(--focus-reach);
-    height: var(--segment-h);
+    height: var(--chip-h);
     pointer-events: none;
     z-index: 0;
   }
@@ -136,12 +141,12 @@
     top: 0;
     left: 0;
     display: block;
-    height: var(--segment-h);
+    height: var(--chip-h);
     background: var(--select);
     transition: transform var(--dur-molla) var(--ease-molla);
   }
   .ui-chips-pill[data-still] > i { transition: none; }
-  .ui-chips-cap { width: var(--segment-h); border-radius: 50%; }
+  .ui-chips-cap { width: var(--chip-h); border-radius: 50%; }
   .ui-chips-mid { width: 1px; transform-origin: 0 0; }
 
   @media (prefers-reduced-motion: reduce) {

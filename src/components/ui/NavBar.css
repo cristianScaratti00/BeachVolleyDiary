@@ -1,93 +1,143 @@
 @layer components {
-  /* La barra compatta: alta --navbar-h più la safe-area, sticky in cima a chi
-     scorre (la finestra sotto i 900, `<main>` da 900). Esce dai margini della
-     pagina fino ai bordi. */
+  /* La barra: alta --navbar-h più la safe-area, sticky in cima a chi scorre
+     (la finestra sotto i 900px, `<main>` da 900). È TRASPARENTE: quello che
+     si vede sono i pulsanti di vetro che ci galleggiano dentro. Esce dai
+     margini della pagina fino ai bordi. */
   .ui-navbar {
     position: sticky;
     top: 0;
     z-index: var(--z-navbar);
     display: grid;
-    grid-template-columns: minmax(var(--touch), 1fr) auto minmax(var(--touch), 1fr);
+    grid-template-columns: minmax(var(--touch), 1fr) minmax(0, auto) minmax(var(--touch), 1fr);
     align-items: center;
     gap: var(--space-2);
     height: calc(var(--safe-top) + var(--navbar-h));
-    padding: var(--safe-top) var(--space-2) 0;
+    padding: calc(var(--safe-top) + var(--bar-top)) var(--gutter) 0;
+    align-items: start;
     margin: 0 calc(-1 * var(--gutter));
-  }
-  .ui-navbar-glass {
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    opacity: 0;
-    visibility: hidden;
     pointer-events: none;
-    transition: opacity var(--dur-svelto) var(--ease-standard), visibility 0s linear var(--dur-svelto);
   }
-  /* Il filo inferiore arriva insieme al vetro (ART_DIRECTION §7). */
-  .ui-navbar-glass::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: var(--hairline);
-    background: var(--separator);
-  }
-  .ui-navbar[data-scrolled] .ui-navbar-glass {
-    opacity: 1;
-    visibility: visible;
-    transition: opacity var(--dur-svelto) var(--ease-standard), visibility 0s;
-  }
-  .ui-navbar-lead { justify-self: start; min-width: 0; display: flex; align-items: center; }
-  .ui-navbar-trail { justify-self: end; display: flex; align-items: center; gap: var(--space-1); }
-  .ui-navbar-compact {
-    min-width: 0;
-    max-width: 100%;
-    font: var(--type-headline);
-    letter-spacing: var(--track-headline);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    opacity: 0;
-    transform: translateY(calc(4px * var(--motion-scale)));
-    transition: opacity var(--dur-svelto) var(--ease-standard), transform var(--dur-svelto) var(--ease-standard);
-  }
-  .ui-navbar[data-scrolled] .ui-navbar-compact { opacity: 1; transform: none; }
+  .ui-navbar > * { pointer-events: auto; }
+  /* Le schermate radice non hanno pulsanti in cima: la barra non occupa
+     spazio, resta solo lo spazio della safe-area sopra il titolo. */
+  .ui-navbar[data-empty] { height: var(--safe-top); }
+  .ui-navbar[data-empty] > * { display: none; }
+  .ui-navbar[data-float] { margin-bottom: calc(-1 * var(--navbar-h)); }
 
-  .ui-navbar-back {
+  .ui-navbar-lead { justify-self: start; min-width: 0; display: flex; align-items: center; }
+  .ui-navbar-trail { justify-self: end; display: flex; align-items: center; gap: var(--space-2); }
+
+  /* I pulsanti di vetro: un cerchio da 44 o una capsula con l'etichetta. */
+  .ui-navbar-back,
+  .ui-navbar-close,
+  .ui-navbar-actions {
+    position: relative;
+    isolation: isolate;
     display: inline-flex;
     align-items: center;
-    gap: 0;
-    min-height: var(--touch);
-    max-width: 100%;
-    padding-right: var(--space-2);
+    height: var(--touch);
+    border-radius: var(--radius-capsule);
     color: var(--ink);
-    font: var(--type-body);
-    letter-spacing: var(--track-body);
+    --material-elev: var(--elev-float);
   }
+  .ui-navbar-back {
+    gap: var(--space-1);
+    max-width: 100%;
+    padding: 0 var(--space-3-5) 0 var(--space-2-5);
+    font: 600 0.9375rem/1 var(--font-ui);
+    letter-spacing: var(--track-callout);
+  }
+  .ui-navbar-back[data-icon],
+  .ui-navbar-close { width: var(--touch); padding: 0; justify-content: center; }
   .ui-navbar-back-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  @media (hover: hover) and (pointer: fine) {
-    .ui-navbar-back:hover .ui-navbar-back-label { text-decoration: underline; text-underline-offset: var(--space-0-5); }
+  .ui-navbar-actions {
+    padding: 0 var(--space-1);
+    gap: 0;
+    transition: opacity var(--dur-svelto) var(--ease-standard), transform var(--dur-press) var(--ease-press), visibility 0s;
   }
+  .ui-navbar-actions[data-hidden] {
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.9);
+    transition: opacity var(--dur-svelto) var(--ease-standard), transform var(--dur-svelto) var(--ease-standard), visibility 0s linear var(--dur-svelto);
+  }
+  /* Le azioni dentro la capsula sono icone nude: il vetro è uno solo. */
+  .ui-navbar-actions .ui-icon-button {
+    width: 40px;
+    height: 40px;
+    background: none;
+    border: 0;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .ui-navbar-actions .ui-icon-button::after {
+    content: "";
+    position: absolute;
+    inset: -2px;
+  }
+  .ui-navbar-close .ui-icon { stroke-width: 2.6; }
 
-  .ui-largetitle { padding-top: var(--space-2); }
-  .ui-largetitle-eyebrow {
+  /* Il titolo compatto: una capsula di vetro al centro, che arriva in SVELTO
+     quando il titolo grande è uscito dalla vista. */
+  .ui-navbar-compact {
+    position: relative;
+    isolation: isolate;
+    min-width: 0;
+    max-width: 100%;
+    height: 36px;
     display: flex;
     align-items: center;
-    flex-wrap: wrap;
-    gap: var(--space-2);
-    margin-bottom: var(--space-2);
+    padding: 0 var(--space-3-5);
+    border-radius: var(--radius-capsule);
+    font: 700 0.9375rem/1 var(--font-ui);
+    letter-spacing: var(--track-headline);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(calc(-4px * var(--motion-scale))) scale(0.96);
+    transition: opacity var(--dur-svelto) var(--ease-standard), transform var(--dur-press) var(--ease-press), visibility 0s linear var(--dur-svelto);
+  }
+  .ui-navbar-compact > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ui-navbar[data-scrolled] .ui-navbar-compact {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition: opacity var(--dur-svelto) var(--ease-standard), transform var(--dur-press) var(--ease-press), visibility 0s;
+  }
+
+  /* ---------------------------------------------------------- Titolo grande */
+  /* Dopo i pulsanti di vetro di un dettaglio, 12; nelle schermate radice
+     (nessuna barra, o solo quella che galleggia) il respiro di --page-top. */
+  .ui-largetitle {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-1) 0;
+  }
+  .ui-navbar:is([data-empty], [data-float]) + .ui-largetitle { padding-top: var(--page-top); }
+  /* Con la medaglia o l'avatar a sinistra il titolo si centra sulla figura. */
+  .ui-largetitle[data-eyebrow] { align-items: center; gap: var(--space-3-5); }
+  .ui-largetitle-eyebrow { flex: none; display: flex; align-items: center; }
+  .ui-largetitle-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--space-1); }
+  .ui-largetitle-kicker {
+    font: 600 0.78125rem/1.25 var(--font-ui);
+    color: var(--ink-2);
   }
   .ui-largetitle-h1 {
     font: var(--type-large-title);
     letter-spacing: var(--track-large-title);
     overflow-wrap: anywhere;
   }
+  .ui-largetitle[data-eyebrow] .ui-largetitle-h1 { font: var(--type-title-1); letter-spacing: var(--track-title-1); }
   .ui-largetitle-sub {
-    margin-top: var(--space-0-5);
     font: var(--type-subhead);
     letter-spacing: var(--track-subhead);
     color: var(--ink-2);
   }
+  .ui-largetitle-aside { flex: none; display: flex; align-items: center; gap: var(--space-2); }
   .ui-navbar-sentinel { display: block; height: 1px; margin-top: -1px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-navbar-compact { transition: opacity var(--dur-svelto) var(--ease-standard), visibility 0s linear var(--dur-svelto); }
+  }
 }

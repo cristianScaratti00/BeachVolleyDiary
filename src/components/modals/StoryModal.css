@@ -1,5 +1,7 @@
 /* ============================================================================
    Visore della Storia: la cornice (token) e la TELA del PNG (letterali).
+   La cornice è il visore scuro con i comandi di vetro scuro che galleggiano:
+   il × in cima, i colori in una capsula, le azioni in fondo.
    ============================================================================ */
 @layer components {
   /* ------------------------------------------------------------ cornice */
@@ -8,22 +10,17 @@
     inset: 0;
     z-index: var(--z-viewer);
     display: grid;
-    grid-template-rows: auto 1fr auto;
+    grid-template-rows: auto minmax(0, 1fr) auto;
     background: var(--viewer-bg);
     color: var(--ink);
   }
-  .storia-bar {
+  .storia-top {
     position: relative;
     z-index: 1;
     display: flex;
     align-items: center;
     gap: var(--space-2);
-    padding: var(--space-1) var(--space-2);
-  }
-  .storia-bar-top { padding-top: calc(var(--safe-top) + var(--space-1)); }
-  .storia-bar-bottom {
-    justify-content: center;
-    padding-bottom: calc(var(--safe-bottom) + var(--space-2));
+    padding: calc(var(--safe-top) + var(--bar-top)) var(--gutter) var(--space-2);
   }
   .storia-title {
     flex: 1;
@@ -32,59 +29,92 @@
     letter-spacing: var(--track-headline);
   }
   .storia-spacer { width: var(--touch); flex: none; }
-  .storia-btn {
-    position: relative;
-    isolation: isolate;
-    flex: none;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-2);
-    min-width: var(--touch);
-    height: var(--touch);
-    border-radius: var(--radius-capsule);
-    color: var(--ink);
-    font: var(--type-headline);
-    letter-spacing: var(--track-headline);
-    transition: transform var(--dur-svelto) var(--ease-standard);
-  }
-  .storia-btn::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background: currentColor;
-    opacity: 0;
-    z-index: -1;
-    transition: opacity var(--dur-svelto) var(--ease-standard);
-  }
-  @media (hover: hover) and (pointer: fine) {
-    .storia-btn:not([aria-disabled]):hover::before { opacity: var(--state-hover); }
-  }
-  .storia-btn:not([aria-disabled]):active { transform: scale(var(--press-scale)); }
-  .storia-btn:not([aria-disabled]):active::before { opacity: var(--state-press); transition-duration: 0ms; }
-  .storia-action { padding: 0 var(--space-5); }
-  /* L'azione principale: il salvagente, etichetta navy (mai bianco sull'arancio). */
-  .storia-action[data-primary] { background: var(--accent); color: var(--on-accent); }
-  .storia-action[aria-disabled] {
-    background: transparent;
-    color: var(--ink-3);
-    box-shadow: inset 0 0 0 var(--border-w) var(--ink-3);
-    cursor: default;
-  }
-  .storia-action[aria-busy] { cursor: progress; }
+  /* Il vetro scuro sul fondo dei visori è nero su nero: il filo del vetro sul
+     buio (lo stesso del Benvenuto) ne disegna il bordo. */
+  .storia [data-material="glass-dark"] { border: var(--border-w) solid var(--glass-clear-border); }
 
   .storia-stage {
     min-height: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
     gap: var(--space-4);
-    padding: var(--space-2) var(--space-4);
+    padding: var(--space-2) var(--space-4) 0;
   }
-  .storia-palette { display: flex; gap: var(--space-3); padding: var(--space-0-5); }
+  /* Lo spazio dell'anteprima: tutto quello che resta fra il × e le scelte.
+     StoryModal lo misura e ci scala dentro la tela. */
+  .storia-spazio {
+    flex: 1 1 0;
+    min-height: 0;
+    align-self: stretch;
+    display: grid;
+    place-items: center;
+  }
+  /* Le due scelte: il layout e il colore, due capsule di vetro scuro. Sul
+     telefono vanno a capo una sotto l'altra; dove c'è posto, in fila. */
+  .storia-scelte {
+    flex: none;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-2-5) var(--space-3);
+  }
+  .storia-layouts,
+  .storia-palette {
+    display: flex;
+    gap: var(--space-1);
+    padding: var(--space-1);
+    border-radius: var(--radius-capsule);
+  }
+  .storia-palette { gap: var(--space-2); }
+
+  /* Un layout: la miniatura della tela e il nome. Scelto, è la pillola
+     bianca con l'inchiostro (la coppia della chip scelta, rovesciata sul
+     buio del visore). */
+  .storia-layout {
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    height: var(--touch);
+    padding: 0 var(--space-3-5) 0 var(--space-1-5);
+    border-radius: var(--radius-capsule);
+    font: var(--type-subhead-strong);
+    letter-spacing: var(--track-subhead);
+    white-space: nowrap;
+    color: var(--ink);
+    transition:
+      background-color var(--dur-svelto) var(--ease-standard),
+      color var(--dur-svelto) var(--ease-standard),
+      transform var(--dur-press) var(--ease-press);
+  }
+  /* Lo strato di stato del redesign: il primo piano a bassa opacità. */
+  .storia-layout::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: currentColor;
+    opacity: 0;
+    transition: opacity var(--dur-svelto) var(--ease-standard);
+  }
+  .storia-layout[aria-checked="true"] { background: var(--on-select); color: var(--select); }
+  @media (hover: hover) and (pointer: fine) {
+    .storia-layout[aria-checked="false"]:hover::before { opacity: var(--state-hover); }
+  }
+  .storia-layout:active { transform: scale(var(--press-scale)); }
+  .storia-layout:active::before { opacity: var(--state-press); transition-duration: 0ms; }
+  .storia-mini {
+    flex: none;
+    width: calc((var(--touch) - var(--space-2)) * 9 / 16);
+    height: calc(var(--touch) - var(--space-2));
+  }
+
+  /* I tre colori. */
   .storia-swatch {
+    position: relative;
     display: grid;
     place-items: center;
     width: var(--touch);
@@ -93,8 +123,11 @@
     background: var(--c);
     box-shadow: var(--swatch-ring);
     color: var(--on-accent);
+    transition: transform var(--dur-press) var(--ease-press);
   }
-  .storia-swatch[data-dark] { color: var(--ink); box-shadow: inset 0 0 0 var(--border-w) var(--ink-3); }
+  .storia-swatch:active { transform: scale(var(--press-scale)); }
+  /* L'inchiostro sul fondo dei visori: un filo chiaro lo stacca, e la spunta è bianca. */
+  .storia-swatch[data-tone="ink"] { color: var(--ink); box-shadow: inset 0 0 0 var(--border-w) var(--ink-3); }
   .storia-swatch .ui-icon { opacity: 0; transition: opacity var(--dur-svelto) var(--ease-standard); }
   .storia-swatch[aria-checked="true"] {
     outline: var(--focus-width) solid var(--focus-ring);
@@ -109,10 +142,26 @@
     overflow: hidden;
   }
 
+  .storia-actions {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    gap: var(--space-2-5);
+    width: 100%;
+    max-width: var(--sheet-max);
+    margin: 0 auto;
+    padding: var(--space-2) var(--space-3-5) calc(var(--safe-bottom) + var(--space-5));
+  }
+  .storia-action { flex: 1; min-width: 0; }
+
   /* -------------------------------------------------------------- tela */
-  /* Da qui in giù: misure della tela 1080×1920 in px LETTERALI (ART_DIRECTION
-     §10.4). È ciò che html-to-image fotografa; i colori arrivano in linea da
-     wrapped/palette.ts. Solo Inter, che si incorpora nel PNG. */
+  /* Da qui in giù: misure della tela 1080×1920 in px LETTERALI. È ciò che
+     html-to-image fotografa; i colori arrivano in linea da wrapped/palette.ts
+     e la famiglia è `EXPORT_FONT` (Geist, che si incorpora nel PNG). Pallo
+     sta fermo: la foto non deve coglierlo a metà salto.
+     Le foto non si ritagliano MAI: niente `object-fit: cover`. Ogni riquadro
+     ha la forma della foto (riga a pari altezza, pannello, polaroid). */
   .storia-canvas {
     position: absolute;
     top: 0;
@@ -121,111 +170,20 @@
     height: 1920px;
     overflow: hidden;
     transform-origin: top left;
-    font-family: var(--font-export);
     -webkit-font-smoothing: antialiased;
   }
-  .storia-disc {
-    position: absolute;
-    left: 740px;
-    top: -580px;
-    width: 920px;
-    height: 920px;
-    border-radius: 50%;
-  }
-  .storia-content {
+  .storia-canvas .pallo * { animation: none !important; }
+  .storia-canvas img { display: block; }
+  .storia-head {
     position: absolute;
     left: 88px;
-    right: 88px;
-    top: 264px;
-    bottom: 250px;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-  .storia-eyebrow {
+    top: 132px;
     margin: 0;
     font-weight: 700;
-    font-size: 28px;
-    line-height: 36px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
+    font-size: 36px;
+    line-height: 1.2;
   }
-  .storia-name {
-    margin: 24px 0 0;
-    font-weight: 800;
-    font-size: 88px;
-    line-height: 92px;
-    letter-spacing: -0.03em;
-    text-wrap: balance;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-  .storia-meta {
-    margin: 20px 0 0;
-    font-weight: 600;
-    font-size: 34px;
-    line-height: 44px;
-  }
-  .storia-hero { margin-top: 56px; display: flex; flex-direction: column; }
-  .storia-hero-n {
-    font-weight: 800;
-    font-size: 320px;
-    line-height: 0.86;
-    letter-spacing: -0.055em;
-    font-variant-numeric: tabular-nums;
-  }
-  .storia-hero-l,
-  .storia-cell-l {
-    font-weight: 700;
-    font-size: 26px;
-    line-height: 32px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
-  .storia-hero-l { margin-top: 12px; }
-  .storia-cells {
-    margin-top: 48px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    border-top: 2px solid;
-  }
-  .storia-cell {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    min-width: 0;
-    padding: 28px 0;
-    border-bottom: 2px solid;
-  }
-  .storia-cell:nth-child(odd) { border-right: 2px solid; padding-right: 32px; }
-  .storia-cell:nth-child(even) { padding-left: 40px; }
-  .storia-cell-n {
-    font-weight: 800;
-    font-size: 112px;
-    line-height: 112px;
-    letter-spacing: -0.04em;
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-  }
-  .storia-photos {
-    margin-top: 48px;
-    flex: 1 1 auto;
-    min-height: 0;
-    max-height: 300px;
-    display: flex;
-    gap: 16px;
-  }
-  .storia-photo {
-    flex: 1;
-    min-width: 0;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 28px;
-    border: 2px solid;
-    display: block;
-  }
+  .storia-pallo { position: absolute; right: 72px; top: 64px; }
   .storia-foot {
     position: absolute;
     left: 88px;
@@ -240,4 +198,249 @@
     line-height: 1;
     letter-spacing: -0.02em;
   }
+
+  /* Il comune dei testi. */
+  .storia-esito { display: flex; align-items: center; gap: 28px; }
+  .storia-eyebrow {
+    margin: 0;
+    min-width: 0;
+    font-weight: 700;
+    font-size: 44px;
+    line-height: 1.15;
+  }
+  .storia-name {
+    margin: 32px 0 0;
+    font-weight: 800;
+    font-size: 92px;
+    line-height: 0.98;
+    letter-spacing: -0.035em;
+    text-wrap: balance;
+    overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .storia-name[data-taglia="m"] { margin-top: 24px; font-size: 80px; -webkit-line-clamp: 2; }
+  .storia-name[data-taglia="s"] { margin: 0; font-size: 56px; line-height: 1.02; letter-spacing: -0.03em; -webkit-line-clamp: 2; }
+  .storia-meta {
+    margin: 20px 0 0;
+    font-weight: 500;
+    font-size: 36px;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .storia-meta[data-righe="1"] { -webkit-line-clamp: 1; }
+
+  /* I numeri in fila (Numeri): filetto sopra, filetti verticali fra le celle. */
+  .storia-numeri { display: grid; border-top: 2px solid; }
+  .storia-numero {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+    padding: 24px 16px 0 0;
+  }
+  .storia-numero + .storia-numero { border-left: 2px solid; padding-left: 28px; }
+  .storia-numero-n {
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .storia-numero-l {
+    font-weight: 600;
+    font-size: 32px;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  /* --------------------------------------------------------- Tabellone */
+  .storia-content {
+    position: absolute;
+    left: 88px;
+    right: 88px;
+    top: 280px;
+    bottom: 250px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  /* Tutto a misura piena: se lo spazio non basta, cede solo la riga di foto. */
+  .storia-content > * { flex: none; }
+  .storia-content > .storia-esito { min-height: 128px; }
+  .storia-hero { margin-top: 40px; display: flex; flex-direction: column; }
+  .storia-hero-n {
+    font-weight: 900;
+    font-size: 240px;
+    line-height: 0.86;
+    letter-spacing: -0.06em;
+    font-variant-numeric: tabular-nums;
+    margin-left: -8px;
+  }
+  .storia-hero-l {
+    margin-top: 14px;
+    font-weight: 600;
+    font-size: 40px;
+    line-height: 1.2;
+  }
+  .storia-cells {
+    margin-top: 40px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-top: 2px solid;
+  }
+  .storia-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+    padding: 24px 0;
+    border-bottom: 2px solid;
+  }
+  .storia-cell:nth-child(odd) { border-right: 2px solid; padding-right: 32px; }
+  .storia-cell:nth-child(even) { padding-left: 40px; }
+  .storia-cell-n {
+    font-weight: 800;
+    font-size: 92px;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .storia-cell-l {
+    font-weight: 600;
+    font-size: 34px;
+    line-height: 1.2;
+  }
+  .storia-tab-numeri { margin-top: 40px; }
+  /* La riga di foto prende lo spazio che resta (contenitore di misura): le
+     foto stanno alla stessa altezza, la più grande che fa stare la riga sia
+     nella larghezza sia nell'altezza. Larghezza = altezza × proporzione. */
+  .storia-content > .storia-strip {
+    flex: 1 1 0;
+    min-height: 0;
+    margin-top: 40px;
+    container-type: size;
+  }
+  .storia-strip-row {
+    display: flex;
+    gap: 16px;
+    height: min(100cqh, calc((100cqw - var(--spazi)) / var(--somma)));
+  }
+  .storia-strip-row > .storia-photo {
+    flex: none;
+    width: auto;
+    height: 100%;
+    border-radius: 28px;
+  }
+
+  /* -------------------------------------------------------------- Foto */
+  /* La foto e il testo sono un blocco solo, centrato fra le zone sicure:
+     l'area della foto è alta quanto la foto chiede (904 / proporzione) e
+     cede solo lei, se il blocco non sta. */
+  .storia-foto {
+    position: absolute;
+    left: 88px;
+    right: 88px;
+    top: 250px;
+    bottom: 250px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .storia-foto-area {
+    position: relative;
+    flex: 0 1 auto;
+    min-height: 0;
+    height: calc(904px / var(--a));
+    container-type: size;
+  }
+  .storia-foto-area[data-vuota] { height: 520px; }
+  /* Il pannello è largo quanto la colonna e alto quanto la foto chiede
+     (larghezza / proporzione), fino allo spazio che c'è. Se si ferma prima,
+     la foto sta intera al centro e ai lati si vede il suo fondo sfocato. */
+  .storia-foto-pannello {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    height: min(100cqh, calc(100cqw / var(--a)));
+    border-radius: 40px;
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
+  }
+  .storia-foto-pannello > .storia-photo { flex: none; width: auto; height: 100%; }
+  /* Pallo sbircia da DIETRO il pannello: le mani sul bordo, niente davanti
+     alla foto. */
+  .storia-foto-pallo { position: absolute; z-index: 0; right: 32px; top: -150px; }
+  .storia-foto-solo { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+  .storia-foto-testo { flex: none; margin-top: 56px; display: flex; flex-direction: column; }
+  .storia-foto-testo .storia-meta { margin-top: 16px; }
+  .storia-foto-numeri { margin-top: 40px; }
+
+  /* ---------------------------------------------------------- Polaroid */
+  .storia-pol-pallo { position: absolute; right: 72px; top: 60px; }
+  .storia-polaroid {
+    position: absolute;
+    left: 88px;
+    right: 88px;
+    top: 250px;
+    bottom: 250px;
+    display: flex;
+    flex-direction: column;
+  }
+  .storia-pol-area {
+    flex: 1 1 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+  }
+  .storia-pol-riga { display: flex; align-items: center; gap: 24px; }
+  /* La cornice bianca: stretta ai lati e sopra, alta sotto per la didascalia. */
+  .storia-pol {
+    flex: none;
+    margin: 0;
+    border: 2px solid;
+  }
+  .storia-pol-vuota { display: grid; place-items: center; width: 520px; height: 520px; }
+  .storia-pol-cap {
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .storia-pol-testo { flex: none; margin-top: 48px; display: flex; flex-direction: column; }
+  .storia-pol-esito {
+    margin: 0 0 0 -6px;
+    font-weight: 900;
+    line-height: 0.9;
+    letter-spacing: -0.05em;
+    text-wrap: balance;
+    overflow-wrap: anywhere;
+  }
+  .storia-pol-nome { margin-top: 28px; display: flex; align-items: center; gap: 28px; }
+  .storia-pol-nome-t { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+  .storia-pol-girone {
+    margin: 0;
+    font-weight: 700;
+    font-size: 40px;
+    line-height: 1.15;
+  }
+  .storia-pol-testo .storia-meta { margin-top: 18px; }
+  .storia-pol-numeri { margin-top: 36px; }
 }

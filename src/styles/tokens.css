@@ -1,21 +1,31 @@
 /* ============================================================================
-   Token del design system "Bagnasciuga" (ART_DIRECTION.md, alla radice).
+   Token del design system "Bagnasciuga", versione D (il redesign Liquid Glass
+   di Claude Design: ART_DIRECTION.md, alla radice, §0).
 
    Questo file contiene SOLO custom properties: nessun selettore di elemento,
    nessuna regola che disegni qualcosa. Importarlo non cambia l'aspetto di
    nessuna schermata: sono i componenti (`src/components/ui/*`) e `base.css` a
    leggere questi valori.
 
-   Tre regole che i valori qui sotto danno per scontate (il perché è in
-   ART_DIRECTION.md §4):
+   Cosa cambia dalla versione di prima, in una riga per voce:
+   - il "nero" è un inchiostro neutro (#1C1C1E), non più il navy;
+   - il fondo è piatto, un bianco caldo (#F6F6F4), senza il sole basso;
+   - le card sono carta bianca con un filo pieno (#E2E2DE), non un'ombra;
+   - l'arancio (#FF6B1A) è il pulsante principale, il ＋ e la tab accesa;
+   - il font è Geist (variabile, servito dall'app, anche nei PNG);
+   - il vetro è chiaro e "liquido": bordo bianco, riflesso, rifrazione
+     (materials.css e `LiquidGlass`).
+
+   Tre regole che i valori qui sotto danno per scontate:
    1. I componenti usano i token SEMANTICI (`--ink-2`, `--accent-text`…), mai
       un esadecimale. I letterali stanno solo in `src/lib/theme.ts` (`LIT`), per
       i posti dove una custom property non arriva (canvas, attributi SVG).
-   2. Sul vetro si scrive solo con l'inchiostro: `[data-material^="glass"]`
-      (materials.css) ridefinisce `--ink-2`/`--ink-3`. Accento, danger e success
-      come TESTO vivono solo su superfici opache.
-   3. Selezionato = navy pieno con contenuto bianco. Arancio = azione e dato.
-      Le due cose non si scambiano mai.
+   2. Arancio = azione, tab accesa e dato. Il filtro scelto è una pillola
+      d'inchiostro piena (chip) o bianca su guida (segmented): il colore pieno
+      dice "questo è il dato", la forma dice "questo è scelto".
+   3. Il testo sta sempre sopra AA (4.5:1). I fili delle card e dei campi sono
+      leggeri di proposito (il redesign li vuole così): un campo si riconosce
+      dall'etichetta e dal fondo bianco, non dal bordo.
 
    Ogni rapporto di contrasto citato nei commenti è verificato da
    `src/styles/tokens.test.ts`, che legge QUESTO file: se un valore cambia, il
@@ -31,249 +41,244 @@
 @layer tokens {
   :root {
     /* ---------------------------------------------------------------- Font */
-    /* Sistema prima: SF Pro su iPhone e Mac, dove vive la persona primaria.
-       Inter subito dopo, caricato da Google Fonts, così Android e Windows
-       hanno lo stesso disegno invece di Roboto o Segoe. `system-ui` è in coda
-       e non in testa: su Windows vincerebbe su Inter. */
-    --font-ui: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, system-ui, sans-serif;
-    /* Solo per la tela dei PNG (Storia, Wrapped): un font di sistema non si
-       incorpora, e lo stesso recap uscirebbe diverso su iPhone e su Android. */
-    --font-export: "Inter", Arial, sans-serif;
+    /* Geist, servito dall'app (@fontsource-variable/geist, importato in
+       main.tsx): lo stesso disegno su iPhone, Android e desktop, e nei PNG di
+       Storia e Wrapped, che lo incorporano senza passare da Google. */
+    --font-ui: "Geist Variable", "Geist", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    --font-export: "Geist Variable", "Geist", Arial, sans-serif;
 
     /* ------------------------------------------------- Scala tipografica */
     /* Shorthand `font` più tracking separato (`letter-spacing` non entra nello
        shorthand). Uso: `font: var(--type-body); letter-spacing: var(--track-body)`.
-       Taglie e interlinee in rem: reggono lo zoom al 200% (UX §8.8).        */
-    --type-large-title: 700 2.125rem/2.5625rem var(--font-ui);   /* 34/41 */
-    --track-large-title: -0.022em;
-    --type-title-1: 700 1.75rem/2.125rem var(--font-ui);         /* 28/34 */
-    --track-title-1: -0.02em;
-    --type-title-2: 700 1.375rem/1.75rem var(--font-ui);         /* 22/28 */
-    --track-title-2: -0.017em;
-    --type-title-3: 600 1.25rem/1.5625rem var(--font-ui);        /* 20/25 */
-    --track-title-3: -0.014em;
-    --type-headline: 600 1.0625rem/1.375rem var(--font-ui);      /* 17/22 */
-    --track-headline: -0.012em;
-    --type-body: 400 1.0625rem/1.5rem var(--font-ui);            /* 17/24 */
-    --type-body-strong: 600 1.0625rem/1.5rem var(--font-ui);     /* 17/24 */
-    --track-body: -0.012em;
-    --type-callout: 400 1rem/1.3125rem var(--font-ui);           /* 16/21 */
-    --track-callout: -0.01em;
-    --type-subhead: 400 0.9375rem/1.25rem var(--font-ui);        /* 15/20 */
-    --type-subhead-strong: 600 0.9375rem/1.25rem var(--font-ui); /* 15/20 */
-    --track-subhead: -0.008em;
-    --type-footnote: 400 0.8125rem/1.125rem var(--font-ui);      /* 13/18 */
-    --track-footnote: -0.003em;
-    --type-caption-1: 500 0.75rem/1rem var(--font-ui);           /* 12/16 */
+       Taglie in rem: reggono lo zoom al 200%. I titoli sono pesanti (800) e
+       stretti, come nel redesign; il corpo è a 500.                        */
+    /* Mobile first: le taglie di base sono quelle del telefono; da 600px i
+       titoli crescono (più sotto, nelle media query). */
+    --type-large-title: 800 1.875rem/1.08 var(--font-ui);        /* 30 · 34 da 600 */
+    --track-large-title: -0.03em;
+    --type-title-1: 800 1.5rem/1.12 var(--font-ui);              /* 24 · 26 da 600 */
+    --track-title-1: -0.03em;
+    --type-title-2: 700 1.25rem/1.25 var(--font-ui);             /* 20 */
+    --track-title-2: -0.02em;
+    --type-title-3: 700 1.0625rem/1.3 var(--font-ui);            /* 17: titoli di sezione */
+    --track-title-3: -0.01em;
+    --type-headline: 600 1rem/1.3 var(--font-ui);                /* 16 */
+    --track-headline: -0.01em;
+    --type-body: 500 1rem/1.45 var(--font-ui);                   /* 16 */
+    --type-body-strong: 600 1rem/1.45 var(--font-ui);            /* 16 */
+    --track-body: -0.005em;
+    --type-callout: 500 0.9375rem/1.35 var(--font-ui);           /* 15 */
+    --track-callout: -0.005em;
+    --type-subhead: 500 0.875rem/1.4 var(--font-ui);             /* 14 */
+    --type-subhead-strong: 600 0.875rem/1.35 var(--font-ui);     /* 14 */
+    --track-subhead: 0em;
+    --type-footnote: 400 0.8125rem/1.35 var(--font-ui);          /* 13 */
+    --track-footnote: 0em;
+    --type-caption-1: 500 0.75rem/1.3 var(--font-ui);            /* 12 */
     --track-caption-1: 0em;
-    --type-caption-2: 600 0.6875rem/0.8125rem var(--font-ui);    /* 11/13: il minimo assoluto */
-    --track-caption-2: 0.01em;
-    /* L'etichetta maiuscola sotto i numeri ("VINTE", "SET"): l'unico
-       maiuscolo dell'interfaccia. Sempre `text-transform: uppercase`. */
-    --type-eyebrow: 600 0.75rem/1rem var(--font-ui);             /* 12/16 */
-    --track-eyebrow: 0.06em;
+    --type-caption-2: 600 0.65625rem/1.2 var(--font-ui);         /* 10.5: le etichette delle tab */
+    --track-caption-2: 0em;
+    /* L'etichetta sopra o sotto un numero («Partite vinte», «record»): non è
+       più maiuscola, è un 13 a peso 600 in --ink-2. */
+    --type-eyebrow: 600 0.8125rem/1.25 var(--font-ui);           /* 13 */
+    --track-eyebrow: 0em;
 
-    /* Numerali da tabellone: sempre con `font-variant-numeric: tabular-nums`.
-       Sono il soggetto dell'app, non un dettaglio: vedi ART_DIRECTION.md §3.3. */
-    --type-num-hero: 700 3.5rem/3.5rem var(--font-ui);           /* 56/56 */
+    /* Numeri: sempre con `font-variant-numeric: tabular-nums`. */
+    --type-num-hero: 700 3.375rem/0.95 var(--font-ui);           /* 54 · 62 da 600: «66%» in Home */
     --track-num-hero: -0.04em;
-    --type-num-xl: 700 2.5rem/2.5rem var(--font-ui);             /* 40/40 */
+    --type-num-xl: 700 1.875rem/1 var(--font-ui);                /* 30 */
     --track-num-xl: -0.035em;
-    --type-num-l: 700 1.75rem/1.875rem var(--font-ui);           /* 28/30 */
+    --type-num-l: 700 1.375rem/1.15 var(--font-ui);              /* 22 */
     --track-num-l: -0.025em;
-    --type-num-m: 600 1.25rem/1.5rem var(--font-ui);             /* 20/24 */
-    --track-num-m: -0.015em;
-    --type-num-s: 600 0.9375rem/1.25rem var(--font-ui);          /* 15/20: set, punteggi */
+    --type-num-m: 700 1.25rem/1.2 var(--font-ui);                /* 20 */
+    --track-num-m: -0.02em;
+    --type-num-s: 600 0.78125rem/1.2 var(--font-ui);             /* 12.5: set, punteggi */
     --track-num-s: 0em;
 
     /* --------------------------------------------------------- Inchiostri */
-    /* Il "nero" è il navy del marchio, non #000: è il filo che lega l'app al
-       logo e alla landing. 14.22:1 sul bianco. */
-    --ink: #1B2A4A;
-    /* Testo secondario. Più scuro del grigio iOS (3.44:1, ✗) di proposito: è
-       "da sole pieno". 6.40 su surface, 5.68 su bg, 5.34 su fill. */
-    --ink-2: #545F77;
-    /* NON è testo: icone inattive, bordi dei campi, chevron che portano
-       significato. ≥3:1 su surface (3.81), bg (3.38) e fill (3.17). */
-    --ink-3: #7A8396;
-    /* Placeholder: vive solo dentro `--field`, dove fa 4.81:1. */
-    --ink-placeholder: #697288;
-    /* Disabilitato: esente da WCAG, ma mai l'unico segnale (c'è anche il
-       cursore e `aria-disabled`). */
-    --ink-disabled: rgb(27 42 74 / 0.32);
-    /* Testo su riempimenti scuri o saturi: navy, danger. */
+    /* Un nero neutro, appena caldo. 17.01:1 sul bianco. */
+    --ink: #1C1C1E;
+    /* Testo secondario: 5.35 su surface, 4.94 su bg, 4.56 su fill. */
+    --ink-2: #6B6B68;
+    /* NON è testo: chevron, icone inattive, contorni che portano significato.
+       ≥3:1 su surface (3.66), bg (3.39) e fill (3.12). Il redesign disegna i
+       chevron più chiari (#A3A39E, 2.53): qui un tono sotto, perché il
+       chevron dice "si apre". */
+    --ink-3: #86867F;
+    /* Le etichette dei campi e i testi "forti ma non titolo": 11.40 su surface. */
+    --ink-label: #3A3A38;
+    /* Placeholder: vive solo dentro `--field`, dove fa 4.56:1. */
+    --ink-placeholder: #767672;
+    /* Disabilitato: esente da WCAG, ma mai l'unico segnale. */
+    --ink-disabled: rgb(28 28 30 / 0.32);
+    /* Testo su riempimenti scuri: la chip scelta, la V della vinta. */
     --ink-inverse: #FFFFFF;
 
     /* ---------------------------------------------------- Fondi e superfici */
-    /* Sabbia asciutta, un tono sotto il vecchio #FAF8F5: le card bianche
-       devono staccarsi dal fondo senza bordi pesanti (1.13:1, come un elenco
-       raggruppato iOS). */
-    --bg: #F3F1ED;
-    /* Il fondo schiarisce verso l'alto, dove sta la barra di stato. È anche il
-       valore di `theme-color` e di `background_color` nel manifest. */
-    --bg-top: #FAF6F0;
-    /* "Sole basso": l'unico punto in cui l'arancio tinge l'ambiente. Un alone
-       in alto a destra, appena percepibile. ink su glow 12.14, ink-2 5.47. */
-    --bg-glow: #FFE9DB;
-    --bg-canvas:
-      radial-gradient(90% 420px at 100% 0%, var(--bg-glow) 0%, rgb(255 233 219 / 0) 100%),
-      linear-gradient(180deg, var(--bg-top) 0px, var(--bg) 480px);
+    /* Un fondo solo, piatto. `--bg-top` e `--bg-glow` restano per chi li
+       legge (theme-color, manifest) e valgono lo stesso. */
+    --bg: #F6F6F4;
+    --bg-top: #F6F6F4;
+    --bg-glow: #F6F6F4;
+    --bg-canvas: none;
 
     /* Carta: card, gruppi di righe, dialoghi opachi. */
     --surface: #FFFFFF;
-    /* Riga o card premuta (evidenziazione, non movimento). */
-    --surface-pressed: #F6F4F0;
-    /* Riempimento incassato: guida del segmented, chip neutre, set persi,
-       binari dei grafici, forme degli skeleton. */
-    --fill: #EDEAE5;
-    /* Campi di testo: bianchi con bordo --field-border (3.81:1 sul bianco del
-       campo, WCAG 1.4.11). Il bordo non sparisce mai, neanche al focus. */
+    /* Riga premuta o in hover: lo stesso bianco caldo del fondo. */
+    --surface-pressed: #F6F6F4;
+    /* Riempimento incassato: guida del segmented, riquadri vuoti, foto che
+       mancano, binari dei grafici. */
+    --fill: #EDEDEA;
+    /* Campi di testo: bianchi con un filo leggero; al focus il filo diventa
+       arancio e compare l'anello d'inchiostro. */
     --field: #FFFFFF;
-    --field-border: #7A8396;
-    /* Velo sotto sheet e dialoghi. Un colore, MAI uno sfocato (UX §10). */
-    --scrim: rgb(14 22 38 / 0.36);
-    /* Fondo dei visori a tutto schermo (Wrapped, Storia, lightbox). */
-    --viewer-bg: #0B111D;
-    /* Il navy del marchio come SUPERFICIE: il pannello del Login. È lo stesso
-       fondo della palette `navy` dei PNG. Il bianco sopra fa 15.6:1. */
-    --surface-brand: #16233F;
+    --field-border: #D6D6D1;
+    --field-focus: #FF6B1A;
+    /* Velo sotto sheet e dialoghi. Un colore, MAI uno sfocato. */
+    --scrim: rgb(28 28 30 / 0.32);
+    /* Fondo dei visori a tutto schermo (Storia, lightbox). */
+    --viewer-bg: #111113;
+    /* Il fondo del Benvenuto e dell'accesso: il tramonto sulla rete. Il
+       bianco sopra fa 19.11:1. */
+    --surface-brand: #120E14;
 
     /* ---------------------------------------------------------- Linee */
-    --hairline: 1px; /* 0.5px sugli schermi ≥2x, più sotto */
-    /* Bordo di card, campi e chip: resta 1px anche a 2x, perché a 0.5px e
-       all'8% sparirebbe (ART_DIRECTION §8). */
+    --hairline: 1px;
     --border-w: 1px;
     /* Separatori fra righe di un gruppo. */
-    --separator: rgb(27 42 74 / 0.14);
-    /* Bordo delle card di contenuto: le definisce, non le incornicia. */
-    --edge: rgb(27 42 74 / 0.08);
-    /* Hover (solo `@media (hover: hover)`): il bordo si fa più deciso, la
-       card non si sposta. */
-    --edge-strong: rgb(27 42 74 / 0.22);
+    --separator: #EDEDEA;
+    /* Il filo delle card e delle chip a riposo. */
+    --edge: #E2E2DE;
+    /* Hover (solo `@media (hover: hover)`): il filo si scurisce. */
+    --edge-strong: #C9C9C3;
+    /* Il filo dei pezzi "in rilievo": la pillola del segmented, l'avatar,
+       il set perso, il piazzamento fuori dal podio. */
+    --line-strong: #D6D6D1;
 
     /* ---------------------------------------------------------- Accento */
-    /* L'arancio del marchio, il salvagente. Come riempimento: CTA principale,
-       marchio, dati. Il testo sopra è --on-accent (5.50:1), MAI bianco (2.84). */
-    --accent: #FF6B35;
-    --on-accent: #16233F;
-    /* Arancio per grafica che porta significato su fondo chiaro (linee dei
-       grafici, barre, anello della V): ≥3:1 su surface (4.06), bg (3.60),
-       fill (3.38). Il #FF6B35 lì fa 2.84 e non basta. */
-    --accent-strong: #DC4F17;
-    /* Arancio come TESTO: link, pulsanti "plain", badge. ≥4.5 su surface
-       (5.55), bg (4.92), fill (4.63), wash (4.71), glow (4.74). Più scuro del
-       minimo #B84A1A fissato in UX §8.5. */
-    --accent-text: #B2461A;
-    /* Fondo tinto: pulsante "tinted", badge accento, banner alpha, set vinto. */
-    --accent-wash: #FFE8DC;
-    /* Il wash sul fondo pagina fa 1.04: il bordo gli dà una forma. */
-    --accent-edge: rgb(220 79 23 / 0.22);
-    /* L'arancio-testo SOTTO lo strato di stato (hover .08, premuto .12).
-       Lo strato è `currentColor` e scurisce il fondo verso l'etichetta: con
-       --accent-text il premuto scende a 4.01 sul wash e 4.17 sul fondo ✗.
-       Un tono più giù e tutti i casi restano sopra AA: premuto 4.78 sul
-       wash, 4.97 sul bg, 4.69 sul fill. */
-    --accent-text-state: #9D3E17;
+    /* L'arancio del marchio. Come riempimento: il CTA, il ＋, il 1° posto.
+       Il testo sopra è --on-accent (5.97:1), MAI bianco (2.85). */
+    --accent: #FF6B1A;
+    --on-accent: #1C1C1E;
+    /* Il filo dell'arancio pieno, e l'arancio per la grafica che porta
+       significato (barre, linee): ≥3:1 su surface (3.72), bg (3.44), fill
+       (3.17). */
+    --accent-strong: #E05A10;
+    /* Arancio come TESTO: link, «Pallo», «Mappa», la tab accesa. ≥4.5 su
+       surface (5.18), bg (4.79), wash (4.66). */
+    --accent-text: #C2410C;
+    /* Fondo tinto: la tab accesa (l'arancio al 12% sul vetro), i badge. */
+    --accent-wash: #FFF0E8;
+    --accent-tint: rgb(255 107 26 / 0.12);
+    /* Il filo dei pezzi tinti (badge «Cerca compagno», la voce in evidenza). */
+    --accent-edge: #FFC7A6;
+    --accent-edge-tint: rgb(255 107 26 / 0.28);
+    /* L'arancio-testo in hover e premuto: 6.58 sul wash, 6.76 sul bg. */
+    --accent-text-state: #9A3409;
 
     /* ------------------------------------------------------- Selezione */
-    /* Tab attiva, segmento attivo, chip attiva: navy pieno, contenuto bianco.
-       Il navy sul bianco fa 14.22, sulla guida --fill 11.85: lo stato si legge
-       dalla forma piena, non dal colore. */
-    --select: #1B2A4A;
+    /* La chip scelta: inchiostro pieno, contenuto bianco (17.01). */
+    --select: #1C1C1E;
     --on-select: #FFFFFF;
 
     /* ------------------------------------------------------------ Stato */
-    /* danger: testo e riempimento (bianco sopra 5.56). Il vecchio #FF477E
-       faceva 3.25. */
-    --danger: #C81F52;
+    /* danger: testo e riempimento (bianco sopra 6.57). */
+    --danger: #B42318;
     --on-danger: #FFFFFF;
-    --danger-wash: #FDE8EE;
-    /* Lo stesso per il danger come testo (pulsante destructive-plain):
-       premuto 4.94 sul bg, 4.66 sul fill (con --danger: 4.09 ✗). */
-    --danger-state: #B01B48;
-    /* success: solo testo e icone (5.51 su surface). Nessun pulsante verde. */
+    --danger-wash: #FEECEB;
+    --danger-state: #912018;
+    /* success: solo testo e icone (5.51 su surface). */
     --success: #11784A;
     --success-wash: #E4F4EC;
-    /* Niente giallo, niente "warning": un'avvertenza usa l'inchiostro più
-       un'icona. Un secondo colore caldo farebbe concorrenza all'accento. */
 
     /* ------------------------------------------------------------ Focus */
-    /* `outline`, non `box-shadow`: sopravvive a `forced-colors`. Il navy si
-       stacca dal fondo (12.61) e dal vetro nel caso peggiore (7.04). */
-    --focus-ring: #1B2A4A;
+    /* `outline`, non `box-shadow`: sopravvive a `forced-colors`. */
+    --focus-ring: #1C1C1E;
     --focus-width: 2px;
     --focus-offset: 2px;
-    /* Quanto l'anello esce dal bordo: lo spazio che un contenitore con
-       `overflow` deve lasciare (padding + margine negativo) per non tagliarlo. */
     --focus-reach: calc(var(--focus-width) + var(--focus-offset));
 
     /* ------------------------------------------------------------- Dati */
-    /* Grafica dei dati (linee, barre, anelli): ≥3:1 sulla card bianca.
-       I PALLINI accanto a un'etichetta restano i letterali di `dotForRank`
-       (derive.ts, condiviso col mobile): lì il colore è ridondante. */
-    --data-win: #DC4F17;    /* 1° posto, vinta, trend in salita: 4.06 */
-    --data-podium: #B87048; /* 2°–3°: 3.85 */
-    --data-rest: #7A8396;   /* tutto il resto: 3.81 */
-    --data-grid: rgb(27 42 74 / 0.08);
-    --data-track: #EDEAE5;
+    /* Grafica dei dati (linee, barre, anelli): ≥3:1 sulla card bianca. Nel
+       redesign la barra delle vinte è d'inchiostro e quella delle perse è
+       --line-strong; l'arancio resta il 1° posto e le vittorie nei grafici. */
+    --data-win: #E05A10;    /* 3.72 */
+    --data-podium: #A06A45; /* 4.52 */
+    --data-rest: #86867F;   /* 3.66 */
+    --data-ink: #1C1C1E;
+    --data-grid: rgb(28 28 30 / 0.08);
+    --data-track: #EDEDEA;
 
     /* ------------------------------------------------------------ Vetro */
-    /* Tinta sabbia-bianca, non bianco puro: un vetro "al sole".
-       Il contrasto si calcola componendo il vetro sul NERO, il fondo peggiore
-       (UX §8.5): la sfocatura non cambia la luminanza media.
-         thin    .48 → #7A7978  ink 3.29: NESSUN testo, solo icone
-         regular .72 → #B8B6B4  ink 7.04 · on-glass-2 5.20 · on-glass-3 3.92
-         thick   .86 → #DBDAD7  ink 10.15 · on-glass-2 6.91 · on-glass-3 4.85  */
-    --glass-thin: rgb(255 253 250 / 0.48);
-    --glass-regular: rgb(255 253 250 / 0.72);
-    --glass-thick: rgb(255 253 250 / 0.86);
-    /* La stessa tinta ad alpha 1: fallback opaco e materiale "frost". */
-    --glass-solid: #FFFDFA;
-    /* Vetro scuro per le toolbar dei visori (sopra foto e slide). Caso
-       peggiore = sul BIANCO: #5E626A, bianco sopra 6.13, bianco .85 4.97. */
-    --glass-dark: rgb(11 17 29 / 0.66);
-    --glass-dark-solid: #0B111D;
+    /* Il vetro LIQUIDO (alla Apple): quasi trasparente, NON un pannello
+       bianco col bordo. Si legge da tre cose:
+       - la luce sul bordo, direzionale: un filo bianco forte in alto a
+         sinistra e uno più tenue in basso a destra, come su una goccia;
+       - lo spessore: dentro, una luce in alto e un'ombra appena in basso;
+       - l'ombra morbida sotto, perché galleggia.
+       Sotto, la sfocatura leggera e la saturazione; sui browser Blink anche
+       la rifrazione vera (LiquidGlass.tsx). Il contrasto si misura sul fondo
+       PEGGIORE che può davvero passarci sotto: il grigio medio di una foto in
+       ombra (#8C8C8C), non il nero.
+         regular .32 → ink 7.92 · on-glass-2 5.07 · on-glass-3 3.49
+         thick   .92 → ink 14.58 (sheet e menu)
+       La tinta del vetro scuro è per i visori, sopra foto e slide.          */
+    --glass-thin: rgb(255 255 255 / 0.24);
+    --glass-regular: rgb(255 255 255 / 0.32);
+    --glass-thick: rgb(246 246 244 / 0.92);
+    --glass-solid: #FFFFFF;
+    --glass-clear: rgb(255 255 255 / 0.14);
+    --glass-dark: rgb(17 17 19 / 0.66);
+    --glass-dark-solid: #111113;
     /* Raggi di sfocatura: i valori sono ripetuti come letterali in
        materials.css, perché `-webkit-backdrop-filter` con var() è fragile su
-       Safari (ART_DIRECTION.md §9.4). Questi servono alla documentazione e ai
-       test, non vanno usati dentro `backdrop-filter`. */
-    --blur-thin: 16px;
-    --blur-regular: 24px;
+       Safari. Questi servono alla documentazione e ai test. */
+    --blur-thin: 8px;
+    --blur-regular: 10px;
     --blur-thick: 30px;
     --glass-saturate: 180%;
-    /* Il "liquido": un riflesso speculare sul bordo alto e un filo di luce
-       interno. Statici: niente riflessi che seguono il dito. */
-    --glass-sheen: linear-gradient(180deg, rgb(255 255 255 / 0.38) 0%, rgb(255 255 255 / 0) 48%);
-    --glass-rim: inset 0 1px 0 rgb(255 255 255 / 0.7), inset 0 0 0 0.5px rgb(255 255 255 / 0.5);
-    /* Il filo esterno che separa il vetro da una card bianca sotto di lui. */
-    --glass-edge: 0 0 0 0.5px rgb(27 42 74 / 0.12);
-    /* Inchiostri per il vetro chiaro: alpha sull'inchiostro, così il testo si
-       scurisce insieme al fondo invece di sbiadire come un grigio pieno
-       (--ink-2 pieno sul vetro regular nel caso peggiore: 3.17 ✗). */
-    --on-glass: #1B2A4A;
-    --on-glass-2: rgb(27 42 74 / 0.85);
-    --on-glass-3: rgb(27 42 74 / 0.72);
+    --glass-brightness: 1.05;
+    /* Il riflesso: chiaro in alto, una caustica tenue in fondo. */
+    --glass-sheen: linear-gradient(180deg, rgb(255 255 255 / 0.5) 0%, rgb(255 255 255 / 0.1) 42%, rgb(255 255 255 / 0) 62%, rgb(255 255 255 / 0.16) 100%);
+    /* La luce sul bordo e lo spessore (tutto dentro: niente bordo vero). */
+    --glass-rim:
+      inset 1.5px 1.5px 0.5px -0.5px rgb(255 255 255 / 0.95),
+      inset -1px -1px 0.5px -0.5px rgb(255 255 255 / 0.7),
+      inset 0 0 0 0.5px rgb(255 255 255 / 0.5),
+      inset 0 -10px 14px -12px rgb(28 28 30 / 0.12),
+      inset 0 8px 14px -10px rgb(255 255 255 / 0.65);
+    --glass-border: transparent;
+    /* Il contorno che lo stacca dalla carta bianca: un'ombra, non un filo. */
+    --glass-edge: 0 0 0 0.5px rgb(28 28 30 / 0.04), 0 1px 2px rgb(28 28 30 / 0.06);
+    /* L'ombra di un pezzo di vetro posato nella pagina (i pulsanti). */
+    --elev-glass: 0 4px 12px -6px rgb(28 28 30 / 0.2);
+    /* Il vetro chiaro sul fondo scuro (Benvenuto, Accedi). */
+    --glass-clear-border: rgb(255 255 255 / 0.38);
+    --glass-clear-rim:
+      inset 1.5px 1.5px 0.5px -0.5px rgb(255 255 255 / 0.6),
+      inset -1px -1px 0.5px -0.5px rgb(255 255 255 / 0.32),
+      inset 0 0 0 0.5px rgb(255 255 255 / 0.22),
+      inset 0 8px 14px -10px rgb(255 255 255 / 0.22);
+    --glass-clear-sheen: linear-gradient(180deg, rgb(255 255 255 / 0.28) 0%, rgb(255 255 255 / 0) 50%);
+    /* Inchiostri per il vetro chiaro. */
+    --on-glass: #1C1C1E;
+    --on-glass-2: rgb(28 28 30 / 0.78);
+    --on-glass-3: rgb(28 28 30 / 0.62);
     /* Inchiostri per il vetro scuro e le superfici scure. */
     --on-glass-dark: #FFFFFF;
-    --on-glass-dark-2: rgb(255 255 255 / 0.85);
-    --on-glass-dark-3: rgb(255 255 255 / 0.72);
+    --on-glass-dark-2: rgb(255 255 255 / 0.82);
+    --on-glass-dark-3: rgb(255 255 255 / 0.66);
 
     /* ------------------------------------------------------- Elevazione */
-    /* Il contenuto (carta) NON ha ombre. Le ombre sono del livello che
-       galleggia, e sono tinte di navy, non nere. */
+    /* Il contenuto (carta) NON ha ombre. Il vetro che galleggia ne ha una
+       appena, perché il bordo bianco non sparisca sul fondo bianco. */
     --elev-none: 0 0 #0000;
-    /* TabBar, Sidebar, pulsanti flottanti. */
-    --elev-float: 0 10px 28px -8px rgb(14 22 38 / 0.22), 0 2px 6px -2px rgb(14 22 38 / 0.1);
-    /* Sheet dal basso, action sheet, popover. */
-    --elev-overlay: 0 -10px 40px -12px rgb(14 22 38 / 0.3), 0 2px 8px -4px rgb(14 22 38 / 0.12);
-    /* Form sheet centrato, ConfirmDialog. */
-    --elev-dialog: 0 24px 64px -16px rgb(14 22 38 / 0.38), 0 0 0 0.5px rgb(27 42 74 / 0.1);
-    /* Toast: opaco, sopra a tutto tranne il consenso. */
-    --elev-toast: 0 12px 32px -12px rgb(14 22 38 / 0.32), 0 0 0 0.5px rgb(27 42 74 / 0.08);
+    --elev-float: 0 12px 30px -10px rgb(28 28 30 / 0.24), 0 3px 8px -4px rgb(28 28 30 / 0.1);
+    --elev-overlay: 0 -10px 40px -14px rgb(28 28 30 / 0.24);
+    --elev-dialog: 0 24px 64px -16px rgb(28 28 30 / 0.32), 0 0 0 1px rgb(28 28 30 / 0.06);
+    --elev-toast: 0 12px 32px -12px rgb(28 28 30 / 0.28), 0 0 0 1px rgb(28 28 30 / 0.06);
 
-    /* Livelli. Toast sopra sheet e visori, sotto il dialogo del consenso
-       (UX §7.8). Il dialogo sta sopra il visore: un'eliminazione chiesta da lì
-       deve coprirlo. */
+    /* Livelli. */
     --z-content: 0;
     --z-sticky: 10;
     --z-navbar: 20;
@@ -287,13 +292,14 @@
     --z-skip-link: 100;
 
     /* ---------------------------------------------------------- Spazio */
-    /* Passi da 4. Niente valori fuori scala: se un 14 sembra servire, è il
-       segno che il componente sta sbagliando qualcos'altro. */
     --space-0: 0px;
     --space-0-5: 2px;
     --space-1: 4px;
+    --space-1-5: 6px;
     --space-2: 8px;
+    --space-2-5: 10px;
     --space-3: 12px;
+    --space-3-5: 14px;
     --space-4: 16px;
     --space-5: 20px;
     --space-6: 24px;
@@ -303,82 +309,90 @@
     --space-16: 64px;
     --space-20: 80px;
 
-    /* Layout. I breakpoint non possono essere custom property dentro una
-       media query: sono 360 · 600 · 900 · 1280 (UX §9.1, `BP` in theme.ts). */
+    /* Layout. I breakpoint sono 360 · 600 · 900 · 1280 (`BP` in theme.ts). */
     --gutter: 16px;                 /* 24 da 600, 32 da 900: più sotto */
+    /* Lo spazio fra i blocchi di una schermata (16), e quello prima di una
+       sezione col suo titolo (24): il ritmo verticale del telefono. */
+    --stack: 16px;
+    --section-gap: 24px;
+    /* Il respiro in cima, sotto la safe-area: 28 prima del titolo delle
+       schermate radice, 10 prima dei pulsanti di vetro dei dettagli. */
+    --page-top: 28px;
+    --bar-top: 10px;
     --content-max: 1120px;
     --reading-max: 720px;
-    --timeline-max: 840px;          /* Tornei · Timeline (UX §9.2) */
+    --timeline-max: 840px;
     --sheet-max: 560px;
-    --segmented-max: 420px;
+    --segmented-max: 520px;
     --sidebar-w: 240px;
-    --sidebar-inset: 12px;          /* la Sidebar galleggia, come la TabBar */
+    --sidebar-inset: 12px;
     --touch: 44px;                  /* bersaglio minimo, sempre */
-    --control-sm: 32px;             /* solo con area cliccabile estesa a 44 */
+    --control-sm: 34px;             /* solo con area cliccabile estesa a 44 */
     --control-md: 44px;
-    --control-lg: 52px;
-    --navbar-h: 52px;               /* barra compatta, senza safe-area */
+    --control-lg: 56px;
+    --navbar-h: 62px;               /* --bar-top + 44 + 8: i pulsanti di vetro in cima, senza safe-area */
     --tabbar-h: 64px;
-    --tabbar-side: 16px;            /* margine della capsula ai lati */
-    --tabbar-max: 480px;            /* da 600 la capsula si centra */
-    --tabbar-bottom: max(12px, env(safe-area-inset-bottom, 0px));
+    --tabbar-side: 14px;            /* margine della barra ai lati */
+    --tabbar-gap: 10px;             /* fra la capsula e il ＋ */
+    --tabbar-max: 520px;
+    --tabbar-bottom: max(16px, env(safe-area-inset-bottom, 0px));
     /* Padding inferiore del contenuto: l'ultima riga non finisce mai sotto
-       la capsula (UX §7.1). */
-    --tabbar-clearance: calc(var(--tabbar-h) + var(--tabbar-bottom) + var(--space-4));
+       la barra. */
+    --tabbar-clearance: calc(var(--tabbar-h) + var(--tabbar-bottom) + var(--space-6));
     --safe-top: env(safe-area-inset-top, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
 
-    /* Misure di singoli controlli (ART_DIRECTION §5.3 e §8): stanno qui perché
-       nessun componente scriva un numero a mano. Dove possono, derivano dalla
-       concentricità: guida 44 − 2×4 = segmento 36; capsula 64 − 2×4 = ＋ 56. */
-    --badge-h: 20px;
-    --segment-h: calc(var(--control-md) - 2 * var(--space-1));
-    --search-h: 40px;
-    --esito-size: 28px;
-    --plus-size: calc(var(--tabbar-h) - 2 * var(--space-1));
-    --switch-w: 51px;
-    --switch-h: 31px;
-    --handle-w: 36px;
+    /* Misure di singoli controlli. */
+    --badge-h: 22px;
+    --segment-h: 32px;
+    --segment-pad: 3px;
+    --chip-h: 34px;
+    --search-h: 44px;
+    --field-h: 48px;
+    --esito-size: 30px;
+    --medal-sm: 34px;
+    --medal-md: 42px;
+    --medal-lg: 64px;
+    --plus-size: var(--tabbar-h);
+    --switch-w: 52px;
+    --switch-h: 32px;
+    --handle-w: 38px;
     --handle-h: 5px;
-    --swatch-ring: inset 0 0 0 1px rgb(27 42 74 / 0.16);
-    --photo-ring: inset 0 0 0 1px rgb(27 42 74 / 0.06);
+    --swatch-ring: inset 0 0 0 1px rgb(28 28 30 / 0.16);
+    --photo-ring: inset 0 0 0 1px rgb(28 28 30 / 0.06);
     --mappa-h: 380px;
     --venue-map-h: 200px;
     --dock-max: 720px;
-    /* Griglie (UX §9.2): colonne `minmax(min(100%, X), 1fr)`, mai scroll
-       orizzontale. */
+    /* Griglie: colonne `minmax(min(100%, X), 1fr)`, mai scroll orizzontale. */
     --card-min: 300px;
     --card-min-narrow: 250px;
     --chart-min: 280px;
     --stat-min: 110px;
     --photo-min: 100px;
-    --timeline-date: 64px;
+    --timeline-date: 44px;
     --empty-max: 320px;
     --dialog-w: 320px;
     --popover-w: 300px;
 
     /* ---------------------------------------------------------- Raggi */
-    /* Concentrici: dentro un contenitore con inset ≤ 10px il raggio interno è
-       raggio esterno − inset (guida 14 − 4 = pillola 10; capsula 32 − 4 = 28).
-       Oltre i 10px di inset ogni elemento usa il raggio del suo ruolo. */
-    --radius-xs: 6px;        /* miniature dentro una riga */
-    --radius-chip: 10px;     /* pillola del segmented, set */
-    --radius-control: 14px;  /* campi, guida del segmented, foto in griglia */
-    --radius-card: 22px;     /* card, gruppi di righe, riquadri mappa */
-    --radius-sheet: 28px;    /* sheet, action sheet, form sheet, popover */
-    --radius-capsule: 999px; /* pulsanti, chip filtro, badge, TabBar, ricerca */
+    --radius-xs: 7px;        /* pastiglie dei set, miniature */
+    --radius-chip: 10px;     /* pillola del segmented, badge */
+    --radius-control: 14px;  /* campi, ricerca, riquadri d'icona */
+    --radius-track: 13px;    /* la guida del segmented */
+    --radius-row: 16px;      /* righe dentro una card, foto in griglia */
+    --radius-card: 22px;     /* card, gruppi di righe */
+    --radius-sheet: 34px;    /* sheet, action sheet, form sheet */
+    --radius-capsule: 999px; /* pulsanti, chip filtro, TabBar */
 
     /* -------------------------------------------------------- Icone */
-    /* Il tratto (in unità del viewBox 24) si ispessisce quando l'icona
-       rimpicciolisce, così sullo schermo resta fra 1.25 e 1.75px. */
-    --icon-12: 12px;  /* solo dentro i badge (trofeo del 1°) */
+    --icon-12: 12px;
     --icon-16: 16px;
     --icon-20: 20px;
     --icon-24: 24px;
-    --icon-stroke-12: 2.5;
-    --icon-stroke-16: 2.1;
-    --icon-stroke-20: 1.9;
-    --icon-stroke-24: 1.75;
+    --icon-stroke-12: 2.6;
+    --icon-stroke-16: 2.4;
+    --icon-stroke-20: 2.1;
+    --icon-stroke-24: 2;
 
     /* ------------------------------------------------------ Movimento */
     /* Gli stessi tempi di `src/components/Motion.tsx`: ENTRATA, SVELTO,
@@ -388,13 +402,20 @@
     --dur-molla: 320ms;    /* MOLLA, ferma al millesimo (312ms, arrotondato) */
     --dur-racconto: 800ms; /* numeri che salgono, grafici che si disegnano */
     --dur-respiro: 1400ms; /* pulsazione degli skeleton (mezzo ciclo) */
-    --ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);   /* ENTRATA e SVELTO */
-    --ease-racconto: cubic-bezier(0.16, 1, 0.3, 1);    /* come NumeroCheSale */
+    --ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+    --ease-racconto: cubic-bezier(0.16, 1, 0.3, 1);
     --ease-respiro: cubic-bezier(0.45, 0, 0.55, 1);
-    /* Lo skeleton in tre tempi (MOTION.md §6.2): a 0ms lo spazio è riservato
-       ma vuoto, a 150ms compaiono le forme (un chunk in cache non lampeggia
-       grigio), a 600ms parte il respiro. Ritardi, non durate: con
-       reduced-motion restano, perché non spostano niente. */
+    /* Il redesign aggiunge due gesti, entrambi con un filo di rimbalzo:
+       - PRESSIONE: il pezzo premuto si stringe a .97 e torna oltre il segno
+         (cubic-bezier con y > 1), 400ms;
+       - SALITA: i blocchi di una schermata salgono di 12px e compaiono, uno
+         dopo l'altro (`--rise-step` fra l'uno e l'altro), 600ms. */
+    --dur-press: 400ms;
+    --ease-press: cubic-bezier(0.3, 1.6, 0.5, 1);
+    --dur-rise: 600ms;
+    --ease-rise: cubic-bezier(0.2, 0.9, 0.25, 1.06);
+    --rise-y: 12px;
+    --rise-step: 50ms;
     --delay-skeleton: 150ms;
     --delay-respiro: 600ms;
     /* MOLLA (stiffness 460, damping 38, mass 0.9: ζ 0.934, quasi critica)
@@ -405,31 +426,30 @@
        Con reduced-motion vale 0 e restano solo le dissolvenze. */
     --motion-scale: 1;
     --press-scale: 0.97;
-    /* Lo strato di stato (MOTION.md §4.3): opacità del livello `currentColor`
-       sotto ciò che si preme. Il paio «soft» è per i livelli tinti d'inchiostro
-       sopra vetro o `--fill` (voci di menu, righe della Mappa), dove
-       `--surface-pressed` opaco cancellerebbe il materiale. */
+    /* Lo strato di stato: opacità del livello `currentColor` sotto ciò che si
+       preme. Il paio «soft» è per i livelli sopra vetro o `--fill`. */
     --state-hover: 0.08;
     --state-press: 0.12;
     --state-hover-soft: 0.06;
     --state-press-soft: 0.1;
   }
 
-  /* Linee sottili davvero dove i pixel lo permettono. */
-  @media (min-resolution: 2dppx) {
-    :root { --hairline: 0.5px; }
-  }
-
-  /* Sotto i 360px la capsula si allarga di 8px per lato: a 320 la colonna di
-     una tab fa 56px e «Compagni» ne misura 56.25 (finiva in «Compa…»). */
-  @media (max-width: 359px) {
-    :root { --tabbar-side: var(--space-2); }
-  }
   @media (min-width: 600px) {
-    :root { --gutter: 24px; --timeline-date: 78px; }
+    :root {
+      --gutter: 24px;
+      --stack: 18px;
+      --page-top: 40px;
+      --type-large-title: 800 2.125rem/1.05 var(--font-ui);
+      --type-title-1: 800 1.625rem/1.1 var(--font-ui);
+      --type-num-hero: 700 3.875rem/0.95 var(--font-ui);
+    }
   }
   @media (min-width: 900px) {
     :root { --gutter: 32px; }
+  }
+  /* Sotto i 360px la barra si allarga di 6px per lato. */
+  @media (max-width: 359px) {
+    :root { --tabbar-side: var(--space-2); --tabbar-gap: var(--space-1-5); }
   }
 
   @supports not (transition-timing-function: linear(0, 1)) {
@@ -437,66 +457,64 @@
   }
 
   /* ------------------------------------------------------------ Dark */
-  /* PREDISPOSTO, NON ATTIVO (risposta 2 dell'utente: solo chiaro in questo
-     giro). Si accende solo con `data-theme="dark"` sull'<html>, che nessuno
-     scrive. Non aggiungere `@media (prefers-color-scheme: dark)` finché la
-     dark mode non viene approvata: i valori sono verificati da tokens.test.ts,
-     le schermate no. */
+  /* PREDISPOSTO, NON ATTIVO: si accende solo con `data-theme="dark"`
+     sull'<html>, che nessuno scrive. Non aggiungere `@media
+     (prefers-color-scheme: dark)` finché la dark mode non viene approvata:
+     i valori sono verificati da tokens.test.ts, le schermate no. */
   :root[data-theme="dark"] {
-    --ink: #F4F2EE;
-    --ink-2: #AEB5C3;
-    --ink-3: #7F889B;
-    --ink-placeholder: #8C95A7;
-    --ink-disabled: rgb(244 242 238 / 0.32);
-    --ink-inverse: #0E1626;
-    --bg: #0E1626;
-    --bg-top: #121B2E;
-    --bg-glow: #2B1C18;
-    --bg-canvas:
-      radial-gradient(90% 420px at 100% 0%, var(--bg-glow) 0%, rgb(43 28 24 / 0) 100%),
-      linear-gradient(180deg, var(--bg-top) 0px, var(--bg) 480px);
-    --surface: #172238;
-    --surface-pressed: #1C283F;
-    --fill: #212D45;
-    --field: #111A2B;
-    --field-border: #7F889B;
-    --scrim: rgb(4 8 16 / 0.56);
-    --separator: rgb(244 242 238 / 0.14);
-    --edge: rgb(244 242 238 / 0.08);
-    --edge-strong: rgb(244 242 238 / 0.22);
-    --accent: #FF6B35;
-    --on-accent: #16233F;
-    --accent-strong: #FF7A47;
-    --accent-text: #FF9466;
-    --accent-wash: #3A2219;
-    --accent-edge: rgb(255 122 71 / 0.28);
-    /* Nel buio lo strato schiarisce il fondo: l'etichetta sale di un tono. */
-    --accent-text-state: #FFA47D;
-    --select: #F4F2EE;
-    --on-select: #0E1626;
-    --danger: #FF6B8E;
-    --on-danger: #0E1626;
-    --danger-wash: #3A1824;
-    --danger-state: #FF819F;
+    --ink: #F4F4F2;
+    --ink-2: #AEAEA9;
+    --ink-3: #85857F;
+    --ink-label: #D6D6D1;
+    --ink-placeholder: #95958F;
+    --ink-disabled: rgb(244 244 242 / 0.32);
+    --ink-inverse: #121214;
+    --bg: #121214;
+    --bg-top: #121214;
+    --bg-glow: #121214;
+    --surface: #1C1C1E;
+    --surface-pressed: #232326;
+    --fill: #2A2A2D;
+    --field: #161618;
+    --field-border: #7A7A7D;
+    --scrim: rgb(0 0 0 / 0.56);
+    --separator: #2A2A2D;
+    --edge: #2E2E31;
+    --edge-strong: #48484C;
+    --line-strong: #3A3A3D;
+    --accent: #FF6B1A;
+    --on-accent: #1C1C1E;
+    --accent-strong: #FF7A30;
+    --accent-text: #FF9A5C;
+    --accent-wash: #3A2216;
+    --accent-edge: #6B3A1E;
+    --accent-text-state: #FFB07F;
+    --select: #F4F4F2;
+    --on-select: #121214;
+    --danger: #FF6B5E;
+    --on-danger: #121214;
+    --danger-wash: #3A1A18;
+    --danger-state: #FF877C;
     --success: #3FCF8E;
     --success-wash: #12301F;
-    --focus-ring: #F4F2EE;
-    --data-win: #FF7A47;
+    --focus-ring: #F4F4F2;
+    --data-win: #FF7A30;
     --data-podium: #D9956C;
-    --data-rest: #7F889B;
-    --data-grid: rgb(244 242 238 / 0.08);
-    --data-track: #212D45;
-    /* Nel buio il caso peggiore sotto il vetro è il BIANCO. */
-    --glass-thin: rgb(23 34 56 / 0.48);
-    --glass-regular: rgb(23 34 56 / 0.72);
-    --glass-thick: rgb(23 34 56 / 0.86);
-    --glass-solid: #172238;
+    --data-rest: #85857F;
+    --data-ink: #F4F4F2;
+    --data-grid: rgb(244 244 242 / 0.08);
+    --data-track: #2A2A2D;
+    --glass-thin: rgb(28 28 30 / 0.48);
+    --glass-regular: rgb(28 28 30 / 0.72);
+    --glass-thick: rgb(28 28 30 / 0.9);
+    --glass-solid: #1C1C1E;
     --glass-sheen: linear-gradient(180deg, rgb(255 255 255 / 0.08) 0%, rgb(255 255 255 / 0) 48%);
     --glass-rim: inset 0 1px 0 rgb(255 255 255 / 0.12), inset 0 0 0 0.5px rgb(255 255 255 / 0.08);
+    --glass-border: rgb(255 255 255 / 0.12);
     --glass-edge: 0 0 0 0.5px rgb(0 0 0 / 0.4);
-    --on-glass: #F4F2EE;
-    --on-glass-2: rgb(244 242 238 / 0.85);
-    --on-glass-3: rgb(244 242 238 / 0.72);
+    --on-glass: #F4F4F2;
+    --on-glass-2: rgb(244 244 242 / 0.85);
+    --on-glass-3: rgb(244 244 242 / 0.72);
   }
 
   /* ------------------------------------------------ Preferenze di sistema */
@@ -540,14 +558,16 @@
       --glass-thick: var(--glass-solid);
       --glass-dark: var(--glass-dark-solid);
     }
-    /* Solo il tema chiaro: quello scuro ha già inchiostri oltre 6.6:1. */
+    /* Solo il tema chiaro: i fili diventano veri bordi. */
     :root:not([data-theme="dark"]) {
-      --ink-2: #3F4A62;
-      --ink-3: #5A647A;
-      --separator: rgb(27 42 74 / 0.32);
-      --edge: rgb(27 42 74 / 0.3);
-      --glass-edge: 0 0 0 1px rgb(27 42 74 / 0.4);
-      --scrim: rgb(14 22 38 / 0.5);
+      --ink-2: #4A4A47;
+      --ink-3: #5F5F5B;
+      --separator: #B9B9B3;
+      --edge: #8E8E88;
+      --line-strong: #8E8E88;
+      --field-border: #6B6B68;
+      --glass-edge: 0 0 0 1px rgb(28 28 30 / 0.5);
+      --scrim: rgb(28 28 30 / 0.5);
     }
   }
 }

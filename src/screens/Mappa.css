@@ -1,83 +1,195 @@
-/* Tornei · Mappa. Solo token; i colori dei pin e dei glifi di legenda sono i
-   letterali della lib (ART_DIRECTION §4.5), passati da Mappa.tsx. */
+/* Tornei · Mappa (il redesign). Solo token: i glifi della legenda usano gli
+   stessi colori dei pin di ConquisteMap, che li prende dai letterali `LIT`
+   degli stessi token (le stringhe HTML di Leaflet non leggono var()). */
 @layer components {
-  .mappa { margin-top: var(--space-4); min-width: 0; }
+  /* Le proporzioni della mappa del redesign (356 × 318 nel riquadro). */
+  .mappa { min-width: 0; --mappa-ratio: 356 / 318; }
+  .mappa > * + * { margin-top: var(--stack); }
+  .mappa-toolbar { margin-top: var(--stack); display: flex; }
 
-  .mappa-toolbar { display: flex; justify-content: flex-start; margin-bottom: var(--space-4); }
-  .mappa-season { width: min(100%, var(--card-min-narrow)); }
-
-  .mappa-best {
-    margin-top: var(--space-3);
-    font: var(--type-subhead);
-    letter-spacing: var(--track-subhead);
+  /* ---------------------------------------------------- stagione */
+  /* Una capsula come le chip; il `<select>` vero è steso sopra, trasparente,
+     alto 44 (il bersaglio), e porta il focus: l'anello va sulla capsula. */
+  .mappa-season {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1-5);
+    height: var(--chip-h);
+    padding: 0 var(--space-3);
+    border-radius: var(--radius-capsule);
+    background: var(--surface);
+    box-shadow: inset 0 0 0 var(--border-w) var(--edge);
     color: var(--ink-2);
+    transition: box-shadow var(--dur-svelto) var(--ease-standard);
   }
-  .mappa-best strong { color: var(--ink); font-weight: 600; }
+  .mappa-season-value {
+    font: var(--type-subhead-strong);
+    letter-spacing: var(--track-subhead);
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .mappa-season-select {
+    position: absolute;
+    inset: calc((var(--chip-h) - var(--touch)) / 2) 0;
+    width: 100%;
+    opacity: 0;
+    cursor: pointer;
+    /* 16px: sotto, Safari ingrandisce la pagina al tocco. */
+    font-size: 1rem;
+    appearance: none;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .mappa-season:hover { box-shadow: inset 0 0 0 var(--border-w) var(--edge-strong); }
+  }
+  .mappa-season:has(.mappa-season-select:focus-visible) {
+    outline: var(--focus-width) solid var(--focus-ring);
+    outline-offset: var(--focus-offset);
+  }
 
-  /* La cornice: carta con raggio da card; la mappa a filo in cima. */
-  .mappa-frame {
-    margin-top: var(--space-4);
+  /* ------------------------------------------------------ numeri */
+  .mappa-stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin: var(--stack) 0 0;
+    padding: var(--space-3) var(--space-1);
     background: var(--surface);
     border: var(--border-w) solid var(--edge);
     border-radius: var(--radius-card);
-    overflow: hidden;
   }
-  .mappa-skel-box { height: var(--mappa-h); border-radius: 0; }
+  .mappa-stat {
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+    min-width: 0;
+    padding: 0 var(--space-1);
+    text-align: center;
+  }
+  .mappa-stat + .mappa-stat { border-left: var(--hairline) solid var(--separator); }
+  .mappa-stat-value {
+    margin: 0;
+    font: var(--type-num-l);
+    letter-spacing: var(--track-num-l);
+    font-variant-numeric: tabular-nums;
+  }
+  .mappa-stat-value[data-tone="win"] { color: var(--accent-text); }
+  .mappa-stat-label {
+    max-width: 100%;
+    font: 400 0.75rem/1.3 var(--font-ui);
+    color: var(--ink-2);
+    overflow-wrap: anywhere;
+    -webkit-hyphens: auto;
+    hyphens: auto;
+  }
+
+  /* ------------------------------------------------------ figura */
+  .mappa-figure {
+    margin-left: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    padding: var(--space-2-5) var(--space-2-5) var(--space-3);
+    background: var(--surface);
+    border: var(--border-w) solid var(--edge);
+    border-radius: var(--radius-card);
+  }
+  /* La mappa dentro la carta, con il raggio concentrico (22 − 10). */
+  .mappa-frame {
+    overflow: hidden;
+    border-radius: calc(var(--radius-card) - var(--space-2-5));
+    /* Il riquadro di Leaflet si mette a fuoco: l'anello lo disegna
+       ConquisteMap dentro il bordo, qui l'`overflow` lo taglierebbe. */
+  }
+  .mappa-skel-box { display: block; width: 100%; aspect-ratio: var(--mappa-ratio); max-height: var(--mappa-h); border-radius: 0; }
   .mappa-offline {
     display: flex;
     align-items: flex-start;
     gap: var(--space-2);
-    padding: var(--space-3) var(--space-4) 0;
+    padding: var(--space-2-5) var(--space-1) 0;
     font: var(--type-footnote);
     letter-spacing: var(--track-footnote);
     color: var(--ink);
   }
+  .mappa-offline .ui-icon { flex: none; margin-top: var(--space-0-5); }
   .mappa-legend {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-2) var(--space-5);
+    justify-content: center;
+    gap: var(--space-1) var(--space-3-5);
     list-style: none;
-    margin: 0;
-    padding: var(--space-3) var(--space-4);
+    margin: var(--space-1) 0 0;
+    padding: 0;
   }
   .mappa-legend-item {
     display: inline-flex;
     align-items: center;
-    gap: var(--space-2);
-    font: var(--type-footnote);
-    letter-spacing: var(--track-footnote);
+    gap: var(--space-1-5);
+    font: var(--type-caption-1);
+    letter-spacing: var(--track-caption-1);
     color: var(--ink-2);
   }
-  .mappa-legend-label { color: var(--ink); font-weight: 600; }
-  .mappa-glyph { flex: none; width: var(--icon-16); height: var(--icon-16); }
-  .mappa-approx { padding: 0 var(--space-4) var(--space-3); }
 
-  .mappa-chips { margin-top: var(--space-4); }
+  /* I glifi: gli stessi riempimenti e fili dei pin sulla mappa. */
+  .mappa-glyph { flex: none; width: var(--icon-12); height: var(--icon-12); overflow: visible; }
+  .mappa-glyph circle { stroke-width: 1.5; }
+  .mappa-glyph[data-tier="vinto"] circle { fill: var(--accent); stroke: var(--ink); }
+  .mappa-glyph[data-tier="podio"] circle { fill: var(--surface); stroke: var(--ink); }
+  .mappa-glyph[data-tier="giocato"] circle { fill: var(--line-strong); stroke: var(--ink-2); }
 
-  /* ---------------------------------------------------------- città */
-  .mappa-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
+  .mappa-best {
+    padding: 0 var(--space-1);
+    font: var(--type-subhead);
+    letter-spacing: var(--track-subhead);
+    color: var(--ink-label);
+  }
+  .mappa-best strong { color: var(--ink); font-weight: 700; }
+
+  /* -------------------------------------------------------- città */
+  .mappa-h2 {
+    margin-bottom: var(--space-2);
+    padding: 0 var(--space-1);
+    font: var(--type-title-3);
+    letter-spacing: var(--track-title-3);
+  }
+  /* L'elenco è UNA card con le righe dentro, come i gruppi della Lista. */
+  .mappa-list {
+    list-style: none;
+    margin: 0;
+    padding: var(--space-1-5);
+    background: var(--surface);
+    border: var(--border-w) solid var(--edge);
+    border-radius: var(--radius-card);
+  }
   /* Opache e posizionate: chi sta sotto scivola SOPRA il contenuto che
      svanisce (MOTION.md §4.3, "si legge come un cassetto"). */
   .mappa-city {
     position: relative;
     background: var(--surface);
-    border: var(--border-w) solid var(--edge);
-    border-radius: var(--radius-card);
+    border-radius: var(--radius-row);
+  }
+  .mappa-city + .mappa-city::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: var(--space-16);
+    right: 0;
+    height: var(--hairline);
+    background: var(--separator);
+    pointer-events: none;
   }
   .mappa-city-row {
     position: relative;
     isolation: isolate;
     display: flex;
     align-items: center;
-    flex-wrap: wrap;
     gap: var(--space-3);
     width: 100%;
-    min-height: var(--touch);
-    padding: var(--space-3) var(--space-4);
+    min-height: calc(var(--medal-md) + 2 * var(--space-2-5));
+    padding: var(--space-2-5) var(--space-3);
     text-align: left;
+    color: var(--ink);
     border-radius: inherit;
+    transition: transform var(--dur-press) var(--ease-press);
   }
-  .mappa-city-row[aria-expanded="true"] { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
   .mappa-city-row::before {
     content: "";
     position: absolute;
@@ -92,15 +204,16 @@
     .mappa-city-row:hover::before { opacity: 1; }
   }
   .mappa-city-row:active::before { opacity: 1; transition-duration: 0ms; }
-  .mappa-city-row:focus-visible { outline-offset: calc(-1 * var(--focus-width)); }
-  .mappa-city-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .mappa-city-row:active { transform: scale(var(--press-scale)); }
+  .mappa-city-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
   .mappa-city-name {
     display: inline-flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: var(--space-2);
-    font: var(--type-headline);
+    gap: var(--space-1) var(--space-2);
+    font: 600 0.96875rem/1.3 var(--font-ui);
     letter-spacing: var(--track-headline);
+    overflow-wrap: anywhere;
   }
   .mappa-city-label {
     font: var(--type-footnote);
@@ -108,40 +221,39 @@
     color: var(--ink-2);
   }
   .mappa-city-chev {
+    flex: none;
     color: var(--ink-3);
     transition: transform var(--dur-molla) var(--ease-molla);
   }
   .mappa-city-row[aria-expanded="true"] .mappa-city-chev { transform: rotate(180deg); }
 
-  /* Chi esce va fuori dal flusso (popLayout) e svanisce: ha il suo fondo e
-     gli angoli della card, e le righe sotto gli scivolano sopra. */
+  /* Chi esce va fuori dal flusso (popLayout) e svanisce: ha il suo fondo, e
+     le righe sotto gli scivolano sopra. Rientra fino al testo della riga. */
   .mappa-city-tornei {
-    padding: 0 var(--space-4) var(--space-4);
-    border-top: var(--hairline) solid var(--separator);
+    padding: 0 var(--space-1) var(--space-2) var(--space-16);
     background: var(--surface);
-    border-radius: 0 0 var(--radius-card) var(--radius-card);
+    border-radius: 0 0 var(--radius-row) var(--radius-row);
   }
   .mappa-city-sum {
-    margin: var(--space-3) 0 var(--space-2);
+    margin: 0 0 var(--space-1);
+    padding: 0 var(--space-2);
     font: var(--type-eyebrow);
     letter-spacing: var(--track-eyebrow);
-    text-transform: uppercase;
     color: var(--ink-2);
   }
 
   /* I tornei di una città: il link copre la riga. */
-  .mappa-tornei { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2); }
+  .mappa-tornei { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-1); }
   .mappa-torneo {
     position: relative;
     isolation: isolate;
     display: flex;
     align-items: center;
-    flex-wrap: wrap;
-    gap: var(--space-1) var(--space-3);
+    gap: var(--space-3);
     min-height: var(--touch);
-    padding: var(--space-2) var(--space-3);
+    padding: var(--space-2) var(--space-2);
     border-radius: var(--radius-control);
-    background: var(--fill);
+    background: var(--surface-pressed);
   }
   .mappa-torneo::before {
     content: "";
@@ -157,12 +269,13 @@
     .mappa-torneo:has(.mappa-torneo-link:hover)::before { opacity: var(--state-hover-soft); }
   }
   .mappa-torneo:has(.mappa-torneo-link:active)::before { opacity: var(--state-press-soft); transition-duration: 0ms; }
+  .mappa-torneo-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
   .mappa-torneo-link {
-    flex: 1;
-    min-width: 0;
     font: var(--type-subhead-strong);
     letter-spacing: var(--track-subhead);
     color: var(--ink);
+    text-decoration: none;
+    overflow-wrap: anywhere;
   }
   .mappa-torneo-link::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }
   .mappa-torneo-link:focus-visible { outline: none; }
@@ -170,6 +283,7 @@
     outline: var(--focus-width) solid var(--focus-ring);
     outline-offset: var(--focus-offset);
   }
+  .mappa-torneo-meta { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-1) var(--space-2); }
   .mappa-torneo-date {
     font: var(--type-footnote);
     letter-spacing: var(--track-footnote);
@@ -177,10 +291,10 @@
   }
 
   /* --------------------------------------------------- fuori mappa */
-  .mappa-bucket-note { margin: calc(-1 * var(--space-1)) 0 var(--space-3); }
-  .mappa-bucket-city { padding: var(--space-3) var(--space-4) var(--space-4); }
-  .mappa-bucket-head { display: flex; align-items: baseline; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-3); }
-  .mappa-notes { display: grid; gap: var(--space-1); margin-top: var(--space-6); }
+  .mappa-bucket-note { margin: calc(-1 * var(--space-1)) var(--space-1) var(--space-2); }
+  .mappa-bucket-city { padding: var(--space-2-5) var(--space-3) var(--space-3); }
+  .mappa-bucket-head { display: flex; align-items: baseline; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-2); }
+  .mappa-notes { display: grid; gap: var(--space-1); padding: 0 var(--space-1); }
 
   @media (prefers-reduced-motion: reduce) {
     .mappa-city-chev { transition: none; }

@@ -9,13 +9,18 @@
     height: var(--d);
     border-radius: 50%;
     overflow: hidden;
-    background: var(--select);
-    color: var(--on-select);
+    /* Il redesign: carta calda col filo, iniziale d'inchiostro a 700. */
+    background: var(--surface-pressed);
+    box-shadow: inset 0 0 0 var(--border-w) var(--line-strong);
+    color: var(--ink);
   }
   .ui-avatar[data-size="24"] { --d: var(--space-6); }
   .ui-avatar[data-size="32"] { --d: var(--space-8); }
   .ui-avatar[data-size="48"] { --d: var(--space-12); }
   .ui-avatar[data-size="64"] { --d: var(--space-16); }
+  .ui-avatar[data-size="44"] { --d: var(--touch); }
+  .ui-avatar[data-size="68"] { --d: 68px; }
+  .ui-avatar[data-size="92"] { --d: 92px; }
   .ui-avatar img {
     width: 100%;
     height: 100%;
@@ -31,8 +36,8 @@
   }
   .ui-avatar-initial {
     font-family: var(--font-ui);
-    font-weight: 600;
-    font-size: calc(var(--d) * 0.42);
+    font-weight: 700;
+    font-size: calc(var(--d) * 0.38);
     line-height: 1;
   }
   .ui-avatar[data-busy] > img,

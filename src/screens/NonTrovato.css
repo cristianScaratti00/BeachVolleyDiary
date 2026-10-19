@@ -1,19 +1,28 @@
-/* Lo stato "non trovato": stessa forma dell'EmptyState filtrato (ART §8). */
+/* «Non trovato» nel linguaggio di Segnala: titolo 30/800, poi una card
+   bianca col filo, Pallo sorpreso al centro, il perché e l'azione. */
 @layer components {
+  .nontrovato .ui-largetitle-h1 {
+    font: 800 1.875rem/1.05 var(--font-ui);
+    letter-spacing: -0.033em;
+  }
   .nontrovato-body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    gap: var(--space-2-5);
+    margin-top: var(--stack);
+    padding: calc(var(--space-6) + var(--space-0-5)) var(--space-5);
+    background: var(--surface);
+    border: var(--border-w) solid var(--edge);
+    border-radius: var(--radius-card);
     text-align: center;
-    max-width: var(--empty-max);
-    margin: var(--space-8) auto 0;
   }
-  .nontrovato-icon { color: var(--ink-3); }
   .nontrovato-text {
-    margin-top: var(--space-3);
+    max-width: var(--empty-max);
     font: var(--type-subhead);
+    line-height: 1.45;
     letter-spacing: var(--track-subhead);
     color: var(--ink-2);
   }
-  .nontrovato-action { margin-top: var(--space-5); }
+  .nontrovato-action { margin-top: var(--space-1-5); }
 }

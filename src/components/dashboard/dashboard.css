@@ -1,8 +1,11 @@
 /* ============================================================================
-   Le card di Statistiche. Carta opaca, un colore di serie per grafico
-   (--data-win), il confronto in --data-rest, la griglia in --data-grid
-   (ART_DIRECTION §4.5). Nessun testo sotto gli 11px: le etichette dei grafici
-   sono HTML, non testo SVG scalato (UX §8.1).
+   Le card di Statistiche e i pezzi che la Home condivide con loro, nel
+   linguaggio del redesign: carta bianca col filo, titoli 17/700, etichette
+   minuscole 13/600 in --ink-2. I dati: le vinte d'inchiostro (--data-ink) e
+   le perse sul filo forte (--line-strong), come la barra della Home;
+   l'arancio (--data-win) resta l'andamento e il 1° posto; il resto
+   --data-rest. Nessun testo sotto gli 11px: le etichette dei grafici sono
+   HTML, non testo SVG scalato (UX §8.1).
    ============================================================================ */
 @layer components {
   .dash-card { display: flex; flex-direction: column; min-width: 0; }
@@ -15,7 +18,7 @@
     flex-wrap: wrap;
     gap: var(--space-2);
   }
-  .dash-title { font: var(--type-headline); letter-spacing: var(--track-headline); }
+  .dash-title { font: var(--type-title-3); letter-spacing: var(--track-title-3); }
   .dash-extra { font: var(--type-footnote); letter-spacing: var(--track-footnote); }
   .dash-empty {
     padding: var(--space-4) 0;
@@ -24,24 +27,29 @@
     letter-spacing: var(--track-subhead);
     color: var(--ink-2);
   }
+  /* L'etichetta sopra o sotto un numero: minuscola, come nel redesign. */
   .dash-eyebrow {
     display: inline-flex;
     align-items: center;
     gap: var(--space-2);
     font: var(--type-eyebrow);
     letter-spacing: var(--track-eyebrow);
-    text-transform: uppercase;
     color: var(--ink-2);
   }
+  /* «Vedi tutti», «Tutti»: arancio-testo a 600, come i link di testata del
+     redesign. Sta da solo in una testata, non dentro un paragrafo: il colore
+     e il peso bastano a dirlo link. */
   .dash-link {
-    font: var(--type-subhead-strong);
-    letter-spacing: var(--track-subhead);
-    color: var(--accent-text);
-    text-decoration: underline;
-    text-underline-offset: var(--space-0-5);
     display: inline-flex;
     align-items: center;
     min-height: var(--touch);
+    font: var(--type-subhead-strong);
+    letter-spacing: var(--track-subhead);
+    color: var(--accent-text);
+    text-decoration: none;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .dash-link:hover { color: var(--accent-text-state); text-decoration: underline; text-underline-offset: var(--space-0-5); }
   }
 
   .dash-rows { display: grid; gap: var(--space-4); }
@@ -117,7 +125,9 @@
     align-items: center;
     justify-content: center;
   }
-  .dash-ring-n { font: var(--type-num-m); letter-spacing: var(--track-num-m); font-variant-numeric: tabular-nums; }
+  .dash-ring-n { font: var(--type-num-l); letter-spacing: var(--track-num-l); font-variant-numeric: tabular-nums; }
+  /* Il «%» piccolo e arancio, come il numero grande della Home. */
+  .dash-pct { font-size: 0.6em; color: var(--accent-text); }
   .dash-legend { display: grid; gap: var(--space-3); margin: 0; }
   .dash-legend > div { display: flex; flex-direction: column-reverse; }
   .dash-legend dd { margin: 0; }
@@ -127,19 +137,21 @@
     width: var(--space-2);
     height: var(--space-2);
     border-radius: var(--radius-capsule);
-    background: var(--data-win);
+    background: var(--data-ink);
   }
-  .dash-swatch[data-tone="rest"] { background: var(--data-rest); }
+  .dash-swatch[data-tone="rest"] { background: var(--line-strong); }
 
   /* --------------------------------------------------------- Piazzamenti */
+  /* La medaglia del piazzamento (la stessa delle righe dei tornei), la barra,
+     il conteggio. */
   .dash-placements { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
   .dash-placement {
     display: grid;
-    grid-template-columns: minmax(var(--space-20), auto) minmax(0, 1fr) var(--space-6);
+    grid-template-columns: auto minmax(0, 1fr) var(--space-6);
     align-items: center;
     gap: var(--space-3);
   }
-  .dash-placement .dash-row-n { text-align: right; }
+  .dash-placement .dash-row-n { text-align: right; font: var(--type-subhead-strong); }
 
   /* --------------------------------------------------------- Per compagno */
   .dash-partners {
@@ -147,6 +159,88 @@
     grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--chart-min)), 1fr));
     gap: var(--space-5);
   }
+
+  /* ------------------------------------------------- Il filtro di vetro */
+  /* Il pulsante «Compagni ⌄» del redesign: vetro, raggio della guida del
+     segmented (13), alto 40 accanto a lei. Il `<select>` vero lo copre tutto
+     e sborda di 2px sopra e sotto: il bersaglio è 44. */
+  .dash-select {
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    min-width: 0;
+    max-width: 100%;
+    height: var(--space-10);
+    padding: 0 var(--space-2-5) 0 var(--space-3);
+    border-radius: var(--radius-track);
+    font: var(--type-eyebrow);
+    letter-spacing: var(--track-eyebrow);
+    color: var(--ink);
+  }
+  /* Lo strato di stato del vetro: lo stesso del Button (currentColor, soft). */
+  .dash-select::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: currentColor;
+    opacity: 0;
+    z-index: -1;
+    pointer-events: none;
+    transition: opacity var(--dur-svelto) var(--ease-standard);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .dash-select:hover::before { opacity: var(--state-hover-soft); }
+  }
+  .dash-select:active::before { opacity: var(--state-press-soft); transition-duration: 0ms; }
+  .dash-select-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dash-select-chev { color: var(--ink-2); }
+  .dash-select-native {
+    position: absolute;
+    inset: calc((var(--space-10) - var(--touch)) / 2) 0;
+    width: 100%;
+    margin: 0;
+    border: 0;
+    opacity: 0;
+    cursor: pointer;
+    appearance: none;
+    /* 16px: sotto, Safari su iPhone ingrandisce la pagina al tocco. */
+    font-size: 1rem;
+  }
+  .dash-select:has(.dash-select-native:focus-visible) {
+    outline: var(--focus-width) solid var(--focus-ring);
+    outline-offset: var(--focus-offset);
+  }
+
+  /* ------------------------------------------------------ Beach Wrapped */
+  .ui-card.dash-wrapped {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-3) var(--space-3) var(--space-3-5);
+  }
+  .dash-wrapped-icon {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: var(--control-md);
+    height: var(--control-md);
+    border-radius: var(--radius-control);
+    background: var(--bg);
+    box-shadow: inset 0 0 0 var(--border-w) var(--edge);
+    color: var(--ink);
+  }
+  .dash-wrapped-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--hairline); }
+  .dash-wrapped-title { font: var(--type-headline); letter-spacing: var(--track-headline); overflow-wrap: anywhere; }
+  .dash-wrapped-sub {
+    font: var(--type-footnote);
+    font-weight: 500;
+    letter-spacing: var(--track-footnote);
+    color: var(--ink-2);
+  }
+  .dash-wrapped-apri { flex: none; }
 
   @media (prefers-reduced-motion: reduce) {
     .dash-trend-g,

@@ -98,12 +98,6 @@ async function fermate(user: ReturnType<typeof renderApp>['user'], max = 60): Pr
   return out
 }
 
-/** Gli elementi hanno questi nomi accessibili, in quest'ordine. */
-function expectNomi(els: HTMLElement[], names: string[]) {
-  expect(els).toHaveLength(names.length)
-  els.forEach((e, i) => expect(e).toHaveAccessibleName(names[i]))
-}
-
 beforeEach(() => {
   // "Oggi" fisso: Home, ＋ e date dipendono dal giorno. Solo Date: i timer
   // restano veri, così user-event e le animazioni girano come al solito.
@@ -118,7 +112,7 @@ afterEach(() => {
 describe('shell — landmark e percorso da tastiera (UX §8.2, §8.4)', () => {
   it('mobile: il primo Tab è «Vai al contenuto», poi il contenuto, la TabBar per ultima', async () => {
     const app = renderApp({ data: diario() })
-    await screen.findByRole('heading', { level: 1, name: 'Ciao, Marta' })
+    await screen.findByRole('heading', { level: 1, name: 'Ciao, Marta.' })
     const main = screen.getByRole('main')
     expect(main).toHaveAttribute('id', 'contenuto')
 
@@ -127,22 +121,24 @@ describe('shell — landmark e percorso da tastiera (UX §8.2, §8.4)', () => {
     const salta = screen.getByRole('link', { name: 'Vai al contenuto' })
     expect(stops[0]).toBe(salta)
     expect(salta).toHaveAttribute('href', '#contenuto')
-    // La TabBar è DOPO il contenuto nel DOM, anche se sta in basso sullo schermo.
+    // La TabBar è DOPO il contenuto nel DOM, anche se sta in basso sullo
+    // schermo: le quattro tab, poi il ＋ staccato.
     const barra = within(nav())
     expect(stops.slice(-5)).toEqual([
       barra.getByRole('link', { name: 'Home' }),
       barra.getByRole('link', { name: 'Tornei' }),
-      barra.getByRole('button', { name: 'Crea' }),
       barra.getByRole('link', { name: 'Compagni' }),
-      barra.getByRole('link', { name: 'Profilo' }),
+      barra.getByRole('link', { name: 'Diario' }),
+      barra.getByRole('button', { name: 'Crea' }),
     ])
-    // In mezzo, il contenuto della Home.
-    expect(stops.slice(1, -5)).toContain(screen.getAllByRole('link', { name: 'Rimini Open' })[0])
+    // In mezzo, il contenuto della Home: per primo l'avatar che porta al Profilo.
+    expect(stops[1]).toBe(screen.getByRole('link', { name: 'Profilo' }))
+    stops.slice(1, -5).forEach((el) => expect(main).toContainElement(el as HTMLElement))
   })
 
   it('desktop: «Vai al contenuto» → Sidebar → contenuto', async () => {
     const app = renderApp({ data: diario(), width: 1280 })
-    await screen.findByRole('heading', { level: 1, name: 'Ciao, Marta' })
+    await screen.findByRole('heading', { level: 1, name: 'Ciao, Marta.' })
     ;(document.activeElement as HTMLElement | null)?.blur()
     const stops = await fermate(app.user)
     const barra = within(nav())
@@ -151,7 +147,7 @@ describe('shell — landmark e percorso da tastiera (UX §8.2, §8.4)', () => {
       barra.getByRole('link', { name: 'Home' }),
       barra.getByRole('link', { name: 'Tornei' }),
       barra.getByRole('link', { name: 'Compagni' }),
-      barra.getByRole('link', { name: 'Profilo' }),
+      barra.getByRole('link', { name: 'Diario' }),
       barra.getByRole('button', { name: 'Nuovo' }),
       barra.getByRole('link', { name: /Marta/ }),
     ])
@@ -180,10 +176,17 @@ describe('shell — landmark e percorso da tastiera (UX §8.2, §8.4)', () => {
   })
 
   it('la tab Tornei riporta all\'ultima vista usata', async () => {
-    const app = renderApp({ data: diario(), path: '/tornei/timeline' })
+    const app = renderApp({ data: diario(), path: '/tornei/mappa' })
     await screen.findByRole('heading', { level: 1, name: 'Tornei' })
     await app.user.click(within(nav()).getByRole('link', { name: 'Home' }))
-    expect(within(nav()).getByRole('link', { name: 'Tornei' })).toHaveAttribute('href', '/tornei/timeline')
+    expect(within(nav()).getByRole('link', { name: 'Tornei' })).toHaveAttribute('href', '/tornei/mappa')
+  })
+
+  it('la vecchia Timeline di Tornei è la tab Diario', async () => {
+    renderApp({ data: diario(), path: '/tornei/timeline' })
+    expect(await screen.findByRole('heading', { level: 1, name: 'Diario' })).toBeInTheDocument()
+    expect(window.location.pathname).toBe('/diario')
+    expect(within(nav()).getByRole('link', { name: 'Diario' })).toHaveAttribute('aria-current', 'page')
   })
 })
 
@@ -191,7 +194,7 @@ describe('shell — landmark e percorso da tastiera (UX §8.2, §8.4)', () => {
 describe('navigazione — focus, titolo e indietro (UX §4.2, §4.4)', () => {
   it('cambiando tab: URL, titolo della scheda e focus sull\'h1 nello stesso gesto', async () => {
     const app = renderApp({ data: diario() })
-    await screen.findByRole('heading', { level: 1, name: 'Ciao, Marta' })
+    await screen.findByRole('heading', { level: 1, name: 'Ciao, Marta.' })
     expect(document.title).toBe('Home · Beach Diary')
     await app.user.click(within(nav()).getByRole('link', { name: 'Tornei' }))
     expect(window.location.pathname).toBe('/tornei')
@@ -207,8 +210,9 @@ describe('navigazione — focus, titolo e indietro (UX §4.2, §4.4)', () => {
     expect(window.location.pathname).toBe(`/tornei/${ID.cervia}`)
     expect(document.title).toBe('Cervia Beach Party · Beach Diary')
     expect(h1('Cervia Beach Party')).toHaveFocus()
-    // L'etichetta è il titolo della schermata da cui si è arrivati.
-    await app.user.click(screen.getByRole('button', { name: 'Tornei' }))
+    // L'etichetta è il titolo della schermata da cui si è arrivati (nel
+    // cerchio di vetro c'è solo la freccia: il nome è «Torna a Tornei»).
+    await app.user.click(screen.getByRole('button', { name: 'Torna a Tornei' }))
     await waitFor(() => expect(window.location.pathname).toBe('/tornei'))
     await waitFor(() => expect(screen.getByRole('link', { name: 'Cervia Beach Party' })).toHaveFocus())
   })
@@ -225,17 +229,17 @@ describe('navigazione — focus, titolo e indietro (UX §4.2, §4.4)', () => {
 
   it('aperto dalla Home, ‹ Indietro si chiama «Home»', async () => {
     const app = renderApp({ data: diario() })
-    await screen.findByRole('heading', { level: 1, name: 'Ciao, Marta' })
-    await app.user.click(screen.getAllByRole('link', { name: 'Rimini Open' })[0])
-    expect(h1('Rimini Open')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Home' })).toBeInTheDocument()
+    await screen.findByRole('heading', { level: 1, name: 'Ciao, Marta.' })
+    await app.user.click(screen.getAllByRole('link', { name: /Cervia Beach Party/ })[0])
+    expect(h1('Cervia Beach Party')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Torna a Home' })).toBeInTheDocument()
   })
 
   it('link diretto senza storia: ‹ Indietro porta al genitore senza aggiungere voci', async () => {
     const app = renderApp({ data: diario(), path: `/tornei/${ID.cervia}` })
     expect(await screen.findByRole('heading', { level: 1, name: 'Cervia Beach Party' })).toBeInTheDocument()
     const prima = window.history.length
-    await app.user.click(screen.getByRole('button', { name: 'Tornei' }))
+    await app.user.click(screen.getByRole('button', { name: 'Torna a Tornei' }))
     expect(window.location.pathname).toBe('/tornei')
     expect(window.history.length).toBe(prima)
     expect(h1('Tornei')).toHaveFocus()
@@ -245,12 +249,12 @@ describe('navigazione — focus, titolo e indietro (UX §4.2, §4.4)', () => {
     const app = renderApp({ data: diario(), path: '/tornei' })
     await screen.findByRole('heading', { level: 1, name: 'Tornei' })
     const prima = window.history.length
-    const timeline = screen.getByRole('button', { name: 'Timeline' })
-    await app.user.click(timeline)
-    expect(window.location.pathname).toBe('/tornei/timeline')
+    const mappa = screen.getByRole('button', { name: /^Mappa/ })
+    await app.user.click(mappa)
+    expect(window.location.pathname).toBe('/tornei/mappa')
     expect(window.history.length).toBe(prima)
-    expect(timeline).toHaveAttribute('aria-pressed', 'true')
-    expect(timeline).toHaveFocus()
+    expect(mappa).toHaveAttribute('aria-pressed', 'true')
+    expect(mappa).toHaveFocus()
   })
 })
 
@@ -280,8 +284,8 @@ describe('stati di §6 — non trovato, primo avvio, primo caricamento fallito',
 
   it('primo avvio: Home vuota con un solo invito, niente numeri, assistente come link', async () => {
     const app = renderApp({ data: makeData() })
-    expect(await screen.findByRole('heading', { name: 'Il tuo diario è vuoto' })).toBeInTheDocument()
-    expect(screen.queryByRole('heading', { name: 'Numeri chiave' })).not.toBeInTheDocument()
+    expect(await screen.findByText('Registra il primo torneo: bastano il nome e la data, il resto lo aggiungi dopo.')).toBeInTheDocument()
+    expect(screen.queryByText('Partite vinte')).not.toBeInTheDocument()
     expect(screen.getByRole('link', { name: "Usa l'assistente" })).toHaveAttribute('href', '/crea')
     await app.user.click(screen.getByRole('button', { name: 'Crea il primo torneo' }))
     expect(screen.getByRole('dialog', { name: 'Nuovo torneo' })).toBeInTheDocument()
@@ -305,28 +309,27 @@ describe('stati di §6 — non trovato, primo avvio, primo caricamento fallito',
   it('primo avvio: il ＋ non propone «Aggiungi partita» senza un torneo di destinazione (F3.5)', async () => {
     const app = renderApp({ data: makeData() })
     await app.user.click(await screen.findByRole('button', { name: 'Crea' }))
-    const menu = screen.getByRole('menu', { name: 'Crea' })
-    expect(within(menu).queryByRole('menuitem', { name: /Aggiungi partita/ })).not.toBeInTheDocument()
+    const menu = screen.getByRole('menu', { name: 'Cosa registriamo?' })
+    expect(within(menu).queryByRole('menuitem', { name: /^Partita\s*Aggiungi/ })).not.toBeInTheDocument()
   })
 
   it('primo caricamento fallito: ErrorState dentro la shell, non il diario vuoto; Riprova ricarica', async () => {
     const app = renderApp({ data: diario(), fallito: true })
     expect(await screen.findByRole('heading', { name: 'Non riesco a caricare il diario' })).toBeInTheDocument()
     expect(screen.getByText('Qualcosa non ha risposto. I tuoi dati sono al sicuro.')).toBeInTheDocument()
-    expect(screen.queryByRole('heading', { name: 'Il tuo diario è vuoto' })).not.toBeInTheDocument()
-    // La TabBar resta: si può andare in Profilo, che non dipende dai dati.
+    expect(screen.queryByText(/Registra il primo torneo/)).not.toBeInTheDocument()
+    // La TabBar resta e si può andare in Profilo (che non dipende dai dati)
+    // dalla Sidebar o da un link diretto; l'avatar della Home non c'è.
     expect(nav()).toBeInTheDocument()
     await app.user.click(within(nav()).getByRole('link', { name: 'Tornei' }))
     expect(screen.getByRole('heading', { name: 'Non riesco a caricare il diario' })).toBeInTheDocument()
-    await app.user.click(within(nav()).getByRole('link', { name: 'Profilo' }))
-    expect(h1('Profilo')).toBeInTheDocument()
 
     await app.user.click(within(nav()).getByRole('link', { name: 'Home' }))
     app.failMore(false)
     const prima = app.reloads()
     await app.user.click(screen.getByRole('button', { name: 'Riprova' }))
     expect(app.reloads()).toBeGreaterThan(prima)
-    expect(await screen.findByRole('heading', { level: 1, name: 'Ciao, Marta' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: 'Ciao, Marta.' })).toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: 'Non riesco a caricare il diario' })).not.toBeInTheDocument()
   })
 
@@ -343,22 +346,24 @@ describe('menu ＋ (UX §7.4)', () => {
   it('voci in ordine fisso con il sottotitolo, focus sulla prima, frecce, Home/Fine', async () => {
     const app = renderApp({ data: diario() })
     await app.user.click(await screen.findByRole('button', { name: 'Crea' }))
-    const menu = screen.getByRole('menu', { name: 'Crea' })
+    const menu = screen.getByRole('menu', { name: 'Cosa registriamo?' })
     const voci = within(menu).getAllByRole('menuitem')
-    expect(voci).toHaveLength(4)
-    expect(voci[0]).toHaveAccessibleName(/^Nuovo torneo\s*Nome, data e luogo: il resto dopo$/)
-    expect(voci[1]).toHaveAccessibleName(/^Aggiungi partita\s*a «Rimini Open»$/)
-    expect(voci[2]).toHaveAccessibleName(/^Check-in oggi\s*Chi c'è in spiaggia$/)
-    expect(voci[3]).toHaveAccessibleName('Annulla')
+    expect(voci).toHaveLength(6)
+    expect(voci[0]).toHaveAccessibleName(/^Partita live\s*Segna i punti, in torneo o tra amici$/)
+    expect(voci[1]).toHaveAccessibleName(/^Torneo\s*Luogo, formato, compagno, piazzamento$/)
+    expect(voci[2]).toHaveAccessibleName(/^Partita\s*Aggiungi un risultato a «Rimini Open»$/)
+    expect(voci[3]).toHaveAccessibleName(/^Torneo rapido\s*Nome e piazzamento, i dettagli dopo$/)
+    expect(voci[4]).toHaveAccessibleName(/^Raccontalo a Pallo\s*Ti faccio io le domande, una alla volta$/)
+    expect(voci[5]).toHaveAccessibleName('Annulla')
     expect(voci[0]).toHaveFocus()
     await app.user.keyboard('{ArrowDown}')
     expect(voci[1]).toHaveFocus()
     await app.user.keyboard('{End}')
-    expect(voci[3]).toHaveFocus()
+    expect(voci[5]).toHaveFocus()
     await app.user.keyboard('{ArrowDown}')
     expect(voci[0]).toHaveFocus()
     await app.user.keyboard('{ArrowUp}')
-    expect(voci[3]).toHaveFocus()
+    expect(voci[5]).toHaveFocus()
     await app.user.keyboard('{Home}')
     expect(voci[0]).toHaveFocus()
   })
@@ -406,7 +411,7 @@ describe('menu ＋ (UX §7.4)', () => {
     const plus = await screen.findByRole('button', { name: 'Crea' })
     const prima = window.history.length
     await app.user.click(plus)
-    await app.user.click(screen.getByRole('menuitem', { name: /Nuovo torneo/ }))
+    await app.user.click(screen.getByRole('menuitem', { name: /^Torneo\s*Luogo/ }))
     const sheet = screen.getByRole('dialog', { name: 'Nuovo torneo' })
     expect(within(sheet).getByRole('textbox', { name: /Nome torneo/ })).toHaveFocus()
     // Il menu ha ceduto la sua voce allo sheet: una voce sola sopra la pagina.
@@ -424,20 +429,28 @@ describe('menu ＋ (UX §7.4)', () => {
   it('«Aggiungi partita» apre lo sheet con il torneo di destinazione già scelto', async () => {
     const app = renderApp({ data: diario() })
     await app.user.click(await screen.findByRole('button', { name: 'Crea' }))
-    await app.user.click(screen.getByRole('menuitem', { name: /Aggiungi partita/ }))
+    await app.user.click(screen.getByRole('menuitem', { name: /^Partita\s*Aggiungi/ }))
     const sheet = screen.getByRole('dialog', { name: 'Nuova partita' })
     expect(within(sheet).getByRole('combobox', { name: 'Torneo' })).toHaveValue(ID.rimini)
   })
 
-  it('«Check-in oggi» è una rotta: porta a /oggi; in check-in la voce dice dove sei', async () => {
-    const app = renderApp({ data: diario(), own: OWN })
+  it('«Partita live» è una rotta: porta a /live, a tutto schermo e senza TabBar', async () => {
+    const app = renderApp({ data: diario() })
     await app.user.click(await screen.findByRole('button', { name: 'Crea' }))
-    await app.user.click(screen.getByRole('menuitem', { name: /Sei a Rimini oggi/ }))
-    expect(window.location.pathname).toBe('/oggi')
+    await app.user.click(screen.getByRole('menuitem', { name: /^Partita live/ }))
+    expect(window.location.pathname).toBe('/live')
     // Il focus va all'h1 della rotta nuova: il menu che esce non lo riporta al ＋.
-    expect(h1("Chi c'è oggi")).toHaveFocus()
+    expect(await screen.findByRole('heading', { level: 1, name: 'Partita live' })).toHaveFocus()
     await waitFor(() => expect(screen.queryByRole('menu')).not.toBeInTheDocument())
-    expect(h1("Chi c'è oggi")).toHaveFocus()
+    expect(screen.queryByRole('navigation', { name: 'Principale' })).not.toBeInTheDocument()
+  })
+
+  it('«Raccontalo a Pallo» porta all\'assistente', async () => {
+    const app = renderApp({ data: diario() })
+    await app.user.click(await screen.findByRole('button', { name: 'Crea' }))
+    await app.user.click(screen.getByRole('menuitem', { name: /^Raccontalo a Pallo/ }))
+    expect(window.location.pathname).toBe('/crea')
+    expect(await screen.findByRole('heading', { level: 1, name: 'Pallo' })).toBeInTheDocument()
   })
 
   it('desktop: «Nuovo» della Sidebar apre lo stesso menu come popover, senza «Annulla»', async () => {
@@ -445,7 +458,7 @@ describe('menu ＋ (UX §7.4)', () => {
     const nuovo = await screen.findByRole('button', { name: 'Nuovo' })
     expect(nuovo).toHaveAttribute('aria-haspopup', 'menu')
     await app.user.click(nuovo)
-    const menu = screen.getByRole('menu', { name: 'Crea' })
+    const menu = screen.getByRole('menu', { name: 'Cosa registriamo?' })
     expect(nuovo).toHaveAttribute('aria-expanded', 'true')
     expect(within(menu).queryByRole('menuitem', { name: 'Annulla' })).not.toBeInTheDocument()
     expect(within(menu).getAllByRole('menuitem')[0]).toHaveFocus()
@@ -459,7 +472,7 @@ describe('sheet (UX §7.5) nell\'app', () => {
   async function apriNuovoTorneo(app: ReturnType<typeof renderApp>) {
     const plus = await screen.findByRole('button', { name: 'Crea' })
     await app.user.click(plus)
-    await app.user.click(screen.getByRole('menuitem', { name: /Nuovo torneo/ }))
+    await app.user.click(screen.getByRole('menuitem', { name: /^Torneo\s*Luogo/ }))
     await waitFor(() => expect(screen.queryByRole('menu')).not.toBeInTheDocument())
     return { plus, sheet: screen.getByRole('dialog', { name: 'Nuovo torneo' }) }
   }
@@ -471,11 +484,11 @@ describe('sheet (UX §7.5) nell\'app', () => {
     expect(within(sheet).getByRole('heading', { level: 2, name: 'Nuovo torneo' })).toBeInTheDocument()
   })
 
-  it('la trappola del focus: Maiusc+Tab dal primo campo va all\'ultima azione, Tab da lì torna al primo', async () => {
+  it('la trappola del focus: Maiusc+Tab dal primo campo va a «Salva» in cima, Tab da lì torna al primo', async () => {
     const app = renderApp({ data: diario() })
     const { sheet } = await apriNuovoTorneo(app)
     const nome = within(sheet).getByRole('textbox', { name: /Nome torneo/ })
-    const crea = within(sheet).getByRole('button', { name: 'Crea torneo' })
+    const crea = within(sheet).getByRole('button', { name: 'Salva' })
     expect(nome).toHaveFocus()
     await app.user.tab({ shift: true })
     expect(crea).toHaveFocus()
@@ -534,10 +547,10 @@ describe('sheet (UX §7.5) nell\'app', () => {
     expect(window.location.pathname).toBe('/tornei')
   })
 
-  it('«Crea torneo» annunciato disattivo senza nome; il tocco porta al campo e dice cosa manca', async () => {
+  it('«Salva» annunciato disattivo senza nome; il tocco porta al campo e dice cosa manca', async () => {
     const app = renderApp({ data: diario() })
     const { sheet } = await apriNuovoTorneo(app)
-    const crea = within(sheet).getByRole('button', { name: 'Crea torneo' })
+    const crea = within(sheet).getByRole('button', { name: 'Salva' })
     expect(crea).toHaveAttribute('aria-disabled', 'true')
     await app.user.click(crea)
     const nome = within(sheet).getByRole('textbox', { name: /Nome torneo/ })
@@ -553,7 +566,7 @@ describe('sheet (UX §7.5) nell\'app', () => {
     const prima = window.history.length
     await app.user.type(within(sheet).getByRole('textbox', { name: /Nome torneo/ }), 'Summer Cup')
     app.hold('saveTorneo')
-    await app.user.click(within(sheet).getByRole('button', { name: 'Crea torneo' }))
+    await app.user.click(within(sheet).getByRole('button', { name: 'Salva' }))
     const occupato = within(sheet).getByRole('button', { name: 'Creo…' })
     expect(occupato).toHaveAttribute('aria-busy', 'true')
     // Il doppio tocco non salva due volte.
@@ -578,7 +591,7 @@ describe('sheet (UX §7.5) nell\'app', () => {
     const app = renderApp({ data: diario(), fail: ['saveTorneo'] })
     const { sheet } = await apriNuovoTorneo(app)
     await app.user.type(within(sheet).getByRole('textbox', { name: /Nome torneo/ }), 'Summer Cup')
-    await app.user.click(within(sheet).getByRole('button', { name: 'Crea torneo' }))
+    await app.user.click(within(sheet).getByRole('button', { name: 'Salva' }))
     const alert = screen.getAllByRole('alert').find((n) => n.textContent?.includes('Non è stato possibile salvare'))
     expect(alert).toHaveTextContent('Non è stato possibile salvare. Riprova tra poco.')
     expect(screen.getByRole('dialog', { name: 'Nuovo torneo' })).toBeInTheDocument()
@@ -590,7 +603,7 @@ describe('sheet (UX §7.5) nell\'app', () => {
     const { sheet } = await apriNuovoTorneo(app)
     setOnline(false)
     await app.user.type(within(sheet).getByRole('textbox', { name: /Nome torneo/ }), 'Summer Cup')
-    await app.user.click(within(sheet).getByRole('button', { name: 'Crea torneo' }))
+    await app.user.click(within(sheet).getByRole('button', { name: 'Salva' }))
     expect(await screen.findByText('Sei offline: non ho salvato. Riprova quando torni in linea.')).toBeInTheDocument()
     expect(screen.getByRole('dialog', { name: 'Nuovo torneo' })).toBeInTheDocument()
   })
@@ -627,7 +640,7 @@ describe('tocco (MOTION.md M3)', () => {
     const app = renderApp({ data: diario() })
     const plus = await screen.findByRole('button', { name: 'Crea' })
     await app.user.pointer({ keys: '[TouchA]', target: plus })
-    const voce = screen.getByRole('menuitem', { name: /Nuovo torneo/ })
+    const voce = screen.getByRole('menuitem', { name: /^Torneo\s*Luogo/ })
     await app.user.pointer({ keys: '[TouchA]', target: voce })
     const sheet = screen.getByRole('dialog', { name: 'Nuovo torneo' })
     expect(within(sheet).getByRole('heading', { level: 2, name: 'Nuovo torneo' })).toHaveFocus()
@@ -673,7 +686,7 @@ describe('reduced-motion (UX §8.7, MOTION.md §11)', () => {
     const app = renderApp({ data: diario(), reduce: true })
     const plus = await screen.findByRole('button', { name: 'Crea' })
     await app.user.click(plus)
-    await app.user.click(screen.getByRole('menuitem', { name: /Nuovo torneo/ }))
+    await app.user.click(screen.getByRole('menuitem', { name: /^Torneo\s*Luogo/ }))
     const sheet = screen.getByRole('dialog', { name: 'Nuovo torneo' })
     await app.user.type(within(sheet).getByRole('textbox', { name: /Nome torneo/ }), 'X')
     await app.user.keyboard('{Escape}')
@@ -685,25 +698,24 @@ describe('reduced-motion (UX §8.7, MOTION.md §11)', () => {
 
 // ============================================================================
 describe('conferme distruttive (UX §7.7): alertdialog, Annulla per primo, esito', () => {
-  async function apriAltreAzioni(app: ReturnType<typeof renderApp>) {
-    const altre = await screen.findByRole('button', { name: 'Altre azioni' })
-    expect(altre).toHaveAttribute('aria-haspopup', 'menu')
-    await app.user.click(altre)
-    return altre
+  /** Nel redesign l'eliminazione del torneo sta nello sheet di modifica. */
+  async function apriEliminaTorneo(app: ReturnType<typeof renderApp>) {
+    await app.user.click(await screen.findByRole('button', { name: 'Modifica torneo' }))
+    const sheet = screen.getByRole('dialog', { name: 'Modifica torneo' })
+    const elimina = within(sheet).getByRole('button', { name: 'Elimina torneo' })
+    await app.user.click(elimina)
+    return { sheet, elimina }
   }
 
-  it('Elimina torneo: testo con le conseguenze, Esc = Annulla, il focus torna a «Altre azioni»', async () => {
+  it('Elimina torneo: testo con le conseguenze, Esc = Annulla, il focus torna a «Elimina torneo»', async () => {
     const app = renderApp({ data: diario(), path: `/tornei/${ID.cervia}` })
-    const altre = await apriAltreAzioni(app)
-    const menu = screen.getByRole('menu', { name: 'Cervia Beach Party' })
-    expectNomi(within(menu).getAllByRole('menuitem'), ['Modifica', 'Storia Instagram', 'Elimina torneo'])
-    await app.user.click(within(menu).getByRole('menuitem', { name: 'Elimina torneo' }))
+    const { elimina } = await apriEliminaTorneo(app)
     const d = screen.getByRole('alertdialog', { name: 'Eliminare «Cervia Beach Party»?' })
     expect(d).toHaveAccessibleDescription('Spariscono anche le sue 2 partite e 1 foto. Non si può annullare.')
     expect(within(d).getByRole('button', { name: 'Annulla' })).toHaveFocus()
     await app.user.keyboard('{Escape}')
     await waitFor(() => expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument())
-    expect(altre).toHaveFocus()
+    expect(elimina).toHaveFocus()
     expect(app.calls.filter((c) => c.name === 'deleteTorneo')).toHaveLength(0)
   })
 
@@ -711,9 +723,8 @@ describe('conferme distruttive (UX §7.7): alertdialog, Annulla per primo, esito
     const app = renderApp({ data: diario(), path: '/tornei' })
     await screen.findByRole('heading', { level: 1, name: 'Tornei' })
     await app.user.click(screen.getByRole('link', { name: 'Cervia Beach Party' }))
-    await apriAltreAzioni(app)
-    await app.user.click(screen.getByRole('menuitem', { name: 'Elimina torneo' }))
-    await app.user.click(screen.getByRole('button', { name: 'Elimina torneo' }))
+    await apriEliminaTorneo(app)
+    await app.user.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Elimina torneo' }))
     await waitFor(() => expect(window.location.pathname).toBe('/tornei'))
     expect(await within(statusRegion()).findByText('Torneo eliminato')).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Cervia Beach Party' })).not.toBeInTheDocument()
@@ -726,21 +737,20 @@ describe('conferme distruttive (UX §7.7): alertdialog, Annulla per primo, esito
 
   it('Elimina torneo fallito: Toast d\'errore e si resta sul dettaglio (C13)', async () => {
     const app = renderApp({ data: diario(), path: `/tornei/${ID.cervia}`, fail: ['deleteTorneo'] })
-    await apriAltreAzioni(app)
-    await app.user.click(screen.getByRole('menuitem', { name: 'Elimina torneo' }))
-    await app.user.click(screen.getByRole('button', { name: 'Elimina torneo' }))
+    await apriEliminaTorneo(app)
+    await app.user.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Elimina torneo' }))
     expect(await screen.findByText('Non è stato possibile eliminare. Riprova tra poco.')).toBeInTheDocument()
     expect(window.location.pathname).toBe(`/tornei/${ID.cervia}`)
     expect(h1('Cervia Beach Party')).toBeInTheDocument()
     await waitFor(() => expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument())
   })
 
-  it('torneo condiviso: «sola lettura», il menu ha la sola Storia, niente «Aggiungi partita»', async () => {
-    const app = renderApp({ data: diario(), path: `/tornei/${ID.sara}` })
+  it('torneo condiviso: «sola lettura», solo la Storia, niente «Modifica» né «Aggiungi partita»', async () => {
+    renderApp({ data: diario(), path: `/tornei/${ID.sara}` })
     expect(await screen.findByText('Condiviso con te · sola lettura')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Aggiungi partita' })).not.toBeInTheDocument()
-    await apriAltreAzioni(app)
-    expectNomi(within(screen.getByRole('menu')).getAllByRole('menuitem'), ['Storia Instagram'])
+    expect(screen.queryByRole('button', { name: 'Modifica torneo' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Condividi come storia Instagram' })).toBeInTheDocument()
   })
 
   it('Elimina partita, dallo sheet della partita', async () => {
@@ -772,8 +782,8 @@ describe('conferme distruttive (UX §7.7): alertdialog, Annulla per primo, esito
 
   it('Elimina compagno: replace verso /compagni e Toast', async () => {
     const app = renderApp({ data: diario(), path: `/compagni/${ID.giulia}` })
-    await apriAltreAzioni(app)
-    await app.user.click(screen.getByRole('menuitem', { name: 'Elimina compagno' }))
+    await screen.findByRole('heading', { level: 1, name: 'Giulia' })
+    await app.user.click(screen.getByRole('button', { name: 'Elimina compagno' }))
     const d = screen.getByRole('alertdialog', { name: 'Eliminare «Giulia»?' })
     expect(d).toHaveAccessibleDescription(
       'Nei tornei e nelle partite resterà segnato come "nessuno" e non conterà più nelle sue statistiche. Non si può annullare.',
@@ -797,7 +807,8 @@ describe('conferme distruttive (UX §7.7): alertdialog, Annulla per primo, esito
 
   it('Togli condivisioni (Profilo)', async () => {
     const app = renderApp({ data: diario(), path: '/profilo' })
-    await screen.findByRole('heading', { level: 1, name: 'Profilo' })
+    // Il Profilo ha per titolo il tuo nome; «Profilo» è nella barra in cima.
+    await screen.findByRole('heading', { level: 1, name: 'Marta' })
     await app.user.click(screen.getByRole('button', { name: /Togli tutte le condivisioni/ }))
     const d = screen.getByRole('alertdialog', { name: 'Togliere tutte le condivisioni ricevute?' })
     expect(d).toHaveAccessibleDescription('I tornei degli altri spariranno dal tuo diario e dalle tue statistiche.')
@@ -812,12 +823,13 @@ describe('conferme distruttive (UX §7.7): alertdialog, Annulla per primo, esito
     const d = screen.getByRole('alertdialog', { name: 'Terminare il check-in a Rimini?' })
     expect(d).toHaveAccessibleDescription('Non comparirai più fra chi è in spiaggia oggi.')
     await app.user.click(within(d).getByRole('button', { name: 'Termina check-in' }))
-    expect(await screen.findByRole('button', { name: 'Fai check-in' })).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: 'Sono in spiaggia' })).toBeInTheDocument()
   })
 
   it('Esci dall\'account: conferma, poi logout e ritorno alla Home in replace', async () => {
     const app = renderApp({ data: diario(), path: '/profilo' })
-    await screen.findByRole('heading', { level: 1, name: 'Profilo' })
+    // Il Profilo ha per titolo il tuo nome; «Profilo» è nella barra in cima.
+    await screen.findByRole('heading', { level: 1, name: 'Marta' })
     await app.user.click(screen.getByRole('button', { name: 'Esci' }))
     const d = screen.getByRole('alertdialog', { name: "Esci dall'account?" })
     expect(within(d).getByRole('button', { name: 'Annulla' })).toHaveFocus()
@@ -828,7 +840,8 @@ describe('conferme distruttive (UX §7.7): alertdialog, Annulla per primo, esito
 
   it('la trappola del focus vale anche per il dialogo', async () => {
     const app = renderApp({ data: diario(), path: '/profilo' })
-    await screen.findByRole('heading', { level: 1, name: 'Profilo' })
+    // Il Profilo ha per titolo il tuo nome; «Profilo» è nella barra in cima.
+    await screen.findByRole('heading', { level: 1, name: 'Marta' })
     await app.user.click(screen.getByRole('button', { name: 'Esci' }))
     const d = screen.getByRole('alertdialog', { name: "Esci dall'account?" })
     for (let i = 0; i < 5; i++) {
@@ -873,11 +886,10 @@ describe('visori (UX §6.5, §8.2)', () => {
     expect(window.location.pathname).toBe(`/tornei/${ID.cervia}`)
   })
 
-  it('Storia: dal menu «Altre azioni», focus sul ✕, colore a radiogroup con le frecce, Esc torna al menu che l\'ha aperta', async () => {
+  it('Storia: dal pulsante di vetro in cima, focus sul ✕, colore a radiogroup con le frecce, Esc torna al pulsante', async () => {
     const app = renderApp({ data: diario(), path: `/tornei/${ID.cervia}` })
-    const altre = await screen.findByRole('button', { name: 'Altre azioni' })
+    const altre = await screen.findByRole('button', { name: 'Condividi come storia Instagram' })
     await app.user.click(altre)
-    await app.user.click(screen.getByRole('menuitem', { name: 'Storia Instagram' }))
     const d = await screen.findByRole('dialog', { name: 'Storia di Cervia Beach Party' })
     expect(within(d).getByRole('button', { name: 'Chiudi' })).toHaveFocus()
     const gruppo = within(d).getByRole('radiogroup', { name: 'Colore della storia' })
@@ -903,30 +915,21 @@ describe('visori (UX §6.5, §8.2)', () => {
     await expectNoA11yViolations(document.body)
     await app.user.keyboard('{Escape}')
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
-    await app.user.click(screen.getByRole('button', { name: 'Altre azioni' }))
-    await app.user.click(screen.getByRole('menuitem', { name: 'Storia Instagram' }))
+    await app.user.click(screen.getByRole('button', { name: 'Condividi come storia Instagram' }))
     await screen.findByRole('dialog', { name: 'Storia di Cervia Beach Party' })
     await expectNoA11yViolations(document.body)
   })
 })
 
 // ============================================================================
-describe('banner alpha (UX §6.1, Q5)', () => {
-  it('chiuso resta chiuso dopo un refresh per quell\'utente; Segnala resta in Profilo', async () => {
+describe('Segnala un problema (UX §6.1)', () => {
+  it('il banner alpha non c\'è più: «Segnala un problema» sta nel Profilo', async () => {
     const app = renderApp({ data: diario() })
-    await screen.findByRole('heading', { level: 1, name: 'Ciao, Marta' })
-    expect(screen.getByRole('link', { name: 'Segnala un problema' })).toHaveAttribute('href', '/profilo/segnala')
-    await app.user.click(screen.getByRole('button', { name: /Chiudi/ }))
-    await waitFor(() => expect(screen.queryByRole('link', { name: 'Segnala un problema' })).not.toBeInTheDocument())
-    cleanup()
-    renderApp({ data: diario(), refresh: true })
-    await screen.findByRole('heading', { level: 1, name: 'Ciao, Marta' })
+    await screen.findByRole('heading', { level: 1, name: 'Ciao, Marta.' })
     expect(screen.queryByRole('link', { name: 'Segnala un problema' })).not.toBeInTheDocument()
-    cleanup()
-    // Un altro account sullo stesso dispositivo lo vede ancora.
-    renderApp({ data: diario(), refresh: true, session: { id: '00000000-0000-4000-8000-0000000000aa', name: 'Luca' } })
-    await screen.findByRole('heading', { level: 1, name: 'Ciao, Luca' })
-    expect(screen.getByRole('link', { name: 'Segnala un problema' })).toBeInTheDocument()
+    await app.user.click(screen.getByRole('link', { name: 'Profilo' }))
+    expect(await screen.findByRole('heading', { level: 1, name: 'Marta' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /Segnala un problema/ })).toHaveAttribute('href', '/profilo/segnala')
   })
 })
 
@@ -934,14 +937,14 @@ describe('banner alpha (UX §6.1, Q5)', () => {
 describe('avvisi (UX §7.8)', () => {
   it('la regione è sempre montata e vuota: status polite e alert', async () => {
     renderApp({ data: diario() })
-    await screen.findByRole('heading', { level: 1, name: 'Ciao, Marta' })
+    await screen.findByRole('heading', { level: 1, name: 'Ciao, Marta.' })
     expect(statusRegion()).toBeEmptyDOMElement()
     expect(screen.getAllByRole('alert').some((n) => n.childElementCount === 0)).toBe(true)
   })
 
   it('offline: «Sei offline» persistente e senza ×; torna la rete e se ne va', async () => {
     renderApp({ data: diario() })
-    await screen.findByRole('heading', { level: 1, name: 'Ciao, Marta' })
+    await screen.findByRole('heading', { level: 1, name: 'Ciao, Marta.' })
     setOnline(false)
     const avviso = within(statusRegion()).getByText('Sei offline')
     expect(avviso).toBeInTheDocument()
@@ -967,7 +970,7 @@ describe('avvisi (UX §7.8)', () => {
 describe('breakpoint (UX §9.1)', () => {
   it('sotto i 900 TabBar, da 900 Sidebar: il cambio di finestra scambia la navigazione', async () => {
     renderApp({ data: diario(), width: 899 })
-    await screen.findByRole('heading', { level: 1, name: 'Ciao, Marta' })
+    await screen.findByRole('heading', { level: 1, name: 'Ciao, Marta.' })
     expect(screen.getByRole('button', { name: 'Crea' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Nuovo' })).not.toBeInTheDocument()
     setViewport({ width: 900 })
@@ -981,7 +984,7 @@ describe('breakpoint (UX §9.1)', () => {
 
   it('/crea è a tutto schermo: niente TabBar su mobile, la Sidebar resta su desktop', async () => {
     renderApp({ data: diario(), path: '/crea' })
-    expect(await screen.findByRole('heading', { level: 1, name: 'Assistente torneo' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: 'Pallo' })).toBeInTheDocument()
     expect(screen.queryByRole('navigation', { name: 'Principale' })).not.toBeInTheDocument()
     setViewport({ width: 1280 })
     expect(nav()).toBeInTheDocument()
@@ -1001,40 +1004,47 @@ describe('breakpoint (UX §9.1)', () => {
 describe('axe sui flussi principali', () => {
   it('Home con dati', async () => {
     renderApp({ data: diario() })
-    await screen.findByRole('heading', { level: 1, name: 'Ciao, Marta' })
+    await screen.findByRole('heading', { level: 1, name: 'Ciao, Marta.' })
     await expectNoA11yViolations(document.body)
   })
 
   it('Home al primo avvio', async () => {
     renderApp({ data: makeData() })
-    await screen.findByRole('heading', { name: 'Il tuo diario è vuoto' })
+    await screen.findByText(/Registra il primo torneo/)
     await expectNoA11yViolations(document.body)
   })
 
-  it('Tornei: Lista e Timeline', async () => {
+  it('Tornei (Lista) e Diario', async () => {
     const app = renderApp({ data: diario(), path: '/tornei' })
     await screen.findByRole('heading', { level: 1, name: 'Tornei' })
     await expectNoA11yViolations(document.body)
-    await app.user.click(screen.getByRole('button', { name: 'Timeline' }))
-    await screen.findByRole('link', { name: 'Cervia Beach Party' })
+    await app.user.click(within(nav()).getByRole('link', { name: 'Diario' }))
+    await screen.findByRole('link', { name: /Cervia Beach Party/ })
     await expectNoA11yViolations(document.body)
   })
 
-  it('dettaglio torneo, con il menu «Altre azioni» aperto', async () => {
+  it('dettaglio torneo, con lo sheet di modifica aperto', async () => {
     const app = renderApp({ data: diario(), path: `/tornei/${ID.cervia}` })
     await screen.findByRole('heading', { level: 1, name: 'Cervia Beach Party' })
     await expectNoA11yViolations(document.body)
-    await app.user.click(screen.getByRole('button', { name: 'Altre azioni' }))
+    await app.user.click(screen.getByRole('button', { name: 'Modifica torneo' }))
+    await screen.findByRole('dialog', { name: 'Modifica torneo' })
     await expectNoA11yViolations(document.body)
   })
 
-  it('menu ＋, sheet Nuovo torneo con Altri dettagli aperto, conferma di scarto', async () => {
+  it('partita live: impostazione', async () => {
+    renderApp({ data: diario(), path: '/live' })
+    await screen.findByRole('heading', { level: 1, name: 'Partita live' })
+    await expectNoA11yViolations(document.body)
+  })
+
+  it('menu ＋, sheet Torneo rapido con Altri dettagli aperto, conferma di scarto', async () => {
     const app = renderApp({ data: diario() })
     await app.user.click(await screen.findByRole('button', { name: 'Crea' }))
     await expectNoA11yViolations(document.body)
-    await app.user.click(screen.getByRole('menuitem', { name: /Nuovo torneo/ }))
+    await app.user.click(screen.getByRole('menuitem', { name: /^Torneo rapido/ }))
     await waitFor(() => expect(screen.queryByRole('menu')).not.toBeInTheDocument())
-    const sheet = screen.getByRole('dialog', { name: 'Nuovo torneo' })
+    const sheet = screen.getByRole('dialog', { name: 'Torneo rapido' })
     await app.user.click(within(sheet).getByRole('button', { name: /Altri dettagli/ }))
     await expectNoA11yViolations(document.body)
     await app.user.type(within(sheet).getByRole('textbox', { name: /Nome torneo/ }), 'X')
@@ -1047,8 +1057,8 @@ describe('axe sui flussi principali', () => {
     const app = renderApp({ data: diario(), path: '/compagni', width: 1280 })
     await screen.findByRole('heading', { level: 1, name: 'Compagni' })
     await expectNoA11yViolations(document.body)
-    await app.user.click(within(nav()).getByRole('link', { name: 'Profilo' }))
-    await screen.findByRole('heading', { level: 1, name: 'Profilo' })
+    await app.user.click(within(nav()).getByRole('link', { name: /Marta/ }))
+    await screen.findByRole('heading', { level: 1, name: 'Marta' })
     await expectNoA11yViolations(document.body)
   })
 

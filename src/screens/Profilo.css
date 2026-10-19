@@ -1,47 +1,52 @@
-/* Profilo: intestazione con l'avatar, poi gruppi di righe (ART_DIRECTION §8). */
+/* ============================================================================
+   Profilo del redesign: avatar e nome centrati, poi i gruppi di righe e
+   «Esci» di vetro. Il ritmo è quello del design: 14 fra i blocchi (--stack),
+   intestazione → card 8, righe alte 52.
+   ============================================================================ */
 @layer components {
+  .profilo-body {
+    /* Il design disegna i gruppi del Profilo (e «Esci») a 20, un filo meno
+       delle card: il token si ridefinisce qui, così le righe ne seguono gli
+       angoli e l'anello di focus non resta mozzato. */
+    --radius-card: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--stack);
+    padding-top: var(--space-0-5);
+  }
+
+  /* ----------------------------------------------------------- Testa */
   .profilo-head {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: var(--space-4);
-    margin-top: var(--space-4);
+    gap: var(--space-2);
+    text-align: center;
   }
   .profilo-avatar {
     position: relative;
     flex: none;
     border-radius: 50%;
-    transition: transform var(--dur-svelto) var(--ease-standard);
   }
-  .profilo-avatar:not([aria-disabled="true"]):active { transform: scale(var(--press-scale)); }
   .profilo-avatar[aria-disabled="true"] { cursor: progress; }
+  /* Il badge della fotocamera, appoggiato in basso a destra: carta col filo. */
   .profilo-avatar-badge {
     position: absolute;
     right: calc(-1 * var(--space-0-5));
-    bottom: calc(-1 * var(--space-0-5));
+    bottom: var(--space-0-5);
     display: grid;
     place-items: center;
-    width: var(--space-6);
-    height: var(--space-6);
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
     background: var(--surface);
     color: var(--ink);
-    box-shadow: inset 0 0 0 var(--border-w) var(--edge-strong);
+    box-shadow: inset 0 0 0 var(--border-w) var(--line-strong);
   }
-  .profilo-who { min-width: 0; }
   .profilo-name {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: var(--space-2);
-    font: var(--type-title-3);
-    letter-spacing: var(--track-title-3);
-    overflow-wrap: anywhere;
-  }
-  .profilo-email {
-    margin-top: var(--space-0-5);
-    font: var(--type-subhead);
-    letter-spacing: var(--track-subhead);
-    color: var(--ink-2);
+    max-width: 100%;
+    font: 800 1.5rem/1.15 var(--font-ui);
+    letter-spacing: -0.025em;
     overflow-wrap: anywhere;
   }
   .profilo-avatar-err,
@@ -52,47 +57,44 @@
     font: var(--type-footnote);
     letter-spacing: var(--track-footnote);
     color: var(--danger);
+    text-align: left;
     animation: profilo-compari var(--dur-entrata) var(--ease-standard) both;
   }
-  .profilo-avatar-err { margin-top: var(--space-3); }
   .profilo-esito[data-ok] { color: var(--success); }
   .profilo-avatar-err .ui-icon,
-  .profilo-esito .ui-icon { margin-top: var(--space-0-5); }
+  .profilo-esito .ui-icon { flex: none; margin-top: var(--space-0-5); }
   @keyframes profilo-compari {
     from { opacity: 0; transform: translateY(calc(-1 * var(--space-1) * var(--motion-scale))); }
     to { opacity: 1; transform: none; }
   }
 
-  .profilo-groups { margin-top: var(--space-8); }
-  .profilo-groups > .ui-list-section + .ui-list-section { margin-top: var(--space-6); }
-
-  .profilo-name-item {
+  /* ------------------------------------------------- Nome visualizzato */
+  /* Il chevron della riga che si apre gira di un quarto, come «Altri
+     dettagli»: dice che la riga si è aperta lì, non che porta altrove. */
+  .profilo-nome-chev { transition: transform var(--dur-entrata) var(--ease-standard); }
+  .profilo-nome .ui-row[aria-expanded="true"] .profilo-nome-chev { transform: rotate(90deg); }
+  .profilo-nome-editor {
     display: grid;
-    gap: var(--space-2);
-    padding: var(--space-3) var(--space-4);
+    gap: var(--space-2-5);
+    padding: 0 var(--space-3-5) var(--space-3-5);
   }
-  /* Lo spazio di «Salva nome» c'è sempre: il pulsante compare in ENTRATA
-     (opacità e visibility) senza spostare il campo (MOTION.md §5 F9). */
-  .profilo-name-save {
-    min-height: var(--control-sm);
-    display: flex;
-    align-items: center;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity var(--dur-svelto) var(--ease-standard), visibility 0s linear var(--dur-svelto);
-  }
-  .profilo-name-save[data-visible] {
-    opacity: 1;
-    visibility: visible;
-    transition: opacity var(--dur-entrata) var(--ease-standard), visibility 0s;
-  }
-  .profilo-value { display: inline-flex; align-items: center; gap: var(--space-1); }
+  .profilo-nome-azioni { display: flex; justify-content: flex-end; gap: var(--space-2); }
+  .profilo-esito { padding: 0 var(--space-3-5) var(--space-3); }
 
-  .profilo-foot {
-    margin-top: var(--space-8);
-    text-align: center;
-    font: var(--type-footnote);
-    letter-spacing: var(--track-footnote);
-    color: var(--ink-2);
+  /* L'interruttore nella card: la riga è alta 52 come le altre, la scritta
+     ha il peso delle righe (500), non quello delle etichette. */
+  .profilo-switch { padding: 0 var(--space-3-5); }
+  .profilo-switch .ui-switch-row { min-height: calc(var(--touch) + var(--space-2)); }
+  .profilo-switch .ui-switch-label { font: 500 0.96875rem/1.35 var(--font-ui); letter-spacing: var(--track-body); }
+
+  /* «Esci»: largo, di vetro, alto 52, raggio 20; il rosso è del tono `danger`. */
+  .profilo-esci {
+    min-height: calc(var(--touch) + var(--space-2));
+    border-radius: var(--radius-card);
+    font-size: 0.96875rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .profilo-nome-chev { transition: none; }
   }
 }

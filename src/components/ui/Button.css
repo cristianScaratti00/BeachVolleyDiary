@@ -1,6 +1,8 @@
 /* ============================================================================
-   Pulsanti: capsule (ART_DIRECTION §6.3: "capsula = si preme"), testo
-   Headline, altezze sm 32 / md 44 / lg 52.
+   Pulsanti: capsule (ART_DIRECTION §6.3: "capsula = si preme"), altezze
+   sm 34 / md 44 / lg 56. Il redesign: l'arancio ha un filo arancio scuro e
+   l'etichetta d'inchiostro a 700; il secondario è di VETRO (bianco al 55% con
+   il bordo bianco), non più tinto; la pressione rimbalza (--ease-press).
 
    Lo strato di stato (MOTION.md §4.3): un livello sotto l'etichetta che cambia
    SOLO opacità, tinta `currentColor`. Hover .08 (solo con un puntatore vero),
@@ -18,15 +20,15 @@
     min-height: var(--control-md);
     padding: 0 var(--space-5);
     border-radius: var(--radius-capsule);
-    font: var(--type-headline);
-    letter-spacing: var(--track-headline);
+    font: 600 0.9375rem/1.2 var(--font-ui);
+    letter-spacing: var(--track-callout);
     white-space: nowrap;
     text-align: center;
     text-decoration: none;
     cursor: pointer;
     user-select: none;
     -webkit-user-select: none;
-    transition: transform var(--dur-svelto) var(--ease-standard);
+    transition: transform var(--dur-press) var(--ease-press);
   }
   .ui-button::before {
     content: "";
@@ -43,7 +45,7 @@
 
   .ui-button[data-size="sm"] {
     min-height: var(--control-sm);
-    padding: 0 var(--space-3);
+    padding: 0 var(--space-3-5);
     font: var(--type-subhead-strong);
     letter-spacing: var(--track-subhead);
   }
@@ -53,22 +55,38 @@
     position: absolute;
     inset: calc((var(--control-sm) - var(--touch)) / 2) 0;
   }
-  .ui-button[data-size="lg"] { min-height: var(--control-lg); padding: 0 var(--space-6); }
+  .ui-button[data-size="lg"] { min-height: var(--control-lg); padding: 0 var(--space-6); font-size: 1rem; }
   .ui-button[data-block] { display: flex; width: 100%; }
 
-  .ui-button[data-variant="filled"] { background: var(--accent); color: var(--on-accent); }
+  /* Il pieno: arancio, filo arancio scuro (dentro, così non cambia la
+     misura), etichetta d'inchiostro più pesante. */
+  .ui-button[data-variant="filled"] {
+    background: var(--accent);
+    color: var(--on-accent);
+    font-weight: 700;
+    box-shadow: inset 0 0 0 var(--border-w) var(--accent-strong);
+  }
   /* `--label-state`: il tono dell'etichetta in hover e premuto. Lo strato è
      `currentColor` e scurisce il fondo verso il testo: l'arancio e il danger
      scendono di un tono per restare ≥ 4.5 (tokens.css, `-state`). */
-  .ui-button[data-variant="tinted"] { background: var(--accent-wash); color: var(--accent-text); --label-state: var(--accent-text-state); }
+  .ui-button[data-variant="tinted"] {
+    background: var(--accent-wash);
+    color: var(--accent-text);
+    box-shadow: inset 0 0 0 var(--border-w) var(--accent-edge);
+    --label-state: var(--accent-text-state);
+  }
   .ui-button[data-variant="plain"] { color: var(--accent-text); padding: 0 var(--space-3); --label-state: var(--accent-text-state); }
   .ui-button[data-variant="quiet"] { color: var(--ink); padding: 0 var(--space-3); }
-  .ui-button[data-variant="neutral"] { background: var(--fill); color: var(--ink); }
+  .ui-button[data-variant="neutral"] { background: var(--surface); color: var(--ink); box-shadow: inset 0 0 0 var(--border-w) var(--edge); }
   .ui-button[data-variant="destructive"] { background: var(--danger); color: var(--on-danger); }
   .ui-button[data-variant="destructive-plain"] { color: var(--danger); padding: 0 var(--space-3); --label-state: var(--danger-state); }
   /* Sul vetro si scrive solo con l'inchiostro (ART_DIRECTION §4.4): il
      materiale ridefinisce --ink, e --ink sul vetro scuro è il bianco. */
-  .ui-button[data-variant="glass"] { color: var(--ink); --material-elev: var(--elev-float); }
+  /* Il vetro posato nella pagina galleggia appena: un'ombra corta. */
+  .ui-button[data-variant="glass"] { color: var(--ink); --material-elev: var(--elev-glass); }
+  /* Il vetro che dice «elimina» / «esci» (Profilo, dettaglio compagno): il
+     rosso sul vetro chiaro sopra il fondo pagina fa 6.08. */
+  .ui-button[data-variant="glass"][data-tone="danger"] { color: var(--danger); }
   [data-material] .ui-button[data-variant="plain"] { color: var(--ink); --label-state: var(--ink); }
 
   /* Disattivato: niente opacità sul pulsante intero (sul vetro mostrerebbe
@@ -76,6 +94,7 @@
   .ui-button[aria-disabled="true"] { cursor: default; color: var(--ink-disabled); }
   .ui-button[aria-disabled="true"]:is([data-variant="filled"], [data-variant="tinted"], [data-variant="neutral"], [data-variant="destructive"]) {
     background: var(--fill);
+    box-shadow: none;
   }
   .ui-button[aria-busy="true"] { cursor: progress; }
 
@@ -107,7 +126,7 @@
     border-radius: 50%;
     color: var(--ink);
     cursor: pointer;
-    transition: transform var(--dur-svelto) var(--ease-standard);
+    transition: transform var(--dur-press) var(--ease-press);
   }
   .ui-icon-button::before {
     content: "";
@@ -120,9 +139,9 @@
     pointer-events: none;
     transition: opacity var(--dur-svelto) var(--ease-standard);
   }
-  .ui-icon-button[data-variant="filled"] { background: var(--accent); color: var(--on-accent); }
+  .ui-icon-button[data-variant="filled"] { background: var(--accent); color: var(--on-accent); box-shadow: inset 0 0 0 var(--border-w) var(--accent-strong); }
   .ui-icon-button[data-variant="quiet"] { color: var(--ink-2); }
-  .ui-icon-button[data-variant="glass"] { --material-elev: var(--elev-float); }
+  .ui-icon-button[data-variant="glass"] { color: var(--ink); --material-elev: var(--elev-glass); }
   @media (hover: hover) and (pointer: fine) {
     .ui-icon-button:not([aria-disabled="true"]):hover::before { opacity: var(--state-hover); }
   }

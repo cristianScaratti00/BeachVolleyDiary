@@ -3,14 +3,16 @@
   .ui-page[data-width="reading"] { max-width: var(--reading-max); }
   .ui-page[data-width="timeline"] { max-width: var(--timeline-max); }
 
-  /* Fra sezioni 32, titolo → contenuto 12 (ART_DIRECTION §5.2). */
-  .ui-section { margin-top: var(--space-8); min-width: 0; }
+  /* Il ritmo del redesign: fra i blocchi 14 (--stack), titolo di sezione →
+     contenuto 8, il titolo rientrato di 4 come le card. */
+  .ui-section { margin-top: var(--section-gap); min-width: 0; }
   .ui-section-head {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
     gap: var(--space-3);
-    margin-bottom: var(--space-3);
+    margin-bottom: var(--space-2);
+    padding: 0 var(--space-1);
   }
   .ui-section-title {
     display: inline-flex;
@@ -20,7 +22,7 @@
     font: var(--type-title-3);
     letter-spacing: var(--track-title-3);
   }
-  .ui-section-action { flex: none; }
+  .ui-section-action { flex: none; font: var(--type-footnote); color: var(--ink-2); }
   .ui-note {
     font: var(--type-footnote);
     letter-spacing: var(--track-footnote);

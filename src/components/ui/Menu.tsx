@@ -1,24 +1,31 @@
 // ============================================================================
-// Menu (UX §7.4, MOTION.md §4.2): l'action sheet del ＋ su mobile e i popover
-// («＋ Nuovo» della Sidebar, «⋯» della NavBar).
+// Menu (UX §7.4, MOTION.md §4.2): lo sheet del ＋ su mobile («Cosa
+// registriamo?», design 13) e i popover («Nuovo» della Sidebar, «⋯» della
+// NavBar).
 //
 // Pattern ARIA menu: contenitore `role="menu"` con `aria-labelledby` sul
 // titolo, voci `role="menuitem"` che sono `<button>` veri; ↑/↓, Home/Fine,
-// Invio/Spazio; Esc chiude; il focus va alla prima voce all'apertura e torna a
-// chi l'ha aperto alla chiusura, sempre a t0.
+// Invio/Spazio; Esc chiude; Tab chiude (il focus non resta dietro a un menu
+// aperto); il focus va alla prima voce all'apertura e torna a chi l'ha
+// aperto alla chiusura, sempre a t0.
 //
-// - `tabbar`: sale DAL ＋ («ciò che hai toccato è ciò che si apre»), origine
-//   al centro del ＋, MOLLA per lo spostamento e ENTRATA per l'opacità.
+// - `sheet`: il foglio --bg che sale dal fondo con la maniglia (trascinabile,
+//   come gli sheet), il titolo grande, Pallo che sbircia dal bordo e le voci
+//   come card di vetro che salgono sfalsate. In fondo «Annulla», capsula di
+//   vetro e voce del menu come le altre: il «chiudi» che si vede e che si
+//   raggiunge con le frecce (il × del design in alto a sinistra stava fuori
+//   dal menu, e a un lettore di schermo non arrivava in ordine).
 // - `popover`: ancorato al pulsante, `translateY(-4px)` in SVELTO, senza velo.
-// Le voci compaiono con il pannello: nessuno sfalsamento.
 // Una voce distruttiva sta su una riga OPACA: danger come testo sul vetro
 // fallisce (ART_DIRECTION §4.4).
 // ============================================================================
 import { useId, useLayoutEffect, useRef, useState } from 'react'
-import type { CSSProperties, KeyboardEvent } from 'react'
+import type { CSSProperties, KeyboardEvent, PointerEvent as ReactPointerEvent } from 'react'
 import * as m from 'motion/react-m'
-import { useIsPresent, useReducedMotion } from 'motion/react'
-import { ENTRATA, MOLLA, SVELTO } from '../Motion'
+import { useDragControls, useIsPresent, useReducedMotion } from 'motion/react'
+import type { PanInfo } from 'motion/react'
+import { MOLLA, SVELTO } from '../Motion'
+import { Pallo } from '../Pallo'
 import { Icon } from './Icon'
 import type { IconName } from './Icon'
 import { useEscape, useInitialFocus, useReturnFocus } from './overlay'
@@ -29,25 +36,44 @@ export interface MenuViewItem {
   label: string
   sub?: string
   icon?: IconName
-  tone?: 'destructive'
+  /** `accent`: la voce in evidenza (la partita live); `destructive`: elimina. */
+  tone?: 'destructive' | 'accent'
   onSelect: () => void
 }
 
-export function Menu({ title, items, onClose, placement = 'tabbar', anchor, opener, top = true, cancel = placement === 'tabbar' }: {
+// Le stesse soglie degli sheet (Sheet.tsx): una buttata giù decisa chiude.
+const CHIUDI_OLTRE_PX = 120
+const CHIUDI_OLTRE_VELOCITA = 550
+
+export function Menu({
+  title,
+  sub,
+  items,
+  onClose,
+  placement = 'sheet',
+  anchor,
+  opener,
+  top = true,
+  cancel = placement === 'sheet',
+}: {
   title: string
+  /** La riga sotto il titolo dello sheet («Scegli tu, al resto penso io.»). */
+  sub?: string
   items: MenuViewItem[]
   onClose: () => void
-  placement?: 'tabbar' | 'popover'
+  placement?: 'sheet' | 'popover'
   anchor?: HTMLElement | null
   opener?: HTMLElement | null
   top?: boolean
-  /** La voce «Annulla» separata (action sheet su mobile). */
+  /** La voce «Annulla» in fondo (lo sheet su mobile). */
   cancel?: boolean
 }) {
   const id = useId()
   const ref = useRef<HTMLDivElement>(null)
   const presente = useIsPresent()
   const ridotto = useReducedMotion()
+  const trascinamento = useDragControls()
+  const [velocitaUscita, setVelocitaUscita] = useState<number | null>(null)
   const [pos, setPos] = useState<CSSProperties | null>(null)
 
   useEscape(onClose, top && presente)
@@ -82,62 +108,129 @@ export function Menu({ title, items, onClose, placement = 'tabbar', anchor, open
     else if (e.key === 'Tab') { e.preventDefault(); onClose() }
   }
 
-  const tabbar = placement === 'tabbar'
-  const anim = tabbar
+  if (placement === 'popover') {
+    return (
+      <m.div
+        ref={ref}
+        className="ui-menu"
+        data-placement="popover"
+        role="menu"
+        aria-labelledby={`${id}-t`}
+        data-material={presente ? 'glass-thick' : 'frost'}
+        {...(presente ? {} : { inert: '' })}
+        style={{ ...(pos ?? {}), '--material-elev': 'var(--elev-overlay)' } as CSSProperties}
+        onKeyDown={onKey}
+        onClick={(e) => e.stopPropagation()}
+        initial={{ opacity: 0, y: ridotto ? 0 : -4 }}
+        animate={{ opacity: 1, y: 0, transition: SVELTO }}
+        exit={{ opacity: 0, transition: SVELTO }}
+      >
+        <p className="ui-menu-title" id={`${id}-t`}>{title}</p>
+        {items.map((it) => (
+          <button key={it.key} type="button" role="menuitem" className="ui-menu-item" data-tone={it.tone} onClick={it.onSelect}>
+            {it.icon && (
+              <span className="ui-menu-icon">
+                <Icon name={it.icon} size={20} />
+              </span>
+            )}
+            <span className="ui-menu-text">
+              <span className="ui-menu-label">{it.label}</span>
+              {it.sub && <span className="ui-menu-sub">{it.sub}</span>}
+            </span>
+          </button>
+        ))}
+      </m.div>
+    )
+  }
+
+  // ----------------------------------------------------------------- sheet
+  const fineTrascinamento = (_e: unknown, info: PanInfo) => {
+    if (info.offset.y <= CHIUDI_OLTRE_PX && info.velocity.y <= CHIUDI_OLTRE_VELOCITA) return
+    // L'uscita continua il gesto con la velocità del dito (M7).
+    setVelocitaUscita(info.velocity.y)
+    onClose()
+  }
+  const anim = ridotto
     ? {
-        initial: { opacity: 0, y: ridotto ? 0 : 12, scale: ridotto ? 1 : 0.96 },
-        animate: { opacity: 1, y: 0, scale: 1, transition: { opacity: ENTRATA, y: MOLLA, scale: MOLLA } },
-        exit: { opacity: 0, y: ridotto ? 0 : 12, scale: ridotto ? 1 : 0.96, transition: SVELTO },
+        initial: { opacity: 0 },
+        animate: { opacity: 1, transition: SVELTO },
+        exit: { opacity: 0, transition: SVELTO },
       }
     : {
-        initial: { opacity: 0, y: ridotto ? 0 : -4 },
-        animate: { opacity: 1, y: 0, transition: SVELTO },
-        exit: { opacity: 0, transition: SVELTO },
+        initial: { y: '100%' },
+        animate: { y: 0, transition: MOLLA },
+        exit: { y: '100%', transition: velocitaUscita != null ? { ...MOLLA, velocity: velocitaUscita } : SVELTO },
       }
 
   return (
-    <m.div
-      ref={ref}
-      className="ui-menu"
-      data-placement={placement}
-      role="menu"
-      aria-labelledby={`${id}-t`}
-      data-material={presente ? 'glass-thick' : 'frost'}
-      {...(presente ? {} : { inert: '' })}
-      style={{ ...(pos ?? {}), '--material-elev': 'var(--elev-overlay)' } as CSSProperties}
-      onKeyDown={onKey}
-      onClick={(e) => e.stopPropagation()}
-      {...anim}
-    >
-      <p className="ui-menu-title" id={`${id}-t`}>{title}</p>
-      {items.map((it) => (
-        <button
-          key={it.key}
-          type="button"
-          role="menuitem"
-          className="ui-menu-item"
-          data-tone={it.tone}
-          onClick={it.onSelect}
+    <>
+      <m.div
+        ref={ref}
+        className="ui-menu-sheet"
+        {...(presente ? {} : { inert: '' })}
+        onClick={(e) => e.stopPropagation()}
+        {...anim}
+        drag="y"
+        dragListener={false}
+        dragControls={trascinamento}
+        dragConstraints={{ top: 0, bottom: 0 }}
+        dragElastic={{ top: 0.02, bottom: 0.9 }}
+        dragMomentum={false}
+        dragTransition={{ bounceStiffness: MOLLA.stiffness, bounceDamping: MOLLA.damping }}
+        onDragEnd={fineTrascinamento}
+      >
+        {/* Pallo sbircia dal bordo, con le mani appoggiate al foglio. */}
+        <Pallo umore="sbircia" size={84} className="ui-menu-pallo" />
+        <div
+          className="ui-menu-handle"
+          aria-hidden="true"
+          onPointerDown={(e: ReactPointerEvent) => trascinamento.start(e)}
+          style={{ cursor: 'grab', touchAction: 'none' }}
         >
-          {it.icon && (
-            <span className="ui-menu-icon">
-              <Icon name={it.icon} size={20} />
-            </span>
+          <span />
+        </div>
+        <div className="ui-menu-head">
+          <h2 className="ui-menu-heading" id={`${id}-t`}>{title}</h2>
+          {sub && <p className="ui-menu-lead">{sub}</p>}
+        </div>
+        <div role="menu" aria-labelledby={`${id}-t`} className="ui-menu-list" onKeyDown={onKey}>
+          {items.map((it, i) => (
+            <button
+              key={it.key}
+              type="button"
+              role="menuitem"
+              className="ui-menu-opt"
+              data-material="glass-regular"
+              data-tone={it.tone}
+              // Salgono una dopo l'altra mentre il foglio arriva (design 13).
+              style={{ '--rise-i': i + 2 } as CSSProperties}
+              onClick={it.onSelect}
+            >
+              {it.icon && (
+                <span className="ui-menu-ico">
+                  <Icon name={it.icon} size={20} />
+                </span>
+              )}
+              <span className="ui-menu-text">
+                <span className="ui-menu-label">{it.label}</span>
+                {it.sub && <span className="ui-menu-sub">{it.sub}</span>}
+              </span>
+            </button>
+          ))}
+          {cancel && (
+            <button
+              type="button"
+              role="menuitem"
+              className="ui-menu-cancel"
+              data-material="glass-regular"
+              style={{ '--rise-i': items.length + 2 } as CSSProperties}
+              onClick={onClose}
+            >
+              Annulla
+            </button>
           )}
-          <span className="ui-menu-text">
-            <span className="ui-menu-label">{it.label}</span>
-            {it.sub && <span className="ui-menu-sub">{it.sub}</span>}
-          </span>
-        </button>
-      ))}
-      {cancel && (
-        <>
-          <hr className="ui-menu-sep" />
-          <button type="button" role="menuitem" className="ui-menu-item ui-menu-cancel" onClick={onClose}>
-            <span className="ui-menu-label">Annulla</span>
-          </button>
-        </>
-      )}
-    </m.div>
+        </div>
+      </m.div>
+    </>
   )
 }

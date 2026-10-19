@@ -1,35 +1,47 @@
 // ============================================================================
-// Beach Wrapped: il visore a tutto schermo, sfogliabile come una storia
-// (UX §5 F8, §6.5, §11; MOTION.md §4.2). La cornice è la stessa della Storia:
-// ✕, `role="dialog"`, Esc, focus, blocco dello scroll, barre di vetro scuro
-// da 44px sopra il fondo dei visori.
+// Beach Wrapped (il redesign, schermata 18): slide a tutto schermo col fondo
+// pieno — arancio col testo d'inchiostro, inchiostro col testo bianco, sabbia
+// col testo d'inchiostro, a turno — sfogliabili come una storia.
 //
-// Riusa la pipeline della Storia (card fissa 1080×1920 → toBlob, foto CORS
-// inlinate come data-URL) e aggiunge:
-//  · barre di avanzamento + navigazione tap/swipe/tastiera + auto-avanzamento;
-//  · sull'ultima slide due azioni sul riepilogo: «Condividi» (share sheet
-//    nativo col PNG; dove non c'è, copia negli appunti) e «Scarica».
-// Il nodo catturato NON è quello scalato dell'anteprima: c'è un layer nascosto a
-// piena risoluzione (una card per slide), così l'immagine esce pixel-perfect.
+// In cima le barre d'avanzamento, «Beach Wrapped · 2026» e il × di vetro; in
+// mezzo Pallo che esulta, l'occhiello, il numero enorme, il titolo e la
+// didascalia, che entrano salendo di 16px; in fondo «Scarica tutte» e
+// «Condividi», di vetro, su ogni slide.
+//
+// Gesti (invariati): tocco = avanti, sul terzo sinistro = indietro; swipe;
+// dito premuto = pausa; ← / → e la barra spaziatrice da tastiera; avanzamento
+// automatico (spento con reduced-motion).
+//
+// Gli export restano quelli di prima, col nuovo look: una tela fissa
+// 1080×1920 per slide (WrappedSlideCard) in un livello nascosto, catturata da
+// html-to-image a piena risoluzione (foto CORS inlinate come data-URL, Geist
+// caricato prima). «Scarica tutte» scarica un PNG per slide; «Condividi» passa
+// allo share sheet nativo la slide che si guarda (sull'ultima, il saluto, il
+// RIEPILOGO), e dove lo share sheet non c'è copia l'immagine negli appunti.
 // ============================================================================
 import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties, PointerEvent as ReactPointerEvent, ReactNode } from 'react'
 import { toBlob } from 'html-to-image'
 import { track } from '@vercel/analytics'
 import { useReducedMotion } from 'motion/react'
-import type { WrappedData } from '../../lib/derive'
+import type { WrappedData, WrappedSlide } from '../../lib/derive'
 import { Button, IconButton } from '../ui/Button'
-import { Icon } from '../ui/Icon'
-import { EmptyState } from '../ui/Feedback'
+import { Pallo } from '../Pallo'
 import { useEscape, useFocusTrap, useInitialFocus, useScrollLock } from '../ui/overlay'
 import { caricaFontExport, wrappedPalette } from './palette'
+import type { PaletteKey } from './palette'
+import { caricaFoto } from './foto'
+import type { FotoTela } from './foto'
+import { annoDi, fotoStretta, tagliaTitolo, umoreSlide } from './slide'
 import WrappedSlideCard from './WrappedSlideCard'
 import './WrappedModal.css'
 
 /** Durata dell'auto-avanzamento per slide: è anche la durata delle barre. */
 const SLIDE_MS = 5200
-/** Spazio dell'anteprima occupato dalle barre e dalle azioni, sopra e sotto. */
-const CORNICE_PX = 230
+/** Fra un download e l'altro di «Scarica tutte»: i browser li accodano meglio distanziati. */
+const PASSO_DOWNLOAD_MS = 150
+/** Tetto all'intera generazione di un PNG: html-to-image può restare appeso sui font. */
+const TETTO_MS = 20000
 const pad2 = (n: number) => String(n).padStart(2, '0')
 
 export type TipoAvviso = 'info' | 'error' | 'success'
@@ -40,8 +52,11 @@ interface WrappedModalProps {
   onNotice?: (msg: string, type?: TipoAvviso) => void
 }
 
-/** La cornice comune: il visore, con il ✕ in alto e il fondo dei visori. */
-function Cornice({ children, onClose, label = 'Beach Wrapped' }: { children: ReactNode; onClose: () => void; label?: string }) {
+/**
+ * La cornice: il dialogo a tutto schermo col fondo della slide. Sull'inchiostro
+ * è una superficie scura (anello di focus bianco).
+ */
+function Cornice({ children, onClose, tono, label = 'Beach Wrapped' }: { children: ReactNode; onClose: () => void; tono: PaletteKey; label?: string }) {
   const ref = useRef<HTMLDivElement>(null)
   useScrollLock(true)
   useFocusTrap(ref)
@@ -49,54 +64,81 @@ function Cornice({ children, onClose, label = 'Beach Wrapped' }: { children: Rea
   // Il focus va al ✕ a t0 (MOTION.md §3.5): è il primo comando del visore.
   useInitialFocus(ref, (root) => root.querySelector<HTMLElement>('[data-chiudi]'))
   return (
-    <div ref={ref} className="wrapped" role="dialog" aria-modal="true" aria-label={label} data-surface="dark" onClick={onClose}>
+    <div ref={ref} className="wrapped" role="dialog" aria-modal="true" aria-label={label} data-tone={tono} data-surface={tono === 'ink' ? 'dark' : undefined}>
       {children}
     </div>
   )
 }
 
 function Chiudi({ onClose }: { onClose: () => void }) {
-  return (
-    <IconButton
-      icon="close"
-      label="Chiudi"
-      className="wrapped-close"
-      data-chiudi=""
-      onClick={(e) => {
-        e.stopPropagation()
-        onClose()
-      }}
-    />
-  )
+  return <IconButton icon="close" label="Chiudi" variant="glass" iconSize={20} className="wrapped-close" data-chiudi="" onClick={onClose} />
 }
 
 /**
  * Wrapped non disponibile (UX §6.5): fuori stagione o con pochi dati. Mai una
- * pagina vuota: il motivo e un [Ho capito] che chiude.
+ * pagina vuota: il motivo e un [Ho capito] che chiude, sulla sabbia. Beach
+ * Wrapped c'è solo a ottobre (la regola sta in App): fuori mese Pallo saluta
+ * e dà appuntamento; con pochi dati sbircia in attesa delle partite.
  */
 export function WrappedNonDisponibile({ motivo, onClose }: { motivo: 'stagione' | 'dati'; onClose: () => void }) {
   return (
-    <Cornice onClose={onClose}>
-      <div className="wrapped-bar wrapped-bar-top" data-material="glass-dark" onClick={(e) => e.stopPropagation()}>
-        <Chiudi onClose={onClose} />
+    <Cornice onClose={onClose} tono="sand">
+      <div className="wrapped-top">
+        <div className="wrapped-head">
+          <h1 className="wrapped-brand">Beach Wrapped</h1>
+          <Chiudi onClose={onClose} />
+        </div>
       </div>
-      <div className="wrapped-empty" onClick={(e) => e.stopPropagation()}>
-        <EmptyState
-          icon="sun"
-          title="Beach Wrapped in arrivo"
-          text={
-            motivo === 'stagione'
-              ? 'Il recap arriva a fine stagione, da settembre.'
-              : 'Servono almeno qualche partita in questo periodo per generare il tuo recap di stagione. Aggiungi tornei e partite e torna a trovarci.'
-          }
-          action={
-            <Button variant="filled" onClick={onClose}>
-              Ho capito
-            </Button>
-          }
-        />
+      <div className="wrapped-empty">
+        <Pallo umore={motivo === 'stagione' ? 'saluta' : 'sbircia'} size={104} ombra={false} />
+        <h2 className="wrapped-empty-t">Beach Wrapped in arrivo</h2>
+        <p className="wrapped-empty-p">
+          {motivo === 'stagione'
+            ? 'Beach Wrapped arriva a ottobre: torna a trovarci allora.'
+            : 'Servono almeno qualche partita in questo periodo per generare il tuo recap di stagione. Aggiungi tornei e partite e torna a trovarci.'}
+        </p>
+        <Button size="lg" onClick={onClose}>
+          Ho capito
+        </Button>
       </div>
     </Cornice>
+  )
+}
+
+/**
+ * La slide a schermo: lo stesso contenuto della tela, coi token. La foto è
+ * intera, con la sua proporzione (mai ritagliata): finché il data URL non è
+ * pronto si mostra l'indirizzo originale, che il browser misura da sé.
+ */
+function Slide({ slide, mani, foto }: { slide: WrappedSlide; mani: string; foto: Pick<FotoTela, 'src'> & Partial<Pick<FotoTela, 'w' | 'h'>> | null }) {
+  const stretta = !!foto?.w && !!foto.h && fotoStretta({ w: foto.w, h: foto.h })
+  return (
+    <>
+      {foto ? (
+        <div className="wrapped-cover">
+          <img className="wrapped-photo" src={foto.src} alt="" width={foto.w} height={foto.h} />
+          {stretta && <Pallo umore={umoreSlide(slide.kind)} size={88} mani={mani} ombra={false} className="wrapped-pallo" />}
+        </div>
+      ) : (
+        <Pallo umore={umoreSlide(slide.kind)} size={slide.stats.length > 4 ? 80 : 104} mani={mani} ombra={false} className="wrapped-pallo" />
+      )}
+      <p className="wrapped-eyebrow">{slide.eyebrow}</p>
+      <p className="wrapped-big" data-taglia={tagliaTitolo(slide.headline)}>
+        {slide.headline.trim()}
+      </p>
+      {slide.title && <p className="wrapped-title">{slide.title}</p>}
+      {slide.caption && <p className="wrapped-caption">{slide.caption}</p>}
+      {slide.stats.length > 0 && (
+        <dl className="wrapped-stats" data-cols={slide.stats.length === 1 ? 1 : slide.stats.length >= 5 ? 3 : 2}>
+          {slide.stats.map((st, i) => (
+            <div key={i} className="wrapped-stat">
+              <dt className="wrapped-stat-l">{st.label}</dt>
+              <dd className="wrapped-stat-v">{st.value}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
+    </>
   )
 }
 
@@ -104,16 +146,15 @@ export default function WrappedModal({ wrapped, onClose, onNotice }: WrappedModa
   const slides = wrapped.slides
   const n = slides.length
   const [idx, setIdx] = useState(0)
+  // Un PNG in preparazione per «Condividi»: pausa e «Preparo…».
   const [busy, setBusy] = useState(false)
+  // «Scarica tutte» in corso: a che slide è arrivato.
+  const [scaricando, setScaricando] = useState<{ i: number; n: number } | null>(null)
   const [autoplay, setAutoplay] = useState(true)
-  // Dito premuto sulla card: è la pausa, lo stesso gesto delle storie. Un
+  // Dito premuto sulla slide: è la pausa, lo stesso gesto delle storie. Un
   // contenuto che scorre da solo deve poter essere fermato da chi lo guarda.
   const [held, setHeld] = useState(false)
-  const [vista, setVista] = useState(() => ({
-    h: typeof window !== 'undefined' ? window.innerHeight : 900,
-    w: typeof window !== 'undefined' ? window.innerWidth : 390,
-  }))
-  const [photos, setPhotos] = useState<Record<string, string>>({})
+  const [photos, setPhotos] = useState<Record<string, FotoTela>>({})
   // Una fonte sola per la preferenza (MOTION.md §11.1): con reduced-motion
   // l'auto-avanzamento è spento e le barre stanno ferme.
   const reduceMotion = !!useReducedMotion()
@@ -127,9 +168,7 @@ export default function WrappedModal({ wrapped, onClose, onNotice }: WrappedModa
       return false
     }
   })
-  const [canCopyImage] = useState(
-    () => typeof ClipboardItem !== 'undefined' && typeof navigator.clipboard?.write === 'function',
-  )
+  const [canCopyImage] = useState(() => typeof ClipboardItem !== 'undefined' && typeof navigator.clipboard?.write === 'function')
   const canShare = canShareFiles || canCopyImage
   const captureRefs = useRef<(HTMLDivElement | null)[]>([])
   const downX = useRef<number | null>(null)
@@ -140,14 +179,9 @@ export default function WrappedModal({ wrapped, onClose, onNotice }: WrappedModa
     setIdx(0)
   }, [rangeKey])
 
-  useEffect(() => {
-    const onResize = () => setVista({ h: window.innerHeight, w: window.innerWidth })
-    window.addEventListener('resize', onResize)
-    return () => window.removeEventListener('resize', onResize)
-  }, [])
-
   // Foto delle slide (intro/podio): scaricate e inlinate come data-URL, così
-  // html-to-image le incorpora nel PNG senza canvas "tainted".
+  // html-to-image le incorpora nel PNG senza canvas "tainted", con le misure
+  // naturali che decidono quanto sono grandi (intere, mai ritagliate).
   const photoUrls = Array.from(new Set(slides.map((s) => s.photoUrl).filter((u): u is string => !!u)))
   const photoKey = photoUrls.join('|')
   useEffect(() => {
@@ -156,27 +190,11 @@ export default function WrappedModal({ wrapped, onClose, onNotice }: WrappedModa
       setPhotos({})
       return
     }
-    const toDataUrl = (u: string) =>
-      fetch(u, { mode: 'cors' })
-        .then((r) => (r.ok ? r.blob() : Promise.reject(new Error('http ' + r.status))))
-        .then(
-          (blob) =>
-            new Promise<[string, string]>((resolve, reject) => {
-              const fr = new FileReader()
-              fr.onload = () => resolve([u, fr.result as string])
-              fr.onerror = reject
-              fr.readAsDataURL(blob)
-            }),
-        )
-        .catch((e) => {
-          console.warn('[wrapped] foto', e)
-          return null
-        })
-    Promise.all(photoUrls.map(toDataUrl)).then((pairs) => {
+    void Promise.all(photoUrls.map((u) => caricaFoto(u, '[wrapped]'))).then((foto) => {
       if (!alive) return
-      const map: Record<string, string> = {}
-      pairs.forEach((p) => {
-        if (p) map[p[0]] = p[1]
+      const map: Record<string, FotoTela> = {}
+      foto.forEach((f, i) => {
+        if (f) map[photoUrls[i]] = f
       })
       setPhotos(map)
     })
@@ -186,16 +204,17 @@ export default function WrappedModal({ wrapped, onClose, onNotice }: WrappedModa
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [photoKey])
 
-  const photoFor = (url?: string | null): string | null => (url ? photos[url] ?? null : null)
+  const photoFor = (url?: string | null): FotoTela | null => (url ? photos[url] ?? null : null)
 
   // Auto-avanzamento: il timer è l'unica fonte di verità (la barra è solo la
-  // sua immagine). Si ferma sull'ultima slide, in pausa, durante l'export e
+  // sua immagine). Si ferma sull'ultima slide, in pausa, durante gli export e
   // con reduced-motion.
+  const occupato = busy || !!scaricando
   useEffect(() => {
-    if (!autoplay || held || busy || reduceMotion || idx >= n - 1) return
+    if (!autoplay || held || occupato || reduceMotion || idx >= n - 1) return
     const t = setTimeout(() => setIdx((i) => Math.min(n - 1, i + 1)), SLIDE_MS)
     return () => clearTimeout(t)
-  }, [autoplay, held, busy, reduceMotion, idx, n])
+  }, [autoplay, held, occupato, reduceMotion, idx, n])
 
   const go = (i: number) => setIdx(Math.max(0, Math.min(n - 1, i)))
   const next = () => go(idx + 1)
@@ -222,28 +241,19 @@ export default function WrappedModal({ wrapped, onClose, onNotice }: WrappedModa
     if (e.clientX - rect.left < rect.width * 0.32) prev()
     else next()
   }
-  // Il dito che esce dalla card senza rilasciare lascerebbe il mazzo fermo per
-  // sempre: qualunque uscita dal gesto rimette in moto.
+  // Il dito che esce dalla slide senza rilasciare lascerebbe il mazzo fermo
+  // per sempre: qualunque uscita dal gesto rimette in moto.
   const onPointerCancel = () => {
     downX.current = null
     setHeld(false)
   }
 
-  // L'anteprima si scala sull'altezza visibile (e sulla larghezza su schermi
-  // stretti); da 900px la card resta entro l'80% dell'altezza (UX §9.2).
-  const perAltezza = (vista.h - CORNICE_PX) / 1920
-  const perLarghezza = (vista.w - 32) / 1080
-  const tetto = vista.w >= 900 ? (vista.h * 0.8) / 1920 : 0.56
-  const scale = Math.max(0.22, Math.min(0.56, tetto, perAltezza, perLarghezza))
-  const boxW = Math.round(1080 * scale)
-  const boxH = Math.round(1920 * scale)
-
+  // ------------------------------------------------------------- export
   const renderBlob = async (i: number): Promise<Blob> => {
     const node = captureRefs.current[i]
-    if (!node) throw new Error('card non montata')
-    // Su iPhone e Mac l'interfaccia usa SF e Inter non è mai scaricato: senza
-    // questo il PNG esce in Arial. Dentro il tetto di 3s (UX §6.5): oltre, si
-    // genera con quel che c'è.
+    if (!node) throw new Error('tela non montata')
+    // Geist prima della foto: senza, il PNG esce in Arial. Dentro il tetto
+    // di 3s (UX §6.5): oltre, si genera con quel che c'è.
     await caricaFontExport()
     // pixelRatio 2 → PNG 2160×3840: nitido su schermi retina e dopo l'upload IG.
     const opts = { pixelRatio: 2, cacheBust: true, width: 1080, height: 1920 }
@@ -258,65 +268,67 @@ export default function WrappedModal({ wrapped, onClose, onNotice }: WrappedModa
 
   const fileName = (i: number) => `${wrapped.slug}-${pad2(i + 1)}.png`
 
-  // Quale card finisce nel PNG: il RIEPILOGO, non la slide che si guarda
-  // (sull'ultima si legge "Grazie"). Senza riepilogo, la slide corrente.
+  // Che cosa condivide «Condividi»: la slide che si guarda; sull'ultima (il
+  // saluto, «Grazie») il RIEPILOGO, che porta tutta la stagione.
   const recapIdx = slides.findIndex((s) => s.kind === 'recap')
-  const exportIdx = recapIdx >= 0 ? recapIdx : idx
+  const shareIdx = slides[idx]?.kind === 'outro' && recapIdx >= 0 ? recapIdx : idx
 
-  // L'immagine si prepara PRIMA del tocco, appena si arriva all'ultima slide:
-  // iOS concede `navigator.share` solo a ridosso del gesto, e generare il PNG
-  // dopo il tocco (secondi, su un telefono) faceva scadere il permesso.
-  const shotKey = `${rangeKey}|${exportIdx}|${Object.keys(photos).length}`
-  const shotRef = useRef<{ key: string; promise: Promise<Blob> } | null>(null)
-  const blobRef = useRef<{ key: string; blob: Blob } | null>(null)
-  const [readyKey, setReadyKey] = useState<string | null>(null)
-  const ready = readyKey === shotKey
-  // «Preparo…» sul pulsante mentre il PNG si sta generando (UX §6.5); se la
-  // preparazione fallisce torna l'etichetta di sempre, e il tocco riprova.
-  const [inCorso, setInCorso] = useState(false)
+  // Un PNG per slide, preparato una volta sola: la promessa in corso e il Blob
+  // pronto. Un errore non resta in cache (il tocco dopo riprova).
+  const fotoKey = Object.keys(photos).length
+  const chiave = (i: number) => `${rangeKey}|${i}|${fotoKey}`
+  const inCorso = useRef(new Map<string, Promise<Blob>>())
+  const pronti = useRef(new Map<string, Blob>())
+  // Le due mappe sono ref (servono subito, dentro il gesto): questo numero
+  // ridisegna i pulsanti quando una preparazione parte, finisce o fallisce.
+  const [, setVersione] = useState(0)
 
-  const prepare = (): Promise<Blob> => {
-    if (shotRef.current?.key === shotKey) return shotRef.current.promise
-    const key = shotKey
-    // Tetto all'intera generazione: se html-to-image resta appeso su un font
-    // che non arriva, il pulsante non deve restare su «Preparo…» per sempre.
+  const prepare = (i: number): Promise<Blob> => {
+    const key = chiave(i)
+    const gia = inCorso.current.get(key)
+    if (gia) return gia
     const promise = Promise.race([
-      renderBlob(exportIdx),
-      new Promise<never>((_, rej) => setTimeout(() => rej(new Error('timeout generazione')), 20000)),
+      renderBlob(i),
+      new Promise<never>((_, rej) => setTimeout(() => rej(new Error('timeout generazione')), TETTO_MS)),
     ])
-    shotRef.current = { key, promise }
-    setInCorso(true)
+    inCorso.current.set(key, promise)
+    setVersione((v) => v + 1)
     promise.then(
       (blob) => {
-        blobRef.current = { key, blob }
-        setReadyKey(key)
-        setInCorso(false)
+        pronti.current.set(key, blob)
+        setVersione((v) => v + 1)
       },
-      // Un errore non resta in cache: il tocco successivo riprova.
       () => {
-        if (shotRef.current?.promise === promise) shotRef.current = null
-        setInCorso(false)
+        if (inCorso.current.get(key) === promise) inCorso.current.delete(key)
+        setVersione((v) => v + 1)
       },
     )
     return promise
   }
 
+  // L'immagine da condividere si prepara PRIMA del tocco appena si arriva
+  // all'ultima slide: iOS concede `navigator.share` solo a ridosso del gesto, e
+  // generare il PNG dopo il tocco (secondi, su un telefono) fa scadere il
+  // permesso. Sulle altre slide si genera al tocco (e se il permesso scade, lo
+  // si dice: il secondo tocco trova l'immagine pronta).
   const atEnd = idx === n - 1
   useEffect(() => {
     if (!atEnd || !wrapped.hasEnoughData) return
     // In sottofondo: un fallimento qui non si mostra, lo dirà il tocco.
-    prepare().catch(() => {})
+    prepare(shareIdx).catch(() => {})
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [atEnd, shotKey, wrapped.hasEnoughData])
+  }, [atEnd, shareIdx, rangeKey, fotoKey, wrapped.hasEnoughData])
 
-  // Il Blob pronto, oppure lo genera adesso (tocco arrivato prima della fine
-  // della preparazione). `busy` copre solo l'attesa visibile.
-  const getBlob = async (): Promise<Blob> => {
-    const pronto = blobRef.current
-    if (pronto?.key === shotKey) return pronto.blob
+  const shareReady = pronti.current.has(chiave(shareIdx))
+  const shareInPreparazione = inCorso.current.has(chiave(shareIdx)) && !shareReady
+
+  /** Il Blob pronto, oppure lo genera adesso; `busy` copre l'attesa visibile. */
+  const getBlob = async (i: number): Promise<Blob> => {
+    const pronto = pronti.current.get(chiave(i))
+    if (pronto) return pronto
     setBusy(true)
     try {
-      return await prepare()
+      return await prepare(i)
     } finally {
       setBusy(false)
     }
@@ -330,35 +342,46 @@ export default function WrappedModal({ wrapped, onClose, onNotice }: WrappedModa
 
   // Scarico via Blob URL e ancora agganciata al documento: un `data:` da
   // qualche MB su un'ancora staccata, su iOS, spesso non partiva.
-  const download = async () => {
-    if (busy) return
+  const salvaFile = (blob: Blob, nome: string) => {
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = nome
+    a.rel = 'noopener'
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    setTimeout(() => URL.revokeObjectURL(url), 60_000)
+  }
+
+  const scaricaTutte = async () => {
+    if (occupato) return
     try {
-      const blob = await getBlob()
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = fileName(exportIdx)
-      a.rel = 'noopener'
-      document.body.appendChild(a)
-      a.click()
-      a.remove()
-      setTimeout(() => URL.revokeObjectURL(url), 60_000)
+      for (let i = 0; i < n; i++) {
+        setScaricando({ i: i + 1, n })
+        const blob = pronti.current.get(chiave(i)) ?? (await prepare(i))
+        salvaFile(blob, fileName(i))
+        if (i < n - 1) await new Promise((r) => setTimeout(r, PASSO_DOWNLOAD_MS))
+      }
       track('wrapped_scaricato')
     } catch (e) {
       failed(e)
+    } finally {
+      setScaricando(null)
     }
   }
 
   const share = async () => {
-    if (busy) return
+    if (occupato) return
+    const i = shareIdx
     let blob: Blob
     try {
-      blob = await getBlob()
+      blob = await getBlob(i)
     } catch (e) {
       failed(e)
       return
     }
-    const file = new File([blob], fileName(exportIdx), { type: 'image/png' })
+    const file = new File([blob], fileName(i), { type: 'image/png' })
     if (canShareFiles) {
       try {
         // Solo il file, niente `text`: con una didascalia alcune app
@@ -392,16 +415,18 @@ export default function WrappedModal({ wrapped, onClose, onNotice }: WrappedModa
   // ---- pochi dati: il recap non ha senso ----
   if (!wrapped.hasEnoughData) return <WrappedNonDisponibile motivo="dati" onClose={onClose} />
 
-  const ferma = (e: { stopPropagation: () => void }) => e.stopPropagation()
+  const pal = wrappedPalette(idx)
+  const slide = slides[idx]
+  const anno = annoDi(wrapped.range.label)
 
   return (
-    <Cornice onClose={onClose}>
-      {/* La barra alta: avanzamento e chiusura. Il ✕ è navigazione, non
-          un'azione sul recap: sta nell'angolo, non fra i comandi. */}
-      <div className="wrapped-bar wrapped-bar-top" data-material="glass-dark" onClick={ferma}>
-        <div className="wrapped-progress" style={{ width: boxW }} aria-hidden="true">
+    <Cornice onClose={onClose} tono={pal.key}>
+      <div className="wrapped-top">
+        {/* Le barre: un riempimento per la durata della slide. Dicono il
+            tempo; il numero della slide lo dice il gruppo qui sotto. */}
+        <div className="wrapped-progress" aria-hidden="true">
           {slides.map((_, i) => {
-            const animating = i === idx && autoplay && !busy && !reduceMotion
+            const animating = i === idx && autoplay && !occupato && !reduceMotion
             const filled = i < idx || (i === idx && !animating)
             return (
               <div key={i} className="wrapped-progress-track">
@@ -422,93 +447,70 @@ export default function WrappedModal({ wrapped, onClose, onNotice }: WrappedModa
             )
           })}
         </div>
-        <Chiudi onClose={onClose} />
-      </div>
-
-      {/* L'anteprima scalata sfogliabile. */}
-      <div className="wrapped-stage">
-        <div
-          onClick={ferma}
-          onPointerDown={onPointerDown}
-          onPointerUp={onPointerUp}
-          onPointerCancel={onPointerCancel}
-          onPointerLeave={onPointerCancel}
-          onKeyDown={(e) => {
-            if (e.key === 'ArrowRight') {
-              e.preventDefault()
-              next()
-            } else if (e.key === 'ArrowLeft') {
-              e.preventDefault()
-              prev()
-            } else if (e.key === ' ') {
-              e.preventDefault()
-              setAutoplay((a) => !a)
-            }
-          }}
-          tabIndex={0}
-          role="group"
-          aria-roledescription="slide"
-          aria-label={`Beach Wrapped, slide ${idx + 1} di ${n}`}
-          className="wrapped-deck"
-          style={{ width: boxW, height: boxH }}
-        >
-          {/* Due livelli: quello ESTERNO entra (opacità e 14px), quello
-              INTERNO tiene la scala dell'anteprima. Sullo stesso nodo,
-              l'entrata che finisce con `transform: none` cancellerebbe la scala. */}
-          <div key={idx} className="wrapped-card" style={{ width: boxW, height: boxH }}>
-            <div className="wrapped-card-scale" style={{ transform: `scale(${scale})` }}>
-              <WrappedSlideCard slide={slides[idx]} pal={wrappedPalette(idx)} index={idx} total={n} photoSrc={photoFor(slides[idx].photoUrl)} />
-            </div>
-          </div>
+        <div className="wrapped-head">
+          <h1 className="wrapped-brand">Beach Wrapped · {anno}</h1>
+          <Chiudi onClose={onClose} />
         </div>
       </div>
 
-      {/* Sotto la card nessuna pulsantiera di navigazione: il mazzo si sfoglia
-          con il dito e con le frecce. Condividi/Scarica solo sull'ultima slide;
-          lo spazio resta riservato, o la card ballerebbe all'ultimo passaggio. */}
-      <div className="wrapped-bar wrapped-bar-bottom" data-material="glass-dark" onClick={ferma}>
-        {atEnd &&
-          (canShare ? (
-            <>
-              <button
-                type="button"
-                className="ui-button"
-                data-variant="filled"
-                onClick={share}
-                aria-busy={busy || !ready}
-                aria-disabled={busy || undefined}
-              >
-                <Icon name="share" size={20} />
-                <span className="ui-button-label">{inCorso || busy ? 'Preparo…' : 'Condividi'}</span>
-              </button>
-              <button
-                type="button"
-                className="ui-button"
-                data-variant="quiet"
-                onClick={download}
-                aria-disabled={busy || undefined}
-              >
-                <Icon name="download" size={20} />
-                <span className="ui-button-label">Scarica</span>
-              </button>
-            </>
-          ) : (
-            <button
-              type="button"
-              className="ui-button"
-              data-variant="filled"
-              onClick={download}
-              aria-busy={busy || !ready}
-              aria-disabled={busy || undefined}
-            >
-              <Icon name="download" size={20} />
-              <span className="ui-button-label">{inCorso || busy ? 'Preparo…' : recapIdx >= 0 ? 'Scarica il riepilogo' : 'Scarica'}</span>
-            </button>
-          ))}
+      {/* La slide: tutta l'area in mezzo è il tocco. */}
+      <div
+        onPointerDown={onPointerDown}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerCancel}
+        onPointerLeave={onPointerCancel}
+        onKeyDown={(e) => {
+          if (e.key === 'ArrowRight') {
+            e.preventDefault()
+            next()
+          } else if (e.key === 'ArrowLeft') {
+            e.preventDefault()
+            prev()
+          } else if (e.key === ' ') {
+            e.preventDefault()
+            setAutoplay((a) => !a)
+          }
+        }}
+        tabIndex={0}
+        role="group"
+        aria-roledescription="slide"
+        aria-label={`Beach Wrapped, slide ${idx + 1} di ${n}`}
+        className="wrapped-deck"
+      >
+        <div key={idx} className="wrapped-slide">
+          <Slide slide={slide} mani={pal.mani} foto={photoFor(slide.photoUrl) ?? (slide.photoUrl ? { src: slide.photoUrl } : null)} />
+        </div>
       </div>
 
-      {/* Il layer nascosto a piena risoluzione: una card per slide, sorgente
-          degli export (mai scalata, quindi immagine pixel-perfect). */}
+      <div className="wrapped-actions" data-solo={canShare ? undefined : ''}>
+        <Button
+          variant="glass"
+          size="lg"
+          className="wrapped-action"
+          busy={!!scaricando}
+          busyLabel={scaricando ? `Preparo ${scaricando.i}/${scaricando.n}…` : undefined}
+          disabled={busy}
+          onClick={() => void scaricaTutte()}
+        >
+          Scarica tutte
+        </Button>
+        {canShare && (
+          <Button
+            variant="glass"
+            size="lg"
+            className="wrapped-action wrapped-share"
+            busy={busy || shareInPreparazione}
+            busyLabel="Preparo…"
+            disabled={!!scaricando}
+            onClick={() => void share()}
+          >
+            Condividi
+          </Button>
+        )}
+      </div>
+
+      {/* Il livello nascosto a piena risoluzione: una tela per slide,
+          sorgente degli export (mai scalata, quindi immagine pixel-perfect). */}
       <div aria-hidden="true" className="wrapped-capture">
         {slides.map((sl, i) => (
           <div
@@ -518,7 +520,7 @@ export default function WrappedModal({ wrapped, onClose, onNotice }: WrappedModa
             }}
             className="wrapped-capture-card"
           >
-            <WrappedSlideCard slide={sl} pal={wrappedPalette(i)} index={i} total={n} photoSrc={photoFor(sl.photoUrl)} />
+            <WrappedSlideCard slide={sl} pal={wrappedPalette(i)} index={i} total={n} label={wrapped.range.label} foto={photoFor(sl.photoUrl)} />
           </div>
         ))}
       </div>

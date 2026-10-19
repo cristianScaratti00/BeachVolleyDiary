@@ -1,5 +1,5 @@
 // ============================================================================
-// Schermata "Mappa delle conquiste" (Tornei · Mappa). È presentazionale —
+// Schermata "Mappa delle conquiste" (Tornei · Mappa, il redesign). È presentazionale —
 // riceve un `MappaData` già completo, la stagione e una callback — quindi si
 // verifica montandola con `vi.fn()` e dati di fabbrica, senza mockare Supabase.
 // I tornei si aprono con link veri (UX §7.6): si verifica indirizzo e router.
@@ -121,8 +121,15 @@ describe('Mappa — il riquadro della mappa', () => {
     // Chi usa uno screen reader deve sapere cosa sta saltando: il nome dice
     // quante città ci sono e che l'elenco completo è più sotto.
     renderMappa({ pins: [jesolo, rimini, cervia] })
-    const mappa = screen.getByRole('region')
+    const mappa = screen.getByRole('region', { name: /Mappa d'Italia/ })
     expect(mappa).toHaveAttribute('aria-label', expect.stringContaining('3 città'))
+  })
+
+  it('sta in una card-figura con la legenda come didascalia', () => {
+    renderMappa({ pins: [cervia] })
+    const figura = screen.getByRole('figure', { name: 'Mappa delle conquiste' })
+    expect(within(figura).getByRole('region', { name: /Mappa d'Italia/ })).toBeInTheDocument()
+    expect(figura.querySelector('figcaption')).toHaveTextContent('VintaPodioGiocata')
   })
 
   it('avvisa quando un pin cade sul centro città invece che sul campo', () => {
@@ -143,11 +150,65 @@ describe('Mappa — il riquadro della mappa', () => {
 describe('Mappa — la stagione si vede e si cambia qui (C10)', () => {
   it('il selettore della stagione sta sopra le statistiche', async () => {
     const user = userEvent.setup()
-    const { setFYear } = renderMappa({ pins: [rimini] }, '2026')
+    const { setFYear, container } = renderMappa({ pins: [rimini] }, '2026')
     const sel = screen.getByRole('combobox', { name: 'Stagione' })
     expect(sel).toHaveValue('2026')
+    expect(sel.compareDocumentPosition(container.querySelector('dl')!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     await user.selectOptions(sel, '2025')
     expect(setFYear).toHaveBeenCalledWith('2025')
+  })
+
+  it('la capsula dice la stagione scelta, a parole', () => {
+    renderMappa({ pins: [rimini] }, '2026')
+    expect(screen.getByText('Stagione 2026', { selector: '.mappa-season-value' })).toBeInTheDocument()
+  })
+
+  it('«Sempre» si legge «Tutte le stagioni»', () => {
+    renderMappa({ pins: [rimini] })
+    expect(screen.getByRole('option', { name: 'Tutte le stagioni' })).toHaveValue('Sempre')
+  })
+})
+
+// ---------------------------------------------------------------- numeri
+describe('Mappa — i quattro numeri', () => {
+  it('città, conquistate, con podio, tornei: in quest\'ordine', () => {
+    const { container } = renderMappa({ pins: [jesolo, rimini, cervia] })
+    const dl = container.querySelector('dl')!
+    const coppie = Array.from(dl.children).map((d) => [d.querySelector('dt')?.textContent, d.querySelector('dd')?.textContent])
+    expect(coppie).toEqual([
+      ['città', '3'],
+      ['conquistate', '1'],
+      ['con podio', '1'],
+      ['tornei', '4'],
+    ])
+  })
+
+  it('il posto migliore: quante volte ci hai fatto quel risultato, non quanti tornei ci hai giocato', () => {
+    const pin = makeMappaPin({
+      city: 'Segrate',
+      tier: 'vinto',
+      best: '1° 🏆',
+      count: 3,
+      tornei: [
+        makeMappaTorneoRow({ badge: '1° 🏆' }),
+        makeMappaTorneoRow({ badge: '1° 🏆 · Gold' }),
+        makeMappaTorneoRow({ badge: 'Gironi' }),
+      ],
+    })
+    renderMappa({ pins: [pin], migliore: pin })
+    expect(screen.getByText(/Il tuo posto migliore è/)).toHaveTextContent('Il tuo posto migliore è Segrate: 1° in 2 tornei su 3.')
+  })
+
+  it('il posto migliore sempre allo stesso risultato: «1° in 3 tornei»', () => {
+    const pin = makeMappaPin({
+      city: 'Segrate',
+      tier: 'vinto',
+      best: '1° 🏆',
+      count: 3,
+      tornei: [makeMappaTorneoRow({ badge: '1° 🏆' }), makeMappaTorneoRow({ badge: '1° 🏆' }), makeMappaTorneoRow({ badge: '1° 🏆' })],
+    })
+    renderMappa({ pins: [pin], migliore: pin })
+    expect(screen.getByText(/Il tuo posto migliore è/)).toHaveTextContent('Il tuo posto migliore è Segrate: 1° in 3 tornei.')
   })
 })
 
@@ -174,9 +235,14 @@ describe('Mappa — senza rete', () => {
 describe('Mappa — legenda', () => {
   it('ha sempre le tre voci, in testo, anche a zero', () => {
     renderMappa({ pins: [jesolo] })
-    expect(screen.getByText('Vinto qui')).toBeInTheDocument()
+    expect(screen.getByText('Vinta')).toBeInTheDocument()
     expect(screen.getByText('Podio')).toBeInTheDocument()
-    expect(screen.getByText('Giocato')).toBeInTheDocument()
+    expect(screen.getByText('Giocata')).toBeInTheDocument()
+  })
+
+  it('ogni glifo dice il suo risultato con la forma dei pin', () => {
+    const { container } = renderMappa({ pins: [jesolo] })
+    expect(Array.from(container.querySelectorAll('.mappa-glyph')).map((g) => g.getAttribute('data-tier'))).toEqual(['vinto', 'podio', 'giocato'])
   })
 
   it('i glifi della legenda sono decorativi', () => {
@@ -198,7 +264,7 @@ describe('Mappa — la lista è la fonte di verità', () => {
   it('il risultato è scritto, non solo colorato', () => {
     renderMappa({ pins: [jesolo, cervia] })
     const riga = screen.getByRole('button', { name: /Cervia/ })
-    // '1° 🏆' diventa «1°» col trofeo SVG e «Primo posto» per gli screen reader (C15).
+    // La medaglia: '1° 🏆' diventa «1°» e «Primo posto» per gli screen reader (C15).
     expect(within(riga).getByText('1°')).toBeInTheDocument()
     expect(within(riga).getByText('Primo posto')).toBeInTheDocument()
     expect(within(screen.getByRole('button', { name: /Jesolo/ })).getByText('Gironi')).toBeInTheDocument()
@@ -320,11 +386,25 @@ describe('Mappa — pin e riga sono la stessa selezione', () => {
     await expect(act(async () => spiaMappa.props!.onSelect('cervia'))).resolves.not.toThrow()
   })
 
-  it('la mappa riceve tutti i pin, anche quando la lista è filtrata', () => {
-    // Il filtro a chip restringe l'elenco, non la mappa: la vista d'insieme
-    // resta completa, com'era col disegno SVG.
+  it('senza filtro la mappa riceve tutti i pin', () => {
     renderMappa({ pins: [cervia, rimini, jesolo] })
     expect(spiaMappa.props!.pins).toHaveLength(3)
+  })
+
+  it('le chip filtrano anche i pin (il redesign)', async () => {
+    const user = userEvent.setup()
+    renderMappa({ pins: [jesolo, rimini, cervia] })
+    await user.click(screen.getByRole('button', { name: /^Vinte/ }))
+    expect(spiaMappa.props!.pins.map((p) => p.city)).toEqual(['Cervia'])
+  })
+
+  it('una città nascosta dal filtro non resta selezionata di nascosto', async () => {
+    const user = userEvent.setup()
+    renderMappa({ pins: [jesolo, rimini, cervia] })
+    await act(async () => spiaMappa.props!.onSelect('jesolo'))
+    expect(spiaMappa.props!.selected).toBe('jesolo')
+    await user.click(screen.getByRole('button', { name: /^Vinte/ }))
+    expect(spiaMappa.props!.selected).toBeNull()
   })
 })
 
@@ -335,11 +415,22 @@ describe('Mappa — filtro per risultato', () => {
     expect(screen.queryByRole('group', { name: /Filtra le città/ })).not.toBeInTheDocument()
   })
 
+  it('le chip hanno le parole e i conteggi del redesign', () => {
+    renderMappa({ pins: [jesolo, rimini, cervia] })
+    const gruppo = screen.getByRole('group', { name: /Filtra le città/ })
+    expect(within(gruppo).getAllByRole('button').map((b) => b.firstElementChild?.textContent)).toEqual([
+      'Tutte',
+      'Vinte · 1',
+      'Podio · 1',
+      'Giocate · 1',
+    ])
+  })
+
   it('compare con risultati misti e filtra', async () => {
     const user = userEvent.setup()
     renderMappa({ pins: [jesolo, rimini, cervia] })
     const gruppo = screen.getByRole('group', { name: /Filtra le città/ })
-    await user.click(within(gruppo).getByRole('button', { name: /Vinto qui/ }))
+    await user.click(within(gruppo).getByRole('button', { name: /^Vinte/ }))
     expect(screen.getByRole('button', { name: /Cervia/ })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /Jesolo/ })).not.toBeInTheDocument()
   })
@@ -348,7 +439,7 @@ describe('Mappa — filtro per risultato', () => {
     const user = userEvent.setup()
     renderMappa({ pins: [jesolo, rimini, cervia] })
     const gruppo = screen.getByRole('group', { name: /Filtra le città/ })
-    await user.click(within(gruppo).getByRole('button', { name: /Vinto qui/ }))
+    await user.click(within(gruppo).getByRole('button', { name: /^Vinte/ }))
     await user.click(within(gruppo).getByRole('button', { name: 'Tutte' }))
     expect(screen.getByRole('button', { name: /Jesolo/ })).toBeInTheDocument()
   })
@@ -416,6 +507,13 @@ describe('Mappa — accessibilità', () => {
       sconosciute: [{ key: 'foo', city: 'Fooburgo', count: 1, tornei: [makeMappaTorneoRow()] }],
       senzaCitta: 2,
     })
+    await expectNoA11yViolations(container)
+  })
+
+  it('nessuna violazione axe: filtro attivo e stagione scelta', async () => {
+    const user = userEvent.setup()
+    const { container } = renderMappa({ pins: [jesolo, rimini, cervia] }, '2026')
+    await user.click(screen.getByRole('button', { name: /^Podio/ }))
     await expectNoA11yViolations(container)
   })
 

@@ -4,6 +4,7 @@
 // chiunque): sotto le tre lettere non si interroga nemmeno, come fa la RPC.
 // L'esito positivo lo dice la shell (Toast «Collegato»); l'errore resta qui,
 // in linea (`role="alert"`), con i risultati ancora lì per riprovare.
+// Non è un modulo: titolo grande in cima e «Annulla» di vetro in fondo.
 // ============================================================================
 import { useEffect, useState } from 'react'
 import type { CollegaSheetProps } from '../../app/contracts'
@@ -74,7 +75,7 @@ export default function CollegaSheet({ onClose, top, byTouch, opener, setBusy, p
       busy={!!busyId}
       footer={
         <SheetActions>
-          <Button variant="quiet" onClick={onClose}>Annulla</Button>
+          <Button variant="glass" block onClick={onClose}>Annulla</Button>
         </SheetActions>
       }
     >

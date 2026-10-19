@@ -1,24 +1,15 @@
 /* ============================================================================
-   Dettaglio torneo (UX §5 F5, §9.2; ART_DIRECTION §8, §10.3).
+   Dettaglio torneo (UX §5 F5, §9.2; il redesign, versione D): medaglia e
+   titolo, tabellone 3×2, la card del luogo, partite, foto, e la barra di
+   vetro fissa in fondo.
    ============================================================================ */
 @layer components {
-  .torneo-eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    font: var(--type-eyebrow);
-    letter-spacing: var(--track-eyebrow);
-    text-transform: uppercase;
-    color: var(--ink-2);
-  }
-  /* Il pallino del piazzamento: decorativo accanto al testo, quindi resta il
-     letterale della lib (ART_DIRECTION §4.5). */
-  .torneo-dot {
-    flex: none;
-    width: var(--space-2);
-    height: var(--space-2);
-    border-radius: 50%;
-  }
+  /* La salita dei blocchi, uno dopo l'altro (--rise-step fra l'uno e l'altro). */
+  .torneo-tags,
+  .torneo-stats { --rise-i: 1; }
+  .torneo-luogo-wrap { --rise-i: 2; }
+  .torneo-sez-partite { --rise-i: 3; }
+  .torneo-sez-foto { --rise-i: 4; }
 
   /* La traccia dell'intestazione modificata (MOTION.md §10.4): un fondo
      --accent-wash sotto il large title che svanisce, solo opacità. */
@@ -37,46 +28,118 @@
     .torneo-traccia .ui-largetitle::after { animation-duration: var(--dur-entrata); }
   }
 
-  /* «3° torneo qui · 1 podio»: inchiostro e non arancio, perché sul fondo
-     pagina l'arancio dei badge non regge AA (contrast.test.ts). */
-  .torneo-venue {
+  /* Tabellone e «condiviso»: pastiglie col filo sotto il titolo, sobrie. */
+  .torneo-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1-5);
+    margin-top: var(--space-2-5);
+    padding: 0 var(--space-1);
+  }
+
+  .torneo-stats { margin-top: var(--stack); }
+  /* «2–0» e «4–1» non sono un numero solo e restano testo, mentre le altre
+     celle sono un tabellone alto 1.875rem (il suo --lh): con la stessa
+     interlinea le etichette stanno tutte sulla stessa riga. */
+  .torneo-stats .ui-stat-value { line-height: 1.875rem; }
+
+  /* ------------------------------------------------------------ Luogo */
+  .torneo-luogo-wrap { margin-top: var(--stack); }
+  .torneo-luogo {
+    position: relative;
     display: flex;
     align-items: center;
-    gap: var(--space-1);
-    margin-top: var(--space-2);
+    gap: var(--space-3);
+    width: 100%;
+    padding: var(--space-2-5);
+    background: var(--surface);
+    border: var(--border-w) solid var(--edge);
+    border-radius: var(--radius-card);
+    color: var(--ink);
+    text-align: left;
+  }
+  .torneo-luogo:focus-visible { outline-offset: var(--focus-offset); }
+  @media (hover: hover) and (pointer: fine) {
+    .torneo-luogo:not([data-static]):hover { border-color: var(--edge-strong); }
+  }
+  .torneo-luogo-thumb {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: var(--space-16);
+    height: 52px;
+    border-radius: var(--radius-control);
+    border: var(--border-w) solid var(--edge);
+    background: var(--fill);
+    color: var(--ink-2);
+  }
+  .torneo-luogo-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+  .torneo-luogo-name {
+    font: 600 0.9375rem/1.3 var(--font-ui);
+    letter-spacing: var(--track-callout);
+    overflow-wrap: anywhere;
+  }
+  .torneo-luogo-sub {
     font: var(--type-footnote);
     letter-spacing: var(--track-footnote);
-    font-weight: 600;
-    color: var(--ink);
+    color: var(--ink-2);
   }
-  .torneo-venue .ui-icon { color: var(--ink-2); }
+  /* «Mappa» in arancio-testo (5.18 sulla carta): dice che la card si apre. */
+  .torneo-luogo-azione {
+    flex: none;
+    padding-right: var(--space-1-5);
+    font: var(--type-subhead-strong);
+    letter-spacing: var(--track-subhead);
+    color: var(--accent-text);
+  }
 
-  .torneo-cta { margin-top: var(--space-4); }
-  .torneo-stats { margin-top: var(--space-6); }
-  .torneo-empty { padding-top: var(--space-6); padding-bottom: var(--space-6); }
-
+  .torneo-mappa { display: grid; gap: var(--space-1); margin-top: var(--space-2); }
+  .torneo-mappa-link { justify-self: end; }
   /* Segnaposto della mappa: alto e arrotondato come la mappa vera. */
   .torneo-map-bone {
     height: var(--venue-map-h);
     border-radius: var(--radius-card);
   }
 
+  /* ------------------------------------------------------- Partite */
+  .torneo-vuoto { padding-top: 0; padding-bottom: 0; }
+  .torneo-vuoto .ui-empty { padding: var(--space-6) 0; }
+
   /* ------------------------------------------------------------- Foto */
-  /* Come Foto di Apple: celle quadrate, gap 4, raggio dei controlli. */
+  /* Tre colonne come nel redesign, gap 8, raggio 16; dai 600px le celle si
+     moltiplicano invece di diventare enormi. */
   .torneo-foto-grid {
     list-style: none;
     margin: 0;
     padding: 0;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(var(--photo-min), 1fr));
-    gap: var(--space-1);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-2);
+  }
+  @media (min-width: 600px) {
+    .torneo-foto-grid { grid-template-columns: repeat(auto-fill, minmax(var(--photo-min), 1fr)); }
   }
   .torneo-foto-cell {
     position: relative;
     isolation: isolate;
     aspect-ratio: 1;
-    border-radius: var(--radius-control);
+    border-radius: var(--radius-row);
   }
+
+  /* «Aggiungi»: la tessera di vetro in testa alla griglia. */
+  .torneo-foto-add.ui-button {
+    flex-direction: column;
+    gap: var(--space-1);
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    padding: 0;
+    border-radius: var(--radius-row);
+    font: 600 0.8125rem/1.2 var(--font-ui);
+    letter-spacing: var(--track-footnote);
+  }
+  .torneo-foto-add .ui-icon { stroke-width: var(--icon-stroke-16); }
+
   .torneo-foto {
     position: relative;
     display: grid;
@@ -90,13 +153,13 @@
     cursor: zoom-in;
   }
   .torneo-foto[data-legacy] { cursor: default; }
-  /* Il filo interno stacca una foto di sabbia bianca dalla carta bianca. */
+  /* Il filo della foto: stacca una foto di sabbia bianca dalla pagina. */
   .torneo-foto::after {
     content: "";
     position: absolute;
     inset: 0;
     border-radius: inherit;
-    box-shadow: var(--photo-ring);
+    box-shadow: inset 0 0 0 var(--border-w) var(--edge), var(--photo-ring);
     pointer-events: none;
   }
   .torneo-foto img {
@@ -107,43 +170,108 @@
     object-fit: cover;
   }
   .torneo-foto:focus-visible { outline-offset: var(--focus-offset); }
+  .torneo-foto:not([data-legacy]) { transition: transform var(--dur-press) var(--ease-press); }
+  .torneo-foto:not([data-legacy]):active { transform: scale(var(--press-scale)); }
   @media (hover: hover) and (pointer: fine) {
-    .torneo-foto:not([data-legacy]):hover::after { box-shadow: var(--photo-ring), inset 0 0 0 var(--border-w) var(--edge-strong); }
+    .torneo-foto:not([data-legacy]):hover::after { box-shadow: inset 0 0 0 var(--border-w) var(--edge-strong), var(--photo-ring); }
   }
-  /* Elimina: un bersaglio da 44 nell'angolo, opaco (niente vetro sopra le
-     foto: con trenta celle il budget delle sfocature salterebbe). */
+
+  /* Elimina: un bersaglio da 44 nell'angolo con il cerchio bianco opaco
+     dentro (niente vetro sopra le foto: con trenta celle il budget delle
+     sfocature salterebbe). */
   .torneo-foto-del {
     position: absolute;
     top: 0;
     right: 0;
     z-index: 2;
-    display: grid;
-    place-items: center;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
     width: var(--touch);
     height: var(--touch);
+    padding: var(--space-1-5);
     color: var(--ink);
   }
-  .torneo-foto-del::before {
-    content: "";
-    position: absolute;
-    top: var(--space-1);
-    right: var(--space-1);
-    width: var(--space-8);
-    height: var(--space-8);
+  .torneo-foto-del-dot {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     background: var(--surface);
     box-shadow: var(--elev-float);
-    z-index: -1;
+    transition: transform var(--dur-press) var(--ease-press);
   }
-  /* L'icona al centro del cerchio, che sta nell'angolo del bersaglio. */
-  .torneo-foto-del .ui-icon { transform: translate(var(--space-0-5), calc(-1 * var(--space-0-5))); }
-  .torneo-foto-del:active::before { background: var(--surface-pressed); }
+  .torneo-foto-del:active .torneo-foto-del-dot { transform: scale(var(--press-scale)); background: var(--surface-pressed); }
+  .torneo-foto-del:focus-visible { outline: none; }
+  .torneo-foto-del:focus-visible .torneo-foto-del-dot {
+    outline: var(--focus-width) solid var(--focus-ring);
+    outline-offset: var(--focus-offset);
+  }
 
+  .torneo-foto-vuoto {
+    padding: 0 var(--space-1);
+    font: var(--type-footnote);
+    letter-spacing: var(--track-footnote);
+    color: var(--ink-2);
+  }
+
+  /* ------------------------------------------------- Barra in fondo */
+  /* Fissa come la TabBar (stesse misure ai lati e dal fondo), che su questa
+     rotta non c'è: lo spazio sotto l'ultima foto è --tabbar-clearance di
+     <main>. Da 900px si centra nella colonna, a destra della Sidebar. */
+  .torneo-azioni {
+    position: fixed;
+    left: var(--tabbar-side);
+    right: var(--tabbar-side);
+    bottom: var(--tabbar-bottom);
+    z-index: var(--z-tabbar);
+    max-width: var(--tabbar-max);
+    margin: 0 auto;
+    display: flex;
+    gap: var(--tabbar-gap);
+    pointer-events: none;
+  }
+  .torneo-azioni > * { pointer-events: auto; }
+  @media (min-width: 900px) {
+    .torneo-azioni { left: calc(var(--sidebar-w) + 2 * var(--sidebar-inset) + var(--gutter)); right: var(--gutter); }
+    /* `<main>` da 900 lascia solo 48px sotto: la barra ne chiede di più. */
+    .torneo-page { padding-bottom: calc(var(--control-lg) + var(--space-6)); }
+  }
+
+  .torneo-storia {
+    position: relative;
+    isolation: isolate;
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    height: var(--control-lg);
+    padding: 0 var(--space-4);
+    border-radius: var(--radius-capsule);
+    color: var(--ink);
+    font: 600 0.9375rem/1.2 var(--font-ui);
+    letter-spacing: var(--track-callout);
+    white-space: nowrap;
+    --material-elev: var(--elev-float);
+  }
+  .torneo-aggiungi.ui-button {
+    flex: 1.4;
+    min-width: 0;
+    padding: 0 var(--space-4);
+    font-size: 0.9375rem;
+    box-shadow: inset 0 0 0 var(--border-w) var(--accent-strong), var(--elev-float);
+  }
+
+  /* ------------------------------------------------------- Non trovato */
   .torneo-missing {
     display: grid;
     justify-items: start;
     gap: var(--space-4);
     margin-top: var(--space-4);
+    padding: 0 var(--space-1);
   }
   .torneo-missing-text {
     font: var(--type-body);

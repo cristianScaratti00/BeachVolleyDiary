@@ -9,10 +9,11 @@
     margin: 0 auto;
     padding: var(--space-8) 0;
   }
-  .ui-empty-zero { display: flex; flex-direction: column; align-items: center; margin-bottom: var(--space-4); }
+  .ui-empty-zero { display: flex; flex-direction: column; align-items: center; margin-bottom: var(--space-3); }
+  /* Sotto Pallo lo «0» si fa più piccolo: il protagonista è lui. */
   .ui-empty-zero-n {
-    font: var(--type-num-hero);
-    letter-spacing: var(--track-num-hero);
+    font: var(--type-num-xl);
+    letter-spacing: var(--track-num-xl);
     font-variant-numeric: tabular-nums;
     color: var(--ink);
   }
@@ -20,11 +21,13 @@
     margin-top: var(--space-1);
     font: var(--type-eyebrow);
     letter-spacing: var(--track-eyebrow);
-    text-transform: uppercase;
     color: var(--ink-2);
   }
+  /* Il primo avvio: Pallo sopra il titolo (dorme finché non c'è niente; con
+     `pallo="saluta"` invita). */
+  .ui-empty-pallo { margin-bottom: var(--space-3); }
   .ui-empty-icon { color: var(--ink-3); margin-bottom: var(--space-3); }
-  .ui-empty-title { font: var(--type-title-2); letter-spacing: var(--track-title-2); }
+  .ui-empty-title { font: var(--type-title-2); letter-spacing: var(--track-title-2); text-wrap: balance; }
   .ui-empty-text {
     margin-top: var(--space-2);
     font: var(--type-subhead);

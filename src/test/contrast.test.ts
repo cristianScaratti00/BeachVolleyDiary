@@ -26,57 +26,37 @@ describe('contrasto — filtro a chip (FilterChips)', () => {
     expect(contrast(LIT.ink, LIT.surface)).toBeGreaterThanOrEqual(AA_TEXT)
   })
 
-  it('il testo della chip attiva supera AA sulla pillola navy', () => {
+  it('il testo della chip attiva supera AA sulla pillola d\'inchiostro', () => {
     expect(contrast(LIT.onSelect, LIT.select)).toBeGreaterThanOrEqual(AA_TEXT)
   })
 
   it('lo stato selezionato si distingue dal fondo pagina senza affidarsi al bordo', () => {
-    // Il navy pieno è ciò che rende leggibile "quale filtro è attivo" anche a
-    // chi non distingue un bordo dall'altro.
+    // L'inchiostro pieno è ciò che rende leggibile "quale filtro è attivo"
+    // anche a chi non distingue un bordo dall'altro.
     expect(contrast(LIT.select, PAGE)).toBeGreaterThanOrEqual(AA_NON_TEXT)
   })
 
   it('l\'anello di focus si stacca dal fondo pagina', () => {
     // `outline-offset: 2px` disegna l'anello FUORI dalla chip: il fondo di
-    // riferimento è la pagina, non il riempimento navy della chip attiva.
+    // riferimento è la pagina, non il riempimento della chip attiva.
     expect(contrast(INK, PAGE)).toBeGreaterThanOrEqual(AA_NON_TEXT)
   })
 })
 
 describe('contrasto — contatori di sezione e badge', () => {
   it('il contatore neutro supera AA (era 3.34 con MUTED su #F2F0EC, difetto #3)', () => {
-    // Badge neutro: --ink-2 su --fill.
-    expect(contrast(LIT.ink2, LIT.fill)).toBe(5.34)
+    // Il secondario sulla guida --fill (segmented inattivo).
+    expect(contrast(LIT.ink2, LIT.fill)).toBe(4.56)
   })
 
   it('il contatore accent supera AA (era 4.21 con #C4501E su #FFF1EA)', () => {
     // Badge accento e "Prossimi tornei": --accent-text su --accent-wash.
-    expect(contrast(LIT.accentText, LIT.accentWash)).toBe(4.71)
+    expect(contrast(LIT.accentText, LIT.accentWash)).toBe(4.66)
   })
 
   it('le vecchie coppie restano sotto AA: sono il motivo del cambio', () => {
     expect(contrast('rgba(27,42,74,.55)', '#F2F0EC')).toBe(3.34)
     expect(contrast('#C4501E', '#FFF1EA')).toBe(4.21)
-  })
-})
-
-// ============================================================================
-// Banner alpha — l'avviso che dice che l'app può rompersi si deve leggere
-// davvero. Fondo --accent-wash con il bordo --accent-edge, testo --ink pieno
-// (ART_DIRECTION §8: 12.07). Il link è --accent-text, 600.
-// ============================================================================
-describe('contrasto — banner versione alpha', () => {
-  it('il testo del banner supera AA sul fondo tinto', () => {
-    expect(contrast(LIT.ink, LIT.accentWash)).toBe(12.07)
-  })
-
-  it('il link "Segnala un problema" supera AA sullo stesso fondo', () => {
-    expect(contrast(LIT.accentText, LIT.accentWash)).toBeGreaterThanOrEqual(AA_TEXT)
-  })
-
-  it('il secondario di prima (.55) sullo stesso fondo NON basterebbe', () => {
-    // La ragione per cui il banner scrive con l'inchiostro pieno.
-    expect(contrast('rgba(27,42,74,.55)', LIT.accentWash)).toBeLessThan(AA_TEXT)
   })
 })
 
@@ -93,13 +73,13 @@ describe('contrasto — banner versione alpha', () => {
 // quello. Qui sotto può esserci mare, bosco, sabbia o asfalto, e **nessun
 // colore singolo supera 3:1 contro tutti**. I numeri lo dicono chiaro:
 //
-//   fondo               bianco   navy
-//   acqua OSM            1.60    8.87
-//   bosco fitto          9.84    1.45
+//   fondo               bianco   inchiostro
+//   acqua OSM            1.60    10.61
+//   bosco fitto          9.84     1.73
 //
 // Esattamente invertiti. Da qui il doppio bordo — alone bianco fuori, contorno
-// navy dentro: qualunque sia la tile, uno dei due la stacca. È la soluzione
-// cartografica standard, e qui è un REQUISITO: togliere uno dei due bordi come
+// d'inchiostro dentro: qualunque sia la tile, uno dei due la stacca. È la
+// soluzione cartografica standard, e qui è un REQUISITO: togliere uno dei due bordi come
 // "rumore visivo" fa sparire i pin su metà della penisola, in silenzio.
 // I pin NON passano dai token (ART_DIRECTION §4.5): restano i letterali di
 // `dotForRank`, ed è su quelli che si misura.
@@ -113,8 +93,8 @@ const TILE_BOSCO_FITTO = '#2E4A2E' // il verde più carico che capita sotto un p
 
 describe('contrasto — pin della mappa', () => {
   it('su ogni tile almeno uno dei due bordi supera la soglia', () => {
-    // L'invariante che tiene in piedi la mappa. Non "il bianco basta" né "il
-    // navy basta": basta la COPPIA, ed è per questo che ci sono entrambi.
+    // L'invariante che tiene in piedi la mappa. Non "il bianco basta" né
+    // "l'inchiostro basta": basta la COPPIA, ed è per questo che ci sono entrambi.
     for (const tile of [TILE_MARE, TILE_BOSCO_FITTO]) {
       const meglio = Math.max(contrast(WHITE, tile), contrast(INK, tile))
       expect(meglio, tile).toBeGreaterThanOrEqual(AA_NON_TEXT)
@@ -124,15 +104,15 @@ describe('contrasto — pin della mappa', () => {
   it('preso da solo, ciascun bordo fallisce su metà dei fondi', () => {
     // Fissati a numero: sono la prova che la ridondanza non è decorativa.
     expect(contrast(WHITE, TILE_MARE)).toBe(1.6) // il bianco sparisce sull'acqua…
-    expect(contrast(INK, TILE_MARE)).toBe(8.87) // …e lì lavora il navy
-    expect(contrast(INK, TILE_BOSCO_FITTO)).toBe(1.45) // il navy sparisce nel bosco…
+    expect(contrast(INK, TILE_MARE)).toBe(10.61) // …e lì lavora l'inchiostro
+    expect(contrast(INK, TILE_BOSCO_FITTO)).toBe(1.73) // l'inchiostro sparisce nel bosco…
     expect(contrast(WHITE, TILE_BOSCO_FITTO)).toBe(9.84) // …e lì lavora il bianco
   })
 
-  it('il contorno navy si stacca sempre dal proprio alone', () => {
-    // 14.22:1 — i due bordi non si confondono mai fra loro, qualunque cosa ci
+  it('il contorno d\'inchiostro si stacca sempre dal proprio alone', () => {
+    // 17.01:1 — i due bordi non si confondono mai fra loro, qualunque cosa ci
     // sia sotto: è ciò che rende leggibile il pin come forma unica.
-    expect(contrast(INK, WHITE)).toBe(14.22)
+    expect(contrast(INK, WHITE)).toBe(17.01)
   })
 
   it('nessuno dei tre riempimenti basterebbe da solo sulle tile', () => {

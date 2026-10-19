@@ -9,7 +9,7 @@
 // sheet mostrano «Salvataggio…» e restano aperti con i dati se qualcosa va
 // storto, e il Toast dice cosa fare.
 // ============================================================================
-import { useCallback, useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { track } from '@vercel/analytics'
 import type { UseDiary } from '../hooks/useDiary'
 import type { UseCheckIn } from '../hooks/useCheckIn'
@@ -18,7 +18,6 @@ import type { Permissions } from '../lib/permissions'
 import type { Session } from '../lib/auth'
 import { updateDisplayName, updatePassword } from '../lib/auth'
 import { supabase } from '../lib/supabase'
-import { riapriScelta } from '../lib/consenso'
 import { isOnline } from '../hooks/useConnection'
 import { toast } from '../components/ui/Toast'
 import type { MenuItem } from './overlays'
@@ -132,6 +131,11 @@ export function useActions({ diary, data, route, session, perm, check, caricamen
     if (nega(perm.check('createTournament'))) return
     openOverlay({ kind: 'torneo', mode: 'nuovo' }, opts(replaceTop))
   }
+  /** «Torneo rapido» dal ＋: lo stesso sheet con in vista solo nome, data e piazzamento. */
+  const torneoRapido = (replaceTop?: boolean) => {
+    if (nega(perm.check('createTournament'))) return
+    openOverlay({ kind: 'torneo', mode: 'nuovo', rapido: true }, opts(replaceTop))
+  }
   const modificaTorneo = (id: string, replaceTop?: boolean) => {
     if (negaCondiviso(id)) return
     openOverlay({ kind: 'torneo', mode: 'modifica', id }, opts(replaceTop))
@@ -167,6 +171,11 @@ export function useActions({ diary, data, route, session, perm, check, caricamen
     openOverlay({ kind: 'azioni', anchor: anchor ? 'popover' : 'tabbar' }, { anchor: anchor ?? null })
   const apriMenu = (title: string, items: MenuItem[], anchor: HTMLElement) =>
     openOverlay({ kind: 'menu', spec: { title, items } }, { anchor })
+
+  /** «Partita live» dal ＋: una rotta a schermo intero; la voce del menu diventa la destinazione. */
+  const partitaLive = () => navigate({ name: 'live' })
+  /** «Raccontalo a Pallo» dal ＋: l'assistente, anche lui una rotta. */
+  const apriAssistente = () => navigate({ name: 'crea' })
 
   /** L'assistente: dallo sheet sporco si chiede prima (UX §5 F2). */
   const usaAssistente = (dirty: boolean) => {
@@ -259,7 +268,9 @@ export function useActions({ diary, data, route, session, perm, check, caricamen
       })
       toast.success('Partita aggiunta')
     } else {
-      navigate({ name: 'torneo', id: tid }, { traccia: nuova?.id })
+      // Dalla partita live si va al torneo in replace: l'indietro non deve
+      // riportare a un segnapunti ormai vuoto.
+      navigate({ name: 'torneo', id: tid }, { traccia: nuova?.id, replace: route.name === 'live' })
       const nome = dopo.tournaments.find((t) => t.id === tid)?.name
       toast.success(nome ? `Partita aggiunta a «${nome}»` : 'Partita aggiunta')
     }
@@ -559,10 +570,10 @@ export function useActions({ diary, data, route, session, perm, check, caricamen
     }
   }
 
-  const cookie = useCallback(() => riapriScelta(), [])
 
   return {
     nuovoTorneo,
+    torneoRapido,
     modificaTorneo,
     nuovaPartita,
     modificaPartita,
@@ -574,6 +585,8 @@ export function useActions({ diary, data, route, session, perm, check, caricamen
     cambiaPassword,
     apriAzioni,
     apriMenu,
+    partitaLive,
+    apriAssistente,
     usaAssistente,
     esciDallAssistente,
     salvaTorneo,
@@ -594,7 +607,6 @@ export function useActions({ diary, data, route, session, perm, check, caricamen
     salvaNome,
     aggiornaPassword,
     caricaAvatar,
-    cookie,
     condiviso,
   }
 }

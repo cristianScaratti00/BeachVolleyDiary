@@ -1,335 +1,406 @@
 // ============================================================================
-// Home `/` (UX §6.1): dice cosa serve ADESSO, non è più una dashboard di otto
-// grafici. L'ordine è il contenuto prima del contorno:
-//   1. NavBar «Ciao, {nome}» con la data di oggi e il marchio piccolo (Q22)
-//   2. banner alpha (compatto, si chiude)
-//   3. *Adesso*: oggi giochi o il prossimo torneo · l'ultimo risultato o
-//      «Com'è andata a «X»?» · chi c'è oggi — ogni card solo se ha qualcosa
-//      da dire, al massimo tre
-//   4. Beach Wrapped, quando è stagione
-//   5. *Numeri chiave* con l'etichetta della stagione (portano a Statistiche)
-//   6. *Approfondisci*: Statistiche, Beach Wrapped
-// Primo avvio: lo «0» da tabellone, il CTA e il link all'assistente. Tornei
-// senza partite: al posto dei numeri una nota con «Aggiungi partita» (una fila
-// di zeri non è un'informazione, UX F1).
+// Home `/` (il redesign, schermata 06): come stai andando, detto in una frase,
+// e cosa fare adesso, detto da Pallo. Dall'alto:
+//   1. la data e il titolo-frase (dai dati, `fraseHome`); a destra l'avatar,
+//      che porta al Profilo (il Profilo non è più una tab);
+//   2. il periodo (Sempre · le ultime stagioni) e «Compagni ⌄»: gli stessi
+//      filtri di Statistiche, Mappa e Wrapped (C10);
+//   3. Pallo con la nuvoletta: un consiglio vero alla volta, un tocco passa al
+//      successivo. Le azioni di oggi stanno qui: «Aggiungi partita» per il
+//      torneo di oggi, «Com'è andata a «X»?», la Storia dell'ultimo torneo.
+//      La faccia di Pallo segue il consiglio (`umoreDelConsiglio`);
+//   4. «Partite vinte»: il win rate grande, lo scarto, la barra vinte/perse.
+//      Tutta la card porta a Statistiche;
+//   5. Beach Wrapped, quando è pronto;
+//   6. tornei vinti (porta a Tornei) e serie record;
+//   7. gli ultimi tornei, con la medaglia.
+// Diario vuoto: solo Pallo che invita a creare il primo torneo. Tornei senza
+// partite: niente numeri (una fila di zeri non informa, UX F1), è Pallo a dire
+// di aggiungere la prima partita.
+//
+// I blocchi salgono uno dopo l'altro (`.rise`, 50ms fra l'uno e l'altro);
+// `.rise` sta sui contenitori e `.press` su ciò che si preme dentro di loro,
+// mai sullo stesso elemento: il `transform` d'arrivo della salita resta
+// applicato e coprirebbe quello della pressione.
 // ============================================================================
-import { useId } from 'react'
-import type { CSSProperties } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import * as m from 'motion/react-m'
-import { AnimatePresence } from 'motion/react'
 import type { HomeProps } from '../app/contracts'
 import { Link } from '../app/router'
-import { dataRelativa, oggiEsteso } from '../app/selectors'
-import type { AdessoData, AdessoTorneo } from '../app/selectors'
-import {
-  Badge,
-  Button,
-  ButtonLink,
-  Card,
-  CardAbove,
-  CardLink,
-  EmptyState,
-  Icon,
-  ListGroup,
-  ListRow,
-  NavBar,
-  Page,
-  PlacementBadge,
-  Section,
-  nomeVisibile,
-  placementText,
-} from '../components/ui/index'
-import { BrandMark } from '../components/Logo'
-import BannerAlpha from '../components/BannerAlpha'
-import { KeyNumbers } from '../components/dashboard'
-import { PALETTES } from '../components/wrapped/palette'
-import { MOLLA, SVELTO } from '../components/Motion'
+import { iniziali, oggiEsteso, stagioniHome } from '../app/selectors'
+import type { AzioneConsiglio, Consiglio, UltimoTorneo } from '../app/selectors'
+import type { DashboardStats } from '../lib/derive'
+import { placementRank } from '../lib/stats'
+import { Button, ButtonLink, Card, Icon, Page, SegmentedControl, Tabellone, nomeVisibile } from '../components/ui/index'
+import { Medal } from '../components/ui/Medal'
+import { Pallo, usePalloTocco } from '../components/Pallo'
+import type { PalloHandle, PalloUmore } from '../components/Pallo'
+import { FiltroSelect, WrappedRow } from '../components/dashboard'
+import { ENTRATA } from '../components/Motion'
 import './Home.css'
 
-/** «oggi», «tra 3 giorni»… e per gli screen reader la data intera. */
-function Quando({ iso, today }: { iso: string; today: string }) {
-  const rel = dataRelativa(iso, today)
+/** Il posto nella salita sfalsata. */
+const sale = (i: number) => ({ '--rise-i': i }) as CSSProperties
+
+const plurale = (n: number, uno: string, tanti: string) => `${n} ${n === 1 ? uno : tanti}`
+
+function Intestazione({ today, frase, nome, avatar }: { today: string; frase: string; nome: string; avatar: string | null }) {
+  const giorno = oggiEsteso(today)
   return (
-    <>
-      <span aria-hidden="true">{rel}</span>
-      <span className="sr-only">{oggiEsteso(iso)}</span>
-    </>
+    <header className="home-head rise" style={sale(0)}>
+      <div className="home-head-text">
+        <p className="home-data">{giorno.charAt(0).toUpperCase() + giorno.slice(1)}</p>
+        <h1 className="home-frase" tabIndex={-1}>{frase}</h1>
+      </div>
+      <Link to={{ name: 'profilo' }} className="home-avatar press" aria-label="Profilo">
+        {avatar ? <img src={avatar} alt="" /> : <span aria-hidden="true">{iniziali(nome)}</span>}
+      </Link>
+    </header>
   )
 }
 
-function Meta({ id, t, today }: { id: string; t: AdessoTorneo; today: string }) {
+/** Il periodo e il compagno. Cambiarli annuncia UNA volta che i numeri sono cambiati. */
+function Filtri({ filtri }: { filtri: HomeProps['filtri'] }) {
+  const { fYear, setFYear, yearOptions, fPartner, setFPartner, partnerOptions } = filtri
+  const stagioni = stagioniHome(yearOptions, fYear)
+  const compagno = fPartner !== 'all' ? partnerOptions.find((p) => p.id === fPartner)?.name : undefined
+
+  // La live region c'è da subito (vuota): al montaggio non si annuncia niente.
+  const [annuncio, setAnnuncio] = useState('')
+  const primo = useRef(true)
+  useEffect(() => {
+    if (primo.current) {
+      primo.current = false
+      return
+    }
+    const periodo = fYear === 'Sempre' ? 'Sempre' : `Stagione ${fYear}`
+    setAnnuncio(`Numeri aggiornati: ${compagno ? `${periodo} con ${compagno}` : periodo}`)
+  }, [fYear, fPartner]) // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
-    <p id={id} className="home-meta">
-      <Quando iso={t.date} today={today} />
-      {t.place && <> · {t.place}</>}
-    </p>
+    <div className="home-filtri rise" style={sale(1)}>
+      {stagioni.length > 1 && (
+        <SegmentedControl
+          label="Periodo"
+          className="home-periodo"
+          options={stagioni.map((y) => ({ value: y, label: y }))}
+          value={fYear}
+          onChange={setFYear}
+        />
+      )}
+      {partnerOptions.length > 0 && (
+        <FiltroSelect
+          label="Compagni"
+          className="home-compagni"
+          value={fPartner}
+          onChange={setFPartner}
+          options={[{ value: 'all', label: 'Tutti i compagni' }, ...partnerOptions.map((p) => ({ value: p.id, label: p.name }))]}
+          mostra={compagno ?? 'Compagni'}
+        />
+      )}
+      <p className="sr-only" role="status">{annuncio}</p>
+    </div>
   )
 }
 
-/** Il piazzamento come badge: «1°» con il trofeo, il podio in accento. */
-function Piazzamento({ label, podio }: { label: string; podio: boolean }) {
-  if (placementText(label) !== label) return <PlacementBadge label={label} />
-  return <Badge tone={podio ? 'accent' : 'neutral'}>{label}</Badge>
-}
-
-function Adesso({ adesso, today, checkIn, onAggiungiPartita, onAggiornaPiazzamento, onStoria }: {
-  adesso: AdessoData
-  today: string
-  checkIn: HomeProps['checkIn']
+interface AzioniConsiglio {
+  onNuovoTorneo: () => void
   onAggiungiPartita: (id: string) => void
   onAggiornaPiazzamento: (id: string) => void
   onStoria: (id: string) => void
-}) {
-  const id = useId()
-  const { oggi, prossimo, ultimo, daChiudere } = adesso
-  const vuota = !oggi && !prossimo && !ultimo && !daChiudere && !checkIn
-  if (vuota) return null
+}
+
+/** L'azione della nuvoletta: piena se è la cosa da fare, tinta se è un invito. */
+function Azione({ a, on }: { a: AzioneConsiglio; on: AzioniConsiglio }) {
+  switch (a.tipo) {
+    case 'partita':
+      return <Button size="sm" icon="plus" onClick={() => on.onAggiungiPartita(a.torneoId)}>{a.label}</Button>
+    case 'nuovoTorneo':
+      return <Button size="sm" icon="plus" onClick={on.onNuovoTorneo}>{a.label}</Button>
+    case 'piazzamento':
+      return <Button size="sm" variant="tinted" onClick={() => on.onAggiornaPiazzamento(a.torneoId)}>{a.label}</Button>
+    case 'storia':
+      return <Button size="sm" variant="tinted" icon="instagram" onClick={() => on.onStoria(a.torneoId)}>{a.label}</Button>
+    case 'link':
+      return <ButtonLink to={a.to} size="sm" variant="tinted">{a.label}</ButtonLink>
+  }
+}
+
+/**
+ * L'umore di Pallo segue il consiglio che sta dando: gli occhiali per la serie
+ * in corso, gli occhi a cuore per il record e per il posto magico, la festa
+ * per un 1° posto recente, la lacrimuccia se l'ultimo torneo è finito fuori
+ * dal podio (l'ultima partita è quella persa che ti ha eliminato), l'occhiolino
+ * per Wrapped, la mano sul mento per «Com'è andata?». Il resto: saluta.
+ */
+function umoreDelConsiglio(c: Consiglio, ultimi: UltimoTorneo[]): PalloUmore {
+  const [tipo, resto = ''] = c.id.split(':')
+  switch (tipo) {
+    case 'serie':
+      return 'cool'
+    case 'record':
+    case 'posto':
+      return 'cuori'
+    case 'wrapped':
+      return 'occhiolino'
+    case 'chiudi':
+      return 'pensa'
+    case 'storia': {
+      const t = ultimi.find((u) => u.id === resto)
+      if (!t) return 'saluta'
+      const r = placementRank(t.placement)
+      if (r === 1) return 'festa'
+      if (r <= 3) return 'contento'
+      return t.record && t.record.lost > 0 ? 'triste' : 'saluta'
+    }
+    default:
+      return 'saluta'
+  }
+}
+
+/**
+ * Pallo e la sua nuvoletta. Con più di un consiglio Pallo è un pulsante: ogni
+ * tocco passa al successivo, e la nuvoletta (una live region) lo dice; intanto
+ * Pallo fa un salto con una faccia allegra a caso, e cinque tocchi di fila (o
+ * uno lungo) sono la sua sorpresa. Con un consiglio solo è un disegno e basta:
+ * un pulsante che non cambia niente sarebbe una promessa vuota. Gli occhi
+ * seguono il dito in tutti e due i casi.
+ */
+function PalloConsiglia({ consigli, ultimi, on, dopo }: { consigli: Consiglio[]; ultimi: UltimoTorneo[]; on: AzioniConsiglio; dopo?: ReactNode }) {
+  const [i, setI] = useState(0)
+  // Il primo consiglio arriva con la salita della riga; i successivi con la
+  // loro comparsa (ENTRATA), solo dopo un tocco.
+  const toccato = useRef(false)
+  const pallo = useRef<PalloHandle>(null)
+  const gesti = usePalloTocco(pallo, () => {
+    toccato.current = true
+    setI((x) => x + 1)
+  })
+  const n = consigli.length
+  if (n === 0) return null
+  const c = consigli[i % n]
+  const disegno = <Pallo ref={pallo} umore={umoreDelConsiglio(c, ultimi)} size={96} ombra segui />
   return (
-    <Section title="Adesso" id={`${id}-h`}>
-      <ul className="home-adesso">
-        {oggi && (
-          <li>
-            <Card>
-              <p className="home-eyebrow">Oggi giochi</p>
-              <CardLink to={{ name: 'torneo', id: oggi.id }} describedBy={`${id}-oggi`}>{oggi.name}</CardLink>
-              <Meta id={`${id}-oggi`} t={oggi} today={today} />
-              <CardAbove className="home-actions">
-                <Button icon="plus" onClick={() => onAggiungiPartita(oggi.id)}>
-                  Aggiungi partita
-                </Button>
-              </CardAbove>
-            </Card>
-          </li>
-        )}
-        {!oggi && prossimo && (
-          <li>
-            <Card>
-              <p className="home-eyebrow">Prossimo torneo</p>
-              <CardLink to={{ name: 'torneo', id: prossimo.id }} describedBy={`${id}-pross`}>{prossimo.name}</CardLink>
-              <Meta id={`${id}-pross`} t={prossimo} today={today} />
-              {prossimo.shared && (
-                <div className="home-badges">
-                  <Badge tone="select">Condiviso</Badge>
-                </div>
-              )}
-            </Card>
-          </li>
-        )}
-        {daChiudere ? (
-          <li>
-            <Card>
-              <p className="home-eyebrow">Da completare</p>
-              <h3 className="ui-card-title">
-                Com'è andata a «
-                <Link to={{ name: 'torneo', id: daChiudere.id }} className="ui-card-link" aria-describedby={`${id}-chiudi`}>
-                  {nomeVisibile(daChiudere.name)}
-                </Link>
-                »?
-              </h3>
-              <Meta id={`${id}-chiudi`} t={daChiudere} today={today} />
-              <CardAbove className="home-actions">
-                <Button variant="tinted" onClick={() => onAggiornaPiazzamento(daChiudere.id)}>
-                  Aggiorna il piazzamento
-                </Button>
-              </CardAbove>
-            </Card>
-          </li>
-        ) : (
-          ultimo && (
-            <li>
-              <Card>
-                <p className="home-eyebrow">Ultimo risultato</p>
-                <CardLink to={{ name: 'torneo', id: ultimo.id }} describedBy={`${id}-ult`}>{ultimo.name}</CardLink>
-                <Meta id={`${id}-ult`} t={ultimo} today={today} />
-                <div className="home-badges">
-                  <Piazzamento label={ultimo.placement} podio={ultimo.podio} />
-                  {ultimo.shared && <Badge tone="select">Condiviso</Badge>}
-                </div>
-                <CardAbove className="home-actions">
-                  <Button variant="tinted" size="sm" icon="share" onClick={() => onStoria(ultimo.id)}>
-                    Storia Instagram
-                  </Button>
-                </CardAbove>
-              </Card>
-            </li>
-          )
-        )}
-        {checkIn && (
-          <li>
-            <CheckInCard own={checkIn.own} metaId={`${id}-oggi-ci`} />
-          </li>
-        )}
-      </ul>
-    </Section>
+    <div className="home-pallo rise" style={sale(2)}>
+      {n > 1 ? (
+        <button type="button" className="home-pallo-btn press pallo-toccabile" aria-label="Pallo: un altro consiglio" {...gesti}>
+          {disegno}
+        </button>
+      ) : (
+        <span className="home-pallo-btn">{disegno}</span>
+      )}
+      <div className="home-nuvola">
+        <p className="home-nuvola-chi">Pallo</p>
+        <div aria-live="polite">
+          <m.div
+            key={`${i % n}:${c.id}`}
+            className="home-nuvola-corpo"
+            initial={toccato.current ? { opacity: 0, y: 4 } : false}
+            animate={{ opacity: 1, y: 0 }}
+            transition={ENTRATA}
+          >
+            <p className="home-nuvola-testo">{c.testo}</p>
+            {c.azione && (
+              <div className="home-nuvola-azioni">
+                <Azione a={c.azione} on={on} />
+              </div>
+            )}
+            {dopo}
+          </m.div>
+        </div>
+      </div>
+    </div>
   )
 }
 
-/** «Sei in spiaggia oggi?» / «Sei a {città} oggi»: solo il proprio stato, nessuna richiesta in più. */
-function CheckInCard({ own, metaId }: { own: { city: string } | null; metaId: string }) {
-  if (own) {
-    return (
-      <Card>
-        <p className="home-eyebrow">Chi c'è oggi</p>
-        <CardLink to={{ name: 'oggi' }} describedBy={metaId}>Sei a {own.city} oggi</CardLink>
-        <p id={metaId} className="home-meta">Guarda chi c'è in spiaggia</p>
-      </Card>
-    )
-  }
+/**
+ * «Partite vinte»: il numero grande col «%» arancio, lo scarto, la barra che
+ * cresce (vinte d'inchiostro, perse sul filo forte). Tutta la card porta a
+ * Statistiche: il chevron accanto all'etichetta è il link, esteso alla card.
+ */
+function Rendimento({ s }: { s: DashboardStats }) {
+  const id = useId()
   return (
-    <Card>
-      <p className="home-eyebrow">Chi c'è oggi</p>
-      <h3 className="ui-card-title">Sei in spiaggia oggi?</h3>
-      <p className="home-meta">Fai check-in per vedere chi gioca dove sei tu.</p>
-      <div className="home-actions">
-        <ButtonLink to={{ name: 'oggi' }} variant="tinted" icon="pin">
-          Fai check-in
-        </ButtonLink>
+    <Card as="section" className="home-rend" aria-labelledby={`${id}-t`}>
+      <div className="home-rend-top">
+        <div className="home-rend-main">
+          <div className="home-label-row">
+            <h2 className="home-label" id={`${id}-t`}>Partite vinte</h2>
+            <Link to={{ name: 'statistiche' }} className="ui-card-link home-chev-link" aria-label="Tutte le statistiche">
+              <Icon name="chevron-right" size={12} />
+            </Link>
+          </div>
+          <p className="home-pct">
+            <Tabellone value={s.winPct} size="hero" rise="home" />
+            <span className="home-pct-s">%</span>
+          </p>
+        </div>
+        <p className="home-scarto">
+          <span className="home-scarto-n"><Tabellone value={s.diffStr} size="l" rise="home" /></span>
+          <span className="home-scarto-l">punti di scarto</span>
+        </p>
       </div>
+      <div className="home-barra" aria-hidden="true">
+        {s.won > 0 && <span className="home-barra-v" style={{ flexGrow: s.won }} />}
+        {s.lost > 0 && <span className="home-barra-p" style={{ flexGrow: s.lost }} />}
+      </div>
+      <p className="home-rend-piede">
+        <span><strong>{s.won}</strong> {s.won === 1 ? 'vinta' : 'vinte'}</span>
+        <span>{plurale(s.lost, 'persa', 'perse')} · {plurale(s.played, 'giocata', 'giocate')}</span>
+      </p>
     </Card>
   )
 }
 
-/** La card di Beach Wrapped: navy piatto, l'anteprima del PNG (ART_DIRECTION §8). */
-function WrappedCard({ titolo, winPct }: { titolo: string; winPct: number | null }) {
-  const p = PALETTES.navy
-  const vars = { '--png-bg': p.bg, '--png-fg': p.fg, '--png-muted': p.muted, '--png-accent': p.accent, '--png-disc': p.disc } as CSSProperties
+/** Il periodo scelto non ha partite (altri sì): la card resta, con una frase. */
+function RendimentoVuoto() {
+  const id = useId()
   return (
-    <Card tone="navy" className="home-wrapped" style={vars}>
-      <span className="home-wrapped-disc" aria-hidden="true" />
-      <p className="home-wrapped-eyebrow">La tua stagione</p>
-      <CardLink to={{ name: 'wrapped' }} level={2} className="home-wrapped-title">
-        {titolo}
-      </CardLink>
-      <p className="home-wrapped-text">Rivivi la stagione in card da sfogliare e condividere.</p>
-      {winPct != null && (
-        <p className="home-wrapped-n">
-          {winPct}%<span className="home-wrapped-n-l"> delle partite vinte</span>
-        </p>
-      )}
+    <Card as="section" className="home-rend" aria-labelledby={`${id}-t`}>
+      <h2 className="home-label" id={`${id}-t`}>Partite vinte</h2>
+      <p className="home-vuoto">Nessuna partita in questo periodo.</p>
+    </Card>
+  )
+}
+
+function Coppia({ s }: { s: DashboardStats }) {
+  const id = useId()
+  return (
+    <div className="home-coppia rise" style={sale(5)}>
+      <Card as="div" className="home-mini">
+        <span className="home-label-row home-mini-head">
+          <Link to={{ name: 'tornei', vista: 'lista' }} className="ui-card-link home-label" aria-describedby={`${id}-tv`}>
+            Tornei vinti
+          </Link>
+          <Icon name="chevron-right" size={16} className="home-chev" />
+        </span>
+        <span id={`${id}-tv`} className="home-mini-body">
+          <span className="home-mini-n">
+            <Tabellone value={s.tWon} size="l" rise="home" />
+            <span className="home-mini-di">
+              {' '}
+              <span aria-hidden="true">/</span>
+              <span className="sr-only">su</span> {s.tPlayed}
+            </span>
+          </span>
+          <span className="home-mini-sub">{plurale(s.podi, 'podio', 'podi')}</span>
+        </span>
+      </Card>
+      <Card as="div" className="home-mini">
+        <span className="home-label">Serie record</span>
+        <span className="home-mini-n"><Tabellone value={s.streak} size="l" rise="home" /></span>
+        <span className="home-mini-sub">{s.streak === 1 ? 'vittoria di fila' : 'vittorie di fila'}</span>
+      </Card>
+    </div>
+  )
+}
+
+function UltimiTornei({ ultimi, rise }: { ultimi: UltimoTorneo[]; rise: number }) {
+  const id = useId()
+  return (
+    <Card as="section" className="home-ultimi rise" style={sale(rise)} aria-labelledby={`${id}-t`}>
+      <div className="home-ultimi-head">
+        <h2 className="home-h2" id={`${id}-t`}>Ultimi tornei</h2>
+        <Link to={{ name: 'tornei', vista: 'lista' }} className="home-tutti" aria-label="Tutti i tornei">
+          Tutti
+        </Link>
+      </div>
+      <ul className="home-ultimi-list">
+        {ultimi.map((t) => (
+          <li key={t.id}>
+            <Link to={{ name: 'torneo', id: t.id }} className="home-ultimo">
+              <Medal placement={t.placement} size="md" />
+              <span className="home-ultimo-text">
+                <span className="home-ultimo-nome">{nomeVisibile(t.name)}</span>
+                <span className="home-ultimo-meta">{t.meta}</span>
+              </span>
+              {t.record && (
+                <span className="home-ultimo-rec">
+                  <span aria-hidden="true">{t.record.won}–{t.record.lost}</span>
+                  <span className="sr-only">
+                    , {plurale(t.record.won, 'vinta', 'vinte')} e {plurale(t.record.lost, 'persa', 'perse')}
+                  </span>
+                </span>
+              )}
+            </Link>
+          </li>
+        ))}
+      </ul>
     </Card>
   )
 }
 
 export default function Home({
   nome,
+  avatar,
   today,
-  adesso,
+  frase,
+  consigli,
   numeri,
+  haPartite,
   hasTornei,
-  stagione,
+  ultimi,
+  filtri,
   wrapped,
-  banner,
-  checkIn,
   onNuovoTorneo,
   onAggiungiPartita,
   onAggiornaPiazzamento,
   onStoria,
 }: HomeProps) {
-  const id = useId()
+  const on = { onNuovoTorneo, onAggiungiPartita, onAggiornaPiazzamento, onStoria }
+  const intestazione = <Intestazione today={today} frase={frase} nome={nome} avatar={avatar} />
 
-  // Chiudendo il banner il suo × sparisce: il focus va all'h1 (UX §8.3.3).
-  const chiudiBanner = () => {
-    banner.onChiudi()
-    window.requestAnimationFrame(() => document.querySelector<HTMLElement>('.ui-largetitle-h1')?.focus({ preventScroll: true }))
+  // Diario vuoto: Pallo invita a creare il primo torneo, e c'è l'assistente
+  // per chi preferisce farsi guidare.
+  if (!hasTornei) {
+    return (
+      <Page className="home">
+        {intestazione}
+        <div className="home-corpo">
+          <PalloConsiglia
+            consigli={consigli}
+            ultimi={ultimi}
+            on={on}
+            dopo={
+              <p className="home-nuvola-nota">
+                Preferisci farti guidare?{' '}
+                <Link to={{ name: 'crea' }} className="home-link">
+                  Usa l'assistente
+                </Link>
+              </p>
+            }
+          />
+        </div>
+      </Page>
+    )
   }
 
-  // Dove va la prima partita: il torneo di oggi, quello da chiudere, l'ultimo
-  // proprio (le stesse priorità di UX §5 F3).
-  const destinazione = adesso.oggi ?? adesso.daChiudere ?? (adesso.ultimo && !adesso.ultimo.shared ? adesso.ultimo : null)
-
   return (
-    <Page>
-      <NavBar
-        title={nome ? `Ciao, ${nome}` : 'Ciao'}
-        subtitle={oggiEsteso(today)}
-        leading={<span className="home-brand"><BrandMark size={28} /></span>}
-      />
+    <Page className="home">
+      {intestazione}
+      {/* Senza partite i filtri non muoverebbero niente di visibile. */}
+      {filtri.canFilter && haPartite && <Filtri filtri={filtri} />}
 
-      {/* Il banner esce fuori dal flusso a t0; quello che sta sotto sale con
-          la molla (MOTION.md §4.3), un contenitore solo. */}
-      <AnimatePresence mode="popLayout" initial={false}>
-        {banner.visibile && (
-          <m.div key="banner" exit={{ opacity: 0, transition: SVELTO }}>
-            <BannerAlpha onChiudi={chiudiBanner} />
-          </m.div>
-        )}
-      </AnimatePresence>
-
-      <m.div layout="position" layoutDependency={banner.visibile} transition={{ layout: MOLLA }}>
-        {!hasTornei ? (
-          <>
-            <EmptyState
-              variant="primo"
-              zero="Tornei"
-              title="Il tuo diario è vuoto"
-              text="Registra il primo torneo: bastano il nome e la data, il resto lo aggiungi dopo."
-              action={<Button onClick={onNuovoTorneo}>Crea il primo torneo</Button>}
-              secondary={
-                <>
-                  Preferisci farti guidare?{' '}
-                  <Link to={{ name: 'crea' }} className="home-link">Usa l'assistente</Link>
-                </>
-              }
-            />
-            {checkIn && (
-              <div className="home-solo">
-                <CheckInCard own={checkIn.own} metaId={`${id}-ci`} />
-              </div>
-            )}
-          </>
-        ) : (
-          <>
-            <Adesso
-              adesso={adesso}
-              today={today}
-              checkIn={checkIn}
-              onAggiungiPartita={onAggiungiPartita}
-              onAggiornaPiazzamento={onAggiornaPiazzamento}
-              onStoria={onStoria}
-            />
-
-            {wrapped.visibile && (
-              <section className="home-section" aria-label="Beach Wrapped">
-                <WrappedCard titolo={wrapped.titolo} winPct={numeri ? numeri.winPct : null} />
-              </section>
-            )}
-
-            {numeri ? (
-              <>
-                <Section title="Numeri chiave" count={<Badge>{stagione}</Badge>} id={`${id}-num`}>
-                  <Card as="div" className="home-numeri">
-                    <KeyNumbers s={numeri} rise="home" />
-                    <p className="home-numeri-foot">
-                      <Link to={{ name: 'statistiche' }} className="ui-card-link">
-                        Tutte le statistiche
-                      </Link>
-                      <Icon name="chevron-right" size={20} />
-                    </p>
-                  </Card>
-                </Section>
-
-                <div className="home-section">
-                  <ListGroup title="Approfondisci" id={`${id}-appr`}>
-                    <ListRow to={{ name: 'statistiche' }} icon="chart" title="Tutte le statistiche" subtitle={stagione} />
-                    {wrapped.visibile && <ListRow to={{ name: 'wrapped' }} icon="sun" title="Beach Wrapped" subtitle="Il recap della stagione" />}
-                  </ListGroup>
-                </div>
-              </>
-            ) : (
-              <Section title="Numeri chiave" id={`${id}-num`}>
-                <Card as="div" className="home-nonumeri">
-                  <p className="home-nonumeri-text">Aggiungi la prima partita per vedere i tuoi numeri.</p>
-                  {destinazione && (
-                    <Button variant="tinted" icon="plus" onClick={() => onAggiungiPartita(destinazione.id)}>
-                      Aggiungi partita
-                    </Button>
-                  )}
-                </Card>
-              </Section>
-            )}
-          </>
-        )}
-      </m.div>
+      <div className="home-corpo">
+        {/* Sotto i 1280 le colonne non esistono (`display: contents`): un
+            flusso solo, nell'ordine del design. Da lì due colonne: Pallo e i
+            numeri a sinistra, Wrapped, le due card e gli ultimi tornei a
+            destra (le altezze si equivalgono). */}
+        <div className="home-col">
+          <PalloConsiglia consigli={consigli} ultimi={ultimi} on={on} />
+          {haPartite && (
+            <div className="home-rend-wrap rise" style={sale(3)}>
+              {numeri ? <Rendimento s={numeri} /> : <RendimentoVuoto />}
+            </div>
+          )}
+        </div>
+        <div className="home-col">
+          {wrapped.visibile && <WrappedRow titolo={wrapped.titolo} className="rise" style={sale(4)} />}
+          {numeri && <Coppia s={numeri} />}
+          {ultimi.length > 0 && <UltimiTornei ultimi={ultimi} rise={6} />}
+        </div>
+      </div>
     </Page>
   )
 }

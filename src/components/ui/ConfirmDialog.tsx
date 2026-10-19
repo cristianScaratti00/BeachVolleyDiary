@@ -4,10 +4,12 @@
 //
 // - Focus iniziale su «Annulla» (l'azione NON distruttiva), a t0. Esc = Annulla.
 // - Il pulsante distruttivo dice cosa fa («Elimina torneo», mai «OK»).
-// - Opaco (`--surface`): sopra uno sheet di vetro farebbe la quarta
-//   superficie sfocata (UX §10).
-// - Su mobile ha la forma di un action sheet (origine 50% 100%); da 600px è
-//   un dialogo centrato largo 320.
+// - Una card bianca opaca (`--surface`) raggio 28, nel linguaggio del
+//   redesign: la conferma è la capsula arancio (o rossa se distrugge),
+//   «Annulla» è la capsula di vetro. Opaca anche perché sopra uno sheet una
+//   superficie sfocata in più non aggiunge niente (UX §10).
+// - Su mobile galleggia in basso, vicino al pollice (origine 50% 100%); da
+//   600px è un dialogo centrato largo 320.
 // - Il suo velo è suo, sopra lo sheet: due veli dicono profondità (§3.7).
 // ============================================================================
 import { useId, useRef, useState } from 'react'
@@ -104,7 +106,7 @@ export function ConfirmDialog({
           >
             {confirmLabel}
           </Button>
-          <Button variant="quiet" block data-cancel="" onClick={() => !busy && onCancel()}>
+          <Button variant="glass" block data-cancel="" onClick={() => !busy && onCancel()}>
             {cancelLabel}
           </Button>
         </div>

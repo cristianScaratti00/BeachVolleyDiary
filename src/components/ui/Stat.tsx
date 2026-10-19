@@ -98,7 +98,7 @@ export function MeterRow({ label, pct, sub, valueLabel }: {
 }
 
 /** Il binario con la barra. `tone` sceglie la tinta del dato (un colore solo). */
-export function Bar({ pct, tone = 'win', size = 'md' }: { pct: number; tone?: 'win' | 'rest' | 'podium'; size?: 'md' | 'lg' }) {
+export function Bar({ pct, tone = 'win', size = 'md' }: { pct: number; tone?: 'win' | 'rest' | 'podium' | 'ink'; size?: 'md' | 'lg' }) {
   const ridotto = useReducedMotion()
   const fill = useRef<HTMLDivElement>(null)
   // Al montaggio la barra parte vuota e, al fotogramma dopo, corre al valore

@@ -1,16 +1,16 @@
-/* Il wordmark (ART_DIRECTION §10.2). Il marchio resta com'è: i suoi colori
-   sono il marchio, non palette. */
+/* Il wordmark del redesign: «Beach Diary» tutto a 700, stretto. Il marchio
+   resta com'è: i suoi colori sono il marchio, non palette. */
 @layer components {
   .ui-brand { display: inline-flex; align-items: center; gap: var(--space-3); color: var(--ink); }
   .ui-brand-word {
     font: var(--type-headline);
     font-weight: 700;
-    letter-spacing: var(--track-title-1);
+    letter-spacing: var(--track-title-2);
     white-space: nowrap;
   }
+  /* Piccolo (il Benvenuto: marchio 24 e testo 15). */
   .ui-brand[data-size="s"] { gap: var(--space-2); }
+  .ui-brand[data-size="s"] .ui-brand-word { font: 700 0.9375rem/1.2 var(--font-ui); letter-spacing: -0.013em; }
   .ui-brand[data-size="l"] .ui-brand-word { font: var(--type-title-2); font-weight: 700; letter-spacing: var(--track-title-1); }
-  .ui-brand-word-2 { font-weight: 400; color: var(--ink-2); }
   .ui-brand[data-light] { color: var(--ink-inverse); }
-  .ui-brand[data-light] .ui-brand-word-2 { color: var(--on-glass-dark-2); }
 }

@@ -6,12 +6,14 @@
 // - Scelto il file c'è SUBITO l'anteprima locale (object URL), al 60% mentre
 //   carica con «Carico…»; durante il caricamento lo sheet non si chiude.
 // - Errori in linea, `role="alert"`: formato non immagine, oltre 5 MB.
+// - La barra dei moduli in cima (design 15): «Annulla · Aggiungi foto ·
+//   Aggiungi», con il nome del torneo sotto il titolo.
 // ============================================================================
 import { useEffect, useRef, useState } from 'react'
 import type { ChangeEvent } from 'react'
 import type { FotoSheetProps } from '../../app/contracts'
 import { SWATCH_COLORS } from '../../lib/theme'
-import { Sheet, SheetActions, SheetTitle } from './Sheet'
+import { Sheet, SheetBar } from './Sheet'
 import { Button } from '../ui/Button'
 import { Icon } from '../ui/Icon'
 import { TextField } from '../ui/Field'
@@ -79,27 +81,30 @@ export default function FotoSheet({ tournamentId, tournamentName, onSave, onClos
       opener={opener}
       dirty={!!file || caption.trim() !== ''}
       busy={busy}
-      footer={
-        <SheetActions>
-          <Button variant="quiet" onClick={onClose} disabled={busy}>Annulla</Button>
-          <Button
-            variant="filled"
-            icon="plus"
-            busy={busy}
-            busyLabel="Carico…"
-            disabled={!file}
-            onDisabledClick={() => {
-              setErr('Scegli una foto dal dispositivo.')
-              dropRef.current?.focus()
-            }}
-            onClick={() => void save()}
-          >
-            Aggiungi foto
-          </Button>
-        </SheetActions>
+      header={
+        <SheetBar
+          title="Aggiungi foto"
+          sub={tournamentName || undefined}
+          onCancel={onClose}
+          cancelBusy={busy}
+          action={
+            <Button
+              variant="filled"
+              busy={busy}
+              busyLabel="Carico…"
+              disabled={!file}
+              onDisabledClick={() => {
+                setErr('Scegli una foto dal dispositivo.')
+                dropRef.current?.focus()
+              }}
+              onClick={() => void save()}
+            >
+              Aggiungi
+            </Button>
+          }
+        />
       }
     >
-      <SheetTitle sub={tournamentName || undefined}>Aggiungi foto</SheetTitle>
       <div className="ui-sheet-stack">
         <button
           ref={dropRef}

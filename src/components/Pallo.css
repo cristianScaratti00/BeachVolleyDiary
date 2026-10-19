@@ -1,0 +1,375 @@
+/* Pallo: le animazioni del redesign, solo transform e opacità. Ferme con
+   reduced-motion (un pallone che saltella per sempre è proprio ciò che chi lo
+   chiede non vuole vedere): ogni umore è disegnato perché il fotogramma fermo
+   si legga da solo. I tempi sono del disegno, letterali come i suoi colori.
+
+   Gli strati, dall'esterno (Pallo.tsx):
+     .pallo-tocco   la reazione al tocco e il palleggio (data-tocco, data-sorpresa)
+     .pallo-giro    il giro su sé stesso del palleggio, attorno al centro
+     .pallo-idle    i gesti «idle» a caso (data-gesto)
+     .pallo-corpo   l'animazione continua dell'umore
+       .pallo-volto / .pallo-sguardo   lo sguardo che segue (transform da JS)
+       .pallo-guarda                   gli sguardi «idle»
+       .pallo-occhi                    l'ammiccare (data-batti)
+   Ognuno ha il suo transform: sullo stesso nodo il secondo coprirebbe il primo. */
+@layer components {
+  .pallo { display: block; flex: none; overflow: visible; }
+
+  .pallo-tocco,
+  .pallo-giro,
+  .pallo-idle,
+  .pallo-corpo,
+  .pallo-saluto,
+  .pallo-agita-sx,
+  .pallo-agita-dx,
+  .pallo-volto,
+  .pallo-sguardo,
+  .pallo-guarda,
+  .pallo-pensa-occhi,
+  .pallo-occhiali,
+  .pallo-riflesso { transform-box: view-box; }
+
+  .pallo-ombra,
+  .pallo-occhi,
+  .pallo-coriandolo,
+  .pallo-stella,
+  .pallo-lacrima,
+  .pallo-puntino,
+  .pallo-russa,
+  .pallo-zeta,
+  .pallo-stupore,
+  .pallo-cuore,
+  .pallo-cuoricino { transform-box: fill-box; transform-origin: center; }
+
+  /* Il pulsante che lo contiene: niente zoom al doppio tocco (cinque tocchi di
+     fila sono l'easter egg), niente menu né selezione al tocco lungo. */
+  .pallo-toccabile {
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* --------------------------------------------------- lo sguardo */
+  /* Il transform lo scrive Pallo.tsx a ogni fotogramma in cui il dito si
+     muove; la transizione ammorbidisce i salti e il ritorno a riposo. */
+  .pallo-volto,
+  .pallo-sguardo { transition: transform 0.24s cubic-bezier(0.2, 0.8, 0.3, 1); }
+
+  /* Ammicca: lo attiva Pallo.tsx, a intervalli sempre diversi. */
+  .pallo[data-batti] .pallo-occhi { animation: pallo-batti 0.17s ease-in-out; }
+  @keyframes pallo-batti {
+    0%, 100% { transform: scaleY(1); }
+    50% { transform: scaleY(0.1); }
+  }
+
+  /* ------------------------------------------------- gli umori di sempre */
+  /* In piedi: rimbalza schiacciandosi un poco, l'ombra si stringe in volo. */
+  .pallo-rimbalzo { transform-origin: 60px 112px; animation: pallo-rimbalzo 1.9s cubic-bezier(0.45, 0, 0.55, 1) infinite; }
+  .pallo[data-umore="saluta"] .pallo-ombra,
+  .pallo[data-umore="contento"] .pallo-ombra { animation: pallo-ombra 1.9s cubic-bezier(0.45, 0, 0.55, 1) infinite; }
+  .pallo-saluto { transform-origin: 100px 66px; animation: pallo-saluto 1.2s ease-in-out infinite alternate; }
+  /* Esulta: salta alto e si gira un poco a destra e a sinistra. */
+  .pallo-salto { transform-origin: 60px 112px; animation: pallo-salto 1.1s cubic-bezier(0.3, 0, 0.4, 1) infinite; }
+  .pallo[data-umore="esulta"] .pallo-ombra { animation: pallo-ombra 1.1s cubic-bezier(0.3, 0, 0.4, 1) infinite; }
+  .pallo-tentenna { transform-origin: 60px 112px; animation: pallo-tentenna 2s ease-in-out infinite; }
+  .pallo-sbircia { transform-origin: 60px 112px; animation: pallo-sbircia 2.4s ease-in-out infinite; }
+
+  @keyframes pallo-rimbalzo {
+    0%, 100% { transform: translateY(0) scale(1.04, 0.96); }
+    45% { transform: translateY(-9px) scale(0.98, 1.02); }
+  }
+  @keyframes pallo-ombra {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(0.75); }
+  }
+  @keyframes pallo-saluto {
+    from { transform: rotate(-10deg); }
+    to { transform: rotate(14deg); }
+  }
+  @keyframes pallo-salto {
+    0%, 100% { transform: translateY(0) scale(1.06, 0.94); }
+    40% { transform: translateY(-18px) scale(0.96, 1.04) rotate(-4deg); }
+    60% { transform: translateY(-18px) rotate(4deg); }
+  }
+  @keyframes pallo-tentenna {
+    0%, 100% { transform: rotate(0); }
+    20% { transform: rotate(-6deg); }
+    40% { transform: rotate(5deg); }
+    60% { transform: rotate(-3deg); }
+    80% { transform: rotate(0); }
+  }
+  @keyframes pallo-sbircia {
+    0%, 100% { transform: translateY(0) rotate(-3deg); }
+    50% { transform: translateY(-6px) rotate(3deg); }
+  }
+
+  /* --------------------------------------------------------- festa */
+  /* Salta più alto di «esulta», agitando le braccia; i coriandoli cadono e
+     le stelline brillano. Fermi, coriandoli e stelline restano sparsi. */
+  .pallo-festa { transform-origin: 60px 104px; animation: pallo-festa 0.9s cubic-bezier(0.3, 0, 0.4, 1) infinite; }
+  .pallo[data-umore="festa"] .pallo-ombra { animation: pallo-ombra-festa 0.9s cubic-bezier(0.3, 0, 0.4, 1) infinite; }
+  .pallo-agita-sx { transform-origin: 20px 60px; animation: pallo-agita-sx 0.45s ease-in-out infinite alternate; }
+  .pallo-agita-dx { transform-origin: 100px 60px; animation: pallo-agita-dx 0.45s ease-in-out infinite alternate; }
+  .pallo-coriandolo { animation: pallo-coriandolo 1.8s linear infinite; animation-delay: calc(var(--i, 0) * -0.41s); }
+  .pallo-stella { animation: pallo-brilla 1.3s ease-in-out infinite; animation-delay: calc(var(--i, 0) * -0.45s); }
+
+  @keyframes pallo-festa {
+    0%, 100% { transform: translateY(0) scale(1.08, 0.92) rotate(0deg); }
+    15% { transform: translateY(-4px) scale(0.95, 1.06) rotate(0deg); }
+    45% { transform: translateY(-20px) scale(0.98, 1.02) rotate(-5deg); }
+    60% { transform: translateY(-18px) scale(1, 1) rotate(5deg); }
+    85% { transform: translateY(0) scale(1, 1) rotate(0deg); }
+  }
+  @keyframes pallo-ombra-festa {
+    0%, 100% { transform: scale(1.05); }
+    50% { transform: scale(0.6); }
+  }
+  @keyframes pallo-agita-sx {
+    from { transform: rotate(-14deg); }
+    to { transform: rotate(10deg); }
+  }
+  @keyframes pallo-agita-dx {
+    from { transform: rotate(14deg); }
+    to { transform: rotate(-10deg); }
+  }
+  @keyframes pallo-coriandolo {
+    0% { transform: translateY(-12px) rotate(0deg); opacity: 0; }
+    15%, 80% { opacity: 1; }
+    100% { transform: translateY(22px) rotate(300deg); opacity: 0; }
+  }
+  @keyframes pallo-brilla {
+    0%, 100% { transform: scale(0.55) rotate(0deg); opacity: 0.55; }
+    50% { transform: scale(1.1) rotate(45deg); opacity: 1; }
+  }
+
+  /* -------------------------------------------------------- triste */
+  /* Si affloscia in un sospiro lento; la lacrima scende e torna. */
+  .pallo-affloscia { transform-origin: 60px 104px; animation: pallo-affloscia 3.4s ease-in-out infinite; }
+  .pallo-lacrima { transform-origin: 50% 0; animation: pallo-lacrima 3.4s ease-in infinite; }
+
+  @keyframes pallo-affloscia {
+    0%, 100% { transform: translateY(0) scale(1, 1); }
+    45%, 60% { transform: translateY(3px) scale(1.05, 0.93); }
+  }
+  @keyframes pallo-lacrima {
+    0%, 15% { transform: translateY(-3px) scale(0.3); opacity: 0; }
+    32% { transform: translateY(0) scale(1); opacity: 1; }
+    78% { transform: translateY(9px) scale(1); opacity: 1; }
+    100% { transform: translateY(16px) scale(0.9); opacity: 0; }
+  }
+
+  /* --------------------------------------------------------- pensa */
+  /* Dondola piano, gli occhi vagano in alto, i tre puntini «scrivono» come
+     quelli della chat (CreaChat.css). */
+  .pallo-pensa { transform-origin: 60px 104px; animation: pallo-pensa 4s ease-in-out infinite; }
+  .pallo-pensa-occhi { animation: pallo-pensa-occhi 4s ease-in-out infinite; }
+  .pallo-puntino { animation: pallo-puntino 1.2s ease-in-out infinite; animation-delay: calc(var(--i, 0) * 0.18s); }
+
+  @keyframes pallo-pensa {
+    0%, 100% { transform: rotate(-3deg); }
+    50% { transform: rotate(3deg); }
+  }
+  @keyframes pallo-pensa-occhi {
+    0%, 100% { transform: translate(-2.5px, 0); }
+    50% { transform: translate(2px, -1px); }
+  }
+  @keyframes pallo-puntino {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.35; }
+    30% { transform: translateY(-3px); opacity: 1; }
+  }
+
+  /* --------------------------------------------------------- dorme */
+  /* Respira lento, la bocca si apre e si chiude, le «z» salgono una dopo l'altra. */
+  .pallo-respira { transform-origin: 60px 112px; animation: pallo-respira 4s ease-in-out infinite; }
+  .pallo[data-umore="dorme"] .pallo-ombra { animation: pallo-ombra-respira 4s ease-in-out infinite; }
+  .pallo-russa { animation: pallo-russa 4s ease-in-out infinite; }
+  .pallo-zeta { animation: pallo-zeta 3.6s ease-out infinite; animation-delay: calc(var(--i, 0) * -1.2s); }
+
+  @keyframes pallo-respira {
+    0%, 100% { transform: scale(1.03, 0.97); }
+    50% { transform: scale(0.99, 1.02); }
+  }
+  @keyframes pallo-ombra-respira {
+    0%, 100% { transform: scale(1.03); }
+    50% { transform: scale(0.97); }
+  }
+  @keyframes pallo-russa {
+    0%, 100% { transform: scale(0.75); }
+    50% { transform: scale(1.12); }
+  }
+  @keyframes pallo-zeta {
+    0% { transform: translate(-5px, 7px) scale(0.6); opacity: 0; }
+    25%, 70% { opacity: 1; }
+    100% { transform: translate(5px, -7px) scale(1.1); opacity: 0; }
+  }
+
+  /* ------------------------------------------------------ sorpreso */
+  /* Un sobbalzo, poi fermo a bocca aperta; i segni dello stupore spuntano. */
+  .pallo-sobbalza { transform-origin: 60px 104px; animation: pallo-sobbalza 2.6s cubic-bezier(0.3, 0, 0.4, 1) infinite; }
+  .pallo[data-umore="sorpreso"] .pallo-ombra { animation: pallo-ombra-sobbalza 2.6s cubic-bezier(0.3, 0, 0.4, 1) infinite; }
+  .pallo-stupore { transform-origin: 50% 100%; animation: pallo-stupore 2.6s ease-out infinite; }
+
+  @keyframes pallo-sobbalza {
+    0%, 20%, 100% { transform: translateY(0) scale(1, 1); }
+    6% { transform: translateY(-9px) scale(0.94, 1.08); }
+    13% { transform: translateY(0) scale(1.05, 0.95); }
+  }
+  @keyframes pallo-ombra-sobbalza {
+    0%, 20%, 100% { transform: scale(1); }
+    6% { transform: scale(0.8); }
+  }
+  @keyframes pallo-stupore {
+    0%, 100% { transform: scale(0.6); opacity: 0; }
+    7% { transform: scale(1.15); opacity: 1; }
+    14%, 72% { transform: scale(1); opacity: 1; }
+  }
+
+  /* ---------------------------------------------------- occhiolino */
+  .pallo-strizza { transform-origin: 60px 104px; animation: pallo-strizza 2.8s ease-in-out infinite; }
+
+  @keyframes pallo-strizza {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    30% { transform: translateY(-3px) rotate(5deg); }
+    55% { transform: translateY(0) rotate(4deg); }
+  }
+
+  /* ---------------------------------------------------- cool, cuori */
+  /* Ondeggia a tempo di musica. Sugli occhiali passa un riflesso. */
+  .pallo-dondola { transform-origin: 60px 104px; animation: pallo-dondola 2.4s ease-in-out infinite; }
+  .pallo-riflesso { animation: pallo-riflesso 3.6s ease-in-out infinite; }
+  .pallo-occhiali { transform-origin: 60px 58px; }
+  .pallo-cuore { animation: pallo-batticuore 1.1s ease-in-out infinite; }
+  .pallo-cuoricino { animation: pallo-cuoricino 2.8s ease-out infinite; animation-delay: calc(var(--i, 0) * -1.4s); }
+
+  @keyframes pallo-dondola {
+    0%, 100% { transform: translateY(0) rotate(-3deg); }
+    25%, 75% { transform: translateY(-3px) rotate(0deg); }
+    50% { transform: translateY(0) rotate(3deg); }
+  }
+  @keyframes pallo-riflesso {
+    0%, 55% { transform: translateX(0); }
+    85%, 100% { transform: translateX(72px); }
+  }
+  @keyframes pallo-batticuore {
+    0%, 40%, 100% { transform: scale(1); }
+    12% { transform: scale(1.22); }
+    24% { transform: scale(1.06); }
+    32% { transform: scale(1.16); }
+  }
+  @keyframes pallo-cuoricino {
+    0% { transform: translateY(8px) scale(0.5); opacity: 0; }
+    20%, 70% { opacity: 1; }
+    100% { transform: translateY(-10px) scale(1); opacity: 0; }
+  }
+
+  /* ------------------------------------------------- i gesti «idle» */
+  /* Li sceglie Pallo.tsx, a caso e mai due volte di fila lo stesso. */
+  .pallo-idle { transform-origin: 60px 104px; }
+  .pallo[data-gesto="inclina-sx"] .pallo-idle { animation: pallo-inclina-sx 1.6s ease-in-out; }
+  .pallo[data-gesto="inclina-dx"] .pallo-idle { animation: pallo-inclina-dx 1.6s ease-in-out; }
+  .pallo[data-gesto="saltello"] .pallo-idle { animation: pallo-saltello 0.8s cubic-bezier(0.3, 0, 0.4, 1); }
+  .pallo[data-gesto="guarda-sx"] .pallo-guarda { animation: pallo-guarda-sx 1.8s ease-in-out; }
+  .pallo[data-gesto="guarda-dx"] .pallo-guarda { animation: pallo-guarda-dx 1.8s ease-in-out; }
+  .pallo[data-gesto="guarda-su"] .pallo-guarda { animation: pallo-guarda-su 1.6s ease-in-out; }
+
+  @keyframes pallo-inclina-sx {
+    0%, 100% { transform: rotate(0deg); }
+    25%, 70% { transform: rotate(-7deg); }
+  }
+  @keyframes pallo-inclina-dx {
+    0%, 100% { transform: rotate(0deg); }
+    25%, 70% { transform: rotate(7deg); }
+  }
+  @keyframes pallo-saltello {
+    0%, 50%, 100% { transform: translateY(0); }
+    25% { transform: translateY(-7px); }
+    72% { transform: translateY(-3px); }
+  }
+  @keyframes pallo-guarda-sx {
+    0%, 100% { transform: translate(0, 0); }
+    15%, 75% { transform: translate(-4px, 0.5px); }
+  }
+  @keyframes pallo-guarda-dx {
+    0%, 100% { transform: translate(0, 0); }
+    15%, 75% { transform: translate(4px, 0.5px); }
+  }
+  @keyframes pallo-guarda-su {
+    0%, 100% { transform: translate(0, 0); }
+    20%, 70% { transform: translate(1px, -3px); }
+  }
+
+  /* ---------------------------------------------- tocco e sorprese */
+  /* Il tocco: si schiaccia, salta, ricade. Due nomi identici che si
+     alternano (data-tocco 0/1): l'animazione riparte a ogni tocco. */
+  .pallo-tocco { transform-origin: 60px 104px; }
+  .pallo-giro { transform-origin: 60px 60px; }
+  .pallo[data-tocco="0"] .pallo-tocco { animation: pallo-boing-a 0.62s cubic-bezier(0.3, 0, 0.3, 1); }
+  .pallo[data-tocco="1"] .pallo-tocco { animation: pallo-boing-b 0.62s cubic-bezier(0.3, 0, 0.3, 1); }
+  .pallo[data-tocco="0"] .pallo-ombra { animation: pallo-ombra-boing-a 0.62s cubic-bezier(0.3, 0, 0.3, 1); }
+  .pallo[data-tocco="1"] .pallo-ombra { animation: pallo-ombra-boing-b 0.62s cubic-bezier(0.3, 0, 0.3, 1); }
+
+  @keyframes pallo-boing-a {
+    0% { transform: translateY(0) scale(1.14, 0.84); }
+    30% { transform: translateY(-14px) scale(0.92, 1.1); }
+    55% { transform: translateY(0) scale(1.08, 0.92); }
+    75% { transform: translateY(-3px) scale(0.98, 1.02); }
+    100% { transform: translateY(0) scale(1, 1); }
+  }
+  @keyframes pallo-boing-b {
+    0% { transform: translateY(0) scale(1.14, 0.84); }
+    30% { transform: translateY(-14px) scale(0.92, 1.1); }
+    55% { transform: translateY(0) scale(1.08, 0.92); }
+    75% { transform: translateY(-3px) scale(0.98, 1.02); }
+    100% { transform: translateY(0) scale(1, 1); }
+  }
+  @keyframes pallo-ombra-boing-a {
+    0%, 55%, 100% { transform: scale(1.08); }
+    30% { transform: scale(0.7); }
+  }
+  @keyframes pallo-ombra-boing-b {
+    0%, 55%, 100% { transform: scale(1.08); }
+    30% { transform: scale(0.7); }
+  }
+
+  /* Il palleggio: si carica, vola, fa un giro su sé stesso, ricade e
+     rimbalza due volte. */
+  .pallo[data-sorpresa="palleggio"] .pallo-tocco { animation: pallo-palleggio 1.4s cubic-bezier(0.3, 0, 0.3, 1); }
+  .pallo[data-sorpresa="palleggio"] .pallo-giro { animation: pallo-giro 1.4s ease-in-out; }
+  .pallo[data-sorpresa="palleggio"] .pallo-ombra { animation: pallo-ombra-palleggio 1.4s cubic-bezier(0.3, 0, 0.3, 1); }
+
+  @keyframes pallo-palleggio {
+    0% { transform: translateY(0) scale(1, 1); }
+    10% { transform: translateY(2px) scale(1.18, 0.8); }
+    40% { transform: translateY(-58px) scale(0.96, 1.04); }
+    68% { transform: translateY(0) scale(1.12, 0.88); }
+    80% { transform: translateY(-12px) scale(0.97, 1.03); }
+    90% { transform: translateY(0) scale(1.04, 0.96); }
+    100% { transform: translateY(0) scale(1, 1); }
+  }
+  @keyframes pallo-giro {
+    0%, 14% { transform: rotate(0deg); }
+    62%, 100% { transform: rotate(360deg); }
+  }
+  @keyframes pallo-ombra-palleggio {
+    0%, 68%, 90%, 100% { transform: scale(1); }
+    10% { transform: scale(1.12); }
+    40% { transform: scale(0.4); }
+    80% { transform: scale(0.85); }
+  }
+
+  /* Gli occhiali: cadono dall'alto sul naso, con un rimbalzino. */
+  .pallo[data-sorpresa="occhiali"] .pallo-occhiali { animation: pallo-occhiali 0.7s cubic-bezier(0.3, 1.4, 0.5, 1) both; }
+
+  @keyframes pallo-occhiali {
+    from { transform: translateY(-46px) rotate(-14deg); }
+    to { transform: translateY(0) rotate(0deg); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pallo,
+    .pallo * { animation: none !important; transition: none !important; }
+    .pallo-volto,
+    .pallo-sguardo { transform: none !important; }
+  }
+}

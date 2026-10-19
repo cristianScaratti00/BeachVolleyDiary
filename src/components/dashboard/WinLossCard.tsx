@@ -1,10 +1,12 @@
 // ============================================================================
-// Vinte / perse: l'anello del win rate, la legenda e i set vinti.
+// Vinte / perse: l'anello del win rate, la legenda e i set vinti. Nei colori
+// della barra della Home (il redesign): l'arco delle vinte d'inchiostro, il
+// binario delle perse sul filo forte, il «%» piccolo in arancio.
 //
 // L'anello è `stroke-dasharray` (MOTION.md E2, `data-motion-exception`): al
 // montaggio e a un cambio di filtro passa dal valore di prima al nuovo in
 // RACCONTO. Con reduced-motion arriva fermo. Le etichette al centro sono HTML:
-// nell'SVG scalato «VINTE» scendeva a 9px.
+// nell'SVG scalato «Vinte» scendeva a 9px.
 // ============================================================================
 import { useEffect, useState } from 'react'
 import { useReducedMotion } from 'motion/react'
@@ -15,7 +17,7 @@ import { ChartCard, EmptyNote } from './Chart'
 // La circonferenza del cerchio di raggio 50 (la stessa di `deriveDashboard`).
 const CIRC = 2 * Math.PI * 50
 
-export function WinLossCard({ s }: { s: DashboardStats }) {
+export function WinLossCard({ s, rise }: { s: DashboardStats; rise?: number }) {
   const ridotto = useReducedMotion()
   // Al primo fotogramma l'arco è vuoto, poi va al valore: la transizione lo porta.
   const [arrivato, setArrivato] = useState(!!ridotto)
@@ -27,7 +29,7 @@ export function WinLossCard({ s }: { s: DashboardStats }) {
 
   if (s.played === 0) {
     return (
-      <ChartCard title="Vinte e perse">
+      <ChartCard title="Vinte e perse" rise={rise}>
         <EmptyNote>Nessuna partita in questo periodo.</EmptyNote>
       </ChartCard>
     )
@@ -36,19 +38,20 @@ export function WinLossCard({ s }: { s: DashboardStats }) {
   return (
     <ChartCard
       title="Vinte e perse"
+      rise={rise}
       summary={`${s.won} ${s.won === 1 ? 'vinta' : 'vinte'} e ${s.lost} ${s.lost === 1 ? 'persa' : 'perse'}: ${s.winPct}% delle partite. Set vinti: ${s.setPct}%.`}
     >
       <div className="dash-wl">
         <div className="dash-ring">
           <svg viewBox="0 0 120 120" aria-hidden="true" focusable="false">
-            <circle cx="60" cy="60" r="50" fill="none" style={{ stroke: TOKEN.dataTrack }} strokeWidth={8} />
+            <circle cx="60" cy="60" r="50" fill="none" style={{ stroke: TOKEN.lineStrong }} strokeWidth={8} />
             <circle
               className="dash-ring-arc"
               cx="60"
               cy="60"
               r="50"
               fill="none"
-              style={{ stroke: TOKEN.dataWin }}
+              style={{ stroke: TOKEN.dataInk }}
               strokeWidth={8}
               strokeLinecap="round"
               strokeDasharray={arrivato ? s.donutDash : `0 ${CIRC.toFixed(1)}`}
@@ -57,8 +60,8 @@ export function WinLossCard({ s }: { s: DashboardStats }) {
             />
           </svg>
           <div className="dash-ring-center" aria-hidden="true">
-            <span className="dash-ring-n">{s.winPct}%</span>
-            <span className="dash-eyebrow">Vinte</span>
+            <span className="dash-ring-n">{s.winPct}<span className="dash-pct">%</span></span>
+            <span className="dash-eyebrow">vinte</span>
           </div>
         </div>
         <dl className="dash-legend">

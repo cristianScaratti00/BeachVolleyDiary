@@ -1,26 +1,27 @@
 // ============================================================================
-// «Nuovo torneo» / «Modifica torneo» (UX §5 F2): UN solo sheet al posto del
-// form completo, della creazione rapida e dei loro tre ingressi.
+// «Nuovo torneo» / «Torneo rapido» / «Modifica torneo» (UX §5 F2, design 15):
+// UN solo sheet per i tre ingressi.
 //
-// - Gli essenziali stanno in cima: Nome* · Data · Dove hai giocato · Con chi ·
-//   Com'è andata. Si salva con il solo nome.
-// - «Altri dettagli» è chiuso in creazione (con il riassunto dei valori
-//   correnti) e aperto in modifica, dove di solito si cerca proprio un
-//   dettaglio. È l'unica altezza animata dell'app (MOTION.md E1).
-// - L'analytics distingue `rapido` (dettagli mai aperti) da `completo` (UX §13).
-// - «Crea torneo» è annunciato disattivo finché il Nome è vuoto, ma il tocco
-//   porta al campo e dice cosa manca (MOTION.md M15). Occupato: «Creo…», campi
+// - In cima la barra «Annulla · titolo · Salva»: le azioni restano in vista
+//   anche con la tastiera su.
+// - «Torneo» (e la modifica) mostra tutto il modulo del design: Nome · Con
+//   chi · Data e Luogo · Categoria · Formato e Superficie · Piazzamento ·
+//   Tabellone. Le scelte brevi sono chip che vanno a capo (`aria-pressed`).
+// - «Torneo rapido» tiene in vista solo Nome, Data e Piazzamento; il resto
+//   sta in «Altri dettagli» (chiuso, con il riassunto). È l'unica altezza
+//   animata dell'app (MOTION.md E1).
+// - L'analytics distingue `rapido` (rapido senza mai aprire i dettagli) da
+//   `completo` (UX §13).
+// - «Salva» è annunciato disattivo finché il Nome è vuoto, ma il tocco porta
+//   al campo e dice cosa manca (MOTION.md M15). Occupato: «Creo…», campi
 //   bloccati, il doppio tocco non fa niente.
-// - Sul vetro dello sheet i campi stanno su gruppi opachi (ART_DIRECTION D6);
-//   «Elimina torneo» è una riga opaca, mai testo --danger sul vetro.
 // ============================================================================
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Sheet, SheetActions, SheetTitle } from './Sheet'
+import { Sheet, SheetBar, SheetChipAdd, SheetChips } from './Sheet'
 import VenuePicker from './VenuePicker'
 import { Button } from '../ui/Button'
-import { Disclosure, FormGroup, Select, SwatchPicker, TextField } from '../ui/Field'
-import { SegmentedControl } from '../ui/Choice'
-import { List, ListRow } from '../ui/List'
+import { Icon } from '../ui/Icon'
+import { Disclosure, SwatchPicker, TextField } from '../ui/Field'
 import { placementText } from '../ui/Badge'
 import { BRACKETS, CATEGORIES, FORMATS, PLACEMENTS, SURFACES } from '../../lib/db.enums'
 import { SWATCH_COLORS } from '../../lib/theme'
@@ -29,6 +30,9 @@ import type { TorneoSheetProps } from '../../app/contracts'
 import './TorneoSheet.css'
 
 const NOME_MANCANTE = 'Scrivi il nome del torneo.'
+
+/** La superficie si legge corta come nel design («Sabbia»); il valore resta quello del DB. */
+const SUPERFICIE: Record<Surface, string> = { 'Sabbia outdoor': 'Sabbia', Indoor: 'Indoor', Erba: 'Erba' }
 
 function formIniziale({ torneo, compagnoDefault, today }: Pick<TorneoSheetProps, 'torneo' | 'compagnoDefault' | 'today'>): AnyForm {
   if (torneo) {
@@ -75,6 +79,7 @@ function formIniziale({ torneo, compagnoDefault, today }: Pick<TorneoSheetProps,
 
 export default function TorneoSheet({
   mode,
+  rapido = false,
   torneo,
   partners,
   venues,
@@ -93,11 +98,13 @@ export default function TorneoSheet({
   setBusy,
 }: TorneoSheetProps) {
   const modifica = mode === 'modifica'
+  const breve = rapido && !modifica
   // Il valore iniziale si fissa all'apertura: è il riferimento del "sporco".
   const iniziale = useMemo(() => formIniziale({ torneo, compagnoDefault, today }), [])  // eslint-disable-line react-hooks/exhaustive-deps
   const [form, setForm] = useState<AnyForm>(iniziale)
-  const [dettagli, setDettagli] = useState(modifica)
-  const dettagliAperti = useRef(modifica)
+  const [dettagli, setDettagli] = useState(false)
+  // Il modulo intero è «completo» da sé; il rapido lo diventa aprendo i dettagli.
+  const dettagliAperti = useRef(!breve)
   const [occupato, setOccupato] = useState(false)
   const [errNome, setErrNome] = useState('')
   const nomeRef = useRef<HTMLInputElement>(null)
@@ -136,8 +143,119 @@ export default function TorneoSheet({
     }
   }
 
-  const riassunto = [form.category, form.format, form.surface].filter(Boolean).join(' · ')
   const nuovoCompagno = form.partnerId === 'new'
+  const compagno = nuovoCompagno ? (form.newPartnerName ?? '').trim() : partners.find((p) => p.id === form.partnerId)?.name
+  const riassunto = [compagno, form.category, form.format, form.surface].filter(Boolean).join(' · ')
+  const titolo = modifica ? 'Modifica torneo' : breve ? 'Torneo rapido' : 'Nuovo torneo'
+
+  // ------------------------------------------------------------- i blocchi
+  const nome = (
+    <TextField
+      ref={nomeRef}
+      label="Nome torneo"
+      value={form.name ?? ''}
+      onChange={(v) => setField('name', v)}
+      placeholder="es. Summer Cup Rimini"
+      autoComplete="off"
+      enterKeyHint="done"
+      required
+      aria-required="true"
+      error={errNome || undefined}
+    />
+  )
+
+  const data = <TextField label="Data" type="date" value={form.date ?? ''} onChange={(v) => setField('date', v)} />
+
+  const conChi = (
+    <div className="torneo-sheet-partner">
+      <SheetChips
+        label="Con chi lo hai fatto"
+        options={partners.map((p) => ({ value: p.id, label: p.name }))}
+        value={nuovoCompagno ? '' : form.partnerId ?? ''}
+        // Ritoccare il compagno scelto lo toglie: il torneo resta «da solo».
+        onChange={(v) => setField('partnerId', v)}
+        toggle
+        hint={modifica ? 'Cambiandolo, il compagno viene aggiornato su tutte le partite del torneo.' : undefined}
+      >
+        {(canAddPartner || nuovoCompagno) && (
+          <SheetChipAdd pressed={nuovoCompagno} onClick={() => setField('partnerId', nuovoCompagno ? '' : 'new')}>
+            <Icon name="plus" size={16} />
+            Nuovo compagno
+          </SheetChipAdd>
+        )}
+      </SheetChips>
+      {nuovoCompagno && (
+        <TextField
+          label="Nome del nuovo compagno"
+          value={form.newPartnerName ?? ''}
+          onChange={(v) => setField('newPartnerName', v)}
+          placeholder="es. Giulia"
+          autoComplete="off"
+          // Scelto «Nuovo compagno», il campo del nome è la cosa da fare.
+          autoFocus
+        />
+      )}
+    </div>
+  )
+
+  const luogo = <VenuePicker form={form} setField={setField} venues={venues} suggestSurface onMerge={onMergeVenues} />
+
+  const categoria = (
+    <SheetChips
+      label="Categoria"
+      options={CATEGORIES.map((c) => ({ value: c, label: c }))}
+      value={form.category ?? 'Amatoriale'}
+      onChange={(v) => v && setField('category', v as Category)}
+    />
+  )
+
+  const formatoSuperficie = (
+    <div className="ui-sheet-pair" data-ratio="chips">
+      <SheetChips
+        label="Formato"
+        options={FORMATS.map((f) => ({ value: f, label: f }))}
+        value={form.format ?? '2vs2'}
+        onChange={(v) => v && setField('format', v as Format)}
+      />
+      <SheetChips
+        label="Superficie"
+        options={SURFACES.map((s) => ({ value: s, label: SUPERFICIE[s] }))}
+        value={form.surface ?? 'Sabbia outdoor'}
+        onChange={(v) => v && setField('surface', v as Surface)}
+      />
+    </div>
+  )
+
+  const piazzamento = (
+    <SheetChips
+      label="Piazzamento"
+      // Il valore resta quello del DB («1° 🏆», C15): cambia solo come si legge.
+      options={PLACEMENTS.map((p) => ({ value: p, label: placementText(p) }))}
+      value={form.placement ?? 'In corso'}
+      onChange={(v) => v && setField('placement', v as Placement)}
+    />
+  )
+
+  // Il tabellone affianca il piazzamento: «2°» da solo non dice se era il
+  // Gold o il Silver. Facoltativo: ritoccarlo lo toglie.
+  const tabellone = (
+    <SheetChips
+      label={<>Tabellone <span className="ui-sheet-optional">(facoltativo)</span></>}
+      options={BRACKETS.map((b) => ({ value: b, label: b }))}
+      value={form.bracket ?? ''}
+      onChange={(v) => setField('bracket', v as Bracket | '')}
+      toggle
+    />
+  )
+
+  const colore = (
+    <SwatchPicker
+      label="Etichetta colore"
+      colors={SWATCH_COLORS}
+      value={form.color ?? SWATCH_COLORS[0]}
+      onChange={(c) => setField('color', c)}
+    />
+  )
 
   return (
     <Sheet
@@ -147,25 +265,26 @@ export default function TorneoSheet({
       opener={opener}
       dirty={sporco}
       busy={occupato}
-      footer={
-        <SheetActions>
-          <Button variant="quiet" onClick={onClose} aria-disabled={occupato || undefined}>
-            Annulla
-          </Button>
-          <Button
-            variant="filled"
-            disabled={nomeVuoto}
-            onDisabledClick={manca}
-            busy={occupato}
-            busyLabel={modifica ? 'Salvataggio…' : 'Creo…'}
-            onClick={() => void salva()}
-          >
-            {modifica ? 'Salva' : 'Crea torneo'}
-          </Button>
-        </SheetActions>
+      header={
+        <SheetBar
+          title={titolo}
+          onCancel={onClose}
+          cancelBusy={occupato}
+          action={
+            <Button
+              variant="filled"
+              disabled={nomeVuoto}
+              onDisabledClick={manca}
+              busy={occupato}
+              busyLabel={modifica ? 'Salvataggio…' : 'Creo…'}
+              onClick={() => void salva()}
+            >
+              Salva
+            </Button>
+          }
+        />
       }
     >
-      <SheetTitle>{modifica ? 'Modifica torneo' : 'Nuovo torneo'}</SheetTitle>
       <form
         className="torneo-sheet-form"
         noValidate
@@ -175,113 +294,59 @@ export default function TorneoSheet({
         }}
       >
         {/* Durante il salvataggio i campi sono bloccati (UX §5 F2). */}
-        <fieldset className="torneo-sheet-fields" disabled={occupato}>
-          <FormGroup>
-            <TextField
-              ref={nomeRef}
-              label="Nome torneo"
-              value={form.name ?? ''}
-              onChange={(v) => setField('name', v)}
-              placeholder="es. Summer Cup Rimini"
-              autoComplete="off"
-              enterKeyHint="done"
-              required
-              aria-required="true"
-              error={errNome || undefined}
-            />
-            <TextField label="Data" type="date" value={form.date ?? ''} onChange={(v) => setField('date', v)} />
-            <VenuePicker form={form} setField={setField} venues={venues} suggestSurface onMerge={onMergeVenues} />
-            <div className="torneo-sheet-partner">
-              <Select
-                label="Con chi"
-                value={form.partnerId ?? ''}
-                onChange={(v) => setField('partnerId', v)}
-                options={[
-                  { value: '', label: 'Nessuno' },
-                  ...partners.map((p) => ({ value: p.id, label: p.name })),
-                  ...(canAddPartner || nuovoCompagno ? [{ value: 'new', label: '＋ Nuovo compagno…' }] : []),
-                ]}
-                hint={modifica ? 'Cambiandolo, il compagno viene aggiornato su tutte le partite del torneo.' : undefined}
-              />
-              {nuovoCompagno && (
-                <TextField
-                  label="Nome del nuovo compagno"
-                  value={form.newPartnerName ?? ''}
-                  onChange={(v) => setField('newPartnerName', v)}
-                  placeholder="es. Giulia"
-                  autoComplete="off"
-                />
-              )}
-            </div>
-            <Select
-              label="Com'è andata"
-              value={form.placement ?? 'In corso'}
-              onChange={(v) => setField('placement', v as Placement)}
-              // Il valore resta quello del DB («1° 🏆», C15): cambia solo come si legge.
-              options={PLACEMENTS.map((p) => ({ value: p, label: placementText(p) }))}
-            />
-          </FormGroup>
-
-          <Disclosure
-            title="Altri dettagli"
-            summary={riassunto}
-            open={dettagli}
-            onToggle={() => {
-              if (!dettagli) dettagliAperti.current = true
-              setDettagli(!dettagli)
-            }}
-            className="torneo-sheet-details"
-          >
-            <FormGroup className="torneo-sheet-more">
-              <Select
-                label="Categoria"
-                value={form.category ?? 'Amatoriale'}
-                onChange={(v) => setField('category', v as Category)}
-                options={CATEGORIES.map((c) => ({ value: c, label: c }))}
-              />
-              <div className="ui-field">
-                <span className="ui-field-label" aria-hidden="true">Formato</span>
-                <SegmentedControl
-                  label="Formato"
-                  value={form.format ?? '2vs2'}
-                  onChange={(v) => setField('format', v as Format)}
-                  options={FORMATS.map((f) => ({ value: f, label: f }))}
-                />
+        <fieldset className="ui-sheet-stack torneo-sheet-fields" disabled={occupato}>
+          {breve ? (
+            <>
+              {nome}
+              {data}
+              {piazzamento}
+              <Disclosure
+                title="Altri dettagli"
+                summary={riassunto}
+                open={dettagli}
+                onToggle={() => {
+                  if (!dettagli) dettagliAperti.current = true
+                  setDettagli(!dettagli)
+                }}
+                className="torneo-sheet-details"
+              >
+                <div className="ui-sheet-stack torneo-sheet-more">
+                  {conChi}
+                  <div className="ui-sheet-stack">{luogo}</div>
+                  {categoria}
+                  {formatoSuperficie}
+                  {tabellone}
+                  {colore}
+                </div>
+              </Disclosure>
+            </>
+          ) : (
+            <>
+              {nome}
+              {conChi}
+              <div className="ui-sheet-pair">
+                {data}
+                {luogo}
               </div>
-              <Select
-                label="Superficie"
-                value={form.surface ?? 'Sabbia outdoor'}
-                onChange={(v) => setField('surface', v as Surface)}
-                options={SURFACES.map((s) => ({ value: s, label: s }))}
-              />
-              {/* Il tabellone affianca il piazzamento: «2°» da solo non dice
-                  se era il Gold o il Silver. Facoltativo. */}
-              <Select
-                label="Tabellone"
-                value={form.bracket ?? ''}
-                onChange={(v) => setField('bracket', v as Bracket | '')}
-                options={[{ value: '', label: 'Nessuno' }, ...BRACKETS.map((b) => ({ value: b, label: b }))]}
-              />
-              <SwatchPicker
-                label="Etichetta colore"
-                colors={SWATCH_COLORS}
-                value={form.color ?? SWATCH_COLORS[0]}
-                onChange={(c) => setField('color', c)}
-              />
-            </FormGroup>
-          </Disclosure>
+              {categoria}
+              {formatoSuperficie}
+              {piazzamento}
+              {tabellone}
+              {colore}
+            </>
+          )}
         </fieldset>
 
         {!modifica && (
-          <Button variant="plain" icon="chat" className="torneo-sheet-assistant" onClick={() => onUseAssistant(sporco)}>
-            Preferisci farti guidare? Usa l'assistente →
+          <Button variant="plain" icon="chat-dots" className="torneo-sheet-assistant" onClick={() => onUseAssistant(sporco)}>
+            Preferisci farti guidare? Usa l'assistente
           </Button>
         )}
 
         {modifica && onDelete && (
-          <List className="torneo-sheet-danger">
-            <ListRow onClick={onDelete} icon="trash" title="Elimina torneo" tone="danger" disabled={occupato} />
-          </List>
+          <Button variant="glass" tone="danger" icon="trash" block className="ui-sheet-danger" disabled={occupato} onClick={onDelete}>
+            Elimina torneo
+          </Button>
         )}
       </form>
     </Sheet>

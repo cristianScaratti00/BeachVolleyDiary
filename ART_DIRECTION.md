@@ -14,6 +14,7 @@ Ogni valore in questo documento è un numero o un token. Se un componente ha bis
 
 ## Indice
 
+- [Versione D: il redesign Liquid Glass](#versione-d-il-redesign-liquid-glass-ottobre-2026)
 0. [In una frase](#0-in-una-frase)
 1. [Estendere o spingere: la decisione](#1-estendere-o-spingere-la-decisione)
 2. [Direzione estetica](#2-direzione-estetica)
@@ -31,6 +32,34 @@ Ogni valore in questo documento è un numero o un token. Se un componente ha bis
 14. [Il test "admin Bootstrap"](#14-il-test-admin-bootstrap)
 15. [Dove questo documento corregge UX.md e il piano](#15-dove-questo-documento-corregge-uxmd-e-il-piano)
 16. [Seam per i ruoli successivi](#16-seam-per-i-ruoli-successivi)
+
+---
+
+## Versione D: il redesign Liquid Glass (ottobre 2026)
+
+> Questa sezione **vince** su tutto il resto del documento dove i due non coincidono. Il resto resta il ragionamento di fondo (carta e vetro, numeri da tabellone, accessibilità), ma i valori sono cambiati: la fonte è sempre `src/styles/tokens.css`, verificato da `tokens.test.ts`.
+
+Il redesign è stato disegnato in Claude Design (19 schermate a 390×844, «versione D») e riprodotto nell'app. Cosa cambia:
+
+| | Prima | Versione D |
+|---|---|---|
+| Inchiostro | navy `#1B2A4A` | nero neutro `#1C1C1E` (17.01 sul bianco); secondario `#6B6B68`, etichette dei campi `#3A3A38` |
+| Fondo | sabbia con il "sole basso" | `#F6F6F4` piatto |
+| Card | carta col filo all'8% | carta bianca col filo pieno `#E2E2DE`, raggio 22, nessuna ombra |
+| Font | SF Pro / Inter | **Geist** variabile, servito dall'app (`@fontsource-variable/geist`), anche nei PNG |
+| Titoli | 34/700 | **mobile first**: 30/800 sul telefono, 34 da 600px, stretti (−0.03em); sezioni 17/700; etichette dei numeri **minuscole** (12–13) |
+| Ritmo verticale | — | 28px di respiro sotto la safe-area prima del titolo delle schermate radice (`--page-top`), 10 prima dei pulsanti di vetro (`--bar-top`); 16 fra i blocchi (`--stack`), 24 prima di una sezione (`--section-gap`) |
+| Arancio | `#FF6B35`, etichetta navy | `#FF6B1A` col filo `#E05A10`, etichetta d'inchiostro a 700; testo arancio `#C2410C` |
+| Selezione | pillola navy | tab: pillola arancio al 12% col filo, testo arancio · segmented: pillola **bianca** su guida `#EDEDEA` · chip: inchiostro pieno |
+| Navigazione | Home · Tornei · ＋ · Compagni · Profilo | capsula di vetro **Home · Tornei · Compagni · Diario** + ＋ arancio staccato; il Profilo si apre dall'avatar in Home; il Diario (l'ex Timeline) torna una tab |
+| Barre in cima | NavBar che diventa vetro allo scroll | **pulsanti di vetro che galleggiano** (‹ indietro, capsula delle azioni, ×); il titolo compatto arriva in una capsula di vetro |
+| Vetro | `glass-regular` .72, blur 24 | vetro **liquido** alla Apple, non un pannello col bordo: bianco appena .32, `blur(10px) saturate(180%) brightness(1.05)`, **nessun bordo vero** ma la luce sul bordo direzionale (forte in alto a sinistra, tenue in basso a destra), lo spessore (luce dentro in alto, ombra appena in basso) e un'ombra morbida perché galleggia; **rifrazione vera** sulle superfici che galleggiano (`LiquidGlass`, `@samasante/liquid-glass`: filtro SVG di spostamento nel `backdrop-filter`, solo Blink e caricato in lazy solo lì) |
+| Piazzamento | badge | **medaglia** (`Medal`): 1° arancio, podio col filo d'inchiostro, il resto grigia |
+| Esito partita | anello arancio/grigio | V = cerchio d'inchiostro pieno; set vinto col filo d'inchiostro, perso col filo chiaro |
+| Mascotte | — | **Pallo** (`src/components/Pallo.tsx`): consigli in Home, sbircia dal ＋, conduce l'assistente, tifa nella partita live e in Wrapped |
+| Movimento | ENTRATA · SVELTO · MOLLA | in più la **SALITA** (`.rise`: 12px, 600ms, sfalsata di 50ms) e la **PRESSIONE** (`.press`: .97 con rimbalzo `cubic-bezier(.3,1.6,.5,1)`, 400ms) |
+
+Il contrasto del testo resta sempre ≥ 4.5. Due scelte consapevoli del redesign, fissate come prove negative in `tokens.test.ts`: il **filo dei campi** è leggero (`#D6D6D1`, 1.46 sul bianco: il campo si riconosce dall'etichetta, dal fondo bianco e dal focus arancio + anello; con `prefers-contrast: more` diventa un filo vero da 5.35), e il vetro si misura sul **grigio di una foto in ombra** (`#8C8C8C`) invece che sul nero, perché sotto le barre di vetro passano solo carta, mappa e foto.
 
 ---
 

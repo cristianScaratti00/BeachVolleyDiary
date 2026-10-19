@@ -1,4 +1,7 @@
-/* Lo splash: il marchio al centro del fondo, nient'altro (ART_DIRECTION §10.2). */
+/* Lo splash: il marchio del redesign (il pallone nella tessera d'inchiostro)
+   al centro del fondo --bg, nient'altro (ART_DIRECTION §10.2). Fermo di
+   proposito: Root e App lo rimontano uno dopo l'altro, e un'animazione
+   d'ingresso ripartirebbe a metà caricamento. */
 @layer components {
   .splash {
     min-height: 100dvh;

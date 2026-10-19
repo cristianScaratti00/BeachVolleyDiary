@@ -1,125 +1,307 @@
-/* Accesso: una card opaca al centro; da 900 il pannello del marchio a sinistra. */
+/* ============================================================================
+   L'accesso del redesign: il tramonto a tutto schermo (--surface-brand), il
+   contenuto ancorato in basso, testo bianco. È una superficie scura
+   (`data-surface="dark"`): --ink, --ink-2, --ink-3 e l'anello di focus sono
+   già i bianchi di materials.css.
+
+   I campi sono quelli del design per il buio: il bianco all'8% col filo al
+   26%, focus arancio. Non si riscrive il campo: si ridefiniscono qui i token
+   che TextField legge (--field, --field-border, --field-h, --ink-label,
+   --ink-placeholder), come fa materials.css per l'inchiostro sul vetro.
+   ============================================================================ */
 @layer components {
-  .login { min-height: 100dvh; display: flex; }
-  .login-brand {
-    flex: 0 0 44%;
-    max-width: var(--sheet-max);
+  .accesso {
+    --field: color-mix(in srgb, var(--on-glass-dark) 8%, transparent);
+    --field-border: color-mix(in srgb, var(--on-glass-dark) 26%, transparent);
+    --field-h: calc(var(--touch) + var(--space-2));
+    --ink-label: var(--on-glass-dark-2);
+    --ink-placeholder: color-mix(in srgb, var(--on-glass-dark) 55%, transparent);
+    /* L'errore di un campo sul buio: il rosso pieno farebbe 3:1 sul nero, il
+       suo fondo chiaro (--danger-wash) fa 17. L'icona dice che è un errore. */
+    --danger: var(--danger-wash);
+    position: relative;
+    isolation: isolate;
+    min-height: 100dvh;
+    background: var(--surface-brand);
+  }
+  /* Il rimbalzo di iOS oltre i bordi mostra il fondo della pagina: qui è il buio. */
+  :root:has(.accesso) body { background-color: var(--surface-brand); }
+
+  /* ------------------------------------------------------------- Scena */
+  .accesso-scena {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  /* La camera: Accedi e Registrati alzano la scena (140 e 170 su 844 nel
+     design) e la avvicinano. È un movimento di macchina in RACCONTO; con
+     reduced-motion --dur-racconto vale 0 e la scena è già al suo posto. */
+  .accesso-camera {
+    position: absolute;
+    inset: 0;
+    transition: transform var(--dur-racconto) var(--ease-racconto);
+  }
+  .accesso-scena[data-inquadratura="accedi"] .accesso-camera { transform: translateY(-16.6%) scale(1.05); }
+  .accesso-scena[data-inquadratura="registrati"] .accesso-camera { transform: translateY(-20.1%) scale(1.08); }
+  /* I tempi dell'illustrazione sono del disegno, come quelli di Pallo. */
+  .accesso-scena-svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    transform-origin: 60% 60%;
+    animation: accesso-kb 22s ease-in-out infinite alternate;
+  }
+  .accesso-palla { animation: accesso-vola 4s ease-in-out infinite; }
+  .accesso-riflesso { animation: accesso-luccica 3s ease-in-out infinite alternate; }
+  @keyframes accesso-kb { from { transform: scale(1); } to { transform: scale(1.08); } }
+  @keyframes accesso-vola {
+    0%, 100% { transform: translate(0, 0) rotate(0); }
+    50% { transform: translate(-10px, -22px) rotate(-14deg); }
+  }
+  @keyframes accesso-luccica { from { opacity: 0.35; } to { opacity: 0.8; } }
+
+  /* I veli dal basso: si scambiano l'opacità quando cambia la vista. Le
+     altezze sono quelle del design (520 e 720 su 844), in proporzione. */
+  .accesso-velo {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    transition: opacity var(--dur-racconto) var(--ease-racconto);
+  }
+  .accesso-velo[data-velo="benvenuto"] {
+    height: 62%;
+    background: linear-gradient(
+      to top,
+      var(--surface-brand) 0%,
+      color-mix(in srgb, var(--surface-brand) 90%, transparent) 34%,
+      color-mix(in srgb, var(--surface-brand) 55%, transparent) 62%,
+      transparent 100%
+    );
+  }
+  .accesso-velo[data-velo="modulo"] {
+    height: 86%;
+    opacity: 0;
+    background: linear-gradient(
+      to top,
+      var(--surface-brand) 0%,
+      color-mix(in srgb, var(--surface-brand) 94%, transparent) 52%,
+      color-mix(in srgb, var(--surface-brand) 60%, transparent) 76%,
+      transparent 100%
+    );
+  }
+  .accesso-scena:not([data-inquadratura="benvenuto"]) .accesso-velo[data-velo="modulo"] { opacity: 1; }
+  .accesso-scena:not([data-inquadratura="benvenuto"]) .accesso-velo[data-velo="benvenuto"] { opacity: 0; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .accesso-scena-svg,
+    .accesso-palla,
+    .accesso-riflesso { animation: none; }
+    .accesso-riflesso { opacity: 0.6; }
+  }
+
+  /* ----------------------------------------------------------- Colonna */
+  /* Una colonna da telefono anche su desktop (440: la misura del design più
+     il respiro), ancorata in basso; se il contenuto non ci sta (schermi
+     bassi, zoom al 200%) la pagina scorre e la scena resta ferma dietro. */
+  .accesso-main {
+    position: relative;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    gap: var(--space-10);
-    padding: var(--space-12) var(--space-10);
-    background: var(--surface-brand);
-    color: var(--ink);
+    min-height: 100dvh;
+    max-width: 440px;
+    margin: 0 auto;
+    padding: calc(var(--safe-top) + var(--space-2)) var(--space-6) max(var(--space-8), calc(var(--safe-bottom) + var(--space-2)));
   }
-  .login-brand-claim {
-    font: var(--type-title-1);
-    letter-spacing: var(--track-title-1);
+  .accesso-vista { flex: 1; display: flex; flex-direction: column; gap: var(--space-6); }
+  .accesso-fondo { margin-top: auto; display: flex; flex-direction: column; gap: var(--space-3-5); }
+
+  /* In cima: il «‹» (16 dal bordo, come la NavBar) e la barra dei passi. */
+  .accesso-top {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3-5);
+    margin-left: calc(-1 * var(--space-2));
+  }
+  .accesso-indietro {
+    position: relative;
+    isolation: isolate;
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: var(--touch);
+    height: var(--touch);
+    border-radius: 50%;
+    color: var(--on-glass-dark);
+  }
+  .accesso-progresso { flex: 1; display: flex; gap: var(--space-1-5); }
+  .accesso-segmento {
+    flex: 1;
+    height: var(--space-1);
+    border-radius: var(--space-0-5);
+    background: color-mix(in srgb, var(--on-glass-dark) 30%, transparent);
+    overflow: hidden;
+  }
+  /* Il riempimento scorre in transform, dall'inizio del segmento. */
+  .accesso-segmento > span {
+    display: block;
+    height: 100%;
+    background: var(--on-glass-dark);
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    transition: transform var(--dur-molla) var(--ease-molla);
+  }
+  .accesso-segmento > span[data-pieno] { transform: none; }
+
+  /* --------------------------------------------------------- Benvenuto */
+  .accesso-benvenuto { gap: calc(var(--space-4) + var(--space-0-5)); }
+  .accesso-marchio { display: flex; }
+  /* 150: lo spazio di due righe di titolo e due di testo. I pulsanti sotto
+     non saltano quando un messaggio è più corto dell'altro. */
+  .accesso-carosello { position: relative; min-height: 150px; touch-action: pan-y; }
+  .accesso-slide { display: flex; flex-direction: column; gap: var(--space-2-5); }
+  .accesso-slide-titolo {
+    font: 800 2.5rem/1.02 var(--font-ui);
+    letter-spacing: -0.04em;
     text-wrap: balance;
   }
-  .login-brand-text {
-    margin-top: var(--space-3);
-    max-width: var(--empty-max);
-    font: var(--type-body);
-    letter-spacing: var(--track-body);
-    color: var(--ink-2);
+  .accesso-slide-testo { font: 500 1rem/1.45 var(--font-ui); color: var(--ink-2); }
+
+  /* I puntini: bersagli da 44 col segno al centro; il primo si allinea al
+     testo. Quello acceso si allunga (la FORMA dice dove sei, non solo il
+     bianco). */
+  .accesso-punti {
+    display: flex;
+    margin: calc(-1 * var(--space-3)) 0 calc(-1 * var(--space-2)) calc(-1 * var(--space-2-5));
   }
-  .login-brand-features {
-    list-style: none;
-    margin: var(--space-8) 0 0;
-    padding: 0;
+  .accesso-punto {
     display: grid;
-    gap: var(--space-3);
+    place-items: center;
+    width: var(--touch);
+    height: var(--touch);
+    border-radius: var(--radius-capsule);
   }
-  .login-brand-features li {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    font: var(--type-subhead-strong);
-    letter-spacing: var(--track-subhead);
+  .accesso-punto-segno {
+    width: var(--space-2);
+    height: var(--space-2);
+    border-radius: var(--space-1);
+    background: color-mix(in srgb, var(--on-glass-dark) 40%, transparent);
+    transition: width var(--dur-press) var(--ease-press), background-color var(--dur-svelto) var(--ease-standard);
+  }
+  .accesso-punto[aria-selected="true"] .accesso-punto-segno { width: 22px; background: var(--on-glass-dark); }
+
+  .accesso-azioni { display: flex; flex-direction: column; gap: var(--space-2-5); }
+  .accesso-nota {
+    text-align: center;
+    font: 400 0.75rem/1.5 var(--font-ui);
+    color: var(--ink-3);
   }
 
-  .login-main {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: calc(var(--safe-top) + var(--space-6)) var(--gutter) calc(var(--safe-bottom) + var(--space-6));
-    outline: none;
+  /* ----------------------------------------------------------- Moduli */
+  .accesso-passo { display: flex; flex-direction: column; gap: var(--space-3-5); }
+  .accesso-testa { margin-bottom: var(--space-1-5); }
+  .accesso-passo-n {
+    margin-bottom: var(--space-1-5);
+    font: 700 0.8125rem/1.25 var(--font-ui);
+    letter-spacing: 0.015em;
+    color: var(--accent-edge);
   }
-  .login-column { width: 100%; max-width: calc(var(--empty-max) + var(--space-16)); }
-  .login-brand-mobile { display: flex; justify-content: center; margin-bottom: var(--space-6); }
-
-  .login-card {
-    padding: var(--space-6) var(--space-5);
-    background: var(--surface);
-    border: var(--border-w) solid var(--edge);
-    border-radius: var(--radius-card);
+  .accesso-h1 {
+    font: 800 2.375rem/1.02 var(--font-ui);
+    letter-spacing: -0.037em;
+    text-wrap: balance;
+    overflow-wrap: anywhere;
   }
-  .login-title { font: var(--type-title-1); letter-spacing: var(--track-title-1); }
-  .login-sub {
-    margin-top: var(--space-1);
-    font: var(--type-subhead);
-    letter-spacing: var(--track-subhead);
+  .accesso-passo .accesso-h1 { font-size: 2.25rem; line-height: 1.04; letter-spacing: -0.036em; }
+  .accesso-sotto {
+    margin-top: var(--space-2);
+    font: 500 1rem/1.45 var(--font-ui);
     color: var(--ink-2);
   }
-  .login-segmented { margin-top: var(--space-5); }
-  .login-form { display: grid; gap: var(--space-4); margin-top: var(--space-5); }
-  .login-name { display: grid; gap: var(--space-1); }
-  .login-name-status {
+  .accesso-passo .accesso-sotto { font-size: 0.96875rem; }
+
+  /* I campi scuri: raggio 16 come nel design, e il fondo che si accende al focus. */
+  .accesso .ui-input {
+    border-radius: var(--radius-row);
+    padding: 0 var(--space-4);
+    transition: border-color var(--dur-svelto) var(--ease-standard), background-color var(--dur-svelto) var(--ease-standard);
+  }
+  .accesso .ui-input:focus { background: color-mix(in srgb, var(--on-glass-dark) 12%, transparent); }
+  /* L'autocompletamento di Chrome dipinge il campo di azzurro chiaro: sul
+     buio diventerebbe una lastra bianca col testo bianco. */
+  .accesso .ui-input:-webkit-autofill {
+    -webkit-text-fill-color: var(--ink);
+    caret-color: var(--ink);
+    box-shadow: inset 0 0 0 100px var(--surface-brand);
+  }
+
+  .accesso-nome { display: grid; gap: calc(var(--space-1) + var(--space-0-5)); }
+  /* Sempre alta una riga: quando arriva l'esito il pulsante sotto non salta. */
+  .accesso-nome-stato {
     display: flex;
     align-items: center;
-    gap: var(--space-1);
-    min-height: var(--space-5);
-    font: var(--type-footnote);
-    letter-spacing: var(--track-footnote);
-    color: var(--ink-2);
+    gap: var(--space-1-5);
+    min-height: 1.35em;
+    font: 600 0.8125rem/1.35 var(--font-ui);
+    color: var(--ink);
   }
-  .login-name-status[data-status="available"] { color: var(--success); }
-  .login-name-status[data-status="taken"] { color: var(--danger); }
+  .accesso-nome-stato[data-status="checking"] { font-weight: 500; color: var(--ink-3); }
+  .accesso-nome-stato[data-status="taken"] .ui-icon { color: var(--accent); }
 
-  .login-notice,
-  .login-error,
-  .login-offline {
+  .accesso-invia { margin-top: var(--space-2); }
+
+  /* Errori, conferma e offline: una lastra appena chiara, testo bianco;
+     l'icona dice il tipo (l'arancio fa 6.9 sul nero). */
+  .accesso-avviso {
     display: flex;
     align-items: flex-start;
     gap: var(--space-2);
-    padding: var(--space-3);
+    padding: var(--space-2-5) var(--space-3);
     border-radius: var(--radius-control);
-    font: var(--type-footnote);
-    letter-spacing: var(--track-footnote);
+    background: var(--field);
+    box-shadow: inset 0 0 0 var(--border-w) var(--field-border);
+    font: var(--type-subhead);
+    letter-spacing: var(--track-subhead);
+    color: var(--ink);
+    animation: accesso-compari var(--dur-entrata) var(--ease-standard) both;
   }
-  .login-notice .ui-icon,
-  .login-error .ui-icon,
-  .login-offline .ui-icon { margin-top: var(--space-0-5); }
-  .login-notice { background: var(--success-wash); color: var(--success); }
-  .login-error { background: var(--danger-wash); color: var(--danger); }
-  .login-offline { margin-top: var(--space-4); background: var(--fill); color: var(--ink); }
+  .accesso-avviso .ui-icon { flex: none; margin-top: var(--space-0-5); }
+  .accesso-avviso[data-tipo="errore"] .ui-icon { color: var(--accent); }
+  @keyframes accesso-compari {
+    from { opacity: 0; transform: translateY(calc(-4px * var(--motion-scale))); }
+    to { opacity: 1; transform: none; }
+  }
 
-  .login-switch {
-    margin-top: var(--space-4);
+  /* «Non hai un account? Registrati»: il link d'azione è un button vero,
+     sottolineato a 700; il bersaglio arriva a 44 con ::after. */
+  .accesso-cambio {
+    margin-top: var(--space-1);
     text-align: center;
     font: var(--type-subhead);
     letter-spacing: var(--track-subhead);
     color: var(--ink-2);
   }
-  /* Un link d'azione: è un `<button>`, con il bersaglio a 44. */
-  .login-link {
-    display: inline-flex;
-    align-items: center;
-    min-height: var(--touch);
-    padding: 0 var(--space-1);
-    color: var(--accent-text);
-    font-weight: 600;
+  .accesso-link {
+    position: relative;
+    font-weight: 700;
+    color: var(--ink);
+    text-decoration: underline;
+    text-underline-offset: var(--space-0-5);
+  }
+  /* Alto 44 qualunque sia l'interlinea: l'estensione si centra sul testo. */
+  .accesso-link::after {
+    content: "";
+    position: absolute;
+    inset: calc(50% - var(--touch) / 2) calc(-1 * var(--space-2));
   }
   @media (hover: hover) and (pointer: fine) {
-    .login-link:hover { text-decoration: underline; text-underline-offset: var(--space-0-5); }
+    .accesso-link:hover { color: var(--accent-edge); }
   }
-  .login-foot {
-    margin-top: var(--space-4);
-    text-align: center;
-    font: var(--type-footnote);
-    letter-spacing: var(--track-footnote);
-    color: var(--ink-2);
+
+  @media (prefers-reduced-motion: reduce) {
+    .accesso-segmento > span,
+    .accesso-punto-segno { transition: none; }
   }
 }

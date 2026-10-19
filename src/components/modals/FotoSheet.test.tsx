@@ -1,6 +1,7 @@
 // ============================================================================
-// «Aggiungi foto» (UX §5 F5): dialogo con titolo, dropzone come <button>,
-// errori in linea, stato occupato «Carico…» con lo sheet che non si chiude.
+// «Aggiungi foto» (UX §5 F5): dialogo con la barra dei moduli («Annulla ·
+// Aggiungi foto · Aggiungi»), dropzone come <button>, errori in linea, stato
+// occupato «Carico…» con lo sheet che non si chiude.
 // ============================================================================
 import { describe, it, expect, vi, beforeAll } from 'vitest'
 import { render, screen, act } from '@testing-library/react'
@@ -49,10 +50,10 @@ describe('FotoSheet', () => {
     expect(click).toHaveBeenCalled()
   })
 
-  it('senza file «Aggiungi foto» resta disattivo e dice cosa manca', async () => {
+  it('senza file «Aggiungi» resta disattivo e dice cosa manca', async () => {
     const user = userEvent.setup()
     const { props } = renderSheet()
-    const salva = screen.getAllByRole('button', { name: 'Aggiungi foto' }).find((b) => b.getAttribute('data-variant') === 'filled')!
+    const salva = screen.getByRole('button', { name: 'Aggiungi' })
     expect(salva).toHaveAttribute('aria-disabled', 'true')
     await user.click(salva)
     expect(props.onSave).not.toHaveBeenCalled()
@@ -82,7 +83,7 @@ describe('FotoSheet', () => {
     const { props } = renderSheet({ onSave })
     await user.upload(fileInput(), new File(['x'], 'foto.jpg', { type: 'image/jpeg' }))
     expect(props.setDirty).toHaveBeenLastCalledWith(true)
-    await user.click(screen.getAllByRole('button', { name: 'Aggiungi foto' }).find((b) => b.getAttribute('data-variant') === 'filled')!)
+    await user.click(screen.getByRole('button', { name: 'Aggiungi' }))
     expect(screen.getAllByRole('button', { name: 'Carico…' })[0]).toBeInTheDocument()
     expect(props.setBusy).toHaveBeenCalledWith(true)
     expect(onSave).toHaveBeenCalledWith({ caption: '', tournamentId: 't1', color: '#FF6B35' }, expect.any(File))

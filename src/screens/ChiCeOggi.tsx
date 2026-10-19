@@ -1,8 +1,8 @@
 // ============================================================================
-// "Chi c'è oggi" (UX §5 F6, §6.7; MOTION.md §5 F6). Presentazionale: il
-// proprio check-in, la stanza già ordinata e le callback arrivano dalla shell
-// (useCheckIn via App). Qui vivono solo il modulo, il filtro della stanza e gli
-// stati dei pulsanti.
+// "Chi c'è oggi" (UX §5 F6, §6.7; MOTION.md §5 F6; il redesign, versione D).
+// Presentazionale: il proprio check-in, la stanza già ordinata e le callback
+// arrivano dalla shell (useCheckIn via App). Qui vivono solo il modulo, il
+// filtro della stanza e gli stati dei pulsanti.
 //
 // - Reciprocità (Q3): la stanza si vede solo dopo il check-in.
 // - Il modulo che diventa la card «Sei a X oggi» (e ritorno) segue lo schema
@@ -10,6 +10,8 @@
 //   chi entra compare al suo posto, la stanza sotto scivola (FLIP). Nessuna
 //   altezza animata.
 // - «Termina check-in» chiede conferma (UX §7.7): la conferma la apre la shell.
+//   Il redesign scrive «Esci», ma «Esci» nell'app è solo il logout (C19): il
+//   pulsante dice «Termina», e il suo nome è «Termina check-in».
 // ============================================================================
 import { useEffect, useId, useRef, useState } from 'react'
 import * as m from 'motion/react-m'
@@ -51,47 +53,46 @@ export default function ChiCeOggi({
   aggiornatoAlle,
 }: ChiCeOggiProps) {
   return (
-    <Page>
+    <Page width="reading" className="oggi-page">
       <NavBar title="Chi c'è oggi" subtitle="Chi è in spiaggia oggi e cerca compagno" back={back} />
-      <div className="oggi-layout">
-        {/* Il modulo e la card si scambiano sul posto: chi esce va fuori dal
-            flusso (popLayout), la stanza sotto scivola con un FLIP. */}
-        <div className="oggi-slot">
-          <AnimatePresence mode="popLayout" initial={false}>
-            {own ? (
-              <m.div
-                key="qui"
-                className="oggi-swap"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0, transition: ENTRATA }}
-                exit={{ opacity: 0, transition: SVELTO }}
-              >
-                <CheckedInCard own={own} onTermina={onTerminaCheckIn} />
-              </m.div>
-            ) : (
-              <m.div
-                key="modulo"
-                className="oggi-swap"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0, transition: ENTRATA }}
-                exit={{ opacity: 0, transition: SVELTO }}
-              >
-                <CheckInForm cityPrefill={cityPrefill} onCheckIn={onCheckIn} />
-              </m.div>
-            )}
-          </AnimatePresence>
-        </div>
-        <m.div layout="position" transition={MOLLA} className="oggi-room-wrap">
-          <RoomSection
-            own={own}
-            room={room}
-            loading={loading}
-            onRefresh={onRefresh}
-            onAddPartner={onAddPartner}
-            aggiornatoAlle={aggiornatoAlle}
-          />
-        </m.div>
+      {/* Il modulo e la card si scambiano sul posto: chi esce va fuori dal
+          flusso (popLayout), la stanza sotto scivola con un FLIP. La salita
+          sta sul contenitore, mai sugli elementi che Motion sposta. */}
+      <div className="oggi-slot rise">
+        <AnimatePresence mode="popLayout" initial={false}>
+          {own ? (
+            <m.div
+              key="qui"
+              className="oggi-swap"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0, transition: ENTRATA }}
+              exit={{ opacity: 0, transition: SVELTO }}
+            >
+              <CheckedInCard own={own} onTermina={onTerminaCheckIn} />
+            </m.div>
+          ) : (
+            <m.div
+              key="modulo"
+              className="oggi-swap"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0, transition: ENTRATA }}
+              exit={{ opacity: 0, transition: SVELTO }}
+            >
+              <CheckInForm cityPrefill={cityPrefill} onCheckIn={onCheckIn} />
+            </m.div>
+          )}
+        </AnimatePresence>
       </div>
+      <m.div layout="position" transition={MOLLA} className="oggi-room-wrap">
+        <RoomSection
+          own={own}
+          room={room}
+          loading={loading}
+          onRefresh={onRefresh}
+          onAddPartner={onAddPartner}
+          aggiornatoAlle={aggiornatoAlle}
+        />
+      </m.div>
     </Page>
   )
 }
@@ -123,7 +124,7 @@ function CheckInForm({ cityPrefill, onCheckIn }: { cityPrefill: string; onCheckI
 
   return (
     <Card as="section" className="oggi-form" aria-labelledby={`${id}-t`}>
-      <h2 id={`${id}-t`} className="oggi-card-title">Fai check-in</h2>
+      <h2 id={`${id}-t`} className="oggi-form-title">Fai check-in</h2>
       <p className="oggi-card-text">Segnala che sei in spiaggia oggi e scopri chi altro c'è.</p>
       <form
         className="oggi-fields"
@@ -132,55 +133,64 @@ function CheckInForm({ cityPrefill, onCheckIn }: { cityPrefill: string; onCheckI
           void submit()
         }}
       >
-        <div className="ui-field" data-invalid={errore && vuota ? '' : undefined}>
-          <label htmlFor={`${id}-city`} className="ui-field-label">Città</label>
-          <span
-            ref={(el) => {
-              cityRef.current = el?.querySelector('input') ?? null
-            }}
-            className="oggi-city"
-          >
-            <CityInput
-              id={`${id}-city`}
-              value={city}
-              onChange={(v) => {
-                setCity(v)
-                if (v.trim()) setErrore(false)
+        <div className="oggi-dove">
+          <div className="ui-field" data-invalid={errore && vuota ? '' : undefined}>
+            <label htmlFor={`${id}-city`} className="ui-field-label">Città</label>
+            <span
+              ref={(el) => {
+                cityRef.current = el?.querySelector('input') ?? null
               }}
-              describedBy={errore && vuota ? `${id}-city-e` : undefined}
-            />
-          </span>
-          {errore && vuota && (
-            <p id={`${id}-city-e`} className="ui-field-error" role="alert">
-              <Icon name="alert" size={16} />
-              <span>Scrivi la città in cui sei.</span>
+              className="oggi-city"
+            >
+              <CityInput
+                id={`${id}-city`}
+                value={city}
+                onChange={(v) => {
+                  setCity(v)
+                  if (v.trim()) setErrore(false)
+                }}
+                describedBy={errore && vuota ? `${id}-city-e` : undefined}
+              />
+            </span>
+            {errore && vuota && (
+              <p id={`${id}-city-e`} className="ui-field-error" role="alert">
+                <Icon name="alert" size={16} />
+                <span>Scrivi la città in cui sei.</span>
+              </p>
+            )}
+          </div>
+
+          {/* Il giorno non si sceglie: il check-in vale per oggi. */}
+          <div className="ui-field">
+            <span className="ui-field-label">Giorno</span>
+            <p className="oggi-giorno">
+              <span className="oggi-giorno-dot" aria-hidden="true" />
+              Oggi
             </p>
-          )}
+          </div>
         </div>
 
-        <div className="ui-field">
-          <span className="ui-field-label">Giorno</span>
-          <p className="oggi-giorno">
-            <Icon name="calendar" size={20} />
-            Oggi
-          </p>
-        </div>
-
-        <Switch label="Cerco compagno" hint="Fatti trovare da chi cerca un partner." checked={looking} onChange={setLooking} />
+        <Switch className="oggi-cerco" label="Cerco compagno" hint="Fatti trovare da chi cerca un partner." checked={looking} onChange={setLooking} />
 
         <TextField
-          label="Nota (facoltativa)"
+          label={
+            <>
+              Nota <span className="oggi-facoltativa">(facoltativa)</span>
+            </>
+          }
           value={note}
           onChange={setNote}
           maxLength={NOTA_MAX}
-          placeholder="es. Cerco per King of the Beach, 2vs2"
-          hint={`${note.length}/${NOTA_MAX}`}
+          placeholder={'Es. "Cerco per King of the Beach, 2vs2"'}
+          // Il contatore compare quando si scrive: a campo vuoto non dice niente.
+          hint={note ? `${note.length}/${NOTA_MAX}` : undefined}
           autoComplete="off"
         />
 
         <Button
           type="submit"
           variant="filled"
+          size="lg"
           block
           disabled={vuota}
           busy={busy}
@@ -191,7 +201,7 @@ function CheckInForm({ cityPrefill, onCheckIn }: { cityPrefill: string; onCheckI
             cityRef.current?.focus()
           }}
         >
-          Fai check-in
+          Sono in spiaggia
         </Button>
       </form>
     </Card>
@@ -201,21 +211,22 @@ function CheckInForm({ cityPrefill, onCheckIn }: { cityPrefill: string; onCheckI
 // ---------------------------------------------------------------- sei qui
 function CheckedInCard({ own, onTermina }: { own: CheckIn; onTermina: () => void }) {
   const id = useId()
+  const stato = own.lookingForPartner ? 'Visibile come “cerca compagno”' : 'Visibile, senza cercare compagno'
   return (
     <Card as="section" className="oggi-qui" aria-labelledby={`${id}-t`}>
-      <div className="oggi-qui-head">
-        <Icon name="pin" size={24} className="oggi-qui-icon" />
-        <div className="oggi-qui-text">
-          <h2 id={`${id}-t`} className="oggi-card-title">Sei a {own.city} oggi</h2>
-          <p className="oggi-card-text">
-            {own.lookingForPartner ? 'Stai cercando un compagno.' : 'Non stai cercando un compagno.'}
-            {own.note ? ` · ${own.note}` : ''}
-          </p>
-        </div>
+      <div className="oggi-qui-text">
+        <h2 id={`${id}-t`} className="oggi-qui-title">
+          <span className="oggi-qui-dot" aria-hidden="true" />
+          Sei a {own.city} oggi
+        </h2>
+        <p className="oggi-card-text">
+          {stato}
+          {own.note ? ` · ${own.note}` : ''}
+        </p>
       </div>
-      <div className="oggi-qui-actions">
-        <Button variant="destructive-plain" onClick={onTermina}>Termina check-in</Button>
-      </div>
+      <Button variant="glass" size="sm" aria-label="Termina check-in" onClick={onTermina}>
+        Termina
+      </Button>
     </Card>
   )
 }
@@ -234,15 +245,14 @@ function RoomSection({ own, room, loading, onRefresh, onAddPartner, aggiornatoAl
 }) {
   const [filtro, setFiltro] = useState<string>(TUTTI)
 
-  // Reciprocità (Q3): la stanza si vede solo se sei in check-in.
+  // Reciprocità (Q3): la stanza si vede solo se sei in check-in. Qui sotto il
+  // modulo resta una riga sola, che dice perché.
   if (!own) {
     return (
-      <Section title="In spiaggia oggi" id="oggi-stanza">
-        <Card as="div" className="oggi-bloccata">
-          <Icon name="lock" size={24} className="oggi-bloccata-icon" />
-          <p>Fai check-in per vedere chi c'è oggi e metterti in contatto.</p>
-        </Card>
-      </Section>
+      <p className="oggi-bloccata rise">
+        <Icon name="lock" size={16} />
+        <span>Fai check-in per vedere chi c'è oggi e metterti in contatto.</span>
+      </p>
     )
   }
 
@@ -256,9 +266,10 @@ function RoomSection({ own, room, loading, onRefresh, onAddPartner, aggiornatoAl
     <Section
       title="In spiaggia oggi"
       id="oggi-stanza"
-      count={room.length > 0 ? <Badge tone="accent">{room.length === 1 ? '1 persona' : `${room.length} persone`}</Badge> : undefined}
+      className="oggi-stanza rise"
+      count={room.length > 0 ? <Badge>{room.length === 1 ? '1 persona' : `${room.length} persone`}</Badge> : undefined}
       action={
-        <Button variant="plain" size="sm" icon="refresh" onClick={onRefresh}>
+        <Button variant="glass" size="sm" onClick={onRefresh}>
           Aggiorna
         </Button>
       }
@@ -283,7 +294,7 @@ function RoomSection({ own, room, loading, onRefresh, onAddPartner, aggiornatoAl
           <p role="status" className="oggi-stato">Aggiornamento…</p>
           <Skeleton className="oggi-skeleton">
             {[0, 1].map((i) => (
-              <div key={i} className="oggi-skel-card">
+              <div key={i} className="oggi-skel-row">
                 <Bone className="oggi-skel-avatar" />
                 <span className="oggi-skel-lines">
                   <Bone className="oggi-skel-name" />
@@ -296,7 +307,7 @@ function RoomSection({ own, room, loading, onRefresh, onAddPartner, aggiornatoAl
       ) : room.length === 0 ? (
         <Card as="div" className="oggi-vuota">
           <p>Ancora nessun altro qui.</p>
-          <Button variant="tinted" icon="refresh" onClick={onRefresh}>Aggiorna</Button>
+          <p className="oggi-vuota-sub">Chi fa check-in in città compare qui: aggiorna tra un po'.</p>
         </Card>
       ) : visibili.length === 0 ? (
         <Card as="div" className="oggi-vuota">
@@ -305,7 +316,7 @@ function RoomSection({ own, room, loading, onRefresh, onAddPartner, aggiornatoAl
       ) : (
         <ul className="oggi-persone">
           {visibili.map((u) => (
-            <PresentCard key={u.id} u={u} onAddPartner={onAddPartner} />
+            <PresentRow key={u.id} u={u} onAddPartner={onAddPartner} />
           ))}
         </ul>
       )}
@@ -314,8 +325,7 @@ function RoomSection({ own, room, loading, onRefresh, onAddPartner, aggiornatoAl
 }
 
 // ---------------------------------------------------------------- persona
-function PresentCard({ u, onAddPartner }: { u: PresentUser; onAddPartner: (u: PresentUser) => Promise<{ ok: boolean; error?: string }> }) {
-  const id = useId()
+function PresentRow({ u, onAddPartner }: { u: PresentUser; onAddPartner: (u: PresentUser) => Promise<{ ok: boolean; error?: string }> }) {
   const [stato, setStato] = useState<'idle' | 'busy' | 'done'>('idle')
   const [err, setErr] = useState('')
 
@@ -333,45 +343,47 @@ function PresentCard({ u, onAddPartner }: { u: PresentUser; onAddPartner: (u: Pr
 
   const fatto = stato === 'done'
   return (
-    <Card as="li" className="oggi-persona">
-      <div className="oggi-persona-head">
-        <Avatar name={u.name} src={u.avatarUrl} size={40} />
+    <li className="oggi-persona">
+      <div className="oggi-persona-row">
+        <Avatar name={u.name} src={u.avatarUrl} size={44} />
         <div className="oggi-persona-who">
-          <h3 id={`${id}-n`} className="oggi-persona-name">{u.name}</h3>
-          {u.lookingForPartner ? <Badge tone="accent">Cerca compagno</Badge> : <span className="oggi-persona-stato">In spiaggia</span>}
+          <div className="oggi-persona-head">
+            <h3 className="oggi-persona-name">{u.name}</h3>
+            {u.lookingForPartner && <Badge tone="accent">Cerca compagno</Badge>}
+          </div>
+          <p className="oggi-persona-note">{u.note ? `“${u.note}”` : 'In spiaggia oggi'}</p>
+        </div>
+        {/* Pulsante ed esito si scambiano SUL POSTO, nella stessa cella:
+            dissolvenza incrociata, niente salto (MOTION.md §5 F6). */}
+        <div className="oggi-add" data-done={fatto ? '' : undefined}>
+          <span className="oggi-add-btn" {...(fatto ? { inert: '' } : {})}>
+            <Button
+              variant="glass"
+              size="sm"
+              aria-label={`Aggiungi ${u.name} ai compagni`}
+              busy={stato === 'busy'}
+              busyLabel="Aggiungo…"
+              onClick={() => void aggiungi()}
+            >
+              Aggiungi
+            </Button>
+          </span>
+          <span className="oggi-add-done" role="status">
+            {fatto && (
+              <>
+                <Icon name="check-circle" size={16} className="oggi-add-ok" />
+                Aggiunto<span className="sr-only"> ai compagni</span>
+              </>
+            )}
+          </span>
         </div>
       </div>
-      {u.note && <p className="oggi-persona-note">{u.note}</p>}
-      {/* Pulsante ed esito si scambiano SUL POSTO, nella stessa altezza
-          riservata: dissolvenza incrociata, niente salto (MOTION.md §5 F6). */}
-      <div className="oggi-add" data-done={fatto ? '' : undefined}>
-        <span className="oggi-add-btn" {...(fatto ? { inert: '' } : {})}>
-          <Button
-            variant="neutral"
-            icon="person-plus"
-            block
-            busy={stato === 'busy'}
-            busyLabel="Aggiungo…"
-            onClick={() => void aggiungi()}
-          >
-            Aggiungi come compagno
-          </Button>
-        </span>
-        <span className="oggi-add-done" role="status">
-          {fatto && (
-            <>
-              <Icon name="check-circle" size={20} className="oggi-add-ok" />
-              Aggiunto ai compagni
-            </>
-          )}
-        </span>
-      </div>
       {err && (
-        <p role="alert" className="ui-field-error">
+        <p role="alert" className="ui-field-error oggi-persona-err">
           <Icon name="alert" size={16} />
           <span>{err}</span>
         </p>
       )}
-    </Card>
+    </li>
   )
 }

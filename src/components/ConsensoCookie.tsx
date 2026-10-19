@@ -5,6 +5,7 @@ import { AnimatePresence, useIsPresent, useReducedMotion } from 'motion/react'
 import { decidi, useScelta } from '../lib/consenso'
 import { ENTRATA, SVELTO } from './Motion'
 import { Button } from './ui/Button'
+import { Pallo } from './Pallo'
 import { useSheetCentered } from '../hooks/useMedia'
 import './ConsensoCookie.css'
 
@@ -28,6 +29,10 @@ import './ConsensoCookie.css'
 // Aspetto (MOTION.md §4.2): la forma del ConfirmDialog su mobile (sale dal
 // basso), centrato da 600px; opaco, sopra a tutto (--z-consent), con il suo
 // velo. Alla scelta esce in SVELTO, e da t0 non riceve più tocchi.
+//
+// Il redesign ci mette Pallo che sbircia dal bordo della carta, con le mani
+// appoggiate: è decorativo (`aria-hidden`) e non è un pulsante, quindi la
+// trappola del fuoco continua a vedere solo i due pulsanti.
 // ============================================================================
 
 export default function ConsensoCookie() {
@@ -139,26 +144,30 @@ function Pannello({ cardRef }: { cardRef: RefObject<HTMLDivElement> }) {
       animate={{ opacity: 1, y: 0, scale: 1, transition: ENTRATA }}
       exit={{ opacity: 0, y, scale: 0.96, transition: SVELTO }}
     >
-      <h2 id="consenso-titolo" className="consenso-title">Cookie e statistiche</h2>
-      <p id="consenso-testo" className="consenso-testo">
-        Il necessario per tenerti collegato è sempre attivo. Ci piacerebbe usare anche strumenti di misura che ci
-        dicono quali schermate si usano e dove ci si blocca, comprese registrazioni anonime delle sessioni. Puoi dire
-        di no e l'app funziona uguale.
-      </p>
+      <Pallo umore="sbircia" size={72} className="consenso-pallo" />
+      <div className="consenso-carta">
+        <h2 id="consenso-titolo" className="consenso-title">Cookie e statistiche</h2>
+        <p id="consenso-testo" className="consenso-testo">
+          Il necessario per tenerti collegato è sempre attivo. Ci piacerebbe usare anche strumenti di misura che ci
+          dicono quali schermate si usano e dove ci si blocca, comprese registrazioni anonime delle sessioni. Puoi dire
+          di no e l'app funziona uguale.
+        </p>
 
-      {/* Rifiuta per primo, e della stessa misura: è il punto. */}
-      <div className="consenso-actions">
-        <Button variant="neutral" size="lg" block onClick={() => decidi('rifiutato')}>
-          Rifiuta
-        </Button>
-        <Button variant="filled" size="lg" block onClick={() => decidi('accettato')}>
-          Accetta
-        </Button>
+        {/* Rifiuta per primo, e della stessa misura: è il punto. */}
+        <div className="consenso-actions">
+          <Button variant="neutral" size="lg" block onClick={() => decidi('rifiutato')}>
+            Rifiuta
+          </Button>
+          <Button variant="filled" size="lg" block onClick={() => decidi('accettato')}>
+            Accetta
+          </Button>
+        </div>
+
+        <p className="consenso-nota">
+          Per continuare scegli una delle due. Puoi cambiare idea quando vuoi da{' '}
+          <b>Profilo → Statistiche d'uso anonime</b>.
+        </p>
       </div>
-
-      <p className="consenso-nota">
-        Per continuare scegli una delle due. Puoi cambiare idea quando vuoi da <b>Profilo → Cookie e statistiche</b>.
-      </p>
     </m.div>
   )
 }

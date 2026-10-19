@@ -1,0 +1,34 @@
+/* La medaglia del piazzamento (Medal.tsx). Misure: sm 34 (Diario), md 42
+   (righe), lg 64 (titolo del dettaglio). */
+@layer components {
+  .ui-medal {
+    --d: var(--medal-md);
+    flex: none;
+    display: inline-grid;
+    place-items: center;
+    width: var(--d);
+    height: var(--d);
+    border-radius: 50%;
+    font: 800 0.9375rem/1 var(--font-ui);
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .ui-medal[data-size="sm"] { --d: var(--medal-sm); font-size: 0.8125rem; }
+  .ui-medal[data-size="lg"] { --d: var(--medal-lg); font-size: 1.5rem; letter-spacing: -0.02em; }
+
+  .ui-medal[data-tier="win"] { background: var(--accent); box-shadow: inset 0 0 0 var(--border-w) var(--accent-strong); }
+  .ui-medal[data-tier="podium"] { background: var(--surface); box-shadow: inset 0 0 0 1.5px var(--ink); }
+  .ui-medal[data-tier="rest"],
+  .ui-medal[data-tier="open"] {
+    background: var(--surface-pressed);
+    box-shadow: inset 0 0 0 var(--border-w) var(--line-strong);
+    color: var(--ink-2);
+    font-weight: 700;
+    font-size: 0.75rem;
+  }
+  .ui-medal[data-tier="open"] { box-shadow: none; border: var(--border-w) dashed var(--line-strong); }
+  .ui-medal[data-long][data-size="sm"] { font-size: 0.625rem; }
+  .ui-medal[data-long][data-size="lg"] { font-size: 1rem; }
+}

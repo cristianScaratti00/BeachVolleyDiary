@@ -1,25 +1,30 @@
 // ============================================================================
-// NavBar con large title (UX §7.3, MOTION.md §4.1, ART_DIRECTION §9.3).
+// NavBar del redesign (ART_DIRECTION §0, UX §7.3).
 //
-// - In cima è trasparente: il large title è nel flusso del contenuto (`<h1>`),
-//   con il sottotitolo e, sotto, quello che la schermata ci mette (ricerca).
-// - Quando il large title esce dalla vista (una sentinella e un
-//   IntersectionObserver: nessun listener di scroll) la barra diventa vetro e
-//   compare il titolo compatto, in SVELTO. È un CAMBIO DI STATO a soglia, non
-//   un'animazione legata allo scroll: su iOS quelle scattano.
-// - Il vetro è un livello sempre presente a opacità 0, e quando è a 0 è anche
-//   `visibility: hidden`: una sfocatura trasparente costa e conta nel budget.
-//   Si anima l'opacità, mai il raggio della sfocatura.
-// - Il titolo compatto è `aria-hidden`: l'h1 resta l'unico titolo.
+// - Le schermate radice (Home, Tornei, Compagni, Diario) NON hanno barra: il
+//   titolo grande (34/800) apre la pagina, con il sottotitolo e, a destra,
+//   quello che la schermata ci mette (`aside`: l'avatar in Home, «＋ Nuovo»
+//   in Compagni).
+// - I dettagli hanno i pulsanti di VETRO LIQUIDO che galleggiano in cima:
+//   «‹ Compagni» (o solo «‹» con `backIcon`) a sinistra, le azioni raccolte in
+//   una capsula di vetro a destra, oppure il × di `close`. Restano lì mentre
+//   il contenuto scorre sotto di loro, ed è lì che la rifrazione si vede.
+// - Quando il titolo grande esce dalla vista (una sentinella e un
+//   IntersectionObserver: nessun listener di scroll) compare il titolo
+//   compatto, in una capsula di vetro al centro. È un CAMBIO DI STATO a
+//   soglia, non un'animazione legata allo scroll.
+// - Il titolo compatto è `aria-hidden`: l'h1 resta l'unico titolo. Con
+//   `hideLargeTitle` l'h1 lo mette la schermata (Profilo: il nome), e la barra
+//   mostra sempre il titolo compatto.
 //
-// La barra è `sticky` e deve essere figlia diretta della pagina (non di un
-// header che esce di vista con lei): per questo il componente restituisce un
-// frammento.
+// La barra è `sticky` e deve essere figlia diretta della pagina: per questo il
+// componente restituisce un frammento.
 // ============================================================================
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Icon } from './Icon'
 import { nomeVisibile } from './Card'
+import { LiquidGlass } from './LiquidGlass'
 import './NavBar.css'
 
 export interface NavBarBack {
@@ -27,7 +32,22 @@ export interface NavBarBack {
   onClick: () => void
 }
 
-export function NavBar({ title, subtitle, subtitleLive, back, leading, actions, scrolledActions, children, eyebrow }: {
+export function NavBar({
+  title,
+  subtitle,
+  subtitleLive,
+  back,
+  backIcon,
+  close,
+  leading,
+  actions,
+  scrolledActions,
+  children,
+  eyebrow,
+  kicker,
+  aside,
+  hideLargeTitle,
+}: {
   title: ReactNode
   /** Riga sotto il large title. */
   subtitle?: ReactNode
@@ -35,20 +55,34 @@ export function NavBar({ title, subtitle, subtitleLive, back, leading, actions, 
   subtitleLive?: boolean
   /** ‹ Indietro con l'etichetta della schermata precedente (UX §4.2). */
   back?: NavBarBack
-  /** Al posto dell'Indietro (il marchio in Home). */
+  /** Solo la freccia nel cerchio di vetro (il nome va nell'`aria-label`). */
+  backIcon?: boolean
+  /** Il × di vetro a destra: le schermate che si chiudono (Profilo). */
+  close?: NavBarBack
+  /** Al posto dell'Indietro. */
   leading?: ReactNode
-  /** Al massimo due azioni, icone da 44 con nome accessibile. */
+  /** Al massimo due azioni, icone da 44 con nome accessibile: stanno in una
+   *  capsula di vetro. */
   actions?: ReactNode
   /** Azioni che compaiono solo dopo lo scroll (la lente in Tornei). */
   scrolledActions?: (visible: boolean) => ReactNode
   /** Contenuto sotto il titolo che scorre con lui (ricerca, segmented). */
   children?: ReactNode
-  /** Riga sopra il large title (categoria e badge nel dettaglio). */
+  /** Accanto al large title, a sinistra (la medaglia del torneo, l'avatar). */
   eyebrow?: ReactNode
+  /** La riga piccola SOPRA il large title («Amatoriale · 2vs2 · Sabbia»). */
+  kicker?: ReactNode
+  /** A destra del large title (l'avatar in Home, «＋ Nuovo» in Compagni). */
+  aside?: ReactNode
+  /** L'h1 lo mette la schermata; la barra mostra sempre il titolo compatto. */
+  hideLargeTitle?: boolean
 }) {
   const bar = useRef<HTMLDivElement>(null)
   const sentinel = useRef<HTMLSpanElement>(null)
   const [scattata, setScattata] = useState(false)
+  const scrolled = scrolledActions?.(scattata)
+  const fissa = !!(back || close || leading || actions || hideLargeTitle)
+  const conBarra = fissa || !!scrolled
 
   useEffect(() => {
     const s = sentinel.current
@@ -60,35 +94,72 @@ export function NavBar({ title, subtitle, subtitleLive, back, leading, actions, 
     )
     io.observe(s)
     return () => io.disconnect()
-  }, [])
+  }, [conBarra])
+
+  const compatto = hideLargeTitle || scattata
 
   return (
     <>
-      <div ref={bar} className="ui-navbar" data-scrolled={scattata ? '' : undefined}>
-        <div className="ui-navbar-glass" data-material="glass-regular" aria-hidden="true" />
+      <div
+        ref={bar}
+        className="ui-navbar"
+        data-scrolled={compatto ? '' : undefined}
+        data-empty={conBarra ? undefined : ''}
+        // Solo azioni «dopo lo scroll» (la lente di Tornei): la barra galleggia
+        // sopra il titolo invece di spingerlo giù.
+        data-float={conBarra && !fissa ? '' : undefined}
+      >
         <div className="ui-navbar-lead">
           {back ? (
-            <button type="button" className="ui-navbar-back" onClick={back.onClick}>
-              <Icon name="chevron-left" size={24} />
-              <span className="ui-navbar-back-label">{back.label}</span>
+            <button
+              type="button"
+              className="ui-navbar-back press"
+              data-icon={backIcon ? '' : undefined}
+              aria-label={backIcon ? `Torna a ${back.label.replace(/^Torna a /, '')}` : undefined}
+              onClick={back.onClick}
+            >
+              <LiquidGlass layer />
+              <Icon name="chevron-left" size={20} />
+              {!backIcon && <span className="ui-navbar-back-label">{back.label}</span>}
             </button>
           ) : (
             leading
           )}
         </div>
-        <div className="ui-navbar-compact" aria-hidden="true">{nomeVisibile(title)}</div>
+        <div className="ui-navbar-compact" aria-hidden="true">
+          <LiquidGlass layer />
+          <span>{nomeVisibile(title)}</span>
+        </div>
         <div className="ui-navbar-trail">
-          {scrolledActions?.(scattata)}
-          {actions}
+          {(scrolled || actions) && (
+            <div className="ui-navbar-actions" data-hidden={!actions && !scattata ? '' : undefined}>
+              <LiquidGlass layer />
+              {scrolled}
+              {actions}
+            </div>
+          )}
+          {close && (
+            <button type="button" className="ui-navbar-close press" aria-label={close.label} onClick={close.onClick}>
+              <LiquidGlass layer />
+              <Icon name="close" size={16} />
+            </button>
+          )}
         </div>
       </div>
-      <div className="ui-largetitle">
-        {eyebrow && <div className="ui-largetitle-eyebrow">{eyebrow}</div>}
-        <h1 className="ui-largetitle-h1" tabIndex={-1}>{nomeVisibile(title)}</h1>
-        {subtitle != null && subtitle !== '' && (
-          <p className="ui-largetitle-sub" role={subtitleLive ? 'status' : undefined}>{subtitle}</p>
-        )}
-      </div>
+      {!hideLargeTitle && (
+        // Il titolo sale per primo, come l'intestazione del redesign.
+        <div className="ui-largetitle rise" data-eyebrow={eyebrow ? '' : undefined}>
+          {eyebrow && <div className="ui-largetitle-eyebrow">{eyebrow}</div>}
+          <div className="ui-largetitle-text">
+            {kicker && <div className="ui-largetitle-kicker">{kicker}</div>}
+            <h1 className="ui-largetitle-h1" tabIndex={-1}>{nomeVisibile(title)}</h1>
+            {subtitle != null && subtitle !== '' && (
+              <p className="ui-largetitle-sub" role={subtitleLive ? 'status' : undefined}>{subtitle}</p>
+            )}
+          </div>
+          {aside && <div className="ui-largetitle-aside">{aside}</div>}
+        </div>
+      )}
       <span ref={sentinel} className="ui-navbar-sentinel" aria-hidden="true" />
       {children}
     </>

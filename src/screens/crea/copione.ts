@@ -102,14 +102,76 @@ export const coloreDelNome = (name: string) => LABEL_COLORS[name.length % LABEL_
 /** Piazzamenti proposti quando il torneo è finito (senza «In corso»). */
 export const FINISHED_PLACEMENTS: Placement[] = ['1° 🏆', '2°', '3°', 'Semifinale', 'Quarti', 'Ottavi', 'Gironi']
 
-/** L'apertura: c'è già quando la schermata si apre, senza pausa (MOTION.md §5 F11). */
-export const INTRO = [
-  'Ciao, sono l’assistente di Beach Diary.',
-  'Creiamo insieme un nuovo torneo: ti faccio qualche domanda al volo.',
-  'Come si chiama il torneo?',
-]
+/** L'apertura: c'è già quando la schermata si apre, senza pausa (MOTION.md §5 F11). Parla Pallo. */
+export const INTRO = ['Ciao! Sono Pallo. Ti faccio qualche domanda e il torneo lo compilo io.', 'Come si chiama il torneo?']
 
 export const RIPARTENZA = ['Ripartiamo da capo.', 'Come si chiama il torneo?']
+
+/**
+ * I passi che si contano nella testata («Nuovo torneo · passo 2 di 8»): le
+ * domande che chiedono la stessa cosa stanno nello stesso passo (il nome di
+ * un compagno nuovo è ancora «con chi»; categoria, formato e superficie sono
+ * «com'era»; le partite, quante che siano, sono un passo solo).
+ */
+export const PASSI = 8
+
+export function passoDi(step: Step): number {
+  switch (step) {
+    case 'boot':
+    case 'name':
+      return 1
+    case 'partner':
+    case 'partnerName':
+      return 2
+    case 'date':
+      return 3
+    case 'venue':
+    case 'venueName':
+      return 4
+    case 'category':
+    case 'format':
+    case 'surface':
+      return 5
+    case 'status':
+    case 'placement':
+    case 'bracket':
+      return 6
+    case 'askResults':
+    case 'resultsPartner':
+    case 'resultsPartnerName':
+    case 'matchOpponents':
+    case 'matchPhase':
+    case 'matchScore':
+    case 'matchMore':
+      return 7
+    default:
+      return 8
+  }
+}
+
+/** Minuscole, senza accenti né segni: «Sì, aggiungiamole» → «si aggiungiamole», «2°» → «2». */
+const pulisci = (t: string) =>
+  t
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+
+/**
+ * Una risposta SCRITTA su uno step a scelte: l'indice della scelta che
+ * corrisponde (uguale, oppure l'unica che comincia così), o -1. «sabbia»
+ * vale «Sabbia outdoor», «si» vale «Sì, aggiungiamole».
+ */
+export function trovaRisposta(testo: string, scelte: string[]): number {
+  const t = pulisci(testo)
+  if (!t) return -1
+  const pulite = scelte.map(pulisci)
+  const uguale = pulite.indexOf(t)
+  if (uguale >= 0) return uguale
+  const inizio = pulite.flatMap((s, i) => (s.startsWith(t) ? [i] : []))
+  return inizio.length === 1 ? inizio[0] : -1
+}
 
 interface Contesto {
   partners: Option[]

@@ -22,10 +22,12 @@
 // indicatore indiretto per necessità, non per scelta — il primo test qui sotto
 // lo tiene onesto verificando che la libreria si comporti ancora così.
 // ============================================================================
+import { useState } from 'react'
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import * as m from 'motion/react-m'
-import { Sheet } from './Sheet'
+import { Sheet, SheetBar, SheetChipAdd, SheetChips } from './Sheet'
 
 // Il foglio trascinabile: primo figlio dello sfondo. È l'elemento su cui vive
 // `drag`, quindi quello a cui Motion scriverebbe sopra `touch-action`.
@@ -117,5 +119,74 @@ describe('Sheet — chiusura', () => {
     render(<Sheet onClose={onClose}>contenuto</Sheet>)
     screen.getByText('contenuto').click()
     expect(onClose).not.toHaveBeenCalled()
+  })
+})
+
+describe('Sheet — la barra dei moduli (design 15/16)', () => {
+  it('«Annulla · titolo · Salva»: il titolo è l’h2 che dà il nome al dialogo, fuori dall’area che scorre', async () => {
+    const onCancel = vi.fn()
+    const { container } = render(
+      <Sheet onClose={vi.fn()} header={<SheetBar title="Nuovo torneo" onCancel={onCancel} action={<button type="button">Salva</button>} />}>
+        <input aria-label="Nome" />
+      </Sheet>,
+    )
+    expect(screen.getByRole('dialog', { name: 'Nuovo torneo' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 2, name: 'Nuovo torneo' })).toBeInTheDocument()
+    const annulla = screen.getByRole('button', { name: 'Annulla' })
+    expect(areaScorrevole(container)!.contains(annulla)).toBe(false)
+    // Il focus a t0 va comunque al primo campo, non ad «Annulla».
+    expect(screen.getByRole('textbox', { name: 'Nome' })).toHaveFocus()
+    annulla.click()
+    expect(onCancel).toHaveBeenCalledOnce()
+  })
+
+  it('durante il salvataggio «Annulla» è annunciato disattivo e non chiude', () => {
+    const onCancel = vi.fn()
+    render(<Sheet onClose={vi.fn()} header={<SheetBar title="X" onCancel={onCancel} cancelBusy />}>contenuto</Sheet>)
+    const annulla = screen.getByRole('button', { name: 'Annulla' })
+    expect(annulla).toHaveAttribute('aria-disabled', 'true')
+    annulla.click()
+    expect(onCancel).not.toHaveBeenCalled()
+  })
+})
+
+describe('Sheet — le chip dei moduli', () => {
+  function Prova({ toggle = false, iniziale = '' }: { toggle?: boolean; iniziale?: string }) {
+    const [v, setV] = useState(iniziale)
+    return (
+      <SheetChips
+        label="Tabellone"
+        hint="Facoltativo."
+        options={[{ value: 'Gold', label: 'Gold' }, { value: 'Silver', label: 'Silver' }]}
+        value={v}
+        onChange={setV}
+        toggle={toggle}
+      >
+        <SheetChipAdd onClick={() => setV('nuovo')}>Nuovo</SheetChipAdd>
+      </SheetChips>
+    )
+  }
+
+  it('un gruppo col nome dell’etichetta e la nota come descrizione; la scelta è aria-pressed', async () => {
+    const user = userEvent.setup()
+    render(<Prova />)
+    const g = screen.getByRole('group', { name: 'Tabellone' })
+    expect(g).toHaveAccessibleDescription('Facoltativo.')
+    await user.click(within(g).getByRole('button', { name: 'Gold' }))
+    expect(within(g).getByRole('button', { name: 'Gold' })).toHaveAttribute('aria-pressed', 'true')
+    await user.click(within(g).getByRole('button', { name: 'Silver' }))
+    expect(within(g).getByRole('button', { name: 'Gold' })).toHaveAttribute('aria-pressed', 'false')
+    expect(within(g).getByRole('button', { name: 'Nuovo' })).toHaveAttribute('data-variant', 'add')
+  })
+
+  it('senza `toggle` ritoccare la scelta la tiene; con `toggle` la toglie', async () => {
+    const user = userEvent.setup()
+    const { unmount } = render(<Prova iniziale="Gold" />)
+    await user.click(screen.getByRole('button', { name: 'Gold' }))
+    expect(screen.getByRole('button', { name: 'Gold' })).toHaveAttribute('aria-pressed', 'true')
+    unmount()
+    render(<Prova iniziale="Gold" toggle />)
+    await user.click(screen.getByRole('button', { name: 'Gold' }))
+    expect(screen.getByRole('button', { name: 'Gold' })).toHaveAttribute('aria-pressed', 'false')
   })
 })

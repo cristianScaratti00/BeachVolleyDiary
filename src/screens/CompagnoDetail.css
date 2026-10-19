@@ -1,14 +1,63 @@
+/* ============================================================================
+   Dettaglio compagno (il redesign, versione D): avatar e titolo, la card del
+   collegamento, il tabellone 2×2, le partite insieme, «Elimina compagno».
+   ============================================================================ */
 @layer components {
-  .compagno-share { margin-top: var(--space-6); }
-  .compagno-stats { margin-top: var(--space-6); }
+  /* Il nome è 30/800, più grande del 26 che la NavBar dà ai titoli con la
+     figura a sinistra: qui la figura è una persona, e il nome è tutto. */
+  .compagno-page .ui-largetitle[data-eyebrow] .ui-largetitle-h1 {
+    font: 800 1.875rem/1.05 var(--font-ui);
+    letter-spacing: var(--track-large-title);
+  }
+
+  .compagno-link { --rise-i: 1; }
+  .compagno-stats,
+  .compagno-vuoto { --rise-i: 2; }
+  .compagno-sez { --rise-i: 3; }
+  .compagno-elimina { --rise-i: 4; }
+
+  /* -------------------------------------------------- Collegamento */
+  .compagno-link {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-top: var(--stack);
+    padding: var(--space-3-5) var(--space-4);
+  }
+  .compagno-link-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--space-0-5); }
+  .compagno-link-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1-5);
+    font: 600 0.90625rem/1.3 var(--font-ui);
+    letter-spacing: var(--track-subhead);
+  }
+  /* Il pallino: pieno d'inchiostro se collegato, vuoto col filo se no. */
+  .compagno-link-dot {
+    flex: none;
+    width: var(--space-2);
+    height: var(--space-2);
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1.5px var(--ink-3);
+  }
+  .compagno-link-dot[data-on] { background: var(--ink); box-shadow: none; }
+  .compagno-link-sub {
+    font: 400 0.78125rem/1.35 var(--font-ui);
+    letter-spacing: var(--track-footnote);
+    color: var(--ink-2);
+  }
+  .compagno-link .ui-button { flex: none; }
+
+  .compagno-stats { margin-top: var(--stack); }
+
   .compagno-vuoto {
-    margin-top: var(--space-6);
+    margin-top: var(--stack);
     padding: var(--space-6) var(--space-4);
     text-align: center;
     font: var(--type-subhead);
     letter-spacing: var(--track-subhead);
-    background: var(--surface);
-    border: var(--border-w) solid var(--edge);
-    border-radius: var(--radius-card);
+    color: var(--ink-2);
   }
+
+  .compagno-elimina { margin-top: var(--stack); }
 }

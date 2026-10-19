@@ -25,7 +25,7 @@ import type { Scelta } from '../lib/consenso'
 import type { EsitoInvio, NuovaSegnalazione, Segnalazione, StatoSegnalazione } from '../lib/segnalazioni'
 import type { NavBarBack } from '../components/ui/NavBar'
 import type { TorneiVista } from './routes'
-import type { AdessoData } from './selectors'
+import type { HomeVista } from './selectors'
 import type { Filtri } from './useScreenData'
 
 // ------------------------------------------------------------------ overlay
@@ -47,9 +47,14 @@ export interface OverlayBase {
 
 export type ViaCreazione = 'rapido' | 'completo'
 
-/** Sheet unico «Nuovo torneo» / «Modifica torneo» (UX §5 F2). */
+/** Sheet unico «Nuovo torneo» / «Torneo rapido» / «Modifica torneo» (UX §5 F2, design 15). */
 export interface TorneoSheetProps extends OverlayBase {
   mode: 'nuovo' | 'modifica'
+  /**
+   * «Torneo rapido» dal ＋: in vista solo Nome, Data e Piazzamento, il resto
+   * in «Altri dettagli». Senza, il modulo è intero (design 15).
+   */
+  rapido?: boolean
   /** In modifica: il torneo. */
   torneo?: Tournament
   partners: Option[]
@@ -60,8 +65,9 @@ export interface TorneoSheetProps extends OverlayBase {
   today: string
   canAddPartner: boolean
   /**
-   * Crea o salva. `via` = 'completo' se «Altri dettagli» è stato aperto almeno
-   * una volta (analytics, UX §13). true = fatto: la shell chiude e naviga.
+   * Crea o salva. `via` = 'rapido' se è il torneo rapido e «Altri dettagli»
+   * non è mai stato aperto, altrimenti 'completo' (analytics, UX §13).
+   * true = fatto: la shell chiude e naviga.
    */
   onSave: (form: AnyForm, via: ViaCreazione) => Promise<boolean>
   /** Solo in modifica: apre il ConfirmDialog «Eliminare «X»?». */
@@ -71,14 +77,20 @@ export interface TorneoSheetProps extends OverlayBase {
   onMergeVenues: (fromId: string, toId: string) => Promise<boolean>
 }
 
-/** «Nuova partita» / «Modifica partita» (UX §5 F3). */
+/** Un torneo nella scelta di «Nuova partita»: con il compagno che la partita eredita. */
+export interface TorneoOption extends Option {
+  /** Il nome del compagno del torneo, o '' se non c'è. */
+  partner: string
+}
+
+/** «Nuova partita» / «Modifica partita» (UX §5 F3, design 16). */
 export interface PartitaSheetProps extends OverlayBase {
   mode: 'nuova' | 'modifica'
   match?: Match
   /** Il torneo di destinazione preselezionato (i 5 casi di F3). */
   tournamentId: string | null
   /** Solo i propri tornei: non si aggiungono partite a un condiviso. */
-  tournaments: Option[]
+  tournaments: TorneoOption[]
   onSave: (form: AnyForm) => Promise<boolean>
   /** Solo in modifica: apre il ConfirmDialog «Eliminare la partita contro…?». */
   onDelete?: () => void
@@ -111,6 +123,17 @@ export interface PasswordSheetProps extends OverlayBase {
 /** Visore della Storia Instagram (UX §6.5, §11). */
 export interface StoriaViewerProps extends OverlayBase {
   story: StoryData
+  /**
+   * Il piazzamento del torneo («1° 🏆», «Semifinale»): la medaglia della tela.
+   * Facoltativo: senza, lo si ricava da `story.resultLabel` («CAMPIONI» → 1°).
+   */
+  placement?: string
+  /**
+   * Le didascalie delle foto della storia, nello stesso ordine di
+   * `story.photoUrls`: scritte sotto le polaroid. Una vuota (o assente) usa il
+   * dove e il quando del torneo.
+   */
+  didascalie?: string[]
   /** Un messaggio per il Toast (errore di generazione, immagine copiata…). */
   onNotice: (msg: string, type?: 'info' | 'error' | 'success') => void
 }
@@ -129,19 +152,23 @@ export interface LightboxProps extends OverlayBase {
 }
 
 // ------------------------------------------------------------------ schermate
-export interface HomeProps {
+/**
+ * La Home del redesign. `frase`, `consigli`, `ultimi`, `hasTornei` e
+ * `haPartite` arrivano tutti da `deriveHome` (selectors.ts). Il banner alpha
+ * e «Chi c'è oggi» non stanno più qui: «Segnala un problema» è nel Profilo,
+ * «Chi c'è oggi» in Compagni.
+ */
+export interface HomeProps extends HomeVista {
+  /** Il nome della sessione: le iniziali dell'avatar. */
   nome: string
+  /** La foto profilo (`session.avatarUrl`), se c'è. */
+  avatar: string | null
   today: string
-  adesso: AdessoData
-  /** null finché non c'è almeno una partita: una fila di zeri non informa (F1). */
+  /** Le statistiche del periodo scelto; null senza partite nel periodo (una fila di zeri non informa, F1). */
   numeri: DashboardStats | null
-  hasTornei: boolean
-  /** Etichetta della stagione condivisa («Stagione 2026», «Sempre»). */
-  stagione: string
+  /** Stagione e compagno: gli stessi filtri di Statistiche, Mappa e Wrapped (C10). */
+  filtri: Filtri
   wrapped: { visibile: boolean; titolo: string }
-  banner: { visibile: boolean; onChiudi: () => void }
-  /** `null` con OGGI_ATTIVO spento. */
-  checkIn: { own: CheckIn | null } | null
   onNuovoTorneo: () => void
   onAggiungiPartita: (tournamentId: string) => void
   /** «Com'è andata a «X»?» → Modifica torneo. */
@@ -162,20 +189,90 @@ export interface TorneiProps {
   onVista: (v: TorneiVista) => void
   onQuery: (q: string) => void
   list: TorneiListData
-  /** Le voci del diario: la Timeline e i risultati della ricerca. */
+  /** Le voci del diario: ciò su cui cerca la ricerca (i risultati hanno la forma del Diario). */
   entries: DiaryEntry[]
   mappa: MappaData
   /** La stagione della Mappa: si vede e si cambia lì (C10). */
   stagione: Pick<Filtri, 'fYear' | 'setFYear' | 'yearOptions'>
   onNuovoTorneo: () => void
   onStoria: (tournamentId: string) => void
-  /** Id dell'entità appena creata o cambiata: la sua card porta la traccia. */
+  /** Id dell'entità appena creata o cambiata: la sua riga porta la traccia. */
   traccia?: string
+}
+
+export interface DiarioProps {
+  q: string
+  onQuery: (q: string) => void
+  /** Le voci del diario, dalla più recente. */
+  entries: DiaryEntry[]
+  onNuovoTorneo: () => void
+  onStoria: (tournamentId: string) => void
+  traccia?: string
+  /** La riga sotto il titolo di ogni voce (`metaDiario`). */
+  meta?: (tournamentId: string) => string | undefined
+}
+
+/** Un torneo in cui si può giocare una partita live: i propri, col compagno. */
+export interface LiveTorneo {
+  id: string
+  name: string
+  /** Il nome del compagno del torneo, o '' se non c'è. */
+  partner: string
+}
+
+export interface PartitaLiveProps {
+  tornei: LiveTorneo[]
+  /** Il torneo proposto all'apertura (quello di oggi, o l'ultimo). */
+  torneoDefault: string | null
+  /**
+   * `torneoDefault` è un torneo di OGGI: l'impostazione si apre su «Torneo».
+   * Altrimenti si apre su «Tra amici» (l'ultimo torneo è di giorni fa).
+   */
+  torneoOggi?: boolean
+  /**
+   * L'account: lo storico delle partite tra amici (localStorage) è suo, e su
+   * un browser condiviso non lo vede chi entra dopo.
+   */
+  utente?: string | null
+  /**
+   * Salva la partita finita (stesso modulo dello sheet «Nuova partita»): nel
+   * suo torneo, o tra amici in quello scelto con «Salva in un torneo…».
+   */
+  onSave: (form: AnyForm) => Promise<boolean>
+  /**
+   * Dopo il salvataggio, se `onSave` non ha già portato altrove: al dettaglio
+   * del torneo. (`salvaPartita` naviga da sé, e la schermata se ne va prima.)
+   */
+  onDone: (tournamentId: string) => void
+  /**
+   * ✕ e indietro, a conferma già data: la conferma la chiede la schermata,
+   * perché solo lei sa che cosa va perso e deve svuotare la sua memoria
+   * (sessionStorage). Qui si esce e basta.
+   */
+  onExit: () => void
+  /** «Torneo» senza tornei: «Crea un torneo» (la partita si salva dentro un torneo). */
+  onNuovoTorneo?: () => void
+  /** Il tasto indietro con una partita iniziata: `onBlocked` apre la conferma della schermata. */
+  registerExitGuard?: (isDirty: () => boolean, onBlocked: () => void) => void | (() => void)
+}
+
+/**
+ * Quello che l'intestazione del redesign legge e la derivata fonde in `meta`:
+ * il formato e la superficie per la riga sopra il titolo («Amatoriale · 2vs2
+ * · Sabbia outdoor»), la data ISO per quella lunga sotto («Sabato 28 giugno
+ * 2025 · con Luca»).
+ */
+export interface TorneoScheda {
+  date: string
+  format: string
+  surface: string
 }
 
 export interface TorneoDetailProps {
   /** `null` = non trovato (eliminato o non più condiviso, C9). */
   t: TorneoDetailData | null
+  /** Senza (dati che non la conoscono): kicker = categoria, sottotitolo = `meta`. */
+  scheda?: TorneoScheda | null
   back: NavBarBack
   traccia?: string
   onAddPartita: () => void
@@ -183,13 +280,16 @@ export interface TorneoDetailProps {
   onAddFoto: () => void
   onOpenFoto: (index: number) => void
   onDeleteFoto: (photoId: string) => void
+  /** La Storia Instagram: nella capsula in cima e nella barra in fondo. */
   onStoria: () => void
-  /** Il menu «⋯» della NavBar, ancorato al pulsante. */
-  onMenu: (anchor: HTMLElement) => void
+  /** La matita della capsula in cima: lo sheet di modifica, che ha anche «Elimina torneo». */
+  onModifica: () => void
 }
 
 export interface CompagniProps {
   compagni: CompagnoCard[]
+  /** Gli id dei compagni collegati a un utente: il badge «Collegato». */
+  collegati?: ReadonlySet<string>
   traccia?: string
   onNuovoCompagno: () => void
 }
@@ -202,7 +302,8 @@ export interface CompagnoDetailProps {
   onOpenMatch: (matchId: string) => void
   onCollega: () => void
   onScollega: () => void
-  onMenu: (anchor: HTMLElement) => void
+  /** «Elimina compagno» in fondo alla pagina: la conferma la apre la shell. */
+  onElimina: () => void
 }
 
 export interface ChiCeOggiProps {
@@ -230,8 +331,14 @@ export interface ProfiloProps {
   onCaricaAvatar: (file: File) => Promise<{ ok: boolean; error?: string }>
   onPassword: () => void
   onTogliCondivisioni: () => void
-  onCookie: () => void
+  /**
+   * Lo switch «Statistiche d'uso anonime»: è la stessa scelta del dialogo dei
+   * cookie (`decidi` di lib/consenso), e accende o spegne gli stessi strumenti.
+   */
+  onConsenso: (scelta: Scelta) => void
   onEsci: () => void
+  /** Il × in alto: Profilo non è una tab, si chiude e si torna da dove si era. */
+  onClose: () => void
 }
 
 export interface SegnalaProps {

@@ -1,22 +1,28 @@
 // ============================================================================
-// «Nuova partita» / «Modifica partita» (UX §5 F3).
+// «Nuova partita» / «Modifica partita» (UX §5 F3, design 16).
 //
-// - Due righe di set vuote di default, al massimo tre. Ogni riga ha «Noi» e
-//   «Loro» con un'etichetta vera (prima solo placeholder) e «Togli set N».
+// - In cima la barra «Annulla · titolo · Salva». Il Torneo è una riga che
+//   apre la scelta, con sotto il compagno («Compagno: Luca, come nel
+//   torneo»: la partita lo eredita); la Fase sono chip che vanno a capo.
+// - Il punteggio è una card: l'intestazione «Noi – Loro», poi una riga per
+//   set con due campi 64×48 centrati, e «+ Aggiungi set». Il risultato
+//   («Vinta 2–1», «In parità 1–1») sta accanto all'etichetta.
+// - Due righe di set vuote di default, al massimo tre. Ogni campo ha il suo
+//   nome («Noi», «Loro») dentro il gruppo «Set N»; «Togli set N» toglie la riga.
 // - Una riga compilata a metà NON si scarta in silenzio: al salvataggio la si
 //   segnala («Completa il set 2 o toglilo») e il focus ci va.
 // - Una riga che arriva o se ne va cresce dentro lo sheet ancorato in basso:
 //   è l'eccezione E1 di MOTION.md (`data-motion-exception="riga-set"`), con il
 //   focus sul «Noi» del set nuovo a t0.
-// - «Elimina partita» (in modifica) è una riga opaca che apre il
-//   ConfirmDialog: mai testo --danger sul vetro.
+// - «Elimina partita» (in modifica) è un pulsante di vetro rosso che apre il
+//   ConfirmDialog.
 // ============================================================================
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useReducedMotion } from 'motion/react'
-import { Sheet, SheetActions, SheetTitle } from './Sheet'
+import { Sheet, SheetBar, SheetChips } from './Sheet'
+import { RigaSet, SetIntestazione } from './RigaSet'
 import { Button } from '../ui/Button'
-import { FormGroup, Select, SetRow, TextArea, TextField } from '../ui/Field'
-import { List, ListRow } from '../ui/List'
+import { Select, TextArea, TextField } from '../ui/Field'
 import { PHASES } from '../../lib/db.enums'
 import type { AnyForm, Phase } from '../../lib/models'
 import type { PartitaSheetProps } from '../../app/contracts'
@@ -41,6 +47,21 @@ const nuovaRiga = (us = '', them = ''): Riga => ({ key: ++chiavi, us, them })
 const animazioniCss = () => typeof document !== 'undefined' && typeof document.documentElement.getAnimations === 'function'
 /** Rete di sicurezza: se `animationend` non arriva (scheda in background), la riga esce lo stesso. */
 const RETE_MS = 400
+
+/** «Vinta 2–1», «Persa 0–2», «In parità 1–1»: solo i set compilati contano. */
+function esito(righe: Riga[]): string {
+  let noi = 0
+  let loro = 0
+  for (const r of righe) {
+    if (r.us === '' || r.them === '') continue
+    const a = Number(r.us)
+    const b = Number(r.them)
+    if (a > b) noi++
+    else if (b > a) loro++
+  }
+  if (noi + loro === 0) return ''
+  return `${noi > loro ? 'Vinta' : loro > noi ? 'Persa' : 'In parità'} ${noi}–${loro}`
+}
 
 export default function PartitaSheet({
   mode,
@@ -166,6 +187,11 @@ export default function PartitaSheet({
     }
   }
 
+  const torneo = tournaments.find((t) => t.id === campi.tournamentId)
+  // La partita eredita il compagno del torneo: lo si dice, non lo si chiede.
+  const compagno = torneo ? (torneo.partner ? `Compagno: ${torneo.partner}, come nel torneo` : 'Senza compagno, come nel torneo') : undefined
+  const risultato = esito(visibili)
+
   return (
     <Sheet
       onClose={onClose}
@@ -174,28 +200,29 @@ export default function PartitaSheet({
       opener={opener}
       dirty={sporco}
       busy={occupato}
-      footer={
-        <SheetActions>
-          <Button variant="quiet" onClick={onClose} aria-disabled={occupato || undefined}>
-            Annulla
-          </Button>
-          <Button
-            variant="filled"
-            disabled={!campi.tournamentId}
-            onDisabledClick={() => {
-              setSenzaTorneo(true)
-              torneoRef.current?.focus()
-            }}
-            busy={occupato}
-            busyLabel="Salvataggio…"
-            onClick={() => void salva()}
-          >
-            {modifica ? 'Salva' : 'Salva partita'}
-          </Button>
-        </SheetActions>
+      header={
+        <SheetBar
+          title={modifica ? 'Modifica partita' : 'Nuova partita'}
+          onCancel={onClose}
+          cancelBusy={occupato}
+          action={
+            <Button
+              variant="filled"
+              disabled={!campi.tournamentId}
+              onDisabledClick={() => {
+                setSenzaTorneo(true)
+                torneoRef.current?.focus()
+              }}
+              busy={occupato}
+              busyLabel="Salvataggio…"
+              onClick={() => void salva()}
+            >
+              Salva
+            </Button>
+          }
+        />
       }
     >
-      <SheetTitle>{modifica ? 'Modifica partita' : 'Nuova partita'}</SheetTitle>
       <form
         className="partita-sheet-form"
         noValidate
@@ -204,90 +231,98 @@ export default function PartitaSheet({
           void salva()
         }}
       >
-        <fieldset className="partita-sheet-fields" disabled={occupato}>
-          <FormGroup>
-            <Select
-              ref={torneoRef}
-              label="Torneo"
-              value={campi.tournamentId}
-              onChange={(v) => {
-                setSenzaTorneo(false)
-                setCampi((c) => ({ ...c, tournamentId: v }))
-              }}
-              options={tournaments.map((t) => ({ value: t.id, label: t.name }))}
-              error={senzaTorneo && !campi.tournamentId ? (tournaments.length ? 'Scegli il torneo della partita.' : 'Crea prima un torneo: la partita sta dentro un torneo.') : undefined}
-            />
-            <Select
-              label="Fase"
-              value={campi.phase}
-              onChange={(v) => setCampi((c) => ({ ...c, phase: v as Phase }))}
-              options={PHASES.map((p) => ({ value: p, label: p }))}
-              hint="Il compagno è quello del torneo."
-            />
-            <TextField
-              label="Avversari"
-              value={campi.opponents}
-              onChange={(v) => setCampi((c) => ({ ...c, opponents: v }))}
-              placeholder="es. Bianchi / Verdi (facoltativo)"
-              autoComplete="off"
-            />
-          </FormGroup>
+        <fieldset className="ui-sheet-stack partita-sheet-fields" disabled={occupato}>
+          <Select
+            ref={torneoRef}
+            label="Torneo"
+            className="ui-sheet-pick ui-sheet-pick-strong"
+            value={campi.tournamentId}
+            onChange={(v) => {
+              setSenzaTorneo(false)
+              setCampi((c) => ({ ...c, tournamentId: v }))
+            }}
+            options={tournaments.map((t) => ({ value: t.id, label: t.name }))}
+            hint={compagno}
+            error={senzaTorneo && !campi.tournamentId ? (tournaments.length ? 'Scegli il torneo della partita.' : 'Crea prima un torneo: la partita sta dentro un torneo.') : undefined}
+          />
 
-          <FormGroup title="Punteggio per set">
-            <div className="partita-sheet-sets">
-              {righe.map((r) => {
-                const n = visibili.indexOf(r)
-                return (
-                  <div
-                    key={r.key}
-                    className="partita-sheet-set"
-                    data-motion-exception="riga-set"
-                    data-entra={r.entra ? '' : undefined}
-                    data-esce={r.esce ? '' : undefined}
-                    onAnimationEnd={(e) => {
-                      if (e.target !== e.currentTarget) return
-                      if (r.esce) setRighe((rr) => rr.filter((x) => x.key !== r.key))
-                      else if (r.entra) setRighe((rr) => rr.map((x) => (x.key === r.key ? { ...x, entra: false } : x)))
-                    }}
-                  >
-                    <div className="partita-sheet-set-inner" {...(r.esce ? { inert: '' } : {})}>
-                      <SetRow
-                        index={n < 0 ? 0 : n}
-                        us={r.us}
-                        them={r.them}
-                        onChange={(campo, v) => aggiorna(r.key, campo, v)}
-                        onRemove={visibili.length > 1 ? () => togli(r.key) : undefined}
-                        error={errori[r.key]}
-                        firstRef={(el) => {
-                          primoNoi.current[r.key] = el
-                        }}
-                      />
-                    </div>
-                  </div>
-                )
-              })}
+          <SheetChips
+            label="Fase"
+            options={PHASES.map((p) => ({ value: p, label: p }))}
+            value={campi.phase}
+            onChange={(v) => v && setCampi((c) => ({ ...c, phase: v as Phase }))}
+          />
+
+          <TextField
+            label="Avversari (coppia)"
+            value={campi.opponents}
+            onChange={(v) => setCampi((c) => ({ ...c, opponents: v }))}
+            placeholder="es. Bianchi / Verdi"
+            autoComplete="off"
+          />
+
+          <div className="ui-field">
+            <div className="partita-sheet-score-head">
+              <span className="ui-field-label">Punteggio per set</span>
+              {risultato && <span className="partita-sheet-esito">{risultato}</span>}
             </div>
-            {visibili.length < MAX_SET && (
-              <Button variant="tinted" size="sm" icon="plus" className="partita-sheet-add" onClick={aggiungi}>
-                Aggiungi set
-              </Button>
-            )}
-          </FormGroup>
+            <div className="partita-sheet-card">
+              <SetIntestazione />
+              <div className="partita-sheet-sets">
+                {righe.map((r) => {
+                  const n = visibili.indexOf(r)
+                  return (
+                    <div
+                      key={r.key}
+                      className="partita-sheet-set"
+                      data-motion-exception="riga-set"
+                      data-entra={r.entra ? '' : undefined}
+                      data-esce={r.esce ? '' : undefined}
+                      onAnimationEnd={(e) => {
+                        if (e.target !== e.currentTarget) return
+                        if (r.esce) setRighe((rr) => rr.filter((x) => x.key !== r.key))
+                        else if (r.entra) setRighe((rr) => rr.map((x) => (x.key === r.key ? { ...x, entra: false } : x)))
+                      }}
+                    >
+                      <div className="partita-sheet-set-inner" {...(r.esce ? { inert: '' } : {})}>
+                        <RigaSet
+                          n={(n < 0 ? 0 : n) + 1}
+                          us={r.us}
+                          them={r.them}
+                          onChange={(campo, v) => aggiorna(r.key, campo, v)}
+                          onRemove={visibili.length > 1 ? () => togli(r.key) : undefined}
+                          error={errori[r.key]}
+                          firstRef={(el) => {
+                            primoNoi.current[r.key] = el
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+              {visibili.length < MAX_SET && (
+                <Button variant="glass" size="sm" icon="plus" className="partita-sheet-add" onClick={aggiungi}>
+                  Aggiungi set
+                </Button>
+              )}
+            </div>
+          </div>
 
-          <FormGroup>
-            <TextArea
-              label="Note"
-              value={campi.note}
-              onChange={(v) => setCampi((c) => ({ ...c, note: v }))}
-              placeholder="Com'è andata?"
-            />
-          </FormGroup>
+          <TextArea
+            label="Note"
+            className="partita-sheet-note"
+            value={campi.note}
+            onChange={(v) => setCampi((c) => ({ ...c, note: v }))}
+            placeholder="Com'è andata?"
+            rows={2}
+          />
         </fieldset>
 
         {modifica && onDelete && (
-          <List className="partita-sheet-danger">
-            <ListRow onClick={onDelete} icon="trash" title="Elimina partita" tone="danger" disabled={occupato} />
-          </List>
+          <Button variant="glass" tone="danger" icon="trash" block className="ui-sheet-danger" disabled={occupato} onClick={onDelete}>
+            Elimina partita
+          </Button>
         )}
       </form>
     </Sheet>

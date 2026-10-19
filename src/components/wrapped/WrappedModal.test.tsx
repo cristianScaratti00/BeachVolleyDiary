@@ -5,14 +5,15 @@
 // i suoi test): si costruisce un WrappedData a mano e si controlla che le slide
 // si sfoglino, che i controlli rispondano e che l'empty state chiuda.
 //
-// Nota: le card sono renderizzate due volte — l'anteprima visibile (dentro il
+// Nota: le slide sono renderizzate due volte — quella a schermo (dentro il
 // role="group") e un layer nascosto a piena risoluzione (aria-hidden) usato solo
 // per l'export. Per sapere "su quale slide siamo" si legge quindi il gruppo
 // visibile, non un testo qualsiasi (che comparirebbe anche nel layer nascosto).
 //
-// Dal refactor (UX §6.5): mentre il PNG si prepara il pulsante dice
-// «Preparo…», quindi i pulsanti si cercano con `findBy` (si aspetta la fine
-// della preparazione); `onNotice` riceve anche il tipo dell'avviso.
+// Dal redesign (schermata 18): la slide è lo schermo, col fondo pieno che
+// cambia; «Scarica tutte» e «Condividi» stanno su ogni slide. Mentre un PNG si
+// prepara il pulsante dice «Preparo…» (`findBy` aspetta la fine); `onNotice`
+// riceve anche il tipo dell'avviso.
 // ============================================================================
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, within, fireEvent, act, waitFor } from '@testing-library/react'
@@ -24,6 +25,9 @@ import { expectNoA11yViolations } from '../../test/axe'
 // `html-to-image` tocca canvas e font: in jsdom non può girare, e comunque qui
 // interessa QUALE nodo viene catturato, non il PNG che ne esce.
 vi.mock('html-to-image', () => ({ toPng: vi.fn(), toBlob: vi.fn() }))
+// Le foto: in jsdom non si scaricano né si decodificano. Qui conta che arrivino
+// con le loro misure naturali e che la tela le mostri intere.
+vi.mock('./foto', async (orig) => ({ ...(await orig<typeof import('./foto')>()), caricaFoto: vi.fn(() => Promise.resolve(null)) }))
 
 const SLIDES: WrappedSlide[] = [
   { kind: 'intro', eyebrow: 'Beach Wrapped', headline: 'PRIMA', title: 'copertina', caption: '12 partite', stats: [], emoji: '🏖️' },
@@ -119,46 +123,66 @@ describe('WrappedModal — auto-avanzamento', () => {
   })
 })
 
-describe('WrappedModal — azioni', () => {
-  it('lo scarico compare solo sull’ultima slide', async () => {
-    // È il recap che si porta via, non una slide qualsiasi: prima della fine
-    // quel pulsante invitava ad andarsene invece di guardare.
-    await pngPronto()
+describe('WrappedModal — il nuovo look', () => {
+  it('il fondo cambia con la slide: arancio → inchiostro → sabbia', () => {
     renderModal()
-    expect(screen.queryByRole('button', { name: /scarica|preparo/i })).not.toBeInTheDocument()
+    const d = screen.getByRole('dialog', { name: 'Beach Wrapped' })
+    expect(d).toHaveAttribute('data-tone', 'orange')
     fireEvent.keyDown(deck(), { key: 'ArrowRight' })
-    expect(screen.queryByRole('button', { name: /scarica|preparo/i })).not.toBeInTheDocument()
+    expect(d).toHaveAttribute('data-tone', 'ink')
+    // L'inchiostro è una superficie scura: l'anello di focus diventa bianco.
+    expect(d).toHaveAttribute('data-surface', 'dark')
     fireEvent.keyDown(deck(), { key: 'ArrowRight' })
-    expect(await screen.findByRole('button', { name: /scarica/i })).toBeInTheDocument()
+    expect(d).toHaveAttribute('data-tone', 'sand')
+    expect(d).not.toHaveAttribute('data-surface')
   })
 
-  it('mentre il PNG si prepara il pulsante dice «Preparo…» ed è occupato', async () => {
+  it('il titolo della schermata è «Beach Wrapped · 2026», con l\'anno della stagione', () => {
+    renderModal()
+    expect(screen.getByRole('heading', { level: 1, name: 'Beach Wrapped · 2026' })).toBeInTheDocument()
+  })
+
+  it('le statistiche della slide sono una lista di termini e valori', () => {
+    renderModal()
+    fireEvent.keyDown(deck(), { key: 'ArrowRight' })
+    const dl = within(deck()).getByText('Win rate').closest('dl') as HTMLElement
+    expect(within(dl).getAllByRole('term').map((t) => t.textContent)).toEqual(['Win rate', 'Record'])
+    expect(within(dl).getAllByRole('definition').map((d) => d.textContent)).toEqual(['70%', '8–4'])
+  })
+})
+
+describe('WrappedModal — azioni', () => {
+  it('«Scarica tutte» c’è su ogni slide; senza share sheet né appunti niente «Condividi»', async () => {
+    await pngPronto()
+    renderModal()
+    expect(screen.getByRole('button', { name: 'Scarica tutte' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /condividi/i })).not.toBeInTheDocument()
+    fireEvent.keyDown(deck(), { key: 'ArrowRight' })
+    expect(screen.getByRole('button', { name: 'Scarica tutte' })).toBeInTheDocument()
+  })
+
+  it('con lo share sheet, «Scarica tutte» e «Condividi» stanno insieme fin dalla prima slide', async () => {
+    await pngPronto()
+    installa(navigator, 'canShare', vi.fn(() => true))
+    installa(navigator, 'share', vi.fn().mockResolvedValue(undefined))
+    renderModal()
+    expect(screen.getByRole('button', { name: 'Scarica tutte' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Condividi' })).toBeInTheDocument()
+  })
+
+  it('mentre l\'immagine da condividere si prepara il pulsante dice «Preparo…» ed è occupato', async () => {
     const toBlob = await pngPronto()
     let fine: (b: Blob) => void = () => {}
     toBlob.mockImplementation(() => new Promise<Blob>((r) => { fine = r }))
+    installa(navigator, 'canShare', vi.fn(() => true))
+    installa(navigator, 'share', vi.fn().mockResolvedValue(undefined))
     renderModal({ slides: CON_RECAP })
     vaiAllUltima()
     const b = await screen.findByRole('button', { name: 'Preparo…' })
     expect(b).toHaveAttribute('aria-busy', 'true')
     await act(async () => fine(new Blob(['png'], { type: 'image/png' })))
     await act(async () => fine(new Blob(['png'], { type: 'image/png' })))
-    expect(await screen.findByRole('button', { name: /scarica il riepilogo/i })).toHaveAttribute('aria-busy', 'false')
-  })
-
-  it('scarica il RIEPILOGO, non la slide che si sta guardando', async () => {
-    // Sull'ultima slide si legge "Grazie": scaricare quella sarebbe portarsi a
-    // casa un saluto invece dei propri numeri. Il PNG è sempre la card recap.
-    const toBlob = await pngPronto()
-    renderModal({ slides: CON_RECAP })
-    vaiAllUltima()
-    expect(deck()).toHaveAccessibleName(/slide 3 di 3/i)
-
-    fireEvent.click(await screen.findByRole('button', { name: /scarica/i }))
-    await waitFor(() => expect(ancore).toHaveLength(1))
-
-    // Il nodo catturato è quello del recap (indice 1), non della slide corrente.
-    const nodo = toBlob.mock.calls[0][0] as HTMLElement
-    expect(within(nodo).getByText('RECAP')).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: 'Condividi' })).not.toHaveAttribute('aria-busy')
   })
 
   it('“Chiudi” chiama onClose', async () => {
@@ -220,8 +244,8 @@ afterEach(() => {
   vi.restoreAllMocks()
 })
 
-describe('WrappedModal — scarica', () => {
-  it('prepara l’immagine appena si arriva all’ultima slide, prima del tocco', async () => {
+describe('WrappedModal — scarica tutte', () => {
+  it('prepara l’immagine da condividere appena si arriva all’ultima slide, prima del tocco', async () => {
     // È ciò che tiene vivo il permesso di condividere su iOS: al tocco il PNG
     // c'è già. Prima dell'ultima slide invece non si genera niente.
     const toBlob = await pngPronto()
@@ -232,21 +256,37 @@ describe('WrappedModal — scarica', () => {
 
     fireEvent.keyDown(deck(), { key: 'ArrowRight' })
     await waitFor(() => expect(toBlob).toHaveBeenCalled())
+    // Sull'ultima (il saluto) si prepara il RIEPILOGO.
+    expect(within(toBlob.mock.calls[0][0] as HTMLElement).getByText('RECAP')).toBeInTheDocument()
   })
 
-  it('scarica con un link blob: agganciato alla pagina, non con un data: URL', async () => {
+  it('scarica un PNG per slide, con link blob: agganciati alla pagina (non data: URL)', async () => {
     // Il vecchio `data:` di qualche MB su un'ancora staccata: sui telefoni
     // spesso il tocco non produceva nulla.
     await pngPronto()
-    renderModal({ slides: CON_RECAP })
-    vaiAllUltima()
-    fireEvent.click(await screen.findByRole('button', { name: /scarica/i }))
-    await waitFor(() => expect(ancore).toHaveLength(1))
-    expect(ancore[0]).toEqual({
-      href: 'blob:http://localhost/png',
-      download: 'beach-wrapped-stagione-2026-02.png',
-      inDom: true,
-    })
+    renderModal()
+    fireEvent.click(screen.getByRole('button', { name: 'Scarica tutte' }))
+    expect(await screen.findByRole('button', { name: /Preparo \d\/3…/ })).toHaveAttribute('aria-busy', 'true')
+    await waitFor(() => expect(ancore).toHaveLength(3), { timeout: 3000 })
+    expect(ancore.map((a) => a.download)).toEqual([
+      'beach-wrapped-stagione-2026-01.png',
+      'beach-wrapped-stagione-2026-02.png',
+      'beach-wrapped-stagione-2026-03.png',
+    ])
+    expect(ancore.every((a) => a.href === 'blob:http://localhost/png' && a.inDom)).toBe(true)
+    expect(await screen.findByRole('button', { name: 'Scarica tutte' })).not.toHaveAttribute('aria-busy')
+  })
+
+  it('ogni PNG viene dalla sua tela, nell\'ordine delle slide', async () => {
+    const toBlob = await pngPronto()
+    renderModal()
+    fireEvent.click(screen.getByRole('button', { name: 'Scarica tutte' }))
+    await waitFor(() => expect(ancore).toHaveLength(3), { timeout: 3000 })
+    // Due passate per tela (la prima a vuoto, per WebKit): 6 catture.
+    const nodi = toBlob.mock.calls.map((c) => (c[0] as HTMLElement).textContent ?? '')
+    expect(nodi[1]).toContain('PRIMA')
+    expect(nodi[3]).toContain('SECONDA')
+    expect(nodi[5]).toContain('TERZA')
   })
 
   it('se la generazione fallisce lo dice, invece di non fare nulla', async () => {
@@ -256,34 +296,22 @@ describe('WrappedModal — scarica', () => {
     vi.spyOn(console, 'error').mockImplementation(() => {})
     const onNotice = vi.fn()
     renderModal({ slides: CON_RECAP }, { onNotice })
-    vaiAllUltima()
-    fireEvent.click(await screen.findByRole('button', { name: /scarica/i }))
+    fireEvent.click(screen.getByRole('button', { name: 'Scarica tutte' }))
     await waitFor(() => expect(onNotice).toHaveBeenCalledWith(expect.stringMatching(/impossibile generare/i), 'error'))
     expect(ancore).toHaveLength(0)
   })
 })
 
 describe('WrappedModal — condividi', () => {
-  it('senza share sheet né appunti non promette una condivisione che non c’è', async () => {
-    await pngPronto()
-    renderModal()
-    vaiAllUltima()
-    expect(screen.queryByRole('button', { name: /condividi/i })).not.toBeInTheDocument()
-    const scarica = await screen.findByRole('button', { name: /scarica/i })
-    // Pronto quando la preparazione in sottofondo ha finito.
-    await waitFor(() => expect(scarica).toHaveAttribute('aria-busy', 'false'))
-  })
-
-  it('con lo share sheet condivide il PNG del riepilogo, senza testo allegato', async () => {
+  it('condivide la slide che si guarda, solo il file, senza testo allegato', async () => {
     await pngPronto()
     const share = vi.fn().mockResolvedValue(undefined)
     installa(navigator, 'canShare', vi.fn(() => true))
     installa(navigator, 'share', share)
     renderModal({ slides: CON_RECAP })
-    expect(screen.queryByRole('button', { name: /condividi/i })).not.toBeInTheDocument()
-    vaiAllUltima()
+    fireEvent.keyDown(deck(), { key: 'ArrowRight' })
 
-    fireEvent.click(await screen.findByRole('button', { name: /condividi/i }))
+    fireEvent.click(screen.getByRole('button', { name: 'Condividi' }))
     await waitFor(() => expect(share).toHaveBeenCalledTimes(1))
     const data = share.mock.calls[0][0] as ShareData
     const file = data.files?.[0] as File
@@ -291,8 +319,19 @@ describe('WrappedModal — condividi', () => {
     expect(file.type).toBe('image/png')
     // Con un `text` alcune app (Instagram) prendono la didascalia e perdono l'immagine.
     expect(data.text).toBeUndefined()
-    // Scarica resta accanto, come alternativa.
-    expect(screen.getByRole('button', { name: /scarica/i })).toBeInTheDocument()
+  })
+
+  it('sull’ultima slide (il saluto) condivide il RIEPILOGO, non «Grazie»', async () => {
+    const toBlob = await pngPronto()
+    const share = vi.fn().mockResolvedValue(undefined)
+    installa(navigator, 'canShare', vi.fn(() => true))
+    installa(navigator, 'share', share)
+    renderModal({ slides: CON_RECAP })
+    vaiAllUltima()
+    fireEvent.click(await screen.findByRole('button', { name: 'Condividi' }))
+    await waitFor(() => expect(share).toHaveBeenCalledTimes(1))
+    expect(((share.mock.calls[0][0] as ShareData).files?.[0] as File).name).toBe('beach-wrapped-stagione-2026-02.png')
+    expect(within(toBlob.mock.calls[0][0] as HTMLElement).getByText('RECAP')).toBeInTheDocument()
   })
 
   it('chiudere lo share sheet senza scegliere non è un errore', async () => {
@@ -302,7 +341,7 @@ describe('WrappedModal — condividi', () => {
     const onNotice = vi.fn()
     renderModal({ slides: CON_RECAP }, { onNotice })
     vaiAllUltima()
-    fireEvent.click(await screen.findByRole('button', { name: /condividi/i }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Condividi' }))
     await act(async () => {})
     await act(async () => {})
     expect(onNotice).not.toHaveBeenCalled()
@@ -314,8 +353,7 @@ describe('WrappedModal — condividi', () => {
     installa(navigator, 'share', vi.fn().mockRejectedValue(Object.assign(new Error('x'), { name: 'NotAllowedError' })))
     const onNotice = vi.fn()
     renderModal({ slides: CON_RECAP }, { onNotice })
-    vaiAllUltima()
-    fireEvent.click(await screen.findByRole('button', { name: /condividi/i }))
+    fireEvent.click(screen.getByRole('button', { name: 'Condividi' }))
     await waitFor(() => expect(onNotice).toHaveBeenCalledWith(expect.stringMatching(/tocca di nuovo/i), 'info'))
   })
 
@@ -327,11 +365,49 @@ describe('WrappedModal — condividi', () => {
     const onNotice = vi.fn()
     renderModal({ slides: CON_RECAP }, { onNotice })
     vaiAllUltima()
-    fireEvent.click(await screen.findByRole('button', { name: /condividi/i }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Condividi' }))
     await waitFor(() => expect(write).toHaveBeenCalledTimes(1))
     const [item] = write.mock.calls[0][0] as Array<{ items: Record<string, Blob> }>
     expect(item.items['image/png']).toBeInstanceOf(Blob)
     expect(onNotice).toHaveBeenCalledWith(expect.stringMatching(/copiata/i), 'success')
+  })
+})
+
+describe('WrappedModal — foto intere, mai ritagliate', () => {
+  const CON_FOTO: WrappedSlide[] = [{ ...SLIDES[0], photoUrl: 'https://foto.test/verticale.jpg' }, SLIDES[1], SLIDES[2]]
+
+  async function conFoto(w: number, h: number) {
+    const { caricaFoto } = await import('./foto')
+    vi.mocked(caricaFoto).mockResolvedValue({ src: 'data:image/jpeg;base64,AAAA', w, h, sfondo: null })
+    renderModal({ slides: CON_FOTO })
+    const tela = document.querySelectorAll<HTMLElement>('.wrapped-capture-card')[0]
+    await waitFor(() => expect(tela.querySelector('img')).not.toBeNull())
+    return tela.querySelector('img') as HTMLImageElement
+  }
+
+  it('sulla tela la foto verticale è intera: la sua proporzione, dentro 904×640, e Pallo accanto', async () => {
+    const img = await conFoto(600, 900)
+    const w = parseFloat(img.style.width)
+    const h = parseFloat(img.style.height)
+    expect(w / h).toBeCloseTo(600 / 900, 2)
+    expect(h).toBeLessThanOrEqual(640)
+    expect(img.style.objectFit).not.toBe('cover')
+    // La copertina verticale lascia posto: Pallo le sta accanto.
+    expect(img.parentElement?.querySelector('.pallo')).not.toBeNull()
+  })
+
+  it('una foto orizzontale prende la larghezza della colonna, senza Pallo accanto', async () => {
+    const img = await conFoto(1600, 900)
+    expect(parseFloat(img.style.width) / parseFloat(img.style.height)).toBeCloseTo(16 / 9, 2)
+    expect(parseFloat(img.style.width)).toBeLessThanOrEqual(904)
+    expect(img.parentElement?.querySelector('.pallo')).toBeNull()
+  })
+
+  it('a schermo la foto porta le misure naturali (il browser la tiene intera)', async () => {
+    await conFoto(600, 900)
+    const img = deck().querySelector('img.wrapped-photo') as HTMLImageElement
+    expect(img).toHaveAttribute('width', '600')
+    expect(img).toHaveAttribute('height', '900')
   })
 })
 

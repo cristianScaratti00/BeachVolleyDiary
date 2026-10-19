@@ -1,11 +1,9 @@
-/* Lo sheet del torneo: gruppi opachi sul vetro, passi di 16 fra i campi e 24
-   fra i gruppi (ART_DIRECTION §5.2). */
+/* Il modulo del torneo (design 15): blocchi a 18 l'uno dall'altro, le chip
+   che vanno a capo, Data e Luogo affiancati. */
 @layer components {
   .torneo-sheet-form { display: grid; gap: var(--space-6); }
-  .torneo-sheet-fields { display: grid; gap: var(--space-4); border: 0; margin: 0; padding: 0; min-width: 0; }
+  .torneo-sheet-fields { border: 0; margin: 0; padding: 0; min-width: 0; }
   .torneo-sheet-partner { display: grid; gap: var(--space-3); }
-  .torneo-sheet-more { margin-top: var(--space-2); }
-  .torneo-sheet-assistant { justify-self: start; white-space: normal; text-align: left; }
-  /* Sul vetro il pulsante «plain» scrive in inchiostro (Button.css): qui è un
-     link d'uscita, e resta leggibile anche nel caso peggiore. */
+  .torneo-sheet-more { padding-top: var(--space-4); }
+  .torneo-sheet-assistant { justify-self: start; white-space: normal; text-align: left; margin-left: calc(-1 * var(--space-3)); }
 }

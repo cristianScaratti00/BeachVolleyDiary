@@ -3,8 +3,9 @@
 // in un portal su `document.body`, così z-index e `overflow` degli antenati
 // non li tagliano.
 //
-// - Il VELO è suo, non del singolo overlay: quando il menu ＋ diventa uno
-//   sheet il velo resta dov'è (niente sfarfallio). Il ConfirmDialog porta il
+// - Il VELO è suo, non del singolo overlay: quando lo sheet del ＋ («Cosa
+//   registriamo?») lascia il posto a un modulo il velo resta dov'è (niente
+//   sfarfallio). Il ConfirmDialog porta il
 //   suo, sopra: due veli dicono profondità. I visori hanno il fondo loro.
 // - Le uscite partono a t0 e insieme (AnimatePresence senza `mode="wait"`).
 // - Blocca lo scroll della pagina sotto finché c'è un overlay.
@@ -24,13 +25,12 @@ import { deriveStory, partnerOptions, todayISO, tournamentOptions } from '../lib
 import type { DiaryData } from '../lib/models'
 import type { UseCheckIn } from '../hooks/useCheckIn'
 import type { UseDiary } from '../hooks/useDiary'
-import { OGGI_ATTIVO } from './routes'
 import type { Route } from './routes'
-import { closeOverlay, closeOverlays, navigate, overlayStack, replaceNextOverlay, setOverlayFlags, useOverlays } from './router'
+import { closeOverlay, closeOverlays, overlayStack, replaceNextOverlay, setOverlayFlags, useOverlays } from './router'
 import type { OverlayEntry } from './overlays'
 import type { Actions } from './useActions'
 import { compagnoDefault, partitaDestinazione } from './selectors'
-import type { OverlayBase } from './contracts'
+import type { OverlayBase, TorneoOption } from './contracts'
 import TorneoSheet from '../components/modals/TorneoSheet'
 import PartitaSheet from '../components/modals/PartitaSheet'
 import FotoSheet from '../components/modals/FotoSheet'
@@ -51,12 +51,13 @@ interface Props {
   data: DiaryData
   route: Route
   diary: UseDiary
-  check: UseCheckIn
+  /** Non serve più qui (il check-in è uscito dal ＋): resta per la firma di App. */
+  check?: UseCheckIn
   actions: Actions
   canAddPartner: boolean
 }
 
-export function ModalHost({ data, route, diary, check, actions, canAddPartner }: Props) {
+export function ModalHost({ data, route, diary, actions, canAddPartner }: Props) {
   const stack = useOverlays()
   useScrollLock(stack.length > 0)
 
@@ -91,7 +92,6 @@ export function ModalHost({ data, route, diary, check, actions, canAddPartner }:
             data={data}
             route={route}
             diary={diary}
-            check={check}
             actions={actions}
             canAddPartner={canAddPartner}
           />
@@ -102,7 +102,7 @@ export function ModalHost({ data, route, diary, check, actions, canAddPartner }:
   )
 }
 
-function Voce({ entry, top, data, route, diary, check, actions, canAddPartner }: Props & { entry: OverlayEntry; top: boolean }) {
+function Voce({ entry, top, data, route, diary, actions, canAddPartner }: Omit<Props, 'check'> & { entry: OverlayEntry; top: boolean }) {
   const o = entry.overlay
   const base: OverlayBase = {
     onClose: () => closeOverlay(),
@@ -115,40 +115,59 @@ function Voce({ entry, top, data, route, diary, check, actions, canAddPartner }:
 
   switch (o.kind) {
     case 'azioni': {
+      // Lo sheet «Cosa registriamo?» (design 13): le stesse voci nel popover
+      // di «Nuovo» della Sidebar. Il check-in non sta più qui: è in Compagni.
       const dest = partitaDestinazione(data, route)
       const items: MenuViewItem[] = [
         {
+          key: 'live',
+          label: 'Partita live',
+          sub: 'Segna i punti, in torneo o tra amici',
+          icon: 'clock',
+          tone: 'accent',
+          // È una rotta: la voce del menu diventa la destinazione.
+          onSelect: actions.partitaLive,
+        },
+        {
           key: 'torneo',
-          label: 'Nuovo torneo',
-          sub: 'Nome, data e luogo: il resto dopo',
+          label: 'Torneo',
+          sub: 'Luogo, formato, compagno, piazzamento',
           icon: 'trophy',
           onSelect: () => actions.nuovoTorneo(true),
         },
       ]
+      // Senza un torneo di destinazione la partita non ha dove andare (F3.5).
       if (dest) {
         items.push({
           key: 'partita',
-          label: 'Aggiungi partita',
-          sub: `a «${dest.name}»`,
-          icon: 'plus',
+          label: 'Partita',
+          sub: `Aggiungi un risultato a «${dest.name}»`,
+          icon: 'volley',
           onSelect: () => actions.nuovaPartita(dest.id, true),
         })
       }
-      if (OGGI_ATTIVO) {
-        items.push({
-          key: 'oggi',
-          label: check.own ? `Sei a ${check.own.city} oggi` : 'Check-in oggi',
-          sub: "Chi c'è in spiaggia",
-          icon: 'pin',
-          // È una rotta: la voce del menu diventa la destinazione.
-          onSelect: () => navigate({ name: 'oggi' }),
-        })
-      }
+      items.push(
+        {
+          key: 'rapido',
+          label: 'Torneo rapido',
+          sub: 'Nome e piazzamento, i dettagli dopo',
+          icon: 'bolt',
+          onSelect: () => actions.torneoRapido(true),
+        },
+        {
+          key: 'pallo',
+          label: 'Raccontalo a Pallo',
+          sub: 'Ti faccio io le domande, una alla volta',
+          icon: 'chat-dots',
+          onSelect: actions.apriAssistente,
+        },
+      )
       return (
         <Menu
-          title="Crea"
+          title="Cosa registriamo?"
+          sub="Scegli tu, al resto penso io."
           items={items}
-          placement={o.anchor === 'popover' ? 'popover' : 'tabbar'}
+          placement={o.anchor === 'popover' ? 'popover' : 'sheet'}
           anchor={entry.anchor}
           opener={entry.opener}
           top={top}
@@ -186,6 +205,7 @@ function Voce({ entry, top, data, route, diary, check, actions, canAddPartner }:
         <TorneoSheet
           {...base}
           mode={o.mode}
+          rapido={o.mode === 'nuovo' && !!o.rapido}
           torneo={torneo}
           partners={partnerOptions(data)}
           venues={data.venues}
@@ -210,7 +230,7 @@ function Voce({ entry, top, data, route, diary, check, actions, canAddPartner }:
           mode={o.mode}
           match={match}
           tournamentId={tid}
-          tournaments={tournamentOptions(data)}
+          tournaments={torneiConCompagno(data)}
           onSave={(form) => actions.salvaPartita(form, o.mode === 'modifica' ? o.matchId : null)}
           onDelete={o.mode === 'modifica' ? () => actions.eliminaPartita(o.matchId) : undefined}
         />
@@ -252,7 +272,14 @@ function Voce({ entry, top, data, route, diary, check, actions, canAddPartner }:
       if (!story) return null
       return (
         <Suspense fallback={<ViewerSkeleton />}>
-          <StoryModal {...base} story={story} onNotice={(msg, type = 'error') => toast.show(type, msg)} />
+          <StoryModal
+            {...base}
+            story={story}
+            placement={data.tournaments.find((x) => x.id === o.tournamentId)?.placement}
+            // Le stesse foto (e nello stesso ordine) di `deriveStory`.
+            didascalie={data.photos.filter((p) => p.tournamentId === o.tournamentId && p.url).slice(0, 3).map((p) => p.caption)}
+            onNotice={(msg, type = 'error') => toast.show(type, msg)}
+          />
         </Suspense>
       )
     }
@@ -298,6 +325,14 @@ function Voce({ entry, top, data, route, diary, check, actions, canAddPartner }:
       )
     }
   }
+}
+
+/** I propri tornei per «Nuova partita», ognuno con il compagno che la partita eredita. */
+function torneiConCompagno(data: DiaryData): TorneoOption[] {
+  return tournamentOptions(data).map((o) => {
+    const pid = data.tournaments.find((t) => t.id === o.id)?.partnerId
+    return { ...o, partner: (pid && data.partners.find((p) => p.id === pid)?.name) || '' }
+  })
 }
 
 function overlayEntryAncoraAperta(key: string) {

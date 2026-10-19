@@ -3,8 +3,11 @@
 // MOTION.md §6 e §8.4).
 //
 // - EmptyState: titolo, testo e AL MASSIMO un CTA principale più un link
-//   secondario. Il primo avvio non ha illustrazioni: mostra lo «0» da
-//   tabellone (mossa firmata 5), che NON sale da zero: è fermo perché è vero.
+//   secondario. Il primo avvio (`primo`) è dove l'app parla con te: c'è Pallo
+//   — di serie dorme, con le «z» che salgono: qui non succede ancora niente;
+//   `pallo="saluta"` dove è lui a invitare — con sotto lo «0» da tabellone
+//   che NON sale da zero: è fermo perché è vero. Niente maiuscole: le
+//   etichette del redesign sono minuscole, 13/600 in --ink-2.
 // - ErrorState: il caricamento fallito non è uno stato vuoto (C8).
 // - Skeleton in tre tempi: a 0ms lo spazio è riservato e vuoto, a 150ms le
 //   forme, da 600ms il respiro. Contenitore `aria-busy` con «Caricamento…».
@@ -12,16 +15,20 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { BUSY_MIN_MS } from '../Motion'
+import { Pallo } from '../Pallo'
+import type { PalloUmore } from '../Pallo'
 import { Icon } from './Icon'
 import type { IconName } from './Icon'
 import { Button } from './Button'
 import './Feedback.css'
 
-export function EmptyState({ variant = 'filtrato', zero, icon, title, text, action, secondary, level = 2, className }: {
+export function EmptyState({ variant = 'filtrato', zero, pallo = 'dorme', icon, title, text, action, secondary, level = 2, className }: {
   /** `primo`: account senza dati, con lo «0». `filtrato`: vuoto per un filtro o un errore. */
   variant?: 'primo' | 'filtrato'
   /** L'etichetta sotto lo «0» («Tornei»). */
   zero?: string
+  /** Pallo sopra lo «0», nel primo avvio: dorme (niente ancora) o saluta (invita). */
+  pallo?: Extract<PalloUmore, 'dorme' | 'saluta'>
   icon?: IconName
   title: ReactNode
   text?: ReactNode
@@ -37,6 +44,7 @@ export function EmptyState({ variant = 'filtrato', zero, icon, title, text, acti
     <div className={className ? `ui-empty ${className}` : 'ui-empty'} data-variant={variant}>
       {variant === 'primo' && zero && (
         <div className="ui-empty-zero" aria-hidden="true">
+          <Pallo umore={pallo} size={88} className="ui-empty-pallo" />
           <span className="ui-empty-zero-n">0</span>
           <span className="ui-empty-zero-l">{zero}</span>
         </div>

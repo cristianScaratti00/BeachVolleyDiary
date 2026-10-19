@@ -70,28 +70,35 @@ export default function VenuePicker({ form, setField, venues, suggestSurface = f
     }
   }
 
+  // Due pezzi, non uno: il campo «Luogo» sta nella sua colonna accanto alla
+  // Data (design 15), il pannello del luogo nuovo e la nota del luogo scelto
+  // prendono tutta la larghezza sotto (`ui-sheet-span`).
   return (
-    <div className="venue ui-field">
-      <FieldLabel htmlFor="torneo-venue">Dove hai giocato</FieldLabel>
-      <span className="ui-select-wrap">
-        <select
-          id="torneo-venue"
-          className="ui-input ui-select"
-          value={selected}
-          onChange={(e: ChangeEvent<HTMLSelectElement>) => pick(e.target.value)}
-        >
-          <option value="">Nessun luogo</option>
-          {venues.map((v) => (
-            <option key={v.id} value={v.id}>{venueLabel(v)}</option>
-          ))}
-          <option value="new">＋ Nuovo luogo…</option>
-        </select>
-        <Icon name="chevron-down" size={16} className="ui-select-chev" />
-      </span>
+    <>
+      <div className="venue ui-field ui-sheet-pick">
+        <FieldLabel htmlFor="torneo-venue">Luogo</FieldLabel>
+        {/* Un select vero: sul telefono «Scegli ›» apre la ruota del
+            sistema, da tastiera si sceglie con le frecce. */}
+        <span className="ui-select-wrap">
+          <select
+            id="torneo-venue"
+            className="ui-input ui-select"
+            value={selected}
+            onChange={(e: ChangeEvent<HTMLSelectElement>) => pick(e.target.value)}
+          >
+            <option value="">Scegli</option>
+            {venues.map((v) => (
+              <option key={v.id} value={v.id}>{venueLabel(v)}</option>
+            ))}
+            <option value="new">＋ Nuovo luogo…</option>
+          </select>
+          <Icon name="chevron-down" size={16} className="ui-select-chev" />
+        </span>
+      </div>
 
       {isNew && <NewVenueFields form={form} setField={setField} />}
       {current && <SelectedVenueNote venue={current} venues={venues} onMerge={onMerge} />}
-    </div>
+    </>
   )
 }
 
@@ -434,7 +441,7 @@ function NewVenueFields({ form, setField }: { form: AnyForm; setField: SetField 
   }
 
   return (
-    <div className="venue-panel">
+    <div className="venue-panel ui-sheet-span">
       <RicercaLuogo onPick={usaRisultato} />
 
       <div className="ui-field">
@@ -523,7 +530,7 @@ function SelectedVenueNote({ venue, venues, onMerge }: {
   }
 
   return (
-    <div className="venue-selected">
+    <div className="venue-selected ui-sheet-span">
       <div className="venue-selected-row">
         <span className="venue-hint">
           {venue.lat != null ? 'Posizione salvata: la mappa compare nel dettaglio del torneo.' : 'Nessuna coordinata: il dettaglio non mostrerà la mappa.'}

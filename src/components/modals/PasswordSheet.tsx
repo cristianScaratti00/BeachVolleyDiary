@@ -1,5 +1,6 @@
 // ============================================================================
-// «Cambia password» (UX §5 F9, §6.8): uno sheet corto. La regola (almeno 6
+// «Cambia password» (UX §5 F9, §6.8): uno sheet corto, con la barra dei
+// moduli «Annulla · titolo · Salva» (design 15). La regola (almeno 6
 // caratteri, le due uguali) la applica `updatePassword` in lib/auth: qui il
 // modulo, lo stato occupato e l'esito in linea. Se va a buon fine la shell
 // chiude lo sheet e dice «Password aggiornata».
@@ -7,8 +8,8 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import type { PasswordSheetProps } from '../../app/contracts'
-import { Sheet, SheetActions, SheetTitle } from './Sheet'
-import { Button, FormGroup, Icon, TextField } from '../ui/index'
+import { Sheet, SheetBar } from './Sheet'
+import { Button, Icon, TextField } from '../ui/index'
 import './PasswordSheet.css'
 
 export default function PasswordSheet({ onClose, top, byTouch, opener, setDirty, setBusy, onSave }: PasswordSheetProps) {
@@ -47,54 +48,56 @@ export default function PasswordSheet({ onClose, top, byTouch, opener, setDirty,
       opener={opener}
       dirty={dirty}
       busy={busy}
-      footer={
-        <SheetActions>
-          <Button variant="quiet" onClick={onClose}>Annulla</Button>
-          <Button
-            variant="filled"
-            disabled={!completo}
-            onDisabledClick={() => void salva()}
-            busy={busy}
-            busyLabel="Salvataggio…"
-            onClick={() => void salva()}
-          >
-            Aggiorna password
-          </Button>
-        </SheetActions>
+      header={
+        <SheetBar
+          title="Cambia password"
+          onCancel={onClose}
+          cancelBusy={busy}
+          action={
+            <Button
+              variant="filled"
+              disabled={!completo}
+              onDisabledClick={() => void salva()}
+              busy={busy}
+              busyLabel="Salvataggio…"
+              onClick={() => void salva()}
+            >
+              Salva
+            </Button>
+          }
+        />
       }
     >
-      <SheetTitle sub="Non serve quella vecchia: basta essere entrati.">Cambia password</SheetTitle>
       <form className="password-form" onSubmit={(e) => void salva(e)} noValidate>
-        <FormGroup>
-          <TextField
-            ref={pwRef}
-            label="Nuova password"
-            type="password"
-            autoComplete="new-password"
-            placeholder="Almeno 6 caratteri"
-            value={pw}
-            onChange={(v) => {
-              setPw(v)
-              setErrore(null)
-            }}
-            readOnly={busy}
-          />
-          <TextField
-            ref={pw2Ref}
-            label="Conferma"
-            type="password"
-            autoComplete="new-password"
-            placeholder="Ripeti la nuova password"
-            value={pw2}
-            onChange={(v) => {
-              setPw2(v)
-              setErrore(null)
-            }}
-            readOnly={busy}
-          />
-        </FormGroup>
+        <p className="password-nota">Non serve quella vecchia: basta essere entrati.</p>
+        <TextField
+          ref={pwRef}
+          label="Nuova password"
+          type="password"
+          autoComplete="new-password"
+          placeholder="Almeno 6 caratteri"
+          value={pw}
+          onChange={(v) => {
+            setPw(v)
+            setErrore(null)
+          }}
+          readOnly={busy}
+        />
+        <TextField
+          ref={pw2Ref}
+          label="Conferma"
+          type="password"
+          autoComplete="new-password"
+          placeholder="Ripeti la nuova password"
+          value={pw2}
+          onChange={(v) => {
+            setPw2(v)
+            setErrore(null)
+          }}
+          readOnly={busy}
+        />
         {errore && (
-          <p className="password-errore" role="alert">
+          <p className="ui-field-error" role="alert">
             <Icon name="alert" size={16} />
             <span>{errore}</span>
           </p>

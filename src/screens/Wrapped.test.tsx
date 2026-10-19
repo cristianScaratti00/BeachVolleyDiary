@@ -1,6 +1,7 @@
 // ============================================================================
 // La rotta `/wrapped` (UX §6.5): quando il recap non c'è non si mostra una
 // pagina vuota ma lo stato «in arrivo», con il motivo e un [Ho capito] vero.
+// Beach Wrapped c'è solo a ottobre: fuori mese il motivo è «stagione».
 // ============================================================================
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
@@ -17,11 +18,20 @@ function renderNonDisponibile(motivo: 'stagione' | 'dati') {
 }
 
 describe('Wrapped — non disponibile', () => {
-  it('fuori stagione dice quando arriva', () => {
+  it('fuori da ottobre dice quando arriva (solo a ottobre)', () => {
     renderNonDisponibile('stagione')
     expect(screen.getByRole('dialog', { name: 'Beach Wrapped' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Beach Wrapped in arrivo' })).toBeInTheDocument()
-    expect(screen.getByText('Il recap arriva a fine stagione, da settembre.')).toBeInTheDocument()
+    expect(screen.getByText('Beach Wrapped arriva a ottobre: torna a trovarci allora.')).toBeInTheDocument()
+  })
+
+  it('Pallo accompagna il messaggio: saluta fuori mese, sbircia se mancano le partite (decorativo)', () => {
+    const { container, unmount } = renderNonDisponibile('stagione')
+    expect(container.ownerDocument.querySelector('.pallo')).toHaveAttribute('data-umore', 'saluta')
+    expect(container.ownerDocument.querySelector('.pallo')).toHaveAttribute('aria-hidden', 'true')
+    unmount()
+    renderNonDisponibile('dati')
+    expect(document.querySelector('.pallo')).toHaveAttribute('data-umore', 'sbircia')
   })
 
   it('con pochi dati dice che servono partite', () => {

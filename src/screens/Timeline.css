@@ -1,66 +1,86 @@
-/* Tornei · Timeline (ex Diario). Solo token. */
+/* Le voci del Diario (il redesign). Solo token. Il ritmo è uno solo: 14
+   (--stack) fra intestazioni di mese e voci, come nel design. */
 @layer components {
-  .timeline { margin-top: var(--space-4); max-width: var(--timeline-max); }
-  .timeline-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
-  .timeline-item { list-style: none; min-width: 0; }
-
-  .timeline-entry {
+  .timeline { margin-top: var(--stack); max-width: var(--timeline-max); }
+  .timeline-month + .timeline-month,
+  .timeline-month + .timeline-more { margin-top: var(--stack); }
+  .timeline-month-title {
+    padding: 0 var(--space-1);
+    font: 700 0.8125rem/1.3 var(--font-ui);
+    letter-spacing: var(--track-footnote);
+    color: var(--ink-2);
+  }
+  .timeline-list {
+    list-style: none;
+    margin: var(--stack) 0 0;
+    padding: 0;
     display: grid;
-    grid-template-columns: var(--timeline-date) minmax(0, 1fr);
-    gap: var(--space-3);
+    gap: var(--stack);
   }
-  .timeline-date {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    padding-top: var(--space-0-5);
-  }
+
+  /* ------------------------------------------------------------ voce */
+  .timeline-entry { display: flex; gap: var(--space-3); min-width: 0; list-style: none; }
+  /* La colonna del giorno: il numero allineato al titolo della card. */
   .timeline-day {
-    font: var(--type-num-m);
+    flex: none;
+    width: var(--timeline-date);
+    padding-top: var(--space-3-5);
+    text-align: center;
+  }
+  .timeline-day > span[aria-hidden] { display: flex; flex-direction: column; align-items: center; }
+  .timeline-day b {
+    font: 700 1.25rem/1 var(--font-ui);
     letter-spacing: var(--track-num-m);
     font-variant-numeric: tabular-nums;
   }
-  .timeline-month,
-  .timeline-year {
-    font: var(--type-eyebrow);
-    letter-spacing: var(--track-eyebrow);
-    text-transform: uppercase;
+  .timeline-day b + span {
+    margin-top: var(--space-0-5);
+    font: 600 0.71875rem/1.2 var(--font-ui);
     color: var(--ink-2);
   }
-  .timeline-emoji { margin-top: var(--space-2); font: var(--type-headline); }
 
-  .timeline-body { min-width: 0; display: flex; flex-direction: column; gap: var(--space-2); }
+  .ui-card.timeline-card {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2-5);
+    padding: var(--space-3-5);
+  }
   .timeline-head {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
     gap: var(--space-2);
   }
+  .timeline-titles { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+  .ui-card-title.timeline-title {
+    font: 700 1rem/1.3 var(--font-ui);
+    letter-spacing: var(--track-headline);
+  }
   .timeline-desc {
     font: var(--type-footnote);
     letter-spacing: var(--track-footnote);
     color: var(--ink-2);
+    overflow-wrap: anywhere;
   }
-  .timeline-hits { margin-top: var(--space-1); }
+  .timeline-hits { margin-top: var(--space-0-5); }
 
-  .timeline-photos { display: grid; gap: var(--space-1); margin-top: var(--space-1); }
-  .timeline-cover,
+  /* Le miniature del redesign: 44, raggio 10, col filo della card. */
+  .timeline-thumbs { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-1-5); }
   .timeline-thumb {
     position: relative;
     display: grid;
     place-items: center;
+    width: var(--control-md);
+    height: var(--control-md);
     overflow: hidden;
-    border-radius: var(--radius-control);
+    border-radius: var(--radius-chip);
     background: var(--fill);
+    box-shadow: inset 0 0 0 var(--border-w) var(--edge);
   }
-  .timeline-cover { aspect-ratio: 16 / 10; }
-  .timeline-thumbs { display: flex; align-items: center; gap: var(--space-1); }
-  .timeline-thumb { width: var(--space-12); height: var(--space-12); border-radius: var(--radius-xs); }
-  .timeline-cover img,
   .timeline-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
   /* Il filo interno stacca una foto chiara dalla carta bianca (§10.3). */
-  .timeline-cover::after,
   .timeline-thumb::after {
     content: "";
     position: absolute;
@@ -71,6 +91,25 @@
   }
   .timeline-photo-missing { background: var(--c); color: var(--ink-3); }
 
-  .timeline-actions { margin-top: var(--space-1); }
-  .timeline-more { display: flex; justify-content: center; margin-top: var(--space-4); }
+  .timeline-note {
+    font: italic 500 0.84375rem/1.4 var(--font-ui);
+    color: var(--ink-label);
+    overflow-wrap: anywhere;
+  }
+
+  .timeline-foot {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-3);
+  }
+  .timeline-count {
+    margin-right: auto;
+    font: var(--type-footnote);
+    letter-spacing: var(--track-footnote);
+    color: var(--ink-2);
+  }
+  .timeline-actions { flex: none; }
+
+  .timeline-more { display: flex; justify-content: center; }
 }

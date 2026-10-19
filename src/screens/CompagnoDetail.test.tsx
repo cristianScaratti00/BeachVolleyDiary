@@ -1,9 +1,11 @@
 // ============================================================================
-// Dettaglio compagno (UX §5 F7, §6.6): non trovato (C9), collegato o no, il
-// menu «⋯», le partite insieme come righe-pulsante, nessun window.confirm.
+// Dettaglio compagno (UX §5 F7, §6.6; il redesign, versione D): non trovato
+// (C9), collegato o no, il tabellone 2×2, le partite insieme come
+// righe-pulsante, «Elimina compagno» di vetro rosso in fondo (il menu «⋯» non
+// c'è più), nessun window.confirm.
 // ============================================================================
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import CompagnoDetail from './CompagnoDetail'
 import type { CompagnoDetailData } from '../lib/derive'
@@ -35,7 +37,7 @@ function renderScreen(over: Partial<Props> = {}) {
     onOpenMatch: vi.fn(),
     onCollega: vi.fn(),
     onScollega: vi.fn(),
-    onMenu: vi.fn(),
+    onElimina: vi.fn(),
     onBack: vi.fn(),
   }
   const view = render(
@@ -46,7 +48,7 @@ function renderScreen(over: Partial<Props> = {}) {
       onOpenMatch={fns.onOpenMatch}
       onCollega={fns.onCollega}
       onScollega={fns.onScollega}
-      onMenu={fns.onMenu}
+      onElimina={fns.onElimina}
       {...over}
     />,
   )
@@ -65,16 +67,20 @@ describe('CompagnoDetail', () => {
     expect(screen.getByRole('link', { name: 'Vai ai compagni' })).toHaveAttribute('href', '/compagni')
   })
 
-  it('intestazione: nome come h1 e il conteggio delle partite', () => {
-    renderScreen()
+  it('intestazione: «‹ Compagni», il nome come h1 e il conteggio delle partite', async () => {
+    const user = userEvent.setup()
+    const { onBack } = renderScreen()
     expect(screen.getByRole('heading', { level: 1, name: 'Giulia' })).toBeInTheDocument()
     expect(screen.getByText('2 partite insieme · 1 vinta')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Compagni' }))
+    expect(onBack).toHaveBeenCalledTimes(1)
   })
 
-  it('non collegato: «Collega a un utente» è un pulsante', async () => {
+  it('non collegato: la card lo dice e «Collega» è un pulsante', async () => {
     const user = userEvent.setup()
     const { onCollega } = renderScreen()
-    await user.click(screen.getByRole('button', { name: /Collega a un utente/ }))
+    const card = screen.getByRole('region', { name: 'Non collegato' })
+    await user.click(within(card).getByRole('button', { name: 'Collega' }))
     expect(onCollega).toHaveBeenCalledTimes(1)
     expect(screen.queryByRole('button', { name: 'Scollega' })).not.toBeInTheDocument()
   })
@@ -83,32 +89,51 @@ describe('CompagnoDetail', () => {
     const user = userEvent.setup()
     const confirm = vi.spyOn(window, 'confirm')
     const { onScollega } = renderScreen({ linked: true })
-    expect(screen.getByText('Collegato a un utente')).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: 'Scollega' }))
+    const card = screen.getByRole('region', { name: 'Collegato a un utente' })
+    expect(within(card).getByText(/condivisi con il suo account/)).toBeInTheDocument()
+    await user.click(within(card).getByRole('button', { name: 'Scollega' }))
     expect(onScollega).toHaveBeenCalledTimes(1)
     expect(confirm).not.toHaveBeenCalled()
   })
 
-  it('il menu «⋯» è un pulsante con nome che apre un menu ancorato a sé', async () => {
-    const user = userEvent.setup()
-    const { onMenu } = renderScreen()
-    const b = screen.getByRole('button', { name: 'Altre azioni' })
-    expect(b).toHaveAttribute('aria-haspopup', 'menu')
-    await user.click(b)
-    expect(onMenu).toHaveBeenCalledExactlyOnceWith(b)
+  it('il collegamento appena fatto porta la traccia', () => {
+    const { container } = renderScreen({ linked: true, traccia: 'collegato' })
+    expect(container.querySelector('section .traccia')).not.toBeNull()
   })
 
-  it('le partite insieme sono righe-pulsante che aprono la modifica', async () => {
+  it('il tabellone 2×2: vittorie, set vinti, differenziale, serie record', () => {
+    renderScreen()
+    const stats = screen.getByRole('group', { name: 'Statistiche insieme' })
+    expect([...stats.querySelectorAll('.ui-stat-label')].map((e) => e.textContent)).toEqual(['vittorie', 'set vinti', 'differenziale', 'serie record'])
+    expect(within(stats).getByText('50%', { selector: '.sr-only' })).toBeInTheDocument()
+  })
+
+  it('le partite insieme sono righe-pulsante col nome del torneo, che aprono la modifica', async () => {
     const user = userEvent.setup()
     const { onOpenMatch } = renderScreen()
-    await user.click(screen.getByRole('button', { name: /Girone · vs Bianchi \/ Verdi/ }))
+    expect(screen.getByRole('heading', { level: 2, name: 'Partite insieme' })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /Rimini Open.*Girone · vs Bianchi \/ Verdi/ }))
     expect(onOpenMatch).toHaveBeenCalledExactlyOnceWith('m1')
   })
 
-  it('senza partite insieme le statistiche non ci sono e lo dice', () => {
+  it('«Elimina compagno» è un pulsante di vetro rosso: la conferma la apre la shell', async () => {
+    const user = userEvent.setup()
+    const confirm = vi.spyOn(window, 'confirm')
+    const { onElimina } = renderScreen()
+    expect(screen.queryByRole('button', { name: 'Altre azioni' })).not.toBeInTheDocument()
+    const b = screen.getByRole('button', { name: 'Elimina compagno' })
+    expect(b).toHaveAttribute('data-variant', 'glass')
+    expect(b).toHaveAttribute('data-tone', 'danger')
+    await user.click(b)
+    expect(onElimina).toHaveBeenCalledTimes(1)
+    expect(confirm).not.toHaveBeenCalled()
+  })
+
+  it('senza partite insieme le statistiche non ci sono e lo dice; eliminare resta possibile', () => {
     renderScreen({ cp: dati({ played: 0, won: 0, matches: [] }) })
     expect(screen.getByText('Ancora nessuna partita insieme.')).toBeInTheDocument()
     expect(screen.queryByRole('group', { name: 'Statistiche insieme' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Elimina compagno' })).toBeInTheDocument()
   })
 
   it('dice «compagno», mai «socio» (C18)', () => {

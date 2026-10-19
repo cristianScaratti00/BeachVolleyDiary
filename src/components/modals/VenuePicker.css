@@ -1,5 +1,7 @@
-/* Il selettore del luogo. Vive dentro un FormGroup opaco dello sheet: il testo
-   d'errore (--danger) sta quindi su carta, mai sul vetro. */
+/* Il selettore del luogo (design 15: «Luogo · Scegli ›» accanto alla Data).
+   Il pannello del luogo nuovo e la nota del luogo scelto stanno sotto, larghi
+   quanto il modulo; lo sheet è opaco, il testo d'errore (--danger) sta su
+   carta. */
 @layer components {
   .venue { min-width: 0; }
   .venue-hint {
@@ -10,16 +12,18 @@
   .venue-hint[data-tone="danger"] { color: var(--danger); }
   .venue-hint:empty { display: none; }
 
-  /* Il pannello del luogo nuovo: rientrato su --fill, si legge come una
-     dipendenza del select e non come un altro campo. */
+  /* Il pannello del luogo nuovo: una card bianca col filo come quella dei
+     set (design 16), si legge come una dipendenza del campo e non come un
+     altro campo. */
   .venue-panel {
     display: grid;
     gap: var(--space-4);
-    margin-top: var(--space-3);
     padding: var(--space-4);
-    border-radius: var(--radius-control);
-    background: var(--fill);
+    border: var(--border-w) solid var(--edge);
+    border-radius: calc(var(--radius-row) + var(--space-0-5));
+    background: var(--surface);
   }
+  .venue-selected .venue-panel { margin-top: var(--space-3); }
   .venue-results { margin-top: var(--space-2); }
   .venue-result-name { display: flex; align-items: baseline; flex-wrap: wrap; gap: var(--space-2); }
 
@@ -56,7 +60,7 @@
   .venue-coords-row { display: flex; flex-wrap: wrap; gap: var(--space-2); }
   .venue-coords-row > .ui-input { flex: 1; min-width: calc(var(--card-min) / 2); }
 
-  .venue-selected { margin-top: var(--space-2); }
+  .venue-selected { min-width: 0; }
   .venue-selected-row { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-2) var(--space-3); }
   .venue-selected-row > .venue-hint { flex: 1; min-width: calc(var(--card-min) / 2); }
   .venue-merge-text { font: var(--type-subhead); letter-spacing: var(--track-subhead); }

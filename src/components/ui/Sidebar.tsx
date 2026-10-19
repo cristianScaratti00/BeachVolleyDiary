@@ -3,7 +3,7 @@
 // (opaco con il riflesso del vetro: sotto non scorre niente, una sfocatura
 // costerebbe senza vedersi) che galleggia a 12px dai bordi della finestra.
 //
-// Voci Home · Tornei · Compagni · Profilo (`<a href>` con `aria-current`), UN
+// Voci Home · Tornei · Compagni · Diario (`<a href>` con `aria-current`), UN
 // solo pulsante «＋ Nuovo» che apre lo stesso menu del ＋ come popover, e il
 // piede con avatar, nome ed email che porta a Profilo. Spariscono i tre
 // pulsanti di creazione di prima e il logout (sta in Profilo, con conferma).
@@ -56,7 +56,7 @@ export const Sidebar = forwardRef<HTMLButtonElement, SidebarProps>(function Side
                   {t.label}
                 </span>
                 <span className="ui-ink-on" aria-hidden="true">
-                  <Icon name={t.icon} size={20} filled />
+                  <Icon name={t.icon} size={20} />
                   {t.label}
                 </span>
               </Link>

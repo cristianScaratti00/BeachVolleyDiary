@@ -12,6 +12,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, within, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import CreaChat from './CreaChat'
+import { passoDi, trovaRisposta } from './crea/copione'
 import { expectNoA11yViolations } from '../test/axe'
 
 let riduci = true
@@ -65,7 +66,7 @@ beforeEach(() => impostaRiduzione(true))
 describe('CreaChat — da tastiera', () => {
   it('si apre con le domande già pronte e il focus nel campo, che ha un nome', () => {
     renderChat()
-    expect(within(log()).getByText(/ti faccio qualche domanda al volo/)).toBeInTheDocument()
+    expect(within(log()).getByText(/Sono Pallo\. Ti faccio qualche domanda/)).toBeInTheDocument()
     const campo = screen.getByRole('textbox', { name: 'Come si chiama il torneo?' })
     expect(campo).toHaveFocus()
     expect(screen.getByRole('button', { name: 'Invia' })).toHaveAttribute('type', 'submit')
@@ -106,43 +107,127 @@ describe('CreaChat — da tastiera', () => {
   })
 })
 
+describe('CreaChat — la testata e la capsula (design 14)', () => {
+  it('la testata dice chi parla e a che passo si è', async () => {
+    const user = userEvent.setup()
+    renderChat()
+    expect(screen.getByRole('heading', { level: 1, name: 'Pallo' })).toBeInTheDocument()
+    expect(screen.getByText('Nuovo torneo · passo 1 di 8')).toBeInTheDocument()
+    await user.keyboard('Rimini Open{Enter}')
+    expect(await screen.findByText('Nuovo torneo · passo 2 di 8')).toBeInTheDocument()
+  })
+
+  it('il campo c\'è anche sulle domande a scelte: scrivere una scelta vale come toccarla', async () => {
+    const user = userEvent.setup()
+    renderChat()
+    await user.keyboard('Rimini Open{Enter}')
+    const campo = await screen.findByRole('textbox', { name: 'Perfetto, «Rimini Open». Con chi hai giocato?' })
+    await user.type(campo, 'giulia{Enter}')
+    expect(await screen.findByRole('button', { name: 'Oggi' })).toBeInTheDocument()
+    expect(within(log()).getByText('Giulia')).toBeInTheDocument()
+  })
+
+  it('un nome che non è fra i compagni è un compagno nuovo', async () => {
+    const user = userEvent.setup()
+    const { onCreate } = renderChat()
+    await user.keyboard('Rimini Open{Enter}')
+    await user.type(await screen.findByRole('textbox', { name: /Con chi hai giocato/ }), 'Luca{Enter}')
+    expect(await screen.findByRole('button', { name: 'Oggi' })).toBeInTheDocument()
+    expect(within(log()).getByText('Luca')).toBeInTheDocument()
+    expect(onCreate).not.toHaveBeenCalled()
+  })
+
+  it('una risposta che non corrisponde a nessuna scelta: Pallo lo dice e le scelte restano', async () => {
+    const user = userEvent.setup()
+    renderChat()
+    await user.keyboard('Rimini Open{Enter}')
+    await user.click(await screen.findByRole('button', { name: 'Da solo' }))
+    await user.type(await screen.findByRole('textbox', { name: 'Quando si è svolto?' }), 'boh{Enter}')
+    expect(await within(log()).findByText('Non ho capito «boh». Scegli una delle risposte qui sotto.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Oggi' })).toBeInTheDocument()
+  })
+
+  it('dove non si scrive (i set) il campo è spento e «Invia» è annunciato disattivo', async () => {
+    const user = userEvent.setup()
+    renderChat()
+    await user.keyboard('Rimini Open{Enter}')
+    await user.click(await screen.findByRole('button', { name: 'Giulia' }))
+    await user.click(await screen.findByRole('button', { name: 'Oggi' }))
+    await user.click(await screen.findByRole('button', { name: 'Salta' }))
+    await user.click(await screen.findByRole('button', { name: 'Amatoriale' }))
+    await user.click(await screen.findByRole('button', { name: '2vs2' }))
+    await user.click(await screen.findByRole('button', { name: 'Sabbia outdoor' }))
+    await user.click(await screen.findByRole('button', { name: 'È ancora in corso' }))
+    await user.click(await screen.findByRole('button', { name: 'Sì, aggiungiamole' }))
+    await user.type(await screen.findByRole('textbox', { name: /Contro chi era la prima/ }), '{Enter}')
+    await user.click(await screen.findByRole('button', { name: 'Finale' }))
+    expect(await screen.findByRole('group', { name: 'Set 1' })).toBeInTheDocument()
+    expect(screen.getByRole('textbox', { name: /Come è finita/ })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Invia' })).toHaveAttribute('aria-disabled', 'true')
+  })
+})
+
+describe('copione — passi e risposte scritte', () => {
+  it('le domande della stessa cosa stanno nello stesso passo', () => {
+    expect(passoDi('name')).toBe(1)
+    expect(passoDi('partnerName')).toBe(passoDi('partner'))
+    expect(passoDi('surface')).toBe(passoDi('category'))
+    expect(passoDi('matchScore')).toBe(passoDi('askResults'))
+    expect(passoDi('recap')).toBe(8)
+  })
+
+  it('riconosce una scelta scritta senza maiuscole, accenti o segni, e un inizio che non è ambiguo', () => {
+    expect(trovaRisposta('si', ['Sì, aggiungiamole', 'No, va bene così'])).toBe(0)
+    expect(trovaRisposta('SABBIA', ['Sabbia outdoor', 'Indoor', 'Erba'])).toBe(0)
+    expect(trovaRisposta('2', ['1°', '2°', '3°'])).toBe(1)
+    expect(trovaRisposta('s', ['Semifinale', 'Silver'])).toBe(-1)
+    expect(trovaRisposta('  ', ['Oggi'])).toBe(-1)
+  })
+})
+
 describe('CreaChat — la pausa "sta scrivendo"', () => {
   it('con reduced-motion non c\'è pausa né indicatore', async () => {
     const user = userEvent.setup()
     renderChat()
     await user.keyboard('Rimini Open{Enter}')
-    expect(screen.queryByText('L’assistente sta scrivendo')).not.toBeInTheDocument()
+    expect(screen.queryByText('Pallo sta scrivendo')).not.toBeInTheDocument()
     expect(within(log()).getByText('Perfetto, «Rimini Open». Con chi hai giocato?')).toBeInTheDocument()
   })
 
   it('senza reduced-motion c\'è UN indicatore, e qualunque input sul dock lo interrompe', async () => {
     impostaRiduzione(false)
     const user = userEvent.setup()
-    renderChat()
+    const { container } = renderChat()
+    // La testa di Pallo nella testata: pensa mentre «scrive».
+    const testa = container.querySelector('.crea-head svg.pallo')!
+    expect(testa).toHaveAttribute('data-umore', 'testa')
     await user.keyboard('Rimini Open{Enter}')
-    expect(screen.getAllByText('L’assistente sta scrivendo')).toHaveLength(1)
+    expect(screen.getAllByText('Pallo sta scrivendo')).toHaveLength(1)
+    expect(testa).toHaveAttribute('data-umore', 'pensa')
+    expect(testa).toHaveAttribute('viewBox', '12 12 96 96')
     expect(within(log()).queryByText('Perfetto, «Rimini Open». Con chi hai giocato?')).not.toBeInTheDocument()
     // Il dock dello step nuovo c'è già (montato, attenuato): toccarlo fa
     // comparire subito la domanda.
     fireEvent.pointerDown(screen.getByRole('button', { name: 'Giulia' }))
     expect(within(log()).getByText('Perfetto, «Rimini Open». Con chi hai giocato?')).toBeInTheDocument()
-    expect(screen.queryByText('L’assistente sta scrivendo')).not.toBeInTheDocument()
+    expect(screen.queryByText('Pallo sta scrivendo')).not.toBeInTheDocument()
+    expect(testa).toHaveAttribute('data-umore', 'testa')
   })
 })
 
 describe('CreaChat — uscire', () => {
-  it('✕ Esci senza risposte: niente da perdere', async () => {
+  it('✕ senza risposte: niente da perdere', async () => {
     const user = userEvent.setup()
     const { onExit } = renderChat()
-    await user.click(screen.getByRole('button', { name: 'Esci' }))
+    await user.click(screen.getByRole('button', { name: "Chiudi l'assistente" }))
     expect(onExit).toHaveBeenCalledWith(false)
   })
 
-  it('✕ Esci dopo una risposta: la shell deve chiedere', async () => {
+  it('✕ dopo una risposta: la shell deve chiedere', async () => {
     const user = userEvent.setup()
     const { onExit } = renderChat()
     await user.keyboard('Rimini Open{Enter}')
-    await user.click(screen.getByRole('button', { name: 'Esci' }))
+    await user.click(screen.getByRole('button', { name: "Chiudi l'assistente" }))
     expect(onExit).toHaveBeenCalledWith(true)
   })
 

@@ -1,20 +1,27 @@
 /* ============================================================================
    Materiali: come si applica il vetro. Valori in tokens.css, regole d'uso in
-   ART_DIRECTION.md §9.
+   ART_DIRECTION.md §0 e §9.
 
    Un componente NON scrive mai `backdrop-filter` da sé: dichiara il materiale
    con un attributo e prende tutto il resto da qui, compresi i fallback.
 
      <nav data-material="glass-regular" style="--material-elev: var(--elev-float)">
 
+   Sopra questo strato c'è `LiquidGlass` (src/components/ui/LiquidGlass.tsx):
+   sui browser Blink aggiunge la rifrazione vera (un filtro SVG di
+   spostamento nel `backdrop-filter`, @samasante/liquid-glass) alle barre che
+   galleggiano. Il materiale qui sotto resta la base dappertutto: la tinta, il
+   bordo, il riflesso e il fallback valgono anche dove la rifrazione non c'è
+   (Safari, Firefox, i test).
+
    I materiali:
-     glass-thin     .48  solo icone, mai testo (ink sopra: 3.29 nel caso peggiore)
-     glass-regular  .72  TabBar, NavBar dopo lo scroll
-     glass-thick    .86  sheet, action sheet, popover
+     glass-regular  .32  il vetro liquido: TabBar, pulsanti di vetro, barre
+                         in cima, azioni in fondo al dettaglio
+     glass-thin     .24  solo icone sopra la mappa (i +/− dello zoom)
+     glass-thick    .92  sheet, action sheet, popover: quasi carta
+     glass-clear    .14  il vetro chiaro sul fondo scuro (Benvenuto, Accedi)
      glass-dark     .66  toolbar dei visori, sopra foto e slide
-     frost          opaco con il riflesso del vetro: Sidebar. Il vetro si
-                    guadagna: dove sotto non scorre niente, una sfocatura costa
-                    e non si vede.
+     frost          opaco con il riflesso del vetro: Sidebar.
 
    Sta nel livello `utilities` di proposito: un componente (livello
    `components`) non può sovrascrivere per sbaglio il fondo di un materiale, ed
@@ -23,8 +30,8 @@
 
 @layer utilities {
   [data-material] {
-    /* Ogni componente sceglie l'altezza a cui galleggia (TabBar: float; NavBar:
-       nessuna, è attaccata al bordo). Il materiale porta solo riflesso e filo. */
+    /* Ogni componente sceglie l'altezza a cui galleggia (TabBar: float; i
+       pulsanti in pagina: nessuna). Il materiale porta riflesso e fili. */
     box-shadow: var(--glass-rim), var(--glass-edge), var(--material-elev, var(--elev-none));
     background-image: var(--glass-sheen);
   }
@@ -34,18 +41,27 @@
      persona primaria. Se cambiano qui, cambiano anche --blur-* in tokens.css. */
   [data-material="glass-thin"] {
     background-color: var(--glass-thin);
-    -webkit-backdrop-filter: blur(16px) saturate(180%);
-    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(8px) saturate(180%) brightness(1.05);
+    backdrop-filter: blur(8px) saturate(180%) brightness(1.05);
   }
   [data-material="glass-regular"] {
     background-color: var(--glass-regular);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%) brightness(1.05);
+    backdrop-filter: blur(10px) saturate(180%) brightness(1.05);
   }
   [data-material="glass-thick"] {
     background-color: var(--glass-thick);
+    background-image: none;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.9), 0 0 0 var(--border-w) var(--edge), var(--material-elev, var(--elev-none));
     -webkit-backdrop-filter: blur(30px) saturate(180%);
     backdrop-filter: blur(30px) saturate(180%);
+  }
+  [data-material="glass-clear"] {
+    background-color: var(--glass-clear);
+    background-image: var(--glass-clear-sheen);
+    box-shadow: var(--glass-clear-rim), var(--material-elev, var(--elev-none));
+    -webkit-backdrop-filter: blur(14px) saturate(180%);
+    backdrop-filter: blur(14px) saturate(180%);
   }
   [data-material="glass-dark"] {
     background-color: var(--glass-dark);
@@ -58,13 +74,9 @@
     background-color: var(--glass-solid);
   }
 
-  /* Sul vetro chiaro si scrive solo con l'inchiostro. Il secondario e il
+  /* Sul vetro chiaro si scrive con l'inchiostro. Il secondario e il
      terziario diventano alpha sull'inchiostro, che si scurisce col fondo
-     invece di sbiadire: così ogni componente che usa --ink-2 è già giusto
-     dentro uno sheet, senza saperlo.
-     Accento, danger e success NON vengono ridefiniti: come testo sul vetro
-     falliscono (accent-text 2.75, danger 2.75 sul regular nel caso peggiore)
-     e la regola è che stanno su una superficie opaca (ART_DIRECTION.md §4.4). */
+     invece di sbiadire. */
   [data-material="glass-thin"],
   [data-material="glass-regular"],
   [data-material="glass-thick"],
@@ -74,9 +86,10 @@
     --ink-3: var(--on-glass-3);
   }
 
-  /* Superfici scure (visori, vetro scuro): inchiostri e anello di focus si
-     invertono. Il bianco sul vetro scuro nel caso peggiore fa 6.13. */
+  /* Superfici scure (visori, vetro scuro, vetro chiaro sul buio): inchiostri
+     e anello di focus si invertono. */
   [data-material="glass-dark"],
+  [data-material="glass-clear"],
   [data-surface="dark"] {
     --ink: var(--on-glass-dark);
     --ink-2: var(--on-glass-dark-2);
@@ -87,29 +100,30 @@
 
   /* ------------------------------------------------------------ Fallback */
   /* tokens.css ha già reso opache le tinte; qui si spegne la sfocatura, che
-     su un fondo opaco costerebbe senza mostrare niente. */
+     su un fondo opaco costerebbe senza mostrare niente. `!important` perché
+     LiquidGlass scrive il suo `backdrop-filter` in linea. */
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     [data-material] { background-image: none; }
   }
   @media (prefers-reduced-transparency: reduce) {
     [data-material] {
-      -webkit-backdrop-filter: none;
-      backdrop-filter: none;
+      -webkit-backdrop-filter: none !important;
+      backdrop-filter: none !important;
       background-image: none;
     }
   }
   @media (prefers-contrast: more) {
     [data-material] {
-      -webkit-backdrop-filter: none;
-      backdrop-filter: none;
+      -webkit-backdrop-filter: none !important;
+      backdrop-filter: none !important;
       background-image: none;
     }
   }
   /* Colori di sistema: niente vetro, niente ombre, un bordo vero. */
   @media (forced-colors: active) {
     [data-material] {
-      -webkit-backdrop-filter: none;
-      backdrop-filter: none;
+      -webkit-backdrop-filter: none !important;
+      backdrop-filter: none !important;
       background: Canvas;
       color: CanvasText;
       box-shadow: none;

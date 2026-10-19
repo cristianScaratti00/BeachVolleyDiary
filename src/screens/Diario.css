@@ -1,0 +1,11 @@
+/* Diario (il redesign): la ricerca sotto il titolo e lo skeleton con le
+   misure della voce (Timeline.css). Solo token. */
+@layer components {
+  .diario-search { margin-top: var(--stack); }
+
+  .diario-skel { display: grid; gap: var(--stack); margin-top: var(--stack); }
+  .diario-skel-month { width: calc(var(--space-20) + var(--space-5)); height: var(--space-3-5); border-radius: var(--radius-xs); }
+  .diario-skel-entry { display: flex; gap: var(--space-3); }
+  .diario-skel-day { flex: none; width: var(--timeline-date); height: var(--space-10); border-radius: var(--radius-xs); }
+  .diario-skel-card { flex: 1; height: calc(var(--space-20) + var(--space-6)); border-radius: var(--radius-card); }
+}

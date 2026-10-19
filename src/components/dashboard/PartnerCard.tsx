@@ -10,12 +10,13 @@ import { ChartCard, EmptyNote } from './Chart'
 const PRIMI = 6
 const partite = (n: number) => (n === 1 ? '1 partita' : `${n} partite`)
 
-export function PartnerCard({ s }: { s: DashboardStats }) {
+export function PartnerCard({ s, rise }: { s: DashboardStats; rise?: number }) {
   const righe = s.partnerRows.slice(0, PRIMI)
   return (
     <ChartCard
       title="Per compagno"
       wide
+      rise={rise}
       extra={
         s.partnerRows.length > 0 ? (
           <Link to={{ name: 'compagni' }} className="dash-link">

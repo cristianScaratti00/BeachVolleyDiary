@@ -1,129 +1,412 @@
 /* ============================================================================
-   Home (UX §6.1, §9.2). *Adesso*: una colonna sotto i 600, due fino ai 900,
-   fino a tre da lì. Numeri chiave 2×2, poi 4×1 (lo fa StatGrid).
+   Home (il redesign, schermata 06). Le misure sono quelle del design, sui
+   token più vicini: dove il design ha un valore che la scala non ha (il
+   titolo a 32, lo scarto a 24, il 12.5 dei piedi) è scritto in rem accanto
+   al token di partenza.
+
+   Una colonna larga al massimo --reading-max; dai 1280 due colonne
+   (`.home-col` passa da `display: contents` a colonna vera).
    ============================================================================ */
 @layer components {
-  .home-adesso {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--space-3);
-  }
-  .home-adesso > li { min-width: 0; display: grid; }
-  @media (min-width: 600px) {
-    .home-adesso { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
-  }
-  @media (min-width: 900px) {
-    .home-adesso { grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--card-min-narrow)), 1fr)); }
-  }
+  .ui-page.home { max-width: var(--reading-max); }
 
-  .home-eyebrow {
-    margin-bottom: var(--space-1);
+  /* -------------------------------------------------------- Intestazione */
+  /* Come il titolo grande delle schermate radice: la safe-area, poi il
+     respiro di --page-top. */
+  .home-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: calc(var(--safe-top) + var(--page-top)) var(--space-1) 0;
+  }
+  .home-head-text { min-width: 0; display: flex; flex-direction: column; gap: var(--space-1); }
+  .home-data {
     font: var(--type-eyebrow);
     letter-spacing: var(--track-eyebrow);
-    text-transform: uppercase;
     color: var(--ink-2);
   }
-  .home-meta {
+  /* 28/800 sul telefono (32 da 600): la frase sta su due righe. */
+  .home-frase {
+    font: var(--type-large-title);
+    font-size: 1.75rem;
+    letter-spacing: var(--track-large-title);
+    text-wrap: balance;
+    overflow-wrap: anywhere;
+  }
+  @media (min-width: 600px) {
+    .home-frase { font-size: 2rem; }
+  }
+  /* L'avatar: carta bianca col filo forte, le iniziali a 700. 42 a vista,
+     44 di bersaglio. */
+  .home-avatar {
+    position: relative;
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: calc(var(--space-10) + var(--space-0-5));
+    height: calc(var(--space-10) + var(--space-0-5));
+    border-radius: 50%;
+    background: var(--surface);
+    box-shadow: inset 0 0 0 var(--border-w) var(--line-strong);
+    color: var(--ink);
+    font: 700 0.875rem/1 var(--font-ui);
+    text-decoration: none;
+  }
+  .home-avatar::after {
+    content: "";
+    position: absolute;
+    inset: calc(-1 * var(--hairline));
+    border-radius: inherit;
+  }
+  .home-avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    object-fit: cover;
+    box-shadow: var(--photo-ring);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .home-avatar:hover { box-shadow: inset 0 0 0 var(--border-w) var(--edge-strong); }
+  }
+
+  /* ------------------------------------------------------------- Filtri */
+  .home-filtri {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-top: var(--stack);
+  }
+  .home-periodo { flex: 1 1 auto; min-width: 0; }
+  /* Un nome di compagno lungo non schiaccia il periodo. */
+  .home-compagni { flex: none; max-width: 45%; }
+
+  /* -------------------------------------------------------------- Corpo */
+  .home-corpo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--stack);
+    margin-top: var(--stack);
+  }
+  .home-col { display: contents; }
+
+  /* --------------------------------------------------- Pallo e nuvoletta */
+  /* Sopra la card che le sale sotto (-16px): l'anello di focus di Pallo non
+     deve finire coperto. */
+  /* Pallo sta FERMO in cima alla riga: se la nuvoletta cambia altezza (un
+     consiglio più lungo, un pulsante in più) cresce lei, verso il basso, e il
+     dito che tocca Pallo di fila lo trova sempre allo stesso posto. */
+  .home-pallo {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-1);
+    margin-top: var(--space-0-5);
+  }
+  .home-pallo-btn {
+    flex: none;
+    display: block;
+    width: 96px;
+    height: 104px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-card);
+    background: none;
+    cursor: pointer;
+  }
+  span.home-pallo-btn { cursor: default; }
+  /* La nuvoletta: una card con l'angolo in alto a sinistra quasi vivo, verso
+     la testa di Pallo; scende di poco perché parta all'altezza della bocca. */
+  .home-nuvola {
+    flex: 1;
+    min-width: 0;
+    margin-top: var(--space-4);
+    margin-bottom: var(--space-4);
+    padding: var(--space-3) var(--space-3-5);
+    background: var(--surface);
+    border: var(--border-w) solid var(--edge);
+    border-radius: var(--radius-xs) var(--radius-card) var(--radius-card) var(--radius-card);
+  }
+  .home-nuvola-chi {
+    font: var(--type-caption-1);
+    font-weight: 600;
+    color: var(--accent-text);
+  }
+  .home-nuvola-corpo { margin-top: var(--space-0-5); }
+  .home-nuvola-testo {
+    font: var(--type-callout);
+    line-height: 1.3;
+    letter-spacing: var(--track-callout);
+  }
+  .home-nuvola-azioni {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-1) var(--space-3);
+    margin-top: var(--space-2-5);
+  }
+  .home-nuvola-nota {
     margin-top: var(--space-1);
     font: var(--type-footnote);
     letter-spacing: var(--track-footnote);
     color: var(--ink-2);
   }
-  .home-badges { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-3); }
-  .home-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-4); }
+  /* «Usa l'assistente»: un link nella frase, sottolineato; il bersaglio
+     arriva a 44 in altezza senza spostare la riga. */
   .home-link {
+    position: relative;
     font-weight: 600;
     color: var(--accent-text);
     text-decoration: underline;
     text-underline-offset: var(--space-0-5);
   }
-  .home-solo { max-width: var(--sheet-max); margin: 0 auto; }
-  /* Il BrandMark rimette il marchio nella chrome mobile (Q22, C6); dai 900 lo
-     porta già la Sidebar e due marchi a 400px di distanza sono un doppione. */
-  .home-brand { display: inline-flex; }
-  @media (min-width: 900px) {
-    .home-brand { display: none; }
-  }
-  .home-section { margin-top: var(--space-8); }
-
-  /* --------------------------------------------------------- Beach Wrapped */
-  /* Il disco del sole tagliato in alto a destra: un cerchio pieno dietro al
-     testo, che il bordo della card taglia. Ogni testo regge anche sopra di
-     lui (ART_DIRECTION §4.7). */
-  .home-wrapped { padding-top: var(--space-6); padding-bottom: var(--space-6); }
-  .home-wrapped-disc {
+  .home-link::after {
+    content: "";
     position: absolute;
-    top: calc(-1 * var(--space-20));
-    right: calc(-1 * var(--space-12));
-    width: calc(var(--space-20) * 2.5);
-    aspect-ratio: 1;
-    border-radius: 50%;
-    background: var(--png-disc);
-    z-index: -1;
-    pointer-events: none;
+    inset: calc((1.35em - var(--touch)) / 2) 0;
   }
-  .home-wrapped-eyebrow {
-    font: var(--type-eyebrow);
-    letter-spacing: var(--track-eyebrow);
-    text-transform: uppercase;
-    color: var(--ink-2);
-  }
-  .ui-card-title.home-wrapped-title {
-    margin-top: var(--space-1);
-    font: var(--type-title-2);
-    letter-spacing: var(--track-title-2);
-  }
-  .home-wrapped-text {
-    margin-top: var(--space-1);
-    max-width: var(--empty-max);
-    font: var(--type-subhead);
-    letter-spacing: var(--track-subhead);
-    color: var(--ink-2);
-  }
-  .home-wrapped-n {
-    margin-top: var(--space-4);
-    font: var(--type-num-xl);
-    letter-spacing: var(--track-num-xl);
-    font-variant-numeric: tabular-nums;
-    color: var(--png-accent);
-  }
-  .home-wrapped-n-l {
-    font: var(--type-subhead);
-    letter-spacing: var(--track-subhead);
-    color: var(--ink-2);
+  @media (hover: hover) and (pointer: fine) {
+    .home-link:hover { color: var(--accent-text-state); }
   }
 
-  /* ---------------------------------------------------------- Numeri chiave */
-  /* La card è solo il bersaglio del link (hover e pressione): il disegno è la
-     griglia dei numeri, che ha già il suo bordo. */
-  .ui-card.home-numeri {
-    padding: 0;
-    background: transparent;
-    border-color: transparent;
-  }
-  .home-numeri-foot {
+  /* ------------------------------------------------------ Partite vinte */
+  /* Sale sotto l'ombra di Pallo, come nel design. */
+  .home-rend-wrap { margin-top: calc(-1 * var(--space-4)); }
+  .ui-card.home-rend { padding: calc(var(--space-4) + var(--space-0-5)) var(--space-5) var(--space-5); }
+  .home-rend-top {
     display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: var(--space-1);
-    min-height: var(--touch);
-    padding: 0 var(--space-2);
-    font: var(--type-subhead-strong);
-    letter-spacing: var(--track-subhead);
-    color: var(--accent-text);
-  }
-  .home-nonumeri {
-    display: flex;
-    flex-direction: column;
+    justify-content: space-between;
     align-items: flex-start;
     gap: var(--space-3);
   }
-  .home-nonumeri-text {
+  .home-rend-main { min-width: 0; }
+  .home-label-row { display: flex; align-items: center; gap: var(--space-1); }
+  .home-label {
+    font: var(--type-eyebrow);
+    letter-spacing: var(--track-eyebrow);
+    color: var(--ink-2);
+  }
+  .home-chev-link { display: inline-flex; color: var(--ink-3); }
+  .home-chev { color: var(--ink-3); }
+  .home-pct {
+    display: flex;
+    align-items: baseline;
+    margin-top: var(--space-1-5);
+    font: var(--type-num-hero);
+    letter-spacing: var(--track-num-hero);
+    font-variant-numeric: tabular-nums;
+  }
+  .home-pct-s {
+    font-size: 2rem;
+    letter-spacing: var(--track-large-title);
+    color: var(--accent-text);
+  }
+  .home-scarto {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--space-1);
+    padding-top: var(--space-1);
+  }
+  .home-scarto-n {
+    font: var(--type-num-l);
+    font-size: 1.5rem;
+    letter-spacing: var(--track-num-l);
+    font-variant-numeric: tabular-nums;
+  }
+  .home-scarto-l {
+    font: var(--type-caption-1);
+    letter-spacing: var(--track-caption-1);
+    color: var(--ink-2);
+  }
+  /* La barra: vinte d'inchiostro, perse sul filo forte, larghe quanto le
+     partite. Cresce da sinistra (le vinte, poi le perse), una volta, al
+     montaggio; ai cambi di filtro le due parti si ridividono lo spazio. */
+  .home-barra {
+    display: flex;
+    gap: var(--space-0-5);
+    height: var(--space-2);
+    margin-top: var(--space-4);
+  }
+  .home-barra > span {
+    flex-basis: 0;
+    border-radius: var(--radius-capsule);
+    transform-origin: left center;
+    animation: home-cresce var(--dur-racconto) var(--ease-racconto) both;
+    animation-delay: calc(6 * var(--rise-step));
+    transition: flex-grow var(--dur-racconto) var(--ease-racconto);
+  }
+  .home-barra-v { background: var(--data-ink); }
+  .home-barra-p { background: var(--line-strong); }
+  .home-barra > .home-barra-p { animation-delay: calc(9 * var(--rise-step)); }
+  @keyframes home-cresce {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
+  .home-rend-piede {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-top: var(--space-2);
+    font: var(--type-caption-1);
+    font-size: 0.78125rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-2);
+  }
+  .home-rend-piede strong { font-weight: 600; color: var(--ink); }
+  .home-vuoto {
+    margin-top: var(--space-2);
     font: var(--type-subhead);
     letter-spacing: var(--track-subhead);
     color: var(--ink-2);
+  }
+
+  /* -------------------------------------------- Tornei vinti · Serie record */
+  .home-coppia {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+  }
+  .ui-card.home-mini {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1-5);
+    padding: var(--space-3-5) var(--space-4);
+  }
+  .home-mini-head { justify-content: space-between; }
+  .home-mini-body { display: flex; flex-direction: column; gap: var(--space-1-5); }
+  .home-mini-n {
+    font: var(--type-num-xl);
+    letter-spacing: var(--track-num-xl);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  /* Il design lo vuole più chiaro (#A3A39E, 2.5:1): qui --ink-2, perché è
+     testo e porta un dato (i tornei giocati). */
+  .home-mini-di {
+    font-size: 1.125rem;
+    font-weight: 600;
+    letter-spacing: 0;
+    color: var(--ink-2);
+  }
+  .home-mini-sub {
+    font: var(--type-caption-1);
+    font-size: 0.78125rem;
+    color: var(--ink-2);
+  }
+
+  /* ------------------------------------------------------- Ultimi tornei */
+  .ui-card.home-ultimi { padding: var(--space-1-5); }
+  .home-ultimi-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-3);
+    padding: var(--space-2-5) var(--space-3) var(--space-1-5);
+  }
+  .home-h2 { font: var(--type-title-3); letter-spacing: var(--track-title-3); }
+  /* «Tutti»: 14/600 arancio-testo; il bersaglio cresce fino a 44 senza
+     allargare la testata. */
+  .home-tutti {
+    position: relative;
+    font: var(--type-subhead-strong);
+    letter-spacing: var(--track-subhead);
+    color: var(--accent-text);
+    text-decoration: none;
+  }
+  .home-tutti::after {
+    content: "";
+    position: absolute;
+    inset: calc((1.35em - var(--touch)) / 2) calc(-1 * var(--space-2));
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .home-tutti:hover { color: var(--accent-text-state); text-decoration: underline; text-underline-offset: var(--space-0-5); }
+  }
+  .home-ultimi-list { list-style: none; margin: 0; padding: 0; }
+  .home-ultimi-list > li { position: relative; }
+  /* Il separatore rientrato fino al testo, oltre la medaglia. */
+  .home-ultimi-list > li + li::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: calc(2 * var(--space-3) + var(--medal-md));
+    right: 0;
+    height: var(--hairline);
+    background: var(--separator);
+  }
+  .home-ultimo {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2-5) var(--space-3);
+    border-radius: var(--radius-row);
+    color: var(--ink);
+    text-decoration: none;
+  }
+  /* Hover e pressione: lo stesso fondo caldo delle righe (--surface-pressed). */
+  .home-ultimo::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--surface-pressed);
+    opacity: 0;
+    z-index: -1;
+    transition: opacity var(--dur-svelto) var(--ease-standard);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .home-ultimo:hover::before { opacity: 1; }
+  }
+  .home-ultimo:active::before { opacity: 1; transition-duration: 0ms; }
+  .home-ultimo-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  /* Una riga di lista, non una scheda: il nome al massimo su due righe, la
+     riga sotto su una. Il nome intero resta nel nome del link e nel
+     dettaglio. */
+  .home-ultimo-nome {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+    font: var(--type-callout);
+    font-weight: 600;
+    letter-spacing: var(--track-callout);
+    overflow-wrap: anywhere;
+  }
+  .home-ultimo-meta {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font: var(--type-footnote);
+    letter-spacing: var(--track-footnote);
+    color: var(--ink-2);
+  }
+  .home-ultimo-rec {
+    flex: none;
+    font: 700 0.9375rem/1.2 var(--font-ui);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ------------------------------------------------------------ Desktop */
+  /* Dai 1280 la colonna di lettura si allarga e il corpo va in due colonne:
+     Pallo e i numeri a sinistra, il resto a destra. */
+  @media (min-width: 1280px) {
+    .ui-page.home { max-width: var(--content-max); }
+    .home-filtri { max-width: var(--reading-max); }
+    .home-corpo {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-items: start;
+      gap: var(--stack) var(--space-6);
+    }
+    .home-col { display: flex; flex-direction: column; gap: var(--stack); min-width: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .home-barra > span { animation: none; transition: none; }
   }
 }

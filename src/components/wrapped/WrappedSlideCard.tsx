@@ -1,120 +1,99 @@
 // ============================================================================
-// La TELA di una slide del Beach Wrapped (ART_DIRECTION §10.4): un nodo fisso
-// 1080×1920 catturato da html-to-image. Grammatica da manifesto sportivo:
-// campiture piatte, una griglia, numeri enormi.
+// La TELA di una slide del Beach Wrapped: un nodo fisso 1080×1920 catturato
+// da html-to-image. È la slide a schermo del redesign (schermata 18) portata a
+// 1080 (× 2.77): fondo pieno, Pallo che esulta, occhiello, numero enorme a
+// 900, titolo, didascalia; in più le celle delle statistiche e il marchio.
 //
 // Regole della tela (diverse da quelle dell'interfaccia, di proposito):
 // - colori LETTERALI e OPACHI dalla palette (`palette.ts`), niente custom
 //   property: html-to-image non le porta nel PNG;
 // - niente `backdrop-filter`, niente ombre, niente gradienti;
-// - solo Inter, scritto come famiglia letterale: si incorpora e il recap esce
-//   uguale su iPhone e su Android (il visore lo carica prima di `toPng`);
-// - misure in px "veri" a 1080: il visore scala il nodo intero per l'anteprima;
+// - Geist, scritto come famiglia letterale (`EXPORT_FONT`): si incorpora e il
+//   recap esce uguale su iPhone e su Android (il visore lo carica prima);
+// - misure in px "veri" a 1080: l'anteprima non scala questo nodo, lo copia;
+// - le foto non si ritagliano mai: intere, con la loro proporzione (le misure
+//   naturali arrivano con il data URL, `foto.ts`);
 // - zone sicure di Instagram: niente testo essenziale nei primi 250px e negli
-//   ultimi 250px (avatar, risposta, sticker). Il marchio in fondo ci sta: è un
-//   marchio, non un'informazione.
+//   ultimi 250px (avatar, risposta, sticker). L'intestazione e il marchio ci
+//   stanno: non sono informazioni.
 // ============================================================================
-import { useEffect, useState } from 'react'
 import type { CSSProperties } from 'react'
 import type { WrappedSlide } from '../../lib/derive'
 import { BrandMark } from '../Logo'
+import { Pallo } from '../Pallo'
+import { EXPORT_FONT } from './palette'
 import type { WrappedPalette } from './palette'
+import { adatta } from './foto'
+import type { FotoTela } from './foto'
+import { annoDi, fotoStretta, tagliaTitolo, umoreSlide } from './slide'
+import type { TagliaTitolo } from './slide'
 
 const W = 1080
 const H = 1920
 const MARGINE = 88
 const ZONA_SICURA = 250
-const FONT = 'Inter, Arial, sans-serif'
+/** Il filetto attorno alla foto: sta FUORI dalla misura della foto. */
+const FILO = 2
+/** L'altezza massima della foto: con il titolo più lungo il resto ci sta ancora. */
+const FOTO_MAX_H = 640
 
-// Il "sole basso": un disco pieno tagliato dal bordo in alto a destra, dietro a
-// tutto. Diametro 920, centro in (1200, −120).
-const SOLE = 920
-const SOLE_X = 1200
-const SOLE_Y = -120
+/** Le taglie del titolo a 1080: quelle dello schermo (96 · 64 · 48 · 38) × 2.77. */
+const TITOLO: Record<TagliaTitolo, number> = { xl: 266, s: 178, m: 132, l: 104 }
 
-/** Un numero (o una stringa numerica breve): va in grande, nel colore d'accento. */
-const NUMERICO = /^[\d.,%+–\-°/]+$/u
-
-function tagliaNumero(t: string): number {
-  const n = t.length
-  if (n <= 3) return 320
-  if (n <= 4) return 260
-  return 210
+/** Sull'inchiostro le braccia d'inchiostro di Pallo sparirebbero: un filo di luce le ridisegna. */
+function luce(pal: WrappedPalette): CSSProperties | undefined {
+  return pal.key === 'ink' ? { filter: `drop-shadow(0 0 3px ${pal.fg}) drop-shadow(0 0 1px ${pal.fg})` } : undefined
 }
 
-/** L'headline di testo (un nome, «Stagione 2026», «Grazie»): mai sotto 88. */
-function tagliaTitolo(t: string): number {
-  const n = t.trim().length
-  if (n <= 6) return 200
-  if (n <= 10) return 150
-  if (n <= 16) return 112
-  return 88
-}
-
-const eyebrow = (pal: WrappedPalette): CSSProperties => ({
-  font: `700 28px/36px ${FONT}`,
-  letterSpacing: '0.12em',
-  textTransform: 'uppercase',
-  color: pal.muted,
-})
-
-// Foto di copertina (intro, podio): segue l'aspetto reale fra 3:4 e 7:5,
-// raggio 28 con il filo `line` da 2px. Mai sotto il testo.
-function Foto({ src, pal }: { src: string; pal: WrappedPalette }) {
-  const [ar, setAr] = useState<number | null>(null)
-  useEffect(() => {
-    let alive = true
-    const im = new Image()
-    im.onload = () => {
-      if (alive) setAr(im.naturalWidth / im.naturalHeight || null)
-    }
-    im.src = src
-    return () => {
-      alive = false
-    }
-  }, [src])
-  const aspect = Math.min(1.4, Math.max(0.75, ar ?? 4 / 3))
-  const larghezza = W - MARGINE * 2
-  const altezza = Math.round(Math.min(760, Math.max(440, larghezza / aspect)))
+// Foto di copertina (intro, podio): INTERA, con la sua proporzione, grande
+// quanto entra in 904 × 640 (raggio 40, filetto della palette). Prende il
+// posto di Pallo; se è verticale Pallo le sta accanto.
+function Foto({ foto, pal, kind }: { foto: FotoTela; pal: WrappedPalette; kind: WrappedSlide['kind'] }) {
+  const { w, h } = adatta(foto, W - MARGINE * 2 - FILO * 2, FOTO_MAX_H - FILO * 2)
   return (
-    <img
-      src={src}
-      alt=""
-      style={{
-        width: '100%',
-        height: altezza,
-        objectFit: 'cover',
-        display: 'block',
-        borderRadius: 28,
-        border: `2px solid ${pal.line}`,
-        boxSizing: 'border-box',
-        flex: 'none',
-      }}
-    />
+    <div style={{ display: 'flex', alignItems: 'flex-end', gap: 32, flex: 'none', marginBottom: 24 }}>
+      <img
+        src={foto.src}
+        alt=""
+        width={foto.w}
+        height={foto.h}
+        style={{
+          width: w,
+          height: h,
+          flex: 'none',
+          display: 'block',
+          borderRadius: 40,
+          border: `${FILO}px solid ${pal.line}`,
+          boxSizing: 'content-box',
+        }}
+      />
+      {fotoStretta(foto) && <Pallo umore={umoreSlide(kind)} size={240} mani={pal.mani} ombra={false} style={luce(pal)} />}
+    </div>
   )
 }
 
-// Le statistiche: celle separate da filetti `line` di 2px, non da riquadri.
-function Celle({ stats, pal, compatte }: { stats: WrappedSlide['stats']; pal: WrappedPalette; compatte: boolean }) {
-  const cols = stats.length === 1 ? 1 : 2
+// Le statistiche: celle separate da filetti di 2px, non da riquadri.
+function Celle({ stats, pal }: { stats: WrappedSlide['stats']; pal: WrappedPalette }) {
+  const cols = stats.length === 1 ? 1 : stats.length >= 5 ? 3 : 2
+  const compatte = cols === 3
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, width: '100%', flex: 'none' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, width: '100%', flex: 'none', marginTop: 24, borderTop: `2px solid ${pal.line}` }}>
       {stats.map((st, i) => {
-        const riga = Math.floor(i / cols)
         const col = i % cols
         return (
           <div
             key={i}
             style={{
-              borderTop: riga > 0 ? `2px solid ${pal.line}` : undefined,
+              borderBottom: `2px solid ${pal.line}`,
               borderLeft: col > 0 ? `2px solid ${pal.line}` : undefined,
-              padding: compatte ? '28px 32px' : '40px 40px',
-              paddingLeft: col > 0 ? (compatte ? 32 : 40) : 0,
+              padding: compatte ? '28px 0 28px 28px' : '36px 0 36px 36px',
+              paddingLeft: col > 0 ? (compatte ? 28 : 36) : 0,
+              minWidth: 0,
             }}
           >
             <div
               style={{
-                font: `800 ${compatte ? 96 : 112}px/${compatte ? 96 : 112}px ${FONT}`,
+                font: `800 ${compatte ? 84 : 104}px/1 ${EXPORT_FONT}`,
                 letterSpacing: '-0.04em',
                 fontVariantNumeric: 'tabular-nums',
                 color: pal.fg,
@@ -123,9 +102,7 @@ function Celle({ stats, pal, compatte }: { stats: WrappedSlide['stats']; pal: Wr
             >
               {st.value}
             </div>
-            <div style={{ font: `700 26px/32px ${FONT}`, letterSpacing: '0.1em', textTransform: 'uppercase', color: pal.muted, marginTop: 12 }}>
-              {st.label}
-            </div>
+            <div style={{ font: `600 ${compatte ? 30 : 34}px/1.2 ${EXPORT_FONT}`, color: pal.muted, marginTop: 12 }}>{st.label}</div>
           </div>
         )
       })}
@@ -138,15 +115,17 @@ interface WrappedSlideCardProps {
   pal: WrappedPalette
   index: number
   total: number
-  /** La foto già inlinata come data-URL (assente → l'emoji della slide). */
-  photoSrc?: string | null
+  /** L'intervallo del recap («Stagione 2026»): l'intestazione in alto. */
+  label: string
+  /** La foto già inlinata come data-URL, con le misure naturali (assente → Pallo). */
+  foto?: FotoTela | null
 }
 
-export default function WrappedSlideCard({ slide, pal, index, total, photoSrc }: WrappedSlideCardProps) {
-  const recap = slide.kind === 'recap'
+export default function WrappedSlideCard({ slide, pal, index, total, label, foto }: WrappedSlideCardProps) {
   const headline = slide.headline.trim()
-  const numerico = NUMERICO.test(headline) && headline.length <= 6
+  const taglia = tagliaTitolo(headline)
   const due = (n: number) => String(n).padStart(2, '0')
+  const testo: CSSProperties = { overflowWrap: 'anywhere' }
 
   return (
     <div
@@ -159,93 +138,60 @@ export default function WrappedSlideCard({ slide, pal, index, total, photoSrc }:
         overflow: 'hidden',
         background: pal.bg,
         color: pal.fg,
-        fontFamily: FONT,
+        fontFamily: EXPORT_FONT,
+        WebkitFontSmoothing: 'antialiased',
       }}
     >
-      {/* Il sole basso, dietro a tutto. */}
-      <div
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          width: SOLE,
-          height: SOLE,
-          left: SOLE_X - SOLE / 2,
-          top: SOLE_Y - SOLE / 2,
-          borderRadius: '50%',
-          background: pal.disc,
-        }}
-      />
+      {/* L'intestazione, nella zona alta che Instagram copre: è un marchio. */}
+      <div style={{ position: 'absolute', left: MARGINE, right: MARGINE, top: 132, font: `700 36px/1.2 ${EXPORT_FONT}`, color: pal.fg }}>
+        Beach Wrapped · {annoDi(label)}
+      </div>
 
-      {/* L'emoji della slide è contenuto, non interfaccia: sta nel sole, nella
-          zona alta che Instagram copre (non porta informazioni). */}
-      {!photoSrc && slide.emoji && (
-        <div aria-hidden="true" style={{ position: 'absolute', right: MARGINE, top: 104, fontSize: 120, lineHeight: 1 }}>
-          {slide.emoji}
-        </div>
-      )}
-
-      {/* Il contenuto: dall'eyebrow a y = 264 fino al limite della zona sicura. */}
+      {/* Il contenuto, centrato fra le due zone sicure. */}
       <div
         style={{
           position: 'absolute',
           left: MARGINE,
           right: MARGINE,
-          top: 264,
+          top: ZONA_SICURA,
           bottom: ZONA_SICURA,
           display: 'flex',
           flexDirection: 'column',
+          justifyContent: 'center',
           gap: 32,
         }}
       >
-        <div style={eyebrow(pal)}>{slide.eyebrow}</div>
-
-        {numerico ? (
-          <div
-            style={{
-              font: `800 ${tagliaNumero(headline)}px/0.86 ${FONT}`,
-              letterSpacing: '-0.055em',
-              fontVariantNumeric: 'tabular-nums',
-              color: pal.accent,
-              marginLeft: -8,
-            }}
-          >
-            {headline}
-          </div>
+        {foto ? (
+          <Foto foto={foto} pal={pal} kind={slide.kind} />
         ) : (
-          <div
-            style={{
-              font: `800 ${tagliaTitolo(headline)}px/1 ${FONT}`,
-              letterSpacing: '-0.03em',
-              color: pal.fg,
-              overflowWrap: 'anywhere',
-              textWrap: 'balance',
-            } as CSSProperties}
-          >
-            {headline}
-          </div>
+          <Pallo
+            umore={umoreSlide(slide.kind)}
+            size={slide.stats.length > 4 ? 220 : 288}
+            mani={pal.mani}
+            ombra={false}
+            style={{ marginBottom: 20, marginLeft: -12, ...luce(pal) }}
+          />
         )}
-
-        {(slide.title || slide.caption) && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {slide.title && (
-              <div style={{ font: `700 52px/60px ${FONT}`, letterSpacing: '-0.02em', color: pal.fg, overflowWrap: 'anywhere' }}>{slide.title}</div>
-            )}
-            {slide.caption && (
-              <div style={{ font: `600 36px/46px ${FONT}`, color: pal.muted, overflowWrap: 'anywhere' }}>{slide.caption}</div>
-            )}
-          </div>
-        )}
-
-        {photoSrc && <Foto src={photoSrc} pal={pal} />}
-
-        {slide.stats.length > 0 && (
-          <div style={{ marginTop: 'auto' }}>
-            <Celle stats={slide.stats} pal={pal} compatte={recap || slide.stats.length > 4} />
-          </div>
-        )}
+        <div style={{ font: `700 42px/1.2 ${EXPORT_FONT}`, color: pal.muted, ...testo }}>{slide.eyebrow}</div>
+        <div
+          style={{
+            font: `900 ${TITOLO[taglia]}px/0.9 ${EXPORT_FONT}`,
+            letterSpacing: '-0.052em',
+            fontVariantNumeric: 'tabular-nums',
+            color: pal.fg,
+            marginLeft: -6,
+            textWrap: 'balance',
+            ...testo,
+          } as CSSProperties}
+        >
+          {headline}
+        </div>
+        {slide.title && <div style={{ font: `700 72px/1.1 ${EXPORT_FONT}`, letterSpacing: '-0.023em', maxWidth: 860, ...testo }}>{slide.title}</div>}
+        {slide.caption && <div style={{ font: `500 42px/1.3 ${EXPORT_FONT}`, color: pal.muted, ...testo }}>{slide.caption}</div>}
+        {slide.stats.length > 0 && <Celle stats={slide.stats} pal={pal} />}
       </div>
 
-      {/* Il piè: il marchio, ancorato a 88 dal fondo. */}
+      {/* Il piè: il marchio e il numero della slide, ancorati a 88 dal fondo. */}
       <div
         style={{
           position: 'absolute',
@@ -259,11 +205,11 @@ export default function WrappedSlideCard({ slide, pal, index, total, photoSrc }:
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-          {/* Sui fondi scuri il marchio è senza il quadrato navy (§10.2). */}
-          <BrandMark size={72} bare={pal.key === 'navy'} />
-          <span style={{ font: `700 34px/40px ${FONT}`, letterSpacing: '-0.02em', color: pal.fg }}>Beach Diary</span>
+          {/* Sull'inchiostro il marchio è senza il suo quadrato d'inchiostro. */}
+          <BrandMark size={72} bare={pal.key === 'ink'} />
+          <span style={{ font: `700 34px/40px ${EXPORT_FONT}`, letterSpacing: '-0.02em', color: pal.fg }}>Beach Diary</span>
         </div>
-        <span style={{ font: `700 28px/36px ${FONT}`, letterSpacing: '0.06em', fontVariantNumeric: 'tabular-nums', color: pal.muted }}>
+        <span style={{ font: `700 30px/36px ${EXPORT_FONT}`, fontVariantNumeric: 'tabular-nums', color: pal.muted }}>
           {due(index + 1)} / {due(total)}
         </span>
       </div>

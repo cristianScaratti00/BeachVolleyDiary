@@ -1,12 +1,13 @@
 // ============================================================================
-// Avatar (ART_DIRECTION §10.3): un cerchio. Con l'iniziale, fondo --select e
-// lettera bianca a peso 600 grande il 42% del diametro; con la foto, lo stesso
-// cerchio con il filo interno. È sempre decorativo: il nome sta accanto, o è
-// il nome del controllo che lo contiene («Cambia foto profilo»).
+// Avatar (ART_DIRECTION §10.3): un cerchio. Con l'iniziale, carta calda col
+// filo --line-strong e la lettera d'inchiostro a peso 700 (il redesign); con
+// la foto, lo stesso cerchio con il filo interno. È sempre decorativo: il
+// nome sta accanto, o è il nome del controllo che lo contiene («Cambia foto
+// profilo»).
 // ============================================================================
 import './Avatar.css'
 
-export type AvatarSize = 24 | 32 | 40 | 48 | 64
+export type AvatarSize = 24 | 32 | 40 | 44 | 48 | 64 | 68 | 92
 
 export function Avatar({ name, src, size = 40, busy, className }: {
   name?: string | null

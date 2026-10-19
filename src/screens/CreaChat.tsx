@@ -1,12 +1,25 @@
 // ============================================================================
-// L'assistente guidato (UX §5 F11, §6.10; MOTION.md §5 F11): la creazione del
-// torneo come conversazione. È un percorso FACOLTATIVO (risposta 6): ci si
-// arriva dallo sheet «Nuovo torneo», dagli stati vuoti e da `/crea`.
+// L'assistente guidato (UX §5 F11, §6.10; MOTION.md §5 F11; design 14): la
+// creazione del torneo come conversazione con Pallo. È un percorso
+// FACOLTATIVO (risposta 6): ci si arriva dal ＋ («Raccontalo a Pallo»), dallo
+// sheet «Nuovo torneo», dagli stati vuoti e da `/crea`.
 //
 // Il copione sta in `crea/copione.ts`, lo stato in `crea/useAssistente.ts`;
-// qui la vista. Le correzioni obbligatorie di UX F11: ogni scelta è un
-// `<button>`, dopo ogni domanda il focus va al primo controllo del dock, i
-// campi hanno un nome (la domanda), il pulsante d'invio si chiama «Invia».
+// qui la vista:
+// - in cima la testata (× di vetro, la testa di Pallo — che pensa mentre
+//   «scrive» — «Pallo» e il passo);
+// - la trascrizione con le nuvolette (Pallo bianca col filo, le tue arancio),
+//   che entrano con un filo di rimbalzo, e i tre puntini «sta scrivendo»;
+// - sotto l'ultima nuvoletta le risposte rapide, pillole di vetro;
+// - in fondo, sopra la conversazione, la capsula di vetro liquido col campo e
+//   il pulsante arancio «Invia». Il campo c'è sempre: dove la domanda ha delle
+//   scelte, quello che scrivi vale la scelta che gli corrisponde (o un nome
+//   nuovo, per compagno e luogo); se non corrisponde a niente Pallo lo dice.
+//
+// Le correzioni obbligatorie di UX F11: ogni scelta è un `<button>`, dopo ogni
+// domanda il focus va al primo controllo (il campo, sui passi da scrivere; la
+// prima scelta, altrimenti), i campi hanno un nome (la domanda), il pulsante
+// d'invio si chiama «Invia».
 // ============================================================================
 import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties, FormEvent, ReactNode } from 'react'
@@ -14,13 +27,14 @@ import { useReducedMotion } from 'motion/react'
 import { BRACKETS, CATEGORIES, FORMATS, PHASES, SURFACES } from '../lib/db.enums'
 import type { Option, Placement } from '../lib/models'
 import type { CreaChatProps } from '../app/contracts'
-import { Button } from '../components/ui/Button'
+import { Button, IconButton } from '../components/ui/Button'
 import { Icon } from '../components/ui/Icon'
-import type { IconName } from '../components/ui/Icon'
-import { SetRow } from '../components/ui/Field'
+import { LiquidGlass } from '../components/ui/LiquidGlass'
 import { focusables } from '../components/ui/overlay'
-import { FINISHED_PLACEMENTS, fmtSets, righeRiepilogo, shiftISO, todayISO } from './crea/copione'
-import type { Draft, Step } from './crea/copione'
+import { Pallo } from '../components/Pallo'
+import { RigaSet, SetIntestazione } from '../components/modals/RigaSet'
+import { FINISHED_PLACEMENTS, PASSI, fmtSets, passoDi, righeRiepilogo, shiftISO, todayISO, trovaRisposta } from './crea/copione'
+import type { Draft } from './crea/copione'
 import { useAssistente } from './crea/useAssistente'
 import type { Assistente, Msg } from './crea/useAssistente'
 import './CreaChat.css'
@@ -45,12 +59,14 @@ function useAltezzaVisibile(): number | null {
 export default function CreaChat({ partners, venues, onCreate, onDone, onExit, registerExitGuard }: CreaChatProps) {
   const a = useAssistente({ partners, venues, onCreate })
   const ridotto = useReducedMotion()
-  const logRef = useRef<HTMLDivElement>(null)
+  const scrollRef = useRef<HTMLDivElement>(null)
   const dockRef = useRef<HTMLDivElement>(null)
+  const campoRef = useRef<HTMLInputElement>(null)
   const vicino = useRef(true)
   const altezza = useAltezzaVisibile()
+  const p = descriviPasso(a, partners, venues, onDone)
 
-  // Il tasto indietro equivale a ✕ Esci, con la stessa conferma (UX F11.6).
+  // Il tasto indietro equivale a ✕, con la stessa conferma (UX F11.6).
   const isDirty = useRef(a.isDirty)
   isDirty.current = a.isDirty
   useEffect(() => {
@@ -60,20 +76,23 @@ export default function CreaChat({ partners, venues, onCreate, onDone, onExit, r
     }
   }, [registerExitGuard])
 
-  // Dopo ogni domanda il focus va al primo controllo del dock, quando la bolla
-  // è già nel DOM (non a fine animazione).
+  // Dopo ogni domanda il focus va al primo controllo, quando la nuvoletta è
+  // già nel DOM (non a fine animazione): il campo sui passi da scrivere, la
+  // prima risposta rapida altrimenti (UX F11.2).
+  const campoPrimo = !!p.campo?.primo
   useEffect(() => {
+    if (campoPrimo) {
+      campoRef.current?.focus({ preventScroll: true })
+      return
+    }
     const dock = dockRef.current
-    if (!dock) return
-    // Il campo di testo, se c'è; altrimenti il primo pulsante (UX F11.2).
-    const campo = dock.querySelector<HTMLElement>('input:not([type="date"])')
-    ;(campo ?? focusables(dock)[0])?.focus({ preventScroll: true })
-  }, [a.focusTick])
+    if (dock) focusables(dock)[0]?.focus({ preventScroll: true })
+  }, [a.focusTick]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // In fondo alla trascrizione solo se l'utente era già lì: chi sta rileggendo
   // più su non viene strappato via.
   useEffect(() => {
-    const el = logRef.current
+    const el = scrollRef.current
     if (!el || !vicino.current) return
     // jsdom (e qualche browser incorporato) non ha `scrollTo` sugli elementi.
     if (typeof el.scrollTo === 'function') el.scrollTo({ top: el.scrollHeight, behavior: ridotto ? 'auto' : 'smooth' })
@@ -81,55 +100,82 @@ export default function CreaChat({ partners, venues, onCreate, onDone, onExit, r
   }, [a.messages, a.typing, a.step, ridotto])
 
   const conDock = a.step !== 'saving' && a.step !== 'boot'
+  const vuoto = !a.text.trim()
+  const inviabile = !!p.campo && (!vuoto || !!p.campo.vuotoOk)
+  const passo = a.step === 'done' ? 'fatto' : `passo ${passoDi(a.step)} di ${PASSI}`
+
+  const invia = (e: FormEvent) => {
+    e.preventDefault()
+    if (!p.campo || !inviabile) return
+    p.campo.invia(a.text)
+  }
 
   return (
     <div className="crea" style={altezza ? { height: altezza } : undefined}>
       <header className="crea-head">
-        <Button variant="quiet" icon="close" onClick={() => onExit(a.isDirty())}>
-          Esci
-        </Button>
+        <IconButton icon="close" label="Chiudi l'assistente" variant="glass" iconSize={20} onClick={() => onExit(a.isDirty())} />
+        {/* Mentre «scrive» pensa (occhi in alto, mano sul mento); a torneo
+            creato è contento. Gli occhi seguono il dito. */}
+        <Pallo umore={a.typing ? 'pensa' : a.step === 'done' ? 'contento' : 'testa'} soloTesta size={38} segui />
         <div className="crea-title">
-          <span className="crea-avatar" aria-hidden="true">
-            <Icon name="ball" size={20} />
-          </span>
-          <div className="crea-title-text">
-            <h1 tabIndex={-1}>Assistente torneo</h1>
-            <p>Creazione guidata</p>
-          </div>
+          <h1 tabIndex={-1}>Pallo</h1>
+          <p>Nuovo torneo · {passo}</p>
         </div>
       </header>
 
       <div
-        ref={logRef}
-        className="crea-log ui-scroll"
-        role="log"
-        aria-live="polite"
-        aria-label="Conversazione con l’assistente"
+        ref={scrollRef}
+        className="crea-scroll ui-scroll"
         onScroll={(e) => {
           const el = e.currentTarget
           vicino.current = el.scrollHeight - el.scrollTop - el.clientHeight <= VICINO_AL_FONDO
         }}
       >
-        {a.messages.map((m) => (
-          <Bubble key={m.id} m={m} partners={partners} venues={venues} />
-        ))}
-        {a.typing && <Typing />}
+        <div className="crea-log" role="log" aria-live="polite" aria-label="Conversazione con Pallo">
+          {a.messages.map((m) => (
+            <Bubble key={m.id} m={m} partners={partners} venues={venues} />
+          ))}
+          {a.typing && <Typing />}
+        </div>
+
+        {conDock && (
+          <div
+            ref={dockRef}
+            className="crea-dock"
+            // Mentre Pallo "scrive" le risposte restano montate (smontarle
+            // faceva cadere il focus sul body) e attenuate; qualunque input le
+            // sveglia.
+            data-attesa={a.typing ? '' : undefined}
+            aria-busy={a.typing || undefined}
+            onPointerDownCapture={a.interrompi}
+            onKeyDownCapture={a.interrompi}
+          >
+            {p.scelte}
+          </div>
+        )}
       </div>
 
-      {conDock && (
-        <div
-          ref={dockRef}
-          className="crea-dock"
-          // Mentre l'assistente "scrive" il dock resta montato (smontarlo faceva
-          // cadere il focus sul body) e attenuato; qualunque input lo sveglia.
-          data-attesa={a.typing ? '' : undefined}
-          aria-busy={a.typing || undefined}
-          onPointerDownCapture={a.interrompi}
-          onKeyDownCapture={a.interrompi}
-        >
-          <Dock a={a} partners={partners} venues={venues} onDone={onDone} />
+      {/* La capsula in fondo galleggia sopra la conversazione (design 14). */}
+      <form className="crea-bar" onSubmit={invia} onPointerDownCapture={a.interrompi} onKeyDownCapture={a.interrompi}>
+        <div className="crea-field">
+          <LiquidGlass layer />
+          <input
+            ref={campoRef}
+            className="crea-input"
+            value={a.text}
+            onChange={(e) => a.setText(e.target.value)}
+            placeholder={p.campo?.placeholder ?? 'Scrivi una risposta…'}
+            // Il nome del campo è la domanda (UX F11.3).
+            aria-label={a.domandaCorrente ?? 'Scrivi a Pallo'}
+            autoComplete="off"
+            enterKeyHint="send"
+            disabled={!p.campo}
+          />
         </div>
-      )}
+        <button type="submit" className="crea-send" aria-label="Invia" aria-disabled={inviabile ? undefined : true}>
+          <Icon name="arrow-up" size={20} />
+        </button>
+      </form>
     </div>
   )
 }
@@ -137,36 +183,27 @@ export default function CreaChat({ partners, venues, onCreate, onDone, onExit, r
 // =============================================================== trascrizione
 
 function Bubble({ m, partners, venues }: { m: Msg; partners: Option[]; venues: Option[] }) {
-  const ai = m.role === 'ai'
   return (
     <div className="crea-msg" data-role={m.role}>
-      {ai && (
-        <span className="crea-avatar" data-size="s" aria-hidden="true">
-          <Icon name="ball" size={16} />
-        </span>
-      )}
       <div className="crea-bubble">
-        {!ai && <span className="sr-only">Tu: </span>}
+        {m.role === 'user' && <span className="sr-only">Tu: </span>}
         {m.recap ? <Recap d={m.recap} partners={partners} venues={venues} /> : m.text}
       </div>
     </div>
   )
 }
 
-/** L'unico indicatore "sta scrivendo" (UX §6.10): la bolla nella trascrizione. */
+/** L'unico indicatore "sta scrivendo" (UX §6.10): la nuvoletta coi tre puntini. */
 function Typing() {
   return (
     <div className="crea-msg" data-role="ai">
-      <span className="crea-avatar" data-size="s" aria-hidden="true">
-        <Icon name="ball" size={16} />
-      </span>
       <div className="crea-bubble crea-typing">
         <span className="crea-dots" aria-hidden="true">
           <span style={{ '--i': 0 } as CSSProperties} />
           <span style={{ '--i': 1 } as CSSProperties} />
           <span style={{ '--i': 2 } as CSSProperties} />
         </span>
-        <span className="sr-only">L’assistente sta scrivendo</span>
+        <span className="sr-only">Pallo sta scrivendo</span>
       </div>
     </div>
   )
@@ -204,213 +241,176 @@ function Recap({ d, partners, venues }: { d: Draft; partners: Option[]; venues: 
   )
 }
 
-// =============================================================== il dock
+// =============================================================== il passo
 
-function Dock({ a, partners, venues, onDone }: { a: Assistente; partners: Option[]; venues: Option[]; onDone: (id: string) => void }) {
+/** Una risposta rapida: si tocca, oppure si scrive (`testo`). */
+interface Risposta {
+  testo: string
+  label?: ReactNode
+  scegli: () => void
+}
+
+interface Passo {
+  /** Sotto l'ultima nuvoletta: risposte rapide, la data, i set, le azioni. */
+  scelte: ReactNode
+  /** Il campo in fondo. Assente = spento (i set, il riepilogo, la fine). */
+  campo?: {
+    placeholder?: string
+    invia: (testo: string) => void
+    /** Il campo vuoto si può inviare (gli avversari diventano «Avversari»). */
+    vuotoOk?: boolean
+    /** Il passo si risponde scrivendo: il focus va al campo. */
+    primo?: boolean
+  }
+}
+
+function descriviPasso(a: Assistente, partners: Option[], venues: Option[], onDone: (id: string) => void): Passo {
   const h = a.handlers
   const q = a.domandaCorrente ?? ''
-  const step: Step = a.step
 
-  switch (step) {
+  // La risposta toccata pulisce quello che era rimasto scritto nel campo.
+  const r = (testo: string, scegli: () => void, label?: ReactNode): Risposta => ({
+    testo,
+    label,
+    scegli: () => {
+      a.setText('')
+      scegli()
+    },
+  })
+
+  /** Un passo a scelte: le pillole, e il campo che le riconosce per nome. */
+  const scelte = (risposte: Risposta[], libero?: (t: string) => void, extra?: ReactNode): Passo => ({
+    scelte: (
+      <>
+        <Chips label={q} risposte={risposte} />
+        {extra}
+      </>
+    ),
+    campo: {
+      invia: (t) => {
+        const i = trovaRisposta(t, risposte.map((x) => x.testo))
+        if (i >= 0) risposte[i].scegli()
+        else if (libero) libero(t)
+        else h.nonCapito(t)
+      },
+    },
+  })
+
+  /** Un passo da scrivere, con al più un'alternativa («Salta», «Da solo»). */
+  const scrivi = (placeholder: string, invia: (t: string) => void, alternative: Risposta[] = [], vuotoOk = false): Passo => ({
+    scelte: alternative.length ? <Chips label="Alternative" risposte={alternative} /> : null,
+    campo: { placeholder, invia, vuotoOk, primo: true },
+  })
+
+  switch (a.step) {
     case 'name':
-      return <TextDock a={a} label={q} placeholder="es. Summer Cup Rimini" onSubmit={() => h.submitName(a.text)} />
+      return scrivi('es. Summer Cup Rimini', h.submitName)
 
     case 'partner':
       // Senza compagni salvati una lista non ha senso: si chiede il nome (o "Da solo").
-      if (!partners.length)
-        return (
-          <TextDock
-            a={a}
-            label={q}
-            placeholder="es. Giulia"
-            skip={{ label: 'Ho giocato da solo', onClick: h.pickNoPartner }}
-            onSubmit={() => h.submitPartnerName(a.text, false)}
-          />
-        )
-      return (
-        <Chips label={q}>
-          {partners.map((p) => (
-            <Chip key={p.id} onClick={() => h.pickPartner(p)}>{p.name}</Chip>
-          ))}
-          <Chip tone="accent" icon="plus" onClick={h.chooseNewPartner}>Nuovo compagno</Chip>
-          <Chip onClick={h.pickNoPartner}>Da solo</Chip>
-        </Chips>
+      if (!partners.length) return scrivi('es. Giulia', (t) => h.submitPartnerName(t, false), [r('Ho giocato da solo', h.pickNoPartner)])
+      return scelte(
+        [...partners.map((p) => r(p.name, () => h.pickPartner(p))), r('Nuovo compagno', h.chooseNewPartner), r('Da solo', h.pickNoPartner)],
+        // Un nome che non c'è è un compagno nuovo.
+        (t) => h.submitPartnerName(t, false),
       )
 
     case 'partnerName':
-      return <TextDock a={a} label={q} placeholder="es. Giulia" onSubmit={() => h.submitPartnerName(a.text, false)} />
+      return scrivi('es. Giulia', (t) => h.submitPartnerName(t, false))
     case 'resultsPartnerName':
-      return <TextDock a={a} label={q} placeholder="es. Giulia" onSubmit={() => h.submitPartnerName(a.text, true)} />
+      return scrivi('es. Giulia', (t) => h.submitPartnerName(t, true))
 
     case 'resultsPartner':
-      return (
-        <Chips label={q}>
-          {partners.map((p) => (
-            <Chip key={p.id} onClick={() => h.pickResultsPartner(p)}>{p.name}</Chip>
-          ))}
-        </Chips>
+      return scelte(
+        partners.map((p) => r(p.name, () => h.pickResultsPartner(p))),
+        (t) => h.submitPartnerName(t, true),
       )
 
     case 'date':
-      return (
-        <div className="crea-stack">
-          <Chips label={q}>
-            <Chip tone="accent" onClick={() => h.pickDate(todayISO(), 'Oggi')}>Oggi</Chip>
-            <Chip onClick={() => h.pickDate(shiftISO(-1), 'Ieri')}>Ieri</Chip>
-            <Chip onClick={() => h.pickDate(shiftISO(-7), 'La scorsa settimana')}>Settimana scorsa</Chip>
-          </Chips>
-          <form
-            className="crea-form"
-            onSubmit={(e: FormEvent) => {
-              e.preventDefault()
-              h.pickDateValue()
-            }}
-          >
-            <label className="sr-only" htmlFor="crea-data">Un altro giorno</label>
-            <input id="crea-data" type="date" className="ui-input" value={a.dateVal} onChange={(e) => a.setDateVal(e.target.value)} />
-            <Button type="submit" variant="neutral">Usa questa data</Button>
-          </form>
-        </div>
+      return scelte(
+        [
+          r('Oggi', () => h.pickDate(todayISO(), 'Oggi')),
+          r('Ieri', () => h.pickDate(shiftISO(-1), 'Ieri')),
+          r('Settimana scorsa', () => h.pickDate(shiftISO(-7), 'La scorsa settimana')),
+        ],
+        undefined,
+        <form
+          className="crea-form"
+          onSubmit={(e: FormEvent) => {
+            e.preventDefault()
+            h.pickDateValue()
+          }}
+        >
+          <label className="sr-only" htmlFor="crea-data">Un altro giorno</label>
+          <input id="crea-data" type="date" className="ui-input crea-date" value={a.dateVal} onChange={(e) => a.setDateVal(e.target.value)} />
+          <Button type="submit" variant="glass">Usa questa data</Button>
+        </form>,
       )
 
     case 'venue':
-      if (!venues.length)
-        return (
-          <TextDock
-            a={a}
-            label={q}
-            placeholder="es. Bagno 26 Riccione"
-            skip={{ label: 'Salta', onClick: h.skipVenue }}
-            onSubmit={() => h.submitVenueName(a.text)}
-          />
-        )
-      return (
-        <Chips label={q}>
-          {venues.map((v) => (
-            <Chip key={v.id} onClick={() => h.pickVenue(v)}>{v.name}</Chip>
-          ))}
-          <Chip tone="accent" icon="pin" onClick={h.chooseNewVenue}>Nuovo luogo</Chip>
-          <Chip onClick={h.skipVenue}>Salta</Chip>
-        </Chips>
+      if (!venues.length) return scrivi('es. Bagno 26 Riccione', h.submitVenueName, [r('Salta', h.skipVenue)])
+      return scelte(
+        [...venues.map((v) => r(v.name, () => h.pickVenue(v))), r('Nuovo luogo', h.chooseNewVenue), r('Salta', h.skipVenue)],
+        // Un posto che non c'è è un luogo nuovo.
+        h.submitVenueName,
       )
 
     case 'venueName':
-      return <TextDock a={a} label={q} placeholder="es. Bagno 26 Riccione" onSubmit={() => h.submitVenueName(a.text)} />
+      return scrivi('es. Bagno 26 Riccione', h.submitVenueName)
 
     case 'category':
-      return (
-        <Chips label={q}>
-          {CATEGORIES.map((c) => (
-            <Chip key={c} onClick={() => h.pickCategory(c)}>{c}</Chip>
-          ))}
-        </Chips>
-      )
-
+      return scelte(CATEGORIES.map((c) => r(c, () => h.pickCategory(c))))
     case 'format':
-      return (
-        <Chips label={q}>
-          {FORMATS.map((f) => (
-            <Chip key={f} onClick={() => h.pickFormat(f)}>{f}</Chip>
-          ))}
-        </Chips>
-      )
-
+      return scelte(FORMATS.map((f) => r(f, () => h.pickFormat(f))))
     case 'surface':
-      return (
-        <Chips label={q}>
-          {SURFACES.map((s) => (
-            <Chip key={s} onClick={() => h.pickSurface(s)}>{s}</Chip>
-          ))}
-        </Chips>
-      )
+      return scelte(SURFACES.map((s) => r(s, () => h.pickSurface(s))))
 
     case 'status':
-      return (
-        <Chips label={q}>
-          <Chip tone="accent" onClick={() => h.pickStatus('finished')}>È finito</Chip>
-          <Chip onClick={() => h.pickStatus('ongoing')}>È ancora in corso</Chip>
-        </Chips>
-      )
+      return scelte([r('È finito', () => h.pickStatus('finished')), r('È ancora in corso', () => h.pickStatus('ongoing'))])
 
     case 'placement':
-      return (
-        <Chips label={q}>
-          {FINISHED_PLACEMENTS.map((p) => (
-            <Chip key={p} onClick={() => h.pickPlacement(p)}>
-              <Piazzamento p={p} />
-            </Chip>
-          ))}
-        </Chips>
-      )
+      return scelte(FINISHED_PLACEMENTS.map((p) => r(p.replace(/\s*🏆\s*/u, ''), () => h.pickPlacement(p), <Piazzamento p={p} />)))
 
     case 'bracket':
-      return (
-        <Chips label={q}>
-          {BRACKETS.map((b) => (
-            <Chip key={b} onClick={() => h.pickBracket(b)}>{b}</Chip>
-          ))}
-          <Chip onClick={() => h.pickBracket('')}>Nessun tabellone</Chip>
-        </Chips>
-      )
+      return scelte([...BRACKETS.map((b) => r(b, () => h.pickBracket(b))), r('Nessun tabellone', () => h.pickBracket(''))])
 
     case 'askResults':
-      return (
-        <Chips label={q}>
-          <Chip tone="accent" onClick={() => h.answerResults(true)}>Sì, aggiungiamole</Chip>
-          <Chip onClick={() => h.answerResults(false)}>No, va bene così</Chip>
-        </Chips>
-      )
+      return scelte([r('Sì, aggiungiamole', () => h.answerResults(true)), r('No, va bene così', () => h.answerResults(false))])
 
     case 'matchOpponents':
-      return (
-        <TextDock
-          a={a}
-          label={q}
-          placeholder="es. Bianchi / Verdi"
-          skip={{ label: 'Senza nome', onClick: () => h.submitOpponents('') }}
-          onSubmit={() => h.submitOpponents(a.text)}
-          submitEmpty
-        />
-      )
+      return scrivi('es. Bianchi / Verdi', h.submitOpponents, [r('Senza nome', () => h.submitOpponents(''))], true)
 
     case 'matchPhase':
-      return (
-        <Chips label={q}>
-          {PHASES.map((ph) => (
-            <Chip key={ph} onClick={() => h.pickPhase(ph)}>{ph}</Chip>
-          ))}
-        </Chips>
-      )
+      return scelte(PHASES.map((ph) => r(ph, () => h.pickPhase(ph))))
 
     case 'matchScore':
-      return <ScoreDock a={a} />
+      return { scelte: <ScoreDock a={a} /> }
 
     case 'matchMore':
-      return (
-        <Chips label={q}>
-          <Chip tone="accent" icon="plus" onClick={() => h.answerMore(true)}>Aggiungi partita</Chip>
-          <Chip onClick={() => h.answerMore(false)}>Ho finito</Chip>
-        </Chips>
-      )
+      return scelte([r('Aggiungi partita', () => h.answerMore(true)), r('Ho finito', () => h.answerMore(false))])
 
     case 'recap':
-      return (
-        <div className="crea-actions" role="group" aria-label={q}>
-          <Button variant="filled" onClick={() => void h.confirmCreate()}>Crea torneo</Button>
-          <Button variant="plain" onClick={h.restart}>Ricomincia</Button>
-        </div>
-      )
+      return {
+        scelte: (
+          <div className="crea-actions" role="group" aria-label={q}>
+            <Button variant="filled" onClick={() => void h.confirmCreate()}>Crea torneo</Button>
+            <Button variant="glass" onClick={h.restart}>Ricomincia</Button>
+          </div>
+        ),
+      }
 
     case 'done':
-      return (
-        <div className="crea-actions">
-          <Button variant="filled" block onClick={() => a.createdId && onDone(a.createdId)}>Apri il torneo</Button>
-          <Button variant="tinted" block onClick={h.restart}>Crea un altro</Button>
-        </div>
-      )
+      return {
+        scelte: (
+          <div className="crea-actions">
+            <Button variant="filled" onClick={() => a.createdId && onDone(a.createdId)}>Apri il torneo</Button>
+            <Button variant="glass" onClick={h.restart}>Crea un altro</Button>
+          </div>
+        ),
+      }
 
     default:
-      return null
+      return { scelte: null }
   }
 }
 
@@ -428,68 +428,15 @@ function Piazzamento({ p }: { p: Placement }) {
 
 // ---------------------------------------------------------------- atomi
 
-function Chips({ label, children }: { label: string; children: ReactNode }) {
+/** Le risposte rapide: pillole di vetro alte 38 che vanno a capo. */
+function Chips({ label, risposte }: { label: string; risposte: Risposta[] }) {
   return (
     <div className="crea-chips" role="group" aria-label={label}>
-      {children}
-    </div>
-  )
-}
-
-function Chip({ children, onClick, tone, icon }: { children: ReactNode; onClick: () => void; tone?: 'accent'; icon?: IconName }) {
-  return (
-    <button type="button" className="crea-chip" data-tone={tone} onClick={onClick}>
-      {icon && <Icon name={icon} size={16} />}
-      {children}
-    </button>
-  )
-}
-
-function TextDock({ a, label, placeholder, onSubmit, skip, submitEmpty = false }: {
-  a: Assistente
-  /** Il nome del campo: la domanda (UX F11.3). */
-  label: string
-  placeholder: string
-  onSubmit: () => void
-  skip?: { label: string; onClick: () => void }
-  /** Il campo vuoto si può inviare (gli avversari diventano «Avversari»). */
-  submitEmpty?: boolean
-}) {
-  const vuoto = !a.text.trim()
-  return (
-    <div className="crea-stack">
-      {skip && (
-        <Chips label="Alternative">
-          <Chip onClick={skip.onClick}>{skip.label}</Chip>
-        </Chips>
-      )}
-      <form
-        className="crea-form"
-        onSubmit={(e: FormEvent) => {
-          e.preventDefault()
-          if (vuoto && !submitEmpty) return
-          onSubmit()
-        }}
-      >
-        <input
-          className="ui-input crea-input"
-          value={a.text}
-          onChange={(e) => a.setText(e.target.value)}
-          placeholder={placeholder}
-          aria-label={label}
-          autoComplete="off"
-          enterKeyHint="send"
-        />
-        <button
-          type="submit"
-          className="ui-icon-button crea-send"
-          data-variant="filled"
-          aria-label="Invia"
-          aria-disabled={vuoto && !submitEmpty ? true : undefined}
-        >
-          <Icon name="send" size={20} />
+      {risposte.map((x) => (
+        <button key={x.testo} type="button" className="crea-chip" data-material="glass-regular" onClick={x.scegli}>
+          {x.label ?? x.testo}
         </button>
-      </form>
+      ))}
     </div>
   )
 }
@@ -503,28 +450,32 @@ function ScoreDock({ a }: { a: Assistente }) {
   const addRow = () => {
     if (rows.length < 3) a.setScoreRows([...rows, { us: '', them: '' }])
   }
+  // La stessa card dei set di «Nuova partita» (design 16), con sotto le
+  // risposte: senza punteggio o salva.
   return (
-    <div className="crea-stack">
-      <div className="crea-sets">
-        {rows.map((r, i) => (
-          <SetRow
-            key={i}
-            index={i}
-            us={r.us}
-            them={r.them}
-            onChange={(k, v) => update(i, k, v)}
-            onRemove={rows.length > 1 ? () => removeRow(i) : undefined}
-          />
-        ))}
-      </div>
-      <div className="crea-actions" data-wrap="">
+    <>
+      <div className="crea-score">
+        <SetIntestazione />
+        <div className="crea-sets">
+          {rows.map((r, i) => (
+            <RigaSet
+              key={i}
+              n={i + 1}
+              us={r.us}
+              them={r.them}
+              onChange={(k, v) => update(i, k, v)}
+              onRemove={rows.length > 1 ? () => removeRow(i) : undefined}
+            />
+          ))}
+        </div>
         {rows.length < 3 && (
-          <Chip icon="plus" onClick={addRow}>Aggiungi set</Chip>
+          <Button variant="glass" size="sm" icon="plus" className="crea-add" onClick={addRow}>Aggiungi set</Button>
         )}
-        <span className="crea-spacer" />
-        <Chip onClick={() => h.submitScore([])}>Senza punteggio</Chip>
-        <Button variant="filled" onClick={() => h.submitScore(rows)}>Salva partita</Button>
       </div>
-    </div>
+      <div className="crea-actions">
+        <Button variant="filled" onClick={() => h.submitScore(rows)}>Salva partita</Button>
+        <Button variant="glass" onClick={() => h.submitScore([])}>Senza punteggio</Button>
+      </div>
+    </>
   )
 }

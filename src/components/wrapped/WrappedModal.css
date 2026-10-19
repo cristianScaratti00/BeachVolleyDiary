@@ -1,61 +1,59 @@
 /* ============================================================================
-   Il visore di Beach Wrapped: fondo dei visori, barre di vetro scuro da 44px
-   in alto (avanzamento, ✕) e in basso (azioni), la card scalata al centro.
-   La stessa cornice del visore della Storia (UX §11.6).
+   Beach Wrapped (schermata 18): la slide è lo schermo. Il fondo pieno cambia
+   con la slide (arancio, inchiostro, sabbia) e scivola in mezzo secondo; in
+   cima le barre e «Beach Wrapped · 2026» col × di vetro, in fondo le due
+   azioni di vetro. Il testo è sempre il primo piano della slide; il
+   secondario è lo stesso colore schiarito (all'85% sull'arancio, dove all'80%
+   non reggerebbe AA). Dai 900px la colonna resta larga quanto uno sheet.
    ============================================================================ */
 @layer components {
   .wrapped {
     position: fixed;
     inset: 0;
     z-index: var(--z-viewer);
-    display: flex;
-    flex-direction: column;
-    background: var(--viewer-bg);
-    color: var(--ink);
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    background: var(--wr-bg);
+    color: var(--wr-fg);
+    transition: background-color 0.5s ease, color 0.5s ease;
+    --wr-soft: 0.8;
   }
+  .wrapped[data-tone="orange"] { --wr-bg: var(--accent); --wr-fg: var(--on-accent); --wr-soft: 0.85; }
+  /* L'inchiostro pieno con il bianco sopra: è la coppia della chip scelta.
+     (Non `--ink`: su questa superficie scura `--ink` diventa il bianco.) */
+  .wrapped[data-tone="ink"] { --wr-bg: var(--select); --wr-fg: var(--on-select); }
+  .wrapped[data-tone="sand"] { --wr-bg: var(--bg); --wr-fg: var(--ink); }
 
-  .wrapped-bar {
+  /* -------------------------------------------------------------- cima */
+  .wrapped-top {
     position: relative;
     z-index: 1;
-    flex: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-2);
-    min-height: calc(var(--touch) + 2 * var(--space-2));
-    padding: var(--space-2) var(--gutter);
+    width: 100%;
+    max-width: var(--sheet-max);
+    margin: 0 auto;
+    padding: calc(var(--safe-top) + var(--bar-top)) var(--gutter) 0;
   }
-  .wrapped-bar-top { padding-top: calc(var(--safe-top) + var(--space-2)); }
-  .wrapped-bar-bottom { padding-bottom: calc(var(--safe-bottom) + var(--space-2)); }
-  .wrapped-close {
-    position: absolute;
-    right: var(--space-2);
-    bottom: var(--space-2);
-  }
-
-  /* Le barre di avanzamento: un riempimento lineare per la durata della
-     slide. Restano anche con reduced-motion (dicono il tempo), ma lì
-     l'auto-avanzamento è spento e stanno ferme. */
-  .wrapped-progress { display: flex; gap: var(--space-1); max-width: calc(100% - 2 * var(--touch)); }
+  .wrapped-progress { display: flex; gap: var(--space-1); }
   .wrapped-progress-track {
+    position: relative;
     flex: 1;
     height: var(--space-1);
     border-radius: var(--radius-capsule);
     overflow: hidden;
-    position: relative;
   }
-  /* Il binario: il bianco dei visori al 28% (0.72 × 0.4), un livello sotto. */
+  /* Il binario: il primo piano al 20% (al 30% sull'inchiostro). */
   .wrapped-progress-track::before {
     content: "";
     position: absolute;
     inset: 0;
-    background: var(--on-glass-dark-3);
-    opacity: 0.4;
+    background: currentColor;
+    opacity: 0.2;
   }
-  .wrapped-progress-fill { position: relative; }
+  .wrapped[data-tone="ink"] .wrapped-progress-track::before { opacity: 0.3; }
   .wrapped-progress-fill {
+    position: relative;
     height: 100%;
-    background: var(--on-glass-dark);
+    background: currentColor;
     transform-origin: left center;
     transform: scaleX(0);
   }
@@ -63,53 +61,186 @@
   .wrapped-progress-fill[data-animating] { animation: wrapped-barra var(--slide-ms) linear both; }
   @keyframes wrapped-barra { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 
-  .wrapped-stage {
-    flex: 1;
-    min-height: 0;
-    display: grid;
-    place-items: center;
-    padding: var(--space-2) 0;
+  .wrapped-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-top: var(--space-3);
   }
+  .wrapped-brand {
+    min-width: 0;
+    font: 700 0.8125rem/1.25 var(--font-ui);
+    font-variant-numeric: tabular-nums;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .wrapped-close { flex: none; }
+
+  /* ------------------------------------------------------------- slide */
   .wrapped-deck {
     position: relative;
-    border-radius: var(--radius-card);
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: var(--space-4) 0;
     overflow: hidden;
     cursor: pointer;
     touch-action: pan-y;
     user-select: none;
     -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
   }
-  /* L'anello di focus si vede (UX §8.2): bianco sulle superfici scure. */
+  /* L'anello di focus si vede (UX §8.2): dentro il bordo, sul fondo pieno. */
   .wrapped-deck:focus-visible {
     outline: var(--focus-width) solid var(--focus-ring);
-    outline-offset: var(--focus-offset);
+    outline-offset: calc(-1 * var(--focus-reach));
   }
-  .wrapped-card {
-    position: absolute;
-    top: 0;
-    left: 0;
-    animation: wrapped-entra var(--dur-entrata) var(--ease-standard) both;
+  .wrapped-slide {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    width: 100%;
+    max-width: var(--sheet-max);
+    margin: 0 auto;
+    padding: 0 calc(var(--space-6) + var(--space-1));
+    animation: wrapped-entra var(--dur-rise) var(--ease-rise) both;
   }
-  .wrapped-card-scale { width: 1080px; height: 1920px; transform-origin: top left; }
+  /* L'entrata del design: sale di 16px e cresce da .98. */
   @keyframes wrapped-entra {
     from {
       opacity: 0;
-      transform: translateY(calc((var(--space-3) + var(--space-0-5)) * var(--motion-scale))) scale(calc(1 - 0.015 * var(--motion-scale)));
+      transform: translateY(calc(var(--space-4) * var(--motion-scale))) scale(calc(1 - 0.02 * var(--motion-scale)));
     }
     to { opacity: 1; transform: none; }
   }
-  @media (prefers-reduced-motion: reduce) {
-    .wrapped-card { animation: none; }
+
+  .wrapped-pallo { margin: 0 0 var(--space-2) calc(-1 * var(--space-1)); }
+  /* Sull'inchiostro le braccia d'inchiostro di Pallo sparirebbero: un filo di
+     luce attorno al disegno le ridisegna. */
+  .wrapped[data-tone="ink"] .wrapped-pallo { filter: drop-shadow(0 0 1px var(--on-select)) drop-shadow(0 0 0.5px var(--on-select)); }
+  /* La foto è INTERA (mai ritagliata): misura naturale, ristretta dentro la
+     colonna e al più un terzo dello schermo, con la proporzione che resta. Se
+     è verticale, Pallo le sta accanto. */
+  .wrapped-cover {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--space-3);
+    margin-bottom: var(--space-2);
+  }
+  .wrapped-cover .wrapped-pallo { flex: none; margin: 0; }
+  .wrapped-photo {
+    flex: none;
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: clamp(160px, 32dvh, 300px);
+    border-radius: var(--radius-card);
+  }
+  .wrapped-eyebrow {
+    font: 700 0.9375rem/1.25 var(--font-ui);
+    opacity: var(--wr-soft);
+  }
+  .wrapped-big {
+    font: 900 6rem/0.9 var(--font-ui);
+    letter-spacing: -0.052em;
+    font-variant-numeric: tabular-nums;
+    margin-left: calc(-1 * var(--space-0-5));
+    overflow-wrap: anywhere;
+    text-wrap: balance;
+  }
+  /* I titoli lunghi (un nome, «Stagione 2026») scalano: mai spezzati a metà. */
+  .wrapped-big[data-taglia="s"] { font-size: 4rem; letter-spacing: -0.045em; }
+  .wrapped-big[data-taglia="m"] { font-size: 3rem; letter-spacing: -0.04em; }
+  .wrapped-big[data-taglia="l"] { font-size: 2.375rem; line-height: 1; letter-spacing: -0.035em; }
+  .wrapped-title {
+    max-width: 300px;
+    font: 700 1.625rem/1.1 var(--font-ui);
+    letter-spacing: -0.023em;
+    overflow-wrap: anywhere;
+  }
+  .wrapped-caption {
+    font: 500 0.9375rem/1.35 var(--font-ui);
+    opacity: var(--wr-soft);
   }
 
-  .wrapped-empty {
-    flex: 1;
+  /* Le statistiche: celle separate da filetti del primo piano, al 25%. */
+  .wrapped-stats {
     display: grid;
-    place-items: center;
-    padding: var(--space-6) var(--gutter);
+    grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr));
+    margin-top: var(--space-2);
+  }
+  .wrapped-stats[data-cols="1"] { --cols: 1; }
+  .wrapped-stats[data-cols="3"] { --cols: 3; }
+  .wrapped-stat {
+    position: relative;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: var(--space-0-5);
+    min-width: 0;
+    padding: var(--space-2-5) var(--space-3) var(--space-2-5) 0;
+  }
+  .wrapped-stat::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: var(--hairline);
+    background: currentColor;
+    opacity: 0.25;
+  }
+  .wrapped-stat-v {
+    font: 800 1.875rem/1 var(--font-ui);
+    letter-spacing: var(--track-num-xl);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .wrapped-stat-l {
+    font: 600 0.8125rem/1.25 var(--font-ui);
+    opacity: var(--wr-soft);
+    overflow-wrap: anywhere;
   }
 
-  /* Il layer degli export: fuori schermo, a piena risoluzione. */
+  /* ------------------------------------------------------------ azioni */
+  .wrapped-actions {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    gap: var(--space-2-5);
+    width: 100%;
+    max-width: var(--sheet-max);
+    margin: 0 auto;
+    padding: 0 var(--space-3-5) calc(var(--safe-bottom) + var(--space-6));
+  }
+  .wrapped-action { flex: 1; min-width: 0; }
+  .wrapped-share { font-weight: 700; }
+
+  /* ------------------------------------------------- non disponibile */
+  .wrapped-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+    max-width: var(--empty-max);
+    margin: 0 auto;
+    padding: var(--space-6) var(--gutter);
+    text-align: center;
+  }
+  .wrapped-empty-t { font: var(--type-title-1); letter-spacing: var(--track-title-1); }
+  .wrapped-empty-p {
+    font: var(--type-callout);
+    letter-spacing: var(--track-callout);
+    color: var(--ink-2);
+    margin-bottom: var(--space-3);
+  }
+
+  /* Il livello degli export: fuori schermo, a piena risoluzione. Pallo ci sta
+     fermo: la foto non deve coglierlo a metà salto. */
   .wrapped-capture {
     position: fixed;
     left: -100000px;
@@ -119,4 +250,9 @@
     pointer-events: none;
   }
   .wrapped-capture-card { position: absolute; top: 0; left: 0; width: 1080px; height: 1920px; }
+  .wrapped-capture .pallo * { animation: none !important; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wrapped { transition: none; }
+  }
 }

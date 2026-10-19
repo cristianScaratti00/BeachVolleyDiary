@@ -1,18 +1,19 @@
 // ============================================================================
-// Schermata Tornei: viste Lista · Timeline · Mappa, sezioni, filtro a chip,
-// card di entità (link veri), empty state, sottotitolo dal vivo.
+// Schermata Tornei (il redesign): viste Lista · Mappa, «Prossimi tornei» col
+// riquadro vuoto, chip del formato coi conteggi, gruppi in una card di righe
+// (link veri), empty state, sottotitolo dal vivo, ricerca.
 //
 // "Oggi" è congelato al 22/07/2026 perché lo screen chiama `todayISO()` da sé
 // (non riceve `today` come prop): senza congelarlo, il test "questo torneo è
 // imminente" comincerebbe a fallire da solo il giorno della data scelta.
 // Si falsifica solo `Date`, non `setTimeout`, così user-event resta normale.
 //
-// Le card aprono il torneo con un `<a href>` vero (UX §7.6): si verifica
+// Le righe aprono il torneo con un `<a href>` vero (UX §7.6): si verifica
 // l'indirizzo e la navigazione del router, non più una callback.
 // ============================================================================
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { useState } from 'react'
-import { act, render, screen, waitFor, within } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import Tornei from './Tornei'
 import type { TorneiProps } from '../app/contracts'
@@ -83,7 +84,7 @@ beforeEach(() => {
 })
 
 // ---------------------------------------------------------------- vista
-describe('Tornei — selettore di vista Lista · Timeline · Mappa', () => {
+describe('Tornei — selettore di vista Lista · Mappa', () => {
   const conMappa = { mappa: makeMappaData({ pins: [makeMappaPin({ city: 'Cervia', tier: 'vinto' })] }) }
 
   it('parte dalla lista', () => {
@@ -95,12 +96,12 @@ describe('Tornei — selettore di vista Lista · Timeline · Mappa', () => {
   it('il selettore sono `button` veri con lo stato annunciato', () => {
     renderTornei([makeTorneo()], conMappa)
     const gruppo = screen.getByRole('group', { name: 'Come vedere i tornei' })
-    expect(within(gruppo).getAllByRole('button').map((b) => b.getAttribute('aria-pressed'))).toEqual(['true', 'false', 'false'])
+    expect(within(gruppo).getAllByRole('button').map((b) => b.getAttribute('aria-pressed'))).toEqual(['true', 'false'])
   })
 
-  it('la voce Mappa mostra quante città ci sono', () => {
+  it('la voce Mappa dice quante città ci sono', () => {
     renderTornei([makeTorneo()], conMappa)
-    expect(screen.getByRole('button', { name: 'Mappa · 1' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Mappa · 1 città' })).toBeInTheDocument()
   })
 
   it('senza città la voce Mappa resta senza contatore', () => {
@@ -127,8 +128,8 @@ describe('Tornei — selettore di vista Lista · Timeline · Mappa', () => {
   it('il focus resta sul segmento dopo il cambio di vista (M4)', async () => {
     const user = userEvent.setup()
     renderTornei([makeTorneo()], conMappa)
-    await user.click(screen.getByRole('button', { name: 'Timeline' }))
-    expect(screen.getByRole('button', { name: 'Timeline' })).toHaveFocus()
+    await user.click(screen.getByRole('button', { name: /^Mappa/ }))
+    expect(screen.getByRole('button', { name: /^Mappa/ })).toHaveFocus()
   })
 
   it('dalla mappa si apre un torneo con un link vero', async () => {
@@ -146,6 +147,11 @@ describe('Tornei — selettore di vista Lista · Timeline · Mappa', () => {
   it('senza tornei il selettore non compare: non c\'è niente da guardare', () => {
     renderTornei([], conMappa)
     expect(screen.queryByRole('group', { name: 'Come vedere i tornei' })).not.toBeInTheDocument()
+  })
+
+  it('la Timeline non è più una vista di Tornei: sta nel Diario', () => {
+    renderTornei([makeTorneo()], conMappa)
+    expect(screen.queryByRole('button', { name: 'Timeline' })).not.toBeInTheDocument()
   })
 
   // ---- vista controllata dall'URL -----------------------------------------
@@ -182,18 +188,9 @@ describe('Tornei — selettore di vista Lista · Timeline · Mappa', () => {
     expect(screen.getByRole('link', { name: 'Rimini Open' })).toBeInTheDocument()
   })
 
-  it('in Timeline il diario arriva dal suo chunk e il sottotitolo conta le voci', async () => {
-    const user = userEvent.setup()
-    renderTornei([makeTorneo({ id: 'e1', name: 'Rimini Open' })], {
-      entries: [makeDiaryEntry({ id: 'e1', title: 'Rimini Open' })],
-    })
-    // Il chunk della Timeline si risolve dentro `act`: è un import, non un'attesa.
-    await act(async () => {
-      await user.click(screen.getByRole('button', { name: 'Timeline' }))
-      await import('./Timeline')
-    })
-    expect(await screen.findByRole('link', { name: 'Rimini Open' })).toHaveAttribute('href', '/tornei/e1')
-    expect(screen.getByRole('status')).toHaveTextContent('1 torneo nel diario')
+  it('sulla Mappa il sottotitolo resta quello dei tornei (il redesign)', () => {
+    renderTornei([makeTorneo({ badge: '1° 🏆', badgeBg: '#FFF1EA' })], { ...conMappa, vistaIniziale: 'mappa' })
+    expect(screen.getByRole('status')).toHaveTextContent('1 torneo · 1 podio · miglior piazzamento 1°')
   })
 })
 
@@ -201,16 +198,19 @@ describe('Tornei — selettore di vista Lista · Timeline · Mappa', () => {
 const sectionTitles = () =>
   screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent ?? '')
 
-// La griglia che segue un'intestazione di sezione.
+// La card di righe che segue un'intestazione di gruppo.
 function gridUnder(title: string | RegExp) {
   const heading = screen.getByRole('heading', { level: 2, name: title })
-  const grid = heading.closest('div')?.nextElementSibling
-  if (!(grid instanceof HTMLElement)) throw new Error(`Nessuna griglia dopo la sezione ${title}`)
+  const grid = heading.nextElementSibling
+  if (!(grid instanceof HTMLElement)) throw new Error(`Nessuna card dopo la sezione ${title}`)
   return grid
 }
 
-// I tornei in una griglia: i nomi dei link delle card, nell'ordine del DOM.
+// I tornei in una card: i nomi dei link delle righe, nell'ordine del DOM.
 const cardNames = (root: HTMLElement) => within(root).getAllByRole('link').map((a) => a.textContent)
+
+// La riga di un torneo: il `<li>` che contiene il suo link.
+const riga = (name: string) => screen.getByRole('link', { name }).closest('li') as HTMLElement
 
 describe('Tornei — con l\'orologio fermo', () => {
   beforeEach(() => {
@@ -224,7 +224,7 @@ describe('Tornei — con l\'orologio fermo', () => {
     it('mostra l\'empty state e nessuna sezione, ricerca o filtro', () => {
       renderTornei([])
       expect(screen.getByRole('heading', { level: 2, name: 'Nessun torneo ancora.' })).toBeInTheDocument()
-      expect(screen.queryByRole('heading', { level: 2, name: /torne[oi]$/ })).not.toBeInTheDocument()
+      expect(screen.queryByRole('heading', { level: 2, name: /Prossimi tornei/ })).not.toBeInTheDocument()
       expect(screen.queryByRole('group', { name: /Filtra i tornei/ })).not.toBeInTheDocument()
       expect(screen.queryByRole('searchbox')).not.toBeInTheDocument()
     })
@@ -276,10 +276,11 @@ describe('Tornei — con l\'orologio fermo', () => {
       expect(cardNames(gridUnder(/^Prossimi tornei/))).toEqual(['Oggi Cup'])
     })
 
-    it('senza tornei futuri non renderizza l\'intestazione "Prossimi tornei"', () => {
-      renderTornei(dati.filter((t) => t.date < TODAY))
-      expect(screen.queryByRole('heading', { level: 2, name: /Prossimi tornei/ })).not.toBeInTheDocument()
-      expect(sectionTitles()).toEqual(['2vs2 2 tornei', '3vs3 1 torneo'])
+    it('ogni gruppo è UNA card con le righe dentro', () => {
+      renderTornei(dati)
+      const card = gridUnder(/^2vs2/)
+      expect(card.tagName).toBe('UL')
+      expect(within(card).getAllByRole('listitem')).toHaveLength(2)
     })
 
     it('con soli tornei futuri mostra solo "Prossimi tornei"', () => {
@@ -294,7 +295,7 @@ describe('Tornei — con l\'orologio fermo', () => {
       // Un layout che cambia forma al crescere dei dati è più straniante della
       // singola intestazione in più.
       renderTornei([makeTorneo({ name: 'Solo', format: '2vs2', date: '2026-01-01' })])
-      expect(sectionTitles()).toEqual(['2vs2 1 torneo'])
+      expect(sectionTitles()).toEqual(['Prossimi tornei', '2vs2 1 torneo'])
     })
 
     it('ordina i formati come FORMATS anche se i dati arrivano al contrario', () => {
@@ -303,7 +304,7 @@ describe('Tornei — con l\'orologio fermo', () => {
         makeTorneo({ name: 'T', format: '3vs3', date: '2026-01-02' }),
         makeTorneo({ name: 'D', format: '2vs2', date: '2026-01-01' }),
       ])
-      expect(sectionTitles()).toEqual(['2vs2 1 torneo', '3vs3 1 torneo', '4vs4 1 torneo'])
+      expect(sectionTitles()).toEqual(['Prossimi tornei', '2vs2 1 torneo', '3vs3 1 torneo', '4vs4 1 torneo'])
     })
 
     it('preserva l\'ordine "agenda" dentro al gruppo (prima i più recenti)', () => {
@@ -312,21 +313,56 @@ describe('Tornei — con l\'orologio fermo', () => {
     })
   })
 
+  // ----------------------------------------------------- prossimi, nessuno
+  describe('Tornei — nessun torneo in programma', () => {
+    const passati = [makeTorneo({ name: 'Rimini Open', format: '2vs2', date: '2026-07-01' })]
+
+    it('la sezione resta, con il riquadro che dice cosa ci andrà', () => {
+      renderTornei(passati)
+      expect(sectionTitles()[0]).toBe('Prossimi tornei')
+      expect(screen.getByText('Nessun torneo in programma: quando ne aggiungi uno, compare qui in cima.')).toBeInTheDocument()
+    })
+
+    it('«Aggiungi» apre Nuovo torneo', async () => {
+      const user = userEvent.setup()
+      const { onNuovoTorneo } = renderTornei(passati)
+      await user.click(screen.getByRole('button', { name: 'Aggiungi un torneo' }))
+      expect(onNuovoTorneo).toHaveBeenCalledTimes(1)
+    })
+
+    it('«Aggiungi» è un pulsante di vetro, il secondario del redesign', () => {
+      renderTornei(passati)
+      expect(screen.getByRole('button', { name: 'Aggiungi un torneo' })).toHaveAttribute('data-variant', 'glass')
+    })
+  })
+
   // -------------------------------------------------------------- filtro
   describe('Tornei — filtro a chip', () => {
+    // Il 4vs4 è sia fra i prossimi sia nell'archivio: le chip filtrano solo
+    // l'archivio, i prossimi restano tutti.
     const dati = [
       makeTorneo({ id: 'f1', name: 'Riccione Cup', format: '4vs4', date: '2026-08-10' }),
       makeTorneo({ id: 'p1', name: 'Rimini Open', format: '2vs2', date: '2026-07-01' }),
       makeTorneo({ id: 'p2', name: 'Ravenna Beach', format: '3vs3', date: '2026-05-01' }),
+      makeTorneo({ id: 'p3', name: 'Cervia 4x4', format: '4vs4', date: '2026-04-01' }),
     ]
     const chips = () =>
       within(screen.getByRole('group', { name: /Filtra i tornei/ }))
         .getAllByRole('button')
         .map(etichetta)
 
-    it('offre "Tutti" più un chip per ogni formato presente', () => {
+    it('offre "Tutti" più un chip per ogni formato dell\'archivio, coi conteggi', () => {
+      renderTornei([...dati, makeTorneo({ name: 'Altro 2vs2', format: '2vs2', date: '2026-03-01' })])
+      expect(chips()).toEqual(['Tutti', '2vs2 · 2', '3vs3 · 1', '4vs4 · 1'])
+    })
+
+    it('le chip stanno sotto «Prossimi tornei», sopra i gruppi (il redesign)', () => {
       renderTornei(dati)
-      expect(chips()).toEqual(['Tutti', '2vs2', '3vs3', '4vs4'])
+      const prossimi = screen.getByRole('heading', { level: 2, name: /^Prossimi/ })
+      const gruppo = screen.getByRole('group', { name: /Filtra i tornei/ })
+      const primoFormato = screen.getByRole('heading', { level: 2, name: /^2vs2/ })
+      expect(prossimi.compareDocumentPosition(gruppo) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+      expect(gruppo.compareDocumentPosition(primoFormato) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     })
 
     it('parte con "Tutti" selezionato', () => {
@@ -342,33 +378,29 @@ describe('Tornei — con l\'orologio fermo', () => {
       expect(screen.queryByRole('group', { name: /Filtra i tornei/ })).not.toBeInTheDocument()
     })
 
-    it('selezionando un formato mostra solo quello', async () => {
+    it('selezionando un formato l\'archivio mostra solo quello', async () => {
       const user = userEvent.setup()
       renderTornei(dati)
-      await user.click(screen.getByRole('button', { name: '3vs3' }))
-      expect(sectionTitles()).toEqual(['3vs3 1 torneo'])
+      await user.click(screen.getByRole('button', { name: /^3vs3/ }))
+      expect(sectionTitles()).toEqual(['Prossimi tornei 1 torneo', '3vs3 1 torneo'])
       expect(screen.queryByRole('link', { name: 'Rimini Open' })).not.toBeInTheDocument()
       expect(screen.getByRole('link', { name: 'Ravenna Beach' })).toBeInTheDocument()
     })
 
-    it('il filtro si applica anche alla sezione "Prossimi tornei"', async () => {
+    it('il filtro non tocca i prossimi: il blocco sopra le chip non cambia sotto il dito', async () => {
       const user = userEvent.setup()
       renderTornei(dati)
-      await user.click(screen.getByRole('button', { name: '2vs2' }))
-      // Il futuro è 4vs4: filtrando su 2vs2 la sezione imminenti sparisce.
-      expect(sectionTitles()).toEqual(['2vs2 1 torneo'])
-
-      await user.click(screen.getByRole('button', { name: '4vs4' }))
-      expect(sectionTitles()).toEqual(['Prossimi tornei 1 torneo'])
+      await user.click(screen.getByRole('button', { name: /^2vs2/ }))
+      expect(cardNames(gridUnder(/^Prossimi tornei/))).toEqual(['Riccione Cup'])
     })
 
     it('aggiorna aria-pressed su tutte le chip, non solo su quella cliccata', async () => {
       const user = userEvent.setup()
       renderTornei(dati)
-      await user.click(screen.getByRole('button', { name: '3vs3' }))
-      expect(screen.getByRole('button', { name: '3vs3' })).toHaveAttribute('aria-pressed', 'true')
+      await user.click(screen.getByRole('button', { name: /^3vs3/ }))
+      expect(screen.getByRole('button', { name: /^3vs3/ })).toHaveAttribute('aria-pressed', 'true')
       expect(screen.getByRole('button', { name: 'Tutti' })).toHaveAttribute('aria-pressed', 'false')
-      expect(screen.getByRole('button', { name: '2vs2' })).toHaveAttribute('aria-pressed', 'false')
+      expect(screen.getByRole('button', { name: /^2vs2/ })).toHaveAttribute('aria-pressed', 'false')
     })
 
     it('le chip restano tutte disponibili dopo aver filtrato', async () => {
@@ -376,43 +408,43 @@ describe('Tornei — con l\'orologio fermo', () => {
       // solo il filtro attivo e non si potrebbe più tornare indietro.
       const user = userEvent.setup()
       renderTornei(dati)
-      await user.click(screen.getByRole('button', { name: '3vs3' }))
-      expect(chips()).toEqual(['Tutti', '2vs2', '3vs3', '4vs4'])
+      await user.click(screen.getByRole('button', { name: /^3vs3/ }))
+      expect(chips()).toEqual(['Tutti', '2vs2 · 1', '3vs3 · 1', '4vs4 · 1'])
     })
 
     it('"Tutti" rimette tutto in pagina', async () => {
       const user = userEvent.setup()
       renderTornei(dati)
-      await user.click(screen.getByRole('button', { name: '3vs3' }))
+      await user.click(screen.getByRole('button', { name: /^3vs3/ }))
       await user.click(screen.getByRole('button', { name: 'Tutti' }))
-      expect(sectionTitles()).toEqual(['Prossimi tornei 1 torneo', '2vs2 1 torneo', '3vs3 1 torneo'])
+      expect(sectionTitles()).toEqual(['Prossimi tornei 1 torneo', '2vs2 1 torneo', '3vs3 1 torneo', '4vs4 1 torneo'])
     })
 
     it('ricliccare la chip attiva non svuota la pagina', async () => {
       const user = userEvent.setup()
       renderTornei(dati)
-      await user.click(screen.getByRole('button', { name: '2vs2' }))
-      await user.click(screen.getByRole('button', { name: '2vs2' }))
-      expect(sectionTitles()).toEqual(['2vs2 1 torneo'])
+      await user.click(screen.getByRole('button', { name: /^2vs2/ }))
+      await user.click(screen.getByRole('button', { name: /^2vs2/ }))
+      expect(sectionTitles()).toEqual(['Prossimi tornei 1 torneo', '2vs2 1 torneo'])
     })
 
     it('un filtro che sparisce dai dati ricade su "Tutti"', async () => {
-      // Es. l'ultimo torneo 4vs4 viene cancellato altrove mentre il filtro è 4vs4.
+      // Es. l'ultimo 4vs4 giocato viene cancellato altrove mentre il filtro è 4vs4.
       const user = userEvent.setup()
       const { rerender } = renderTornei(dati)
-      await user.click(screen.getByRole('button', { name: '4vs4' }))
-      expect(sectionTitles()).toEqual(['Prossimi tornei 1 torneo'])
+      await user.click(screen.getByRole('button', { name: /^4vs4/ }))
+      expect(sectionTitles()).toEqual(['Prossimi tornei 1 torneo', '4vs4 1 torneo'])
 
       // Stesso componente, prop diverse: il filtro per formato è locale e deve
       // sopravvivere al rerender, o il test non proverebbe niente.
-      rerender(<TorneiConVista list={makeList(dati.filter((t) => t.format !== '4vs4'))} />)
+      rerender(<TorneiConVista list={makeList(dati.filter((t) => t.id !== 'p3'))} />)
       expect(screen.getByRole('button', { name: 'Tutti' })).toHaveAttribute('aria-pressed', 'true')
-      expect(sectionTitles()).toEqual(['2vs2 1 torneo', '3vs3 1 torneo'])
+      expect(sectionTitles()).toEqual(['Prossimi tornei 1 torneo', '2vs2 1 torneo', '3vs3 1 torneo'])
     })
   })
 
-  // -------------------------------------------------------------- card
-  describe('Tornei — card', () => {
+  // -------------------------------------------------------------- riga
+  describe('Tornei — riga del torneo', () => {
     const t = makeTorneo({
       id: 'abc',
       name: 'Rimini Open',
@@ -426,37 +458,45 @@ describe('Tornei — con l\'orologio fermo', () => {
       badge: '1° 🏆',
       badgeBg: '#FFF1EA',
     })
-    const card = (name: string) => screen.getByRole('link', { name }).closest('article') as HTMLElement
 
-    it('mostra categoria, nome, meta, piazzamento e statistiche', () => {
+    it('mostra medaglia, nome, meta e record', () => {
       renderTornei([t])
-      const c = card('Rimini Open')
-      expect(within(c).getByText('Pro')).toBeInTheDocument()
-      expect(within(c).getByRole('link', { name: 'Rimini Open' })).toBeInTheDocument()
-      expect(within(c).getByText('1 giu 2026 · Rimini · 2vs2 · con Luca')).toBeInTheDocument()
-      // Il trofeo del valore '1° 🏆' diventa un'icona; il nome è «Primo posto» (C15).
-      expect(within(c).getByText('1°')).toBeInTheDocument()
-      expect(within(c).getByText('Primo posto')).toBeInTheDocument()
-      expect(within(c).getByText('4-1')).toBeInTheDocument()
-      expect(within(c).getByText('80%')).toBeInTheDocument()
+      const r = riga('Rimini Open')
+      // La medaglia: «1°» a vista, «Primo posto» per gli screen reader (C15).
+      expect(within(r).getByText('1°')).toBeInTheDocument()
+      expect(within(r).getByText('Primo posto')).toBeInTheDocument()
+      expect(within(r).getByText('1 giu 2026 · Rimini · Pro · con Luca')).toBeInTheDocument()
+      // Il record col trattino tipografico; a voce «4 a 1».
+      expect(within(r).getByText('4–1')).toBeInTheDocument()
+      expect(within(r).getByText('record 4 a 1')).toBeInTheDocument()
     })
 
     it('al focus il link si fa descrivere dalla riga meta', () => {
       renderTornei([t])
-      expect(screen.getByRole('link', { name: 'Rimini Open' })).toHaveAccessibleDescription('1 giu 2026 · Rimini · 2vs2 · con Luca')
+      expect(screen.getByRole('link', { name: 'Rimini Open' })).toHaveAccessibleDescription('1 giu 2026 · Rimini · Pro · con Luca')
     })
 
-    it('tiene il formato nella riga meta anche se sta già nell\'intestazione', () => {
-      // `meta` è condivisa con altre schermate, dove non c'è raggruppamento:
-      // toglierlo lo farebbe sparire dal resto dell'app.
-      renderTornei([t])
-      expect(screen.getByText(/· 2vs2 ·/)).toBeInTheDocument()
+    it('nel gruppo del formato la meta non ripete il formato; fra i prossimi sì', () => {
+      renderTornei([t, makeTorneo({ name: 'Domani Cup', date: '2026-08-01', meta: '1 ago 2026 · Cesenatico · 2vs2', category: 'Open' })])
+      expect(within(riga('Rimini Open')).queryByText(/2vs2/)).not.toBeInTheDocument()
+      expect(within(riga('Domani Cup')).getByText('1 ago 2026 · Cesenatico · Open · 2vs2')).toBeInTheDocument()
+    })
+
+    it('senza partite il record non c\'è', () => {
+      renderTornei([makeTorneo({ name: 'Vuoto', record: '0-0', matchCount: 0, date: '2026-01-01' })])
+      expect(within(riga('Vuoto')).queryByText('0–0')).not.toBeInTheDocument()
+    })
+
+    it('il tabellone resta visibile accanto al nome', () => {
+      renderTornei([makeTorneo({ name: 'Gold Cup', badge: '1° 🏆 · Gold', badgeBg: '#FFF1EA', date: '2026-01-01' })])
+      expect(within(riga('Gold Cup')).getByText('Gold')).toBeInTheDocument()
+      expect(within(riga('Gold Cup')).getByText('Primo posto')).toBeInTheDocument()
     })
 
     it('mostra il badge "Condiviso" solo sui tornei condivisi', () => {
       renderTornei([t, makeTorneo({ name: 'Condiviso Cup', shared: true, date: '2026-06-02' })])
-      expect(within(card('Condiviso Cup')).getByText('Condiviso')).toBeInTheDocument()
-      expect(within(card('Rimini Open')).queryByText('Condiviso')).not.toBeInTheDocument()
+      expect(within(riga('Condiviso Cup')).getByText('Condiviso')).toBeInTheDocument()
+      expect(within(riga('Rimini Open')).queryByText('Condiviso')).not.toBeInTheDocument()
     })
 
     it('il link apre il torneo giusto', async () => {
@@ -471,15 +511,15 @@ describe('Tornei — con l\'orologio fermo', () => {
     it('apre il torneo giusto anche dopo aver filtrato', async () => {
       const user = userEvent.setup()
       renderTornei([t, makeTorneo({ id: 'tre', name: 'Tre Cup', format: '3vs3', date: '2026-05-01' })])
-      await user.click(screen.getByRole('button', { name: '3vs3' }))
+      await user.click(screen.getByRole('button', { name: /^3vs3/ }))
       await user.click(screen.getByRole('link', { name: 'Tre Cup' }))
       expect(window.location.pathname).toBe('/tornei/tre')
     })
 
-    it('porta la traccia solo sulla card appena toccata', () => {
+    it('porta la traccia solo sulla riga appena toccata', () => {
       renderTornei([t, makeTorneo({ id: 'xyz', name: 'Altro', date: '2026-05-01' })], { traccia: 'xyz' })
-      expect(card('Altro').querySelector('.traccia')).not.toBeNull()
-      expect(card('Rimini Open').querySelector('.traccia')).toBeNull()
+      expect(riga('Altro').querySelector('.traccia')).not.toBeNull()
+      expect(riga('Rimini Open').querySelector('.traccia')).toBeNull()
     })
   })
 
@@ -491,7 +531,7 @@ describe('Tornei — con l\'orologio fermo', () => {
       makeTorneo({ id: 'p2', name: 'Ravenna Beach', format: '3vs3', date: '2026-05-01' }),
     ]
 
-    it('Invio sul link di una card apre il torneo', async () => {
+    it('Invio sul link di una riga apre il torneo', async () => {
       const user = userEvent.setup()
       renderTornei(dati)
       screen.getByRole('link', { name: 'Rimini Open' }).focus()
@@ -515,11 +555,11 @@ describe('Tornei — con l\'orologio fermo', () => {
       expect(window.location.pathname).toBe('/tornei')
     })
 
-    it('ogni card è una sola fermata di Tab', async () => {
+    it('ogni riga è una sola fermata di Tab', async () => {
       const user = userEvent.setup()
       renderTornei([makeTorneo({ name: 'Solo', date: '2026-01-01' })])
       const link = screen.getByRole('link', { name: 'Solo' })
-      expect(within(link.closest('article')!).getAllByRole('link')).toHaveLength(1)
+      expect(within(riga('Solo')).getAllByRole('link')).toHaveLength(1)
       link.focus()
       expect(link).toHaveFocus()
       await user.tab()
@@ -529,21 +569,22 @@ describe('Tornei — con l\'orologio fermo', () => {
     it('si filtra da tastiera senza usare il mouse', async () => {
       const user = userEvent.setup()
       renderTornei(dati)
-      screen.getByRole('button', { name: '3vs3' }).focus()
+      screen.getByRole('button', { name: /^3vs3/ }).focus()
       await user.keyboard('{Enter}')
-      expect(sectionTitles()).toEqual(['3vs3 1 torneo'])
+      expect(sectionTitles()).toEqual(['Prossimi tornei 1 torneo', '3vs3 1 torneo'])
     })
 
-    it('l\'ordine di tabulazione è ricerca → vista → filtro → card, nell\'ordine visivo', async () => {
+    it('l\'ordine di tabulazione segue l\'ordine visivo: ricerca → vista → prossimi → filtro → archivio', async () => {
       const user = userEvent.setup()
       renderTornei(dati)
-      const btn = (name: string) => screen.getByRole('button', { name })
+      const btn = (name: string | RegExp) => screen.getByRole('button', { name })
       const link = (name: string) => screen.getByRole('link', { name })
       const attesi = [
         screen.getByRole('searchbox', { name: 'Cerca nei tornei' }),
-        btn('Lista'), btn('Timeline'), btn('Mappa'),
-        btn('Tutti'), btn('2vs2'), btn('3vs3'), btn('4vs4'),
-        link('Riccione Cup'), link('Rimini Open'), link('Ravenna Beach'),
+        btn('Lista'), btn(/^Mappa/),
+        link('Riccione Cup'),
+        btn('Tutti'), btn(/^2vs2/), btn(/^3vs3/),
+        link('Rimini Open'), link('Ravenna Beach'),
       ]
       for (const el of attesi) {
         await user.tab()
@@ -569,8 +610,19 @@ describe('Tornei — con l\'orologio fermo', () => {
       expect(screen.getByRole('heading', { level: 2, name: '2vs2 1 torneo' })).toBeInTheDocument()
     })
 
+    it('la medaglia e il chevron delle righe non parlano due volte', () => {
+      renderTornei(dati)
+      const r = riga('Rimini Open')
+      expect(r.querySelector('.tornei-row-chev')).toHaveAttribute('aria-hidden', 'true')
+    })
+
     it('nessuna violazione axe con dati completi', async () => {
       const { container } = renderTornei(dati)
+      await expectNoA11yViolations(container)
+    })
+
+    it('nessuna violazione axe senza tornei in programma', async () => {
+      const { container } = renderTornei(dati.slice(1))
       await expectNoA11yViolations(container)
     })
 
@@ -582,7 +634,7 @@ describe('Tornei — con l\'orologio fermo', () => {
     it('nessuna violazione axe con un filtro attivo', async () => {
       const user = userEvent.setup()
       const { container } = renderTornei(dati)
-      await user.click(screen.getByRole('button', { name: '4vs4' }))
+      await user.click(screen.getByRole('button', { name: /^3vs3/ }))
       await expectNoA11yViolations(container)
     })
   })
@@ -596,6 +648,7 @@ describe('Tornei — con l\'orologio fermo', () => {
       makeTorneo({ id: 'f1', name: 'Riccione Cup', format: '4vs4', date: '2026-08-10' }),
       makeTorneo({ id: 'p1', name: 'Rimini Open', format: '2vs2', date: '2026-07-01' }),
       makeTorneo({ id: 'p2', name: 'Ravenna Beach', format: '3vs3', date: '2026-05-01' }),
+      makeTorneo({ id: 'p3', name: 'Cervia 4x4', format: '4vs4', date: '2026-04-01' }),
     ]
 
     // Difetto #1 — il sottotitolo diceva "3 tornei" mentre in pagina ne restava
@@ -603,15 +656,21 @@ describe('Tornei — con l\'orologio fermo', () => {
     it('il sottotitolo si accorda con il filtro attivo', async () => {
       const user = userEvent.setup()
       renderTornei(dati)
-      expect(screen.getByRole('status')).toHaveTextContent(/^3 tornei ·/)
-      await user.click(screen.getByRole('button', { name: '3vs3' }))
-      expect(screen.getByText(/^1 torneo ·/)).toBeInTheDocument()
-      expect(screen.getByRole('status')).toHaveTextContent('1 torneo · 0 podi')
+      expect(screen.getByRole('status')).toHaveTextContent(/^4 tornei ·/)
+      await user.click(screen.getByRole('button', { name: /^3vs3/ }))
+      // Il prossimo (che le chip non toccano) più il 3vs3.
+      expect(screen.getByRole('status')).toHaveTextContent(/^2 tornei · 0 podi/)
     })
 
-    it('il sottotitolo conta i podi delle card visibili', () => {
-      renderTornei([...dati, makeTorneo({ name: 'Podio', badge: '2°', badgeBg: '#FFF1EA', date: '2026-04-01' })])
-      expect(screen.getByRole('status')).toHaveTextContent('4 tornei · 1 podio')
+    it('il sottotitolo conta i podi delle righe visibili e dice il miglior piazzamento', () => {
+      renderTornei([...dati, makeTorneo({ name: 'Podio', badge: '2°', badgeBg: '#FFF1EA', date: '2026-04-02' })])
+      expect(screen.getByRole('status')).toHaveTextContent('5 tornei · 1 podio · miglior piazzamento 2°')
+    })
+
+    it('senza un piazzamento vero il sottotitolo non inventa un «miglior piazzamento»', () => {
+      renderTornei([makeTorneo({ name: 'In corso', badge: 'In corso', date: '2026-08-01' })])
+      expect(screen.getByRole('status')).toHaveTextContent('1 torneo · 0 podi')
+      expect(screen.getByRole('status')).not.toHaveTextContent(/miglior/)
     })
 
     // Difetto #2 — il filtro scartato restava nello stato: se quel formato
@@ -622,18 +681,18 @@ describe('Tornei — con l\'orologio fermo', () => {
       const { rerender } = renderTornei(dati)
       const render4vs4 = (tornei: typeof dati) => rerender(<TorneiConVista list={makeList(tornei)} />)
 
-      await user.click(screen.getByRole('button', { name: '4vs4' }))
-      render4vs4(dati.filter((t) => t.format !== '4vs4')) // il 4vs4 sparisce → si ricade su Tutti
+      await user.click(screen.getByRole('button', { name: /^4vs4/ }))
+      render4vs4(dati.filter((t) => t.id !== 'p3')) // il 4vs4 sparisce dall'archivio → Tutti
       render4vs4(dati) // il 4vs4 torna: deve restare "Tutti", non rifiltrare
 
       expect(screen.getByRole('button', { name: 'Tutti' })).toHaveAttribute('aria-pressed', 'true')
-      expect(sectionTitles()).toEqual(['Prossimi tornei 1 torneo', '2vs2 1 torneo', '3vs3 1 torneo'])
+      expect(sectionTitles()).toEqual(['Prossimi tornei 1 torneo', '2vs2 1 torneo', '3vs3 1 torneo', '4vs4 1 torneo'])
     })
 
     // Difetto #4 — le azioni erano `div` (ui.tsx `Button`): da tastiera non si
-    // poteva creare un torneo. L'intestazione di Tornei non ha più «Nuovo
-    // torneo» (la creazione sta nel ＋ e nella Sidebar, UX §14.1): il CTA da
-    // provare è quello dell'empty state, che è un `<button>` vero.
+    // poteva creare un torneo. L'intestazione di Tornei non ha «Nuovo
+    // torneo» (la creazione sta nel ＋, nella Sidebar e nel riquadro dei
+    // prossimi): i CTA da provare sono `<button>` veri.
     it('il CTA dell\'empty state è raggiungibile e attivabile da tastiera', async () => {
       const user = userEvent.setup()
       const { onNuovoTorneo } = renderTornei([])
@@ -652,14 +711,13 @@ describe('Tornei — con l\'orologio fermo', () => {
     // Difetto #5 — `role="button"` rendeva presentazionali i discendenti: con
     // uno screen reader la card annunciava solo "Apri il torneo X" e perdeva
     // categoria, piazzamento, data, città, record.
-    it('la card espone anche il proprio contenuto, non solo l\'etichetta', () => {
+    it('la riga espone anche il proprio contenuto, non solo l\'etichetta', () => {
       renderTornei([makeTorneo({ name: 'Rimini Open', category: 'Pro', badge: '1° 🏆', badgeBg: '#FFF1EA', date: '2026-01-01' })])
-      const link = screen.getByRole('link', { name: 'Rimini Open' })
-      const card = link.closest('article')!
-      expect(within(card).getByText('Pro')).toBeVisible()
-      expect(within(card).getByText('Primo posto')).toBeInTheDocument()
-      expect(card.querySelector('[role="button"]')).toBeNull()
-      expect(card.getAttribute('role')).not.toBe('button')
+      const r = riga('Rimini Open')
+      expect(within(r).getByText(/· Pro/)).toBeVisible()
+      expect(within(r).getByText('Primo posto')).toBeInTheDocument()
+      expect(r.querySelector('[role="button"]')).toBeNull()
+      expect(r.getAttribute('role')).not.toBe('button')
     })
   })
 
@@ -668,13 +726,6 @@ describe('Tornei — con l\'orologio fermo', () => {
   // verifica il contratto che le primitive dichiarano (UX §14.1): la classe o
   // l'attributo, non lo stile calcolato.
   describe('Tornei — responsive', () => {
-    it('la griglia dichiara colonne che non impongono una larghezza minima fissa', () => {
-      // `data-layout="grid-auto"` = `auto-fill, minmax(min(100%, var(--card-min)), 1fr)`:
-      // è ciò che impedisce alla colonna di superare il viewport.
-      renderTornei([makeTorneo({ date: '2026-01-01' })])
-      expect(gridUnder(/^2vs2/)).toHaveAttribute('data-layout', 'grid-auto')
-    })
-
     it('le chip del filtro restano su una riga che scorre, non vanno a capo', () => {
       renderTornei([
         makeTorneo({ format: '2vs2', date: '2026-01-01' }),
@@ -684,8 +735,8 @@ describe('Tornei — con l\'orologio fermo', () => {
     })
 
     it('il selettore di vista divide la riga in parti uguali', () => {
-      // Lista, Timeline e Mappa sono VISTE, non filtri: si dividono la riga
-      // dentro una guida piena, e la forma le distingue dalle chip sotto.
+      // Lista e Mappa sono VISTE, non filtri: si dividono la riga dentro una
+      // guida piena, e la forma le distingue dalle chip sotto.
       renderTornei([makeTorneo()], { mappa: makeMappaData({ pins: [makeMappaPin({ city: 'Cervia', tier: 'vinto' })] }) })
       expect(screen.getByRole('group', { name: 'Come vedere i tornei' })).toHaveAttribute('data-fill', 'equal')
     })
@@ -700,6 +751,11 @@ describe('Tornei — ricerca su tutte le viste', () => {
   ]
   const tornei = [makeTorneo({ id: 'e1', name: 'Riccione Cup' }), makeTorneo({ id: 'e2', name: 'Forlì Beach' })]
 
+  it('il campo dice cosa si può cercare', () => {
+    renderTornei(tornei, { entries })
+    expect(screen.getByRole('searchbox', { name: 'Cerca nei tornei' })).toHaveAttribute('placeholder', 'Cerca torneo, città, compagno')
+  })
+
   it('scrivendo, segmented e chip spariscono e compaiono i risultati', async () => {
     const user = userEvent.setup()
     renderTornei(tornei, { entries })
@@ -708,6 +764,15 @@ describe('Tornei — ricerca su tutte le viste', () => {
     expect(await screen.findByRole('link', { name: 'Forlì Beach' })).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Riccione Cup' })).not.toBeInTheDocument()
     expect(screen.getByRole('status')).toHaveTextContent('1 risultato per «forli»')
+  })
+
+  it('i risultati hanno la forma delle voci del Diario, ferme (niente salita mentre si scrive)', async () => {
+    const user = userEvent.setup()
+    renderTornei(tornei, { entries })
+    await user.type(screen.getByRole('searchbox', { name: 'Cerca nei tornei' }), 'forli')
+    const link = await screen.findByRole('link', { name: 'Forlì Beach' })
+    expect(link.closest('article')).not.toBeNull()
+    expect(link.closest('li')).not.toHaveClass('rise')
   })
 
   it('i risultati sono gli stessi dalla Mappa', async () => {

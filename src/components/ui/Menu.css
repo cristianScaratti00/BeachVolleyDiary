@@ -1,30 +1,162 @@
+/* ============================================================================
+   Menu: lo sheet del ＋ («Cosa registriamo?», design 13) e i popover.
+   ============================================================================ */
 @layer components {
+  /* ----------------------------------------------------------------- sheet */
+  /* Il foglio --bg col filo, raggio 34 in alto: 10 sopra la maniglia, 10 fra
+     un blocco e l'altro, 30 in fondo (più la safe-area). */
+  .ui-menu-sheet {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: var(--z-sheet);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2-5);
+    width: 100%;
+    max-width: var(--sheet-max);
+    max-height: 92dvh;
+    margin: 0 auto;
+    padding: var(--space-2-5) var(--gutter) calc(var(--space-8) - var(--space-0-5) + var(--safe-bottom));
+    border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+    background: var(--bg);
+    box-shadow: 0 0 0 var(--border-w) var(--edge), var(--elev-overlay);
+    color: var(--ink);
+  }
+  /* Pallo spunta dal bordo in alto a destra: le mani poggiano sul foglio. */
+  .ui-menu-pallo {
+    position: absolute;
+    right: calc(var(--space-6) + var(--space-1));
+    top: calc(-1 * (var(--space-16) - var(--space-0-5)));
+    pointer-events: none;
+  }
+  .ui-menu-handle {
+    position: relative;
+    flex: none;
+    align-self: center;
+    display: grid;
+    place-items: center;
+    width: calc(var(--handle-w) + 2 * var(--space-6));
+    height: var(--handle-h);
+  }
+  /* La presa arriva a 44, quasi tutta sopra il bordo del foglio. */
+  .ui-menu-handle::before {
+    content: "";
+    position: absolute;
+    inset: calc(var(--handle-h) + var(--space-2) - var(--touch)) 0 calc(-1 * var(--space-2));
+  }
+  .ui-menu-handle > span {
+    width: var(--handle-w);
+    height: var(--handle-h);
+    border-radius: var(--radius-capsule);
+    background: var(--line-strong);
+  }
+  .ui-menu-head { padding: var(--space-1-5) var(--space-1) var(--space-1); }
+  .ui-menu-heading { font: var(--type-title-1); letter-spacing: var(--track-title-1); }
+  .ui-menu-lead {
+    margin-top: calc(var(--space-1) - var(--hairline));
+    font: var(--type-subhead);
+    letter-spacing: var(--track-subhead);
+    color: var(--ink-2);
+  }
+  .ui-menu-list { display: flex; flex-direction: column; gap: var(--space-2-5); }
+
+  /* Le voci: card di vetro, raggio 20, riquadro icona 44 raggio 13, titolo
+     16/700 e sotto 13 --ink-2. Salgono sfalsate (la salita del redesign) e
+     si premono a molla: l'animazione NON resta appesa a fine corsa
+     (`backwards`), o il suo `transform` coprirebbe quello della pressione. */
+  .ui-menu-opt {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3-5);
+    width: 100%;
+    padding: var(--space-3) var(--space-3-5);
+    border-radius: calc(var(--radius-row) + var(--space-1));
+    text-align: left;
+    color: var(--ink);
+    animation: ui-rise var(--dur-rise) var(--ease-rise) backwards;
+    animation-delay: calc(var(--rise-i, 0) * var(--rise-step));
+    transition: transform var(--dur-press) var(--ease-press);
+  }
+  .ui-menu-opt:active { transform: scale(var(--press-scale)); }
+  /* Il filo in più (arancio sulla live, più scuro in hover) è un livello
+     sopra il bordo del vetro: il bordo del materiale non si sovrascrive. */
+  .ui-menu-opt::after {
+    content: "";
+    position: absolute;
+    inset: calc(-1 * var(--border-w));
+    border-radius: inherit;
+    box-shadow: inset 0 0 0 var(--border-w) transparent;
+    pointer-events: none;
+    transition: box-shadow var(--dur-svelto) var(--ease-standard);
+  }
+  .ui-menu-opt[data-tone="accent"]::after { box-shadow: inset 0 0 0 var(--border-w) var(--accent-edge); }
+  @media (hover: hover) and (pointer: fine) {
+    .ui-menu-opt:hover::after { box-shadow: inset 0 0 0 var(--border-w) var(--edge-strong); }
+  }
+  .ui-menu-opt:focus-visible { outline-offset: var(--focus-offset); }
+  .ui-menu-ico {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: var(--touch);
+    height: var(--touch);
+    border-radius: var(--radius-track);
+    border: var(--border-w) solid var(--edge);
+    background: var(--bg);
+    color: var(--ink);
+  }
+  .ui-menu-opt[data-tone="accent"] .ui-menu-ico { background: var(--accent); border-color: var(--accent-strong); color: var(--on-accent); }
+  .ui-menu-opt .ui-menu-text { flex: 1; gap: var(--space-0-5); }
+  .ui-menu-opt .ui-menu-label { font: var(--type-headline); font-weight: 700; letter-spacing: var(--track-headline); }
+  /* Il sottotitolo va a capo, ma al più due righe: un torneo dal nome
+     lunghissimo non fa della voce un paragrafo (il nome accessibile resta
+     intero). */
+  .ui-menu-opt .ui-menu-sub {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    white-space: normal;
+  }
+
+  /* «Annulla»: la capsula di vetro in fondo, staccata dalle voci. */
+  .ui-menu-cancel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: var(--touch);
+    margin-top: var(--space-1-5);
+    border-radius: var(--radius-capsule);
+    color: var(--ink);
+    font: var(--type-headline);
+    letter-spacing: var(--track-headline);
+    animation: ui-rise var(--dur-rise) var(--ease-rise) backwards;
+    animation-delay: calc(var(--rise-i, 0) * var(--rise-step));
+    transition: transform var(--dur-press) var(--ease-press);
+  }
+  .ui-menu-cancel:active { transform: scale(var(--press-scale)); }
+
+  /* --------------------------------------------------------------- popover */
   .ui-menu {
     position: fixed;
     z-index: var(--z-sheet);
     padding: var(--space-2);
-    border-radius: var(--radius-sheet);
+    border-radius: calc(var(--radius-card) + var(--space-0-5));
     color: var(--ink);
-  }
-  /* Sopra la TabBar, larga come lei; l'origine è il CENTRO DEL ＋. */
-  .ui-menu[data-placement="tabbar"] {
-    left: var(--tabbar-side);
-    right: var(--tabbar-side);
-    bottom: calc(var(--tabbar-bottom) + var(--tabbar-h) + var(--space-2));
-    max-width: var(--tabbar-max);
-    margin: 0 auto;
-    transform-origin: 50% calc(100% + var(--space-2) + var(--tabbar-h) / 2);
   }
   .ui-menu[data-placement="popover"] {
     width: min(var(--popover-w), calc(100vw - 2 * var(--space-2)));
     transform-origin: 50% 0;
   }
   .ui-menu-title {
-    padding: var(--space-2) 0 var(--space-1);
-    font: var(--type-footnote);
-    letter-spacing: var(--track-footnote);
+    padding: var(--space-2) var(--space-3) var(--space-1);
+    font: var(--type-eyebrow);
+    letter-spacing: var(--track-eyebrow);
     color: var(--ink-2);
-    text-align: center;
   }
   .ui-menu-item {
     position: relative;
@@ -35,7 +167,7 @@
     width: 100%;
     min-height: calc(var(--touch) + var(--space-3));
     padding: var(--space-2) var(--space-3);
-    border-radius: var(--radius-control);
+    border-radius: var(--radius-row);
     text-align: left;
     color: var(--ink);
   }
@@ -53,21 +185,24 @@
     .ui-menu-item:hover::before { opacity: var(--state-hover-soft); }
   }
   .ui-menu-item:active::before { opacity: var(--state-press-soft); transition-duration: 0ms; }
-  .ui-menu-item:focus-visible { outline-offset: -2px; }
+  .ui-menu-item:focus-visible { outline-offset: calc(-1 * var(--focus-width)); }
   /* Distruttiva: riga opaca, testo --danger (ART_DIRECTION §4.4). */
   .ui-menu-item[data-tone="destructive"] { background: var(--surface); color: var(--danger); margin-top: var(--space-1); }
   .ui-menu-item[data-tone="destructive"]::before { background: var(--danger); }
+  /* Il riquadro dell'icona come nello sheet, un poco più piccolo. */
   .ui-menu-icon {
     flex: none;
     display: grid;
     place-items: center;
     width: var(--space-10);
     height: var(--space-10);
-    border-radius: 50%;
-    background: var(--fill);
+    border-radius: calc(var(--radius-track) - var(--space-0-5));
+    border: var(--border-w) solid var(--edge);
+    background: var(--bg);
     color: var(--ink);
   }
-  .ui-menu-item[data-tone="destructive"] .ui-menu-icon { background: var(--danger-wash); color: var(--danger); }
+  .ui-menu-item[data-tone="accent"] .ui-menu-icon { background: var(--accent); border-color: var(--accent-strong); color: var(--on-accent); }
+  .ui-menu-item[data-tone="destructive"] .ui-menu-icon { background: var(--danger-wash); border-color: transparent; color: var(--danger); }
   .ui-menu-text { display: flex; flex-direction: column; min-width: 0; }
   .ui-menu-label { font: var(--type-headline); letter-spacing: var(--track-headline); }
   .ui-menu-sub {
@@ -78,6 +213,4 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  .ui-menu-sep { border: 0; height: var(--hairline); background: var(--separator); margin: var(--space-2) var(--space-3); }
-  .ui-menu-cancel { justify-content: center; min-height: var(--touch); }
 }

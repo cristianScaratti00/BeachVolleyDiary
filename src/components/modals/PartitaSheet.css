@@ -1,14 +1,48 @@
+/* Il modulo della partita (design 16): la card del punteggio bianca col filo,
+   raggio 18, le righe dei set a 8 l'una dall'altra; i punteggi 64×48
+   centrati, 20/700 a cifre tabellari. */
 @layer components {
   .partita-sheet-form { display: grid; gap: var(--space-6); }
-  .partita-sheet-fields { display: grid; gap: var(--space-4); border: 0; margin: 0; padding: 0; min-width: 0; }
+  .partita-sheet-fields { border: 0; margin: 0; padding: 0; min-width: 0; }
+
+  .partita-sheet-score-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-3);
+  }
+  .partita-sheet-esito {
+    font: var(--type-eyebrow);
+    letter-spacing: var(--track-eyebrow);
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+  }
+
+  .partita-sheet-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    border: var(--border-w) solid var(--edge);
+    border-radius: calc(var(--radius-row) + var(--space-0-5));
+    background: var(--surface);
+  }
   .partita-sheet-sets { display: grid; }
-  .partita-sheet-add { justify-self: start; }
+
+  /* «+ Aggiungi set»: la pillola di vetro alta 40 del design. */
+  .partita-sheet-add.ui-button {
+    align-self: flex-start;
+    min-height: calc(var(--control-sm) + var(--space-1-5));
+    margin-top: var(--space-1);
+  }
+
+  .partita-sheet-note .ui-textarea { min-height: calc(var(--field-h) * 1.5); resize: none; }
 
   /* E1 (MOTION.md §1.3): la riga di un set cresce e cala dentro lo sheet
      ancorato in basso, con `grid-template-rows`. Entrata in ENTRATA, uscita in
      SVELTO; con reduced-motion istantanea (la riga non riceve `data-entra`). */
   .partita-sheet-set { display: grid; grid-template-rows: 1fr; }
-  .partita-sheet-set + .partita-sheet-set > .partita-sheet-set-inner { padding-top: calc(var(--space-4) + var(--focus-reach)); }
+  .partita-sheet-set + .partita-sheet-set > .partita-sheet-set-inner { padding-top: calc(var(--space-2) + var(--focus-reach)); }
   /* Il padding è lo spazio dell'anello di focus dei campi (--focus-reach). */
   .partita-sheet-set-inner { min-height: 0; overflow: hidden; padding: var(--focus-reach); margin: calc(-1 * var(--focus-reach)); }
   .partita-sheet-set[data-entra] { animation: partita-cresce var(--dur-entrata) var(--ease-standard) both; }

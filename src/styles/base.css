@@ -1,5 +1,5 @@
 /* ============================================================================
-   Base del design system "Bagnasciuga": gli elementi HTML nudi, prima di
+   Base del design system "Bagnasciuga" (versione D): gli elementi HTML nudi, prima di
    qualunque componente. Legge solo token (tokens.css); il perché delle scelte
    sta in ART_DIRECTION.md §3, §8 e §16 (F1) e in MOTION.md §17 (F1).
 
@@ -48,13 +48,16 @@
     min-height: 100dvh;
     overflow-x: clip;
     background-color: var(--bg);
-    /* Il "sole basso" in alto a destra. Non `fixed`: su iOS non funziona e
-       ridipinge a ogni scroll (MOTION.md §9.2). */
+    /* Il fondo del redesign è piatto (--bg-canvas vale `none`). Mai `fixed`:
+       su iOS non funziona e ridipinge a ogni scroll (MOTION.md §9.2). */
     background-image: var(--bg-canvas);
     background-repeat: no-repeat;
     color: var(--ink);
     font: var(--type-body);
     letter-spacing: var(--track-body);
+    /* Cifre tabellari ovunque, come nel redesign: i numeri sono il soggetto
+       dell'app e non devono ballare quando cambiano. */
+    font-variant-numeric: tabular-nums;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     /* Il lampo grigio di WebKit al tocco raddoppierebbe lo strato di
@@ -74,8 +77,8 @@
   h1, h2, h3 { text-wrap: balance; }
   p { text-wrap: pretty; }
 
-  /* Anello di focus: navy su tutto il chiaro (12.61 sul fondo, 7.04 sul vetro
-     nel caso peggiore), bianco sulle superfici scure (materials.css).
+  /* Anello di focus: inchiostro su tutto il chiaro (15.72 sul fondo), bianco
+     sulle superfici scure (materials.css).
      `outline` e non `box-shadow`: sopravvive a `forced-colors`. */
   :focus-visible {
     outline: var(--focus-width) solid var(--focus-ring);
@@ -149,6 +152,25 @@
     clip: rect(0 0 0 0);
     white-space: nowrap;
   }
+
+  /* La SALITA del redesign: i blocchi di una schermata salgono di 12px e
+     compaiono uno dopo l'altro. Chi la usa mette `--rise-i` (0, 1, 2…) sul
+     blocco: il ritardo è `--rise-i × --rise-step`. Solo transform e opacità;
+     con reduced-motion resta la sola dissolvenza (--motion-scale a 0).
+     MAI su un contenitore che ha figli `position: fixed` o `sticky`: durante
+     la salita il transform ne diventerebbe il riferimento. */
+  .rise {
+    animation: ui-rise var(--dur-rise) var(--ease-rise) both;
+    animation-delay: calc(var(--rise-i, 0) * var(--rise-step));
+  }
+  @keyframes ui-rise {
+    from { opacity: 0; transform: translateY(calc(var(--rise-y) * var(--motion-scale))); }
+    to { opacity: 1; transform: none; }
+  }
+
+  /* La PRESSIONE del redesign: si stringe a .97 e torna oltre il segno. */
+  .press { transition: transform var(--dur-press) var(--ease-press); }
+  .press:active { transform: scale(var(--press-scale)); }
 
   /* La traccia (MOTION.md §10.4): ciò che hai appena creato o cambiato resta
      segnato da un fondo `--accent-wash` che svanisce, SOLO opacità. Parte

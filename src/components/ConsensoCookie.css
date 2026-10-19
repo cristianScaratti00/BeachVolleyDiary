@@ -1,5 +1,6 @@
-/* Il dialogo del consenso: la forma del ConfirmDialog (ART_DIRECTION §8),
-   opaco, sopra a tutto tranne il salto al contenuto (--z-consent). */
+/* Il dialogo del consenso nel linguaggio del redesign: la carta bianca del
+   ConfirmDialog (raggio degli sheet), opaca, sopra a tutto tranne il salto al
+   contenuto (--z-consent), con Pallo che sbircia dal bordo in alto. */
 @layer components {
   .consenso-velo {
     position: fixed;
@@ -12,24 +13,39 @@
     background: var(--scrim);
   }
   .consenso-velo[data-leaving] { pointer-events: none; }
+  /* Il dialogo è la cornice: dentro, Pallo (dietro) e la carta (davanti). */
   .consenso-dialog {
+    position: relative;
+    isolation: isolate;
     width: 100%;
     max-width: var(--sheet-max);
-    padding: var(--space-5) var(--space-4) var(--space-4);
-    background: var(--surface);
-    border-radius: var(--radius-sheet);
-    box-shadow: var(--elev-dialog);
     color: var(--ink);
     transform-origin: 50% 100%;
   }
+  /* Pallo sta DIETRO la carta: il bordo in alto gli copre la pancia, e restano
+     fuori la testa e le mani appoggiate. 55 = dove cadono i polsi a 72px. */
+  .consenso-pallo {
+    position: absolute;
+    z-index: -1;
+    top: -55px;
+    right: var(--space-8);
+  }
+  .consenso-carta {
+    padding: var(--space-6) var(--space-5) var(--space-5);
+    background: var(--surface);
+    border-radius: var(--radius-sheet);
+    box-shadow: var(--elev-dialog);
+  }
   @media (min-width: 600px) {
     .consenso-velo { align-items: center; }
-    .consenso-dialog { padding: var(--space-6); transform-origin: 50% 50%; }
+    .consenso-dialog { transform-origin: 50% 50%; }
+    .consenso-carta { padding: var(--space-6); }
   }
-  .consenso-title { font: var(--type-headline); letter-spacing: var(--track-headline); }
+  .consenso-title { font: var(--type-title-3); letter-spacing: var(--track-title-3); }
   .consenso-testo {
     margin-top: var(--space-2);
     font: var(--type-subhead);
+    line-height: 1.45;
     letter-spacing: var(--track-subhead);
     color: var(--ink-2);
   }
@@ -37,7 +53,7 @@
   .consenso-actions {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-2);
+    gap: var(--space-2-5);
     margin-top: var(--space-5);
   }
   .consenso-nota {

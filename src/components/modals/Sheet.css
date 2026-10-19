@@ -1,7 +1,8 @@
 /* ============================================================================
-   Sheet (ART_DIRECTION §9: `glass-thick`, raggio 28; MOTION.md §4.2). Sotto i
-   600px sale dal basso; da 600 è un form sheet centrato (max 560, raggio su
-   tutti gli angoli, niente maniglia né trascinamento).
+   Sheet (design 13/15/16, MOTION.md §4.2): fondo --bg pieno con il filo
+   --edge, raggio 34 in alto, maniglia 38×5 --line-strong. Sotto i 600px sale
+   dal basso; da 600 è un form sheet centrato (max 560, raggio su tutti gli
+   angoli, niente maniglia né trascinamento).
    ============================================================================ */
 @layer components {
   .ui-sheet-layer {
@@ -18,43 +19,109 @@
     width: 100%;
     max-width: var(--sheet-max);
     border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+    background: var(--bg);
+    box-shadow: 0 0 0 var(--border-w) var(--edge), var(--elev-overlay);
     color: var(--ink);
     outline: none;
   }
   @media (min-width: 600px) {
     .ui-sheet-layer { align-items: center; padding: var(--space-6) var(--gutter); }
-    .ui-sheet { border-radius: var(--radius-sheet); }
+    .ui-sheet { border-radius: var(--radius-sheet); box-shadow: 0 0 0 var(--border-w) var(--edge), var(--elev-dialog); overflow: hidden; }
   }
 
+  /* La maniglia: 10 sopra, la barretta, 10 sotto (il design). La presa vera
+     arriva a 44 allargandosi SOPRA il bordo del foglio, dove non c'è niente
+     da toccare: sotto c'è la barra dei moduli coi suoi pulsanti. */
   .ui-sheet-handle {
+    position: relative;
     flex: none;
     display: grid;
     place-items: center;
-    height: var(--touch);
+    height: calc(var(--space-5) + var(--handle-h));
+  }
+  .ui-sheet-handle::before {
+    content: "";
+    position: absolute;
+    inset: calc(var(--space-5) + var(--handle-h) - var(--touch)) 0 0;
   }
   .ui-sheet-handle > span {
     width: var(--handle-w);
     height: var(--handle-h);
     border-radius: var(--radius-capsule);
-    background: var(--ink-3);
+    background: var(--line-strong);
   }
 
   .ui-sheet-area,
   .ui-sheet-body {
     flex: 1;
     min-height: 0;
-    padding: 0 var(--gutter) var(--space-4);
+    padding: var(--space-2) var(--gutter) calc(var(--space-8) + var(--safe-bottom));
   }
+  .ui-sheet-area[data-header],
+  .ui-sheet-body[data-header] { padding-top: var(--space-3-5); }
   @media (min-width: 600px) {
-    .ui-sheet-area, .ui-sheet-body { padding-top: var(--space-6); }
+    .ui-sheet-area, .ui-sheet-body { padding-top: var(--space-6); padding-bottom: var(--space-6); }
+    .ui-sheet-area[data-header], .ui-sheet-body[data-header] { padding-top: var(--space-4); }
   }
+  /* Con il piè sotto, l'area non ha bisogno dello spazio della safe-area. */
+  .ui-sheet-area:has(+ .ui-sheet-footer),
+  .ui-sheet-body:has(+ .ui-sheet-footer) { padding-bottom: var(--space-4); }
 
-  .ui-sheet-head { margin-bottom: var(--space-4); }
-  .ui-sheet-title { font: var(--type-title-3); letter-spacing: var(--track-title-3); }
+  /* --------------------------------------------- titolo grande (contenuto) */
+  .ui-sheet-head { padding: var(--space-1-5) var(--space-1) 0; margin-bottom: var(--space-4); }
+  .ui-sheet-title { font: var(--type-title-1); letter-spacing: var(--track-title-1); text-wrap: balance; }
+  .ui-sheet-title:focus { outline: none; }
+  .ui-sheet-title:focus-visible { outline: var(--focus-width) solid var(--focus-ring); outline-offset: var(--focus-offset); }
   .ui-sheet-sub {
-    margin-top: var(--space-1);
+    margin-top: calc(var(--space-1) - var(--hairline));
     font: var(--type-subhead);
     letter-spacing: var(--track-subhead);
+    color: var(--ink-2);
+  }
+
+  /* ------------------------------------------------- barra dei moduli */
+  /* «Annulla · titolo · Salva» col filo sotto (design 15/16). Le due colonne
+     ai lati sono uguali: il titolo è al centro del foglio, non dello spazio
+     che avanza. */
+  .ui-sheet-header {
+    flex: none;
+    padding: var(--space-1) var(--gutter) var(--space-3);
+    border-bottom: var(--border-w) solid var(--edge);
+  }
+  @media (min-width: 600px) {
+    .ui-sheet-header { padding-top: var(--space-4); }
+  }
+  .ui-sheet-bar {
+    display: grid;
+    grid-template-columns: minmax(max-content, 1fr) minmax(0, max-content) minmax(max-content, 1fr);
+    align-items: center;
+    gap: var(--space-2);
+    min-height: var(--touch);
+  }
+  .ui-sheet-bar-side { display: flex; min-width: 0; }
+  .ui-sheet-bar-side[data-end] { justify-content: flex-end; }
+  .ui-sheet-bar-side > .ui-button { padding: 0 var(--space-4); }
+  .ui-sheet-bar-side[data-end] > .ui-button { padding: 0 calc(var(--space-4) + var(--space-0-5)); }
+  /* Il primario disattivo (manca il nome) è una capsula spenta: il filo
+     arancio del pieno se ne va con il colore. */
+  .ui-sheet-bar-side > .ui-button[data-variant="filled"][aria-disabled="true"] { box-shadow: inset 0 0 0 var(--border-w) var(--edge); }
+  .ui-sheet-bar-title { min-width: 0; text-align: center; }
+  .ui-sheet-bar-title > h2 {
+    font: var(--type-headline);
+    font-weight: 700;
+    letter-spacing: var(--track-headline);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .ui-sheet-bar-title > h2:focus { outline: none; }
+  .ui-sheet-bar-title > h2:focus-visible { outline: var(--focus-width) solid var(--focus-ring); outline-offset: var(--focus-offset); border-radius: var(--radius-xs); }
+  .ui-sheet-bar-title > p {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font: var(--type-footnote);
+    letter-spacing: var(--track-footnote);
     color: var(--ink-2);
   }
 
@@ -63,7 +130,7 @@
   .ui-sheet-footer {
     flex: none;
     padding: var(--space-3) var(--gutter) calc(var(--space-3) + var(--safe-bottom));
-    border-top: var(--hairline) solid var(--separator);
+    border-top: var(--border-w) solid var(--edge);
   }
   @media (min-width: 600px) {
     .ui-sheet-footer { padding-bottom: var(--space-4); }
@@ -72,7 +139,82 @@
   /* Fra un bersaglio distruttivo e uno no almeno 8px (UX §8.6). */
   .ui-sheet-actions-danger { margin-right: auto; }
   .ui-sheet-actions-main { display: flex; align-items: center; gap: var(--space-2); margin-left: auto; }
+  .ui-sheet-actions-main:has(> .ui-button[data-block]) { flex: 1; }
+  .ui-sheet-actions-main > .ui-button[data-block] { flex: 1; }
 
-  /* Lo stack dei moduli dentro lo sheet. */
-  .ui-sheet-stack { display: grid; gap: var(--space-4); }
+  /* Lo stack dei moduli: 18 fra un blocco e l'altro (design 15/16). */
+  /* Una colonna che non si allarga mai oltre il foglio: un testo su una riga
+     (il riassunto di «Altri dettagli») altrimenti la spingerebbe fuori. */
+  .ui-sheet-stack { display: grid; grid-template-columns: minmax(0, 1fr); gap: calc(var(--space-4) + var(--space-0-5)); }
+  /* Due campi affiancati (Data · Luogo; Formato · Superficie). */
+  .ui-sheet-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2-5); align-items: start; }
+  .ui-sheet-pair[data-ratio="chips"] { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); }
+  .ui-sheet-pair > .ui-sheet-span { grid-column: 1 / -1; }
+
+  /* Il campo che APRE una scelta (Luogo, Torneo): un select vero, vestito
+     come la riga del design con il chevron a destra. */
+  .ui-sheet-pick .ui-select-chev { transform: translateY(-50%) rotate(-90deg); }
+  .ui-sheet-pick-strong .ui-select { font-weight: 600; }
+
+  /* ---------------------------------------------------------------- chip */
+  /* Alte 36, raggio pieno, 13.5/600; la scelta è d'inchiostro pieno. Vanno a
+     capo: 6 fra l'una e l'altra in riga, 8 fra le righe, così i bersagli da
+     44 (allargati sopra e sotto) non si sovrappongono. */
+  .ui-sheet-chips { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-1-5); }
+  .ui-sheet-chip {
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    min-height: calc(var(--chip-h) + var(--space-0-5));
+    padding: 0 calc(var(--space-3) + var(--hairline));
+    border-radius: var(--radius-capsule);
+    background: var(--surface);
+    box-shadow: inset 0 0 0 var(--border-w) var(--edge);
+    color: var(--ink);
+    font: var(--type-subhead-strong);
+    letter-spacing: var(--track-subhead);
+    white-space: nowrap;
+    transition:
+      background-color var(--dur-svelto) var(--ease-standard),
+      color var(--dur-svelto) var(--ease-standard),
+      box-shadow var(--dur-svelto) var(--ease-standard),
+      transform var(--dur-press) var(--ease-press);
+  }
+  .ui-sheet-chip::after {
+    content: "";
+    position: absolute;
+    inset: calc((var(--chip-h) + var(--space-0-5) - var(--touch)) / 2) 0;
+  }
+  .ui-sheet-pair[data-ratio="chips"] .ui-sheet-chip { padding: 0 var(--space-2-5); }
+  .ui-sheet-chip[aria-pressed="true"] {
+    background: var(--select);
+    box-shadow: inset 0 0 0 var(--border-w) var(--select);
+    color: var(--on-select);
+  }
+  .ui-sheet-chip[data-variant="add"]:not([aria-pressed="true"]) {
+    background: var(--surface);
+    box-shadow: none;
+    outline: var(--border-w) dashed var(--line-strong);
+    outline-offset: calc(-1 * var(--border-w));
+    color: var(--ink-label);
+  }
+  .ui-sheet-chip[data-variant="add"]:not([aria-pressed="true"]):focus-visible {
+    outline: var(--focus-width) solid var(--focus-ring);
+    outline-offset: var(--focus-offset);
+  }
+  .ui-sheet-chip:not(:disabled):active { transform: scale(var(--press-scale)); }
+  @media (hover: hover) and (pointer: fine) {
+    .ui-sheet-chip:not([aria-pressed="true"]):not(:disabled):hover { box-shadow: inset 0 0 0 var(--border-w) var(--edge-strong); }
+    .ui-sheet-chip[data-variant="add"]:not([aria-pressed="true"]):not(:disabled):hover { outline-color: var(--edge-strong); box-shadow: none; }
+  }
+  .ui-sheet-chip:disabled { color: var(--ink-disabled); cursor: default; }
+  .ui-sheet-chip[aria-pressed="true"]:disabled { color: var(--on-select); opacity: 0.6; }
+
+  /* Lo «(facoltativo)» accanto a un'etichetta. */
+  .ui-field-label > .ui-sheet-optional { font-weight: 500; color: var(--ink-2); }
+
+  /* Il distruttivo in fondo ai moduli in modifica: vetro rosso, largo. */
+  .ui-sheet-danger { margin-top: var(--space-2); }
 }

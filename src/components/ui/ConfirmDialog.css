@@ -1,3 +1,5 @@
+/* Il dialogo di conferma: card bianca raggio 28 che galleggia sopra il suo
+   velo, pulsanti capsula uno sopra l'altro (il primario in alto). */
 @layer components {
   .ui-dialog-layer {
     position: fixed;
@@ -17,9 +19,9 @@
     position: relative;
     width: 100%;
     max-width: var(--sheet-max);
-    padding: var(--space-5) var(--space-4) var(--space-4);
+    padding: var(--space-6) var(--space-5) var(--space-5);
     background: var(--surface);
-    border-radius: var(--radius-sheet);
+    border-radius: calc(var(--radius-card) + var(--space-1-5));
     box-shadow: var(--elev-dialog);
     text-align: center;
     color: var(--ink);
@@ -29,12 +31,13 @@
     .ui-dialog-layer { align-items: center; }
     .ui-dialog { width: var(--dialog-w); transform-origin: 50% 50%; }
   }
-  .ui-dialog-title { font: var(--type-headline); letter-spacing: var(--track-headline); }
+  .ui-dialog-title { font: var(--type-title-3); letter-spacing: var(--track-title-3); text-wrap: balance; }
   .ui-dialog-text {
-    margin-top: var(--space-1);
+    margin-top: var(--space-1-5);
     font: var(--type-subhead);
     letter-spacing: var(--track-subhead);
     color: var(--ink-2);
+    text-wrap: pretty;
   }
   .ui-dialog-actions { display: grid; gap: var(--space-2); margin-top: var(--space-5); }
 }

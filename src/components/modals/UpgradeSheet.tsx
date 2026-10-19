@@ -27,7 +27,7 @@ export default function UpgradeSheet({ title = 'Limite raggiunto', message, onUp
       onClose={onClose}
       footer={
         <SheetActions>
-          <Button variant="quiet" onClick={onSeePlans}>Vedi i piani</Button>
+          <Button variant="glass" onClick={onSeePlans}>Vedi i piani</Button>
           <Button variant="filled" onClick={onUpgrade}>Passa a Premium · €5</Button>
         </SheetActions>
       }
