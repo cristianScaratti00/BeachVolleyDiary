@@ -226,17 +226,18 @@ describe('token — vetro chiaro, caso peggiore', () => {
     expect(contrast(L('on-glass'), vetro('glass-thick'))).toBe(14.58)
   })
 
-  it('la tab accesa: arancio-testo sulla pillola tinta, sul vetro sopra la carta', () => {
-    const pillola = over(L('accent-tint'), over(L('glass-regular'), WHITE))
-    expect(contrast(L('accent-text'), pillola)).toBe(4.56)
+  it('la tab accesa: arancio-testo sulla lente di vetro, sopra la capsula, sopra la carta', () => {
+    const lente = over(L('glass-lens'), over(L('glass-regular'), WHITE))
+    expect(contrast(L('accent-text'), lente)).toBe(5.18)
   })
 
-  it('PROVA NEGATIVA: lo stesso arancio-testo sopra un\'ombra non basta', () => {
-    // Per questo l'arancio come testo sul vetro c'è solo nella tab accesa,
-    // che galleggia su carta e mappa, e mai sopra le foto (dettaglio torneo:
-    // lì la TabBar non c'è).
-    const pillola = over(L('accent-tint'), over(L('glass-regular'), OMBRA))
-    expect(contrast(L('accent-text'), pillola)).toBeLessThan(AA_TEXT)
+  it('PROVA NEGATIVA: sopra un\'ombra la lente non basta del tutto (3.97)', () => {
+    // La lente più chiara della capsula fa salire l'etichetta accesa da 2.27
+    // (la vecchia pillola tinta) a 3.97, ma non a 4.5: per questo la TabBar
+    // non c'è dove sotto passano le foto (dettaglio torneo), e sopra carta e
+    // mappa l'etichetta resta sopra AA.
+    const lente = over(L('glass-lens'), over(L('glass-regular'), OMBRA))
+    expect(contrast(L('accent-text'), lente)).toBe(3.97)
   })
 
   it('--ink-2 PIENO sul vetro è più chiaro dell\'inchiostro al 78%: materials.css lo ridefinisce', () => {
@@ -246,6 +247,15 @@ describe('token — vetro chiaro, caso peggiore', () => {
 
   it('il rosso di «Elimina» sul vetro sopra il fondo pagina regge AA', () => {
     expect(contrast(L('danger'), over(L('glass-regular'), L('bg')))).toBe(6.23)
+  })
+
+  it('il vetro sopra i media: l\'etichetta è il primo piano della superficie sotto', () => {
+    // Wrapped sull'arancio e sull'inchiostro (anche nel tema scuro, dove
+    // l'inchiostro è chiaro), la Storia sul fondo dei visori.
+    expect(contrast(L('on-accent'), over(L('glass-media'), L('accent')))).toBe(6.66)
+    expect(contrast(L('on-select'), over(L('glass-media'), L('select')))).toBe(11.84)
+    expect(contrast(D('on-select'), over(D('glass-media'), D('select')))).toBe(17.19)
+    expect(contrast(L('on-glass-dark'), over(L('glass-media'), L('viewer-bg')))).toBe(13.64)
   })
 
   it('vetro scuro dei visori: caso peggiore sul BIANCO', () => {

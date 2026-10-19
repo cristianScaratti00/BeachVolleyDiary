@@ -36,6 +36,7 @@ import { Pallo } from '../Pallo'
 import type { PalloUmore } from '../Pallo'
 import { Button, IconButton } from '../ui/Button'
 import { Icon } from '../ui/Icon'
+import { LiquidGlass } from '../ui/LiquidGlass'
 import { medalTier } from '../ui/Medal'
 import { placementText } from '../ui/Badge'
 import { useEscape, useFocusTrap, useInitialFocus, useReturnFocus } from '../ui/overlay'
@@ -356,7 +357,7 @@ export default function StoryModal({ story, placement, didascalie: scritte, onCl
       exit={{ opacity: 0, transition: SVELTO }}
     >
       <div className="storia-top">
-        <IconButton icon="close" label="Chiudi" variant="glass" material="glass-dark" iconSize={20} data-close="" onClick={onClose} />
+        <IconButton icon="close" label="Chiudi" variant="glass" material="glass-media" iconSize={20} data-close="" onClick={onClose} />
         <p className="storia-title" aria-hidden="true">Storia Instagram</p>
         <span className="storia-spacer" />
       </div>
@@ -383,7 +384,8 @@ export default function StoryModal({ story, placement, didascalie: scritte, onCl
         </div>
 
         <div className="storia-scelte">
-          <div role="radiogroup" aria-label="Layout della storia" className="storia-layouts" data-material="glass-dark">
+          <div role="radiogroup" aria-label="Layout della storia" className="storia-layouts">
+            <LiquidGlass layer material="glass-media" />
             {LAYOUTS.map((l, i) => (
               <button key={l.key} {...radioLayout(l.key, i)} className="storia-layout">
                 <MiniLayout layout={l.key} pal={pal} />
@@ -391,7 +393,8 @@ export default function StoryModal({ story, placement, didascalie: scritte, onCl
               </button>
             ))}
           </div>
-          <div role="radiogroup" aria-label="Colore della storia" className="storia-palette" data-material="glass-dark">
+          <div role="radiogroup" aria-label="Colore della storia" className="storia-palette">
+            <LiquidGlass layer material="glass-media" />
             {STORY_PALETTES.map((p, i) => (
               <button
                 key={p.key}
@@ -412,7 +415,7 @@ export default function StoryModal({ story, placement, didascalie: scritte, onCl
         {canShareFiles && (
           <Button
             variant="glass"
-            material="glass-dark"
+            material="glass-media"
             size="lg"
             icon="share"
             className="storia-action"

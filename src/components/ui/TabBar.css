@@ -41,17 +41,18 @@
     --material-elev: var(--elev-float);
   }
 
-  /* La pillola della tab accesa: l'arancio al 12% col suo filo, che scivola
-     da una tab all'altra con un filo di rimbalzo. */
+  /* Il selettore della tab accesa: una lente di vetro liquido (LiquidGlass,
+     variante «lente») che scivola da una tab all'altra con un filo di
+     rimbalzo. Niente colore: l'arancio sta su icona ed etichetta. */
   .ui-tabbar-pill {
     position: absolute;
+    isolation: isolate;
     top: var(--space-1-5);
     bottom: var(--space-1-5);
     left: var(--space-1-5);
     width: calc((100% - 2 * var(--space-1-5) - (var(--n, 4) - 1) * var(--space-0-5)) / var(--n, 4));
     border-radius: var(--radius-capsule);
-    background: var(--accent-tint);
-    box-shadow: inset 0 0 0 var(--border-w) var(--accent-edge-tint);
+    --material-elev: 0 2px 8px -3px rgb(28 28 30 / 0.18);
     transform: translateX(calc(var(--i, 0) * (100% + var(--space-0-5))));
     transition: transform var(--dur-rise) var(--ease-press), opacity var(--dur-svelto) var(--ease-standard);
     pointer-events: none;

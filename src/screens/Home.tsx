@@ -5,10 +5,11 @@
 //      che porta al Profilo (il Profilo non è più una tab);
 //   2. il periodo (Sempre · le ultime stagioni) e «Compagni ⌄»: gli stessi
 //      filtri di Statistiche, Mappa e Wrapped (C10);
-//   3. Pallo con la nuvoletta: un consiglio vero alla volta, un tocco passa al
-//      successivo. Le azioni di oggi stanno qui: «Aggiungi partita» per il
-//      torneo di oggi, «Com'è andata a «X»?», la Storia dell'ultimo torneo.
-//      La faccia di Pallo segue il consiglio (`umoreDelConsiglio`);
+//   3. Pallo con la nuvoletta: un consiglio vero alla volta, che passa da
+//      solo al successivo ogni 40 secondi. Le azioni di oggi stanno qui:
+//      «Aggiungi partita» per il torneo di oggi, «Com'è andata a «X»?», la
+//      Storia dell'ultimo torneo. La faccia di Pallo segue il consiglio
+//      (`umoreDelConsiglio`); toccarlo lo fa solo saltare;
 //   4. «Partite vinte»: il win rate grande, lo scarto, la barra vinte/perse.
 //      Tutta la card porta a Statistiche;
 //   5. Beach Wrapped, quando è pronto;
@@ -24,7 +25,8 @@
 // applicato e coprirebbe quello della pressione.
 // ============================================================================
 import { useEffect, useId, useRef, useState } from 'react'
-import type { CSSProperties, ReactNode } from 'react'
+import type { CSSProperties, FocusEvent, ReactNode } from 'react'
+import { AnimatePresence, useReducedMotion } from 'motion/react'
 import * as m from 'motion/react-m'
 import type { HomeProps } from '../app/contracts'
 import { Link } from '../app/router'
@@ -37,7 +39,7 @@ import { Medal } from '../components/ui/Medal'
 import { Pallo, usePalloTocco } from '../components/Pallo'
 import type { PalloHandle, PalloUmore } from '../components/Pallo'
 import { FiltroSelect, WrappedRow } from '../components/dashboard'
-import { ENTRATA } from '../components/Motion'
+import { ENTRATA, SVELTO } from '../components/Motion'
 import './Home.css'
 
 /** Il posto nella salita sfalsata. */
@@ -159,56 +161,127 @@ function umoreDelConsiglio(c: Consiglio, ultimi: UltimoTorneo[]): PalloUmore {
   }
 }
 
+/** Ogni quanto Pallo passa da solo al consiglio dopo. */
+const GIRO_CONSIGLI_MS = 40_000
+
+/** La pagina è nascosta (un'altra app, un'altra scheda, lo schermo spento). */
+function usePaginaNascosta(): boolean {
+  const [nascosta, setNascosta] = useState(() => typeof document !== 'undefined' && document.visibilityState === 'hidden')
+  useEffect(() => {
+    const aggiorna = () => setNascosta(document.visibilityState === 'hidden')
+    document.addEventListener('visibilitychange', aggiorna)
+    return () => document.removeEventListener('visibilitychange', aggiorna)
+  }, [])
+  return nascosta
+}
+
 /**
- * Pallo e la sua nuvoletta. Con più di un consiglio Pallo è un pulsante: ogni
- * tocco passa al successivo, e la nuvoletta (una live region) lo dice; intanto
- * Pallo fa un salto con una faccia allegra a caso, e cinque tocchi di fila (o
- * uno lungo) sono la sua sorpresa. Con un consiglio solo è un disegno e basta:
- * un pulsante che non cambia niente sarebbe una promessa vuota. Gli occhi
- * seguono il dito in tutti e due i casi.
+ * L'altezza della nuvoletta scivola da un consiglio all'altro invece di
+ * saltare, e le card sotto scendono o salgono con lei. Misura il contenuto
+ * (ResizeObserver) e anima l'altezza vera, non una scala: il filo e il testo
+ * non si deformano. Con reduced-motion cambia di colpo; senza ResizeObserver
+ * (jsdom) resta `auto`.
+ */
+function AltezzaMorbida({ children }: { children: ReactNode }) {
+  const dentro = useRef<HTMLDivElement>(null)
+  const [h, setH] = useState<number | 'auto'>('auto')
+  const ridotto = useReducedMotion()
+  useEffect(() => {
+    const el = dentro.current
+    if (!el || typeof ResizeObserver === 'undefined') return
+    const ro = new ResizeObserver(([e]) => setH(e?.borderBoxSize?.[0]?.blockSize ?? el.offsetHeight))
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+  return (
+    <m.div className="home-nuvola-misura" initial={false} animate={{ height: h }} transition={ridotto ? { duration: 0 } : ENTRATA}>
+      <div ref={dentro} className="home-nuvola-dentro">
+        {children}
+      </div>
+    </m.div>
+  )
+}
+
+/**
+ * Pallo e la sua nuvoletta. Il consiglio cambia da solo ogni 40 secondi, in
+ * giro; se quello in vista sparisce dai dati (la partita aggiunta, il
+ * piazzamento scritto) si riparte dal primo. Il primo arriva con la salita
+ * della riga; i successivi sfumano (SVELTO via, ENTRATA dentro) mentre
+ * l'altezza scivola.
+ *
+ * WCAG 2.2.2 (contenuto che si aggiorna da solo): il cambio si ferma finché
+ * il puntatore o il dito sono sulla nuvoletta o il focus è dentro (si sta
+ * leggendo, o si sta per toccare il suo pulsante), e finché la pagina è
+ * nascosta; a mano libera riparte da 40 secondi pieni. Il cambio non si
+ * annuncia: niente live region, un annuncio ogni 40 secondi interromperebbe
+ * VoiceOver mentre legge altro. Il consiglio sta nel flusso della pagina, e
+ * chi ci arriva lo legge.
+ *
+ * Pallo invece è un disegno: toccarlo lo fa saltare con una faccia allegra e
+ * cinque tocchi di fila (o uno lungo) sono la sua sorpresa, ma non cambia
+ * niente. Per questo non è un pulsante: niente nome, niente fermata di Tab,
+ * `aria-hidden`; a chi non lo vede non manca nulla. Gli occhi seguono il dito.
  */
 function PalloConsiglia({ consigli, ultimi, on, dopo }: { consigli: Consiglio[]; ultimi: UltimoTorneo[]; on: AzioniConsiglio; dopo?: ReactNode }) {
-  const [i, setI] = useState(0)
-  // Il primo consiglio arriva con la salita della riga; i successivi con la
-  // loro comparsa (ENTRATA), solo dopo un tocco.
-  const toccato = useRef(false)
+  const [scelto, setScelto] = useState<string | null>(null)
+  const [sopra, setSopra] = useState(false)
+  const [aFuoco, setAFuoco] = useState(false)
+  const nascosta = usePaginaNascosta()
   const pallo = useRef<PalloHandle>(null)
-  const gesti = usePalloTocco(pallo, () => {
-    toccato.current = true
-    setI((x) => x + 1)
-  })
+  const gesti = usePalloTocco(pallo)
+
   const n = consigli.length
-  if (n === 0) return null
-  const c = consigli[i % n]
-  const disegno = <Pallo ref={pallo} umore={umoreDelConsiglio(c, ultimi)} size={96} ombra segui />
+  // Per id, non per posizione: un consiglio che entra o esce prima di quello
+  // in vista non lo cambia sotto gli occhi.
+  const i = Math.max(0, consigli.findIndex((x) => x.id === scelto))
+  const c: Consiglio | undefined = consigli[i]
+  const dopoId = n > 1 ? consigli[(i + 1) % n].id : null
+  const fermo = !dopoId || sopra || aFuoco || nascosta
+
+  // Dipende solo da stringhe e booleani: un nuovo array di consigli con gli
+  // stessi id (un re-render del genitore) non fa ripartire il conto.
+  useEffect(() => {
+    if (fermo || !dopoId) return
+    const t = window.setTimeout(() => setScelto(dopoId), GIRO_CONSIGLI_MS)
+    return () => window.clearTimeout(t)
+  }, [fermo, c?.id, dopoId])
+
+  if (!c) return null
+  const esce = (e: FocusEvent<HTMLDivElement>) => {
+    if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setAFuoco(false)
+  }
   return (
     <div className="home-pallo rise" style={sale(2)}>
-      {n > 1 ? (
-        <button type="button" className="home-pallo-btn press pallo-toccabile" aria-label="Pallo: un altro consiglio" {...gesti}>
-          {disegno}
-        </button>
-      ) : (
-        <span className="home-pallo-btn">{disegno}</span>
-      )}
-      <div className="home-nuvola">
+      <span className="home-pallo-tocco press pallo-toccabile" aria-hidden="true" {...gesti}>
+        <Pallo ref={pallo} umore={umoreDelConsiglio(c, ultimi)} size={96} ombra segui />
+      </span>
+      <div
+        className="home-nuvola"
+        onPointerEnter={() => setSopra(true)}
+        onPointerLeave={() => setSopra(false)}
+        onFocus={() => setAFuoco(true)}
+        onBlur={esce}
+      >
         <p className="home-nuvola-chi">Pallo</p>
-        <div aria-live="polite">
-          <m.div
-            key={`${i % n}:${c.id}`}
-            className="home-nuvola-corpo"
-            initial={toccato.current ? { opacity: 0, y: 4 } : false}
-            animate={{ opacity: 1, y: 0 }}
-            transition={ENTRATA}
-          >
-            <p className="home-nuvola-testo">{c.testo}</p>
-            {c.azione && (
-              <div className="home-nuvola-azioni">
-                <Azione a={c.azione} on={on} />
-              </div>
-            )}
-            {dopo}
-          </m.div>
-        </div>
+        <AltezzaMorbida>
+          <AnimatePresence mode="wait" initial={false}>
+            <m.div
+              key={c.id}
+              className="home-nuvola-corpo"
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0, transition: ENTRATA }}
+              exit={{ opacity: 0, transition: SVELTO }}
+            >
+              <p className="home-nuvola-testo">{c.testo}</p>
+              {c.azione && (
+                <div className="home-nuvola-azioni">
+                  <Azione a={c.azione} on={on} />
+                </div>
+              )}
+              {dopo}
+            </m.div>
+          </AnimatePresence>
+        </AltezzaMorbida>
       </div>
     </div>
   )

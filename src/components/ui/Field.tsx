@@ -7,8 +7,10 @@
 //   ogni tasto (UX §8.9). Niente scossone (MOTION.md §8.1).
 // - I campi usano il Body (17px): sopra i 16px iOS non ingrandisce la pagina.
 // - Il focus non toglie il bordo: si aggiunge l'anello.
+// - Ogni `TextField type="password"` ha l'occhio «Mostra password» dentro il
+//   campo (`revealable`, acceso di serie): sul telefono si sbaglia a scrivere.
 // ============================================================================
-import { forwardRef, useId, useRef } from 'react'
+import { forwardRef, useId, useLayoutEffect, useRef, useState } from 'react'
 import type { CSSProperties, InputHTMLAttributes, KeyboardEvent, ReactNode, SelectHTMLAttributes, TextareaHTMLAttributes } from 'react'
 import { Icon } from './Icon'
 import './Field.css'
@@ -48,27 +50,89 @@ function Chrome({ id, label, labelHidden, hint, error, trailing, className, chil
 export interface TextFieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'>, FieldChrome {
   value: string
   onChange: (value: string) => void
+  /**
+   * Solo con `type="password"`, ed è acceso di serie: l'occhio dentro il
+   * campo, a destra, mostra e nasconde quello che si sta scrivendo. `false`
+   * lo toglie.
+   */
+  revealable?: boolean
 }
 
+// Una password mostrata è un `type="text"`: senza questi, iOS le metterebbe la
+// maiuscola e la correggerebbe mentre la si scrive.
+const SENZA_CORRETTORE = { autoCapitalize: 'none', autoCorrect: 'off', spellCheck: false } as const
+
 export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function TextField(
-  { label, labelHidden, hint, error, trailing, className, id, value, onChange, type = 'text', ...rest },
+  { label, labelHidden, hint, error, trailing, className, id, value, onChange, type = 'text', revealable = true, ...rest },
   ref,
 ) {
   const auto = useId()
   const fid = id ?? auto
+  const segreto = type === 'password' && revealable
+  const [mostra, setMostra] = useState(false)
+  const own = useRef<HTMLInputElement | null>(null)
+  const cursore = useRef<[number, number] | null>(null)
+
+  // Cambiare `type` può spostare il cursore (Safari lo manda in fondo): torna
+  // dov'era, prima che si veda.
+  useLayoutEffect(() => {
+    const el = own.current
+    const c = cursore.current
+    cursore.current = null
+    if (el && c && document.activeElement === el) el.setSelectionRange(c[0], c[1])
+  }, [mostra])
+
+  const campo = (
+    <input
+      {...(segreto ? SENZA_CORRETTORE : null)}
+      {...rest}
+      ref={(el) => {
+        own.current = el
+        if (typeof ref === 'function') ref(el)
+        else if (ref) ref.current = el
+      }}
+      id={fid}
+      type={segreto && mostra ? 'text' : type}
+      className="ui-input"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      aria-invalid={error ? true : undefined}
+      aria-describedby={describedBy(hint ? `${fid}-h` : false, error ? `${fid}-e` : false, rest['aria-describedby'])}
+    />
+  )
+
   return (
     <Chrome id={fid} label={label} labelHidden={labelHidden} hint={hint} error={error} trailing={trailing} className={className}>
-      <input
-        {...rest}
-        ref={ref}
-        id={fid}
-        type={type}
-        className="ui-input"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={describedBy(hint ? `${fid}-h` : false, error ? `${fid}-e` : false, rest['aria-describedby'])}
-      />
+      {segreto ? (
+        <span className="ui-password">
+          {campo}
+          {/* Un interruttore (`aria-pressed`) col nome fisso: «Mostra password,
+              premuto» vuol dire che si vede. Al tocco non prende il fuoco
+              (pointerdown e il mousedown di compatibilità annullati): il campo
+              lo tiene, la tastiera resta su e il cursore non si muove. */}
+          <button
+            type="button"
+            className="ui-password-toggle"
+            aria-label="Mostra password"
+            aria-pressed={mostra}
+            aria-controls={fid}
+            disabled={rest.disabled}
+            onPointerDown={(e) => e.preventDefault()}
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => {
+              const el = own.current
+              if (el && document.activeElement === el && el.selectionStart !== null && el.selectionEnd !== null) {
+                cursore.current = [el.selectionStart, el.selectionEnd]
+              }
+              setMostra((v) => !v)
+            }}
+          >
+            <Icon name={mostra ? 'eye-off' : 'eye'} size={20} />
+          </button>
+        </span>
+      ) : (
+        campo
+      )}
     </Chrome>
   )
 })

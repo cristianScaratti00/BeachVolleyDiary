@@ -115,8 +115,8 @@ describe('Home — diario vuoto', () => {
     await user.click(screen.getByRole('button', { name: 'Crea il primo torneo' }))
     expect(p.onNuovoTorneo).toHaveBeenCalledOnce()
     expect(screen.getByRole('link', { name: "Usa l'assistente" })).toHaveAttribute('href', '/crea')
-    // Un consiglio solo: Pallo non è un pulsante che non cambia niente.
-    expect(screen.queryByRole('button', { name: 'Pallo: un altro consiglio' })).toBeNull()
+    // Pallo è un disegno, non un pulsante.
+    expect(screen.queryByRole('button', { name: /Pallo/ })).toBeNull()
     // Niente numeri, niente filtri: non c'è niente da filtrare.
     expect(screen.queryByRole('heading', { name: 'Partite vinte' })).toBeNull()
     expect(screen.queryByRole('group', { name: 'Periodo' })).toBeNull()
@@ -128,18 +128,133 @@ describe('Home — diario vuoto', () => {
   })
 })
 
+/** Il giro dei consigli di Pallo. */
+const GIRO = 40_000
+/** Con Wrapped pronto il diario pieno ha tre consigli: oggi si gioca, Wrapped, la Storia. */
+const conWrapped: Partial<HomeProps> = { wrapped: { visibile: true, titolo: 'Beach Wrapped' } }
+const OGGI_SI_GIOCA = 'Oggi si gioca: «Summer Cup Rimini».'
+const WRAPPED = "Beach Wrapped è pronto. Ci diamo un'occhiata?"
+const STORIA = 'Hai vinto «Sunset Series Cervia»: lo racconti in una storia?'
+
+/** La nuvoletta: il «Pallo» che firma e il consiglio sotto. */
+const nuvola = () => screen.getByText('Pallo').parentElement!
+/** Pallo da toccare: il contenitore del disegno. */
+const palloDa = (container: HTMLElement) => container.querySelector('svg.pallo')!.parentElement!
+/** Fa passare il tempo finto (timer e animazioni). */
+const passa = (ms: number) =>
+  act(() => {
+    vi.advanceTimersByTime(ms)
+  })
+
 describe('Home — Pallo', () => {
-  it('ogni tocco passa al consiglio successivo, nella live region', async () => {
-    const user = userEvent.setup()
-    renderHome(pieno, { wrapped: { visibile: true, titolo: 'Beach Wrapped' } })
-    const nuvola = screen.getByText('Pallo').parentElement!
-    const live = nuvola.querySelector('[aria-live="polite"]')!
-    expect(live).toHaveTextContent('Oggi si gioca: «Summer Cup Rimini».')
-    const pallo = screen.getByRole('button', { name: 'Pallo: un altro consiglio' })
-    await user.click(pallo)
-    expect(live).toHaveTextContent("Beach Wrapped è pronto. Ci diamo un'occhiata?")
-    await user.click(pallo)
-    expect(live).toHaveTextContent('Hai vinto «Sunset Series Cervia»: lo racconti in una storia?')
+  describe('il giro dei consigli', () => {
+    beforeEach(() => {
+      vi.useFakeTimers()
+    })
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('ogni 40 secondi passa al consiglio successivo, in giro, e la faccia lo segue', () => {
+      const { container } = renderHome(pieno, conWrapped)
+      expect(nuvola()).toHaveTextContent(OGGI_SI_GIOCA)
+      passa(GIRO - 1)
+      expect(nuvola()).toHaveTextContent(OGGI_SI_GIOCA)
+      passa(1)
+      expect(nuvola()).toHaveTextContent(WRAPPED)
+      expect(nuvola()).not.toHaveTextContent(OGGI_SI_GIOCA)
+      expect(within(nuvola()).queryByRole('button', { name: 'Aggiungi partita' })).toBeNull()
+      // «Ci diamo un'occhiata?»: l'occhiolino.
+      expect(container.querySelector('svg.pallo')).toHaveAttribute('data-umore', 'occhiolino')
+      passa(GIRO)
+      expect(nuvola()).toHaveTextContent(STORIA)
+      passa(GIRO)
+      expect(nuvola()).toHaveTextContent(OGGI_SI_GIOCA)
+    })
+
+    it('il cambio non si annuncia: la nuvoletta non è una live region', () => {
+      renderHome(pieno, conWrapped)
+      expect(nuvola().closest('[aria-live]')).toBeNull()
+      expect(nuvola().querySelector('[aria-live], [role="status"], [role="log"]')).toBeNull()
+    })
+
+    it('si ferma col puntatore o il dito sulla nuvoletta, e riparte da 40 secondi pieni', () => {
+      renderHome(pieno, conWrapped)
+      passa(GIRO - 5000)
+      fireEvent.pointerEnter(nuvola())
+      passa(GIRO * 3)
+      expect(nuvola()).toHaveTextContent(OGGI_SI_GIOCA)
+      fireEvent.pointerLeave(nuvola())
+      passa(GIRO - 1)
+      expect(nuvola()).toHaveTextContent(OGGI_SI_GIOCA)
+      passa(1)
+      expect(nuvola()).toHaveTextContent(WRAPPED)
+    })
+
+    it('si ferma col focus nella nuvoletta (sul suo pulsante), e riparte quando esce', () => {
+      renderHome(pieno, conWrapped)
+      const aggiungi = within(nuvola()).getByRole('button', { name: 'Aggiungi partita' })
+      act(() => aggiungi.focus())
+      passa(GIRO * 3)
+      expect(nuvola()).toHaveTextContent(OGGI_SI_GIOCA)
+      expect(aggiungi).toHaveFocus()
+      act(() => aggiungi.blur())
+      passa(GIRO)
+      expect(nuvola()).toHaveTextContent(WRAPPED)
+    })
+
+    it('si ferma quando la pagina non si vede', () => {
+      let stato: DocumentVisibilityState = 'visible'
+      Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => stato })
+      try {
+        renderHome(pieno, conWrapped)
+        stato = 'hidden'
+        act(() => {
+          document.dispatchEvent(new Event('visibilitychange'))
+        })
+        passa(GIRO * 3)
+        expect(nuvola()).toHaveTextContent(OGGI_SI_GIOCA)
+        stato = 'visible'
+        act(() => {
+          document.dispatchEvent(new Event('visibilitychange'))
+        })
+        passa(GIRO)
+        expect(nuvola()).toHaveTextContent(WRAPPED)
+      } finally {
+        Reflect.deleteProperty(document, 'visibilityState')
+      }
+    })
+
+    it('se il consiglio in vista sparisce dai dati si torna al primo', () => {
+      const { p, rerender } = renderHome(pieno, conWrapped)
+      passa(GIRO)
+      expect(nuvola()).toHaveTextContent(WRAPPED)
+      // Wrapped non è più pronto: il suo consiglio esce.
+      rerender(<Home {...p} consigli={p.consigli.filter((c) => !c.id.startsWith('wrapped'))} />)
+      passa(1000)
+      expect(nuvola()).toHaveTextContent(OGGI_SI_GIOCA)
+      expect(nuvola()).not.toHaveTextContent(WRAPPED)
+      passa(GIRO)
+      expect(nuvola()).toHaveTextContent(STORIA)
+    })
+
+    it('un consiglio solo resta fermo', () => {
+      renderHome(makeData())
+      passa(GIRO * 3)
+      expect(nuvola()).toHaveTextContent('Registra il primo torneo')
+    })
+
+    it('la Storia dell\'ultimo torneo e il link a Beach Wrapped', () => {
+      const data = makeData({
+        tournaments: [makeTournament({ id: 't9', name: 'Riccione Beach', date: '2026-07-01', placement: '1° 🏆' })],
+        matches: [makeMatch({ tournamentId: 't9' })],
+      })
+      const { p } = renderHome(data, conWrapped)
+      expect(within(nuvola()).getByRole('link', { name: 'Apri Beach Wrapped' })).toHaveAttribute('href', '/wrapped')
+      passa(GIRO)
+      fireEvent.click(within(nuvola()).getByRole('button', { name: 'Storia Instagram' }))
+      expect(p.onStoria).toHaveBeenCalledWith('t9')
+    })
   })
 
   it('oggi giochi: «Aggiungi partita» per il torneo di oggi', async () => {
@@ -156,20 +271,6 @@ describe('Home — Pallo', () => {
     expect(screen.getByText("Com'è andata a «Lido Cup»?")).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Aggiorna il piazzamento' }))
     expect(p.onAggiornaPiazzamento).toHaveBeenCalledWith('t2')
-  })
-
-  it('la Storia dell\'ultimo torneo e il link a Beach Wrapped', async () => {
-    const user = userEvent.setup()
-    const data = makeData({
-      tournaments: [makeTournament({ id: 't9', name: 'Riccione Beach', date: '2026-07-01', placement: '1° 🏆' })],
-      matches: [makeMatch({ tournamentId: 't9' })],
-    })
-    const { p } = renderHome(data, { wrapped: { visibile: true, titolo: 'Beach Wrapped' } })
-    const nuvola = screen.getByText('Pallo').parentElement!
-    expect(within(nuvola).getByRole('link', { name: 'Apri Beach Wrapped' })).toHaveAttribute('href', '/wrapped')
-    await user.click(screen.getByRole('button', { name: 'Pallo: un altro consiglio' }))
-    await user.click(within(nuvola).getByRole('button', { name: 'Storia Instagram' }))
-    expect(p.onStoria).toHaveBeenCalledWith('t9')
   })
 
   /** L'ultimo torneo del diario: prima le vinte, poi le perse (in quest'ordine, per la serie). */
@@ -201,43 +302,48 @@ describe('Home — Pallo', () => {
       vi.useRealTimers()
     })
 
+    it('Pallo è un disegno da toccare, non un pulsante: niente nome, niente fermata di Tab', () => {
+      const { container } = renderHome(pieno, conWrapped)
+      expect(screen.queryByRole('button', { name: /Pallo/ })).toBeNull()
+      const pallo = palloDa(container)
+      expect(pallo.tagName).not.toBe('BUTTON')
+      expect(pallo).toHaveAttribute('aria-hidden', 'true')
+      expect(pallo).not.toHaveAttribute('tabindex')
+    })
+
     // `fireEvent`: con l'orologio finto userEvent aspetterebbe un tempo che
     // non passa. Qui conta il click, non come ci si arriva.
-    it('Pallo salta con una faccia allegra, poi prende quella del consiglio nuovo', () => {
-      const { container } = renderHome(pieno, { wrapped: { visibile: true, titolo: 'Beach Wrapped' } })
+    it('il tocco lo fa saltare con una faccia allegra, poi torna quella del consiglio: il consiglio resta', () => {
+      const { container } = renderHome(pieno, conWrapped)
       const svg = container.querySelector('svg.pallo')!
       expect(svg).toHaveAttribute('data-umore', 'saluta')
-      fireEvent.click(screen.getByRole('button', { name: 'Pallo: un altro consiglio' }))
+      fireEvent.click(palloDa(container))
       expect(svg).toHaveAttribute('data-tocco')
       expect(['esulta', 'contento', 'occhiolino', 'cuori', 'festa']).toContain(svg.getAttribute('data-umore'))
-      act(() => {
-        vi.advanceTimersByTime(1000)
-      })
-      // «Beach Wrapped è pronto. Ci diamo un'occhiata?»: l'occhiolino.
+      expect(nuvola()).toHaveTextContent(OGGI_SI_GIOCA)
+      passa(1000)
       expect(svg).not.toHaveAttribute('data-tocco')
-      expect(svg).toHaveAttribute('data-umore', 'occhiolino')
+      expect(svg).toHaveAttribute('data-umore', 'saluta')
+      expect(nuvola()).toHaveTextContent(OGGI_SI_GIOCA)
     })
 
-    it('cinque tocchi di fila sono la sorpresa (e ognuno passa al consiglio dopo)', () => {
-      const { container } = renderHome(pieno, { wrapped: { visibile: true, titolo: 'Beach Wrapped' } })
-      const pallo = screen.getByRole('button', { name: 'Pallo: un altro consiglio' })
+    it('cinque tocchi di fila sono la sorpresa, e il consiglio resta', () => {
+      const { container } = renderHome(pieno, conWrapped)
+      const pallo = palloDa(container)
       for (let k = 0; k < 5; k++) fireEvent.click(pallo)
       expect(container.querySelector('svg.pallo')).toHaveAttribute('data-sorpresa', 'palleggio')
-      // 5 tocchi su 3 consigli: il terzo, la Storia.
-      expect(screen.getByText('Hai vinto «Sunset Series Cervia»: lo racconti in una storia?')).toBeInTheDocument()
+      expect(nuvola()).toHaveTextContent(OGGI_SI_GIOCA)
     })
 
-    it('il tocco lungo è solo la sorpresa: il consiglio non cambia', () => {
-      const { container } = renderHome(pieno, { wrapped: { visibile: true, titolo: 'Beach Wrapped' } })
-      const pallo = screen.getByRole('button', { name: 'Pallo: un altro consiglio' })
+    it('il tocco lungo è la sorpresa, e il consiglio resta', () => {
+      const { container } = renderHome(pieno, conWrapped)
+      const pallo = palloDa(container)
       fireEvent.pointerDown(pallo, { button: 0 })
-      act(() => {
-        vi.advanceTimersByTime(600)
-      })
+      passa(600)
       expect(container.querySelector('svg.pallo')).toHaveAttribute('data-sorpresa')
       fireEvent.pointerUp(pallo)
       fireEvent.click(pallo)
-      expect(screen.getByText(/^Oggi si gioca: «Summer Cup Rimini»\./)).toBeInTheDocument()
+      expect(nuvola()).toHaveTextContent(OGGI_SI_GIOCA)
     })
   })
 

@@ -64,6 +64,25 @@ describe('PasswordSheet', () => {
     expect(screen.getByLabelText('Conferma')).toHaveFocus()
   })
 
+  it('ogni password si può mostrare, una per volta, senza perdere il fuoco', async () => {
+    const user = userEvent.setup()
+    const { props } = renderSheet()
+    const nuova = screen.getByLabelText('Nuova password')
+    const conferma = screen.getByLabelText('Conferma')
+    const occhi = screen.getAllByRole('button', { name: 'Mostra password' })
+    expect(occhi.map((b) => b.getAttribute('aria-controls'))).toEqual([nuova.id, conferma.id])
+    await user.type(nuova, 'segreta')
+    await user.click(occhi[0])
+    expect(occhi[0]).toHaveAttribute('aria-pressed', 'true')
+    expect(nuova).toHaveAttribute('type', 'text')
+    expect(nuova).toHaveAttribute('autocomplete', 'new-password')
+    expect(conferma).toHaveAttribute('type', 'password')
+    expect(nuova).toHaveFocus()
+    // Mostrare non è salvare: il modulo non si chiude e non parte niente.
+    expect(props.onSave).not.toHaveBeenCalled()
+    expect(props.onClose).not.toHaveBeenCalled()
+  })
+
   it('nessuna violazione axe', async () => {
     const { container } = renderSheet()
     await expectNoA11yViolations(container)

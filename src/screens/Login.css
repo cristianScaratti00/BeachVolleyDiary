@@ -19,15 +19,32 @@
     /* L'errore di un campo sul buio: il rosso pieno farebbe 3:1 sul nero, il
        suo fondo chiaro (--danger-wash) fa 17. L'icona dice che è un errore. */
     --danger: var(--danger-wash);
-    position: relative;
+    /* La cornice: ferma, alta quanto la parte visibile dello schermo. Con la
+       tastiera su, `--vv-h` e `--vv-top` (useAccessoFermo) la stringono
+       sopra la tastiera; senza JS è la viewport dinamica. Mai più alta. */
+    position: fixed;
+    top: var(--vv-top, 0px);
+    left: 0;
+    right: 0;
+    height: var(--vv-h, 100dvh);
     isolation: isolate;
-    min-height: 100dvh;
+    overflow: hidden;
+    overscroll-behavior: none;
     background: var(--surface-brand);
   }
-  /* Il rimbalzo di iOS oltre i bordi mostra il fondo della pagina: qui è il buio. */
-  :root:has(.accesso) body { background-color: var(--surface-brand); }
+  /* Finché c'è l'accesso (`<html data-accesso>`, messo e tolto da Login) la
+     pagina non scorre e non rimbalza; il fondo, se mai si vedesse, è il buio. */
+  :root[data-accesso],
+  :root[data-accesso] body {
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+  :root[data-accesso] body { background-color: var(--surface-brand); }
 
   /* ------------------------------------------------------------- Scena */
+  /* La scena è della pagina intera (`fixed` sulla viewport, non sulla
+     cornice): quando sale la tastiera non si rimpicciolisce, la tastiera le
+     passa sopra come a tutto il resto. */
   .accesso-scena {
     position: fixed;
     inset: 0;
@@ -103,19 +120,30 @@
   }
 
   /* ----------------------------------------------------------- Colonna */
-  /* Una colonna da telefono anche su desktop (440: la misura del design più
-     il respiro), ancorata in basso; se il contenuto non ci sta (schermi
-     bassi, zoom al 200%) la pagina scorre e la scena resta ferma dietro. */
+  /* L'area del modulo riempie la cornice. È l'unica cosa che può scorrere, e
+     solo se il contenuto non ci sta (iPhone SE con la tastiera, testo al
+     200%): la pagina mai. In orizzontale non scorre: i passi che scivolano
+     di lato non devono aprire uno scroll. È anche il contenitore che misura
+     l'altezza rimasta (vedi «Poco spazio», in fondo). */
   .accesso-main {
     position: relative;
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    container: accesso / size;
+  }
+  /* Una colonna da telefono anche su desktop (440: la misura del design più
+     il respiro), alta almeno quanto l'area e col modulo ancorato in basso. */
+  .accesso-vista {
     display: flex;
     flex-direction: column;
-    min-height: 100dvh;
+    gap: var(--space-6);
+    min-height: 100%;
     max-width: 440px;
     margin: 0 auto;
     padding: calc(var(--safe-top) + var(--space-2)) var(--space-6) max(var(--space-8), calc(var(--safe-bottom) + var(--space-2)));
   }
-  .accesso-vista { flex: 1; display: flex; flex-direction: column; gap: var(--space-6); }
   .accesso-fondo { margin-top: auto; display: flex; flex-direction: column; gap: var(--space-3-5); }
 
   /* In cima: il «‹» (16 dal bordo, come la NavBar) e la barra dei passi. */
@@ -229,6 +257,12 @@
     transition: border-color var(--dur-svelto) var(--ease-standard), background-color var(--dur-svelto) var(--ease-standard);
   }
   .accesso .ui-input:focus { background: color-mix(in srgb, var(--on-glass-dark) 12%, transparent); }
+  /* L'occhio «Mostra password» col margine di questi campi (16): l'icona si
+     allinea al testo e il testo si ferma prima. Sul buio è il bianco al 66%
+     (--ink-3), pieno quando la password si vede o sotto il mouse. */
+  .accesso .ui-password > .ui-input { padding-right: calc(var(--touch) + var(--space-1)); }
+  .accesso .ui-password-toggle { right: calc(var(--space-4) - (var(--touch) - var(--icon-20)) / 2); }
+  .accesso .ui-password-toggle[aria-pressed="true"] { color: var(--ink); }
   /* L'autocompletamento di Chrome dipinge il campo di azzurro chiaro: sul
      buio diventerebbe una lastra bianca col testo bianco. */
   .accesso .ui-input:-webkit-autofill {
@@ -303,5 +337,45 @@
   @media (prefers-reduced-motion: reduce) {
     .accesso-segmento > span,
     .accesso-punto-segno { transition: none; }
+  }
+
+  /* ------------------------------------------------------ Poco spazio */
+  /* Con la tastiera su il margine della barra Home sta sotto la tastiera:
+     il pulsante si appoggia subito sopra. (`:where`: le regole qui sotto,
+     per l'altezza, possono stringere ancora.) */
+  :where(.accesso[data-tastiera]) .accesso-vista { padding-bottom: var(--space-4); }
+
+  /* Quando l'altezza rimasta non basta a tutto (la tastiera su, un iPhone
+     SE, il telefono in orizzontale) titolo, campi e pulsante devono starci:
+     se ne vanno il sottotitolo, il «Passo n di 2» (lo dice già la barra) e
+     il cambio Accedi/Registrati, che torna appena si chiude la tastiera; il
+     titolo si accorcia e gli spazi si stringono. Se nemmeno così ci sta,
+     scorre l'area del modulo. 540: la vista più alta (Registrati, passo 2)
+     ne chiede 534; un iPhone SE in Safari, senza tastiera, ne ha 548. */
+  @container accesso (height < 540px) {
+    .accesso-vista { gap: var(--space-4); padding-bottom: var(--space-4); }
+    .accesso-fondo,
+    .accesso-passo { gap: var(--space-3); }
+    .accesso-sotto,
+    .accesso-passo-n,
+    .accesso-cambio { display: none; }
+    .accesso-testa { margin-bottom: 0; }
+    .accesso-h1,
+    .accesso-passo .accesso-h1 { font-size: 1.75rem; line-height: 1.08; letter-spacing: -0.03em; }
+    .accesso-invia { margin-top: 0; }
+  }
+  /* Ancora meno (iPhone SE con la tastiera, ~340): campi da 48, spazi da 8,
+     titolo su una riga quando può. Il bersaglio resta 44. */
+  @container accesso (height < 420px) {
+    .accesso-vista {
+      --field-h: calc(var(--touch) + var(--space-1));
+      gap: var(--space-2);
+      padding-top: calc(var(--safe-top) + var(--space-1));
+      padding-bottom: var(--space-3);
+    }
+    .accesso-fondo,
+    .accesso-passo { gap: var(--space-2); }
+    .accesso-h1,
+    .accesso-passo .accesso-h1 { font-size: 1.375rem; }
   }
 }

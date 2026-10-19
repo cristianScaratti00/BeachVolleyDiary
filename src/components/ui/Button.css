@@ -84,6 +84,8 @@
      materiale ridefinisce --ink, e --ink sul vetro scuro è il bianco. */
   /* Il vetro posato nella pagina galleggia appena: un'ombra corta. */
   .ui-button[data-variant="glass"] { color: var(--ink); --material-elev: var(--elev-glass); }
+  /* Il vetro chiaro sul buio (Benvenuto, Accedi): inchiostro bianco. */
+  :is(.ui-button, .ui-icon-button)[data-glass="clear"] { color: var(--on-glass-dark); --focus-ring: #FFFFFF; }
   /* Il vetro che dice «elimina» / «esci» (Profilo, dettaglio compagno): il
      rosso sul vetro chiaro sopra il fondo pagina fa 6.08. */
   .ui-button[data-variant="glass"][data-tone="danger"] { color: var(--danger); }
@@ -142,6 +144,10 @@
   .ui-icon-button[data-variant="filled"] { background: var(--accent); color: var(--on-accent); box-shadow: inset 0 0 0 var(--border-w) var(--accent-strong); }
   .ui-icon-button[data-variant="quiet"] { color: var(--ink-2); }
   .ui-icon-button[data-variant="glass"] { color: var(--ink); --material-elev: var(--elev-glass); }
+  /* Il vetro sopra i media (Wrapped, Storia): l'etichetta è il primo piano
+     della superficie sotto, l'ombra appena un velo sul colore pieno. Dopo le
+     due regole del vetro qui sopra, e vince su entrambe. */
+  :is(.ui-button, .ui-icon-button)[data-glass="media"] { color: inherit; --material-elev: var(--elev-glass-media); }
   @media (hover: hover) and (pointer: fine) {
     .ui-icon-button:not([aria-disabled="true"]):hover::before { opacity: var(--state-hover); }
   }

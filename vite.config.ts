@@ -30,9 +30,9 @@ export default defineConfig({
           // alla mappa delle conquiste e resta nel suo chunk, così la mappa del
           // luogo non lo scarica.
           if (/[\\/]node_modules[\\/]leaflet[\\/]/.test(id)) return 'leaflet'
-          // Il vetro liquido: arriva in lazy solo sui browser Blink, dove la
-          // rifrazione si vede (LiquidGlass.tsx). Un nome stabile per la cache.
-          if (id.includes('@samasante/liquid-glass')) return 'liquid-glass'
+          // Il vetro liquido (liquid-glass-react): arriva in lazy al primo vetro
+          // montato (LiquidGlass.tsx). Un nome stabile per la cache.
+          if (id.includes('liquid-glass-react')) return 'liquid-glass'
         },
       },
     },

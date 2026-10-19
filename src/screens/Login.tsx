@@ -21,8 +21,12 @@
 //
 // «Password dimenticata?» non c'è: nel repo non esiste un flusso di recupero,
 // e un link che non porta da nessuna parte è peggio di nessun link.
+//
+// L'accesso NON scorre: è alto esattamente quanto la parte visibile dello
+// schermo, anche con la tastiera su (`useAccessoFermo`, più sotto). Le
+// password si possono mostrare: l'occhio è di TextField.
 // ============================================================================
-import { useEffect, useId, useRef, useState } from 'react'
+import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import type { CSSProperties, FormEvent, KeyboardEvent, PointerEvent, ReactNode, RefObject } from 'react'
 import * as m from 'motion/react-m'
 import { AnimatePresence, useIsPresent } from 'motion/react'
@@ -49,6 +53,14 @@ const NOME_DEBOUNCE_MS = 450
 const NOME_MAX = 40
 /** Quanto deve scorrere il dito in orizzontale perché il carosello cambi. */
 const SWIPE_PX = 40
+/**
+ * Di quanto si deve accorciare la parte visibile perché sia la tastiera: le
+ * barre di Safari che entrano ed escono valgono meno di 100, una tastiera
+ * più di 250.
+ */
+const TASTIERA_PX = 150
+/** Lo spazio sopra il campo a fuoco quando l'area del modulo deve scorrere fino a lui. */
+const MARGINE_FUOCO = 16
 
 // Le tre cose che l'app fa davvero. La terza nomina «Chi c'è oggi» solo se
 // la funzione è accesa: un carosello non promette quello che non c'è.
@@ -82,6 +94,9 @@ export default function Login() {
   const [nameMsg, setNameMsg] = useState('')
   const [nameErr, setNameErr] = useState('')
   const nomeRef = useRef<HTMLInputElement>(null)
+  const cornice = useRef<HTMLDivElement>(null)
+  const area = useRef<HTMLElement>(null)
+  useAccessoFermo(cornice, area)
   // La prima vista arriva col caricamento della pagina e non prende il focus;
   // da lì in poi ogni cambio di vista o di passo lo porta al nuovo titolo,
   // come la navigazione dell'app (UX §4.4).
@@ -197,9 +212,9 @@ export default function Login() {
   )
 
   return (
-    <div className="accesso" data-surface="dark">
+    <div ref={cornice} className="accesso" data-surface="dark">
       <Scena inquadratura={vista} />
-      <main className="accesso-main" id="contenuto">
+      <main ref={area} className="accesso-main" id="contenuto">
         <AnimatePresence mode="wait" initial={false}>
           {vista === 'benvenuto' ? (
             <Quadro key="benvenuto">
@@ -348,6 +363,116 @@ export default function Login() {
       </main>
     </div>
   )
+}
+
+/**
+ * L'accesso sta fermo, alto quanto la parte visibile dello schermo. Finché è
+ * montato:
+ *  - `<html data-accesso>`: pagina e body non scorrono e non rimbalzano
+ *    (Login.css). Si toglie all'uscita, e l'app torna a scorrere;
+ *  - la cornice (`position: fixed`) segue il `visualViewport`: con la tastiera
+ *    su iOS non accorcia il layout ma sposta la parte visibile (`offsetTop`).
+ *    `--vv-h` e `--vv-top` la rimettono lì, a ogni `resize`/`scroll`, in un
+ *    rAF e senza transizioni (la tastiera la anima iOS). Il modulo è ancorato
+ *    in basso: finisce subito sopra la tastiera. Con lo zoom a pizzico la
+ *    cornice si ferma, se no inseguirebbe la lente;
+ *  - `data-tastiera` quando la parte visibile si accorcia di una tastiera: il
+ *    margine della barra Home, che è sotto la tastiera, non serve più;
+ *  - un dito che trascina non sposta niente: iOS farebbe scorrere la parte
+ *    visibile e i campi sparirebbero sotto la tastiera. Restano liberi lo
+ *    zoom (due dita, o pagina già ingrandita: UX §8.8) e ciò che scorre
+ *    davvero, cioè l'area del modulo quando non ci sta (testo grande, iPhone
+ *    SE in orizzontale): scorre lei, mai la pagina.
+ */
+function useAccessoFermo(cornice: RefObject<HTMLDivElement>, area: RefObject<HTMLElement>) {
+  useLayoutEffect(() => {
+    const root = document.documentElement
+    root.setAttribute('data-accesso', '')
+    return () => root.removeAttribute('data-accesso')
+  }, [])
+
+  useLayoutEffect(() => {
+    const vv = window.visualViewport
+    const el = cornice.current
+    if (!vv || !el) return
+    let frame = 0
+    let larga = -1
+    let alta = 0 // la parte visibile più alta vista a questa larghezza: senza tastiera
+    let prima = -1
+
+    // Si sta scrivendo e l'area del modulo non ci sta: mostra il fondo (campi
+    // e pulsante sopra la tastiera) e, se il campo a fuoco resta sopra,
+    // risale fino a lui.
+    const tieniInVista = () => {
+      const a = area.current
+      const f = document.activeElement
+      if (!a || a.scrollHeight <= a.clientHeight) return
+      if (!(f instanceof HTMLElement) || !a.contains(f) || !f.matches('input, textarea, select')) return
+      a.scrollTop = a.scrollHeight
+      const sopra = a.getBoundingClientRect().top + MARGINE_FUOCO - f.getBoundingClientRect().top
+      if (sopra > 0) a.scrollTop -= sopra
+    }
+
+    const misura = () => {
+      frame = 0
+      if (vv.scale > 1.01) {
+        el.style.removeProperty('--vv-h')
+        el.style.removeProperty('--vv-top')
+        el.removeAttribute('data-tastiera')
+        return
+      }
+      const w = document.documentElement.clientWidth
+      if (w !== larga) {
+        larga = w
+        alta = 0
+      }
+      alta = Math.max(alta, vv.height)
+      el.style.setProperty('--vv-h', `${vv.height}px`)
+      el.style.setProperty('--vv-top', `${vv.offsetTop}px`)
+      el.toggleAttribute('data-tastiera', alta - vv.height > TASTIERA_PX)
+      if (vv.height !== prima) {
+        prima = vv.height
+        tieniInVista()
+      }
+    }
+    const pianifica = () => {
+      if (!frame) frame = requestAnimationFrame(misura)
+    }
+
+    misura()
+    vv.addEventListener('resize', pianifica)
+    vv.addEventListener('scroll', pianifica)
+    return () => {
+      cancelAnimationFrame(frame)
+      vv.removeEventListener('resize', pianifica)
+      vv.removeEventListener('scroll', pianifica)
+    }
+  }, [cornice, area])
+
+  useEffect(() => {
+    // Si decide all'inizio del gesto: il dito è partito dentro qualcosa che
+    // scorre davvero (l'area del modulo che non ci sta, o un dialogo sopra)?
+    let libero = false
+    const inizia = (e: TouchEvent) => {
+      libero = false
+      for (let el = e.target instanceof Element ? e.target : null; el && el !== document.body; el = el.parentElement) {
+        if (el.scrollHeight > el.clientHeight && /auto|scroll/.test(getComputedStyle(el).overflowY)) {
+          libero = true
+          return
+        }
+      }
+    }
+    const blocca = (e: TouchEvent) => {
+      if (libero || e.touches.length > 1 || (window.visualViewport?.scale ?? 1) > 1.01) return
+      if (e.cancelable) e.preventDefault()
+    }
+    document.addEventListener('touchstart', inizia, { passive: true })
+    document.addEventListener('touchmove', blocca, { passive: false })
+    return () => {
+      document.removeEventListener('touchstart', inizia)
+      document.removeEventListener('touchmove', blocca)
+    }
+  }, [])
 }
 
 /**

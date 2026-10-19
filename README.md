@@ -215,10 +215,18 @@ redesign Liquid Glass (prima sezione di ART_DIRECTION.md). In breve:
   `#E2E2DE`, un accento (arancio `#FF6B1A` col filo `#E05A10`; come testo `--accent-text`). Il CTA
   è arancio con l'etichetta d'inchiostro; la tab accesa è una pillola arancio tenue; la chip scelta
   è d'inchiostro pieno.
-- **Vetro liquido** sui livelli che galleggiano, via `data-material` (`materials.css`) e
-  `LiquidGlass` (`src/components/ui/LiquidGlass.tsx`): bianco al 55% che sfoca e satura, bordo
-  bianco e riflesso; sui browser Blink anche la **rifrazione** vera (`@samasante/liquid-glass`,
-  caricata in lazy solo lì). Il contenuto (card, liste, grafici) è carta opaca.
+- **Vetro liquido** con [`liquid-glass-react`](https://github.com/rdev/liquid-glass-react) in tutta
+  l'app, via `LiquidGlass` (`src/components/ui/LiquidGlass.tsx`): TabBar (con la lente che scorre
+  sotto la tab accesa), Sidebar, pulsanti di vetro in cima ai dettagli, azioni in fondo, ogni
+  `Button variant="glass"`, voci del ＋, risposte rapide dell'assistente; sopra i media (Wrapped,
+  Storia) il vetro `glass-media`, quasi trasparente con la sola luce sul bordo. Su Chrome/Android il
+  bordo piega il contenuto (filtro SVG); su Safari/iOS e Firefox restano sfocatura, luce sul bordo e
+  ombra. Della libreria si usa solo il vetro: i suoi bordi di luce e i suoi veli sono spenti
+  (`LiquidGlass.css`), la luce la disegna il materiale. Il materiale CSS (`data-material`,
+  `materials.css`) è la base e il ripiego. La libreria dichiara React 19 ma usa solo API di React
+  18: `overrides` in `package.json`. Il contenuto (card, liste, grafici) è carta opaca.
+  `node docs/qa/barra.mjs` controlla a ogni fotogramma che la TabBar resti ferma cambiando tab e
+  scorrendo (niente che sbordi a destra).
 - **Movimento**: `ENTRATA` / `SVELTO` / `MOLLA` (`src/components/Motion.tsx`, libreria Motion) =
   `--dur-*` + `--ease-*`, più la SALITA sfalsata (`.rise`) e la PRESSIONE a molla (`.press`) del
   redesign; solo `transform` e `opacity`; tutto rispetta `prefers-reduced-motion`.

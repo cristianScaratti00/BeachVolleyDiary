@@ -8,6 +8,7 @@
 // ============================================================================
 import { IconButton } from './ui/Button'
 import './MapZoom.css'
+import { LiquidGlass } from './ui/LiquidGlass'
 
 export function MapZoom({ onIn, onOut, canIn = true, canOut = true }: {
   onIn: () => void
@@ -18,7 +19,8 @@ export function MapZoom({ onIn, onOut, canIn = true, canOut = true }: {
   canOut?: boolean
 }) {
   return (
-    <div className="mapzoom" data-material="glass-thin" role="group" aria-label="Zoom della mappa">
+    <div className="mapzoom" role="group" aria-label="Zoom della mappa">
+      <LiquidGlass layer />
       <IconButton
         icon="plus"
         label="Ingrandisci"

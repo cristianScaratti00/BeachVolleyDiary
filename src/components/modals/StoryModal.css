@@ -1,6 +1,6 @@
 /* ============================================================================
    Visore della Storia: la cornice (token) e la TELA del PNG (letterali).
-   La cornice è il visore scuro con i comandi di vetro scuro che galleggiano:
+   La cornice è il visore scuro con i comandi di vetro che galleggiano:
    il × in cima, i colori in una capsula, le azioni in fondo.
    ============================================================================ */
 @layer components {
@@ -29,9 +29,6 @@
     letter-spacing: var(--track-headline);
   }
   .storia-spacer { width: var(--touch); flex: none; }
-  /* Il vetro scuro sul fondo dei visori è nero su nero: il filo del vetro sul
-     buio (lo stesso del Benvenuto) ne disegna il bordo. */
-  .storia [data-material="glass-dark"] { border: var(--border-w) solid var(--glass-clear-border); }
 
   .storia-stage {
     min-height: 0;
@@ -50,8 +47,9 @@
     display: grid;
     place-items: center;
   }
-  /* Le due scelte: il layout e il colore, due capsule di vetro scuro. Sul
-     telefono vanno a capo una sotto l'altra; dove c'è posto, in fila. */
+  /* Le due scelte: il layout e il colore, due capsule di vetro sopra i media
+     (LiquidGlass `glass-media`, lo strato dietro ai bottoni). Sul telefono
+     vanno a capo una sotto l'altra; dove c'è posto, in fila. */
   .storia-scelte {
     flex: none;
     display: flex;
@@ -61,12 +59,16 @@
   }
   .storia-layouts,
   .storia-palette {
+    position: relative;
+    isolation: isolate;
     display: flex;
     gap: var(--space-1);
     padding: var(--space-1);
     border-radius: var(--radius-capsule);
   }
-  .storia-palette { gap: var(--space-2); }
+  /* L'anello del colore scelto (2px + 2px di stacco) deve stare dentro la
+     capsula, non sul suo bordo. */
+  .storia-palette { gap: var(--space-2); padding: var(--space-1-5); }
 
   /* Un layout: la miniatura della tela e il nome. Scelto, è la pillola
      bianca con l'inchiostro (la coppia della chip scelta, rovesciata sul

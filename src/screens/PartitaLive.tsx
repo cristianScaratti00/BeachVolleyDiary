@@ -80,6 +80,7 @@ import {
 } from './PartitaLive.storico'
 import type { PartitaAmici } from './PartitaLive.storico'
 import './PartitaLive.css'
+import { LiquidGlass } from '../components/ui/LiquidGlass'
 
 /** La chiave della partita in corso (una per scheda: è sessionStorage). */
 export const CHIAVE_LIVE = 'bvd_partita_live'
@@ -874,12 +875,12 @@ function Pannello({ chi, nome, punti, pop, etichetta, etichettaMeno, onPiu, onMe
       <button
         type="button"
         className="live-meno press"
-        data-material="glass-regular"
         aria-label={etichettaMeno}
         aria-keyshortcuts={`Shift+${freccia}`}
         aria-disabled={punti === 0 || undefined}
         onClick={onMeno}
       >
+        <LiquidGlass layer />
         <span aria-hidden="true">−1</span>
       </button>
     </div>

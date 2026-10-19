@@ -91,8 +91,8 @@
   .home-col { display: contents; }
 
   /* --------------------------------------------------- Pallo e nuvoletta */
-  /* Sopra la card che le sale sotto (-16px): l'anello di focus di Pallo non
-     deve finire coperto. */
+  /* Sopra la card che le sale sotto (-16px): i salti e la sorpresa di Pallo
+     non devono finire coperti. */
   /* Pallo sta FERMO in cima alla riga: se la nuvoletta cambia altezza (un
      consiglio più lungo, un pulsante in più) cresce lei, verso il basso, e il
      dito che tocca Pallo di fila lo trova sempre allo stesso posto. */
@@ -104,18 +104,16 @@
     gap: var(--space-1);
     margin-top: var(--space-0-5);
   }
-  .home-pallo-btn {
+  /* Pallo si tocca (salta, e la sorpresa) ma non è un controllo: niente
+     focus, niente nome. Il cursore a manina resta: dice «toccami» al mouse,
+     e su iPhone è ciò che fa arrivare il click a un elemento qualunque. */
+  .home-pallo-tocco {
     flex: none;
     display: block;
     width: 96px;
     height: 104px;
-    padding: 0;
-    border: 0;
-    border-radius: var(--radius-card);
-    background: none;
     cursor: pointer;
   }
-  span.home-pallo-btn { cursor: default; }
   /* La nuvoletta: una card con l'angolo in alto a sinistra quasi vivo, verso
      la testa di Pallo; scende di poco perché parta all'altezza della bocca. */
   .home-nuvola {
@@ -133,6 +131,16 @@
     font-weight: 600;
     color: var(--accent-text);
   }
+  /* La misura che scivola (AltezzaMorbida): mentre l'altezza va verso quella
+     del consiglio nuovo, il contenuto che sborda si taglia invece di passare
+     sopra il filo della nuvoletta. Il taglio sta --space-2 più in fuori del
+     contenuto (margine negativo, padding uguale): l'anello di focus (4px) e
+     il bersaglio di 44 del pulsante piccolo (5px oltre i 34) restano interi. */
+  .home-nuvola-misura {
+    overflow: clip;
+    margin: calc(-1 * var(--space-2));
+  }
+  .home-nuvola-dentro { padding: var(--space-2); }
   .home-nuvola-corpo { margin-top: var(--space-0-5); }
   .home-nuvola-testo {
     font: var(--type-callout);

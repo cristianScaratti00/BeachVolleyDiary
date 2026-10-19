@@ -1,4 +1,4 @@
-/* La capsula dei pulsanti +/− (ART_DIRECTION §10.3): glass-thin, galleggia
+/* La capsula dei pulsanti +/− (ART_DIRECTION §10.3): vetro liquido, galleggia
    (`--elev-float`), in alto a sinistra come il controllo di Leaflet che
    sostituisce. Sta sopra la mappa per ordine nel DOM: il riquadro di Leaflet
    ha `isolation`, i suoi z-index restano chiusi lì dentro. */

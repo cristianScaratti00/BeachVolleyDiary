@@ -1,0 +1,90 @@
+/* ============================================================================
+   Il vetro di liquid-glass-react dentro lo strato di LiquidGlass.tsx. La
+   libreria scrive tutto in linea (anche un font e un'ombra sua): qui si
+   piegano le sue scelte alla grammatica del redesign, per forza con
+   `!important`. Le classi `.glass` e `.glass__warp` sono le sue.
+   ============================================================================ */
+@layer components {
+  .ui-liquid-misura { display: block; }
+
+  /* Della libreria si tiene il vetro (`.glass`: la sfocatura piegata dal
+     filtro SVG, l'aberrazione sul bordo). Il resto si spegne:
+     - i due bordi di luce in `mix-blend-mode`. Dentro un elemento fisso o
+       isolato (la TabBar, un pulsante) Chrome isola il gruppo e il
+       `backdrop-filter` del vetro smette di vedere la pagina sotto; in
+       fusione normale diventano un anello bianco netto, il filo strano sui
+       fondi colorati. La luce sul bordo la disegna il materiale (::after);
+     - i due veli `.bg-black`: classi Tailwind, che qui non c'è; vuoti.
+     Nascono tutti a 270×69 — la misura che la libreria si dà prima di
+     misurarsi — e si stringono solo un fotogramma dopo, con una transizione:
+     su un vetro vicino al bordo destro sbordavano dalla pagina e Chrome su
+     Android la rimpiccioliva (la TabBar scendeva e tornava su a ogni cambio
+     pagina e a ogni vetro che entrava in vista). L'<svg> del filtro tiene
+     solo i <defs>: misura zero. */
+  .ui-liquid > span,
+  .ui-liquid > .bg-black { display: none !important; }
+  .ui-liquid svg { width: 0 !important; height: 0 !important; }
+
+  /* L'ombra è quella dell'elemento che galleggia (barre: --material-elev),
+     più corta per un pulsante posato nella pagina. */
+  .ui-liquid .glass {
+    gap: 0 !important;
+    box-shadow: var(--material-elev, var(--elev-glass)) !important;
+  }
+
+  /* La tinta, la luce sul bordo e lo spessore del materiale stanno SOPRA la
+     sfocatura piegata (non dentro): così restano nitidi. */
+  .ui-liquid .glass::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background-color: var(--glass-regular);
+    background-image: var(--glass-sheen);
+    box-shadow: var(--glass-rim);
+  }
+  .ui-liquid[data-material="glass-clear"] .glass::after {
+    background-color: var(--glass-clear);
+    background-image: var(--glass-clear-sheen);
+    box-shadow: var(--glass-clear-rim);
+  }
+  /* Il vetro sopra i media (Wrapped, Storia): quasi trasparente, niente
+     riflesso a gradiente, solo la luce sul bordo — il «clear» di Apple sopra
+     foto e colori pieni. */
+  .ui-liquid[data-material="glass-media"] .glass::after {
+    background-color: var(--glass-media);
+    background-image: none;
+    box-shadow: var(--glass-media-rim);
+  }
+  /* La lente della tab accesa: più chiara della capsula su cui scorre. */
+  .ui-liquid[data-variante="lente"] .glass::after {
+    background-color: var(--glass-lens);
+    box-shadow: var(--glass-rim), inset 0 0 0 0.5px rgb(28 28 30 / 0.06);
+  }
+
+  /* Fuori da Blink il filtro SVG nel backdrop non piega niente e su WebKit
+     spegne la sfocatura: resta la sfocatura sola (col prefisso di Safari). */
+  .ui-liquid:is([data-engine="webkit"], [data-engine="gecko"]) .glass__warp {
+    filter: none !important;
+    -webkit-backdrop-filter: blur(10px) saturate(180%) !important;
+    backdrop-filter: blur(10px) saturate(180%) !important;
+  }
+
+  /* Chi chiede meno movimento: il vetro cambia senza transizione. */
+  @media (prefers-reduced-motion: reduce) {
+    .ui-liquid .glass { transition: none !important; }
+  }
+}
+
+/* Chi ospita lo strato di vetro deve tenerlo dentro di sé: posizionato e
+   isolato, così lo z-index negativo dello strato resta sotto il contenuto
+   ma sopra la pagina. */
+@layer components {
+  .ui-menu-opt,
+  .ui-menu-cancel,
+  .crea-chip,
+  .live-meno,
+  .mapzoom { isolation: isolate; }
+  .ui-menu-cancel { position: relative; }
+}

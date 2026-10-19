@@ -60,6 +60,35 @@
   .ui-textarea { min-height: calc(var(--control-md) * 2.5); padding: var(--space-3) var(--space-3-5); resize: vertical; }
   input[type="date"].ui-input { padding-right: var(--space-2); }
 
+  /* ---------------------------------------------------- Mostra password */
+  /* L'occhio sta DENTRO il campo, a destra, come il ✕ della ricerca: un
+     bersaglio da 44 centrato in verticale, con l'icona allineata al margine
+     del testo; il testo si ferma prima. Centrato con i margini e non con
+     `transform`, che resta libero. */
+  .ui-password { position: relative; display: block; min-width: 0; }
+  .ui-password > .ui-input { padding-right: calc(var(--touch) + var(--space-0-5)); }
+  /* Edge disegna il suo occhio nei campi password: ne basta uno. */
+  .ui-password > .ui-input::-ms-reveal { display: none; }
+  .ui-password-toggle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: calc(var(--space-3-5) - (var(--touch) - var(--icon-20)) / 2);
+    margin: auto 0;
+    display: grid;
+    place-items: center;
+    width: var(--touch);
+    height: var(--touch);
+    border-radius: 50%;
+    color: var(--ink-3);
+    transition: color var(--dur-svelto) var(--ease-standard);
+  }
+  .ui-password-toggle[aria-pressed="true"] { color: var(--ink-2); }
+  .ui-password-toggle:disabled { color: var(--ink-disabled); }
+  @media (hover: hover) and (pointer: fine) {
+    .ui-password-toggle:not(:disabled):hover { color: var(--ink); }
+  }
+
   .ui-select-wrap { position: relative; display: block; min-width: 0; }
   .ui-select { padding-right: calc(var(--space-3) + var(--icon-16) + var(--space-2)); cursor: pointer; }
   .ui-select-chev {

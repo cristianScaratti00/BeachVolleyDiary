@@ -26,8 +26,11 @@
   }
   .ui-odo-cols { position: relative; display: inline-flex; }
   /* Ritaglio solo in verticale: in orizzontale il glifo può sbordare (il
-     tracking è negativo). Il ritaglio è fermo, si muove la striscia. */
-  .ui-odo-d { display: inline-block; height: var(--lh); clip-path: inset(0 -0.2em); }
+     tracking è negativo). Il ritaglio è fermo, si muove la striscia.
+     `clip-path` nasconde il disegno ma non lo spazio: la striscia (21 righe,
+     fino a 1237px per un numero grande) allungava lo scroll della pagina oltre
+     la fine di <main>. `overflow-y: clip` taglia anche quello. */
+  .ui-odo-d { display: inline-block; height: var(--lh); clip-path: inset(0 -0.2em); overflow-y: clip; }
   .ui-odo-strip { display: block; transform: translateY(calc(var(--k, 0) * -1 * var(--lh))); }
   .ui-odo-strip > span { display: block; height: var(--lh); }
   .ui-odo-strip > span::before { content: attr(data-d); }

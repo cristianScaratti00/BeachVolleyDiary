@@ -64,6 +64,12 @@
        pressione, che è nostro (MOTION.md §4.3). */
     -webkit-tap-highlight-color: transparent;
   }
+  /* Il ritaglio del body non basta: il suo `overflow` passa alla finestra, e
+     Chrome su Android, se qualcosa sborda a destra anche per un fotogramma,
+     rimpicciolisce lo stesso la pagina per farcela stare — la TabBar fissa
+     scende fuori dallo schermo e torna su. Sul contenitore dell'app il
+     ritaglio è vero; chi è `fixed` (barre, sheet) non ne è toccato. */
+  #root { overflow-x: clip; }
 
   /* I campi usano il Body (17px): sopra i 16px iOS non ingrandisce la pagina
      al focus. Non scendere a `subhead` dentro un input (ART_DIRECTION §3.3.7). */

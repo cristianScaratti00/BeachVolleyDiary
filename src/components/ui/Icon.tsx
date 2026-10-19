@@ -54,6 +54,10 @@ const PATHS = {
   inbox: 'M4 13l2.5-8h11L20 13v6H4zM4 13h4.5l1 2.5h5l1-2.5H20',
   shield: 'M12 3 5 6v5.5c0 4.4 3 8 7 9.5 4-1.5 7-5.1 7-9.5V6z',
   lock: 'M6 11h12v9H6zM8.5 11V8a3.5 3.5 0 0 1 7 0v3',
+  // «Mostra password» (TextField): l'occhio aperto, e lo stesso barrato con
+  // il contorno interrotto dove passa la barra.
+  eye: 'M2.5 12c2-4 5.5-6.5 9.5-6.5s7.5 2.5 9.5 6.5c-2 4-5.5 6.5-9.5 6.5S4.5 16 2.5 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
+  'eye-off': 'M4 4l16 16M10.2 5.7c.6-.1 1.2-.2 1.8-.2 4 0 7.5 2.5 9.5 6.5-.6 1.2-1.3 2.2-2.2 3.1M14.1 14.1a3 3 0 0 1-4.2-4.2M17 17c-1.5.9-3.2 1.5-5 1.5-4 0-7.5-2.5-9.5-6.5 1-2 2.4-3.6 4-4.7',
   logout: 'M14 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 16l-4-4 4-4M6 12h10',
   external: 'M7 17 17 7M8.5 7H17v8.5',
   send: 'M4.5 12 19.5 4.5 16 19.5l-4-6z',

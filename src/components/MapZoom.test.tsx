@@ -14,7 +14,9 @@ describe('MapZoom', () => {
     const onIn = vi.fn()
     const onOut = vi.fn()
     render(<MapZoom onIn={onIn} onOut={onOut} />)
-    expect(screen.getByRole('group', { name: 'Zoom della mappa' })).toHaveAttribute('data-material', 'glass-thin')
+    // Il vetro è uno strato liquido dentro il gruppo (LiquidGlass), decorativo.
+    const gruppo = screen.getByRole('group', { name: 'Zoom della mappa' })
+    expect(gruppo.querySelector(':scope > .ui-liquid')).toHaveAttribute('aria-hidden', 'true')
     await user.click(screen.getByRole('button', { name: 'Ingrandisci' }))
     await user.click(screen.getByRole('button', { name: 'Riduci' }))
     expect(onIn).toHaveBeenCalledTimes(1)

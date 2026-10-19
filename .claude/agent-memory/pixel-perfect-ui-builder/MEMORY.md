@@ -3,6 +3,7 @@
 - [project-pallo-mascotte](project_pallo_mascotte.md) — L'utente ama la mascotte Pallo e la vuole espressiva; umori, interazioni e regole che l'illustrazione deve rispettare (redesign versione D, ott 2026)
 - [project-redesign-versione-d](project_redesign_versione_d.md) — Oct 2026 redesign "versione D" (Liquid Glass) from Claude Design, reproduced screen by screen by parallel agents on branch `redesign`; what Home/Statistiche became
 - [qa-export-png-preview](qa_export_png_preview.md) — How to check the real PNG export (Story/Wrapped canvases) in the live docs/preview without a build, and what the canvases look like after the 2026-10 redesign
+- [qa-tastiera-ios](qa-tastiera-ios.md) — Simulating the iPhone keyboard (fake visualViewport) and touch-drag checks in headless Chrome; the headless :focus trap
 - [qa-foto-vere-anteprima](qa-foto-vere-anteprima.md) — How to test share-image canvases (Story/Wrapped) with real raster photos of any proportion without touching docs/preview/main.tsx
 - [redesign-d-gotchas](redesign-d-gotchas.md) — Non-obvious traps of the "versione D" (Liquid Glass) design system in BeachVolleyDiary — .rise vs press, glass material in utilities layer, grid overflow, StatTile line-height, Button aria-disabled, inert in tests
 - [ui-qa-workflow](ui-qa-workflow.md) — How UI work is verified in BeachVolleyDiary when several agents work in parallel — live preview, own CDP port, axe in real Chrome

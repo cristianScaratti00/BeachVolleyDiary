@@ -9,6 +9,7 @@
 // ============================================================================
 import { Icon } from '../ui/Icon'
 import './dashboard.css'
+import { LiquidGlass } from '../ui/LiquidGlass'
 
 export interface FiltroOpzione {
   value: string
@@ -26,7 +27,8 @@ export function FiltroSelect({ label, value, onChange, options, mostra, classNam
   className?: string
 }) {
   return (
-    <span className={className ? `dash-select press ${className}` : 'dash-select press'} data-material="glass-regular">
+    <span className={className ? `dash-select press ${className}` : 'dash-select press'}>
+      <LiquidGlass layer />
       <span className="dash-select-text" aria-hidden="true">{mostra}</span>
       <Icon name="chevron-down" size={12} className="dash-select-chev" />
       <select className="dash-select-native" aria-label={label} value={value} onChange={(e) => onChange(e.target.value)}>

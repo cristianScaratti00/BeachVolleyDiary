@@ -16,7 +16,25 @@ import { Link } from '../../app/router'
 import type { LinkProps } from '../../app/router'
 import { Icon } from './Icon'
 import type { IconName } from './Icon'
+import { LiquidGlass } from './LiquidGlass'
 import './Button.css'
+
+/**
+ * Il vetro del pulsante: il vetro LIQUIDO (liquid-glass-react, LiquidGlass)
+ * per quello chiaro, per quello sul buio e per quello sopra i media (Wrapped,
+ * Storia); il vetro scuro resta il materiale CSS.
+ */
+function vetro(variant: string, material: Material | undefined) {
+  if (variant !== 'glass') return { attr: {}, strato: null }
+  const m = material ?? 'glass-regular'
+  if (m === 'glass-regular' || m === 'glass-clear' || m === 'glass-media') {
+    return {
+      attr: { 'data-glass': m.slice('glass-'.length) },
+      strato: <LiquidGlass layer material={m} />,
+    }
+  }
+  return { attr: { 'data-material': m }, strato: null }
+}
 
 export type ButtonVariant =
   | 'filled' // l'azione principale: arancio, etichetta navy (5.50). Una per vista
@@ -30,7 +48,7 @@ export type ButtonVariant =
 
 export type ButtonSize = 'sm' | 'md' | 'lg'
 
-type Material = 'glass-regular' | 'glass-dark' | 'glass-thin' | 'glass-clear'
+type Material = 'glass-regular' | 'glass-dark' | 'glass-thin' | 'glass-clear' | 'glass-media'
 
 interface CommonProps {
   variant?: ButtonVariant
@@ -113,13 +131,14 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       data-variant={variant}
       data-size={size}
       data-block={block ? '' : undefined}
-      data-material={variant === 'glass' ? material ?? 'glass-regular' : undefined}
+      {...vetro(variant, material).attr}
       data-tone={tone}
       aria-disabled={disabled || undefined}
       aria-busy={busy || undefined}
       onClick={handle}
       style={busy && riposo.current ? { ...style, minWidth: riposo.current } : style}
     >
+      {vetro(variant, material).strato}
       {icon && <Icon name={icon} size={size === 'sm' ? 16 : 20} />}
       <span className="ui-button-label">{busy && busyLabel ? busyLabel : children}</span>
     </button>
@@ -143,9 +162,10 @@ export const ButtonLink = forwardRef<HTMLAnchorElement, ButtonLinkProps>(functio
       data-variant={variant}
       data-size={size}
       data-block={block ? '' : undefined}
-      data-material={variant === 'glass' ? material ?? 'glass-regular' : undefined}
+      {...vetro(variant, material).attr}
       data-tone={tone}
     >
+      {vetro(variant, material).strato}
       {icon && <Icon name={icon} size={size === 'sm' ? 16 : 20} />}
       <span className="ui-button-label">{children}</span>
     </Link>
@@ -174,8 +194,9 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(functio
       aria-label={label}
       className={className ? `ui-icon-button ${className}` : 'ui-icon-button'}
       data-variant={variant}
-      data-material={variant === 'glass' ? material ?? 'glass-regular' : undefined}
+      {...vetro(variant, material).attr}
     >
+      {vetro(variant, material).strato}
       <Icon name={icon} size={iconSize} />
     </button>
   )

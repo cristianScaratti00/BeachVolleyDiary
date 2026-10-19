@@ -71,7 +71,7 @@ function Cornice({ children, onClose, tono, label = 'Beach Wrapped' }: { childre
 }
 
 function Chiudi({ onClose }: { onClose: () => void }) {
-  return <IconButton icon="close" label="Chiudi" variant="glass" iconSize={20} className="wrapped-close" data-chiudi="" onClick={onClose} />
+  return <IconButton icon="close" label="Chiudi" variant="glass" material="glass-media" iconSize={20} className="wrapped-close" data-chiudi="" onClick={onClose} />
 }
 
 /**
@@ -485,6 +485,7 @@ export default function WrappedModal({ wrapped, onClose, onNotice }: WrappedModa
       <div className="wrapped-actions" data-solo={canShare ? undefined : ''}>
         <Button
           variant="glass"
+          material="glass-media"
           size="lg"
           className="wrapped-action"
           busy={!!scaricando}
@@ -497,6 +498,7 @@ export default function WrappedModal({ wrapped, onClose, onNotice }: WrappedModa
         {canShare && (
           <Button
             variant="glass"
+            material="glass-media"
             size="lg"
             className="wrapped-action wrapped-share"
             busy={busy || shareInPreparazione}

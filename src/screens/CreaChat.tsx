@@ -433,7 +433,8 @@ function Chips({ label, risposte }: { label: string; risposte: Risposta[] }) {
   return (
     <div className="crea-chips" role="group" aria-label={label}>
       {risposte.map((x) => (
-        <button key={x.testo} type="button" className="crea-chip" data-material="glass-regular" onClick={x.scegli}>
+        <button key={x.testo} type="button" className="crea-chip" onClick={x.scegli}>
+          <LiquidGlass layer />
           {x.label ?? x.testo}
         </button>
       ))}

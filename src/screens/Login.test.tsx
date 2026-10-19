@@ -159,6 +159,25 @@ describe('Accedi', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('non posso verificare le credenziali')
   })
 
+  it('la password si può mostrare: l\'occhio è un interruttore nel campo e il fuoco resta lì', async () => {
+    const user = userEvent.setup()
+    await apriAccedi(user)
+    const campo = screen.getByLabelText('Password')
+    await user.type(campo, 'segreta')
+    const occhio = screen.getByRole('button', { name: 'Mostra password' })
+    expect(occhio).toHaveAttribute('aria-pressed', 'false')
+    expect(occhio).toHaveAttribute('aria-controls', campo.id)
+    await user.click(occhio)
+    expect(occhio).toHaveAttribute('aria-pressed', 'true')
+    expect(campo).toHaveAttribute('type', 'text')
+    expect(campo).toHaveAttribute('autocomplete', 'current-password')
+    expect(campo).toHaveFocus()
+    expect(campo).toHaveValue('segreta')
+    await user.click(occhio)
+    expect(campo).toHaveAttribute('type', 'password')
+    expect(campo).toHaveFocus()
+  })
+
   it('«‹» torna al Benvenuto; «Registrati» è un button vero che apre la registrazione', async () => {
     const user = userEvent.setup()
     await apriAccedi(user)
@@ -228,6 +247,20 @@ describe('Registrati', () => {
     expect(screen.getByLabelText('Nickname')).toHaveValue('Marta')
   })
 
+  it('passo 2: anche la nuova password si può mostrare', async () => {
+    const user = userEvent.setup()
+    await apriRegistrati(user)
+    await user.type(screen.getByLabelText('Nickname'), 'Marta')
+    await user.click(screen.getByRole('button', { name: 'Continua' }))
+    await h1('Ciao Marta, ultimo passo.')
+    const campo = screen.getByLabelText('Password')
+    await user.type(campo, 'segreta')
+    await user.click(screen.getByRole('button', { name: 'Mostra password' }))
+    expect(campo).toHaveAttribute('type', 'text')
+    expect(campo).toHaveAttribute('autocomplete', 'new-password')
+    expect(campo).toHaveFocus()
+  })
+
   it('«Crea account» registra con nome, email e password', async () => {
     const user = userEvent.setup()
     await apriRegistrati(user)
@@ -265,6 +298,83 @@ describe('Registrati', () => {
     await h1('Ciao Marta, ultimo passo.')
     await user.click(screen.getByRole('button', { name: 'Crea account' }))
     expect(await screen.findByRole('alert')).toHaveTextContent('Email già registrata')
+  })
+})
+
+// ------------------------------------------------------- La pagina ferma
+// jsdom non fa layout né ha un visualViewport: si verificano i patti (l'
+// attributo che blocca la pagina, le misure date alla cornice, il tocco
+// annullato), non lo scroll vero, che si guarda in Chrome.
+
+/** Un visualViewport finto: si accorcia e si sposta come con la tastiera di iOS. */
+function finestraVisibile(altezza: number) {
+  const s = { height: altezza, offsetTop: 0, scale: 1 }
+  const vv = new EventTarget()
+  Object.defineProperties(vv, {
+    height: { get: () => s.height },
+    offsetTop: { get: () => s.offsetTop },
+    scale: { get: () => s.scale },
+  })
+  vi.stubGlobal('visualViewport', vv)
+  return {
+    cambia(o: Partial<typeof s>) {
+      Object.assign(s, o)
+      vv.dispatchEvent(new Event('resize'))
+    },
+  }
+}
+
+/** Le misure arrivano al frame dopo l'evento. */
+const frame = () => new Promise<void>((r) => requestAnimationFrame(() => r()))
+
+/** Un `touchmove` con `n` dita; dice se è stato annullato. */
+function trascina(el: Element, dita: number): boolean {
+  const e = new Event('touchmove', { bubbles: true, cancelable: true })
+  Object.defineProperty(e, 'touches', { value: Array.from({ length: dita }) })
+  el.dispatchEvent(e)
+  return e.defaultPrevented
+}
+
+describe('Accesso — la pagina ferma', () => {
+  it('finché c\'è l\'accesso la pagina non scorre (<html data-accesso>); all\'uscita torna a scorrere', () => {
+    const { unmount } = render(<Login />)
+    expect(document.documentElement).toHaveAttribute('data-accesso')
+    unmount()
+    expect(document.documentElement).not.toHaveAttribute('data-accesso')
+  })
+
+  it('la cornice segue la parte visibile: con la tastiera si stringe sopra di lei, con lo zoom si ferma', async () => {
+    const vv = finestraVisibile(844)
+    render(<Login />)
+    const cornice = screen.getByRole('main').parentElement!
+    expect(cornice.style.getPropertyValue('--vv-h')).toBe('844px')
+    expect(cornice.style.getPropertyValue('--vv-top')).toBe('0px')
+    expect(cornice).not.toHaveAttribute('data-tastiera')
+
+    await act(async () => {
+      vv.cambia({ height: 470, offsetTop: 300 })
+      await frame()
+    })
+    expect(cornice.style.getPropertyValue('--vv-h')).toBe('470px')
+    expect(cornice.style.getPropertyValue('--vv-top')).toBe('300px')
+    expect(cornice).toHaveAttribute('data-tastiera')
+
+    // Lo zoom a pizzico: la cornice non insegue la lente.
+    await act(async () => {
+      vv.cambia({ scale: 2, height: 422, offsetTop: 100 })
+      await frame()
+    })
+    expect(cornice.style.getPropertyValue('--vv-h')).toBe('')
+    expect(cornice).not.toHaveAttribute('data-tastiera')
+  })
+
+  it('un dito che trascina non sposta niente; con due dita lo zoom resta libero; all\'uscita si sblocca', () => {
+    const { unmount } = render(<Login />)
+    const titolo = screen.getByRole('heading', { level: 1 })
+    expect(trascina(titolo, 1)).toBe(true)
+    expect(trascina(titolo, 2)).toBe(false)
+    unmount()
+    expect(trascina(document.body, 1)).toBe(false)
   })
 })
 

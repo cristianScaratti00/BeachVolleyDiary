@@ -8,11 +8,11 @@
      <nav data-material="glass-regular" style="--material-elev: var(--elev-float)">
 
    Sopra questo strato c'è `LiquidGlass` (src/components/ui/LiquidGlass.tsx):
-   sui browser Blink aggiunge la rifrazione vera (un filtro SVG di
-   spostamento nel `backdrop-filter`, @samasante/liquid-glass) alle barre che
-   galleggiano. Il materiale qui sotto resta la base dappertutto: la tinta, il
-   bordo, il riflesso e il fallback valgono anche dove la rifrazione non c'è
-   (Safari, Firefox, i test).
+   il vetro di liquid-glass-react (sfocatura piegata dal filtro SVG, bordi di
+   luce, ombra) dietro a barre e pulsanti. Questo materiale resta la base: è
+   ciò che si vede finché la libreria non è arrivata e il ripiego dove il
+   vetro non si vuole (test, trasparenza ridotta, contrasto alto). Quando la
+   libreria è accesa (`data-liquid`) il materiale si fa da parte.
 
    I materiali:
      glass-regular  .32  il vetro liquido: TabBar, pulsanti di vetro, barre
@@ -20,6 +20,7 @@
      glass-thin     .24  solo icone sopra la mappa (i +/− dello zoom)
      glass-thick    .92  sheet, action sheet, popover: quasi carta
      glass-clear    .14  il vetro chiaro sul fondo scuro (Benvenuto, Accedi)
+     glass-media    .12  il vetro sopra i media: Wrapped, Storia
      glass-dark     .66  toolbar dei visori, sopra foto e slide
      frost          opaco con il riflesso del vetro: Sidebar.
 
@@ -63,6 +64,15 @@
     -webkit-backdrop-filter: blur(14px) saturate(180%);
     backdrop-filter: blur(14px) saturate(180%);
   }
+  /* Sopra i media: niente riflesso, solo la luce sul bordo. Il testo resta
+     il primo piano della superficie sotto (Wrapped: quello della slide). */
+  [data-material="glass-media"] {
+    background-color: var(--glass-media);
+    background-image: none;
+    box-shadow: var(--glass-media-rim), var(--material-elev, var(--elev-none));
+    -webkit-backdrop-filter: blur(12px) saturate(170%);
+    backdrop-filter: blur(12px) saturate(170%);
+  }
   [data-material="glass-dark"] {
     background-color: var(--glass-dark);
     background-image: none;
@@ -72,6 +82,16 @@
   }
   [data-material="frost"] {
     background-color: var(--glass-solid);
+  }
+
+  /* La libreria è accesa: tinta, luce e ombra le disegna lei (LiquidGlass.css). */
+  [data-material][data-liquid] {
+    background-color: transparent;
+    background-image: none;
+    box-shadow: none;
+    border: 0;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
   }
 
   /* Sul vetro chiaro si scrive con l'inchiostro. Il secondario e il

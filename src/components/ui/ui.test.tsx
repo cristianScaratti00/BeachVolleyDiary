@@ -213,6 +213,50 @@ describe('Campi', () => {
     await expectNoA11yViolations(container)
   })
 
+  it('TextField password: l\'occhio «Mostra password» è un interruttore nel campo; fuoco e cursore restano', async () => {
+    const user = userEvent.setup()
+    function H() {
+      const [v, setV] = useState('')
+      return <TextField label="Password" type="password" autoComplete="current-password" value={v} onChange={setV} />
+    }
+    const { container } = render(<H />)
+    const campo = screen.getByLabelText('Password') as HTMLInputElement
+    const occhio = screen.getByRole('button', { name: 'Mostra password' })
+    expect(occhio).toHaveAttribute('aria-pressed', 'false')
+    expect(occhio).toHaveAttribute('aria-controls', campo.id)
+    // Mostrata, una password non va corretta né messa in maiuscolo.
+    expect(campo).toHaveAttribute('autocapitalize', 'none')
+    expect(campo).toHaveAttribute('autocorrect', 'off')
+    expect(campo).toHaveAttribute('spellcheck', 'false')
+
+    await user.type(campo, 'segreta')
+    campo.setSelectionRange(2, 4)
+    await user.click(occhio)
+    expect(occhio).toHaveAttribute('aria-pressed', 'true')
+    expect(occhio).toHaveAccessibleName('Mostra password')
+    expect(campo).toHaveAttribute('type', 'text')
+    expect(campo).toHaveAttribute('autocomplete', 'current-password')
+    expect(campo).toHaveFocus()
+    expect([campo.selectionStart, campo.selectionEnd]).toEqual([2, 4])
+
+    await user.click(occhio)
+    expect(campo).toHaveAttribute('type', 'password')
+    expect(occhio).toHaveAttribute('aria-pressed', 'false')
+    expect(campo).toHaveFocus()
+    await expectNoA11yViolations(container)
+  })
+
+  it('TextField: niente occhio con revealable={false} né nei campi che non sono password', () => {
+    render(
+      <>
+        <TextField label="PIN" type="password" revealable={false} value="" onChange={() => {}} />
+        <TextField label="Nome" value="" onChange={() => {}} />
+      </>,
+    )
+    expect(screen.queryByRole('button', { name: 'Mostra password' })).not.toBeInTheDocument()
+    expect(screen.getByLabelText('PIN')).toHaveAttribute('type', 'password')
+  })
+
   it('Switch: role=switch con aria-checked', async () => {
     const user = userEvent.setup()
     function H() {

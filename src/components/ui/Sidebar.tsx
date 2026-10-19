@@ -17,6 +17,7 @@ import { Avatar } from './Avatar'
 import { Badge } from './Badge'
 import { Button } from './Button'
 import { Icon } from './Icon'
+import { LiquidGlass } from './LiquidGlass'
 import type { TabDef } from './TabBar'
 import './Sidebar.css'
 
@@ -44,7 +45,9 @@ export const Sidebar = forwardRef<HTMLButtonElement, SidebarProps>(function Side
         <BrandLockup size={40} />
       </div>
       <div className="ui-sidebar-nav" style={{ '--i': Math.max(0, i) } as CSSProperties}>
-        <span className="ui-sidebar-pill" aria-hidden="true" data-hidden={i < 0 ? '' : undefined} />
+        <span className="ui-sidebar-pill" aria-hidden="true" data-hidden={i < 0 ? '' : undefined}>
+          <LiquidGlass layer variante="lente" />
+        </span>
         <ul className="ui-sidebar-list">
         {tabs.map((t) => {
           const on = t.key === active

@@ -7,9 +7,9 @@
 // - Le quattro tab sono `<a href>` veri con `aria-current="page"`; il ＋ è un
 //   `<button aria-haspopup="menu" aria-expanded>` chiamato «Crea».
 // - Etichette visibili a 10.5px sotto le icone.
-// - Stato attivo = pillola arancio tenue UNICA che scivola (molla con un filo
-//   di rimbalzo) + etichetta e icona in arancio scuro: forma e colore, non
-//   solo colore (WCAG 1.4.1).
+// - Stato attivo = una LENTE di vetro liquido UNICA che scivola sotto la tab
+//   (molla con un filo di rimbalzo) + etichetta e icona in arancio scuro:
+//   forma e colore, non solo colore (WCAG 1.4.1).
 // - Si nasconde mentre si scrive in un campo fuori da uno sheet (su Android
 //   salirebbe sopra la tastiera).
 // - Ritoccare la tab attiva alla sua radice riporta in cima (convenzione iOS).
@@ -84,7 +84,11 @@ export const TabBar = forwardRef<HTMLButtonElement, TabBarProps>(function TabBar
     >
       <div className="ui-tabbar-capsule" style={{ '--i': Math.max(0, i), '--n': tabs.length } as CSSProperties}>
         <LiquidGlass layer />
-        <span className="ui-tabbar-pill" aria-hidden="true" data-hidden={i < 0 ? '' : undefined} />
+        {/* Il selettore: una lente di vetro liquido che scorre sotto la tab
+            accesa; il colore sta solo su icona ed etichetta. */}
+        <span className="ui-tabbar-pill" aria-hidden="true" data-hidden={i < 0 ? '' : undefined}>
+          <LiquidGlass layer variante="lente" />
+        </span>
         {tabs.map((t) => {
           const on = t.key === active
           return (

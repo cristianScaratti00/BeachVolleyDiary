@@ -30,6 +30,7 @@ import { Icon } from './Icon'
 import type { IconName } from './Icon'
 import { useEscape, useInitialFocus, useReturnFocus } from './overlay'
 import './Menu.css'
+import { LiquidGlass } from './LiquidGlass'
 
 export interface MenuViewItem {
   key: string
@@ -200,12 +201,12 @@ export function Menu({
               type="button"
               role="menuitem"
               className="ui-menu-opt"
-              data-material="glass-regular"
               data-tone={it.tone}
               // Salgono una dopo l'altra mentre il foglio arriva (design 13).
               style={{ '--rise-i': i + 2 } as CSSProperties}
               onClick={it.onSelect}
             >
+              <LiquidGlass layer />
               {it.icon && (
                 <span className="ui-menu-ico">
                   <Icon name={it.icon} size={20} />
@@ -222,10 +223,10 @@ export function Menu({
               type="button"
               role="menuitem"
               className="ui-menu-cancel"
-              data-material="glass-regular"
               style={{ '--rise-i': items.length + 2 } as CSSProperties}
               onClick={onClose}
             >
+              <LiquidGlass layer />
               Annulla
             </button>
           )}

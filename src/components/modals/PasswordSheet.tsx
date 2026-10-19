@@ -3,7 +3,8 @@
 // moduli «Annulla · titolo · Salva» (design 15). La regola (almeno 6
 // caratteri, le due uguali) la applica `updatePassword` in lib/auth: qui il
 // modulo, lo stato occupato e l'esito in linea. Se va a buon fine la shell
-// chiude lo sheet e dice «Password aggiornata».
+// chiude lo sheet e dice «Password aggiornata». Ognuno dei due campi ha il
+// suo occhio «Mostra password»: è di TextField, per ogni `type="password"`.
 // ============================================================================
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'

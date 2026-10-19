@@ -53,7 +53,7 @@ Il redesign è stato disegnato in Claude Design (19 schermate a 390×844, «vers
 | Selezione | pillola navy | tab: pillola arancio al 12% col filo, testo arancio · segmented: pillola **bianca** su guida `#EDEDEA` · chip: inchiostro pieno |
 | Navigazione | Home · Tornei · ＋ · Compagni · Profilo | capsula di vetro **Home · Tornei · Compagni · Diario** + ＋ arancio staccato; il Profilo si apre dall'avatar in Home; il Diario (l'ex Timeline) torna una tab |
 | Barre in cima | NavBar che diventa vetro allo scroll | **pulsanti di vetro che galleggiano** (‹ indietro, capsula delle azioni, ×); il titolo compatto arriva in una capsula di vetro |
-| Vetro | `glass-regular` .72, blur 24 | vetro **liquido** alla Apple, non un pannello col bordo: bianco appena .32, `blur(10px) saturate(180%) brightness(1.05)`, **nessun bordo vero** ma la luce sul bordo direzionale (forte in alto a sinistra, tenue in basso a destra), lo spessore (luce dentro in alto, ombra appena in basso) e un'ombra morbida perché galleggia; **rifrazione vera** sulle superfici che galleggiano (`LiquidGlass`, `@samasante/liquid-glass`: filtro SVG di spostamento nel `backdrop-filter`, solo Blink e caricato in lazy solo lì) |
+| Vetro | `glass-regular` .72, blur 24 | vetro **liquido** alla Apple, non un pannello col bordo: bianco appena .32, `blur(10px) saturate(180%) brightness(1.05)`, **nessun bordo vero** ma la luce sul bordo direzionale (forte in alto a sinistra, tenue in basso a destra), lo spessore (luce dentro in alto, ombra appena in basso) e un'ombra morbida perché galleggia; il vetro di **liquid-glass-react** (rdev) in tutta l'app tramite `LiquidGlass`: sfocatura piegata dal filtro SVG e aberrazione sul bordo su Blink, sfocatura e bordi di luce su WebKit/Gecko; la tab accesa è una **lente** di vetro che scorre, l'arancio sta solo su icona ed etichetta |
 | Piazzamento | badge | **medaglia** (`Medal`): 1° arancio, podio col filo d'inchiostro, il resto grigia |
 | Esito partita | anello arancio/grigio | V = cerchio d'inchiostro pieno; set vinto col filo d'inchiostro, perso col filo chiaro |
 | Mascotte | — | **Pallo** (`src/components/Pallo.tsx`): consigli in Home, sbircia dal ＋, conduce l'assistente, tifa nella partita live e in Wrapped |
@@ -518,14 +518,15 @@ Il vetro va **solo dove qualcosa ci scorre sotto**. Una sfocatura sopra un fondo
 
 Massimo **3 superfici sfocate** contemporaneamente (UX §10).
 
-### 9.2 I cinque materiali
+### 9.2 I materiali
 
 | `data-material` | Tinta | Sfocatura | Testo | Chi |
 |---|---|---|---|---|
 | `glass-thin` | `rgb(255 253 250 / .48)` | `blur(16px) saturate(180%)` | **nessuno**: solo icone `--on-glass` (3.29) | pulsanti icona sopra la mappa |
 | `glass-regular` | `rgb(255 253 250 / .72)` | `blur(24px) saturate(180%)` | `--on-glass`, `--on-glass-2` | TabBar; NavBar **dopo** lo scroll |
 | `glass-thick` | `rgb(255 253 250 / .86)` | `blur(30px) saturate(180%)` | `--on-glass`, `-2`, `-3` | sheet e form sheet, action sheet del ＋, popover desktop |
-| `glass-dark` | `rgb(11 17 29 / .66)` | `blur(24px) saturate(160%)` | `--on-glass-dark`, `-2` | toolbar di Wrapped, Storia e lightbox |
+| `glass-dark` | `rgb(11 17 29 / .66)` | `blur(24px) saturate(160%)` | `--on-glass-dark`, `-2` | toolbar della lightbox |
+| `glass-media` | `rgb(255 255 255 / .12)` | `blur(12px) saturate(170%)` | il primo piano della superficie sotto (6.66 sull'arancio, 11.84 sull'inchiostro, 13.64 sul visore) | il «clear» di Apple sopra foto e colori pieni: × e azioni di Wrapped, ×, scelte e «Condividi» della Storia. Niente riflesso a gradiente, solo la luce sul bordo |
 | `frost` | `#FFFDFA` opaco | nessuna | `--on-glass` | Sidebar flottante |
 
 La tinta è sabbia-bianca (`255 253 250`) e non bianco puro, perché il vetro è "al sole". Il fallback opaco è la stessa tinta ad alpha 1 (`--glass-solid` `#FFFDFA`), quindi passando a opaco il colore non salta.

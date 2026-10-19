@@ -228,6 +228,8 @@
     --glass-thick: rgb(246 246 244 / 0.92);
     --glass-solid: #FFFFFF;
     --glass-clear: rgb(255 255 255 / 0.14);
+    /* La lente della tab accesa, più chiara della capsula. */
+    --glass-lens: rgb(255 255 255 / 0.62);
     --glass-dark: rgb(17 17 19 / 0.66);
     --glass-dark-solid: #111113;
     /* Raggi di sfocatura: i valori sono ripetuti come letterali in
@@ -260,6 +262,18 @@
       inset 0 0 0 0.5px rgb(255 255 255 / 0.22),
       inset 0 8px 14px -10px rgb(255 255 255 / 0.22);
     --glass-clear-sheen: linear-gradient(180deg, rgb(255 255 255 / 0.28) 0%, rgb(255 255 255 / 0) 50%);
+    /* Il vetro sopra i media (Wrapped, Storia): il «clear» di Apple sopra
+       foto e colori pieni. Si vede il fondo quasi com'è, un filo più chiaro;
+       niente riflesso a gradiente (sull'arancio faceva la pillola lucida),
+       solo la luce sul bordo: forte in alto a sinistra, tenue in basso a
+       destra. Il testo è il primo piano della superficie sotto. */
+    --glass-media: rgb(255 255 255 / 0.12);
+    --glass-media-rim:
+      inset 1px 1px 0.5px -0.5px rgb(255 255 255 / 0.75),
+      inset -1px -1px 0.5px -0.5px rgb(255 255 255 / 0.4),
+      inset 0 0 0 0.5px rgb(255 255 255 / 0.18),
+      inset 0 6px 10px -8px rgb(255 255 255 / 0.3);
+    --elev-glass-media: 0 4px 14px -8px rgb(0 0 0 / 0.22);
     /* Inchiostri per il vetro chiaro. */
     --on-glass: #1C1C1E;
     --on-glass-2: rgb(28 28 30 / 0.78);
