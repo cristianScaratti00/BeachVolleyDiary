@@ -395,3 +395,35 @@ describe('Accesso — accessibilità', () => {
     await expectNoA11yViolations(container)
   })
 })
+
+// Il deep link della landing (UX LC5): «Crea il tuo diario» porta a
+// `/?accesso=registrati`, «Ho già un account» a `/?accesso=accedi`. Il
+// parametro si legge una volta e si toglie dall'indirizzo.
+describe('il deep link ?accesso=', () => {
+  afterEach(() => {
+    window.history.replaceState(null, '', '/')
+  })
+
+  it('?accesso=registrati apre Registrati, e il parametro sparisce lasciando il resto', async () => {
+    window.history.replaceState(null, '', '/?accesso=registrati&x=1#fondo')
+    render(<Login />)
+    expect(await h1('Come ti chiamano in spiaggia?')).toBeInTheDocument()
+    expect(window.location.search).toBe('?x=1')
+    expect(window.location.hash).toBe('#fondo')
+  })
+
+  it('?accesso=accedi apre Accedi, e il parametro sparisce', async () => {
+    window.history.replaceState(null, '', '/?accesso=accedi')
+    render(<Login />)
+    expect(await h1('Bentornato.')).toBeInTheDocument()
+    expect(window.location.search).toBe('')
+  })
+
+  it('un valore sconosciuto apre il Benvenuto, e il parametro sparisce lo stesso', () => {
+    window.history.replaceState(null, '', '/?accesso=boh')
+    render(<Login />)
+    expect(screen.getByRole('button', { name: 'Crea il tuo diario' })).toBeInTheDocument()
+    expect(screen.getAllByRole('heading', { level: 1 }).map((h) => h.textContent)).toEqual(['Beach Diary'])
+    expect(window.location.search).toBe('')
+  })
+})

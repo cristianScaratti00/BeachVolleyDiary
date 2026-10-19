@@ -14,12 +14,12 @@
 // un desktop in orizzontale si vede il panorama.
 //
 // I movimenti:
-//   - in CSS (Login.css): lo zoom lento della scena, la palma che ondeggia,
+//   - in CSS (Login.scena.css): lo zoom lento della scena, la palma che ondeggia,
 //     le nuvole, i gabbiani, la barca, la schiuma, l'alone del sole e il
 //     riflesso sull'acqua;
-//   - in JS (`usePalleggio`): i due giocatori e il pallone, calcolati in
-//     Login.palleggio.ts e scritti negli attributi a ogni fotogramma, senza
-//     rifare il render di React.
+//   - in JS (`avviaPalleggio`, Login.palleggio.dom.ts): i due giocatori e il
+//     pallone, calcolati in Login.palleggio.ts e scritti negli attributi a
+//     ogni fotogramma, senza rifare il render di React.
 // Con reduced-motion è tutto fermo: resta un fotogramma del palleggio.
 //
 // Decorativa (`aria-hidden`): quello che dice lo dicono i titoli accanto. I
@@ -28,8 +28,9 @@
 // ============================================================================
 import { useEffect, useId, useRef } from 'react'
 import type { RefObject } from 'react'
-import { FERMO, avanza, fotogramma } from './Login.palleggio'
-import type { Fotogramma, Posa, Scambio } from './Login.palleggio'
+import { FERMO } from './Login.palleggio'
+import { avviaPalleggio } from './Login.palleggio.dom'
+import './Login.scena.css'
 
 export type Inquadratura = 'benvenuto' | 'accedi' | 'registrati'
 
@@ -55,117 +56,134 @@ export function Scena({ inquadratura }: { inquadratura: Inquadratura }) {
     <div className="accesso-scena" data-inquadratura={inquadratura} aria-hidden="true">
       <div className="accesso-camera">
         <svg ref={svg} className="accesso-scena-svg" viewBox="-480 0 1350 844" preserveAspectRatio="xMidYMid slice" focusable="false">
-          <defs>
-            <linearGradient id={id('cielo')} x1="0" y1="0" x2="0" y2="340" gradientUnits="userSpaceOnUse">
-              <stop offset="0" stopColor="#1B1626" />
-              <stop offset=".42" stopColor="#6E3440" />
-              <stop offset=".72" stopColor="#E06B35" />
-              <stop offset="1" stopColor="#FFB46A" />
-            </linearGradient>
-            <linearGradient id={id('mare')} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stopColor="#5A2E3C" />
-              <stop offset="1" stopColor="#2E1E2A" />
-            </linearGradient>
-            <linearGradient id={id('sabbia')} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stopColor="#C98C5E" />
-              <stop offset="1" stopColor="#4A2E22" />
-            </linearGradient>
-            <radialGradient id={id('sole')}>
-              <stop offset="0" stopColor="#FFE3BC" />
-              <stop offset=".55" stopColor="#FFC184" stopOpacity=".55" />
-              <stop offset="1" stopColor="#FF9A4D" stopOpacity="0" />
-            </radialGradient>
-            <pattern id={id('rete')} width="9" height="9" patternUnits="userSpaceOnUse">
-              <path d="M0 0H9M0 0V9" stroke="#140C0C" strokeOpacity=".6" strokeWidth="1" fill="none" />
-            </pattern>
-            <clipPath id={id('palla')}>
-              <circle r="11" />
-            </clipPath>
-          </defs>
+          {/* Tre piani, dal fondo: cielo, sole, terra. Il disegno e l'ordine
+              di pittura sono quelli di sempre; i piani servono alla landing,
+              che li separa in tre <svg> e li fa scorrere a velocità diverse
+              (MOTION.md §L12). Ogni piano porta le sue definizioni. */}
+          <g data-piano="cielo">
+            <defs>
+              <linearGradient id={id('cielo')} x1="0" y1="0" x2="0" y2="340" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stopColor="#1B1626" />
+                <stop offset=".42" stopColor="#6E3440" />
+                <stop offset=".72" stopColor="#E06B35" />
+                <stop offset="1" stopColor="#FFB46A" />
+              </linearGradient>
+            </defs>
 
-          {/* Il cielo, con le nuvole e i gabbiani che lo attraversano. */}
-          <rect x="-480" width="1350" height="844" fill={url('cielo')} />
-          <g className="accesso-nuvola" fill="#F6A07A" opacity=".45">
-            <rect x="40" y="132" width="150" height="7" rx="3.5" />
-            <rect x="80" y="144" width="96" height="5" rx="2.5" />
-          </g>
-          <g className="accesso-nuvola" data-nuvola="2" fill="#FFC08F" opacity=".4">
-            <rect x="210" y="196" width="130" height="6" rx="3" />
-            <rect x="236" y="207" width="70" height="4" rx="2" />
-          </g>
-          <g className="accesso-gabbiani" stroke="#2A1620" strokeWidth="2" fill="none" strokeLinecap="round">
-            <g transform="translate(0 92)">
-              <path className="accesso-ala" d="M-7 0 Q-3.5 -5 0 0 Q3.5 -5 7 0" />
+            {/* Il cielo, con le nuvole e i gabbiani che lo attraversano. */}
+            <rect x="-480" width="1350" height="844" fill={url('cielo')} />
+            <g className="accesso-nuvola" fill="#F6A07A" opacity=".45">
+              <rect x="40" y="132" width="150" height="7" rx="3.5" />
+              <rect x="80" y="144" width="96" height="5" rx="2.5" />
             </g>
-            <g transform="translate(20 80)">
-              <path className="accesso-ala" data-ala="2" d="M-5 0 Q-2.5 -4 0 0 Q2.5 -4 5 0" />
+            <g className="accesso-nuvola" data-nuvola="2" fill="#FFC08F" opacity=".4">
+              <rect x="210" y="196" width="130" height="6" rx="3" />
+              <rect x="236" y="207" width="70" height="4" rx="2" />
             </g>
-            <g transform="translate(34 98)">
-              <path className="accesso-ala" d="M-4 0 Q-2 -3 0 0 Q2 -3 4 0" />
+            <g className="accesso-gabbiani" stroke="#2A1620" strokeWidth="2" fill="none" strokeLinecap="round">
+              <g transform="translate(0 92)">
+                <path className="accesso-ala" d="M-7 0 Q-3.5 -5 0 0 Q3.5 -5 7 0" />
+              </g>
+              <g transform="translate(20 80)">
+                <path className="accesso-ala" data-ala="2" d="M-5 0 Q-2.5 -4 0 0 Q2.5 -4 5 0" />
+              </g>
+              <g transform="translate(34 98)">
+                <path className="accesso-ala" d="M-4 0 Q-2 -3 0 0 Q2 -3 4 0" />
+              </g>
             </g>
           </g>
 
-          {/* Il sole col suo alone, il mare, il riflesso che luccica, la barca. */}
-          <circle className="accesso-alone" cx="300" cy="300" r="140" fill={url('sole')} />
-          <circle cx="300" cy="300" r="42" fill="#FFE1B8" />
-          <rect x="-480" y="300" width="1350" height="60" fill={url('mare')} />
-          <g className="accesso-riflesso" fill="#FFC48A">
-            <rect x="262" y="306" width="76" height="2.5" rx="1" />
-            <rect x="272" y="314" width="56" height="2" rx="1" />
-            <rect x="282" y="322" width="36" height="2" rx="1" />
-            <rect x="290" y="330" width="20" height="1.5" rx="1" />
-          </g>
-          <g className="accesso-barca" fill="#2A1620">
-            <g transform="translate(40 300)">
-              <path d="M0 -2 L0 -22 L12 -2Z" />
-              <path d="M-1 -20 L-9 -3 L-1 -3Z" opacity=".8" />
-              <path d="M-11 -1 H15 L12 3 H-8Z" />
-            </g>
+          {/* Il sole col suo alone. */}
+          <g data-piano="sole">
+            <defs>
+              <radialGradient id={id('sole')}>
+                <stop offset="0" stopColor="#FFE3BC" />
+                <stop offset=".55" stopColor="#FFC184" stopOpacity=".55" />
+                <stop offset="1" stopColor="#FF9A4D" stopOpacity="0" />
+              </radialGradient>
+            </defs>
+            <circle className="accesso-alone" cx="300" cy="300" r="140" fill={url('sole')} />
+            <circle cx="300" cy="300" r="42" fill="#FFE1B8" />
           </g>
 
-          {/* La spiaggia e la schiuma sulla riva. */}
-          <path d="M-480 348 L0 346 Q120 334 220 340 T390 342 L870 344 V844 H-480Z" fill={url('sabbia')} />
-          <path className="accesso-schiuma" d={SCHIUMA} fill="none" stroke="#FFD9B5" strokeOpacity=".55" strokeWidth="2" strokeLinecap="round" />
+          <g data-piano="terra">
+            <defs>
+              <linearGradient id={id('mare')} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stopColor="#5A2E3C" />
+                <stop offset="1" stopColor="#2E1E2A" />
+              </linearGradient>
+              <linearGradient id={id('sabbia')} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stopColor="#C98C5E" />
+                <stop offset="1" stopColor="#4A2E22" />
+              </linearGradient>
+              <pattern id={id('rete')} width="9" height="9" patternUnits="userSpaceOnUse">
+                <path d="M0 0H9M0 0V9" stroke="#140C0C" strokeOpacity=".6" strokeWidth="1" fill="none" />
+              </pattern>
+              <clipPath id={id('palla')}>
+                <circle r="11" />
+              </clipPath>
+            </defs>
 
-          {/* La palma: il tronco prosegue sotto il bordo, per il panorama. */}
-          <g className="accesso-palma" fill="none" stroke={OMINO} strokeLinecap="round">
-            <path d="M-20.8 521 L-4 430 Q20 300 52 164" strokeWidth="11" />
-            <g transform="translate(52 164)" strokeWidth="6">
-              <path d="M0 0 Q30 -26 70 -4" />
-              <path d="M0 0 Q40 -4 62 30" />
-              <path d="M0 0 Q10 -36 46 -46" />
-              <path d="M0 0 Q-24 -30 -50 -18" />
-              <path d="M0 0 Q-30 2 -44 30" />
-              <path d="M0 0 Q-4 -30 10 -56" />
+            {/* Il mare, il riflesso che luccica, la barca. */}
+            <rect x="-480" y="300" width="1350" height="60" fill={url('mare')} />
+            <g className="accesso-riflesso" fill="#FFC48A">
+              <rect x="262" y="306" width="76" height="2.5" rx="1" />
+              <rect x="272" y="314" width="56" height="2" rx="1" />
+              <rect x="282" y="322" width="36" height="2" rx="1" />
+              <rect x="290" y="330" width="20" height="1.5" rx="1" />
             </g>
-            <g transform="translate(52 164)" fill={OMINO} stroke="none">
-              <circle cx="-4" cy="6" r="5" />
-              <circle cx="5" cy="8" r="5" />
+            <g className="accesso-barca" fill="#2A1620">
+              <g transform="translate(40 300)">
+                <path d="M0 -2 L0 -22 L12 -2Z" />
+                <path d="M-1 -20 L-9 -3 L-1 -3Z" opacity=".8" />
+                <path d="M-11 -1 H15 L12 3 H-8Z" />
+              </g>
             </g>
-          </g>
 
-          {/* La rete, vista di taglio: la maglia, i pali, le due bande. */}
-          <polygon points="180,240 212,253 212,280 180,272" fill={OMINO} />
-          <polygon points="180,240 212,253 212,280 180,272" fill={url('rete')} />
-          <rect x="178" y="236" width="4" height="116" rx="1.5" fill="#140C0C" />
-          <rect x="210" y="250" width="3.5" height="74" rx="1.5" fill="#140C0C" />
-          <path d="M180 240 L212 253" stroke="#F2E9DE" strokeWidth="3.5" strokeLinecap="round" />
-          <path d="M180 272 L212 280" stroke="#F2E9DE" strokeOpacity=".7" strokeWidth="2" strokeLinecap="round" />
+            {/* La spiaggia e la schiuma sulla riva. */}
+            <path d="M-480 348 L0 346 Q120 334 220 340 T390 342 L870 344 V844 H-480Z" fill={url('sabbia')} />
+            <path className="accesso-schiuma" d={SCHIUMA} fill="none" stroke="#FFD9B5" strokeOpacity=".55" strokeWidth="2" strokeLinecap="round" />
 
-          {/* L'ombra del pallone, i due giocatori, il pallone. */}
-          <g data-ombra="" transform={`translate(${ombra.x.toFixed(1)} 344) scale(${ombra.scala.toFixed(2)} 1)`}>
-            <ellipse rx="12" ry="3" fill="#2A1A14" opacity={ombra.opacita.toFixed(2)} />
-          </g>
-          <Giocatore lato={0} />
-          <Giocatore lato={1} />
-          <g data-pallone="" transform={`translate(${pallone.x.toFixed(1)} ${pallone.y.toFixed(1)}) rotate(${pallone.giro.toFixed(1)})`}>
-            <circle r="11" fill="#FFF7EE" />
-            <g clipPath={url('palla')}>
-              <path d="M-13 -5 C-4 -11 6 -11 13 -4" stroke="#FF6B1A" strokeWidth="3.4" fill="none" />
-              <path d="M8 -11 C13 -2 11 7 5 13" stroke="#E8D9C8" strokeWidth="2.6" fill="none" />
-              <path d="M-11 7 C-6 11 0 12 5 11" stroke="#E8D9C8" strokeWidth="2.6" fill="none" />
+            {/* La palma: il tronco prosegue sotto il bordo, per il panorama. */}
+            <g className="accesso-palma" fill="none" stroke={OMINO} strokeLinecap="round">
+              <path d="M-20.8 521 L-4 430 Q20 300 52 164" strokeWidth="11" />
+              <g transform="translate(52 164)" strokeWidth="6">
+                <path d="M0 0 Q30 -26 70 -4" />
+                <path d="M0 0 Q40 -4 62 30" />
+                <path d="M0 0 Q10 -36 46 -46" />
+                <path d="M0 0 Q-24 -30 -50 -18" />
+                <path d="M0 0 Q-30 2 -44 30" />
+                <path d="M0 0 Q-4 -30 10 -56" />
+              </g>
+              <g transform="translate(52 164)" fill={OMINO} stroke="none">
+                <circle cx="-4" cy="6" r="5" />
+                <circle cx="5" cy="8" r="5" />
+              </g>
             </g>
-            <circle r="11" fill="none" stroke="#1C1C1E" strokeWidth="1.5" />
+
+            {/* La rete, vista di taglio: la maglia, i pali, le due bande. */}
+            <polygon points="180,240 212,253 212,280 180,272" fill={OMINO} />
+            <polygon points="180,240 212,253 212,280 180,272" fill={url('rete')} />
+            <rect x="178" y="236" width="4" height="116" rx="1.5" fill="#140C0C" />
+            <rect x="210" y="250" width="3.5" height="74" rx="1.5" fill="#140C0C" />
+            <path d="M180 240 L212 253" stroke="#F2E9DE" strokeWidth="3.5" strokeLinecap="round" />
+            <path d="M180 272 L212 280" stroke="#F2E9DE" strokeOpacity=".7" strokeWidth="2" strokeLinecap="round" />
+
+            {/* L'ombra del pallone, i due giocatori, il pallone. */}
+            <g data-ombra="" transform={`translate(${ombra.x.toFixed(1)} 344) scale(${ombra.scala.toFixed(2)} 1)`}>
+              <ellipse rx="12" ry="3" fill="#2A1A14" opacity={ombra.opacita.toFixed(2)} />
+            </g>
+            <Giocatore lato={0} />
+            <Giocatore lato={1} />
+            <g data-pallone="" transform={`translate(${pallone.x.toFixed(1)} ${pallone.y.toFixed(1)}) rotate(${pallone.giro.toFixed(1)})`}>
+              <circle r="11" fill="#FFF7EE" />
+              <g clipPath={url('palla')}>
+                <path d="M-13 -5 C-4 -11 6 -11 13 -4" stroke="#FF6B1A" strokeWidth="3.4" fill="none" />
+                <path d="M8 -11 C13 -2 11 7 5 13" stroke="#E8D9C8" strokeWidth="2.6" fill="none" />
+                <path d="M-11 7 C-6 11 0 12 5 11" stroke="#E8D9C8" strokeWidth="2.6" fill="none" />
+              </g>
+              <circle r="11" fill="none" stroke="#1C1C1E" strokeWidth="1.5" />
+            </g>
           </g>
         </svg>
       </div>
@@ -179,7 +197,7 @@ export function Scena({ inquadratura }: { inquadratura: Inquadratura }) {
 /**
  * Un giocatore: la giocatrice con la coda a sinistra, quello col cappellino
  * a destra (lo stesso omino, specchiato). Ogni tratto porta il nome della
- * sua parte di `Posa`: `usePalleggio` lo ritrova e lo riscrive.
+ * sua parte di `Posa`: `avviaPalleggio` lo ritrova e lo riscrive.
  */
 function Giocatore({ lato }: { lato: 0 | 1 }) {
   const p = FERMO.giocatori[lato]
@@ -204,65 +222,17 @@ function Giocatore({ lato }: { lato: 0 | 1 }) {
   )
 }
 
-type Tratto = Exclude<keyof Posa, 'testa' | 'pallone'>
-
 /**
- * Il palleggio vivo: a ogni fotogramma calcola lo scambio e lo scrive negli
- * attributi dei tratti, del pallone e della sua ombra. Si ferma con
- * reduced-motion (anche se la preferenza cambia mentre l'accesso è aperto:
- * si torna al fotogramma fermo) e allo smontaggio; con la scheda nascosta ci
- * pensa il browser, che non chiama più requestAnimationFrame.
+ * Il palleggio vivo: il pilota DOM di Login.palleggio.dom.ts, che scrive gli
+ * attributi dei tratti, del pallone e della sua ombra a ogni fotogramma senza
+ * passare da React. Si ferma con reduced-motion (anche se la preferenza cambia
+ * mentre l'accesso è aperto: si torna al fotogramma fermo), fuori vista, con
+ * la scheda nascosta e allo smontaggio.
  */
 function usePalleggio(svg: RefObject<SVGSVGElement>) {
   useEffect(() => {
     const el = svg.current
-    if (!el || typeof requestAnimationFrame !== 'function') return
-    const ridotto = typeof window.matchMedia === 'function' ? window.matchMedia('(prefers-reduced-motion: reduce)') : null
-    const giocatori = ([0, 1] as const).map((lato) =>
-      Array.from(el.querySelectorAll<SVGElement>(`[data-giocatore="${lato}"] [data-parte]`)),
-    )
-    const pallone = el.querySelector<SVGGElement>('[data-pallone]')
-    const ombra = el.querySelector<SVGGElement>('[data-ombra]')
-    const ombraEllisse = ombra?.querySelector('ellipse')
-
-    const disegna = (f: Fotogramma) => {
-      giocatori.forEach((tratti, lato) => {
-        const p = f.giocatori[lato]
-        for (const t of tratti) {
-          const parte = t.dataset.parte
-          if (parte === 'testa') {
-            t.setAttribute('cx', p.testa[0].toFixed(1))
-            t.setAttribute('cy', p.testa[1].toFixed(1))
-          } else if (parte) t.setAttribute('d', p[parte as Tratto])
-        }
-      })
-      const b = f.pallone
-      pallone?.setAttribute('transform', `translate(${b.x.toFixed(1)} ${b.y.toFixed(1)}) rotate(${b.giro.toFixed(1)})`)
-      ombra?.setAttribute('transform', `translate(${f.ombra.x.toFixed(1)} 344) scale(${f.ombra.scala.toFixed(2)} 1)`)
-      ombraEllisse?.setAttribute('opacity', f.ombra.opacita.toFixed(2))
-    }
-
-    let raf = 0
-    let scambio: Scambio | null = null
-    const giro = (ora: number) => {
-      raf = requestAnimationFrame(giro)
-      scambio = avanza(scambio, ora)
-      disegna(fotogramma(scambio, ora))
-    }
-    const aggiorna = () => {
-      if (ridotto?.matches) {
-        cancelAnimationFrame(raf)
-        raf = 0
-        scambio = null
-        disegna(FERMO)
-      } else if (!raf) raf = requestAnimationFrame(giro)
-    }
-
-    aggiorna()
-    ridotto?.addEventListener?.('change', aggiorna)
-    return () => {
-      cancelAnimationFrame(raf)
-      ridotto?.removeEventListener?.('change', aggiorna)
-    }
+    if (!el) return
+    return avviaPalleggio(el)
   }, [svg])
 }
