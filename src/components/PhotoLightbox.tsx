@@ -53,7 +53,7 @@ export default function PhotoLightbox({ photos, startIndex, nameBase, onClose, t
   useFocusTrap(ref, presente)
   useEscape(onClose, top && presente)
   useInitialFocus(ref, (root) => root.querySelector<HTMLElement>('[data-close]'))
-  useReturnFocus(presente, opener)
+  useReturnFocus(presente, opener, ref)
 
   const vai = (d: number) => {
     if (!molte) return

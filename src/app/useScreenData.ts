@@ -85,7 +85,9 @@ export function useScreenData({ data, loading, error, reload, route, canFilter, 
 
   // ---------------------------------------------------------- primo carico
   const [caricamento, setCaricamento] = useState<Caricamento>(loading ? 'attesa' : error ? 'fallito' : 'pronto')
-  const dataAlFallimento = useRef<DiaryData | null>(null)
+  // Montato già fallito (l'anteprima `?fallito`, un remount dopo l'errore):
+  // il riferimento parte da qui, o il primo «Riprova» riuscito non si vedrebbe.
+  const dataAlFallimento = useRef<DiaryData | null>(!loading && error ? data : null)
   useEffect(() => {
     if (loading || caricamento !== 'attesa') return
     if (error) {

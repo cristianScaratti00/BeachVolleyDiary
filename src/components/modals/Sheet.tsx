@@ -127,7 +127,7 @@ export function Sheet({
     if (byTouch) return titolo
     return firstField(root) ?? titolo
   })
-  useReturnFocus(presente, opener)
+  useReturnFocus(presente, opener, ref)
 
   const fineTrascinamento = (_e: unknown, info: PanInfo) => {
     const oltre = info.offset.y > CHIUDI_OLTRE_PX || info.velocity.y > CHIUDI_OLTRE_VELOCITA

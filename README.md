@@ -154,9 +154,11 @@ Fuori da `src/`:
 ```
 supabase/migrations/          # schema, RLS, RPC
 supabase/functions/check-name # Edge Function: nickname già in uso?
-docs/                         # report QA per feature
+docs/                         # report QA per feature; QA-refactor.md = stati di UX §6 → test
 docs/motion/                  # demo del movimento (MOTION.md), fuori dalla build
+docs/preview/ · docs/qa/      # l'app con dati finti + script CDP (axe, Tab, bersagli, sweep)
 UX.md · ART_DIRECTION.md · MOTION.md  # flussi, sistema visivo, movimento
+POLISH.md                     # misure della rifinitura e come rifarle con docs/qa
 ```
 
 ## Test
@@ -172,7 +174,10 @@ I test sono co-locati accanto al codice che coprono (`*.test.ts` / `*.test.tsx`)
 di fabbrica con "oggi" congelato al `2026-07-22`, così la suite non cambia colore a mezzanotte;
 `src/test/axe.ts` è un wrapper su axe-core limitato alle regole WCAG 2.1 A/AA;
 `src/test/contrast.test.ts` calcola il contrasto sui colori veri, che axe in jsdom non può misurare.
-I report QA per feature stanno in `docs/`.
+`src/test/app.tsx` monta l'app intera (`AppView`) con un diario in memoria: ci girano i test dei
+flussi in `src/app/AppView.test.tsx` (menu ＋, sheet, conferme, focus, indietro, breakpoint).
+I report QA per feature stanno in `docs/`; [`docs/QA-refactor.md`](docs/QA-refactor.md) dice dove è
+verificato ogni stato dell'interfaccia.
 
 ## Design tokens
 

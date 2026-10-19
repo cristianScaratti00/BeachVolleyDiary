@@ -84,25 +84,46 @@ export function useInitialFocus(ref: RefObject<HTMLElement | null>, pick: (root:
   }, [])
 }
 
+const OVERLAY = '[role="dialog"], [role="alertdialog"], [role="menu"]'
+
 /**
  * All'inizio dell'uscita il focus torna a chi aveva aperto. Se quell'elemento
  * non esiste più (un'eliminazione), va all'h1 della schermata (UX §8.3.3).
+ * Se sta dentro un overlay che esce anche lui (lo sheet sotto il «Scartare le
+ * modifiche?»), il focus lo rimette quell'overlay, al suo opener.
  */
 export function restoreFocus(opener: HTMLElement | null | undefined) {
-  const target =
-    opener && opener.isConnected && !opener.closest('[inert]')
-      ? opener
-      : document.querySelector<HTMLElement>('main h1')
-  target?.focus({ preventScroll: true })
+  if (opener && opener.isConnected) {
+    const muro = opener.closest('[inert]')
+    if (!muro) {
+      opener.focus({ preventScroll: true })
+      return
+    }
+    if (muro.matches(OVERLAY)) return
+  }
+  document.querySelector<HTMLElement>('main h1')?.focus({ preventScroll: true })
 }
 
-export function useReturnFocus(present: boolean, opener: HTMLElement | null | undefined) {
+/**
+ * Il focus è rimasto senza casa: sul body, su un nodo staccato o dentro un
+ * overlay che sta uscendo (`inert`, oppure `root`). Se invece è già altrove —
+ * nello sheet che ha preso il posto del menu, sull'h1 della rotta in cui una
+ * voce del menu ha portato — qualcuno l'ha messo lì apposta: non si tocca.
+ */
+function focusOrfano(root: HTMLElement | null | undefined): boolean {
+  const a = document.activeElement
+  if (!a || a === document.body || !a.isConnected) return true
+  if (a.closest('[inert]')) return true
+  return !!root && root.contains(a)
+}
+
+export function useReturnFocus(present: boolean, opener: HTMLElement | null | undefined, ref?: RefObject<HTMLElement | null>) {
   const fatto = useRef(false)
   useEffect(() => {
     if (present || fatto.current) return
     fatto.current = true
-    restoreFocus(opener)
-  }, [present, opener])
+    if (focusOrfano(ref?.current)) restoreFocus(opener)
+  }, [present, opener, ref])
 }
 
 let locks = 0

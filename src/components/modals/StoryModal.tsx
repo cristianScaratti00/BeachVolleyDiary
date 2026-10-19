@@ -65,7 +65,7 @@ export default function StoryModal({ story, onClose, onNotice, top, opener }: St
   useFocusTrap(ref, presente)
   useEscape(onClose, top && presente)
   useInitialFocus(ref, (root) => root.querySelector<HTMLElement>('[data-close]'))
-  useReturnFocus(presente, opener)
+  useReturnFocus(presente, opener, ref)
 
   // Download disattivo finché i font della tela non sono pronti, al massimo 3s
   // (UX §6.5): dopo, si genera con quel che c'è.

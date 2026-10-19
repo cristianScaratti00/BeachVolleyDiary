@@ -54,6 +54,14 @@ describe('useScreenData — primo caricamento (§4.10)', () => {
     expect(result.current.caricamento).toBe('pronto')
   })
 
+  it('montato già fallito, il primo reload con dati nuovi lo riporta a «pronto»', () => {
+    const vuoto = makeData()
+    const { result, rerender } = setup({ data: vuoto, loading: false, error: 'rete', route: { name: 'home' } })
+    expect(result.current.caricamento).toBe('fallito')
+    rerender({ data: makeData({ tournaments: [makeTournament()] }), loading: false, error: null, route: { name: 'home' } })
+    expect(result.current.caricamento).toBe('pronto')
+  })
+
   it('gli errori dopo il primo carico non cambiano lo stato (sono Toast)', () => {
     const d = makeData()
     const { result, rerender } = setup({ data: d, loading: false, error: null, route: { name: 'home' } })

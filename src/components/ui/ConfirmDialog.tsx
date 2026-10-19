@@ -57,7 +57,7 @@ export function ConfirmDialog({
     if (!busy) onCancel()
   }, top && presente)
   useInitialFocus(ref, (root) => root.querySelector<HTMLElement>('[data-cancel]'))
-  useReturnFocus(presente, opener)
+  useReturnFocus(presente, opener, ref)
 
   const conferma = async () => {
     if (busy) return

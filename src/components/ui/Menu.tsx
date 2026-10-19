@@ -52,7 +52,7 @@ export function Menu({ title, items, onClose, placement = 'tabbar', anchor, open
 
   useEscape(onClose, top && presente)
   useInitialFocus(ref, (root) => root.querySelector<HTMLElement>('[role="menuitem"]'))
-  useReturnFocus(presente, opener)
+  useReturnFocus(presente, opener, ref)
 
   // Il popover si posa accanto al pulsante che l'ha aperto, dal lato in cui
   // c'è spazio (sotto se ci sta, altrimenti sopra). Sono misure calcolate al
