@@ -111,12 +111,17 @@ Ultimo giro: 2026-10-20, Chrome headless (macOS). Larghezze 320 · 360 · 390 ·
 
 ## Prestazioni (build di produzione, CPU 4×)
 
+Tre giri a 390 e tre a 1280, l'ultimo coi pannelli della demo nascosti agli screen reader.
+
 | Cosa | 390 | 1280 |
 |---|---|---|
-| FCP · LCP · TBT · CLS | 176 · 176 · 80 ms · 0 | 148 · 148 · 66 ms · 0 |
-| Fotogrammi lenti (> 25 ms) scorrendo ogni sezione | 1 su 862 (83 ms, in #wrapped) | 0 su 864 |
-| Interazioni (guida, foglio, tab, chat, demo) | INP ≤ 24 ms | INP ≤ 24 ms |
+| FCP · LCP | 112–176 ms | 116–152 ms |
+| TBT · CLS | 0–80 ms · 0 | 0–66 ms · 0 |
+| Fotogrammi lenti (> 25 ms) scorrendo ogni sezione, ~860 a giro | 1 · 1 · 0 (83 ms in #wrapped, 33 ms in #numeri) | 0 · 0 · 0 |
+| Interazioni (guida, foglio, tab, chat, demo), 26 misure | INP ≤ 24 ms | INP ≤ 24 ms |
 | Proprietà animate | transform, opacity | idem |
+
+UX §L13 chiede 0 fotogrammi lunghi. Quelli visti sono isolati, uno ogni ~860, e non si ripetono nello stesso punto: sembrano rumore di Chrome headless (garbage collection). Vanno guardati su un telefono vero prima di chiamarli difetto.
 
 ## Le prove falliscono davvero (mutazioni)
 
