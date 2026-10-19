@@ -192,6 +192,10 @@ function monta({ guida, figura, svgGuida, bolla, menu, eroePallo, svgEroe }: Pez
       const volare = vuole() || s === 'inizio'
       if (!deepLink && volare && !visto('salto') && !programmatico() && !movimentoFermo()) return passaggio()
       if (vuole() || s === 'inizio') {
+        // Senza volo la guida è contenuto che arriva: compare dove sta, in
+        // ENTRATA, senza scivolare dal bordo (MOTION §L4.1).
+        guida.setAttribute('data-compare', '')
+        window.setTimeout(() => guida.removeAttribute('data-compare'), ms('--dur-entrata'))
         entra()
         pallo.setUmore(s === 'inizio' ? 'occhiolino' : umoreDiSezione())
         di('diario-1', ATTERRAGGIO, null)

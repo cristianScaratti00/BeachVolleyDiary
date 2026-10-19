@@ -37,6 +37,9 @@
     visibility: visible;
     transition: transform var(--dur-molla) var(--ease-molla), opacity var(--dur-entrata) var(--ease-standard), visibility 0s;
   }
+  /* Senza il salto (deep link, ricarica, fermo, salto già visto) compare
+     dove sta, in sola opacità: è contenuto che arriva (MOTION §L4.1). */
+  .guida[data-compare] { transform: none; transition: opacity var(--dur-entrata) var(--ease-standard), visibility 0s; }
   .guida-figura { display: block; width: 100%; }
   .guida-figura .pallo { width: 100%; height: auto; }
   /* Da guida galleggia sulla pagina, non ci sta in piedi: niente ombra. */

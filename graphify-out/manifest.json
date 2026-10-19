@@ -220,8 +220,8 @@
     "semantic_hash": ""
   },
   "src/screens/Login.tsx": {
-    "mtime": 1792432110.2799416,
-    "ast_hash": "2513daa2bc65fe716adb763e08e7ab6d",
+    "mtime": 1792441439.5108087,
+    "ast_hash": "445b8303c242b12b4a85c2529aaaff5d",
     "semantic_hash": ""
   },
   "src/screens/Profilo.tsx": {
@@ -360,13 +360,13 @@
     "semantic_hash": ""
   },
   "tsconfig.json": {
-    "mtime": 1792430491.0018556,
-    "ast_hash": "a3d39fa780ebff65444de257f291ce6c",
+    "mtime": 1792442079.773577,
+    "ast_hash": "e6261e95d374741b1db1854ddb469016",
     "semantic_hash": ""
   },
   "tsconfig.node.json": {
-    "mtime": 1792430491.0019348,
-    "ast_hash": "e07c1c664b91bd71718968bd772cca05",
+    "mtime": 1792442079.7737617,
+    "ast_hash": "a75925d26713802b7fdc10330d502314",
     "semantic_hash": ""
   },
   "tsconfig.test.json": {
@@ -375,8 +375,8 @@
     "semantic_hash": ""
   },
   "vite.config.ts": {
-    "mtime": 1792432110.285511,
-    "ast_hash": "55e1b5c65a85d766ac6bed8d14f78630",
+    "mtime": 1792442079.7493112,
+    "ast_hash": "4442df4f7463ca5373394c91e45d3512",
     "semantic_hash": ""
   },
   "vitest.config.ts": {
@@ -385,8 +385,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1792432110.2414253,
-    "ast_hash": "86ad38f3d724c82196f7cd9357a9e82b",
+    "mtime": 1792444082.1955402,
+    "ast_hash": "d813dd6db5931879ad3a8b7bd126c492",
     "semantic_hash": ""
   },
   "docs/QA-tornei-formati.md": {
@@ -564,19 +564,14 @@
     "ast_hash": "df6f26a4231449c7123e3215a202fbd6",
     "semantic_hash": ""
   },
-  "presentazione/landing.js": {
-    "mtime": 1792430490.9792728,
-    "ast_hash": "f911f60971cfbaf7bef618563ca59dff",
-    "semantic_hash": ""
-  },
   "public/sw.js": {
     "mtime": 1792430490.9828253,
     "ast_hash": "49d39bf315de8db0e6318a11a61e9dec",
     "semantic_hash": ""
   },
   "presentazione/index.html": {
-    "mtime": 1792430490.9791248,
-    "ast_hash": "5eb16bfe185d45b26c779d3aa0b429b3",
+    "mtime": 1792443905.0756254,
+    "ast_hash": "6bfdb5e668600725ef806be1f6140b9e",
     "semantic_hash": ""
   },
   "public/offline.html": {
@@ -585,43 +580,28 @@
     "semantic_hash": ""
   },
   "public/icons/apple-touch-icon.png": {
-    "mtime": 1792430490.9794557,
-    "ast_hash": "864ecec02a45e740eab44835efefd4dc",
+    "mtime": 1792441582.5269346,
+    "ast_hash": "5f2f024f681af600d5f6cc9f48fa3dc2",
     "semantic_hash": ""
   },
   "public/icons/icon-192.png": {
-    "mtime": 1792430490.979647,
-    "ast_hash": "3e593bd4fbb65dd4966b6634fd4053b4",
+    "mtime": 1792441582.6519072,
+    "ast_hash": "44c74669aaf231ea3bb3aac3cf9dba40",
     "semantic_hash": ""
   },
   "public/icons/icon-512.png": {
-    "mtime": 1792430490.979847,
-    "ast_hash": "966bb1258c1cca288834d09cf94648a8",
+    "mtime": 1792441582.8049545,
+    "ast_hash": "7a6e56a7ad2fdcbbd576c60a72574520",
     "semantic_hash": ""
   },
   "public/icons/icon-maskable-512.png": {
-    "mtime": 1792430490.980085,
-    "ast_hash": "c5c63743594e6fc564efbc4c637e2e90",
+    "mtime": 1792441582.953803,
+    "ast_hash": "4ecb6522e000ed8d919c46565aeb5231",
     "semantic_hash": ""
   },
   "public/icons/icon.svg": {
-    "mtime": 1792430490.9801712,
-    "ast_hash": "5509ccaade7256682aa31b875adfd500",
-    "semantic_hash": ""
-  },
-  "public/presentazione/screens/home.png": {
-    "mtime": 1792430490.9814286,
-    "ast_hash": "bf9dcfa491f4ef96974937d1653af6ae",
-    "semantic_hash": ""
-  },
-  "public/presentazione/screens/tornei.png": {
-    "mtime": 1792430490.982096,
-    "ast_hash": "9616225ebec1976e66a2396650cb1b95",
-    "semantic_hash": ""
-  },
-  "public/presentazione/screens/wrapped.png": {
-    "mtime": 1792430490.9827256,
-    "ast_hash": "6f3d394b8bdfc7f5f3828db39ff3d4b7",
+    "mtime": 1792441581.3005998,
+    "ast_hash": "1ca2f77eca86d9ae37943d5c7f1223a9",
     "semantic_hash": ""
   },
   "vercel.json": {
@@ -765,8 +745,8 @@
     "semantic_hash": ""
   },
   "docs/preview/main.tsx": {
-    "mtime": 1792432110.2434196,
-    "ast_hash": "ccd648594355cecc683605fc693c71dd",
+    "mtime": 1792441344.4104576,
+    "ast_hash": "3a070b5e02b7e0b802f824079700d5c2",
     "semantic_hash": ""
   },
   "src/app/AppShell.tsx": {
@@ -950,8 +930,8 @@
     "semantic_hash": ""
   },
   "src/components/ui/Icon.tsx": {
-    "mtime": 1792432110.2690945,
-    "ast_hash": "22e83a35d71348372f090839ba7ccd9f",
+    "mtime": 1792441428.2387054,
+    "ast_hash": "b35268fd8c9c07eda2c9491232b248a6",
     "semantic_hash": ""
   },
   "src/components/ui/List.tsx": {
@@ -995,8 +975,8 @@
     "semantic_hash": ""
   },
   "src/components/ui/Tabellone.tsx": {
-    "mtime": 1792432110.2720654,
-    "ast_hash": "d8db8367863adc1719fa5ee817acd682",
+    "mtime": 1792441335.7704494,
+    "ast_hash": "44845f6b27421efa63c43078f3fc2099",
     "semantic_hash": ""
   },
   "src/components/ui/Toast.tsx": {
@@ -1045,8 +1025,8 @@
     "semantic_hash": ""
   },
   "src/screens/Login.test.tsx": {
-    "mtime": 1792432110.2796931,
-    "ast_hash": "65e06cfdea94461f4a21df84112fdf6d",
+    "mtime": 1792441447.3941708,
+    "ast_hash": "53572290237ab938e9fdfd5c1c8ef521",
     "semantic_hash": ""
   },
   "src/screens/NonTrovato.tsx": {
@@ -1195,8 +1175,8 @@
     "semantic_hash": ""
   },
   "src/components/Pallo.tsx": {
-    "mtime": 1792432110.2608018,
-    "ast_hash": "2d6f252c10c1257d36dde46d12599aba",
+    "mtime": 1792441324.4567416,
+    "ast_hash": "080427068adf9aeb2a9dfa42805cb511",
     "semantic_hash": ""
   },
   "src/components/dashboard/Filtri.tsx": {
@@ -1250,8 +1230,8 @@
     "semantic_hash": ""
   },
   "src/screens/Login.scena.tsx": {
-    "mtime": 1792432110.279492,
-    "ast_hash": "e821d18fede294cc3d82419c376274a5",
+    "mtime": 1792441424.0308237,
+    "ast_hash": "d710a124cad7eefaa7f0ad0f945d74ac",
     "semantic_hash": ""
   },
   "src/screens/PartitaLive.test.tsx": {
@@ -1260,8 +1240,8 @@
     "semantic_hash": ""
   },
   "src/screens/PartitaLive.tsx": {
-    "mtime": 1792432110.2810256,
-    "ast_hash": "f9f59ad556536bd957a53bac10dd0535",
+    "mtime": 1792441540.962897,
+    "ast_hash": "f28d0e0662fe5417f2b6a14b2eb60733",
     "semantic_hash": ""
   },
   ".claude/agent-memory/pixel-perfect-ui-builder/MEMORY.md": {
@@ -1387,6 +1367,206 @@
   "docs/motion/L5-soglie.html": {
     "mtime": 1792440716.884449,
     "ast_hash": "5b5ab3ad442a0bdc188c0615a7f09d8f",
+    "semantic_hash": ""
+  },
+  "docs/preview/dati.ts": {
+    "mtime": 1792441340.1360493,
+    "ast_hash": "89f90d18181737170e713eb0f724ac5d",
+    "semantic_hash": ""
+  },
+  "docs/qa/icone.mjs": {
+    "mtime": 1792441575.8274078,
+    "ast_hash": "53781aa8e95f47031b3fbd415149d012",
+    "semantic_hash": ""
+  },
+  "docs/qa/landing-og.mjs": {
+    "mtime": 1792444028.8563063,
+    "ast_hash": "221bb6c079e81405c774f7fcd7f915fe",
+    "semantic_hash": ""
+  },
+  "docs/qa/landing-shots.mjs": {
+    "mtime": 1792441497.5497396,
+    "ast_hash": "d487119fd9a33b769b99ff67a5ff2472",
+    "semantic_hash": ""
+  },
+  "presentazione/js/chat.passi.ts": {
+    "mtime": 1792441786.23226,
+    "ast_hash": "0e3c48cab61231cdda8fcc7260313d87",
+    "semantic_hash": ""
+  },
+  "presentazione/js/chat.ts": {
+    "mtime": 1792443856.3764362,
+    "ast_hash": "24d73a8b2d2c000982b0e32b658d5a90",
+    "semantic_hash": ""
+  },
+  "presentazione/js/generati/dati.ts": {
+    "mtime": 1792441798.347919,
+    "ast_hash": "c4f37c3c8414e676522d0470755529e4",
+    "semantic_hash": ""
+  },
+  "presentazione/js/generati/pallo.ts": {
+    "mtime": 1792441520.220479,
+    "ast_hash": "0d765b09827cf40d509ee664f0771cb3",
+    "semantic_hash": ""
+  },
+  "presentazione/js/generati/scena.ts": {
+    "mtime": 1792441520.2204728,
+    "ast_hash": "131c82a8a90e0e7dab39d285f55b230c",
+    "semantic_hash": ""
+  },
+  "presentazione/js/guida.ts": {
+    "mtime": 1792444323.173782,
+    "ast_hash": "76821573efecec479ca6188d64c7b0e3",
+    "semantic_hash": ""
+  },
+  "presentazione/js/install.ts": {
+    "mtime": 1792443369.2227495,
+    "ast_hash": "bee5392cebeda9c9bf3f2a42a9600bbd",
+    "semantic_hash": ""
+  },
+  "presentazione/js/live.ts": {
+    "mtime": 1792443369.2225726,
+    "ast_hash": "e32759eeb8a37c4ef737f6b541e21bb1",
+    "semantic_hash": ""
+  },
+  "presentazione/js/main.ts": {
+    "mtime": 1792443339.6811922,
+    "ast_hash": "4be2d4103ac254af81bb4c749b90886e",
+    "semantic_hash": ""
+  },
+  "presentazione/js/movimento.ts": {
+    "mtime": 1792443203.500645,
+    "ast_hash": "3eb989b92c5ac6f3d0b8bb60fc016094",
+    "semantic_hash": ""
+  },
+  "presentazione/js/nav.ts": {
+    "mtime": 1792444246.3116293,
+    "ast_hash": "680f2b437bd0fe75349d737a1a3f6d35",
+    "semantic_hash": ""
+  },
+  "presentazione/js/numeri.ts": {
+    "mtime": 1792443263.5741003,
+    "ast_hash": "fbe1877c19e4dc99539076de6661fda7",
+    "semantic_hash": ""
+  },
+  "presentazione/js/pallo.disegno.ts": {
+    "mtime": 1792441826.979061,
+    "ast_hash": "f1bfb504d0760f7142e2808bf8a1c0fe",
+    "semantic_hash": ""
+  },
+  "presentazione/js/pallo.ts": {
+    "mtime": 1792442879.5910363,
+    "ast_hash": "1d7c56182a92db6a47d2fdd80ebd0814",
+    "semantic_hash": ""
+  },
+  "presentazione/js/scene.ts": {
+    "mtime": 1792444246.3113923,
+    "ast_hash": "5268093d5cc3055f6808c4f25ec998f4",
+    "semantic_hash": ""
+  },
+  "presentazione/js/sezioni.ts": {
+    "mtime": 1792443016.0340996,
+    "ast_hash": "300740d5832f40f4881ca59b00c048ec",
+    "semantic_hash": ""
+  },
+  "presentazione/js/tempi.ts": {
+    "mtime": 1792443096.3174443,
+    "ast_hash": "e10343675f40ab3975ead0ea8385998c",
+    "semantic_hash": ""
+  },
+  "public/presentazione/fermo.js": {
+    "mtime": 1792442079.755449,
+    "ast_hash": "e6d62a1032d7f30058fe5b62da06a636",
+    "semantic_hash": ""
+  },
+  "src/app/landing.dati.test.ts": {
+    "mtime": 1792443379.5324404,
+    "ast_hash": "39ee57f8fc16cd13f8a823d41c469dc0",
+    "semantic_hash": ""
+  },
+  "src/components/Pallo.landing.test.tsx": {
+    "mtime": 1792441514.3702264,
+    "ast_hash": "8d52eb7012e4d1d586e3378682c3bc7c",
+    "semantic_hash": ""
+  },
+  "src/components/Pallo.vita.ts": {
+    "mtime": 1792441310.253579,
+    "ast_hash": "220ef5ef11ef203343a9e18d304c3a22",
+    "semantic_hash": ""
+  },
+  "src/components/ui/Icon.paths.ts": {
+    "mtime": 1792441424.0466318,
+    "ast_hash": "225f537f161f4ff0f8a8a1a54518c1cf",
+    "semantic_hash": ""
+  },
+  "src/components/ui/Odometro.ts": {
+    "mtime": 1792441339.754074,
+    "ast_hash": "0ce39c7d843977dba69eeebc33055fab",
+    "semantic_hash": ""
+  },
+  "src/screens/Login.palleggio.dom.test.ts": {
+    "mtime": 1792441572.4088984,
+    "ast_hash": "629083694da42c5c8f844be0a819a124",
+    "semantic_hash": ""
+  },
+  "src/screens/Login.palleggio.dom.ts": {
+    "mtime": 1792441378.8507886,
+    "ast_hash": "846bf8fbc3aacf18fca7b36156711433",
+    "semantic_hash": ""
+  },
+  "src/screens/PartitaLive.regole.ts": {
+    "mtime": 1792441355.414354,
+    "ast_hash": "6840e1c5527e212651f12c1268e8fc97",
+    "semantic_hash": ""
+  },
+  "tsconfig.landing.json": {
+    "mtime": 1792443369.2231793,
+    "ast_hash": "37e9187172c9ce8480c0d1dfe8461c1b",
+    "semantic_hash": ""
+  },
+  "public/presentazione/og.png": {
+    "mtime": 1792444063.4500082,
+    "ast_hash": "6bbc9efb7d1d1c2e2ff475cfa0861b6e",
+    "semantic_hash": ""
+  },
+  "public/presentazione/screens/compagni.webp": {
+    "mtime": 1792441515.8429146,
+    "ast_hash": "3611f41258a605820ab3fcb257904340",
+    "semantic_hash": ""
+  },
+  "public/presentazione/screens/diario.webp": {
+    "mtime": 1792441513.8710032,
+    "ast_hash": "d4f27eb569d576222577f998a03cbba9",
+    "semantic_hash": ""
+  },
+  "public/presentazione/screens/home.webp": {
+    "mtime": 1792441508.7921298,
+    "ast_hash": "74b14cf266edbd9aaaa4770216d07fcb",
+    "semantic_hash": ""
+  },
+  "public/presentazione/screens/mappa.webp": {
+    "mtime": 1792441511.6725104,
+    "ast_hash": "652373226df63faeb8b35673f1307cca",
+    "semantic_hash": ""
+  },
+  "public/presentazione/screens/storia-foto.webp": {
+    "mtime": 1792441526.6787045,
+    "ast_hash": "b8ddf92f3056d65aa07570f34c939c31",
+    "semantic_hash": ""
+  },
+  "public/presentazione/screens/storia-polaroid.webp": {
+    "mtime": 1792441527.7548935,
+    "ast_hash": "b81b921d2f07153e49f2f172f38b88af",
+    "semantic_hash": ""
+  },
+  "public/presentazione/screens/storia-tabellone.webp": {
+    "mtime": 1792441524.657647,
+    "ast_hash": "94556d80b206930d2fdf48f2d583c80b",
+    "semantic_hash": ""
+  },
+  "public/presentazione/screens/torneo.webp": {
+    "mtime": 1792441519.0361133,
+    "ast_hash": "6f8c812d7ad52b7553b1169826abfaa0",
     "semantic_hash": ""
   }
 }
