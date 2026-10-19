@@ -1,0 +1,254 @@
+/* ============================================================================
+   «Cosa registriamo?» `#registra` (UX §L6.3, §L7.9, ART §L8, MOTION §L5.8):
+   il ＋ dell'app che si apre nel menu delle quattro voci, e il pannello della
+   voce scelta: la mini chat «Raccontalo a Pallo» di serie.
+
+   Le voci sono quelle di `.ui-menu-opt` dell'app ma OPACHE (sotto non scorre
+   niente); la scelta è un filo d'inchiostro da 2px, mai un riempimento (ART
+   A7). La chat ha altezza fissa e scorre dentro (ML10): una chat che cresce
+   sposterebbe la pagina sotto il dito a ogni messaggio.
+   ============================================================================ */
+@layer components {
+  .registra { display: grid; gap: var(--space-4); max-width: var(--registra-max); }
+
+  /* Il ＋ in testa al menu: decorativo, è lui che «si apre» (LM4). */
+  .registra-piu {
+    display: grid;
+    place-items: center;
+    width: var(--plus-size);
+    height: var(--plus-size);
+    border-radius: 50%;
+    background-color: var(--accent);
+    color: var(--on-accent);
+    box-shadow: inset 0 0 0 var(--border-w) var(--accent-strong);
+  }
+  .registra-piu .ui-icon { width: var(--piu-icona); height: var(--piu-icona); stroke-width: var(--piu-tratto); }
+  .registra-piu[data-premuto] { animation: registra-premi var(--dur-press) var(--ease-press); }
+  @keyframes registra-premi { from { transform: scale(var(--press-scale-tab)); } to { transform: none; } }
+
+  /* ---------------------------------------------------------------- Voci */
+  .voci {
+    display: grid;
+    gap: var(--space-2-5);
+    margin: 0;
+    padding: var(--space-2);
+    list-style: none;
+    border-radius: calc(var(--radius-card) + var(--space-0-5));
+    background-color: var(--surface);
+    box-shadow: inset 0 0 0 var(--border-w) var(--edge);
+    transform-origin: calc(var(--plus-size) / 2) calc(-1 * var(--space-4) - var(--plus-size) / 2);
+    transition: opacity var(--dur-entrata) var(--ease-standard), transform var(--dur-molla) var(--ease-molla);
+  }
+  .voce {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: var(--voce-h);
+    padding: var(--space-2) var(--space-3);
+    border-radius: calc(var(--radius-row) + var(--space-1));
+    color: var(--ink);
+    transition: transform var(--dur-press) var(--ease-press);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .voce-ico {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: var(--touch);
+    height: var(--touch);
+    border-radius: var(--radius-track);
+    background-color: var(--bg);
+    box-shadow: inset 0 0 0 var(--border-w) var(--edge);
+  }
+  .voce[data-tono="live"] .voce-ico { background-color: var(--accent); box-shadow: inset 0 0 0 var(--border-w) var(--accent-strong); color: var(--on-accent); }
+  .voce-testo { display: grid; gap: var(--space-0-5); min-width: 0; }
+  .voce-nome { font: var(--type-headline); letter-spacing: var(--track-headline); }
+  .voce-sotto { font: var(--type-footnote); letter-spacing: var(--track-footnote); color: var(--ink-2); }
+  /* Viva, la voce è una tab: si preme, e la scelta prende il filo di colpo. */
+  .voce[role="tab"] { cursor: pointer; }
+  .voce[role="tab"]::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background-color: currentColor;
+    opacity: 0;
+    transition: opacity var(--dur-svelto) var(--ease-standard);
+  }
+  .voce[role="tab"]:active { transform: scale(var(--press-scale)); }
+  .voce[role="tab"]:active::before { opacity: var(--state-press-soft); transition-duration: 0ms; }
+  @media (hover: hover) and (pointer: fine) {
+    .voce[role="tab"]:hover::before { opacity: var(--state-hover-soft); }
+  }
+  .voce[aria-selected="true"] { box-shadow: inset 0 0 0 calc(2 * var(--border-w)) var(--ink); }
+
+  /* LM4: armato (fuori vista, la prima volta) il menu è chiuso; scatta
+     togliendo l'attributo, e le voci salgono una dopo l'altra (SALITA).
+     L'effetto sta sul ＋, che ha una scatola anche quando da 900 il blocco
+     si scioglie nella griglia. */
+  .registra-piu[data-armato] ~ .voci {
+    opacity: 0;
+    transform: translateY(calc(var(--rise-y) * var(--motion-scale))) scale(calc(1 - 0.04 * var(--motion-scale)));
+    transition: none;
+  }
+  .registra-piu[data-armato] ~ .voci .voce { opacity: 0; }
+  .registra-piu[data-aperto] ~ .voci .voce {
+    animation: registra-sali var(--dur-rise) var(--ease-rise) backwards;
+    animation-delay: calc(var(--rise-i, 0) * var(--stagger-narrativo));
+  }
+  .voce:nth-child(2) { --rise-i: 1; }
+  .voce:nth-child(3) { --rise-i: 2; }
+  .voce:nth-child(4) { --rise-i: 3; }
+  @keyframes registra-sali {
+    from { opacity: 0; transform: translateY(calc(var(--rise-y) * var(--motion-scale))); }
+    to { opacity: 1; transform: none; }
+  }
+
+  /* --------------------------------------------------------------- Pannelli */
+  .pannello-voce { display: grid; gap: var(--space-3); align-content: start; }
+  .pannello-voce[hidden] { display: none; }
+  .pannello-voce-testo { font: var(--type-body); letter-spacing: var(--track-body); color: var(--text); }
+  .pannello-voce .ui-button { justify-self: start; }
+  .pannello-voce-schermo .schermo { box-shadow: 0 0 0 var(--phone-bezel) var(--phone-color); margin: var(--phone-bezel); }
+  .pannello-voce-schermo img { display: block; width: 100%; height: 100%; max-width: none; }
+
+  /* ------------------------------------------------------------------ Chat */
+  .chat {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    height: var(--chat-h);
+    border-radius: var(--radius-card);
+    background-color: var(--surface);
+    box-shadow: inset 0 0 0 var(--border-w) var(--edge);
+    overflow: hidden;
+  }
+  .chat-testa {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2-5);
+    padding: var(--space-3) var(--space-4);
+    border-bottom: var(--border-w) solid var(--separator);
+    font: var(--type-headline);
+    letter-spacing: var(--track-headline);
+    color: var(--ink);
+  }
+  .chat-avatar { display: block; width: var(--pallo-chat); flex: none; }
+  .chat-avatar .pallo { width: 100%; height: auto; }
+  .chat-log {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin: 0;
+    padding: var(--space-4);
+    list-style: none;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  /* L'anello dentro il registro, che altrimenti lo taglierebbe. */
+  .chat-log:focus-visible { outline-offset: calc(-1 * var(--focus-width)); }
+  .msg {
+    max-width: 82%;
+    padding: var(--space-2-5) var(--space-3-5);
+    border-radius: var(--bolla-r) var(--bolla-r) var(--bolla-r) var(--bolla-r-coda);
+    background-color: var(--surface);
+    box-shadow: inset 0 0 0 var(--border-w) var(--edge);
+    font: var(--type-callout);
+    letter-spacing: var(--track-callout);
+    color: var(--ink);
+    align-self: flex-start;
+  }
+  .msg[data-chi="tu"] {
+    align-self: flex-end;
+    border-radius: var(--bolla-r) var(--bolla-r) var(--bolla-r-coda) var(--bolla-r);
+    background-color: var(--accent);
+    box-shadow: inset 0 0 0 var(--border-w) var(--accent-strong);
+    color: var(--on-accent);
+    font-weight: 600;
+  }
+  .msg[data-nuovo] { animation: chat-entra var(--dur-entrata) var(--ease-standard) both; }
+  @keyframes chat-entra {
+    from { opacity: 0; transform: translateY(calc(var(--space-2) * var(--motion-scale))); }
+    to { opacity: 1; transform: none; }
+  }
+  /* Pallo scrive: i puntini dell'assistente dell'app (RESPIRO), sfalsati di
+     mezza MOLLA. Fermo: niente puntini (la pausa è 0). */
+  .msg-scrive { display: inline-flex; gap: var(--space-1); padding: var(--space-3-5); }
+  .msg-scrive > span {
+    width: var(--space-2);
+    height: var(--space-2);
+    border-radius: 50%;
+    background-color: var(--ink-3);
+    animation: chat-puntino calc(var(--dur-racconto) * 1.5) var(--ease-respiro) infinite both;
+  }
+  .msg-scrive > span:nth-child(2) { animation-delay: calc(var(--dur-molla) / 2); }
+  .msg-scrive > span:nth-child(3) { animation-delay: var(--dur-molla); }
+  @keyframes chat-puntino {
+    0%, 70%, 100% { opacity: 0.3; transform: none; }
+    35% { opacity: 1; transform: translateY(calc(-1 * var(--space-1) * var(--motion-scale))); }
+  }
+  /* La card del riepilogo (`righeRiepilogo`): righe chiave/valore. */
+  .chat-riepilogo { max-width: 100%; width: 100%; }
+  .chat-riepilogo dl { display: grid; gap: var(--space-1); margin: 0; }
+  .chat-riepilogo dl > div { display: flex; justify-content: space-between; gap: var(--space-3); }
+  .chat-riepilogo dt { color: var(--ink-2); }
+  .chat-riepilogo dd { margin: 0; font-weight: 600; text-align: right; }
+
+  .chat-risposte {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    border-top: var(--border-w) solid var(--separator);
+    min-height: calc(var(--touch) + 2 * var(--space-3));
+  }
+  .chat-risposte:empty { display: none; }
+  .chat-risposte:focus { outline: none; }
+  .chat-risposta {
+    position: relative;
+    isolation: isolate;
+    min-height: var(--touch);
+    padding: 0 var(--space-4);
+    border-radius: var(--radius-capsule);
+    background-color: var(--surface);
+    box-shadow: inset 0 0 0 var(--border-w) var(--edge);
+    font: var(--type-callout);
+    font-weight: 600;
+    letter-spacing: var(--track-callout);
+    color: var(--ink);
+    animation: registra-sali var(--dur-rise) var(--ease-rise) backwards;
+    animation-delay: calc(var(--rise-i, 0) * var(--stagger-narrativo));
+    transition: transform var(--dur-press) var(--ease-press);
+  }
+  .chat-risposta::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background-color: currentColor;
+    opacity: 0;
+    transition: opacity var(--dur-svelto) var(--ease-standard);
+  }
+  .chat-risposta:active { transform: scale(var(--press-scale)); }
+  .chat-risposta:active::before { opacity: var(--state-press); transition-duration: 0ms; }
+  @media (hover: hover) and (pointer: fine) {
+    .chat-risposta:hover::before { opacity: var(--state-hover); }
+  }
+  .chat-risposta:nth-child(2) { --rise-i: 1; }
+  .chat-risposta:nth-child(3) { --rise-i: 2; }
+  .chat-nota { font: var(--type-footnote); letter-spacing: var(--track-footnote); }
+
+  /* --------------------------------------------------------- Da 900px */
+  /* Il titolo e le voci nelle colonne 1–5 (le voci larghe come il menu
+     dell'app), il pannello nelle 7–12 (ART §L5.4): il blocco si scioglie
+     nella griglia della sezione. */
+  @media (min-width: 900px) {
+    .registra { display: contents; }
+    .registra-piu, .voci { grid-column: 1 / 6; margin-top: var(--section-object-gap); }
+    .voci { max-width: var(--voci-max); margin-top: var(--space-4); }
+    .pannello-voce { grid-column: 7 / 13; grid-row: 1 / span 3; max-width: var(--registra-max); }
+  }
+}

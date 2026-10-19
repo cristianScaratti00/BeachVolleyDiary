@@ -23,6 +23,8 @@ import { MONTHS_FULL } from '../lib/theme'
 import { placementText } from '../components/ui/Badge'
 import { umoreSlide } from '../components/wrapped/slide'
 import { deriveConsigli, deriveHome, wrappedAOttobre } from './selectors'
+import { INTRO, bozza, domandaDi, riepilogo, scelte } from '../../presentazione/js/chat.passi'
+import type { NomiChat, PassoChat } from '../../presentazione/js/chat.passi'
 
 // Relativo a questo file, come vuole `toMatchFileSnapshot`.
 const FILE = '../../presentazione/js/generati/dati.ts'
@@ -82,6 +84,25 @@ function pin(pins: MappaPin[]) {
 
 const ESITO: Record<MappaTier, string> = { vinto: 'vinta', podio: 'podio', giocato: 'giocata' }
 
+// ------------------------------------------------------------------ chat
+// La conversazione senza JavaScript (UX §L6.3): il copione scritto per
+// intero, scegliendo sempre la prima risposta rapida, come una trascrizione.
+function trascrizione(nomi: NomiChat) {
+  const righe: { chi: 'pallo' | 'tu'; testo: string }[] = INTRO.map((testo) => ({ chi: 'pallo' as const, testo }))
+  let passo: PassoChat = 'name'
+  let d = bozza(nomi)
+  let riassunto: [string, string][] = []
+  for (let giri = 0; passo !== 'fine' && giri < 10; giri++) {
+    const [prima] = scelte(passo, nomi)
+    righe.push({ chi: 'tu', testo: prima.testo })
+    d = prima.applica(d)
+    passo = prima.prossimo
+    righe.push({ chi: 'pallo', testo: domandaDi(passo, d, nomi) })
+    if (passo === 'recap') riassunto = riepilogo(d, nomi)
+  }
+  return { righe, riepilogo: riassunto }
+}
+
 // ---------------------------------------------------------- composizione
 function genera() {
   const home = deriveHome(data, { nome: NOME, today: OGGI_LANDING, wrapped: wrappedAOttobre(OGGI_LANDING) })
@@ -95,6 +116,11 @@ function genera() {
   const tornei = data.tournaments.filter((t) => !t.shared).slice().sort((a, b) => (a.date < b.date ? 1 : -1))
   const passati = tornei.filter((t) => t.date <= OGGI_LANDING)
   const migliore = mappa.migliore
+  const nomi: NomiChat = {
+    tornei: passati.slice(0, 2).map((t) => t.name),
+    compagni: data.partners.filter((p) => !p.shared).slice(0, 2).map((p) => p.name),
+    oggi: OGGI_LANDING,
+  }
 
   return {
     oggi: OGGI_LANDING,
@@ -143,10 +169,7 @@ function genera() {
         .map((x) => ({ tipo: x.kind, occhiello: x.eyebrow, titolo: x.headline, sotto: x.title, didascalia: x.caption, umore: umoreSlide(x.kind) })),
     },
     /** Le risposte rapide della chat: i nomi del diario (UX §L12.5). */
-    chat: {
-      tornei: passati.slice(0, 2).map((t) => t.name),
-      compagni: data.partners.filter((p) => !p.shared).slice(0, 2).map((p) => p.name),
-    },
+    chat: { ...nomi, trascrizione: trascrizione(nomi) },
   }
 }
 
@@ -161,6 +184,9 @@ describe('i numeri della landing vengono dal diario di fabbrica', () => {
     expect(dati.wrapped.slide.map((s) => s.tipo)).toEqual(['wins', 'streak', 'partner'])
     expect(dati.chat.tornei).toHaveLength(2)
     expect(dati.chat.compagni).toHaveLength(2)
+    // La trascrizione arriva fino in fondo, riepilogo compreso.
+    expect(dati.chat.trascrizione.righe[dati.chat.trascrizione.righe.length - 1]?.testo).toBe("Fatto. Nell'app adesso sarebbe nel tuo diario.")
+    expect(dati.chat.trascrizione.riepilogo.length).toBeGreaterThan(0)
   })
 
   it('i pin stanno nel riquadro e non si toccano', () => {

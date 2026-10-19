@@ -1,0 +1,301 @@
+/* ============================================================================
+   La barra (≙ TabBar dell'app, UX §L4.1, ART §L5.6 e §L9.2, MOTION §L5.1):
+   una capsula di vetro con quattro tab e la lente, più il ＋ arancio «Apri il
+   diario». In basso sotto i 900px, in alto da lì, col marchio a sinistra.
+
+   La capsula ha DUE strati di vetro, quelli dell'app senza ritocchi
+   (`glass-regular` sulla carta, `glass-dark` sul buio): il fondo che le passa
+   sotto sceglie quale si vede (`data-sopra`), e si scambiano l'opacità in
+   SVELTO. Il raggio della sfocatura e il colore non si animano mai. La lente
+   è una pillola bianca piena, senza sfocatura: la barra conta 1 nel vetro.
+   ============================================================================ */
+@layer components {
+  .barra {
+    position: fixed;
+    z-index: var(--z-tabbar);
+    left: var(--tabbar-side);
+    right: var(--tabbar-side);
+    bottom: var(--tabbar-bottom);
+    display: flex;
+    gap: var(--tabbar-gap);
+    height: var(--tabbar-h);
+    /* Fra la capsula e il ＋ il tocco passa alla pagina. */
+    pointer-events: none;
+  }
+  .barra > * { pointer-events: auto; }
+  .barra-marchio { display: none; }
+
+  /* ------------------------------------------------------------- Capsula */
+  .capsula {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    border-radius: var(--radius-capsule);
+    isolation: isolate;
+  }
+  .capsula-vetro {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    --material-elev: var(--elev-float);
+    transition: opacity var(--dur-svelto) var(--ease-standard), visibility 0s linear var(--dur-svelto);
+  }
+  /* Chi esce smette di sfocare a fine corsa (visibility), e uno scambio a
+     metà si inverte invece di sommarsi: i livelli sono sempre due. */
+  .capsula-vetro[data-material="glass-dark"],
+  .capsula[data-sopra="scuro"] > .capsula-vetro[data-material="glass-regular"] { opacity: 0; visibility: hidden; }
+  .capsula[data-sopra="scuro"] > .capsula-vetro[data-material="glass-dark"],
+  .capsula[data-sopra="chiaro"] > .capsula-vetro[data-material="glass-regular"] {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity var(--dur-svelto) var(--ease-standard), visibility 0s;
+  }
+
+  .tabs {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-0-5);
+    height: 100%;
+    margin: 0;
+    padding: var(--space-1-5);
+    list-style: none;
+  }
+  .tabs > li { display: contents; }
+
+  /* La lente: si sposta con la transizione della TabBar dell'app (ART A5);
+     `--i` lo scrive nav.ts. Sulle sezioni senza tab sparisce in opacità, e
+     torna DOVE sei, senza scivolare da una tab vecchia (`data-salta`, ML12). */
+  .lente {
+    position: absolute;
+    top: var(--space-1-5);
+    bottom: var(--space-1-5);
+    left: var(--space-1-5);
+    width: calc((100% - 2 * var(--space-1-5) - 3 * var(--space-0-5)) / 4);
+    border-radius: var(--radius-capsule);
+    background-color: var(--lente-bg);
+    box-shadow: var(--lente-elev);
+    transform: translateX(calc(var(--i, 0) * (100% + var(--space-0-5))));
+    transition: transform var(--dur-rise) var(--ease-press), opacity var(--dur-svelto) var(--ease-standard);
+    pointer-events: none;
+  }
+  .lente[data-nascosta] { opacity: 0; }
+  .lente[data-salta] { transition: opacity var(--dur-entrata) var(--ease-standard); }
+
+  .tab {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    min-width: 0;
+    min-height: var(--touch);
+    border-radius: var(--radius-capsule);
+    color: inherit;
+    transition: transform var(--dur-press) var(--ease-press);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .tab:active { transform: scale(var(--press-scale-tab)); }
+  /* L'anello dentro la capsula, che lo taglierebbe fuori. */
+  .tab:focus-visible { outline-offset: calc(-1 * var(--focus-width)); }
+  /* Lo strato di stato in hover, solo con un puntatore vero. */
+  .tab::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background-color: currentColor;
+    opacity: 0;
+    transition: opacity var(--dur-svelto) var(--ease-standard);
+    pointer-events: none;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .tab:not([aria-current="true"]):hover::before { opacity: var(--state-hover-soft); }
+  }
+  /* L'inchiostro a due livelli (MOTION M8, ML13): spento d'inchiostro PIENO,
+     acceso `--lente-label` sulla lente; si scambiano l'opacità in MOLLA,
+     insieme alla lente. Nessuna transizione nomina `color`. */
+  .tab-liv {
+    grid-area: 1 / 1;
+    display: grid;
+    justify-items: center;
+    gap: var(--space-0-5);
+    font: var(--type-caption-2);
+    letter-spacing: var(--track-caption-2);
+    transition: opacity var(--dur-molla) var(--ease-molla);
+  }
+  .tab-liv .ui-icon { width: var(--tab-icona); height: var(--tab-icona); stroke-width: var(--tab-tratto); }
+  .tab-liv[data-liv="spento"] { color: var(--on-glass); }
+  .tab-liv[data-liv="acceso"] { color: var(--lente-label); opacity: 0; }
+  .tab[aria-current="true"] > .tab-liv[data-liv="spento"] { opacity: 0; }
+  .tab[aria-current="true"] > .tab-liv[data-liv="acceso"] { opacity: 1; }
+  /* Spento chiaro ↔ scuro: un cambio DISCRETO a metà dello scambio del vetro
+     (`data-inchiostro`, scritto da nav.ts mezzo SVELTO dopo `data-sopra`). */
+  .capsula[data-inchiostro="scuro"] .tab-liv[data-liv="spento"] { color: var(--on-glass-dark); }
+  /* Telefono in orizzontale: solo icone, il nome resta per chi lo legge. */
+  @media (max-height: 399px) {
+    .tab-etichetta {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+  }
+
+  /* ------------------------------------------------------------------ ＋ */
+  /* Un link a `/`, arancio con il glifo d'inchiostro; mai ruota in ×. Sotto
+     i 600px è un cerchio (il nome resta per chi lo legge), da 600 una capsula
+     con l'etichetta. */
+  .piu {
+    position: relative;
+    isolation: isolate;
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    width: var(--plus-size);
+    height: var(--plus-size);
+    border-radius: var(--radius-capsule);
+    background-color: var(--accent);
+    color: var(--on-accent);
+    box-shadow: inset 0 0 0 var(--border-w) var(--accent-strong), var(--elev-float);
+    font: var(--type-body-strong);
+    font-weight: 700;
+    transition: transform var(--dur-press) var(--ease-press);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .piu .ui-icon { width: var(--piu-icona); height: var(--piu-icona); stroke-width: var(--piu-tratto); }
+  .piu::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background-color: currentColor;
+    opacity: 0;
+    transition: opacity var(--dur-svelto) var(--ease-standard);
+  }
+  .piu:active { transform: scale(var(--press-scale-tab)); }
+  .piu:active::before { opacity: var(--state-press); transition-duration: 0ms; }
+  @media (hover: hover) and (pointer: fine) {
+    .piu:hover::before { opacity: var(--state-hover); }
+  }
+  /* L'anello fuori, sul fondo: sull'arancio non si vedrebbe. */
+  .piu:focus-visible { outline-offset: var(--focus-offset); }
+  .piu-etichetta {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  /* Da 600 la capsula si ferma a `--tabbar-max` e il gruppo sta al centro. */
+  @media (min-width: 600px) {
+    .barra { justify-content: center; }
+    .capsula { flex: 0 1 var(--tabbar-max); }
+    .piu { width: auto; padding: 0 var(--space-6); }
+    .piu .ui-icon { width: var(--icon-24); height: var(--icon-24); stroke-width: var(--icon-stroke-16); }
+    .piu-etichetta { position: static; width: auto; height: auto; overflow: visible; clip: auto; }
+  }
+
+  /* ----------------------------------------------- Da 900px: la barra in alto */
+  @media (min-width: 900px) {
+    .barra {
+      top: var(--barra-inset);
+      bottom: auto;
+      left: var(--gutter);
+      right: var(--gutter);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) var(--barra-capsule-w) minmax(0, 1fr);
+      align-items: center;
+    }
+    .barra-marchio {
+      justify-self: start;
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2-5);
+      min-height: var(--touch);
+      padding-right: var(--space-2);
+      border-radius: var(--radius-control);
+      font: var(--type-marchio-m);
+      letter-spacing: var(--track-marchio);
+      color: var(--on-glass);
+    }
+    /* Sopra il buio il wordmark è bianco: lo decide la capsula (`data-inchiostro`). */
+    .barra:has(.capsula[data-inchiostro="scuro"]) .barra-marchio { color: var(--on-glass-dark); }
+    .barra-marchio .marchio {
+      width: var(--marchio-m);
+      height: var(--marchio-m);
+      padding: calc(var(--marchio-m) * 0.14);
+      border-radius: var(--marchio-tessera-r);
+      background-color: var(--ink);
+      flex: none;
+    }
+    .capsula { height: 100%; }
+    .piu { justify-self: end; }
+  }
+
+  /* -------------------------------------------------------- Avanzamento */
+  /* Il pallone del marchio rotola su una riga di sabbia (LM10): `translateX`
+     e `rotate` dallo scroll, con la timeline nativa. Senza, non c'è: un
+     pallone fermo all'inizio direbbe «sei in cima» a chi è in fondo. */
+  .avanza { display: none; }
+  @supports (animation-timeline: scroll()) {
+    @media (prefers-reduced-motion: no-preference) {
+      :root:not([data-movimento="fermo"]) .avanza {
+        display: block;
+        position: fixed;
+        z-index: var(--z-progress);
+        top: var(--progress-top);
+        left: var(--gutter);
+        right: var(--gutter);
+        height: var(--progress-box);
+        container-type: inline-size;
+        pointer-events: none;
+      }
+    }
+    .avanza::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: calc(50% - var(--progress-track) / 2);
+      height: var(--progress-track);
+      border-radius: var(--progress-track);
+      background-color: var(--line-strong);
+    }
+    .avanza-palla {
+      position: absolute;
+      left: 0;
+      top: calc(50% - var(--progress-ball) / 2);
+      width: var(--progress-ball);
+      height: var(--progress-ball);
+      border-radius: 50%;
+      overflow: hidden;
+      background-color: var(--surface);
+      box-shadow: inset 0 0 0 var(--border-w) var(--ink);
+      animation: avanza-rotola linear both;
+      animation-timeline: scroll(root block);
+    }
+    /* La fascia arancio del pallone: si vede girare. */
+    .avanza-palla::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 18%;
+      height: 26%;
+      background-color: var(--accent);
+    }
+  }
+  /* `--giri` = corsa ÷ (π × diametro): lo scrive scene.ts al ridimensionamento. */
+  @keyframes avanza-rotola {
+    from { transform: none; }
+    to { transform: translateX(calc(100cqw - var(--progress-ball))) rotate(calc(var(--giri, 8) * 1turn)); }
+  }
+}

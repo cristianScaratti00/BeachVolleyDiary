@@ -1,0 +1,41 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.landing.tsbuildinfo",
+    "target": "ES2020",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  /* La landing /presentazione (niente React). Prende da src/ solo moduli senza
+     framework: devono stare qui per nome, perché un progetto composito vuole
+     l'elenco di tutti i suoi file. Se un import da src/ ne tira dentro uno
+     nuovo, tsc lo dice (TS6307) e lo si aggiunge qui. */
+  "include": [
+    "presentazione/js",
+    "src/vite-env.d.ts",
+    "src/components/Pallo.vita.ts",
+    "src/components/ui/Odometro.ts",
+    "src/screens/PartitaLive.regole.ts",
+    "src/screens/Login.palleggio.ts",
+    "src/screens/Login.palleggio.dom.ts",
+    "src/screens/crea/copione.ts",
+    "src/lib/theme.ts",
+    "src/lib/models.ts",
+    "src/lib/db.enums.ts",
+    "src/lib/database.types.ts"
+  ]
+}

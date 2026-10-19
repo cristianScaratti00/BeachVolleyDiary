@@ -1,0 +1,255 @@
+/* ============================================================================
+   «Partita live: provala qui» `#live` (UX §L6.4, §L7.6, ART §L8, MOTION
+   §L5.9): la demo giocabile con le regole vere. Il disegno è quello di
+   `PartitaLive.css`: pannello «loro» di carta col filo, pannello «noi» col
+   filo d'inchiostro da 2px, Pallo a cavallo dei due con la sua battuta, il
+   numero da 112 che fa il «pop» (ridichiarato qui con gli stessi valori).
+
+   Senza JavaScript è un tabellone fermo (un'immagine fatta di testo). Il −1
+   è `frost`: il riflesso del vetro senza sfocatura (ART A11). «Chiudi il set»
+   ha il suo posto riservato e un anello che pulsa TRE volte, in transform e
+   opacità (ML8), non il box-shadow infinito dell'app.
+   ============================================================================ */
+@layer components {
+  /* I fatti, ognuno con la sua icona (ART §L10.1): a 15, si possono saltare. */
+  .fatti {
+    display: grid;
+    gap: var(--space-3);
+    margin: var(--block-gap) 0 0;
+    padding: 0;
+    list-style: none;
+    max-width: var(--measure-body);
+  }
+  .fatti li {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    font: var(--type-callout);
+    letter-spacing: var(--track-callout);
+    color: var(--text);
+  }
+  .fatti .ui-icon { margin-top: var(--space-0-5); color: var(--text-strong); }
+
+  .demo-colonna { max-width: var(--demo-max); }
+  .demo-invito {
+    font: var(--type-callout);
+    letter-spacing: var(--track-callout);
+    color: var(--text);
+  }
+  .demo-tasti { color: var(--text-muted); margin-top: var(--space-1); }
+  .demo {
+    position: relative;
+    display: grid;
+    gap: var(--space-2-5);
+    margin-top: var(--space-4);
+  }
+  /* Le scorciatoie valgono col fuoco dentro: la demo è un contenitore che
+     prende i tasti, non un controllo con l'anello. */
+  .demo:focus { outline: none; }
+  .demo-occhiello {
+    font: var(--type-eyebrow);
+    letter-spacing: var(--track-eyebrow);
+    color: var(--text-muted);
+  }
+  .demo-set {
+    font: var(--type-title-3);
+    letter-spacing: var(--track-title-3);
+    color: var(--text-strong);
+  }
+  /* La riga dei set chiusi: alta 32 anche vuota, così la pillola che arriva
+     non sposta niente. */
+  .demo-pillole { display: flex; flex-wrap: wrap; gap: var(--space-2); min-height: var(--space-8); }
+  .demo-pillola {
+    display: inline-flex;
+    align-items: center;
+    height: var(--space-8);
+    padding: 0 var(--space-3);
+    border-radius: var(--radius-capsule);
+    box-shadow: inset 0 0 0 var(--border-w) var(--edge);
+    font: var(--type-num-s);
+    letter-spacing: var(--track-num-s);
+    color: var(--text);
+    animation: live-compari var(--dur-entrata) var(--ease-standard) both;
+  }
+  @keyframes live-compari { from { opacity: 0; } to { opacity: 1; } }
+
+  /* ------------------------------------------------------------- Il campo */
+  .demo-campo { position: relative; display: grid; }
+  .demo-box { position: relative; isolation: isolate; height: var(--live-panel-h); }
+  .demo-box + .demo-mezzo + .demo-box { margin-top: calc(var(--space-12) + var(--space-1)); }
+  .pannello {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-0-5);
+    width: 100%;
+    border-radius: var(--radius-sheet);
+    background-color: var(--surface);
+    box-shadow: inset 0 0 0 var(--border-w) var(--edge);
+    color: var(--ink);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .pannello[data-chi="noi"] { box-shadow: inset 0 0 0 calc(2 * var(--border-w)) var(--ink); }
+  .pannello-nome {
+    font: var(--type-num-etichetta);
+    letter-spacing: var(--track-callout);
+    color: var(--ink-2);
+  }
+  .pannello[data-chi="noi"] .pannello-nome { color: var(--ink-label); }
+  .live-num {
+    display: block;
+    font: var(--type-live-num);
+    letter-spacing: var(--track-live-num);
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-2);
+  }
+  .pannello[data-chi="noi"] .live-num { color: var(--ink); }
+  /* Il «pop»: sale a 1.16 e torna col rimbalzo; due nomi alternati, così
+     riparte anche quando segna di nuovo la stessa squadra. */
+  .live-num[data-pop="a"] { animation: live-pop-a var(--dur-press) var(--ease-press); }
+  .live-num[data-pop="b"] { animation: live-pop-b var(--dur-press) var(--ease-press); }
+  @keyframes live-pop-a { 0% { transform: scale(1); } 40% { transform: scale(1.16); } 100% { transform: scale(1); } }
+  @keyframes live-pop-b { 0% { transform: scale(1); } 40% { transform: scale(1.16); } 100% { transform: scale(1); } }
+
+  /* Il «+1» vivo: tutto il pannello è il pulsante. Lo strato di stato sotto
+     il numero; «premuto» anche quando l'autoplay lo preme da solo. */
+  button.pannello { cursor: pointer; transition: transform var(--dur-press) var(--ease-press); }
+  button.pannello::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background-color: var(--ink);
+    opacity: 0;
+    transition: opacity var(--dur-svelto) var(--ease-standard);
+  }
+  button.pannello:active, button.pannello[data-premuto] { transform: scale(var(--press-scale)); }
+  button.pannello:active::before, button.pannello[data-premuto]::before { opacity: var(--state-press-soft); transition-duration: 0ms; }
+  @media (hover: hover) and (pointer: fine) {
+    button.pannello:hover::before { opacity: var(--state-hover-soft); }
+  }
+  button.pannello[aria-disabled="true"] { cursor: default; }
+  button.pannello:focus-visible { outline-offset: var(--focus-offset); }
+
+  /* Il «−1»: un cerchio nell'angolo, sopra il «+1», 44 di bersaglio. */
+  .meno {
+    position: absolute;
+    top: var(--space-3);
+    right: var(--space-3);
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: var(--touch);
+    height: var(--touch);
+    border-radius: 50%;
+    color: var(--ink);
+    touch-action: manipulation;
+    transition: transform var(--dur-press) var(--ease-press);
+  }
+  .meno:active { transform: scale(var(--press-scale)); }
+  .meno[aria-disabled="true"] { color: var(--ink-disabled); cursor: default; }
+  .meno[aria-disabled="true"]:active { transform: none; }
+
+  /* Pallo a cavallo dei due pannelli, con la battuta che tocca il nostro. */
+  .demo-mezzo {
+    position: relative;
+    z-index: 2;
+    height: 0;
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+  }
+  .demo-mezzo-in {
+    position: absolute;
+    top: calc(var(--space-3) - var(--space-12) - var(--space-0-5));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .demo-pallo { display: block; width: var(--pallo-demo); }
+  .demo-pallo .pallo { width: 100%; height: auto; }
+  .demo-pallo .pallo-ombra { display: none; }
+  .live-bolla {
+    margin-top: calc(-1 * var(--space-1));
+    max-width: calc(100vw - 2 * var(--gutter));
+    padding: var(--space-1-5) var(--space-3);
+    border-radius: var(--radius-control);
+    background-color: var(--surface);
+    box-shadow: inset 0 0 0 var(--border-w) var(--edge);
+    font: var(--type-eyebrow);
+    letter-spacing: var(--track-eyebrow);
+    color: var(--ink);
+    text-align: center;
+    text-wrap: balance;
+  }
+  .live-bolla[data-anima] { animation: live-bolla var(--dur-press) var(--ease-press) both; }
+  @keyframes live-bolla {
+    from { opacity: 0; transform: translateY(calc(var(--space-1) * var(--motion-scale))) scale(calc(1 - 0.08 * var(--motion-scale))); }
+    to { opacity: 1; transform: none; }
+  }
+
+  /* Il riepilogo a partita finita: copre i pannelli nello stesso riquadro. */
+  .demo-riepilogo {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    display: grid;
+    place-content: center;
+    gap: var(--space-3);
+    padding: var(--space-6);
+    border-radius: var(--radius-sheet);
+    background-color: var(--surface);
+    box-shadow: inset 0 0 0 calc(2 * var(--border-w)) var(--ink);
+    text-align: center;
+    animation: live-entra var(--dur-rise) var(--ease-rise) both;
+  }
+  .demo-riepilogo[hidden] { display: none; }
+  .demo-riepilogo[data-esce] { opacity: 0; transition: opacity var(--dur-svelto) var(--ease-standard); animation: none; }
+  .demo-riepilogo-titolo { font: var(--type-title-1); letter-spacing: var(--track-title-1); color: var(--ink); }
+  .demo-riepilogo-set { font: var(--type-callout); letter-spacing: var(--track-callout); color: var(--ink-2); }
+  @keyframes live-entra {
+    from { opacity: 0; transform: translateY(calc(var(--rise-y) * var(--motion-scale))) scale(calc(1 - 0.02 * var(--motion-scale))); }
+    to { opacity: 1; transform: none; }
+  }
+
+  /* ------------------------------------------------------------ Azioni */
+  .demo-azioni { display: flex; gap: var(--space-2-5); }
+  .demo-azioni .ui-button { flex: 1; }
+  /* Senza JavaScript i pulsanti non ci sono (`hidden`); vivi, «Chiudi il set»
+     ha il suo posto e compare senza spostare niente. */
+  .demo-azioni .ui-button[hidden] { display: none; }
+  .chiudi-set {
+    visibility: hidden;
+    opacity: 0;
+    transform: scale(calc(1 - 0.04 * var(--motion-scale)));
+    transition: opacity var(--dur-svelto) var(--ease-standard), transform var(--dur-svelto) var(--ease-standard), visibility 0s linear var(--dur-svelto);
+  }
+  .chiudi-set[data-pronto] {
+    visibility: visible;
+    opacity: 1;
+    transform: none;
+    transition: opacity var(--dur-entrata) var(--ease-standard), transform var(--dur-entrata) var(--ease-standard), visibility 0s;
+  }
+  .chiudi-set::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    box-shadow: 0 0 0 var(--space-2) var(--accent-edge-tint);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .chiudi-set[data-pronto]::after { animation: live-anello var(--dur-anello) var(--ease-respiro) var(--dur-entrata) 3; }
+  @keyframes live-anello {
+    from { opacity: 0.6; transform: scale(0.96); }
+    to { opacity: 0; transform: scale(1.12); }
+  }
+}

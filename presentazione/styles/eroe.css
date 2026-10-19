@@ -1,0 +1,204 @@
+/* ============================================================================
+   L'hero `#inizio` (UX §L6.1, ART §L5.4 e §L10.4, MOTION §L5.6): il tramonto
+   del Benvenuto, la scena in tre piani, il velo sotto il testo, Pallo in
+   piedi sulla sabbia sopra il titolo.
+
+   La scena è lo snapshot di `Login.scena.tsx` in tre <svg> impilati (cielo,
+   sole, terra): uscendo dall'hero si muovono i loro contenitori HTML, sul
+   compositor (LM1, ML1: cielo .15, sole .30, la terra con la pagina). Il
+   movimento del disegno (nuvole, gabbiani, palma…) è quello di
+   `Login.scena.css`, in pausa senza modulo (ML14) e fuori vista (RL5).
+   ============================================================================ */
+@layer components {
+  .eroe {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    /* In cima c'è posto per il marchio e per Pallo in piedi sopra il titolo
+       (alto 130/120 della sua larghezza), anche quando l'hero non è a tutta
+       altezza. */
+    padding: calc(var(--safe-top) + var(--page-top) + var(--marchio-s) + var(--space-4) + var(--pallo-hero) * 130 / 120 + var(--eroe-pallo-piedi)) 0 0;
+    overflow: clip;
+    isolation: isolate;
+  }
+  /* A tutta altezza solo dove ci sta (UX §L9.2): in orizzontale sul telefono
+     è alto quanto il contenuto. */
+  @media (min-height: 560px) {
+    .eroe { min-height: 100svh; }
+  }
+
+  /* --------------------------------------------------------------- Scena */
+  .eroe-scena {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  /* La camera del Benvenuto: alza la scena quanto basta a lasciare la sabbia
+     fra i piedi dei giocatori e il titolo. */
+  .eroe-camera {
+    position: absolute;
+    inset: 0;
+    transform: translateY(var(--eroe-alzata));
+  }
+  .eroe-piano { position: absolute; inset: 0; }
+  .eroe-piano > svg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+  /* La scena è un disegno: nei colori forzati resta un disegno (UX §L6.0). */
+  @media (forced-colors: active) {
+    .eroe-scena, .pallo { forced-color-adjust: none; }
+  }
+
+  /* LM1: il tramonto legato allo scroll, SOLO con le timeline native (RL1).
+     `exit-crossing`: dall'hero in cima al viewport all'hero sopra il
+     viewport, qualunque sia la sua altezza. Senza supporto, col movimento
+     ridotto o fermo: la scena resta ferma. */
+  @supports (animation-timeline: view()) and (animation-range: exit-crossing 0%) {
+    /* Inset 0: di serie la timeline userebbe lo `scroll-padding` della pagina
+       (le barre), e in cima l'hero sarebbe già al 12% del tramonto. */
+    .eroe { view-timeline: --inizio block; view-timeline-inset: 0; }
+    @media (prefers-reduced-motion: no-preference) {
+      :root:not([data-movimento="fermo"]) .eroe[data-viva] .eroe-piano[data-piano="cielo"] {
+        animation: eroe-tramonto-cielo linear both;
+        animation-timeline: --inizio;
+        animation-range: exit-crossing 0% exit-crossing 100%;
+      }
+      :root:not([data-movimento="fermo"]) .eroe[data-viva] .eroe-piano[data-piano="sole"] {
+        animation: eroe-tramonto-sole linear both;
+        animation-timeline: --inizio;
+        animation-range: exit-crossing 0% exit-crossing 100%;
+      }
+    }
+  }
+  @keyframes eroe-tramonto-cielo { from { transform: none; } to { transform: translateY(15%); } }
+  @keyframes eroe-tramonto-sole { from { transform: none; } to { transform: translateY(30%); } }
+
+  /* ------------------------------------------------------------- Marchio */
+  .eroe-marchio {
+    position: absolute;
+    top: calc(var(--safe-top) + var(--page-top));
+    left: var(--gutter);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2-5);
+    font: var(--type-marchio);
+    letter-spacing: var(--track-marchio);
+    color: var(--text-strong);
+  }
+  .eroe-marchio .marchio { width: var(--marchio-s); height: var(--marchio-s); flex: none; }
+
+  /* --------------------------------------------------------------- Testo */
+  .eroe-testo {
+    position: relative;
+    padding: 0 var(--gutter) var(--tabbar-clearance);
+    max-width: calc(var(--hero-text-max) + 2 * var(--gutter));
+  }
+  /* Il velo regge il testo sopra la scena (ART §L4.8): attaccato al blocco del
+     testo, parte 96px sopra il titolo e vale a qualunque a capo. */
+  .eroe-testo::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: calc(-1 * var(--hero-velo-rise)) 0 0;
+    background-image: var(--hero-velo);
+    pointer-events: none;
+  }
+  .eroe h1 {
+    position: relative;
+    font: var(--type-display-hero);
+    letter-spacing: var(--track-display-hero);
+    color: var(--text-strong);
+  }
+  .eroe-frase {
+    position: relative;
+    font: var(--type-lede);
+    letter-spacing: var(--track-lede);
+    color: var(--text);
+    max-width: var(--measure-lede);
+    margin-top: var(--space-4);
+  }
+  .eroe-cta {
+    position: relative;
+    display: grid;
+    gap: var(--space-2-5);
+    margin-top: var(--space-6);
+  }
+  /* Sui pulsanti arancio l'anello sta fuori, sul tramonto (ART §L8). */
+  .eroe-cta .ui-button[data-variant="filled"]:focus-visible { outline-offset: var(--focus-offset); }
+  .eroe-riga {
+    position: relative;
+    font: var(--type-footnote);
+    letter-spacing: var(--track-footnote);
+    color: var(--text);
+    margin-top: var(--space-3);
+  }
+  /* La riga dei comandi: sempre alta 44, «Installa sul telefono» a sinistra
+     (il suo posto c'è anche quando il pulsante no), «Ferma le animazioni» a
+     destra (ART A6). */
+  .eroe-comandi {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    min-height: var(--touch);
+    margin-top: var(--space-3);
+  }
+  .eroe-testo > .fermo-nota { position: relative; text-align: right; margin-top: var(--space-1); }
+
+  /* ----------------------------------------------------------- Pallo */
+  /* In piedi sulla sabbia, a destra, coi piedi 4px sopra il titolo. Quando
+     salta nell'angolo sparisce DI COLPO (è lui che parte, MOTION §L10.3);
+     quando torna, in ENTRATA. */
+  .eroe-pallo {
+    position: absolute;
+    right: var(--gutter);
+    bottom: calc(100% + var(--eroe-pallo-piedi));
+    width: var(--pallo-hero);
+    pointer-events: none;
+    transition: opacity var(--dur-entrata) var(--ease-standard);
+  }
+  .eroe-pallo .pallo { width: 100%; height: auto; }
+  .eroe-pallo[data-partito] { opacity: 0; transition: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .eroe-pallo[data-partito] { transition: opacity var(--dur-svelto) var(--ease-standard); }
+  }
+  :root[data-movimento="fermo"] .eroe-pallo[data-partito] { transition: opacity var(--dur-svelto) var(--ease-standard); }
+  /* Le sentinelle sopra la testa (MOTION §L9.1): quando passano il bordo
+     alto del viewport, la testa è a 24px (si salta, ancora tutto in vista) o
+     è tornata sotto i 96px (la guida esce). */
+  .eroe-sentinella { position: absolute; left: 0; right: 0; height: 1px; pointer-events: none; }
+  .eroe-sentinella[data-linea="salto"] { top: calc(-1 * var(--salto-px)); }
+  .eroe-sentinella[data-linea="ritorno"] { top: calc(-1 * var(--ritorno-px)); }
+
+  /* --------------------------------------------------------- Da 600px */
+  @media (min-width: 600px) {
+    .eroe-cta { grid-auto-flow: column; justify-content: start; }
+  }
+
+  /* --------------------------------------------------------- Da 900px */
+  /* Testo a sinistra, centrato in verticale; la scena intera col velo di
+     lato; Pallo da 240 sulla sabbia, a destra del centro (ART §L5.4). Il
+     marchio è nella barra in alto. */
+  @media (min-width: 900px) {
+    .eroe {
+      justify-content: center;
+      padding: calc(var(--barra-inset) + var(--tabbar-h) + var(--space-12)) 0 var(--space-16);
+    }
+    /* `::after`: allo stesso livello della scena (−1) ma dopo di lei, quindi sopra. */
+    .eroe::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background-image: var(--hero-velo-lato);
+      pointer-events: none;
+    }
+    .eroe-marchio { display: none; }
+    /* Il testo resta al margine sinistro: il velo di lato è misurato da lì
+       (la colonna da 35rem tutta sopra il 78%, ART §L4.8). */
+    .eroe-testo { position: static; padding-bottom: 0; }
+    .eroe-testo::before { display: none; }
+    .eroe-pallo { right: var(--eroe-pallo-destra); bottom: var(--eroe-pallo-basso); }
+  }
+}

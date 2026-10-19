@@ -1,0 +1,113 @@
+/* ============================================================================
+   La pagina: campiture, ritmo, griglia, testa delle sezioni (ART §L4.2, §L5).
+   Il testo usa i RUOLI (--text-strong, --text, --text-muted, --text-accent),
+   che le sezioni scure (`data-surface="dark"`) invertono da sole.
+   ============================================================================ */
+@layer components {
+  /* Il fondo oltre la pagina (il rimbalzo di iOS in cima e in fondo) è il
+     tramonto, come l'hero e il footer; fra le sezioni, la carta. La barra di
+     scorrimento non sparisce quando il foglio blocca lo scroll (MOTION §L5.4).
+     Nessuno `scroll-behavior: smooth` globale (MOTION §9.3). Il fuoco non
+     finisce mai sotto le barre né sotto Pallo (UX §L4.3). */
+  :root {
+    background-color: var(--field-dusk);
+    scrollbar-gutter: stable;
+    scroll-padding-top: var(--scroll-pad-top);
+    scroll-padding-bottom: var(--scroll-pad-bottom);
+  }
+  :root[data-bloccato] { overflow: hidden; }
+  body { background-color: var(--field-paper); color: var(--text-strong); }
+
+  .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+  /* Il marchio (`BrandMark` di Logo.tsx): il pallone bianco con la fascia
+     arancio e il filo bianco. La geometria è del disegno; i colori qui. */
+  .marchio { display: block; overflow: visible; }
+  .marchio-palla { fill: var(--surface); }
+  .marchio-fascia { fill: none; stroke: var(--accent); }
+  .marchio-filo { fill: none; stroke: var(--surface); }
+  @media (forced-colors: active) {
+    .marchio { forced-color-adjust: none; }
+  }
+
+  /* ------------------------------------------------------------ Campiture */
+  /* Fondi pieni a tutta larghezza, col taglio netto fra l'uno e l'altro. */
+  .campo {
+    position: relative;
+    padding: var(--section-pad) var(--gutter);
+  }
+  .campo[data-campo="tramonto"] { background-color: var(--field-dusk); }
+  .campo[data-campo="carta"] { background-color: var(--field-paper); }
+  .campo[data-campo="inchiostro"] { background-color: var(--field-ink); }
+  .dentro { max-width: var(--content-max); margin-inline: auto; }
+
+  /* ------------------------------------------------------ Testa di sezione */
+  .occhiello {
+    font: var(--type-kicker);
+    letter-spacing: var(--track-kicker);
+    color: var(--text-accent);
+    margin-bottom: var(--space-3);
+  }
+  .campo h2 {
+    font: var(--type-display-section);
+    letter-spacing: var(--track-display-section);
+    color: var(--text-strong);
+    max-width: var(--measure-body);
+  }
+  .frase {
+    font: var(--type-lede);
+    letter-spacing: var(--track-lede);
+    color: var(--text);
+    max-width: var(--measure-lede);
+    margin-top: var(--section-head-gap);
+  }
+  .nota {
+    font: var(--type-callout);
+    letter-spacing: var(--track-callout);
+    color: var(--text-muted);
+    max-width: var(--measure-body);
+    margin-top: var(--space-3);
+  }
+  /* Testa → oggetto: un oggetto per sezione, staccato dalla frase. */
+  .colonne > .testa + * { margin-top: var(--section-object-gap); }
+
+  /* ------------------------------------------------- La griglia da 900px */
+  /* Testo nelle colonne 1–5, una colonna d'aria, l'oggetto nelle 7–12 (ART
+     §L5.3). Il testo sta sempre a sinistra. */
+  @media (min-width: 900px) {
+    .colonne {
+      display: grid;
+      grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
+      column-gap: var(--grid-gap);
+      align-items: start;
+    }
+    .colonne > .testa { grid-column: 1 / 6; }
+    .colonne > .testa + * { grid-column: 7 / 13; margin-top: 0; }
+  }
+
+  /* I pulsanti di testo sul buio: l'inchiostro del fondo (Button.css li fa
+     `--ink`, che `data-surface="dark"` rende bianco). */
+  .ui-button[data-variant="quiet"] { color: var(--text-strong); }
+
+  /* Ciò che c'è solo a pagina viva (la riga «Provala qui…» della demo): il
+     posto è riservato da subito, così quando il modulo arriva non si sposta
+     niente (CLS 0). */
+  .campo:not([data-viva]) [data-solo-vivo] { visibility: hidden; }
+
+  /* Il comando «Ferma le animazioni» con il movimento già ridotto dal sistema:
+     la nota accanto lo dice (UX §L7.13). È CSS e non JavaScript, così c'è dal
+     primo fotogramma e non sposta niente. */
+  .fermo-nota { display: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .fermo-nota {
+      display: block;
+      font: var(--type-footnote);
+      letter-spacing: var(--track-footnote);
+      color: var(--text-muted);
+    }
+  }
+
+  @media print {
+    .barra, .guida, .guida-bolla, .guida-menu, .avanza, .foglio, .velo { display: none !important; }
+  }
+}

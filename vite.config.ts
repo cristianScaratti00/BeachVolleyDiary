@@ -1,15 +1,34 @@
 import { defineConfig } from 'vite'
+import type { Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
+import { componiLanding } from './presentazione/build/componi'
+
+// La landing `/presentazione` è un modello: scena, Pallo, marchio, mappa,
+// icone e numeri ci entrano qui, dalle stesse fonti dell'app (gli snapshot in
+// presentazione/js/generati e Icon.paths.ts). Così il primo fotogramma è già
+// la pagina intera, anche senza JavaScript (ART_DIRECTION §L13 A12).
+function landing(): Plugin {
+  return {
+    name: 'landing',
+    transformIndexHtml: {
+      order: 'pre',
+      handler: (html, ctx) => (ctx.path.startsWith('/presentazione/') ? componiLanding(html) : html),
+    },
+  }
+}
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), landing()],
   build: {
     rollupOptions: {
       // Due pagine indipendenti: l'app (index.html, React + Supabase) e la
-      // landing pubblica su /presentazione/, che è HTML statico e non importa
-      // niente da src/. Restano due bundle separati: chi apre la landing non
-      // scarica una riga dell'app.
+      // landing pubblica su /presentazione/. La landing non importa React né
+      // Supabase: da src/ prende solo moduli senza framework (Pallo.vita,
+      // Odometro, le regole della Partita live, il copione della chat, il
+      // palleggio della scena) e i fogli dei token, del vetro e delle
+      // primitive. Restano due bundle separati: chi apre la landing non
+      // scarica l'app.
       input: {
         main: 'index.html',
         presentazione: 'presentazione/index.html',

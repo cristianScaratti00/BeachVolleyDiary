@@ -1,0 +1,57 @@
+/* ============================================================================
+   «Il diario resta tuo» `#dati` (UX §L6.8, §L7.11, ART §L8): righe
+   raggruppate come la List dell'app. A sinistra il riquadro dell'icona, poi
+   titolo e testo. Nessuna riga si tocca: niente chevron, niente strato.
+   Nessun movimento, a parte la guida (ART §L11.4: le righe non salgono).
+   ============================================================================ */
+@layer components {
+  .righe {
+    margin: 0;
+    padding: 0 var(--space-4);
+    list-style: none;
+    border-radius: var(--radius-card);
+    background-color: var(--surface);
+    box-shadow: inset 0 0 0 var(--border-w) var(--edge);
+  }
+  .riga {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-4) 0;
+  }
+  /* Il separatore rientra fino al testo, come nella List dell'app. */
+  .riga + .riga::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: calc(var(--riga-ico) + var(--space-3));
+    border-top: var(--border-w) solid var(--separator);
+  }
+  .riga-ico {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: var(--riga-ico);
+    height: var(--riga-ico);
+    border-radius: var(--radius-track);
+    background-color: var(--bg);
+    box-shadow: inset 0 0 0 var(--border-w) var(--edge);
+    color: var(--ink);
+  }
+  .riga h3 {
+    font: var(--type-body-strong);
+    letter-spacing: var(--track-body);
+    color: var(--ink);
+  }
+  .riga p {
+    font: var(--type-callout);
+    letter-spacing: var(--track-callout);
+    color: var(--ink-2);
+    margin-top: var(--space-1);
+  }
+  @media (min-width: 600px) {
+    .righe { padding-inline: var(--space-5); max-width: var(--reading-max); }
+  }
+}

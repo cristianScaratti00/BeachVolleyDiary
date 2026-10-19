@@ -278,7 +278,10 @@
     /* La slide è una tessera 9:16 alta quanto lo schermo meno la barra: sul
        telefono di riferimento (390×844) viene ~334×594. */
     --slide-h: min(40rem, calc(100svh - var(--safe-top) - var(--page-top) - var(--tabbar-h) - var(--tabbar-bottom) - 2 * var(--space-6)));
-    --slide-w: calc(var(--slide-h) * 9 / 16);
+    /* Mai più larga del contenuto (MOTION §L5.12 lo lasciava da decidere: a
+       390×844 senza le barre di Safari l'altezza darebbe 387 su 358). Quando
+       la larghezza si ferma, l'altezza la segue (`aspect-ratio: 9 / 16`). */
+    --slide-w: min(calc(var(--slide-h) * 9 / 16), calc(100vw - 2 * var(--gutter)));
     --slide-w-manual: 17.5rem;                     /* la riga a mano (fermo, schermi bassi): 280 · 320 da 600 */
     --slide-pad: var(--space-6);                   /* 24 · 32 da 900 (tela 88 × 1/3) */
     --slide-gap: var(--space-3);
@@ -351,6 +354,8 @@
        e due tempi: la nuvoletta resta 4000ms (come TOAST_MS), lo sfalsamento
        narrativo è lo stesso passo della SALITA (50ms), al massimo 8 elementi. */
     --dur-bolla: 4000ms;
+    /* L'anello di «Chiudi il set» nella demo: pulsa tre volte e basta (ML8). */
+    --dur-anello: 1600ms;
     --stagger-narrativo: var(--rise-step);
     --stagger-max: 8;
     /* Le due molle campionate in `linear()`, come `--ease-molla` dell'app
@@ -369,6 +374,84 @@
     --ease-caduta: linear(0, 0.084 5%, 0.277 10%, 0.509 15%, 0.729 20%, 0.908 25%, 1 28.47%, 0.968 30%, 0.895 35%, 0.866 40%, 0.869 45%, 0.891 50%, 0.922 55%, 0.953 60%, 0.979 65%, 0.999 70%, 1 70.31%, 0.989 75%, 0.983 80%, 0.982 85%, 0.984 90%, 0.988 95%, 1);
     /* Da dove cade un pin (LM5). */
     --caduta-y: -24px;
+
+    /* ------------------------------------------- Aggiunte della costruzione */
+    /* Misure che i fogli dei componenti chiedevano e che sopra non c'erano
+       (ART §L12: si aggiungono qui, mai nel componente). Nessun colore. */
+    /* Il marchio (ART §L10.2): 28 nell'hero e nel footer, 32 nella barra in
+       alto; il wordmark 700, −0.02em, 17 accanto al 28 e 18 accanto al 32. */
+    --marchio-s: 28px;
+    --marchio-m: 32px;
+    --marchio-tessera-r: calc(var(--marchio-m) * 0.26);
+    --type-marchio: 700 1.0625rem/1.2 var(--font-ui);
+    --type-marchio-m: 700 1.125rem/1.2 var(--font-ui);
+    --track-marchio: -0.02em;
+    /* Le etichette dei numeri di #numeri: 600 15 (ART §L5.4). */
+    --type-num-etichetta: 600 0.9375rem/1.3 var(--font-ui);
+    /* L'interlinea dei numeri del tabellone, in em: la striscia di
+       `Odometro` si sposta di un'interlinea per cifra (Tabellone.css, --lh). */
+    --lh-num-poster: 0.86em;
+    --lh-num-cell: 1em;
+    --lh-live-num: 1em;
+    /* La barra vinte/perse: alta 8, raggio 4. */
+    --barra-vp-h: var(--space-2);
+    --barra-vp-max: 22rem;
+    /* L'hero: la camera alza la scena come il Benvenuto (i piedi dei
+       giocatori al 39.8%, il blocco del testo ~500 dal fondo a 390), Pallo in
+       piedi coi piedi 4px sopra il titolo; da 900 sulla sabbia, a destra. */
+    --eroe-alzata: min(0px, calc(60.2% - 520px));
+    --eroe-pallo-piedi: var(--space-1);
+    --eroe-pallo-destra: 18%;
+    --eroe-pallo-basso: 14%;
+    /* Le sentinelle sopra la testa del Pallo dell'hero (MOTION §L2.2:
+       SALTO_PX / RITORNO_PX): devono valere quanto le costanti di guida.ts. */
+    --salto-px: 24px;
+    --ritorno-px: 96px;
+    /* Il menu della guida da 600px: un popover largo 320. */
+    --guida-menu-w: 20rem;
+    /* Il foglio d'installazione da 600px: un form sheet centrato. */
+    --foglio-w: 26.25rem;
+    /* #registra: il pannello (la chat) al più 420, le voci da 900 larghe
+       come il menu dell'app (380); la chat ad altezza fissa (MOTION ML10). */
+    --registra-max: 26.25rem;
+    --voci-max: 23.75rem;
+    --chat-h: min(28rem, 60svh);
+    --voce-h: var(--space-16);
+    /* #diario col telefono sticky: un capitolo alto almeno così, perché
+       sulla linea del capitolo ce ne sia uno solo (70svh da 900, ART §L5.4;
+       sotto, la fascia del telefono ne prende già il 56%). */
+    --capitolo-min: 60svh;
+    /* La mappa: etichette 600 12 con l'alone bianco di 3px; il filo dei pin
+       per esito (ART §L4.6); il segno della legenda, 12. */
+    --type-mappa-etichetta: 600 0.75rem/1 var(--font-ui);
+    --mappa-etichetta-alone: 3px;
+    --pin-line-vinta: 1.6px;
+    --pin-line-podio: 1.8px;
+    --pin-line-giocata: 1.4px;
+    --mappa-segno: var(--space-3);
+    /* La Storia a ventaglio: le carte ai lati spostate del 62% (ART §L5.7). */
+    --story-spostamento: 62%;
+    /* Il riflesso del sole nel footer: quattro tratti alti 2, a 8 l'uno
+       dall'altro, larghi 76 · 56 · 36 · 20, a .6 (ART §L5.4). */
+    --riflesso-1: 76px;
+    --riflesso-2: 56px;
+    --riflesso-3: 36px;
+    --riflesso-4: 20px;
+    --riflesso-h: var(--space-0-5);
+    --riflesso-opacita: 0.6;
+    /* Le icone della barra come la TabBar dell'app (TabBar.css): 23 col tratto
+       2 nelle tab, 28 col tratto 2.6 nel ＋; la pressione delle tab e del ＋ è
+       0.94 (MOTION §L5.1), 1 col movimento fermo (segue `--press-scale`). */
+    --tab-icona: 23px;
+    --tab-tratto: 2;
+    --piu-icona: 28px;
+    --piu-tratto: 2.6;
+    --press-scale-tab: calc(1 - (1 - var(--press-scale)) * 2);
+    /* La riga d'icona di «Il diario resta tuo»: 44, raggio 13 (ART §L8). */
+    --riga-ico: var(--touch);
+    /* Il filo di luce di Pallo sulla slide d'inchiostro, come nel PNG
+       (WrappedSlideCard: `luce`): le braccia d'inchiostro non spariscono. */
+    --slide-ink-luce: drop-shadow(0 0 3px var(--slide-ink-fg)) drop-shadow(0 0 1px var(--slide-ink-fg));
   }
 
   /* Senza `linear()` (Safari < 17.2) le due molle diventano la curva
@@ -425,6 +508,7 @@
       --story-w: 13.5rem;
       --pallo-hero: 240px;
       --pallo-finale: 240px;
+      --capitolo-min: 70svh;
       --sole-r: 96px;
       --sole-halo-r: 330px;
     }

@@ -121,7 +121,102 @@ export const DATI = {
     "compagni": [
       "Giulia",
       "Marco"
-    ]
+    ],
+    "oggi": "2026-10-17",
+    "trascrizione": {
+      "righe": [
+        {
+          "chi": "pallo",
+          "testo": "Ciao! Sono Pallo. Ti faccio qualche domanda e il torneo lo compilo io."
+        },
+        {
+          "chi": "pallo",
+          "testo": "Come si chiama il torneo?"
+        },
+        {
+          "chi": "tu",
+          "testo": "Rimini Open"
+        },
+        {
+          "chi": "pallo",
+          "testo": "Perfetto, «Rimini Open». Con chi hai giocato?"
+        },
+        {
+          "chi": "tu",
+          "testo": "Giulia"
+        },
+        {
+          "chi": "pallo",
+          "testo": "Quando si è svolto?"
+        },
+        {
+          "chi": "tu",
+          "testo": "Oggi"
+        },
+        {
+          "chi": "pallo",
+          "testo": "Il torneo è già finito o è ancora in corso?"
+        },
+        {
+          "chi": "tu",
+          "testo": "Finito"
+        },
+        {
+          "chi": "pallo",
+          "testo": "Ottimo. Che piazzamento hai ottenuto?"
+        },
+        {
+          "chi": "tu",
+          "testo": "1°"
+        },
+        {
+          "chi": "pallo",
+          "testo": "Ecco il riepilogo. Confermo la creazione?"
+        },
+        {
+          "chi": "tu",
+          "testo": "Conferma"
+        },
+        {
+          "chi": "pallo",
+          "testo": "Fatto. Nell'app adesso sarebbe nel tuo diario."
+        }
+      ],
+      "riepilogo": [
+        [
+          "Nome",
+          "Rimini Open"
+        ],
+        [
+          "Compagno",
+          "Giulia"
+        ],
+        [
+          "Data",
+          "17 Ott 2026"
+        ],
+        [
+          "Luogo",
+          "—"
+        ],
+        [
+          "Categoria",
+          "Amatoriale"
+        ],
+        [
+          "Formato",
+          "2vs2"
+        ],
+        [
+          "Superficie",
+          "Sabbia outdoor"
+        ],
+        [
+          "Stato",
+          "Finito · 1°"
+        ]
+      ]
+    }
   }
 } as const
 

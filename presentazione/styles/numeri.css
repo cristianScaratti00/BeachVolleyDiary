@@ -1,0 +1,104 @@
+/* ============================================================================
+   «I numeri li fa l'app» `#numeri` (UX §L6.5, ART §L13 A1 e §L5.4, MOTION
+   §L5.10): sull'inchiostro, il tabellone acceso. Il numero da manifesto
+   bianco col «%» arancio, la barra vinte/perse, le celle 2×2 separate da
+   filetti (la grammatica della slide d'inchiostro di Wrapped), con le
+   etichette della Home.
+
+   Le cifre sono `Odometro` (src/components/ui/Odometro.ts) con le regole di
+   `Tabellone.css`: la striscia si sposta di un'interlinea per cifra (`--lh`).
+   Senza JavaScript i valori sono testo, già finali.
+   ============================================================================ */
+@layer components {
+  .poster { margin-top: var(--section-object-gap); }
+  .poster-num {
+    display: flex;
+    align-items: flex-start;
+    font: var(--type-num-poster);
+    letter-spacing: var(--track-num-poster);
+    font-variant-numeric: tabular-nums;
+    color: var(--text-strong);
+  }
+  .poster-num .ui-tabellone { --lh: var(--lh-num-poster); }
+  .poster-pct { color: var(--text-accent); }
+  .poster-etichetta {
+    font: var(--type-num-etichetta);
+    letter-spacing: var(--track-callout);
+    color: var(--text);
+    margin-top: var(--space-2);
+  }
+
+  /* La barra vinte/perse: larga quanto il binario, la parte vinta spostata in
+     `translateX` dentro il binario (MOTION §4.4: niente scaleX). `--v` è la
+     quota delle vinte (la mette la build sul binario); armata, la barra
+     mette il suo 0. */
+  .barra-vp {
+    position: relative;
+    display: block;
+    height: var(--barra-vp-h);
+    max-width: var(--barra-vp-max);
+    margin-top: var(--space-4);
+    border-radius: var(--barra-vp-h);
+    background-color: var(--rule);
+    overflow: hidden;
+  }
+  .barra-vp-v {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background-color: var(--text-strong);
+    transform: translateX(calc((var(--v, 0) - 100) * 1%));
+    transition: transform var(--dur-racconto) var(--ease-racconto);
+  }
+  .poster[data-armato] .barra-vp-v { --v: 0; }
+  [data-subito] :is(.barra-vp-v, .ui-odo-strip) { transition: none !important; }
+  .poster-piede {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-3);
+    max-width: var(--barra-vp-max);
+    margin-top: var(--space-2);
+    font: var(--type-footnote);
+    letter-spacing: var(--track-footnote);
+    color: var(--text-muted);
+  }
+  .poster-piede strong { color: var(--text-strong); }
+
+  /* ---------------------------------------------------------------- Celle */
+  /* Nessun riquadro: filetti di 1px in alto, in basso e al centro. */
+  .celle {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-top: var(--border-w) solid var(--rule);
+  }
+  .cella {
+    display: grid;
+    align-content: start;
+    gap: var(--space-2);
+    padding: var(--space-4);
+    border-bottom: var(--border-w) solid var(--rule);
+  }
+  .cella:nth-child(odd) { border-right: var(--border-w) solid var(--rule); padding-left: 0; }
+  .cella-num {
+    display: flex;
+    align-items: flex-start;
+    font: var(--type-num-cell);
+    letter-spacing: var(--track-num-cell);
+    font-variant-numeric: tabular-nums;
+    color: var(--text-strong);
+    white-space: nowrap;
+  }
+  .cella-num .ui-tabellone { --lh: var(--lh-num-cell); }
+  .cella-di { color: var(--text-muted); }
+  .cella-etichetta {
+    font: var(--type-num-etichetta);
+    letter-spacing: var(--track-callout);
+    color: var(--text);
+  }
+  .celle-colonna .nota { margin-top: var(--block-gap); }
+
+  /* Da 900 le celle stanno nelle colonne 7–12, in basso: allineate al numero. */
+  @media (min-width: 900px) {
+    .celle-colonna { align-self: end; }
+  }
+}
