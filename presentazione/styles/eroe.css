@@ -95,11 +95,17 @@
   }
   /* Il velo regge il testo sopra la scena (ART §L4.8): attaccato al blocco del
      testo, parte 96px sopra il titolo e vale a qualunque a capo. */
+  /* Largo quanto l'hero, non quanto il blocco: il blocco si ferma a
+     `--hero-text-max`, e fra 600 e 900 il velo finiva a 592 con uno
+     spigolo netto sulla sabbia. Quello che esce lo taglia l'hero (`clip`). */
   .eroe-testo::before {
     content: "";
     position: absolute;
     z-index: -1;
-    inset: calc(-1 * var(--hero-velo-rise)) 0 0;
+    top: calc(-1 * var(--hero-velo-rise));
+    bottom: 0;
+    left: 0;
+    width: 100vw;
     background-image: var(--hero-velo);
     pointer-events: none;
   }

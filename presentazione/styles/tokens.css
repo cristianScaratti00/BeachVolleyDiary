@@ -222,12 +222,18 @@
     --barra-capsule-w: 25rem;                      /* da 900: la capsula al centro */
     /* Chi scorre lascia libere le barre (UX §L4.3, come AppShell.css):
        sotto i 900px la barra e Pallo stanno in basso, dai 900px la barra
-       sta in alto e Pallo in basso a destra. */
-    --scroll-pad-top: calc(var(--safe-top) + var(--space-3));
+       sta in alto e Pallo in basso a destra. In alto c'è anche
+       l'avanzamento: un fuoco (o il telefono sticky di #diario) che si
+       ferma sotto di lui ha il pallone che gli rotola addosso. */
+    --scroll-pad-top: calc(var(--progress-top) + var(--progress-box) + var(--space-2));
     --scroll-pad-bottom: calc(var(--tabbar-h) + var(--tabbar-bottom) + var(--guida-size) + var(--guida-gap) + var(--space-4));
     --lente-bg: var(--surface);
     --lente-label: var(--accent-text);
     --lente-elev: var(--glass-rim), 0 2px 8px -3px rgb(28 28 30 / 0.18);
+    /* L'anello di chi galleggia su ogni fondo (il ＋, Pallo guida): l'anello
+       d'inchiostro dell'app più un alone bianco nel distacco. Sulla carta si
+       vede l'inchiostro, sul buio l'alone (la tecnica a due colori, WCAG C40). */
+    --anello-alone: 0 0 0 var(--focus-offset) var(--surface);
 
     /* --------------------------------------------------- Pallo guida */
     --guida-size: 64px;                            /* 56 sotto i 360 */
@@ -270,7 +276,10 @@
 
     /* ------------------------------------------------- Demo Partita live */
     --demo-max: 26.25rem;                          /* 420 */
-    --live-panel-h: 10.5rem;                       /* 168 · 200 da 600 */
+    /* 200 a ogni larghezza. A 168 (il minimo dell'app, che però cresce fino
+       a 250) la testa di Pallo copriva il fondo della cifra di «loro» e la
+       sua battuta toccava la scritta «Noi»: misurato a 320 e 390. */
+    --live-panel-h: 12.5rem;
     --type-live-num: 800 7rem/1 var(--font-ui);    /* 112, come l'app */
     --track-live-num: -0.045em;
 
@@ -401,6 +410,10 @@
     --lh-num-poster: 0.86em;
     --lh-num-cell: 1em;
     --lh-live-num: 1em;
+    /* Lo spazio fra due pezzi di un numero («1 / 7»), quando sono due
+       elementi: lo spazio di Geist 800 col tracking da numero (−0.04em),
+       misurato in Chrome a 44px: 0.18em. */
+    --num-spazio: 0.18em;
     /* La barra vinte/perse: alta 8, raggio 4. */
     --barra-vp-h: var(--space-2);
     --barra-vp-max: 22rem;
@@ -488,7 +501,6 @@
       --type-num-poster: 900 8rem/0.86 var(--font-ui);
       --section-pad: var(--space-30);
       --phone-screen-w: min(17.5rem, calc((56svh - 2 * var(--phone-bezel)) * 0.4621));
-      --live-panel-h: 12.5rem;
       --slide-w-manual: 20rem;
     }
   }
@@ -507,7 +519,6 @@
       --phone-screen-w: min(20rem, calc((100svh - 2 * var(--space-24) - 2 * var(--phone-bezel)) * 0.4621));
       --progress-ball: 14px;
       --progress-top: calc(var(--barra-inset) + var(--tabbar-h) + var(--space-2));
-      --scroll-pad-top: calc(var(--barra-inset) + var(--tabbar-h) + var(--space-4));
       --scroll-pad-bottom: calc(var(--guida-size) + var(--space-6) + var(--space-4));
       --guida-bottom: max(var(--space-6), calc(var(--safe-bottom) + var(--space-4)));
       --guida-right: var(--gutter);

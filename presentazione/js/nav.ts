@@ -60,6 +60,11 @@ export function avviaNav() {
     }, dopo)
   }
   const fondi = [...document.querySelectorAll<HTMLElement>('main > section[data-fondo], footer[data-fondo]')]
+  // Da 900px il wordmark sta accanto alla capsula senza vetro: si legge
+  // sull'hero, ma poi il testo delle sezioni gli scorrerebbe attraverso. Oltre
+  // l'hero resta la tessera, che è piena (barra.css, `data-marchio`).
+  const barra = capsula.closest<HTMLElement>('.barra')
+  const eroe = document.getElementById('inizio')
   let io: IntersectionObserver | null = null
   const osserva = () => {
     io?.disconnect()
@@ -68,7 +73,10 @@ export function avviaNav() {
     const sotto = Math.max(0, window.innerHeight - mezzo - 1)
     io = new IntersectionObserver(
       (voci) => {
-        for (const v of voci) if (v.isIntersecting) cambiaFondo((v.target as HTMLElement).dataset.fondo ?? 'chiaro')
+        for (const v of voci) {
+          if (v.target === eroe && barra) barra.dataset.marchio = v.isIntersecting ? 'intero' : 'tessera'
+          if (v.isIntersecting) cambiaFondo((v.target as HTMLElement).dataset.fondo ?? 'chiaro')
+        }
       },
       { rootMargin: `-${Math.max(0, mezzo)}px 0px -${sotto}px 0px` },
     )
@@ -87,7 +95,6 @@ export function avviaNav() {
   // Il tramonto finché l'hero copre la cima dello schermo, poi la carta.
   // Un solo <meta>, aggiornato a soglia; i valori sono i token.
   const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
-  const eroe = document.getElementById('inizio')
   if (meta && eroe && typeof IntersectionObserver !== 'undefined') {
     const tramonto = token('--field-dusk')
     const carta = token('--field-paper')

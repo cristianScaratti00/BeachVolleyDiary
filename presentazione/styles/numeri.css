@@ -79,9 +79,16 @@
     border-bottom: var(--border-w) solid var(--rule);
   }
   .cella:nth-child(odd) { border-right: var(--border-w) solid var(--rule); padding-left: 0; }
+  /* «1 / 7» in due pezzi flex: lo spazio fra i due è un `column-gap` largo
+     quanto lo spazio di Geist (il primo spazio del secondo pezzo, a inizio
+     riga, cadrebbe: «1/ 7»). Se il totale non ci sta («144 / 1440» a 320),
+     «/ 1440» va a capo intero invece di uscire dalla cella: a 320 usciva dallo
+     schermo e allargava il viewport a 401. */
   .cella-num {
     display: flex;
+    flex-wrap: wrap;
     align-items: flex-start;
+    column-gap: var(--num-spazio);
     font: var(--type-num-cell);
     letter-spacing: var(--track-num-cell);
     font-variant-numeric: tabular-nums;
@@ -90,6 +97,23 @@
   }
   .cella-num .ui-tabellone { --lh: var(--lh-num-cell); }
   .cella-di { color: var(--text-muted); }
+
+  /* Il posto del valore finale, da subito (CLS 0). I numeri salgono da uno
+     zero di UNA cifra: quando ne guadagnano una, la colonna nuova entra a
+     sinistra (Odometro, in FLIP) e il numero si allarga, e il «%» accanto
+     scattava di lato. Il valore finale, invisibile nella stessa cella della
+     griglia, tiene la larghezza ferma; le cifre restano a sinistra, come le
+     vuole il FLIP. `data-fin` lo scrive numeri.ts. */
+  .odo[data-fin] { display: inline-grid; }
+  .odo[data-fin] > .ui-odo,
+  .odo[data-fin]::after { grid-area: 1 / 1; }
+  .odo[data-fin]::after {
+    content: attr(data-fin);
+    height: var(--lh);
+    line-height: var(--lh);
+    visibility: hidden;
+    pointer-events: none;
+  }
   .cella-etichetta {
     font: var(--type-num-etichetta);
     letter-spacing: var(--track-callout);

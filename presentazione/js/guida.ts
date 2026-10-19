@@ -56,7 +56,11 @@ const BATTUTA: Partial<Record<Sezione, string>> = {
   mappa: DATI.guida.mappa,
   dati: 'I tuoi tornei li vedi tu. E chi ci ha giocato con te, se lo colleghi.',
 }
-const ATTERRAGGIO = 'Quando vuoi, il ＋ arancio apre il diario.'
+// Il «+» ASCII, non il «＋» a tutta larghezza dei documenti: Geist non ha
+// quel glifo, e la prima volta il browser cerca un carattere di ripiego nel
+// sistema (un CJK, più largo e più nero): 85ms di layout con la CPU 4×,
+// proprio nel fotogramma in cui Pallo atterra.
+const ATTERRAGGIO = 'Quando vuoi, il + arancio apre il diario.'
 /** Il salto (MOTION §L10.3): SALTO tocca il segno la prima volta al 42% della durata. */
 const CONTATTO = 0.42
 /** Il picco dell'arco, al 20% della corsa: 20 / 42 della durata dell'arco. */

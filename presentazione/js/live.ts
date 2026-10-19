@@ -139,6 +139,8 @@ function monta({ sezione, demo, campo, titolo, pillole, stato, chiudi, ricominci
     // Set finito: niente punto, la battuta del set rientra («prima chiudi il set»).
     if (d > 0 && setFinito(p.noi, p.loro, t)) {
       dici(bolla.textContent ?? '')
+      // Il pannello è disattivo: chi non vede la nuvoletta sente il perché.
+      if (utente) stato.textContent = `Set finito, ${p.noi} a ${p.loro}: prima chiudi il set.`
       return
     }
     if (d < 0 && p[chi] === 0) return

@@ -273,3 +273,7 @@ node docs/qa/landing-og.mjs
 
 `OGGI_LANDING` sta in `docs/preview/dati.ts` (a ottobre: Beach Wrapped esiste solo allora); se cambia, cambia anche
 in `docs/qa/landing-shots.mjs`. Gli script avviano un loro Vite e un loro Chrome su porte proprie e li chiudono.
+
+La rifinitura si misura sulla build di produzione con `docs/qa/landing.mjs` (axe, tastiera con la visibilità
+dell'anello, overflow, bersagli, CLS, reduced-motion, prestazioni a CPU 4×): comandi e risultati in
+[`POLISH.md`](POLISH.md), Parte L.

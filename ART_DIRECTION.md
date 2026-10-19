@@ -1228,7 +1228,7 @@ Sul telefono di riferimento (390×844 nell'emulazione, `svh` = 844) lo schermo �
 | Pallo guida | `--guida-size` 64 (56 sotto i 360), sopra il ＋ allineato a destra: `bottom: --guida-bottom` (safe-area + 64 + 8), `right: --guida-right` | 64, in basso a destra: `bottom: max(24px, safe-area + 16px)`, `right: --gutter` |
 | Nuvoletta | Sopra Pallo, allineata a destra, larga al più `--bolla-max` (min(280, 100vw − 32)), 8px sopra la sua testa | idem |
 | Avanzamento | Al bordo alto: `top: --progress-top` (safe-area + 6), largo quanto il contenuto meno i gutter, alto `--progress-box` 16: binario 2px, pallone 12 | Appena sotto la barra in alto (16 + 64 + 8), pallone 14 |
-| `scroll-padding` | in alto `--scroll-pad-top` (safe-area + 12), in basso `--scroll-pad-bottom` (64 + safe-area + 64 + 8 + 16) | in alto 16 + 64 + 16, in basso 64 + 24 + 16 |
+| `scroll-padding` | in alto `--scroll-pad-top`, sotto l'avanzamento: `--progress-top` + `--progress-box` + 8 (safe-area + 30); in basso `--scroll-pad-bottom` (64 + safe-area + 64 + 8 + 16) | in alto lo stesso conto, 16 + 64 + 8 + 16 + 8 = 112; in basso 64 + 24 + 16 |
 
 **Livelli:** avanzamento `--z-progress` 25, barra `--z-tabbar` 30, Pallo e nuvoletta `--z-guida` 32, menu della guida `--z-guida-menu` 35. Velo e foglio sono quelli dell'app (`--z-scrim` 40, `--z-sheet` 50). Lo skip link è a `--z-skip-link` 100.
 
@@ -1291,7 +1291,7 @@ La Storia a ventaglio si stacca con un **taglio** del colore del fondo (`--story
 | **Righe di «Il diario resta tuo»** | A sinistra il riquadro dell'icona: 44, raggio 13, `--bg` col filo `--edge`, icona 20 `--ink`. Il titolo è `h3` a 600 16 `--text-strong`, il testo a 15/1.4 `--text-muted`. Niente chevron: non si toccano |
 | **Voci del ＋** | Come `.ui-menu-opt` dell'app, ma **opache** (`--surface` + filo `--edge`): sotto non scorre niente. Partita live col riquadro arancio (`--accent`, filo `--accent-strong`, icona `--on-accent`) e il filo `--accent-edge`. **La voce scelta**: filo d'inchiostro da 2px (inset, la misura non cambia), il segno dei pannelli «noi» della Partita live. Non un riempimento d'inchiostro: §L13, A7 |
 | **Chat** | Bolle di Pallo `--surface` col filo `--edge`, raggio 20/20/20/6. Bolle dell'utente `--accent` con l'inchiostro (5.97), raggio 20/20/6/20. Risposte rapide: capsule alte 44, `--surface` + filo `--edge`, 600 15 `--ink`, gap 8. I puntini di Pallo che scrive come in CreaChat (`--ink-3`) |
-| **Demo** | Come `PartitaLive.css`: pannello «loro» `--surface` + filo `--edge`, pannello «noi» filo 2px `--ink`, raggio 34, alti `--live-panel-h` (168; 200 da 600). Numero `--type-live-num`. −1: cerchio 44 `data-material="frost"` (opaco, col riflesso: niente sfocatura), a 12 dall'angolo. Pastiglia del set: capsula alta 32, filo `--edge` |
+| **Demo** | Come `PartitaLive.css`: pannello «loro» `--surface` + filo `--edge`, pannello «noi» filo 2px `--ink`, raggio 34, alti `--live-panel-h` (200 a ogni larghezza: a 168 Pallo copriva la cifra di «loro» e la battuta toccava «Noi», POLISH.md Parte L). Numero `--type-live-num`. −1: cerchio 44 `data-material="frost"` (opaco, col riflesso: niente sfocatura), a 12 dall'angolo. Pastiglia del set: capsula alta 32, filo `--edge` |
 | **Celle di #numeri** | Nessun riquadro: filetti `--rule` da 1px, in alto, in basso e al centro |
 | **Slide** | Campitura della palette + `--slide-ring` |
 | **Nuvoletta** | Opaca (`--surface` + `--edge`): porta testo su ogni fondo, anche scuro, e non conta nel budget del vetro |

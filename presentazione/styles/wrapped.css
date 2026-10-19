@@ -78,13 +78,21 @@
       /* La pista è alta un viewport più la corsa delle slide; dentro, il
          blocco sticky. Il titolo della sezione scorre via sopra, e resta il
          bersaglio del fuoco nei salti. */
+      /* Il vuoto sopra e sotto le slide quando il blocco è fermo: sono
+         centrate in un viewport intero. Lo usano la pista e la Storia. */
+      :root:not([data-movimento="fermo"]) #wrapped[data-viva] { --palco: calc((100svh - var(--slide-h)) / 2); }
       :root:not([data-movimento="fermo"]) #wrapped[data-viva] .pista {
         --n-slide: 3;
         --blocco-w: min(calc(100vw - 2 * var(--gutter)), var(--content-max));
         --corsa: max(0px, calc(var(--n-slide) * (var(--slide-w) + var(--slide-gap)) - var(--slide-gap) - var(--blocco-w)));
         display: block;
         height: calc(100svh + var(--corsa));
-        margin-top: var(--section-object-gap);
+        /* Fra il testo e le slide c'è già il palco: si aggiunge solo quello
+           che manca a `--section-object-gap` (prima si sommavano: 165px a 390). */
+        margin-top: max(0px, calc(var(--section-object-gap) - var(--palco)));
+        /* A tutta larghezza: le slide che scorrono si tagliano al bordo dello
+           schermo, non al gutter (prima, a 16px dal bordo, un taglio netto). */
+        margin-inline: calc(-1 * var(--gutter));
         view-timeline: --wrapped block;
         /* Il blocco copre il viewport intero: lo `scroll-padding` delle barre
            non c'entra (di serie la timeline lo userebbe come inset). */
@@ -97,10 +105,16 @@
         flex-direction: column;
         justify-content: center;
         height: 100svh;
-        max-width: var(--content-max);
-        margin-inline: auto;
+        /* La fila parte dal bordo del contenuto (il gutter, o la colonna da
+           `--content-max` al centro); `100cqw` della corsa è quella colonna. */
+        padding-inline: max(var(--gutter), calc((100% - var(--content-max)) / 2));
         overflow: hidden;
         container-type: inline-size;
+      }
+      /* Dopo la pista, lo stesso conto: la Storia sta a `--section-pad` dalle
+         slide, palco compreso (prima 221px di inchiostro vuoto a 390). */
+      :root:not([data-movimento="fermo"]) #wrapped[data-viva] .storia-testa {
+        margin-top: max(0px, calc(var(--section-pad) - var(--palco)));
       }
       :root:not([data-movimento="fermo"]) #wrapped[data-viva] .slides {
         margin: 0;

@@ -375,8 +375,8 @@
     "semantic_hash": ""
   },
   "vite.config.ts": {
-    "mtime": 1792442079.7493112,
-    "ast_hash": "4442df4f7463ca5373394c91e45d3512",
+    "mtime": 1792448133.3145134,
+    "ast_hash": "8b45edc15285271a6492c16f7eb7fbb8",
     "semantic_hash": ""
   },
   "vitest.config.ts": {
@@ -385,8 +385,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1792444082.1955402,
-    "ast_hash": "d813dd6db5931879ad3a8b7bd126c492",
+    "mtime": 1792447591.2578778,
+    "ast_hash": "6826883aafff7a1c12c42b2e07b3684e",
     "semantic_hash": ""
   },
   "docs/QA-tornei-formati.md": {
@@ -685,8 +685,8 @@
     "semantic_hash": ""
   },
   "ART_DIRECTION.md": {
-    "mtime": 1792438204.5907912,
-    "ast_hash": "ad9cd84d01b3d3e7f3bc755f5f578015",
+    "mtime": 1792447443.2607186,
+    "ast_hash": "52f52206aff1f03cb1b15ae2e14dfea4",
     "semantic_hash": ""
   },
   "UX.md": {
@@ -1145,8 +1145,8 @@
     "semantic_hash": ""
   },
   "POLISH.md": {
-    "mtime": 1792432110.2410622,
-    "ast_hash": "104a26379be74ee079ea4deaf7cbdedb",
+    "mtime": 1792449210.591603,
+    "ast_hash": "60207b59473fe60ada1f18067536fa51",
     "semantic_hash": ""
   },
   "src/app/AppView.test.tsx": {
@@ -1415,8 +1415,8 @@
     "semantic_hash": ""
   },
   "presentazione/js/guida.ts": {
-    "mtime": 1792444323.173782,
-    "ast_hash": "76821573efecec479ca6188d64c7b0e3",
+    "mtime": 1792446890.7638829,
+    "ast_hash": "604326e8f3a39b5c191962eed88c771d",
     "semantic_hash": ""
   },
   "presentazione/js/install.ts": {
@@ -1425,8 +1425,8 @@
     "semantic_hash": ""
   },
   "presentazione/js/live.ts": {
-    "mtime": 1792443369.2225726,
-    "ast_hash": "e32759eeb8a37c4ef737f6b541e21bb1",
+    "mtime": 1792447493.1135173,
+    "ast_hash": "aba50a06ef9a1592363ea9481f6fb263",
     "semantic_hash": ""
   },
   "presentazione/js/main.ts": {
@@ -1440,13 +1440,13 @@
     "semantic_hash": ""
   },
   "presentazione/js/nav.ts": {
-    "mtime": 1792444246.3116293,
-    "ast_hash": "680f2b437bd0fe75349d737a1a3f6d35",
+    "mtime": 1792446960.9179356,
+    "ast_hash": "a7ba256e09ea370d83514d2d1621703b",
     "semantic_hash": ""
   },
   "presentazione/js/numeri.ts": {
-    "mtime": 1792443263.5741003,
-    "ast_hash": "fbe1877c19e4dc99539076de6661fda7",
+    "mtime": 1792446912.5425897,
+    "ast_hash": "d628b6493aa2be65f2b58ee3e1278f7e",
     "semantic_hash": ""
   },
   "presentazione/js/pallo.disegno.ts": {
@@ -1567,6 +1567,11 @@
   "public/presentazione/screens/torneo.webp": {
     "mtime": 1792441519.0361133,
     "ast_hash": "6f8c812d7ad52b7553b1169826abfaa0",
+    "semantic_hash": ""
+  },
+  "docs/qa/landing.mjs": {
+    "mtime": 1792449263.0736885,
+    "ast_hash": "5b642d27639c9daddfb10ab6823ba083",
     "semantic_hash": ""
   }
 }

@@ -21,6 +21,8 @@ export function avviaNumeri() {
   const numeri = [...sezione.querySelectorAll<HTMLElement>('[data-odo]')].map((el) => {
     const finale = (el.textContent ?? '').trim()
     el.classList.add('ui-tabellone')
+    // Il posto del valore finale (numeri.css): salendo, il «%» non si sposta.
+    el.dataset.fin = finale
     const odo = new Odometro(el)
     odo.set(finale, false)
     return { odo, finale }

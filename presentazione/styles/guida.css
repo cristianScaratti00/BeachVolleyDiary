@@ -40,6 +40,9 @@
   /* Senza il salto (deep link, ricarica, fermo, salto già visto) compare
      dove sta, in sola opacità: è contenuto che arriva (MOTION §L4.1). */
   .guida[data-compare] { transform: none; transition: opacity var(--dur-entrata) var(--ease-standard), visibility 0s; }
+  /* Pallo galleggia sulla carta e sull'inchiostro di #numeri: l'anello
+     d'inchiostro da solo lì spariva. Doppio, come il ＋ (`--anello-alone`). */
+  .guida:focus-visible { outline-color: var(--ink); box-shadow: var(--anello-alone); }
   .guida-figura { display: block; width: 100%; }
   .guida-figura .pallo { width: 100%; height: auto; }
   /* Da guida galleggia sulla pagina, non ci sta in piedi: niente ombra. */

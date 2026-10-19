@@ -17,9 +17,29 @@ function landing(): Plugin {
   }
 }
 
+// Geist (il sottoinsieme latino) parte insieme al CSS, non dopo di lui: sulla
+// rete lenta (Slow 4G) il titolo dell'hero restava ~1.3s nel carattere di
+// riserva (POLISH.md, Parte L). Solo in build, dove il nome ha l'hash; il
+// `crossorigin` serve anche dallo stesso sito, o il font si scarica due volte.
+function landingFont(): Plugin {
+  return {
+    name: 'landing-font',
+    apply: 'build',
+    transformIndexHtml: {
+      order: 'post',
+      handler: (html, ctx) => {
+        if (!ctx.path.startsWith('/presentazione/') || !ctx.bundle) return html
+        const font = Object.keys(ctx.bundle).find((f) => /geist-latin-wght-normal-[\w-]+\.woff2$/.test(f))
+        if (!font) return html
+        return { html, tags: [{ tag: 'link', attrs: { rel: 'preload', href: `/${font}`, as: 'font', type: 'font/woff2', crossorigin: true }, injectTo: 'head-prepend' }] }
+      },
+    },
+  }
+}
+
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), landing()],
+  plugins: [react(), landing(), landingFont()],
   build: {
     rollupOptions: {
       // Due pagine indipendenti: l'app (index.html, React + Supabase) e la

@@ -166,8 +166,13 @@
     justify-content: center;
     pointer-events: none;
   }
+  /* Da bordo a bordo, coi figli al centro: centrata sulla sua posizione
+     statica, la scatola si spostava ogni volta che la battuta cambiava
+     larghezza (CLS 0.0009 a 1280, con l'autoplay). */
   .demo-mezzo-in {
     position: absolute;
+    left: 0;
+    right: 0;
     top: calc(var(--space-3) - var(--space-12) - var(--space-0-5));
     display: flex;
     flex-direction: column;
