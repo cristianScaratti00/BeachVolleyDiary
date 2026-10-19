@@ -148,10 +148,11 @@ Tutto sulla build di produzione. «Prima» è il commit `0457f1d` (la landing co
 
 ```sh
 npm run build && npx vite preview --port 5199 --strictPort --host 127.0.0.1   # una porta propria, mai la 5173
-node docs/qa/landing.mjs tutto            # oppure: axe | tab | sweep | targets | cls | reduced | perf | numeri
+node docs/qa/landing.mjs tutto            # oppure: axe | tab | sweep | targets | cls | reduced | perf | numeri | rete | tocco
+W=844 H=390 node docs/qa/landing.mjs sweep,axe,targets   # il telefono in orizzontale
 FLAT=1 V=1 INC=1 node docs/qa/landing.mjs axe   # senza gradienti, coi nodi e coi contrasti incompleti
 ALL=1 node docs/qa/landing.mjs tab        # ogni fermata, con quanto si vede l'anello
 CSS='.barra{--focus-ring:#1C1C1E!important}' node docs/qa/landing.mjs tab   # rimette un difetto: la prova deve trovarlo
 ```
 
-`LBASE` cambia l'URL e `W` le larghezze; `PORTA_CDP` vale 9343 di serie. Sotto i 900px la pagina si apre come Safari 26 su iPhone; `ANDROID=1` usa invece Chrome. Ogni caricamento è una prima visita: `bvd_landing_fermo` e `bvd_landing_visti` si azzerano, perché il profilo di Chrome resta fra un giro e l'altro.
+`LBASE` cambia l'URL, `W` le larghezze e `H` l'altezza; `PORTA_CDP` vale 9343 di serie. Sotto i 900px la pagina si apre come Safari 26 su iPhone; `ANDROID=1` usa invece Chrome. Ogni caricamento è una prima visita: `bvd_landing_fermo` e `bvd_landing_visti` si azzerano, perché il profilo di Chrome resta fra un giro e l'altro.

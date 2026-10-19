@@ -27,7 +27,12 @@
 //   perf      CPU 4×: FCP/LCP/TBT, fotogrammi lenti nello scroll di tutta la
 //             pagina, e le interazioni (guida, foglio, tab, demo, chat).
 //   numeri    prova di resistenza: numeri enormi e punteggi ai vantaggi.
+//   rete      ogni richiesta dal caricamento al fondo (menu, foglio, chat,
+//             demo compresi): nessun host diverso dal sito (UX §L12.8).
+//   tocco     solo dito, come un iPhone (eventi touch veri): Pallo, il suo
+//             menu, il tocco lungo, la demo, il foglio e il velo.
 //
+// H=390 forza l'altezza del viewport (il telefono in orizzontale: W=844 H=390).
 // Chrome headless su una porta CDP propria (PORTA_CDP, 9343): mai la 9333.
 // Sotto i 900px la pagina si apre come Safari 26 su iPhone (ANDROID=1: Chrome).
 // CSS='…' aggiunge un foglio dopo il caricamento (provare una correzione, o
@@ -48,7 +53,7 @@ const p = await page(PORTA)
 await p.send('Network.enable')
 await p.send('Network.setCacheDisabled', { cacheDisabled: true })
 
-const alto = (w) => (w >= 900 ? 800 : w <= 320 ? 568 : 844)
+const alto = (w) => (process.env.H ? Number(process.env.H) : w >= 900 ? 800 : w <= 320 ? 568 : 844)
 // Sotto i 900px la pagina si apre come Safari su iPhone (il telefono per cui
 // è fatta): il pulsante d'installazione apre il foglio d'istruzioni. Da
 // computer quel pulsante lancia il prompt nativo di Chrome, che headless non
@@ -555,6 +560,79 @@ if (fa('numeri')) {
     console.log('  demo:', await p.eval(`[...document.querySelectorAll('#live .live-num')].map(e => e.textContent).join('–')`), m2.docW > m2.vw ? `SCROLL ${m2.docW}>${m2.vw}` : 'niente scroll', m2.testo.join(' ; '))
     await p.shot(`landing-demo-${w}`)
   }
+}
+
+// ------------------------------------------------------------------ rete
+// «Niente cookie né statistiche qui: caratteri e immagini arrivano da questo
+// sito» (UX §L12.8): ogni richiesta, dal caricamento al fondo e coi
+// sovrapposti aperti, va all'host della pagina (o è un data:/blob:).
+if (fa('rete')) {
+  const viste = []
+  p.on('Network.requestWillBeSent', (e) => viste.push(e.request.url))
+  for (const w of (process.env.W ?? '390,1280').split(',').map(Number)) {
+    titolo(`rete @${w}`)
+    viste.length = 0
+    await apri(w)
+    for (const s of SEZIONI) await vai(s, 0.3, 300)
+    await vai('diario', 0.2, 900)
+    await p.eval(`document.querySelector('.guida')?.click()`)
+    await sleep(300)
+    await p.key('Escape')
+    await vai('registra', 0.2, 600)
+    await p.eval(`document.querySelector('.chat-risposte button')?.click()`)
+    await sleep(1200)
+    if (iphone(w)) {
+      await p.eval(`[...document.querySelectorAll('[data-installa]')].find(b => !b.hidden && b.getClientRects().length)?.click()`)
+      await sleep(500)
+      await p.key('Escape')
+    }
+    const casa = new URL(LBASE).host
+    const altrove = [...new Set(viste.filter((u) => /^https?:/.test(u) && new URL(u).host !== casa))]
+    const tipi = [...new Set(viste.filter((u) => /^https?:/.test(u)).map((u) => new URL(u).pathname.split('.').pop()))]
+    console.log(`  ${viste.length} richieste (${tipi.join(', ')}); verso altri host: ${altrove.length ? '\n    ✗ ' + altrove.join('\n    ✗ ') : 'nessuna'}`)
+  }
+}
+
+// ----------------------------------------------------------------- tocco
+// Solo dito, con gli eventi touch veri del telefono (Input.dispatchTouchEvent,
+// CPU a 1×: col rallentamento la sessione CDP può bloccarsi).
+if (fa('tocco')) {
+  const w = 390
+  titolo(`tocco @${w} (Safari su iPhone)`)
+  await apri(w, { touch: true })
+  const tocca = async (sel, tieni = 0) => {
+    const c = await centro(sel)
+    if (!c) return console.log(`  ✗ manca ${sel}`)
+    await p.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: c[0], y: c[1] }] })
+    if (tieni) await sleep(tieni)
+    await p.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+    await sleep(350)
+  }
+  const esito = (ok, cosa) => console.log(`  ${ok ? '✓' : '✗'} ${cosa}`)
+  await vai('diario', 0, 1200)
+  await sleep(4200)
+  await tocca('.guida')
+  esito(await p.eval(`document.querySelector('.guida').getAttribute('aria-expanded') === 'true'`), 'un tocco su Pallo apre «Dove vuoi andare?»')
+  esito(await p.eval(`document.activeElement?.closest('#guida-menu') != null`), '  e il fuoco va alla prima voce')
+  await tocca('#guida-menu a[href="#wrapped"]')
+  esito(await p.eval(`document.activeElement?.id === 'wrapped-titolo' && document.querySelector('.guida').getAttribute('aria-expanded') === 'false'`), 'una voce chiude il menu e salta, col fuoco al titolo')
+  await vai('dati', 0.2, 1500)
+  await tocca('.guida', 750)
+  esito(await p.eval(`document.querySelector('.guida svg').hasAttribute('data-sorpresa') && document.querySelector('.guida').getAttribute('aria-expanded') === 'false'`), 'il tocco lungo: la sorpresa, niente menu')
+  await vai('live', 0.45, 900)
+  const prima = await p.eval(`document.querySelector('.pannello[data-chi="noi"]').getAttribute('aria-label')`)
+  await tocca('.pannello[data-chi="noi"]')
+  const dopo = await p.eval(`document.querySelector('.pannello[data-chi="noi"]').getAttribute('aria-label')`)
+  esito(prima !== dopo, `un tocco sul pannello segna: «${prima}» → «${dopo}»`)
+  await tocca('.meno[data-chi="noi"]')
+  esito((await p.eval(`document.querySelector('.pannello[data-chi="noi"]').getAttribute('aria-label')`)) === prima, 'il «−1» toglie il punto')
+  await vai('comincia', 0.2, 900)
+  await tocca('#comincia [data-installa]')
+  esito(await p.eval(`document.getElementById('installa').hasAttribute('data-aperto') && document.activeElement?.id === 'installa-titolo'`), 'il foglio si apre, col fuoco al titolo')
+  await p.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: 195, y: 40 }] })
+  await p.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+  await sleep(500)
+  esito(await p.eval(`!document.getElementById('installa').hasAttribute('data-aperto') && document.activeElement?.matches('#comincia [data-installa]')`), 'un tocco sul velo lo chiude, e il fuoco torna al pulsante')
 }
 
 if (p.consoleMsgs.some((m) => /exception|error/i.test(m))) console.log('\nconsole:\n  ' + p.consoleMsgs.filter((m) => /exception|error/i.test(m)).slice(0, 10).join('\n  '))

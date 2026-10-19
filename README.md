@@ -197,6 +197,10 @@ di fabbrica con "oggi" congelato al `2026-07-22`, così la suite non cambia colo
 `src/test/contrast.test.ts` calcola il contrasto sui colori veri, che axe in jsdom non può misurare.
 `src/test/app.tsx` monta l'app intera (`AppView`) con un diario in memoria: ci girano i test dei
 flussi in `src/app/AppView.test.tsx` (menu ＋, sheet, conferme, focus, indietro, breakpoint).
+`src/test/landing.ts` fa lo stesso per la landing `/presentazione`: l'HTML finito e i moduli veri, con
+un'impaginazione finta misurata da un IntersectionObserver che segue la regola vera, scroll a passi e
+tempo finto. Ci girano `src/test/landing.{vivo,sezioni,installa}.test.ts`; `src/test/landing.test.ts`
+legge l'HTML e i fogli come testo (CSP, struttura, ruoli, layer, colori, movimento).
 I report QA per feature stanno in `docs/`; [`docs/QA-refactor.md`](docs/QA-refactor.md) dice dove è
 verificato ogni stato dell'interfaccia.
 
@@ -275,5 +279,6 @@ node docs/qa/landing-og.mjs
 in `docs/qa/landing-shots.mjs`. Gli script avviano un loro Vite e un loro Chrome su porte proprie e li chiudono.
 
 La rifinitura si misura sulla build di produzione con `docs/qa/landing.mjs` (axe, tastiera con la visibilità
-dell'anello, overflow, bersagli, CLS, reduced-motion, prestazioni a CPU 4×): comandi e risultati in
-[`POLISH.md`](POLISH.md), Parte L.
+dell'anello, overflow, bersagli, CLS, reduced-motion, prestazioni a CPU 4×, richieste di rete, tocchi veri;
+`H=390` per il telefono in orizzontale): comandi e risultati in [`POLISH.md`](POLISH.md), Parte L. Dove è
+verificato ogni stato della pagina (jsdom, browser o a mano) lo dice [`docs/QA-landing.md`](docs/QA-landing.md).

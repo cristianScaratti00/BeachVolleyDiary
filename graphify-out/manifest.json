@@ -380,13 +380,13 @@
     "semantic_hash": ""
   },
   "vitest.config.ts": {
-    "mtime": 1792435113.996698,
-    "ast_hash": "c29d80eb23609d79c23505501e6b0bed",
+    "mtime": 1792449777.958427,
+    "ast_hash": "60c5859f341f0a6079a71ef6c5fc7a70",
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1792447591.2578778,
-    "ast_hash": "6826883aafff7a1c12c42b2e07b3684e",
+    "mtime": 1792451428.3523798,
+    "ast_hash": "b92a732640c9347171a46da0ebe87892",
     "semantic_hash": ""
   },
   "docs/QA-tornei-formati.md": {
@@ -570,8 +570,8 @@
     "semantic_hash": ""
   },
   "presentazione/index.html": {
-    "mtime": 1792443905.0756254,
-    "ast_hash": "6bfdb5e668600725ef806be1f6140b9e",
+    "mtime": 1792451179.9693522,
+    "ast_hash": "e1c9c5899ce3a5fb34c379056f1c6603",
     "semantic_hash": ""
   },
   "public/offline.html": {
@@ -1145,8 +1145,8 @@
     "semantic_hash": ""
   },
   "POLISH.md": {
-    "mtime": 1792449210.591603,
-    "ast_hash": "60207b59473fe60ada1f18067536fa51",
+    "mtime": 1792451435.332028,
+    "ast_hash": "ae25bc0a00b0ca3e39da121f82bace1c",
     "semantic_hash": ""
   },
   "src/app/AppView.test.tsx": {
@@ -1395,7 +1395,7 @@
     "semantic_hash": ""
   },
   "presentazione/js/chat.ts": {
-    "mtime": 1792443856.3764362,
+    "mtime": 1792451157.3103194,
     "ast_hash": "24d73a8b2d2c000982b0e32b658d5a90",
     "semantic_hash": ""
   },
@@ -1415,17 +1415,17 @@
     "semantic_hash": ""
   },
   "presentazione/js/guida.ts": {
-    "mtime": 1792446890.7638829,
+    "mtime": 1792451088.9116473,
     "ast_hash": "604326e8f3a39b5c191962eed88c771d",
     "semantic_hash": ""
   },
   "presentazione/js/install.ts": {
-    "mtime": 1792443369.2227495,
+    "mtime": 1792451063.7545178,
     "ast_hash": "bee5392cebeda9c9bf3f2a42a9600bbd",
     "semantic_hash": ""
   },
   "presentazione/js/live.ts": {
-    "mtime": 1792447493.1135173,
+    "mtime": 1792451142.4056332,
     "ast_hash": "aba50a06ef9a1592363ea9481f6fb263",
     "semantic_hash": ""
   },
@@ -1435,17 +1435,17 @@
     "semantic_hash": ""
   },
   "presentazione/js/movimento.ts": {
-    "mtime": 1792443203.500645,
+    "mtime": 1792451113.0177724,
     "ast_hash": "3eb989b92c5ac6f3d0b8bb60fc016094",
     "semantic_hash": ""
   },
   "presentazione/js/nav.ts": {
-    "mtime": 1792446960.9179356,
+    "mtime": 1792451117.9098759,
     "ast_hash": "a7ba256e09ea370d83514d2d1621703b",
     "semantic_hash": ""
   },
   "presentazione/js/numeri.ts": {
-    "mtime": 1792446912.5425897,
+    "mtime": 1792451341.162156,
     "ast_hash": "d628b6493aa2be65f2b58ee3e1278f7e",
     "semantic_hash": ""
   },
@@ -1460,7 +1460,7 @@
     "semantic_hash": ""
   },
   "presentazione/js/scene.ts": {
-    "mtime": 1792444246.3113923,
+    "mtime": 1792451167.9138215,
     "ast_hash": "5268093d5cc3055f6808c4f25ec998f4",
     "semantic_hash": ""
   },
@@ -1515,7 +1515,7 @@
     "semantic_hash": ""
   },
   "src/screens/PartitaLive.regole.ts": {
-    "mtime": 1792441355.414354,
+    "mtime": 1792451185.4318166,
     "ast_hash": "6840e1c5527e212651f12c1268e8fc97",
     "semantic_hash": ""
   },
@@ -1570,8 +1570,43 @@
     "semantic_hash": ""
   },
   "docs/qa/landing.mjs": {
-    "mtime": 1792449263.0736885,
-    "ast_hash": "5b642d27639c9daddfb10ab6823ba083",
+    "mtime": 1792451088.1555748,
+    "ast_hash": "6ae310bcbf015f79fccc43718ed4a803",
+    "semantic_hash": ""
+  },
+  "src/screens/PartitaLive.regole.test.ts": {
+    "mtime": 1792450932.9077709,
+    "ast_hash": "fe4ce065aa493f7ec53a05978a35e839",
+    "semantic_hash": ""
+  },
+  "src/test/landing.installa.test.ts": {
+    "mtime": 1792450863.0940335,
+    "ast_hash": "4282b9cdc3379c2c08319932922f189c",
+    "semantic_hash": ""
+  },
+  "src/test/landing.sezioni.test.ts": {
+    "mtime": 1792451411.026391,
+    "ast_hash": "c05b34abc3f577a799a91a86a0f984a2",
+    "semantic_hash": ""
+  },
+  "src/test/landing.test.ts": {
+    "mtime": 1792451391.7414315,
+    "ast_hash": "4af6064806e0437dd81beb7b80a65829",
+    "semantic_hash": ""
+  },
+  "src/test/landing.ts": {
+    "mtime": 1792451391.7409604,
+    "ast_hash": "2453f8265dbd9558898c4ade681004aa",
+    "semantic_hash": ""
+  },
+  "src/test/landing.vivo.test.ts": {
+    "mtime": 1792451010.5587666,
+    "ast_hash": "c2e451cd7922de534bc9b4f2d9bb7a46",
+    "semantic_hash": ""
+  },
+  "docs/QA-landing.md": {
+    "mtime": 1792451353.1649885,
+    "ast_hash": "51d5e14672d410d960f3eb013e06c881",
     "semantic_hash": ""
   }
 }
