@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>L2 · La barra, il menu, il foglio · laboratorio della landing</title>
+<link rel="stylesheet" href="../../src/styles/tokens.css">
+<link rel="stylesheet" href="../../src/styles/materials.css">
+<link rel="stylesheet" href="../../presentazione/styles/tokens.css">
+<link rel="stylesheet" href="./_lab.css">
+<link rel="stylesheet" href="./_landing.css">
+<style>
+@layer components {
+  html { scrollbar-gutter: stable; }
+  html[data-bloccato] { overflow: hidden; }
+  .campo { min-height: 90svh; }
+  .campo[data-campo="tramonto"]:first-of-type { min-height: 100svh; }
+
+  /* ================================================================ Barra
+     Capsula a DUE strati di vetro (ART §L9.2): si scambiano l'opacità in
+     SVELTO; chi esce prende visibility: hidden a fine corsa. Il raggio
+     della sfocatura e il colore non si animano mai.                       */
+  .barra { position: fixed; z-index: var(--z-tabbar); left: var(--tabbar-side); right: calc(var(--tabbar-side) + var(--plus-size) + var(--tabbar-gap)); bottom: var(--tabbar-bottom); height: var(--tabbar-h); }
+  .capsula { position: relative; height: 100%; border-radius: var(--radius-capsule); isolation: isolate; }
+  .capsula > .vetro { position: absolute; inset: 0; border-radius: inherit; z-index: -1; transition: opacity var(--dur-svelto) var(--ease-standard), visibility 0s linear var(--dur-svelto); --material-elev: var(--elev-float); }
+  .capsula > .vetro[data-material="glass-dark"] { opacity: 0; visibility: hidden; }
+  .capsula[data-sopra="scuro"] > .vetro[data-material="glass-regular"] { opacity: 0; visibility: hidden; }
+  .capsula[data-sopra="scuro"] > .vetro[data-material="glass-dark"] { opacity: 1; visibility: visible; transition: opacity var(--dur-svelto) var(--ease-standard), visibility 0s; }
+  .capsula[data-sopra="chiaro"] > .vetro[data-material="glass-regular"] { transition: opacity var(--dur-svelto) var(--ease-standard), visibility 0s; }
+
+  .tabs { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-0-5); height: 100%; padding: var(--space-1-5); list-style: none; margin: 0; }
+  /* La lente: pillola BIANCA piena, senza sfocatura (UX LC8). Si sposta
+     con la transizione della TabBar dell'app (ART A5). */
+  .lente {
+    position: absolute; top: var(--space-1-5); bottom: var(--space-1-5); left: var(--space-1-5);
+    width: calc((100% - 2 * var(--space-1-5) - 3 * var(--space-0-5)) / 4);
+    border-radius: var(--radius-capsule); background: var(--lente-bg); box-shadow: var(--lente-elev);
+    transform: translateX(calc(var(--i, 0) * (100% + var(--space-0-5))));
+    transition: transform var(--dur-rise) var(--ease-press), opacity var(--dur-svelto) var(--ease-standard);
+    pointer-events: none;
+  }
+  .lente[data-nascosta] { opacity: 0; }
+  /* Ricompare sulla tab nuova senza scivolare da quella vecchia (ML12): il JS
+     la sposta con `data-salta` (nessuna transizione sul transform). */
+  .lente[data-salta] { transition: opacity var(--dur-entrata) var(--ease-standard); }
+  :root.rm .lente, :root[data-movimento="fermo"] .lente { transition: opacity var(--dur-svelto) var(--ease-standard); }
+  :root.rm .capsula > .vetro, :root[data-movimento="fermo"] .capsula > .vetro { transition: none; }
+
+  .tab { position: relative; z-index: 1; display: grid; place-items: center; border-radius: var(--radius-capsule); text-decoration: none; transition: transform var(--dur-press) var(--ease-press); }
+  .tab:active { transform: scale(0.94); }
+  .tab:focus-visible { outline-offset: calc(-1 * var(--focus-width)); }
+  /* Inchiostro a due livelli (M8): spento d'inchiostro pieno, acceso arancio
+     sulla lente. Si scambiano l'OPACITÀ in MOLLA, insieme alla lente. */
+  .tab > .liv { grid-area: 1 / 1; display: grid; justify-items: center; gap: var(--space-0-5); font: var(--type-caption-2); letter-spacing: var(--track-caption-2); transition: opacity var(--dur-molla) var(--ease-molla); }
+  .tab > .liv svg.i { width: 23px; height: 23px; }
+  .tab > .spento { color: var(--on-glass); }
+  .tab > .acceso { color: var(--lente-label); opacity: 0; }
+  .tab[aria-current="true"] > .spento { opacity: 0; }
+  .tab[aria-current="true"] > .acceso { opacity: 1; }
+  /* Spento chiaro ↔ scuro: un cambio DISCRETO a metà dello scambio del vetro
+     (ML13): `data-inchiostro` lo scrive il JS mezzo SVELTO dopo `data-sopra`.
+     Una pittura sola; nessuna transizione nomina `color`. */
+  .capsula[data-inchiostro="scuro"] .tab > .spento { color: var(--on-glass-dark); }
+
+  .piu {
+    position: fixed; z-index: var(--z-tabbar); right: var(--tabbar-side); bottom: var(--tabbar-bottom);
+    width: var(--plus-size); height: var(--plus-size); border-radius: 50%; display: grid; place-items: center;
+    background: var(--accent); color: var(--on-accent); box-shadow: inset 0 0 0 1px var(--accent-strong), var(--elev-float);
+    transition: transform var(--dur-press) var(--ease-press);
+  }
+  .piu:active { transform: scale(0.94); }
+  .piu svg.i { width: 28px; height: 28px; stroke-width: 2.6; }
+
+  /* ====================================================== Avanzamento (LM10)
+     Il pallone rotola: translateX sul binario e rotate = corsa ÷ (π × d).
+     Solo con le timeline native; altrimenti non c'è.                     */
+  .avanza { display: none; }
+  @supports (animation-timeline: scroll()) {
+    .avanza {
+      display: block; position: fixed; z-index: var(--z-progress);
+      top: var(--progress-top); left: var(--gutter); right: var(--gutter); height: var(--progress-box);
+      container-type: inline-size; pointer-events: none;
+    }
+    .avanza::before { content: ""; position: absolute; left: 0; right: 0; top: calc(50% - var(--progress-track) / 2); height: var(--progress-track); border-radius: 1px; background: var(--rule); opacity: 0.6; }
+    .avanza-palla {
+      position: absolute; top: calc(50% - var(--progress-ball) / 2); left: 0;
+      width: var(--progress-ball); height: var(--progress-ball); border-radius: 50%;
+      background: var(--surface); box-shadow: inset 0 0 0 1.5px var(--ink);
+      animation: rotola linear both; animation-timeline: scroll(root block);
+    }
+    .avanza-palla::after { content: ""; position: absolute; inset: 2px 0 auto; height: 3px; background: var(--accent); }
+    :root.rm .avanza, :root[data-movimento="fermo"] .avanza { display: none; }
+  }
+  @keyframes rotola { from { transform: none; } to { transform: translateX(calc(100cqw - var(--progress-ball))) rotate(calc(var(--giri, 8) * 1turn)); } }
+
+  /* ============================================================== Guida
+     (base in _landing.css). Qui c'è il menu «Dove vuoi andare?».          */
+  .guida[data-stato] { transform: none; opacity: 1; visibility: visible; }
+  .menu {
+    position: fixed; z-index: var(--z-guida-menu);
+    left: var(--gutter); right: var(--gutter);
+    bottom: calc(var(--guida-bottom) + var(--guida-size) + var(--space-2));
+    max-height: calc(100svh - var(--safe-top) - var(--guida-bottom) - var(--guida-size) - var(--space-6));
+    overflow-y: auto; overscroll-behavior: contain;
+    padding: var(--space-3); border-radius: var(--radius-sheet); color: var(--ink);
+    --material-elev: var(--elev-overlay);
+    /* L'origine è il centro di Pallo (§L5.3). */
+    transform-origin: calc(100% - var(--guida-size) / 2 + var(--gutter) - var(--guida-right)) calc(100% + var(--space-2) + var(--guida-size) / 2);
+    opacity: 0;
+    transform: translateY(calc(12px * var(--motion-scale))) scale(calc(1 - 0.04 * var(--motion-scale)));
+    transition: opacity var(--dur-svelto) var(--ease-standard), transform var(--dur-svelto) var(--ease-standard);
+  }
+  .menu[data-aperto] { opacity: 1; transform: none; transition: opacity var(--dur-entrata) var(--ease-standard), transform var(--dur-molla) var(--ease-molla); }
+  .menu h2 { font: var(--type-eyebrow); letter-spacing: var(--track-eyebrow); color: var(--ink-2); padding: var(--space-1) var(--space-2) var(--space-2); }
+  .menu ul { list-style: none; margin: 0; padding: 0; display: grid; }
+  .menu a, .menu .azione { display: flex; align-items: center; gap: var(--space-3); min-height: var(--touch); padding: 0 var(--space-3); border-radius: var(--radius-row); color: var(--ink); text-decoration: none; font: var(--type-body); }
+  .menu a[aria-current="true"] { font-weight: 700; }
+  .menu .azioni { display: flex; gap: var(--space-2); margin-top: var(--space-2); flex-wrap: wrap; }
+  .menu .azione { background: var(--fill); border-radius: var(--radius-capsule); font: var(--type-subhead-strong); }
+  .menu .azione[aria-pressed="true"] { background: var(--ink); color: var(--on-select); }
+  @media (min-width: 600px) {
+    .menu { left: auto; right: var(--guida-right); width: 320px; transform-origin: calc(100% - var(--guida-size) / 2) calc(100% + var(--space-2) + var(--guida-size) / 2); }
+  }
+
+  /* ============================================================== Foglio */
+  .velo { position: fixed; inset: 0; z-index: var(--z-scrim); background: var(--scrim); opacity: 0; visibility: hidden; transition: opacity var(--dur-svelto) var(--ease-standard), visibility 0s linear var(--dur-svelto); }
+  .velo[data-aperto] { opacity: 1; visibility: visible; transition: opacity var(--dur-entrata) var(--ease-standard), visibility 0s; }
+  .foglio {
+    position: fixed; z-index: var(--z-sheet); left: 0; right: 0; bottom: 0;
+    padding: var(--space-6) var(--gutter) calc(var(--safe-bottom) + var(--space-6));
+    border-radius: var(--radius-sheet) var(--radius-sheet) 0 0; color: var(--ink);
+    --material-elev: var(--elev-overlay);
+    transform: translateY(calc(100% * var(--motion-scale))); opacity: 0; visibility: hidden;
+    transition: transform var(--dur-svelto) var(--ease-standard), opacity var(--dur-svelto) var(--ease-standard), visibility 0s linear var(--dur-svelto);
+  }
+  .foglio[data-aperto] { transform: none; opacity: 1; visibility: visible; transition: transform var(--dur-molla) var(--ease-molla), opacity var(--dur-entrata) var(--ease-standard), visibility 0s; }
+  .foglio h2 { font: var(--type-title-2); letter-spacing: var(--track-title-2); }
+  .foglio h2:focus { outline: none; }
+  .foglio ol { margin: var(--space-4) 0; padding-left: var(--space-5); display: grid; gap: var(--space-2); }
+  .foglio .chiudi { position: absolute; top: var(--space-3); right: var(--space-3); width: var(--touch); height: var(--touch); display: grid; place-items: center; border-radius: 50%; }
+  /* Pallo sbircia dal bordo alto, DOPO che il foglio è arrivato: non può
+     sbirciare da un bordo che non c'è ancora (ritardo causale). Il riquadro
+     sta SOPRA il bordo e ritaglia: Pallo sale da dietro la linea del foglio. */
+  .foglio .sbircia { position: absolute; bottom: 100%; left: var(--space-6); width: var(--pallo-sbircia); height: calc(var(--pallo-sbircia) * 0.7); overflow: hidden; pointer-events: none; }
+  .foglio .sbircia svg { display: block; width: 100%; height: auto; transform: translateY(70%); opacity: 0; transition: transform var(--dur-svelto) var(--ease-standard), opacity var(--dur-svelto) var(--ease-standard); }
+  .foglio[data-aperto] .sbircia svg { transform: translateY(12%); opacity: 1; transition: transform var(--dur-molla) var(--ease-molla) var(--dur-molla), opacity var(--dur-entrata) var(--ease-standard) var(--dur-molla); }
+  :root.rm .foglio[data-aperto] .sbircia svg, :root[data-movimento="fermo"] .foglio[data-aperto] .sbircia svg { transition: opacity var(--dur-entrata) var(--ease-standard); }
+  @media (min-width: 600px) {
+    .foglio { left: 50%; bottom: auto; top: 50%; width: 420px; border-radius: var(--radius-sheet); --material-elev: var(--elev-dialog);
+      transform: translate(-50%, -50%) scale(calc(1 - 0.04 * var(--motion-scale))); transform-origin: 50% 50%; }
+    .foglio[data-aperto] { transform: translate(-50%, -50%); transition: transform var(--dur-entrata) var(--ease-standard), opacity var(--dur-entrata) var(--ease-standard), visibility 0s; }
+    .foglio[data-aperto] .sbircia svg { transition-delay: var(--dur-entrata); }
+  }
+
+  /* =========================================================== Da 900px */
+  @media (min-width: 900px) {
+    .barra { top: var(--barra-inset); bottom: auto; left: 50%; right: auto; width: var(--barra-capsule-w); transform: translateX(-50%); }
+    .piu { top: var(--barra-inset); bottom: auto; right: var(--gutter); }
+  }
+}
+</style>
+</head>
+<body>
+<div class="ls-strumenti" aria-label="Strumenti della demo">
+  <button type="button" data-comando="fermo" aria-pressed="false">Ferma le animazioni</button>
+</div>
+<div class="avanza" aria-hidden="true"><span class="avanza-palla"></span></div>
+
+<nav class="barra" aria-label="Sezioni">
+  <div class="capsula" data-sopra="scuro" data-inchiostro="scuro">
+    <span class="vetro" data-material="glass-regular" aria-hidden="true"></span>
+    <span class="vetro" data-material="glass-dark" aria-hidden="true"></span>
+    <span class="lente" data-nascosta aria-hidden="true"></span>
+    <ul class="tabs">
+      <li><a class="tab" href="#diario" data-i="0"><span class="liv spento"><svg class="i" aria-hidden="true"><use href="#i-book"/></svg>Diario</span><span class="liv acceso" aria-hidden="true"><svg class="i" aria-hidden="true"><use href="#i-book"/></svg>Diario</span></a></li>
+      <li><a class="tab" href="#live" data-i="1"><span class="liv spento"><svg class="i" aria-hidden="true"><use href="#i-clock"/></svg>Live</span><span class="liv acceso" aria-hidden="true"><svg class="i" aria-hidden="true"><use href="#i-clock"/></svg>Live</span></a></li>
+      <li><a class="tab" href="#numeri" data-i="2"><span class="liv spento"><svg class="i" aria-hidden="true"><use href="#i-chart"/></svg>Numeri</span><span class="liv acceso" aria-hidden="true"><svg class="i" aria-hidden="true"><use href="#i-chart"/></svg>Numeri</span></a></li>
+      <li><a class="tab" href="#wrapped" data-i="3"><span class="liv spento"><svg class="i" aria-hidden="true"><use href="#i-sun"/></svg>Wrapped</span><span class="liv acceso" aria-hidden="true"><svg class="i" aria-hidden="true"><use href="#i-sun"/></svg>Wrapped</span></a></li>
+    </ul>
+  </div>
+</nav>
+<a class="piu" href="#inizio" aria-label="Apri il diario"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg></a>
+<button type="button" class="guida" data-stato="dentro" aria-expanded="false" aria-controls="guida-menu" aria-label="Pallo: dove vuoi andare?"><span class="guida-figura"></span></button>
+<div id="guida-menu" class="menu" data-material="glass-thick" hidden>
+  <nav aria-labelledby="guida-titolo">
+    <h2 id="guida-titolo">Dove vuoi andare?</h2>
+    <ul>
+      <li><a href="#diario">Il diario in tasca</a></li>
+      <li><a href="#live">Partita live</a></li>
+      <li><a href="#numeri">I numeri e la mappa</a></li>
+      <li><a href="#wrapped">Beach Wrapped</a></li>
+      <li><a href="#dati">I tuoi dati</a></li>
+      <li><a href="#inizio">Torna su</a></li>
+    </ul>
+    <div class="azioni">
+      <button type="button" class="azione state" data-apre="foglio"><svg class="i" data-size="20" aria-hidden="true"><use href="#i-download"/></svg>Installa l'app</button>
+      <button type="button" class="azione state" data-comando="fermo" aria-pressed="false"><svg class="i" data-size="20" aria-hidden="true"><use href="#i-pause"/></svg>Ferma le animazioni</button>
+    </div>
+  </nav>
+</div>
+
+<main>
+  <section id="inizio" class="campo" data-campo="tramonto" data-surface="dark" data-fondo="scuro" aria-labelledby="t-inizio"><div class="dentro">
+    <h2 id="t-inizio" tabindex="-1">La barra sul tramonto</h2>
+    <p class="frase">Nessuna tab accesa: la lente è spenta. La capsula è <code>glass-dark</code>, le tab spente bianche.</p>
+  </div></section>
+  <section id="diario" class="campo" data-campo="carta" data-fondo="chiaro" aria-labelledby="t-diario"><div class="dentro">
+    <h2 id="t-diario" tabindex="-1">Il diario in tasca</h2>
+    <p class="frase">La lente ricompare sulla tab «Diario» senza scivolare da una tab vecchia (ML12). Sotto la linea mediana della capsula ora c'è carta: il vetro passa a <code>glass-regular</code> in SVELTO, l'inchiostro delle tab spente cambia di colpo a metà.</p>
+  </div></section>
+  <section id="live" class="campo" data-campo="carta" data-fondo="chiaro" aria-labelledby="t-live"><div class="dentro">
+    <h2 id="t-live" tabindex="-1">Partita live</h2>
+    <p class="frase">La lente scivola (600ms, la curva della TabBar). L'arancio arriva con la lente, non prima: lo scambio d'inchiostro è in MOLLA.</p>
+  </div></section>
+  <section id="numeri" class="campo" data-campo="inchiostro" data-surface="dark" data-fondo="scuro" aria-labelledby="t-numeri"><div class="dentro">
+    <h2 id="t-numeri" tabindex="-1">I numeri li fa l'app</h2>
+    <p class="frase">Di nuovo il buio: <code>glass-dark</code>. Nei 180ms dello scambio i vetri sono due (il caso contato da ART §L9.3).</p>
+  </div></section>
+  <section id="wrapped" class="campo" data-campo="inchiostro" data-surface="dark" data-fondo="scuro" aria-labelledby="t-wrapped"><div class="dentro">
+    <h2 id="t-wrapped" tabindex="-1">Beach Wrapped</h2>
+    <p class="frase">Tocca Pallo: il menu esce da lui, il focus va alla prima voce subito. «Installa l'app»: il menu passa a <code>frost</code> a t0 ed esce mentre il foglio sale.</p>
+  </div></section>
+  <section id="dati" class="campo" data-campo="carta" data-fondo="chiaro" aria-labelledby="t-dati"><div class="dentro">
+    <h2 id="t-dati" tabindex="-1">Il diario resta tuo</h2>
+    <p class="frase">Nessuna tab accesa: la lente si spegne in SVELTO dove è.</p>
+    <div class="lab-note ls-note"><b>Che cosa guardare.</b> La lente, l'inchiostro a due livelli, i due vetri della capsula, il pallone che rotola (solo con <code>animation-timeline</code>), il menu dalla sua origine, il foglio con Pallo che sbircia dopo l'arrivo. <code>?audit</code> conta il vetro: mai più di 2 a riposo, 3 nel peggiore dei passaggi. Con <code>?reduce</code> o «Ferma le animazioni»: la lente salta, le dissolvenze restano, il pallone sparisce.</div>
+  </div></section>
+</main>
+
+<div class="velo" aria-hidden="true"></div>
+<div class="foglio" data-material="glass-thick" role="dialog" aria-modal="true" aria-labelledby="foglio-titolo" hidden>
+  <span class="sbircia" aria-hidden="true"></span>
+  <h2 id="foglio-titolo" tabindex="-1">Aggiungi alla schermata Home</h2>
+  <p class="nota">Beach Diary si apre a tutto schermo, come un'app.</p>
+  <ol><li>Tocca <b>⋯</b> in basso a destra.</li><li>Tocca <b>Condividi</b>, poi <b>Aggiungi alla schermata Home</b>.</li><li>Conferma con <b>Aggiungi</b>.</li></ol>
+  <button type="button" class="ui-button state" data-variant="neutral" data-size="lg" data-chiude style="width:100%">Ho capito</button>
+  <button type="button" class="chiudi state" data-chiude aria-label="Chiudi"><svg class="i" aria-hidden="true"><use href="#i-close"/></svg></button>
+</div>
+
+<script src="./_lab.js"></script>
+<script src="./_landing.js"></script>
+<script>
+Landing.pronto(() => {
+  'use strict'
+  const $ = (s) => document.querySelector(s)
+  const capsula = $('.capsula')
+  const lente = $('.lente')
+  const tabs = [...document.querySelectorAll('.tab')]
+  const guida = $('.guida')
+  const menu = $('#guida-menu')
+  const velo = $('.velo')
+  const foglio = $('.foglio')
+  $('.guida-figura').innerHTML = Landing.pallo('occhiolino', 64)
+  foglio.querySelector('.sbircia').innerHTML = Landing.pallo('sbircia', 72)
+
+  // ----------------------------------------------- La sezione corrente (40%)
+  const TAB = { diario: 0, live: 1, numeri: 2, wrapped: 3 }
+  let corrente = null
+  const decidi = Landing.arbitro(() => {
+    const i = TAB[corrente]
+    tabs.forEach((t, k) => (k === i ? t.setAttribute('aria-current', 'true') : t.removeAttribute('aria-current')))
+    if (i === undefined) { lente.dataset.nascosta = ''; return }
+    if (lente.dataset.nascosta !== undefined) {
+      // ML12: si mette sulla tab nuova senza transizione (è invisibile), poi compare.
+      lente.dataset.salta = ''
+      lente.style.setProperty('--i', i)
+      void lente.offsetWidth
+      delete lente.dataset.nascosta
+      setTimeout(() => delete lente.dataset.salta, Lab.dur('entrata'))
+      return
+    }
+    lente.style.setProperty('--i', i)
+  })
+  const ioSez = new IntersectionObserver((voci) => {
+    for (const v of voci) if (v.isIntersecting) corrente = v.target.id
+    decidi()
+  }, { rootMargin: '-40% 0px -59% 0px' })
+  document.querySelectorAll('main > section').forEach((s) => ioSez.observe(s))
+
+  // ---------------------------- Il materiale: la sezione sotto la capsula
+  // Una fascia dell'1% sulla linea mediana della capsula (§L9.1).
+  function osservaMateriale() {
+    const r = capsula.getBoundingClientRect() // una volta, e al resize
+    const mezzo = (r.top + r.height / 2) / innerHeight
+    const sopra = Math.max(0, mezzo * 100 - 0.5).toFixed(2)
+    const sotto = Math.max(0, 100 - mezzo * 100 - 0.5).toFixed(2)
+    const io = new IntersectionObserver((voci) => {
+      for (const v of voci) if (v.isIntersecting) cambiaFondo(v.target.dataset.fondo)
+    }, { rootMargin: `-${sopra}% 0px -${sotto}% 0px` })
+    document.querySelectorAll('main > section').forEach((s) => io.observe(s))
+    return io
+  }
+  let inchiostro = 0
+  function cambiaFondo(f) {
+    if (capsula.dataset.sopra === f) return
+    capsula.dataset.sopra = f
+    clearTimeout(inchiostro)
+    // A metà dello scambio dei vetri; col fermo lo scambio è istantaneo, e l'inchiostro anche.
+    inchiostro = setTimeout(() => { capsula.dataset.inchiostro = f }, Landing.movimentoFermo() ? 0 : Lab.dur('svelto') / 2)
+  }
+  let ioMat = osservaMateriale()
+  addEventListener('resize', () => { ioMat.disconnect(); ioMat = osservaMateriale(); giri() })
+
+  // Tab: salto istantaneo, focus all'h2 (§L9.2).
+  for (const a of document.querySelectorAll('.tab, .menu a')) {
+    a.addEventListener('click', (e) => { e.preventDefault(); chiudiMenu(false); Landing.salta(a.getAttribute('href').slice(1)) })
+  }
+
+  // ----------------------------- Il pallone: giri = corsa ÷ (π × diametro)
+  function giri() {
+    const av = $('.avanza')
+    if (!av || getComputedStyle(av).display === 'none') return
+    const d = parseFloat(getComputedStyle($('.avanza-palla')).width)
+    av.style.setProperty('--giri', ((av.clientWidth - d) / (Math.PI * d)).toFixed(3))
+  }
+  giri()
+
+  // ------------------------------------------------ Il menu della guida
+  let fineMenu = 0
+  function apriMenu() {
+    clearTimeout(fineMenu)
+    menu.hidden = false
+    menu.inert = false
+    menu.dataset.material = 'glass-thick'
+    void menu.offsetWidth // la transizione parte dallo stato chiuso
+    menu.dataset.aperto = ''
+    guida.setAttribute('aria-expanded', 'true')
+    menu.querySelector('a').focus() // a t0 (§3.5)
+  }
+  function chiudiMenu(focusAPallo) {
+    if (menu.dataset.aperto === undefined) return
+    delete menu.dataset.aperto
+    guida.setAttribute('aria-expanded', 'false')
+    menu.inert = true
+    menu.dataset.material = 'frost' // chi esce smette di sfocare (§3.4)
+    if (focusAPallo) guida.focus()
+    fineMenu = setTimeout(() => { menu.hidden = true; menu.dataset.material = 'glass-thick' }, Lab.dur('svelto') + 80)
+  }
+  guida.addEventListener('click', () => {
+    Landing.boing(guida.querySelector('svg'))
+    menu.dataset.aperto === undefined ? apriMenu() : chiudiMenu(false)
+  })
+  addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return
+    if (foglio.dataset.aperto !== undefined) return chiudiFoglio()
+    if (menu.dataset.aperto !== undefined) chiudiMenu(true)
+  })
+  addEventListener('pointerdown', (e) => { if (!menu.contains(e.target) && !guida.contains(e.target)) chiudiMenu(false) })
+  menu.addEventListener('focusout', (e) => { if (!menu.contains(e.relatedTarget) && e.relatedTarget !== guida && e.relatedTarget) chiudiMenu(false) })
+
+  // ------------------------------------------------------------ Il foglio
+  let opener = null
+  let fineFoglio = 0
+  const restoDellaPagina = () => [document.querySelector('main'), $('.barra'), $('.piu'), guida, menu]
+  function apriFoglio(da) {
+    opener = da
+    // Dal menu: il menu passa a frost a t0 ed esce MENTRE il foglio sale.
+    chiudiMenu(false)
+    clearTimeout(fineFoglio)
+    foglio.hidden = false
+    foglio.dataset.material = 'glass-thick'
+    void foglio.offsetWidth
+    foglio.dataset.aperto = ''
+    velo.dataset.aperto = ''
+    document.documentElement.dataset.bloccato = ''
+    for (const n of restoDellaPagina()) n.inert = true
+    foglio.querySelector('h2').focus({ preventScroll: true }) // titolo, a t0
+  }
+  function chiudiFoglio() {
+    if (foglio.dataset.aperto === undefined) return
+    delete foglio.dataset.aperto
+    delete velo.dataset.aperto
+    foglio.dataset.material = 'frost'
+    delete document.documentElement.dataset.bloccato
+    for (const n of restoDellaPagina()) n.inert = n === menu
+    // Il focus torna a chi l'ha aperto; se era una voce del menu ormai chiuso, a Pallo.
+    ;(opener && !menu.contains(opener) ? opener : guida).focus({ preventScroll: true })
+    fineFoglio = setTimeout(() => { foglio.hidden = true; foglio.dataset.material = 'glass-thick' }, Lab.dur('svelto') + 80)
+  }
+  document.querySelector('[data-apre="foglio"]').addEventListener('click', (e) => apriFoglio(e.currentTarget))
+  foglio.addEventListener('click', (e) => { if (e.target.closest('[data-chiude]')) chiudiFoglio() })
+  velo.addEventListener('click', chiudiFoglio)
+  foglio.addEventListener('keydown', (e) => {
+    if (e.key !== 'Tab') return
+    const f = [...foglio.querySelectorAll('button')]
+    if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus() }
+    else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus() }
+  })
+  menu.inert = true
+})
+</script>
+</body>
+</html>

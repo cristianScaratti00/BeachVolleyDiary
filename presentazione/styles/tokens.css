@@ -353,6 +353,31 @@
     --dur-bolla: 4000ms;
     --stagger-narrativo: var(--rise-step);
     --stagger-max: 8;
+    /* Le due molle campionate in `linear()`, come `--ease-molla` dell'app
+       (MOTION.md, Parte L §L2): girano sul compositor come una transizione
+       CSS o una Web Animation, senza una libreria di molle. I campioni e le
+       durate li ricalcola landing.tokens.test.ts dalla forma chiusa.
+         SALTO   k 300, c 26, m 1 (ζ 0.75): supera il segno del 2.8% e
+                 torna; ferma entro il 2‰ della corsa a 510ms.
+         CADUTA  k 500, c 24, m 1 (ζ 0.54), RIFLESSA: il superamento
+                 torna in alto, cioè rimbalza invece di affondare nella
+                 mappa. Tocca terra a 113ms e a 280ms; ferma entro l'1%
+                 (un quarto di px su 24) a 400ms. */
+    --dur-salto: 510ms;
+    --ease-salto: linear(0, 0.037, 0.128, 0.247, 0.376, 0.503, 0.618, 0.719, 0.804, 0.872, 0.924, 0.963, 0.991, 1.009, 1.021, 1.026, 1.028, 1.027, 1.025, 1.022, 1.018, 1.015, 1.011, 1.008, 1.006, 1.004, 1.002, 1.001, 1, 1, 1);
+    --dur-caduta: 400ms;
+    --ease-caduta: linear(0, 0.084 5%, 0.277 10%, 0.509 15%, 0.729 20%, 0.908 25%, 1 28.47%, 0.968 30%, 0.895 35%, 0.866 40%, 0.869 45%, 0.891 50%, 0.922 55%, 0.953 60%, 0.979 65%, 0.999 70%, 1 70.31%, 0.989 75%, 0.983 80%, 0.982 85%, 0.984 90%, 0.988 95%, 1);
+    /* Da dove cade un pin (LM5). */
+    --caduta-y: -24px;
+  }
+
+  /* Senza `linear()` (Safari < 17.2) le due molle diventano la curva
+     standard, come fa l'app con MOLLA. */
+  @supports not (transition-timing-function: linear(0, 1)) {
+    :root {
+      --ease-salto: var(--ease-standard);
+      --ease-caduta: var(--ease-standard);
+    }
   }
 
   /* -------------------------------------------------------- Breakpoint */

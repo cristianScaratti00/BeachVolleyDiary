@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>L3 · Telefono, Wrapped, Storia · laboratorio della landing</title>
+<link rel="stylesheet" href="../../src/styles/tokens.css">
+<link rel="stylesheet" href="../../src/styles/materials.css">
+<link rel="stylesheet" href="../../presentazione/styles/tokens.css">
+<link rel="stylesheet" href="./_lab.css">
+<link rel="stylesheet" href="./_landing.css">
+<style>
+@layer components {
+  .campo:first-of-type { min-height: 70svh; }
+
+  /* ===================================================== Telefono (LM3)
+     Base (fermo, niente JS, schermi bassi): i capitoli in fila, ognuno con
+     la sua schermata. Viva: una cornice sticky con le quattro schermate
+     impilate (copie aria-hidden); quelle in linea si nascondono.          */
+  .capitoli { display: grid; gap: var(--space-12); margin-top: var(--section-object-gap); }
+  .capitolo h3 { font: var(--type-display-chapter); letter-spacing: var(--track-display-chapter); color: var(--text-strong); }
+  .capitolo p { font: var(--type-body); color: var(--text); margin-top: var(--space-2); max-width: var(--measure-body); }
+  .capitolo .in-linea { margin-top: var(--space-4); }
+  .telefono-fascia { display: none; }
+
+  .telefono { width: calc(var(--phone-screen-w) + 2 * var(--phone-bezel)); padding: var(--phone-bezel); border-radius: var(--phone-r); background: var(--phone-color); }
+  .schermo { position: relative; aspect-ratio: 390 / 844; border-radius: var(--phone-screen-r); overflow: hidden; background: var(--fill); }
+  .pagina { position: absolute; inset: 0; opacity: 0; }
+  .pagina > img { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; }
+  .pagina[data-pronta] > img { opacity: 1; transition: opacity var(--dur-svelto) var(--ease-standard); }
+  .pagina[data-pronta][data-subito] > img { transition: none; }
+  .pagina[data-errore] > img { visibility: hidden; }
+
+  /* Lo skeleton con la forma VERA della schermata (§L6): compare a 150ms,
+     respira da 600ms su un elemento annidato (due animation sullo stesso
+     nodo si annullano). Errore: fermo a .75, niente icona rotta.          */
+  .scheletro { position: absolute; inset: 0; background: var(--bg); opacity: 0; }
+  .pagina[data-attesa] .scheletro { opacity: 1; transition: opacity var(--dur-entrata) var(--ease-standard) var(--delay-skeleton); }
+  .pagina[data-attesa] .respiro { animation: respiro var(--dur-respiro) var(--ease-respiro) var(--delay-respiro) infinite alternate both; position: absolute; inset: 0; }
+  .pagina[data-errore] .respiro, :root.rm .respiro, :root[data-movimento="fermo"] .respiro { animation: none !important; opacity: 0.75; }
+  .scheletro i { position: absolute; display: block; background: var(--fill); border-radius: 6px; }
+
+  /* Lo scambio: la schermata nuova passa in cima e fa la dissolvenza; quella
+     sotto resta piena finché la nuova non lo è. */
+  .telefono-fascia .pagina[data-prima] { opacity: 1; z-index: 1; transition: opacity var(--dur-entrata) var(--ease-standard); }
+  .telefono-fascia .pagina[data-attiva] { opacity: 1; z-index: 2; transition: opacity var(--dur-entrata) var(--ease-standard); }
+  .capitolo .pagina { position: relative; opacity: 1; }
+  .capitolo .schermo { width: var(--phone-screen-w); }
+
+  @media (min-height: 640px) and (min-width: 360px) {
+    :root:not(.rm):not([data-movimento="fermo"]) #diario[data-viva] .telefono-fascia {
+      display: block; position: sticky; top: var(--scroll-pad-top); z-index: 2;
+      padding-bottom: var(--phone-band-fade);
+      background: linear-gradient(to bottom, var(--field-paper) calc(100% - var(--phone-band-fade)), transparent);
+    }
+    :root:not(.rm):not([data-movimento="fermo"]) #diario[data-viva] .telefono { margin: 0 auto; }
+    :root:not(.rm):not([data-movimento="fermo"]) #diario[data-viva] .in-linea { display: none; }
+    :root:not(.rm):not([data-movimento="fermo"]) #diario[data-viva] .capitolo { min-height: 60svh; }
+  }
+
+  /* ================================================ Wrapped bloccato (LM8)
+     Il blocco è NATIVO o non c'è (RL1). L'altezza la decide il CSS: 1px di
+     scroll = 1px di slide; nessun calcolo per fotogramma.                 */
+  .pista { --n-slide: 3; }
+  .slides { list-style: none; margin: var(--section-object-gap) calc(-1 * var(--gutter)) 0; padding: 0 var(--gutter); display: flex; gap: var(--slide-gap); overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: var(--gutter); }
+  .slide { flex: none; width: var(--slide-w-manual); aspect-ratio: 9 / 16; border-radius: var(--slide-r); box-shadow: var(--slide-ring); padding: var(--slide-pad); display: flex; flex-direction: column; justify-content: center; gap: 10px; scroll-snap-align: start; }
+  .slide .occ { font: var(--type-slide-eyebrow); }
+  .slide .num { font: var(--type-slide-headline); letter-spacing: var(--track-slide-headline); }
+  .slide .tit { font: var(--type-slide-title); letter-spacing: var(--track-slide-title); }
+  .slide[data-palette="arancio"] { background: var(--slide-orange-bg); color: var(--slide-orange-fg); }
+  .slide[data-palette="inchiostro"] { background: var(--slide-ink-bg); color: var(--slide-ink-fg); }
+  .slide[data-palette="inchiostro"] .num { color: var(--slide-ink-accent); }
+  .slide[data-palette="sabbia"] { background: var(--slide-sand-bg); color: var(--slide-sand-fg); }
+  .pista, .blocco { display: contents; }
+  :root:not(.rm):not([data-movimento="fermo"]) #wrapped[data-viva] .pista { display: block; }
+
+  @supports (animation-timeline: view()) and (animation-range: contain 0%) {
+    @media (min-height: 600px) {
+      /* La pista è alta un viewport più la corsa delle slide; dentro, il
+         blocco sticky. Il titolo della sezione scorre via sopra, e resta il
+         bersaglio del focus nei salti. */
+      :root:not(.rm):not([data-movimento="fermo"]) #wrapped[data-viva] .pista {
+        view-timeline: --wrapped block;
+        --wrapped-corsa: calc(var(--n-slide) * (var(--slide-w) + var(--slide-gap)) - var(--slide-gap) - 100cqw);
+        height: calc(100svh + var(--n-slide) * (var(--slide-w) + var(--slide-gap)) - var(--slide-gap) - (100vw - 2 * var(--gutter)));
+        margin-bottom: calc(-1 * var(--section-pad));
+      }
+      :root:not(.rm):not([data-movimento="fermo"]) #wrapped[data-viva] .blocco {
+        display: flex; flex-direction: column; justify-content: center;
+        position: sticky; top: 0; height: 100svh; container-type: inline-size; overflow: hidden;
+      }
+      :root:not(.rm):not([data-movimento="fermo"]) #wrapped[data-viva] .slides {
+        overflow: visible; scroll-snap-type: none; margin-top: 0;
+        animation: sfoglia linear both; animation-timeline: --wrapped; animation-range: contain 0% contain 100%;
+      }
+      :root:not(.rm):not([data-movimento="fermo"]) #wrapped[data-viva] .slide { width: var(--slide-w); height: var(--slide-h); aspect-ratio: auto; }
+    }
+  }
+  @keyframes sfoglia { from { transform: none; } to { transform: translateX(calc(-1 * var(--wrapped-corsa))); } }
+
+  /* ============================================== Storia a ventaglio (LM9)
+     Base e fermo: affiancate. Viva: impilate al centro, poi a ventaglio in
+     transform (MOLLA, sinistra poi destra a 50ms).                       */
+  .storia { display: flex; gap: var(--slide-gap); justify-content: center; margin-top: var(--section-object-gap); }
+  .storia .carta { width: calc(var(--story-w) * 0.62); aspect-ratio: 9 / 16; border-radius: var(--radius-card); box-shadow: 0 0 0 var(--story-keyline) var(--field-ink); display: grid; place-items: center; font: var(--type-caption-1); text-align: center; }
+  .carta[data-p="arancio"] { background: var(--slide-orange-bg); color: var(--slide-orange-fg); }
+  .carta[data-p="inchiostro"] { background: var(--slide-ink-bg); color: var(--slide-ink-fg); box-shadow: 0 0 0 var(--story-keyline) var(--field-ink), var(--slide-ring); }
+  .carta[data-p="sabbia"] { background: var(--slide-sand-bg); color: var(--slide-sand-fg); }
+  :root:not(.rm):not([data-movimento="fermo"]) .storia[data-viva] { display: grid; justify-content: center; }
+  :root:not(.rm):not([data-movimento="fermo"]) .storia[data-viva] .carta { grid-area: 1 / 1; width: var(--story-w); transition: transform var(--dur-molla) var(--ease-molla); transition-delay: calc(var(--i, 0) * var(--stagger-narrativo)); }
+  :root:not(.rm):not([data-movimento="fermo"]) .storia[data-viva] .carta[data-p="inchiostro"] { z-index: 1; }
+  :root:not(.rm):not([data-movimento="fermo"]) .storia[data-viva]:not([data-armato]) .carta[data-p="arancio"] { transform: translateX(-62%) rotate(calc(-1 * var(--story-tilt))); }
+  :root:not(.rm):not([data-movimento="fermo"]) .storia[data-viva]:not([data-armato]) .carta[data-p="sabbia"] { transform: translateX(62%) rotate(var(--story-tilt)); }
+  .storia[data-subito] .carta { transition: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="ls-strumenti" aria-label="Strumenti della demo">
+  <button type="button" data-comando="fermo" aria-pressed="false">Ferma le animazioni</button>
+  <button type="button" id="da-capo">Da capo</button>
+</div>
+<main>
+  <section id="inizio" class="campo" data-campo="tramonto" data-surface="dark" aria-labelledby="t-inizio"><div class="dentro">
+    <h2 id="t-inizio" tabindex="-1">Scorri</h2>
+    <p class="frase">Le schermate arrivano lente apposta: la prima subito (niente skeleton), la seconda dopo 1,2s (skeleton a 150ms, respiro a 600ms), la terza dopo 3s, la quarta fallisce (forme ferme, niente icona rotta).</p>
+  </div></section>
+
+  <section id="diario" class="campo" data-campo="carta" aria-labelledby="t-diario"><div class="dentro">
+    <h2 id="t-diario" tabindex="-1">Il diario in tasca</h2>
+    <div class="telefono-fascia" aria-hidden="true"><div class="telefono"><div class="schermo" id="cornice"></div></div></div>
+    <div class="capitoli">
+      <article class="capitolo" data-k="0"><h3>La Home ti dice come va</h3><p>Una frase sola, dai tuoi numeri. Sotto, le partite vinte, i punti di scarto e un consiglio di Pallo.</p><div class="in-linea"></div></article>
+      <article class="capitolo" data-k="1"><h3>Tornei e mappa delle conquiste</h3><p>Ogni città dove hai giocato diventa un pin: vinta, podio o giocata.</p><div class="in-linea"></div></article>
+      <article class="capitolo" data-k="2"><h3>Il diario, mese per mese</h3><p>Tornei, partite e foto in fila.</p><div class="in-linea"></div></article>
+      <article class="capitolo" data-k="3"><h3>Compagni, e chi c'è oggi</h3><p>Con chi vinci di più, partita per partita.</p><div class="in-linea"></div></article>
+    </div>
+  </div></section>
+
+  <section id="wrapped" class="campo" data-campo="inchiostro" data-surface="dark" aria-labelledby="t-wrapped">
+    <div class="dentro testa-wrapped">
+      <h2 id="t-wrapped" tabindex="-1">Beach Wrapped</h2>
+      <p class="frase">A ottobre la tua stagione diventa una storia.</p>
+    </div>
+    <div class="pista"><div class="blocco">
+      <ol class="slides" role="region" aria-label="Slide di Beach Wrapped" tabindex="0">
+        <li class="slide" data-palette="arancio"><span class="occ">Vittorie totali</span><span class="num">31</span><span class="tit">Una stagione da ricordare</span></li>
+        <li class="slide" data-palette="inchiostro"><span class="occ">Striscia vincente</span><span class="num">6</span><span class="tit">di fila, a luglio</span></li>
+        <li class="slide" data-palette="sabbia"><span class="occ">Miglior compagno</span><span class="num">Luca</span><span class="tit">18 vittorie insieme</span></li>
+      </ol>
+    </div></div>
+  </section>
+
+  <section id="storia" class="campo" data-campo="inchiostro" data-surface="dark" aria-labelledby="t-storia"><div class="dentro">
+    <h2 id="t-storia" tabindex="-1">E ogni torneo, una Storia</h2>
+    <figure class="storia" data-viva>
+      <div class="carta" data-p="arancio" style="--i:0">Tabellone</div>
+      <div class="carta" data-p="inchiostro">Foto</div>
+      <div class="carta" data-p="sabbia" style="--i:1">Polaroid</div>
+    </figure>
+    <div class="lab-note ls-note"><b>Che cosa guardare.</b> Il telefono cambia schermata quando il testo di un capitolo passa la linea al 72% (50% da 900px): la nuova sale in dissolvenza sopra la vecchia. Wrapped si blocca e lo scroll sfoglia le slide (timeline nativa: senza, riga a mano). La Storia si apre a ventaglio una volta per sessione. «Ferma le animazioni» a metà pagina: telefono e Wrapped tornano in linea, e la sezione che avevi davanti resta lì (riaggancio, §L3.3).</div>
+  </div></section>
+</main>
+
+<script src="./_lab.js"></script>
+<script src="./_landing.js"></script>
+<script>
+Landing.pronto(() => {
+  'use strict'
+  const $ = (s) => document.querySelector(s)
+  $('#da-capo').addEventListener('click', () => { sessionStorage.removeItem('bvd_landing_visti'); location.reload() })
+
+  // Schermate finte (le vere sono WebP dall'anteprima, ⟂ I) e forme dello skeleton.
+  const SCHERMI = [
+    { titolo: 'Stai vincendo più di prima.', forme: [[6, 8, 70, 4], [6, 16, 88, 20], [6, 40, 42, 16], [52, 40, 42, 16], [6, 88, 88, 7]] },
+    { titolo: 'Tornei', forme: [[6, 8, 40, 4], [6, 16, 88, 36], [6, 56, 88, 7], [6, 66, 88, 7], [6, 88, 88, 7]] },
+    { titolo: 'Diario', forme: [[6, 8, 50, 4], [6, 16, 30, 3], [6, 22, 88, 22], [6, 50, 88, 22], [6, 88, 88, 7]] },
+    { titolo: 'Compagni', forme: [[6, 8, 50, 4], [6, 16, 42, 26], [52, 16, 42, 26], [6, 46, 88, 14], [6, 88, 88, 7]] },
+  ]
+  const finta = (t, k) => 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844"><rect width="390" height="844" fill="#F6F6F4"/><text x="24" y="96" font-family="Arial" font-weight="800" font-size="30" fill="#1C1C1E">${t}</text><rect x="24" y="${140 + k * 6}" width="342" height="190" rx="22" fill="#FFFFFF" stroke="#E2E2DE"/><rect x="24" y="360" width="164" height="140" rx="22" fill="#FFFFFF" stroke="#E2E2DE"/><rect x="202" y="360" width="164" height="140" rx="22" fill="#FF6B1A"/><rect x="24" y="742" width="342" height="64" rx="32" fill="#FFFFFF" stroke="#E2E2DE"/></svg>`)
+  const ATTESA = [60, 1200, 3000, -1] // ms; -1 = fallisce
+  function pagina(k, conAttesa) {
+    const p = document.createElement('div')
+    p.className = 'pagina'
+    p.innerHTML = '<div class="scheletro" aria-hidden="true"><div class="respiro">' + SCHERMI[k].forme.map(([x, y, w, h]) => `<i style="left:${x}%;top:${y}%;width:${w}%;height:${h}%"></i>`).join('') + '</div></div><img alt="" width="390" height="844" decoding="async">'
+    const img = p.querySelector('img')
+    if (!conAttesa) { img.src = finta(SCHERMI[k].titolo, k); p.dataset.pronta = ''; p.dataset.subito = ''; return p }
+    // Nella landing vera: `data-attesa` se l'immagine non è `complete` quando la cornice è in vista.
+    p.dataset.attesa = ''
+    const t0 = performance.now()
+    img.addEventListener('load', () => {
+      if (performance.now() - t0 < 150) p.dataset.subito = '' // prima dei 150ms: niente dissolvenza
+      p.dataset.pronta = ''
+      setTimeout(() => delete p.dataset.attesa, Lab.dur('svelto'))
+    })
+    img.addEventListener('error', () => { p.dataset.errore = '' })
+    if (ATTESA[k] < 0) setTimeout(() => { img.src = 'non-esiste.webp' }, 800)
+    else setTimeout(() => { img.src = finta(SCHERMI[k].titolo, k) }, ATTESA[k])
+    return p
+  }
+  const cornice = $('#cornice')
+  const pagine = SCHERMI.map((_, k) => cornice.appendChild(pagina(k, true)))
+  document.querySelectorAll('.in-linea').forEach((n, k) => {
+    const s = document.createElement('div'); s.className = 'schermo'; s.appendChild(pagina(k, false)); n.appendChild(s)
+    n.querySelector('img').alt = 'Schermata: ' + SCHERMI[k].titolo
+  })
+  $('#diario').dataset.viva = ''
+  $('#wrapped').dataset.viva = ''
+
+  // --------------------------------------------- Il capitolo sulla linea
+  let attiva = -1
+  function mostra(k) {
+    if (k === attiva) return
+    pagine.forEach((p) => delete p.dataset.prima)
+    if (attiva >= 0) { pagine[attiva].dataset.prima = ''; delete pagine[attiva].dataset.attiva }
+    pagine[k].dataset.attiva = ''
+    const prima = attiva
+    attiva = k
+    // Quando la nuova è piena, quella sotto scende a 0 (senza transizione).
+    setTimeout(() => { if (attiva === k && prima >= 0) delete pagine[prima].dataset.prima }, Lab.dur('entrata'))
+  }
+  mostra(0)
+  function osservaCapitoli() {
+    const linea = innerWidth >= 900 ? 50 : 72 // LINEA_CAPITOLO
+    const io = new IntersectionObserver((voci) => {
+      for (const v of voci) if (v.isIntersecting) mostra(Number(v.target.dataset.k))
+    }, { rootMargin: `-${linea - 0.5}% 0px -${100 - linea - 0.5}% 0px` })
+    document.querySelectorAll('.capitolo').forEach((c) => io.observe(c))
+    return io
+  }
+  let ioCap = osservaCapitoli()
+  addEventListener('resize', () => { ioCap.disconnect(); ioCap = osservaCapitoli() })
+
+  // ---------------------------------------- La Storia: «una volta» (RL3)
+  const storia = $('.storia')
+  Landing.arma(storia, {
+    chiave: 'storia', soglia: 0.5,
+    prepara: () => { storia.dataset.subito = ''; void storia.offsetWidth; delete storia.dataset.subito },
+    scatta: () => {},             // togliere data-armato basta: il CSS apre il ventaglio
+    finale: () => { storia.dataset.subito = ''; requestAnimationFrame(() => delete storia.dataset.subito) },
+  })
+
+  // ------------------------------------ Riaggancio quando cambia il layout
+  // Prima del cambio: la sezione sotto la linea del 40% e la distanza del suo
+  // titolo dalla cima. Dopo: scrollBy istantaneo della differenza (§L3.3).
+  let ancora = null
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('[data-comando="fermo"]')) return
+    const linea = innerHeight * 0.4
+    const s = [...document.querySelectorAll('main > section')].find((x) => { const r = x.getBoundingClientRect(); return r.top <= linea && r.bottom > linea })
+    if (s) ancora = { h: s.querySelector('h2'), top: s.querySelector('h2').getBoundingClientRect().top }
+  }, true)
+  Landing.alCambioDelMovimento(() => {
+    if (!ancora) return
+    const { h, top } = ancora
+    ancora = null
+    const delta = h.getBoundingClientRect().top - top
+    if (Math.abs(delta) > 1) scrollBy({ top: delta, behavior: 'instant' })
+  })
+})
+</script>
+</body>
+</html>

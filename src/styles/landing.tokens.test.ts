@@ -403,3 +403,73 @@ describe('landing — la scala da manifesto', () => {
     expect(misura(LANDING.get('type-display-hero')!)).toBeGreaterThan(misura(APP.get('type-large-title')!))
   })
 })
+
+// ============================================================================
+// MOTION.md, Parte L §L2: SALTO e CADUTA non sono curve disegnate a occhio ma
+// molle (rigidità k, smorzamento c, massa m) campionate in `linear()`. Qui si
+// ricalcolano dalla forma chiusa: se qualcuno ritocca un campione o la durata,
+// la curva smette di essere quella molla e il test cade.
+describe('landing — le molle SALTO e CADUTA', () => {
+  /** Posizione (0 → 1) di una molla sottosmorzata partita da ferma, e quando si ferma entro `eps`. */
+  const molla = (k: number, c: number, m: number) => {
+    const w0 = Math.sqrt(k / m)
+    const z = c / (2 * Math.sqrt(k * m))
+    const wd = w0 * Math.sqrt(1 - z * z)
+    const x = (t: number) => 1 - Math.exp(-z * w0 * t) * (Math.cos(wd * t) + ((z * w0) / wd) * Math.sin(wd * t))
+    const inviluppo = Math.sqrt(1 + ((z * w0) / wd) ** 2)
+    return { z, wd, w0, x, ferma: (eps: number) => Math.log(inviluppo / eps) / (z * w0) }
+  }
+  /** I punti di `linear(…)` con la loro posizione (0–1); quelli senza posizione si distribuiscono come dice CSS. */
+  const punti = (v: string) => {
+    const corpo = v.match(/^linear\((.*)\)$/)![1]
+    const pts = corpo.split(',').map((s) => {
+      const [val, pct] = s.trim().split(/\s+/)
+      return { v: Number(val), p: pct === undefined ? NaN : parseFloat(pct) / 100 }
+    })
+    pts[0].p = Number.isNaN(pts[0].p) ? 0 : pts[0].p
+    pts[pts.length - 1].p = Number.isNaN(pts[pts.length - 1].p) ? 1 : pts[pts.length - 1].p
+    for (let i = 1; i < pts.length; i++) {
+      if (!Number.isNaN(pts[i].p)) continue
+      let j = i
+      while (Number.isNaN(pts[j].p)) j++
+      const a = pts[i - 1].p
+      const b = pts[j].p
+      for (let q = i; q < j; q++) pts[q].p = a + ((b - a) * (q - i + 1)) / (j - i + 1)
+    }
+    return pts
+  }
+  const ms = (v: string) => parseFloat(v)
+
+  it('SALTO è la molla 300/26/1 (ζ 0.75), ferma entro il 2‰ in --dur-salto', () => {
+    const s = molla(300, 26, 1)
+    expect(s.z).toBeCloseTo(0.75, 2)
+    const durata = s.ferma(0.002)
+    expect(Math.abs(ms(T('dur-salto')) - durata * 1000)).toBeLessThanOrEqual(5)
+    for (const { v, p } of punti(T('ease-salto'))) expect(Math.abs(v - (p === 1 ? 1 : s.x(p * durata)))).toBeLessThanOrEqual(0.002)
+    // Il superamento che fa «atterrare» Pallo: 2.8% oltre il segno, non di più.
+    expect(Math.max(...punti(T('ease-salto')).map((q) => q.v))).toBe(1.028)
+  })
+
+  it('CADUTA è la molla 500/24/1 (ζ 0.54) riflessa: rimbalza, non affonda', () => {
+    const c = molla(500, 24, 1)
+    expect(c.z).toBeCloseTo(0.54, 2)
+    const durata = c.ferma(0.01)
+    expect(Math.abs(ms(T('dur-caduta')) - durata * 1000)).toBeLessThanOrEqual(5)
+    const rimbalzo = (t: number) => (c.x(t) > 1 ? 2 - c.x(t) : c.x(t))
+    const pts = punti(T('ease-caduta'))
+    for (const { v, p } of pts) expect(Math.abs(v - (p === 1 ? 1 : rimbalzo(p * durata)))).toBeLessThanOrEqual(0.002)
+    // Mai oltre il punto d'arrivo: il pin non scende sotto la sua città.
+    expect(Math.max(...pts.map((q) => q.v))).toBe(1)
+    // I due contatti con la mappa sono punti della curva, non cadono fra due campioni.
+    const primo = (Math.PI - Math.atan(c.wd / (c.z * c.w0))) / c.wd
+    for (const t of [primo, primo + Math.PI / c.wd]) {
+      expect(pts.some((q) => q.v === 1 && Math.abs(q.p * durata - t) < 0.0005)).toBe(true)
+    }
+  })
+
+  it('senza linear() le due molle ripiegano sulla curva standard, come MOLLA nell\'app', () => {
+    const ripiego = dichiarazioni(blocco(blocco(landingCss, '@supports not (transition-timing-function: linear(0, 1))'), ':root'))
+    expect(ripiego.get('ease-salto')).toBe('var(--ease-standard)')
+    expect(ripiego.get('ease-caduta')).toBe('var(--ease-standard)')
+  })
+})

@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>L5 · Effetti «una volta» · laboratorio della landing</title>
+<link rel="stylesheet" href="../../src/styles/tokens.css">
+<link rel="stylesheet" href="../../src/styles/materials.css">
+<link rel="stylesheet" href="../../presentazione/styles/tokens.css">
+<link rel="stylesheet" href="./_lab.css">
+<link rel="stylesheet" href="./_landing.css">
+<style>
+@layer components {
+  .campo { min-height: 100svh; }
+
+  /* ======================================================= Numeri (LM7)
+     Un contachilometri ridotto (il vero è Odometro.ts, ⟂ E): per cifra una
+     striscia 0–9 che scorre in translateY. Armato = a zero, senza
+     transizione; scatta = al valore, in RACCONTO. Il valore vero è sempre
+     nel testo nascosto.                                                  */
+  .poster { --lh: 0.86em; font: var(--type-num-poster); letter-spacing: var(--track-num-poster); color: var(--text-strong); display: flex; align-items: flex-start; margin-top: var(--section-object-gap); }
+  .poster .pct { color: var(--text-accent); }
+  .odo { display: inline-flex; height: var(--lh); line-height: var(--lh); font-variant-numeric: tabular-nums; }
+  .odo .d { display: inline-block; height: var(--lh); clip-path: inset(0 -0.2em); overflow-y: clip; }
+  .odo .s { display: block; transform: translateY(calc(var(--k, 0) * -1 * var(--lh))); transition: transform var(--dur-racconto) var(--ease-racconto); }
+  .odo .s > span { display: block; height: var(--lh); }
+  [data-subito] .odo .s, [data-subito] .barra-vp > i { transition: none !important; }
+  :root.rm .odo .s, :root[data-movimento="fermo"] .odo .s { transition: none; }
+  .etichetta { font: 600 0.9375rem/1.3 var(--font-ui); color: var(--text); margin-top: var(--space-2); }
+  /* La barra vinte/perse: larga quanto il binario, translateX dentro
+     overflow: hidden. NON scaleX: schiaccerebbe le estremità tonde. */
+  .barra-vp { height: 8px; border-radius: 4px; background: var(--rule); overflow: hidden; margin-top: var(--space-4); max-width: 22rem; }
+  .barra-vp > i { display: block; height: 100%; border-radius: 4px; background: var(--text-strong); transform: translateX(calc((var(--v) - 100) * 1%)); transition: transform var(--dur-racconto) var(--ease-racconto); }
+  :root.rm .barra-vp > i, :root[data-movimento="fermo"] .barra-vp > i { transition: none; }
+  .celle { display: grid; grid-template-columns: 1fr 1fr; margin-top: var(--section-object-gap); border-top: 1px solid var(--rule); max-width: 26rem; }
+  .celle > div { --lh: 1em; padding: var(--space-4); border-bottom: 1px solid var(--rule); font: var(--type-num-cell); letter-spacing: var(--track-num-cell); color: var(--text-strong); }
+  .celle > div:nth-child(odd) { border-right: 1px solid var(--rule); }
+  .celle small { display: block; font: 600 0.9375rem/1.3 var(--font-ui); letter-spacing: 0; color: var(--text); margin-top: var(--space-2); }
+
+  /* ========================================================= Pin (LM5)
+     Pin HTML sopra l'SVG della costa (ML11): cadono sul compositor. Due
+     animazioni separate (proprietà diverse): la caduta con CADUTA, la
+     comparsa nel primo quarto, lineare. Sfalsate di 50ms, nord → sud.    */
+  .mappa { position: relative; aspect-ratio: var(--map-ratio); border-radius: var(--radius-card); overflow: hidden; border: 1px solid var(--edge); margin-top: var(--section-object-gap); max-width: 26rem; background: var(--map-sea); }
+  .mappa svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .pin { position: absolute; width: 20px; height: 20px; margin: -10px 0 0 -10px; border-radius: 50%; box-shadow: 0 0 0 var(--pin-halo-w) var(--pin-halo), inset 0 0 0 1.6px var(--pin-line); }
+  .pin[data-p="vinta"] { background: var(--pin-win); }
+  .pin[data-p="podio"] { background: var(--pin-podium); }
+  .pin[data-p="giocata"] { background: var(--pin-rest); width: 16px; height: 16px; margin: -8px 0 0 -8px; }
+  .mappa[data-armato] .pin { opacity: 0; }
+  .mappa[data-cade] .pin { animation: cade-y var(--dur-caduta) var(--ease-caduta) both, cade-o calc(var(--dur-caduta) / 4) linear both; animation-delay: calc(min(var(--i), 7) * var(--stagger-narrativo)); }
+  @keyframes cade-y { from { transform: translateY(var(--caduta-y)); } to { transform: none; } }
+  @keyframes cade-o { from { opacity: 0; } to { opacity: 1; } }
+  .citta { list-style: none; margin: var(--space-4) 0 0; padding: 0; display: grid; gap: var(--space-1); font: var(--type-subhead); color: var(--text); }
+}
+</style>
+</head>
+<body>
+<div class="ls-strumenti" aria-label="Strumenti della demo">
+  <button type="button" data-comando="fermo" aria-pressed="false">Ferma le animazioni</button>
+  <button type="button" id="da-capo">Da capo</button>
+  <a href="?nuova#numeri" style="display:inline-flex;align-items:center;min-height:32px;padding:0 8px;border-radius:999px;background:var(--surface);border:1px solid var(--edge);font:var(--type-caption-1);color:var(--ink)">Apri su #numeri</a>
+</div>
+<main>
+  <section id="inizio" class="campo" data-campo="carta" aria-labelledby="t-inizio"><div class="dentro">
+    <h2 id="t-inizio" tabindex="-1">Scorri</h2>
+    <p class="frase">Numeri e pin sono effetti «una volta per sessione». Si armano solo se all'avvio sono fuori vista (RL3): apri la pagina già su <code>#numeri</code> e i numeri sono fermi al valore, senza salire.</p>
+  </div></section>
+
+  <section id="numeri" class="campo" data-campo="inchiostro" data-surface="dark" aria-labelledby="t-numeri"><div class="dentro">
+    <h2 id="t-numeri" tabindex="-1">I numeri li fa l'app</h2>
+    <div class="blocco-numeri">
+      <div class="poster"><span class="odo" data-v="66" aria-hidden="true"></span><span class="pct" aria-hidden="true">%</span><span class="sr-only">66%</span></div>
+      <p class="etichetta">partite vinte</p>
+      <div class="barra-vp" aria-hidden="true"><i style="--v:66"></i></div>
+      <div class="celle">
+        <div><span class="odo" data-v="81" aria-hidden="true"></span><span class="sr-only">+81</span><small>punti di scarto</small></div>
+        <div><span class="odo" data-v="6" aria-hidden="true"></span><span class="sr-only">6</span><small>serie record</small></div>
+      </div>
+    </div>
+  </div></section>
+
+  <section id="mappa" class="campo" data-campo="carta" aria-labelledby="t-mappa"><div class="dentro">
+    <h2 id="t-mappa" tabindex="-1">La mappa delle conquiste</h2>
+    <figure style="margin:0">
+      <div class="mappa" role="img" aria-labelledby="mappa-didascalia">
+        <svg viewBox="0 0 356 318" aria-hidden="true" focusable="false"><path d="M0 0 H220 C196 60 214 120 236 170 C258 222 270 270 280 318 H0Z" fill="var(--map-land)"/></svg>
+        <span class="pin" data-p="podio" style="--i:0; left:58%; top:12%"></span>
+        <span class="pin" data-p="vinta" style="--i:1; left:61%; top:28%"></span>
+        <span class="pin" data-p="giocata" style="--i:2; left:63%; top:41%"></span>
+        <span class="pin" data-p="vinta" style="--i:3; left:66%; top:55%"></span>
+        <span class="pin" data-p="podio" style="--i:4; left:72%; top:68%"></span>
+        <span class="pin" data-p="giocata" style="--i:5; left:76%; top:82%"></span>
+      </div>
+      <figcaption id="mappa-didascalia" class="nota">Illustrazione: 6 città della costa. Nell'app la mappa è vera, con OpenStreetMap.</figcaption>
+    </figure>
+    <ul class="citta"><li>Milano Marittima · podio</li><li>Cervia · vinta</li><li>Cesenatico · giocata</li><li>Rimini · vinta</li><li>Riccione · podio</li><li>Cattolica · giocata</li></ul>
+    <div class="lab-note ls-note"><b>Che cosa guardare.</b> I numeri salgono insieme (stessa causa: nessuno sfalsamento) in RACCONTO, la barra cresce in translateX dentro il binario. I pin cadono con CADUTA (la molla riflessa: rimbalzano, non affondano), uno ogni 50ms da nord a sud. Ricarica: la sessione li ricorda, e restano fermi. «Da capo» per rivederli.</div>
+  </div></section>
+</main>
+
+<script src="./_lab.js"></script>
+<script src="./_landing.js"></script>
+<script>
+Landing.pronto(() => {
+  'use strict'
+  const $ = (s) => document.querySelector(s)
+  $('#da-capo').addEventListener('click', () => { sessionStorage.removeItem('bvd_landing_visti'); location.href = location.pathname })
+
+  // Le strisce: una colonna per cifra, posizione = la cifra.
+  const odometri = [...document.querySelectorAll('.odo')]
+  for (const o of odometri) {
+    o.innerHTML = String(o.dataset.v).split('').map(() => '<span class="d"><span class="s">' + '0123456789'.split('').map((c) => `<span>${c}</span>`).join('') + '</span></span>').join('')
+  }
+  const scrivi = (zero) => {
+    for (const o of odometri) {
+      const cifre = String(o.dataset.v).split('')
+      o.querySelectorAll('.s').forEach((s, i) => s.style.setProperty('--k', zero ? 0 : cifre[i]))
+    }
+    document.querySelectorAll('.barra-vp > i').forEach((b) => b.style.setProperty('--v', zero ? 0 : 66))
+  }
+  scrivi(false) // l'HTML è lo stato finale
+  const blocco = $('.blocco-numeri')
+  Landing.arma(blocco, {
+    chiave: 'numeri', soglia: 0.5,
+    // Armato fuori vista: a zero SENZA transizione (nessuno lo vede).
+    prepara: () => { blocco.dataset.subito = ''; scrivi(true); void blocco.offsetWidth; delete blocco.dataset.subito },
+    scatta: () => scrivi(false),
+    finale: () => {},
+  })
+
+  const mappa = $('.mappa')
+  Landing.arma(mappa, {
+    chiave: 'mappa', soglia: 0.5,
+    prepara: () => {},
+    scatta: () => { mappa.dataset.cade = '' },
+    finale: () => {},
+  })
+})
+</script>
+</body>
+</html>
