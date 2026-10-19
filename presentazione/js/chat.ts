@@ -93,14 +93,16 @@ function avviaVoci(sezione: HTMLElement) {
 // ------------------------------------------------------------ La chat
 function avviaChat(sezione: HTMLElement) {
   const chat = sezione.querySelector<HTMLElement>('.chat')
-  const log = chat?.querySelector<HTMLOListElement>('.chat-log')
+  const log = chat?.querySelector<HTMLElement>('.chat-log')
+  const righe = chat?.querySelector<HTMLOListElement>('.chat-righe')
   const gruppo = chat?.querySelector<HTMLElement>('.chat-risposte')
   const svg = chat?.querySelector<SVGSVGElement>('.chat-avatar svg.pallo')
-  if (!chat || !log || !gruppo || !svg) return
-  montaChat(chat, log, gruppo, svg)
+  if (!chat || !log || !righe || !gruppo || !svg) return
+  montaChat(chat, log, righe, gruppo, svg)
 }
 
-function montaChat(chat: HTMLElement, log: HTMLOListElement, gruppo: HTMLElement, svg: SVGSVGElement) {
+/** `log` è il contenitore che scorre (role="log"), `righe` l'elenco delle bolle. */
+function montaChat(chat: HTMLElement, log: HTMLElement, righe: HTMLOListElement, gruppo: HTMLElement, svg: SVGSVGElement) {
   const avatar = new Pallo(svg, { testa: true, vivo: false })
   const nomi: NomiChat = { tornei: DATI.chat.tornei, compagni: DATI.chat.compagni, oggi: new Date().toISOString().slice(0, 10) }
 
@@ -120,18 +122,18 @@ function montaChat(chat: HTMLElement, log: HTMLOListElement, gruppo: HTMLElement
     li.dataset.chi = chi
     if (nuovo) li.setAttribute('data-nuovo', '')
     li.textContent = testo
-    log.append(li)
+    righe.append(li)
     inFondo(vicino)
     return li
   }
-  function card(righe: [string, string][]) {
+  function card(coppie: [string, string][]) {
     const vicino = vicinoAlFondo()
     const li = document.createElement('li')
     li.className = 'msg chat-riepilogo'
     li.dataset.chi = 'pallo'
     li.setAttribute('data-nuovo', '')
     const dl = document.createElement('dl')
-    for (const [k, v] of righe) {
+    for (const [k, v] of coppie) {
       const riga = document.createElement('div')
       const dt = document.createElement('dt')
       dt.textContent = k
@@ -141,7 +143,7 @@ function montaChat(chat: HTMLElement, log: HTMLOListElement, gruppo: HTMLElement
       dl.append(riga)
     }
     li.append(dl)
-    log.append(li)
+    righe.append(li)
     inFondo(vicino)
   }
   function risposte(lista: { testo: string; fai: () => void }[]) {
@@ -195,7 +197,7 @@ function montaChat(chat: HTMLElement, log: HTMLOListElement, gruppo: HTMLElement
     scrive.setAttribute('aria-hidden', 'true')
     scrive.append(document.createElement('span'), document.createElement('span'), document.createElement('span'))
     const vicino = vicinoAlFondo()
-    log.append(scrive)
+    righe.append(scrive)
     inFondo(vicino)
     inPausa = dopo
     pausa = window.setTimeout(dopo, attesa)
@@ -204,7 +206,7 @@ function montaChat(chat: HTMLElement, log: HTMLOListElement, gruppo: HTMLElement
   function ricomincia() {
     if (inPausa) inPausa()
     // La conversazione riparte, non arriva: di colpo, senza pausa.
-    log.replaceChildren()
+    righe.replaceChildren()
     passo = 'name'
     d = bozza(nomi)
     avatar.setUmore('testa')
@@ -218,7 +220,7 @@ function montaChat(chat: HTMLElement, log: HTMLOListElement, gruppo: HTMLElement
 
   // L'apertura c'è già, senza pausa (INTRO): la trascrizione scritta per chi
   // non ha JavaScript lascia il posto alla chat viva.
-  log.replaceChildren()
+  righe.replaceChildren()
   for (const t of INTRO) messaggio(t, 'pallo', false)
   risposte(rispostePer(passo))
 }

@@ -57,6 +57,15 @@ const BATTUTA: Partial<Record<Sezione, string>> = {
   dati: 'I tuoi tornei li vedi tu. E chi ci ha giocato con te, se lo colleghi.',
 }
 const ATTERRAGGIO = 'Quando vuoi, il ＋ arancio apre il diario.'
+/** Il salto (MOTION §L10.3): SALTO tocca il segno la prima volta al 42% della durata. */
+const CONTATTO = 0.42
+/** Il picco dell'arco, al 20% della corsa: 20 / 42 della durata dell'arco. */
+const PICCO = 0.2 / CONTATTO
+/** L'arco: alto il 12% del dislivello, al più 48px. */
+const ARCO_QUOTA = 0.12
+const ARCO_MAX_PX = 48
+/** La rete dell'uscita del menu: oltre SVELTO, se `transitionend` non arriva (MOTION §L5.3). */
+const RETE_MS = 80
 
 
 let capitoloCorrente = 0
@@ -271,19 +280,19 @@ function monta({ guida, figura, svgGuida, bolla, menu, eroePallo, svgEroe }: Pez
     })
     // L'arco: la figura sale e ricade entro il primo contatto di SALTO col
     // segno (42% della durata); picco al 20%.
-    const h = Math.min(48, Math.abs(a.top - b.top) * 0.12)
+    const h = Math.min(ARCO_MAX_PX, Math.abs(a.top - b.top) * ARCO_QUOTA)
     st.arco = figura.animate(
       [
-        { transform: 'none', easing: 'cubic-bezier(0.2, 0.7, 0.4, 1)' },
-        { transform: `translateY(${-h}px)`, offset: 0.476, easing: 'cubic-bezier(0.6, 0, 0.8, 0.3)' },
+        { transform: 'none', easing: curva('--ease-arco-su') },
+        { transform: `translateY(${-h}px)`, offset: PICCO, easing: curva('--ease-arco-giu') },
         { transform: 'none' },
       ],
-      { duration: d * 0.42 },
+      { duration: d * CONTATTO },
     )
     const tocca = window.setTimeout(() => {
       pallo.setUmore('occhiolino')
       pallo.boing()
-    }, d * 0.42)
+    }, d * CONTATTO)
     st.volo.finished.then(
       () => {
         guida.style.transition = ''
@@ -400,7 +409,7 @@ function monta({ guida, figura, svgGuida, bolla, menu, eroePallo, svgEroe }: Pez
       if (menuAperto()) return
       menu.hidden = true
       menu.dataset.material = 'glass-thick'
-    }, ms('--dur-svelto') + 80)
+    }, ms('--dur-svelto') + RETE_MS)
     decidi()
   }
   document.addEventListener('keydown', (e) => {

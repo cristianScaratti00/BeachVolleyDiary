@@ -13,16 +13,22 @@
 @layer components {
   .pista { display: contents; }
   .blocco { display: contents; }
+  /* La regione che scorre a mano; dentro, la fila (un elenco vero). */
   .slides {
-    display: flex;
-    gap: var(--slide-gap);
     margin: var(--section-object-gap) calc(-1 * var(--gutter)) 0;
     padding: 0 var(--gutter) var(--space-1);
-    list-style: none;
     overflow-x: auto;
     overscroll-behavior-x: contain;
     scroll-snap-type: x mandatory;
     scroll-padding-inline: var(--gutter);
+  }
+  .slides-fila {
+    display: flex;
+    gap: var(--slide-gap);
+    width: max-content;
+    margin: 0;
+    padding: 0;
+    list-style: none;
   }
   .slides:focus-visible { outline-offset: calc(-1 * var(--focus-width)); }
   .slide {
@@ -101,6 +107,8 @@
         padding: 0;
         overflow: visible;
         scroll-snap-type: none;
+      }
+      :root:not([data-movimento="fermo"]) #wrapped[data-viva] .slides-fila {
         animation: wrapped-sfoglia linear both;
         animation-timeline: --wrapped;
         animation-range: contain 0% contain 100%;
@@ -125,7 +133,7 @@
     letter-spacing: var(--track-display-chapter);
     color: var(--text-strong);
   }
-  .storia { margin: var(--section-object-gap) 0 0; }
+  .storia { margin: var(--section-object-gap) 0 0; container-type: inline-size; }
   .storia figcaption { text-align: center; }
   /* Base e fermo: le tre carte affiancate, leggibili. */
   .storia-carte { display: flex; justify-content: center; gap: var(--slide-gap); }

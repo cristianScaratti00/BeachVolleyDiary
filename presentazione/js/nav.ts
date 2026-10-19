@@ -11,7 +11,8 @@ import type { Sezione } from './sezioni'
 
 /** Sezione → tab (UX §L3.2): «Cosa registriamo?» è del Diario, la mappa dei Numeri. */
 const TAB: Partial<Record<Sezione, number>> = { diario: 0, registra: 0, live: 1, numeri: 2, mappa: 2, wrapped: 3 }
-
+/** Dopo un ridimensionamento, le fasce degli observer si rimisurano una volta sola, a gesto finito. */
+const RIMISURA_MS = 120
 
 export function avviaNav() {
   const capsula = document.querySelector<HTMLElement>('.capsula')
@@ -78,7 +79,7 @@ export function avviaNav() {
     let attesa = 0
     window.addEventListener('resize', () => {
       window.clearTimeout(attesa)
-      attesa = window.setTimeout(osserva, 120)
+      attesa = window.setTimeout(osserva, RIMISURA_MS)
     })
   }
 

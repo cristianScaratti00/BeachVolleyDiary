@@ -308,7 +308,10 @@
     --slide-ring: inset 0 0 0 1px rgb(255 255 255 / 0.16);
     /* La Storia a ventaglio: tre PNG 9:16, ruotati di ±8°, staccati da un
        taglio del colore del fondo (come adesivi), non da un'ombra. */
-    --story-w: 10rem;                              /* 160 · 216 da 900 */
+    /* 160 · 216 da 900, ma mai più del 40% della figura (`cqw`: .storia è un
+       contenitore): aperto a ventaglio il gruppo è largo ~2,5 carte, e a 390
+       la carta da 160 usciva dal bordo. */
+    --story-w: min(10rem, 40cqw);
     --story-tilt: 8deg;
     --story-keyline: 3px;
 
@@ -374,6 +377,11 @@
     --ease-caduta: linear(0, 0.084 5%, 0.277 10%, 0.509 15%, 0.729 20%, 0.908 25%, 1 28.47%, 0.968 30%, 0.895 35%, 0.866 40%, 0.869 45%, 0.891 50%, 0.922 55%, 0.953 60%, 0.979 65%, 0.999 70%, 1 70.31%, 0.989 75%, 0.983 80%, 0.982 85%, 0.984 90%, 0.988 95%, 1);
     /* Da dove cade un pin (LM5). */
     --caduta-y: -24px;
+    /* L'arco del salto di Pallo (MOTION §L10.3): la figura sale fino al picco
+       (20% della corsa) uscendo veloce, e ricade entrando, fino al primo
+       contatto di SALTO col segno (42%). */
+    --ease-arco-su: cubic-bezier(0.2, 0.7, 0.4, 1);
+    --ease-arco-giu: cubic-bezier(0.6, 0, 0.8, 0.3);
 
     /* ------------------------------------------- Aggiunte della costruzione */
     /* Misure che i fogli dei componenti chiedevano e che sopra non c'erano
@@ -505,7 +513,7 @@
       --guida-right: var(--gutter);
       --slide-h: min(40rem, calc(100svh - var(--barra-inset) - var(--tabbar-h) - 2 * var(--space-8)));
       --slide-pad: var(--space-8);
-      --story-w: 13.5rem;
+      --story-w: min(13.5rem, 40cqw);
       --pallo-hero: 240px;
       --pallo-finale: 240px;
       --capitolo-min: 70svh;

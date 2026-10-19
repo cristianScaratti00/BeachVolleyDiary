@@ -15,7 +15,8 @@ import { ms } from './tempi'
 
 /** La linea del capitolo di #diario: al 72% sotto i 900px (la cornice è in alto), al 50% da lì (ART A8). */
 const linea = () => (window.innerWidth >= 900 ? 0.5 : 0.72)
-
+/** Dopo un ridimensionamento, le fasce degli observer si rimisurano una volta sola, a gesto finito. */
+const RIMISURA_MS = 120
 
 // ------------------------------------------------------------ fuori vista
 /** RL5: le animazioni infinite di una sezione si fermano dove sono quando esce. */
@@ -149,7 +150,7 @@ export function avviaDiario() {
     let attesa = 0
     window.addEventListener('resize', () => {
       window.clearTimeout(attesa)
-      attesa = window.setTimeout(osserva, 120)
+      attesa = window.setTimeout(osserva, RIMISURA_MS)
     })
   }
   sezione.setAttribute('data-viva', '')

@@ -214,19 +214,19 @@
             <ul class="voci" aria-label="Cosa registriamo?">
               <li class="voce" data-voce="live" data-tono="live">
                 <span class="voce-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-clock" /></svg></span>
-                <span class="voce-testo"><span class="voce-nome">Partita live</span><span class="voce-sotto">Segna i punti, in torneo o tra amici</span></span>
+                <span class="voce-testo"><span class="voce-nome">Partita live</span> <span class="voce-sotto">Segna i punti, in torneo o tra amici</span></span>
               </li>
               <li class="voce" data-voce="torneo">
                 <span class="voce-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-trophy" /></svg></span>
-                <span class="voce-testo"><span class="voce-nome">Torneo</span><span class="voce-sotto">Luogo, formato, compagno, piazzamento</span></span>
+                <span class="voce-testo"><span class="voce-nome">Torneo</span> <span class="voce-sotto">Luogo, formato, compagno, piazzamento</span></span>
               </li>
               <li class="voce" data-voce="rapido">
                 <span class="voce-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-bolt" /></svg></span>
-                <span class="voce-testo"><span class="voce-nome">Torneo rapido</span><span class="voce-sotto">Nome e piazzamento, i dettagli dopo</span></span>
+                <span class="voce-testo"><span class="voce-nome">Torneo rapido</span> <span class="voce-sotto">Nome e piazzamento, i dettagli dopo</span></span>
               </li>
               <li class="voce" data-voce="chat">
                 <span class="voce-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-chat-dots" /></svg></span>
-                <span class="voce-testo"><span class="voce-nome">Raccontalo a Pallo</span><span class="voce-sotto">Ti faccio io le domande, una alla volta</span></span>
+                <span class="voce-testo"><span class="voce-nome">Raccontalo a Pallo</span> <span class="voce-sotto">Ti faccio io le domande, una alla volta</span></span>
               </li>
             </ul>
 
@@ -246,10 +246,14 @@
             <div class="pannello-voce" data-voce="chat">
               <div class="chat">
                 <p class="chat-testa"><span class="chat-avatar" aria-hidden="true"><!--@pallo testa--></span><span>Raccontalo a Pallo</span></p>
-                <ol class="chat-log" role="log" aria-label="Conversazione con Pallo" tabindex="0">
-                  <!--@trascrizione-->
-                  <li class="msg chat-riepilogo" data-chi="pallo"><dl><!--@riepilogo--></dl></li>
-                </ol>
+                <!-- Il ruolo `log` sta sul contenitore che scorre: su un <ol> l'HTML
+                     non lo ammette, e le bolle smetterebbero di essere un elenco. -->
+                <div class="chat-log" role="log" aria-label="Conversazione con Pallo" tabindex="0">
+                  <ol class="chat-righe">
+                    <!--@trascrizione-->
+                    <li class="msg chat-riepilogo" data-chi="pallo"><dl><!--@riepilogo--></dl></li>
+                  </ol>
+                </div>
                 <div class="chat-risposte" role="group" aria-label="Le tue risposte" tabindex="-1"></div>
               </div>
               <p class="nota chat-nota">Nell'app, Pallo segue un copione scritto a mano, una domanda alla volta: nessuna intelligenza artificiale. Niente esce dal telefono finché non salvi.</p>
@@ -367,9 +371,11 @@
              sfoglia le slide (LM8). Altrimenti la riga si scorre a mano. -->
         <div class="pista">
           <div class="blocco">
-            <ol class="slides" role="region" aria-label="Slide di Beach Wrapped" tabindex="0">
-              <!--@slide-->
-            </ol>
+            <div class="slides" role="region" aria-label="Slide di Beach Wrapped" tabindex="0">
+              <ol class="slides-fila">
+                <!--@slide-->
+              </ol>
+            </div>
           </div>
         </div>
         <div class="dentro storia-testa">

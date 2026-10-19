@@ -195,6 +195,9 @@
       pointer-events: none;
     }
     .eroe-marchio { display: none; }
+    /* La scena intera, il panorama: la camera del telefono alzerebbe la scena
+       e lascerebbe scoperto il fondo, che qui il velo di lato non copre. */
+    .eroe-camera { transform: none; }
     /* Il testo resta al margine sinistro: il velo di lato è misurato da lì
        (la colonna da 35rem tutta sopra il 78%, ART §L4.8). */
     .eroe-testo { position: static; padding-bottom: 0; }
