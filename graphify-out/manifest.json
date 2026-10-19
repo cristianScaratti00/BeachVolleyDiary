@@ -385,8 +385,8 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1792404727.3258462,
-    "ast_hash": "81abdd1ffcffcd755a8196b2d9d7e431",
+    "mtime": 1792430965.276122,
+    "ast_hash": "86ad38f3d724c82196f7cd9357a9e82b",
     "semantic_hash": ""
   },
   "docs/QA-tornei-formati.md": {
@@ -1255,8 +1255,8 @@
     "semantic_hash": ""
   },
   "src/screens/Login.scena.tsx": {
-    "mtime": 1792395142.8441854,
-    "ast_hash": "6ad2753e613784ff702ba12754c4026f",
+    "mtime": 1792430522.6953328,
+    "ast_hash": "e821d18fede294cc3d82419c376274a5",
     "semantic_hash": ""
   },
   "src/screens/PartitaLive.test.tsx": {
@@ -1347,6 +1347,21 @@
   "docs/qa/barra.mjs": {
     "mtime": 1792404638.361035,
     "ast_hash": "6f8ed404b6acf765e50ed5e137d94afd",
+    "semantic_hash": ""
+  },
+  "src/screens/Login.palleggio.test.ts": {
+    "mtime": 1792430866.763359,
+    "ast_hash": "ac488dc7f09b813ac807a825a07cb222",
+    "semantic_hash": ""
+  },
+  "src/screens/Login.palleggio.ts": {
+    "mtime": 1792430890.039082,
+    "ast_hash": "7e51908dcf1c51798bbfbc6dbdfeba23",
+    "semantic_hash": ""
+  },
+  "src/screens/Login.scena.test.tsx": {
+    "mtime": 1792430903.117629,
+    "ast_hash": "60276fe35394c27196baccf5c3155c73",
     "semantic_hash": ""
   }
 }

@@ -23,7 +23,8 @@ npm run preview        # anteprima della build
 
 ## Funzionalità
 
-- **Accesso** — Supabase Auth (email + password). Benvenuto con la scena del tramonto e un
+- **Accesso** — Supabase Auth (email + password). Benvenuto con la scena del tramonto (due
+  giocatori che palleggiano sopra la rete, la stessa scena dietro Accedi e Registrati) e un
   carosello di tre messaggi, Accedi, Registrati in due passi (nickname verificato live dalla Edge
   Function `check-name`, poi email e password). Gate in `Root.tsx`: splash → login → app.
 - **Home** — una frase su come stai andando, periodo (Sempre / stagioni) e filtro per compagno;
