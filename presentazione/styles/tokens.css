@@ -1,0 +1,442 @@
+/* ============================================================================
+   Token della landing `/presentazione`: «Controluce» (ART_DIRECTION.md,
+   Parte L). Si importa DOPO i fogli dell'app, in quest'ordine:
+
+     src/styles/tokens.css       i token dell'app e l'ordine dei @layer
+     src/styles/base.css         reset, focus, .rise, .press
+     src/styles/materials.css    il vetro ([data-material]) e [data-surface="dark"]
+     presentazione/styles/tokens.css   QUESTO foglio
+
+   Questo foglio AGGIUNGE token, non ne cambia: colori, vetro, raggi, curve e
+   inchiostri restano quelli dell'app. Le uniche ridefinizioni di un nome
+   dell'app sono due, e il test le conosce per nome:
+   - `--font-ui`: lo stesso Geist, con in mezzo la riserva metrica qui sotto
+     (il carattere che arriva non sposta il layout);
+   - il blocco `:root[data-movimento="fermo"]`, che ripete i valori di
+     `prefers-reduced-motion` per il comando «Ferma le animazioni».
+
+   È anche l'UNICO foglio della landing che può contenere un colore
+   letterale: i fogli dei componenti (`presentazione/styles/*.css`) leggono
+   solo `var(--…)`. I letterali qui sotto sono di tre tipi, tutti fissati da
+   `src/styles/landing.tokens.test.ts`:
+   - la palette di OpenStreetMap (la mappa disegnata è la mappa vera, semplificata);
+   - i grigi «muted» e i filetti delle slide di Wrapped, copiati da
+     `src/components/wrapped/palette.ts` (il test li confronta uno a uno);
+   - la luce del finale, presa dalla scena del Login (`Login.scena.tsx`).
+
+   Ogni rapporto di contrasto citato nei commenti è ricalcolato dal test.
+   ============================================================================ */
+
+@layer tokens {
+  /* ------------------------------------------------- Riserva metrica di Geist */
+  /* Geist arriva con `font-display: swap`. Finché non c'è, il testo usa Arial
+     ridimensionato perché occupi la stessa larghezza: le righe vanno a capo
+     negli stessi punti e il cambio di carattere non sposta niente (CLS 0).
+     Misure prese in Chrome con `measureText` su una frase italiana della
+     landing (ART_DIRECTION §L3.1): Geist ha ascendente 1.005 e discendente
+     0.295 dell'em; il rapporto di larghezza con Arial cambia col peso, e
+     Arial ha solo il tondo e il neretto, quindi una faccia per fascia di peso.
+     `ascent-override` = 100.5% ÷ size-adjust, `descent-override` = 29.5% ÷
+     size-adjust. Su Android Arial non c'è: lì la riserva salta e si scende al
+     carattere di sistema, come nell'app. */
+  @font-face {
+    font-family: "Geist Fallback";
+    src: local("Arial"), local("ArialMT");
+    font-weight: 100 549;
+    size-adjust: 104.49%;
+    ascent-override: 96.18%;
+    descent-override: 28.23%;
+    line-gap-override: 0%;
+  }
+  @font-face {
+    font-family: "Geist Fallback";
+    src: local("Arial Bold"), local("Arial-BoldMT");
+    font-weight: 550 649;
+    size-adjust: 98.86%;
+    ascent-override: 101.66%;
+    descent-override: 29.84%;
+    line-gap-override: 0%;
+  }
+  @font-face {
+    font-family: "Geist Fallback";
+    src: local("Arial Bold"), local("Arial-BoldMT");
+    font-weight: 650 749;
+    size-adjust: 101.09%;
+    ascent-override: 99.42%;
+    descent-override: 29.18%;
+    line-gap-override: 0%;
+  }
+  @font-face {
+    font-family: "Geist Fallback";
+    src: local("Arial Bold"), local("Arial-BoldMT");
+    font-weight: 750 849;
+    size-adjust: 103.32%;
+    ascent-override: 97.27%;
+    descent-override: 28.55%;
+    line-gap-override: 0%;
+  }
+  @font-face {
+    font-family: "Geist Fallback";
+    src: local("Arial Bold"), local("Arial-BoldMT");
+    font-weight: 850 900;
+    size-adjust: 105.55%;
+    ascent-override: 95.22%;
+    descent-override: 27.95%;
+    line-gap-override: 0%;
+  }
+
+  :root {
+    /* Lo stesso stack dell'app, con la riserva metrica prima del carattere
+       di sistema. I `--type-*` dell'app la ereditano da soli: sono dichiarati
+       sullo stesso :root e leggono `var(--font-ui)` lì. */
+    --font-ui: "Geist Variable", "Geist", "Geist Fallback", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+
+    /* ------------------------------------------------ Scala da manifesto */
+    /* Il gradino sopra `--type-large-title` (30/34) che l'app non ha: sulla
+       landing il carattere è l'immagine. Mobile first: questi sono i valori
+       sotto i 600px; più sotto crescono a 600, 900 e 1280. Si usa come
+       nell'app: `font: var(--type-display-hero); letter-spacing: var(--track-display-hero)`. */
+    --type-display-hero: 800 3rem/1 var(--font-ui);               /* 48 · 44 sotto 360 · 64 · 72 · 84 */
+    --track-display-hero: -0.045em;
+    --type-display-section: 800 2.125rem/1.04 var(--font-ui);     /* 34 · 44 · 52 · 56 */
+    --track-display-section: -0.04em;
+    --type-display-chapter: 700 1.375rem/1.2 var(--font-ui);      /* 22 · 24 · 26 */
+    --track-display-chapter: -0.02em;
+    /* La frase sotto un titolo di sezione. */
+    --type-lede: 500 1.125rem/1.45 var(--font-ui);                /* 18 · 19 · 20 */
+    --track-lede: -0.01em;
+    /* L'occhiello sopra un titolo, quando c'è: il nome della funzione come
+       la scrive l'app («Partita live»), minuscolo come l'eyebrow dell'app. */
+    --type-kicker: 600 0.875rem/1.25 var(--font-ui);              /* 14 */
+    --track-kicker: 0em;
+    /* Il numero da manifesto di #numeri: bianco sull'inchiostro (vedi la
+       regola della capsula chiara più sotto: sulla carta un numero così non
+       ci va). Sempre con `font-variant-numeric: tabular-nums`. */
+    --type-num-poster: 900 6rem/0.86 var(--font-ui);              /* 96 · 128 · 144 · 160 */
+    --track-num-poster: -0.055em;
+    /* Le celle del tabellone di #numeri: la grammatica delle celle 2×2 della
+       slide d'inchiostro di Wrapped, alla misura della pagina. */
+    --type-num-cell: 800 2.75rem/1 var(--font-ui);                /* 44 · 56 da 900 */
+    --track-num-cell: -0.04em;
+
+    /* Le slide di Wrapped sulla pagina: la tela 1080 dei PNG
+       (WrappedSlideCard.tsx) scalata a una slide larga ~360, cioè × 1/3,
+       arrotondata e mai sotto i 15px per il testo da leggere. */
+    --type-slide-eyebrow: 700 0.9375rem/1.2 var(--font-ui);       /* 15   (tela 42) */
+    --type-slide-headline: 900 5.5rem/0.9 var(--font-ui);         /* 88   (tela 266) */
+    --type-slide-headline-long: 900 2.25rem/0.9 var(--font-ui);   /* 36   (tela 104, i nomi) */
+    --track-slide-headline: -0.052em;
+    --type-slide-title: 700 1.5rem/1.1 var(--font-ui);            /* 24   (tela 72) */
+    --track-slide-title: -0.023em;
+    --type-slide-caption: 500 0.9375rem/1.3 var(--font-ui);       /* 15   (tela 42) */
+
+    /* ----------------------------------------------------- Testo per ruolo */
+    /* Tre livelli, ridefiniti sui fondi scuri ([data-surface="dark"], più
+       sotto). Così un componente scrive `color: var(--text)` e ha ragione su
+       ogni fondo. Su carta (#F6F6F4) e bianco:
+         --text-strong  titoli, numeri        15.72 · 17.01
+         --text         frasi, capitoli        10.53 · 11.40
+         --text-muted   note, fatti, didascalie 4.94 · 5.35
+       Gli alias si risolvono QUI, sul :root: dentro un fondo scuro `--ink`
+       diventa bianco, ma `--text-strong` resta quello che è stato calcolato
+       qui finché il blocco scuro non lo ridefinisce. */
+    --text-strong: var(--ink);
+    --text: var(--ink-label);
+    --text-muted: var(--ink-2);
+    /* L'arancio come TESTO (occhiello, il «%» accanto a un numero): sulla
+       carta è --accent-text (4.79), sul buio l'arancio del marchio. */
+    --text-accent: var(--accent-text);
+    --rule: var(--edge);
+
+    /* --------------------------------------------------------- Campiture */
+    /* Tre fondi pieni, a tutta larghezza, con il taglio netto fra l'uno e
+       l'altro (niente onde, niente sfumature fra sezioni):
+         dusk   il tramonto del Benvenuto: hero, finale, footer
+         paper  la carta dell'app: le sezioni del diario
+         ink    l'inchiostro della slide di Wrapped: #numeri, #wrapped   */
+    --field-dusk: var(--surface-brand);
+    --field-paper: var(--bg);
+    --field-ink: var(--ink);
+
+    /* ---------------------------------------------------------- Spazio */
+    /* La scala dell'app (passi di 4) prosegue: */
+    --space-14: 56px;
+    --space-24: 96px;
+    --space-30: 120px;
+    --space-36: 144px;
+    /* Il respiro verticale di una sezione, sopra e sotto. */
+    --section-pad: var(--space-24);                /* 96 · 120 · 144 */
+    /* Titolo → frase, frase → oggetto, fra due blocchi dello stesso oggetto. */
+    --section-head-gap: var(--space-4);            /* 16 */
+    --section-object-gap: var(--space-10);         /* 40 · 56 da 900 */
+    --block-gap: var(--space-6);                   /* 24 */
+    /* Le righe di lettura non superano queste misure. */
+    --measure-lede: 34rem;
+    --measure-body: 38rem;
+    /* La griglia da 900px: 12 colonne, il gutter dell'app come gap. */
+    --grid-cols: 12;
+    --grid-gap: var(--space-8);
+
+    /* ----------------------------------------------------------- Hero */
+    /* Il velo che regge il testo sopra la scena. È attaccato al blocco del
+       testo (non alla scena): parte 96px sopra il titolo e scende, così vale
+       a qualunque altezza e a qualunque a capo. Le soglie sono i requisiti
+       (sopra il pixel più chiaro della scena, il pallone #FFF7EE):
+         ≥ 50% dove comincia il titolo  → bianco 3.76 (testo grande, ≥ 3)
+         ≥ 72% dove comincia la frase   → bianco .82 6.04, il vetro chiaro
+                                           di «Ho già un account» 5.50
+       Sotto i 900px il titolo ha almeno due righe (88px), quindi la frase
+       comincia almeno a 200px, dove il velo è già al 65.5% (bianco .82 sopra il
+       pallone: 4.89); dai 244px in giù è al 72% o più. */
+    --hero-velo: linear-gradient(
+      to bottom,
+      transparent 0px,
+      color-mix(in srgb, var(--surface-brand) 50%, transparent) 96px,
+      color-mix(in srgb, var(--surface-brand) 72%, transparent) 244px,
+      color-mix(in srgb, var(--surface-brand) 94%, transparent) 420px,
+      var(--surface-brand) 560px
+    );
+    --hero-velo-rise: 96px;
+    /* Da 900px il testo sta a sinistra e la scena a destra: il velo va di
+       lato. La colonna del testo (35rem) sta tutta sopra il 78%. */
+    --hero-velo-lato: linear-gradient(
+      to right,
+      color-mix(in srgb, var(--surface-brand) 94%, transparent) 0px,
+      color-mix(in srgb, var(--surface-brand) 78%, transparent) calc(var(--gutter) + 35rem),
+      transparent calc(var(--gutter) + 47.5rem)
+    );
+    --hero-text-max: 35rem;
+
+    /* ------------------------------------------------- La barra (capsula) */
+    /* I materiali sono quelli dell'app, senza ritocchi:
+         sopra la carta  data-material="glass-regular"  (bianco .32)
+         sopra il buio   data-material="glass-dark"     (inchiostro .66)
+       Cambia solo l'inchiostro delle tab spente: pieno (`--on-glass` sul
+       chiaro, bianco sul buio), non al 78% come nell'app. Sulla landing sotto
+       la capsula passano numeri da 112px (la demo live): sfocati coprono quasi
+       l'80% del vetro d'inchiostro, e lì l'inchiostro al 78% scende a 3.39
+       (quello pieno regge: 4.56).
+       La lente NON ha sfocatura (UX LC8): è una pillola bianca piena, la
+       stessa sul chiaro e sul buio, con l'etichetta `--accent-text` (5.18). */
+    --barra-inset: var(--space-4);                 /* da 900: la distanza dal bordo alto */
+    --barra-capsule-w: 25rem;                      /* da 900: la capsula al centro */
+    /* Chi scorre lascia libere le barre (UX §L4.3, come AppShell.css):
+       sotto i 900px la barra e Pallo stanno in basso, dai 900px la barra
+       sta in alto e Pallo in basso a destra. */
+    --scroll-pad-top: calc(var(--safe-top) + var(--space-3));
+    --scroll-pad-bottom: calc(var(--tabbar-h) + var(--tabbar-bottom) + var(--guida-size) + var(--guida-gap) + var(--space-4));
+    --lente-bg: var(--surface);
+    --lente-label: var(--accent-text);
+    --lente-elev: var(--glass-rim), 0 2px 8px -3px rgb(28 28 30 / 0.18);
+
+    /* --------------------------------------------------- Pallo guida */
+    --guida-size: 64px;                            /* 56 sotto i 360 */
+    --guida-gap: var(--space-2);                   /* sopra il ＋ */
+    /* Sotto i 900px Pallo sta sopra il ＋, allineato al suo bordo destro. */
+    --guida-bottom: calc(var(--tabbar-bottom) + var(--plus-size) + var(--guida-gap));
+    --guida-right: var(--tabbar-side);
+    --bolla-max: min(17.5rem, calc(100vw - 2 * var(--gutter)));
+    --bolla-r: calc(var(--radius-row) + var(--space-1));   /* 20, come la chat dell'app */
+    --bolla-r-coda: var(--space-1-5);                      /* 6: l'angolo verso Pallo */
+    /* Le misure di Pallo sulla pagina (larghezza; l'altezza è × 130/120). */
+    --pallo-chat: 38px;                            /* l'avatar della chat, come CreaChat */
+    --pallo-sbircia: 72px;                         /* dal bordo del foglio, come il consenso */
+    --pallo-demo: 80px;                            /* nella demo, come PartitaLive */
+    --pallo-slide: 96px;                           /* sulle slide (tela 288 × 1/3) */
+    --pallo-hero: 128px;                           /* 240 da 900 */
+    --pallo-finale: 160px;                         /* 240 da 900 */
+
+    /* ------------------------------------------- Indicatore di avanzamento */
+    --progress-box: 16px;                          /* il massimo di UX §L7.3 */
+    --progress-track: 2px;
+    --progress-ball: 12px;                         /* 14 da 900 */
+    --progress-top: calc(var(--safe-top) + var(--space-1-5));
+
+    /* ------------------------------------------------------- Il telefono */
+    /* La cornice delle schermate: d'inchiostro, piatta, di fronte. Niente
+       ombra, niente riflesso, niente isola né tasti. Lo schermo è largo
+       `--phone-screen-w` e alto × 844/390; sotto i 900px non supera il 56%
+       dell'altezza (UX §L6.2). 0.4621 = 390/844. Il raggio dello schermo è
+       quello di un iPhone (47.33 su 390 = 0.1214 della larghezza), la cornice
+       gli gira intorno concentrica. */
+    --phone-bezel: 10px;                           /* 12 da 900 */
+    --phone-screen-w: min(15rem, calc((56svh - 2 * var(--phone-bezel)) * 0.4621));
+    --phone-screen-r: calc(var(--phone-screen-w) * 0.1214);
+    --phone-r: calc(var(--phone-screen-r) + var(--phone-bezel));
+    --phone-color: var(--ink);
+    /* La fascia di carta su cui sta il telefono sticky: il testo che sale ci
+       sparisce sotto, sfumando negli ultimi 24px. */
+    --phone-band-fade: var(--space-6);
+
+    /* ------------------------------------------------- Demo Partita live */
+    --demo-max: 26.25rem;                          /* 420 */
+    --live-panel-h: 10.5rem;                       /* 168 · 200 da 600 */
+    --type-live-num: 800 7rem/1 var(--font-ui);    /* 112, come l'app */
+    --track-live-num: -0.045em;
+
+    /* ------------------------------------------------- Wrapped e Storia */
+    /* La slide è una tessera 9:16 alta quanto lo schermo meno la barra: sul
+       telefono di riferimento (390×844) viene ~334×594. */
+    --slide-h: min(40rem, calc(100svh - var(--safe-top) - var(--page-top) - var(--tabbar-h) - var(--tabbar-bottom) - 2 * var(--space-6)));
+    --slide-w: calc(var(--slide-h) * 9 / 16);
+    --slide-w-manual: 17.5rem;                     /* la riga a mano (fermo, schermi bassi): 280 · 320 da 600 */
+    --slide-pad: var(--space-6);                   /* 24 · 32 da 900 (tela 88 × 1/3) */
+    --slide-gap: var(--space-3);
+    --slide-r: var(--radius-card);
+    /* Le tre palette, le stesse dei PNG (palette.ts). Si risolvono qui sul
+       :root: dentro #wrapped (`data-surface="dark"`) --ink è bianco. */
+    --slide-orange-bg: var(--accent);
+    --slide-orange-fg: var(--ink);
+    --slide-orange-accent: var(--ink);
+    --slide-orange-muted: #3E281D;                 /* 4.83 sull'arancio */
+    --slide-orange-line: #C6571B;
+    --slide-ink-bg: var(--ink);
+    --slide-ink-fg: var(--ink-inverse);
+    --slide-ink-accent: var(--accent);
+    --slide-ink-muted: #D2D2D2;                    /* 11.25 sull'inchiostro */
+    --slide-ink-line: #4E4E50;
+    --slide-sand-bg: var(--bg);
+    --slide-sand-fg: var(--ink);
+    --slide-sand-accent: var(--accent-text);
+    --slide-sand-muted: #484849;                   /* 8.44 sulla sabbia */
+    --slide-sand-line: var(--line-strong);
+    /* Sul fondo d'inchiostro della sezione la slide d'inchiostro sparirebbe:
+       ogni slide ha un filo bianco al 16%, dentro. */
+    --slide-ring: inset 0 0 0 1px rgb(255 255 255 / 0.16);
+    /* La Storia a ventaglio: tre PNG 9:16, ruotati di ±8°, staccati da un
+       taglio del colore del fondo (come adesivi), non da un'ombra. */
+    --story-w: 10rem;                              /* 160 · 216 da 900 */
+    --story-tilt: 8deg;
+    --story-keyline: 3px;
+
+    /* ---------------------------------------------------------- Mappa */
+    /* La mappa disegnata usa la palette di OpenStreetMap, quella delle tile
+       vere: l'illustrazione e la schermata dell'app dicono la stessa cosa, e
+       i pin si misurano sugli stessi fondi di contrast.test.ts. */
+    --map-land: #F2EFE9;
+    --map-sea: #AAD3DF;
+    --map-ratio: 356 / 318;                        /* il riquadro della Mappa dell'app */
+    /* I pin sono quelli di ConquisteMap: riempimento per piazzamento, alone
+       bianco di 3px fuori e filo d'inchiostro dentro (il doppio bordo che
+       contrast.test.ts rende obbligatorio). */
+    --pin-win: var(--accent);
+    --pin-podium: var(--surface);
+    --pin-rest: var(--line-strong);
+    --pin-halo: var(--surface);
+    --pin-halo-w: 3px;
+    --pin-line: var(--ink);
+
+    /* --------------------------------------------------------- Finale */
+    /* Il sole basso dietro Pallo: gli stessi colori del sole della scena
+       (`Login.scena.tsx`), più grande. Il disco è tagliato dall'orizzonte,
+       che è il filo in cima al footer. Il testo non entra mai nell'alone. */
+    --sole-core: #FFE1B8;
+    --sole-halo: radial-gradient(closest-side, #FFE3BC 0%, rgb(255 193 132 / 0.55) 55%, rgb(255 154 77 / 0) 100%);
+    --sole-r: 64px;                                /* 96 da 900 */
+    --sole-halo-r: 220px;                          /* 330 da 900 */
+    --riflesso: #FFC48A;
+    --horizon: rgb(255 255 255 / 0.16);
+
+    /* ------------------------------------------------------- Livelli */
+    --z-progress: 25;
+    --z-guida: 32;
+    --z-guida-menu: 35;
+
+    /* ------------------------------------------------------ Movimento */
+    /* Le curve sono quelle dell'app (SVELTO, ENTRATA, MOLLA, RACCONTO,
+       RESPIRO, PRESSIONE, SALITA). La landing ne aggiunge due MOLLE in JS
+       (Motion `animate`, ART_DIRECTION §L11):
+         SALTO    Pallo dall'hero all'angolo: stiffness 300, damping 26, mass 1 (ζ 0.75)
+         CADUTA   i pin sulla mappa:          stiffness 500, damping 24, mass 1 (ζ 0.54)
+       e due tempi: la nuvoletta resta 4000ms (come TOAST_MS), lo sfalsamento
+       narrativo è lo stesso passo della SALITA (50ms), al massimo 8 elementi. */
+    --dur-bolla: 4000ms;
+    --stagger-narrativo: var(--rise-step);
+    --stagger-max: 8;
+  }
+
+  /* -------------------------------------------------------- Breakpoint */
+  /* Gli stessi dell'app: 360 · 600 · 900 · 1280 (`BP` in theme.ts). */
+  @media (max-width: 359px) {
+    :root {
+      --type-display-hero: 800 2.75rem/1 var(--font-ui);
+      --guida-size: 56px;
+    }
+  }
+  @media (min-width: 600px) {
+    :root {
+      --type-display-hero: 800 4rem/1 var(--font-ui);
+      --type-display-section: 800 2.75rem/1.04 var(--font-ui);
+      --type-display-chapter: 700 1.5rem/1.2 var(--font-ui);
+      --type-lede: 500 1.1875rem/1.45 var(--font-ui);
+      --type-num-poster: 900 8rem/0.86 var(--font-ui);
+      --section-pad: var(--space-30);
+      --phone-screen-w: min(17.5rem, calc((56svh - 2 * var(--phone-bezel)) * 0.4621));
+      --live-panel-h: 12.5rem;
+      --slide-w-manual: 20rem;
+    }
+  }
+  @media (min-width: 900px) {
+    :root {
+      --type-display-hero: 800 4.5rem/1 var(--font-ui);
+      --type-display-section: 800 3.25rem/1.04 var(--font-ui);
+      --type-display-chapter: 700 1.625rem/1.2 var(--font-ui);
+      --type-lede: 500 1.25rem/1.45 var(--font-ui);
+      --type-num-poster: 900 9rem/0.86 var(--font-ui);
+      --type-num-cell: 800 3.5rem/1 var(--font-ui);
+      --section-pad: var(--space-36);
+      --section-object-gap: var(--space-14);
+      --phone-bezel: 12px;
+      /* Il telefono sta al centro della colonna destra, sotto la barra in alto. */
+      --phone-screen-w: min(20rem, calc((100svh - 2 * var(--space-24) - 2 * var(--phone-bezel)) * 0.4621));
+      --progress-ball: 14px;
+      --progress-top: calc(var(--barra-inset) + var(--tabbar-h) + var(--space-2));
+      --scroll-pad-top: calc(var(--barra-inset) + var(--tabbar-h) + var(--space-4));
+      --scroll-pad-bottom: calc(var(--guida-size) + var(--space-6) + var(--space-4));
+      --guida-bottom: max(var(--space-6), calc(var(--safe-bottom) + var(--space-4)));
+      --guida-right: var(--gutter);
+      --slide-h: min(40rem, calc(100svh - var(--barra-inset) - var(--tabbar-h) - 2 * var(--space-8)));
+      --slide-pad: var(--space-8);
+      --story-w: 13.5rem;
+      --pallo-hero: 240px;
+      --pallo-finale: 240px;
+      --sole-r: 96px;
+      --sole-halo-r: 330px;
+    }
+  }
+  @media (min-width: 1280px) {
+    :root {
+      --type-display-hero: 800 5.25rem/1 var(--font-ui);
+      --type-display-section: 800 3.5rem/1.04 var(--font-ui);
+      --type-num-poster: 900 10rem/0.86 var(--font-ui);
+      --phone-screen-w: min(22.5rem, calc((100svh - 2 * var(--space-24) - 2 * var(--phone-bezel)) * 0.4621));
+    }
+  }
+
+  /* ------------------------------------------------------- Fondi scuri */
+  /* Le sezioni sul tramonto e sull'inchiostro portano `data-surface="dark"`:
+     materials.css inverte già --ink, --ink-2, --ink-3 e l'anello di focus.
+     Qui si invertono i ruoli della landing. Sul tramonto #120E14 e
+     sull'inchiostro #1C1C1E:
+       --text-strong  bianco       19.11 · 17.01
+       --text         bianco .82   12.88 · 11.73
+       --text-muted   bianco .66    8.57 ·  8.01
+     L'arancio come testo, sul buio, è l'arancio del marchio: 6.71 · 5.97. */
+  [data-surface="dark"] {
+    --text-strong: var(--on-glass-dark);
+    --text: var(--on-glass-dark-2);
+    --text-muted: var(--on-glass-dark-3);
+    --text-accent: var(--accent);
+    --rule: rgb(255 255 255 / 0.16);
+  }
+
+  /* ------------------------------------------- «Ferma le animazioni» */
+  /* Il comando della pagina (UX §L7.13) vale quanto prefers-reduced-motion:
+     gli stessi quattro valori del blocco dell'app. */
+  :root[data-movimento="fermo"] {
+    --motion-scale: 0;
+    --press-scale: 1;
+    --dur-racconto: 0ms;
+    --dur-respiro: 0ms;
+  }
+}

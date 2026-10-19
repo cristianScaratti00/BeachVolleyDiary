@@ -18,6 +18,8 @@ export default defineConfig({
     // fanno eccezione perché src/styles/tokens.test.ts li legge come testo per
     // ricalcolare il contrasto: senza questa riga il test vedrebbe "".
     // Solo loro: il CSS dei componenti resta fuori da jsdom come prima.
-    css: { include: [/src\/styles\/(tokens|materials)\.css/] },
+    // Il terzo è il foglio dei token della landing, che
+    // src/styles/landing.tokens.test.ts legge allo stesso modo.
+    css: { include: [/src\/styles\/(tokens|materials)\.css/, /presentazione\/styles\/tokens\.css/] },
   },
 })
