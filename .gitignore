@@ -22,3 +22,6 @@ build
 .nuxt.config.ts
 .nuxt.config.tsx
 .nuxt.config.tsx
+
+# Non è un output: è il codice che compone la landing (vite.config.ts).
+!presentazione/build/
