@@ -1,15 +1,54 @@
 import { defineConfig } from 'vite'
+import type { Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
+import { componiLanding } from './presentazione/build/componi'
+
+// La landing `/presentazione` è un modello: scena, Pallo, marchio, mappa,
+// icone e numeri ci entrano qui, dalle stesse fonti dell'app (gli snapshot in
+// presentazione/js/generati e Icon.paths.ts). Così il primo fotogramma è già
+// la pagina intera, anche senza JavaScript (ART_DIRECTION §L13 A12).
+function landing(): Plugin {
+  return {
+    name: 'landing',
+    transformIndexHtml: {
+      order: 'pre',
+      handler: (html, ctx) => (ctx.path.startsWith('/presentazione/') ? componiLanding(html) : html),
+    },
+  }
+}
+
+// Geist (il sottoinsieme latino) parte insieme al CSS, non dopo di lui: sulla
+// rete lenta (Slow 4G) il titolo dell'hero restava ~1.3s nel carattere di
+// riserva (POLISH.md, Parte L). Solo in build, dove il nome ha l'hash; il
+// `crossorigin` serve anche dallo stesso sito, o il font si scarica due volte.
+function landingFont(): Plugin {
+  return {
+    name: 'landing-font',
+    apply: 'build',
+    transformIndexHtml: {
+      order: 'post',
+      handler: (html, ctx) => {
+        if (!ctx.path.startsWith('/presentazione/') || !ctx.bundle) return html
+        const font = Object.keys(ctx.bundle).find((f) => /geist-latin-wght-normal-[\w-]+\.woff2$/.test(f))
+        if (!font) return html
+        return { html, tags: [{ tag: 'link', attrs: { rel: 'preload', href: `/${font}`, as: 'font', type: 'font/woff2', crossorigin: true }, injectTo: 'head-prepend' }] }
+      },
+    },
+  }
+}
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), landing(), landingFont()],
   build: {
     rollupOptions: {
       // Due pagine indipendenti: l'app (index.html, React + Supabase) e la
-      // landing pubblica su /presentazione/, che è HTML statico e non importa
-      // niente da src/. Restano due bundle separati: chi apre la landing non
-      // scarica una riga dell'app.
+      // landing pubblica su /presentazione/. La landing non importa React né
+      // Supabase: da src/ prende solo moduli senza framework (Pallo.vita,
+      // Odometro, le regole della Partita live, il copione della chat, il
+      // palleggio della scena) e i fogli dei token, del vetro e delle
+      // primitive. Restano due bundle separati: chi apre la landing non
+      // scarica l'app.
       input: {
         main: 'index.html',
         presentazione: 'presentazione/index.html',

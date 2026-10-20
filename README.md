@@ -197,6 +197,10 @@ di fabbrica con "oggi" congelato al `2026-07-22`, così la suite non cambia colo
 `src/test/contrast.test.ts` calcola il contrasto sui colori veri, che axe in jsdom non può misurare.
 `src/test/app.tsx` monta l'app intera (`AppView`) con un diario in memoria: ci girano i test dei
 flussi in `src/app/AppView.test.tsx` (menu ＋, sheet, conferme, focus, indietro, breakpoint).
+`src/test/landing.ts` fa lo stesso per la landing `/presentazione`: l'HTML finito e i moduli veri, con
+un'impaginazione finta misurata da un IntersectionObserver che segue la regola vera, scroll a passi e
+tempo finto. Ci girano `src/test/landing.{vivo,sezioni,installa}.test.ts`; `src/test/landing.test.ts`
+legge l'HTML e i fogli come testo (CSP, struttura, ruoli, layer, colori, movimento).
 I report QA per feature stanno in `docs/`; [`docs/QA-refactor.md`](docs/QA-refactor.md) dice dove è
 verificato ogni stato dell'interfaccia.
 
@@ -238,3 +242,43 @@ redesign Liquid Glass (prima sezione di ART_DIRECTION.md). In breve:
 - **Primitive** in `src/components/ui/*`: un file `.tsx` e uno `.css` per componente, classi con il
   prefisso `ui-`, varianti come `data-variant` / `data-size`. Le schermate hanno il loro `.css`
   accanto, con il prefisso della schermata.
+
+## La landing `/presentazione`
+
+La pagina pubblica da cui si installa l'app («Controluce»: [`UX.md`](UX.md), [`ART_DIRECTION.md`](ART_DIRECTION.md)
+e [`MOTION.md`](MOTION.md), Parte L). Vite la costruisce come seconda pagina (`presentazione/index.html`) e
+**non** importa React né Supabase: chi la apre non scarica l'app. Dall'app prende solo moduli senza framework
+e i fogli dei token, del vetro e delle primitive:
+
+- `src/components/Pallo.vita.ts` (lo sguardo e la vita di Pallo), `src/components/ui/Odometro.ts` (i numeri),
+  `src/screens/PartitaLive.regole.ts` (le regole della demo), `src/screens/crea/copione.ts` (la chat),
+  `src/screens/Login.palleggio.dom.ts` (il palleggio della scena), `src/components/ui/Icon.paths.ts` (le icone).
+- `presentazione/index.html` è un **modello**: al momento della build (e in sviluppo) il plugin `landing` di
+  `vite.config.ts` lo compone con `presentazione/build/componi.ts`, che ci mette dentro la scena, Pallo, il marchio,
+  la mappa, le slide, lo sprite delle icone e i numeri (`{{…}}`, `<!--@…-->`). Così il primo fotogramma è la pagina
+  intera anche senza JavaScript, e niente è copiato a mano.
+- `presentazione/js/main.ts` accende le parti una per una (ognuna nel suo try/catch); `presentazione/styles/landing.css`
+  importa i fogli nell'ordine di ART_DIRECTION §L12. Nei fogli della landing solo `var(--…)`: i letterali stanno in
+  `presentazione/styles/tokens.css`. `tsc -b` controlla anche la landing (`tsconfig.landing.json`).
+
+I file generati si rigenerano dalla radice:
+
+```bash
+# Pallo (14 umori) e la scena del Benvenuto in tre piani, dagli snapshot di Pallo.tsx e Login.scena.tsx
+npx vitest run src/components/Pallo.landing.test.tsx -u
+# I numeri, le battute di Pallo, la mappa, le slide e la chat: il diario dell'anteprima a OGGI_LANDING
+npx vitest run src/app/landing.dati.test.ts -u
+# Le schermate del telefono e della Storia (WebP), con la data fissata a OGGI_LANDING
+node docs/qa/landing-shots.mjs
+# Le icone PWA col pallone del marchio, e l'anteprima social (og.png)
+node docs/qa/icone.mjs
+node docs/qa/landing-og.mjs
+```
+
+`OGGI_LANDING` sta in `docs/preview/dati.ts` (a ottobre: Beach Wrapped esiste solo allora); se cambia, cambia anche
+in `docs/qa/landing-shots.mjs`. Gli script avviano un loro Vite e un loro Chrome su porte proprie e li chiudono.
+
+La rifinitura si misura sulla build di produzione con `docs/qa/landing.mjs` (axe, tastiera con la visibilità
+dell'anello, overflow, bersagli, CLS, reduced-motion, prestazioni a CPU 4×, richieste di rete, tocchi veri;
+`H=390` per il telefono in orizzontale): comandi e risultati in [`POLISH.md`](POLISH.md), Parte L. Dove è
+verificato ogni stato della pagina (jsdom, browser o a mano) lo dice [`docs/QA-landing.md`](docs/QA-landing.md).

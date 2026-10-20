@@ -1,0 +1,142 @@
+/* ============================================================================
+   «Il diario in tasca» `#diario` (UX §L6.2, §L7.5, ART §L5.4–§L5.5, MOTION
+   §L5.7 e §L6): quattro capitoli, ognuno con la sua schermata.
+
+   La base (senza JS, col movimento fermo, sugli schermi bassi) sono i
+   capitoli in fila con la schermata sotto il testo. Viva: una sola cornice
+   sticky con le quattro schermate impilate (copie decorative), che cambia a
+   soglia; le schermate dei capitoli si nascondono solo agli occhi (l'`alt`
+   resta, una volta).
+
+   La cornice è un rettangolo d'inchiostro, piatto e di fronte: niente ombra,
+   riflesso, isola o tasti (ART §L2.4, mossa 4).
+   ============================================================================ */
+@layer components {
+  .diario-testa { margin-bottom: var(--section-object-gap); }
+
+  /* --------------------------------------------------------------- Cornice */
+  .telefono {
+    width: calc(var(--phone-screen-w) + 2 * var(--phone-bezel));
+    padding: var(--phone-bezel);
+    border-radius: var(--phone-r);
+    background-color: var(--phone-color);
+  }
+  .schermo {
+    position: relative;
+    width: var(--phone-screen-w);
+    aspect-ratio: 390 / 844;
+    border-radius: var(--phone-screen-r);
+    overflow: hidden;
+    background-color: var(--fill);
+  }
+  .telefono .schermo { width: 100%; }
+  .pagina { position: absolute; inset: 0; }
+  .pagina > img {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+  }
+
+  /* -------------------------------------------------------------- Skeleton */
+  /* Lo skeleton nasce col modulo (`data-attesa`, MOTION §L6): a 150ms le forme
+     vere della schermata sul fondo dell'app, a 600ms il respiro su un nodo
+     annidato (due `animation` sullo stesso nodo si annullerebbero). Arrivata
+     l'immagine: dissolvenza in SVELTO. Errore: forme ferme a .75, niente
+     icona rotta (l'`alt` resta per chi lo legge). */
+  .scheletro { position: absolute; inset: 0; display: block; background-color: var(--bg); opacity: 0; }
+  .scheletro-respiro { position: absolute; inset: 0; display: block; }
+  .scheletro-forme { display: block; width: 100%; height: 100%; fill: var(--fill); }
+  .pagina[data-attesa] .scheletro { opacity: 1; transition: opacity var(--dur-entrata) var(--ease-standard) var(--delay-skeleton); }
+  .pagina[data-attesa] .scheletro-respiro { animation: diario-respiro var(--dur-respiro) var(--ease-respiro) var(--delay-respiro) infinite alternate both; }
+  .pagina[data-attesa] > img { opacity: 0; }
+  .pagina[data-pronta] > img { opacity: 1; transition: opacity var(--dur-svelto) var(--ease-standard); }
+  .pagina[data-subito] > img { transition: none; }
+  .pagina[data-errore] .scheletro { opacity: 1; }
+  .pagina[data-errore] .scheletro-respiro { animation: none; opacity: 0.75; }
+  .pagina[data-errore] > img { visibility: hidden; }
+  @keyframes diario-respiro { from { opacity: 1; } to { opacity: 0.55; } }
+
+  /* -------------------------------------------------------------- Capitoli */
+  .capitoli { display: grid; gap: var(--space-12); margin: 0; padding: 0; list-style: none; }
+  .capitolo h3 {
+    font: var(--type-display-chapter);
+    letter-spacing: var(--track-display-chapter);
+    color: var(--text-strong);
+  }
+  .capitolo p {
+    font: var(--type-body);
+    letter-spacing: var(--track-body);
+    color: var(--text);
+    max-width: var(--measure-body);
+    margin-top: var(--space-2);
+  }
+  .capitolo-schermo { margin-top: var(--block-gap); }
+  .capitolo-schermo .schermo {
+    box-shadow: 0 0 0 var(--phone-bezel) var(--phone-color);
+    margin: var(--phone-bezel);
+  }
+
+  /* --------------------------------------------- Il telefono sticky (vivo) */
+  .telefono-fascia { display: none; }
+  /* Solo col modulo, con il movimento permesso, alto almeno 640 e largo
+     almeno 360 (UX §L9.2); altrimenti si resta sulla base. */
+  @media (min-height: 640px) and (min-width: 360px) and (prefers-reduced-motion: no-preference) {
+    :root:not([data-movimento="fermo"]) #diario[data-viva] .telefono-fascia {
+      display: block;
+      position: sticky;
+      z-index: 2;
+      top: var(--scroll-pad-top);
+      margin-inline: calc(-1 * var(--gutter));
+      padding: 0 var(--gutter) var(--phone-band-fade);
+      /* La fascia di carta: il testo che sale ci sparisce sotto, sfumando
+         negli ultimi 24px; non passa mai sotto la cornice. */
+      background-image: linear-gradient(to bottom, var(--field-paper) calc(100% - var(--phone-band-fade)), transparent);
+    }
+    :root:not([data-movimento="fermo"]) #diario[data-viva] .telefono { margin-inline: auto; }
+    /* Le schermate impilate: quella del capitolo passa in cima e compare in
+       ENTRATA; quella sotto resta piena finché la nuova non lo è. */
+    :root:not([data-movimento="fermo"]) #diario[data-viva] .telefono .pagina { opacity: 0; }
+    :root:not([data-movimento="fermo"]) #diario[data-viva] .telefono .pagina[data-prima] { opacity: 1; z-index: 1; }
+    :root:not([data-movimento="fermo"]) #diario[data-viva] .telefono .pagina[data-attiva] {
+      opacity: 1;
+      z-index: 2;
+      transition: opacity var(--dur-entrata) var(--ease-standard);
+    }
+    :root:not([data-movimento="fermo"]) #diario[data-viva] .capitolo { min-height: var(--capitolo-min); }
+    /* Le schermate dei capitoli: nascoste agli occhi, non a chi legge. */
+    :root:not([data-movimento="fermo"]) #diario[data-viva] .capitolo-schermo {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+  }
+
+  /* ------------------------------------------------------------ Da 900px */
+  /* Testo a sinistra, telefono sticky a destra, centrato in verticale fra la
+     barra in alto e il fondo (ART §L5.4). */
+  @media (min-width: 900px) {
+    .diario {
+      display: grid;
+      grid-template-columns: repeat(var(--grid-cols), minmax(0, 1fr));
+      column-gap: var(--grid-gap);
+    }
+    .diario-testa { grid-column: 1 / 6; }
+    .capitoli { grid-column: 1 / 6; }
+    .telefono-fascia { grid-column: 7 / 13; grid-row: 1 / span 2; }
+  }
+  @media (min-width: 900px) and (min-height: 640px) and (prefers-reduced-motion: no-preference) {
+    :root:not([data-movimento="fermo"]) #diario[data-viva] .telefono-fascia {
+      align-self: start;
+      margin: 0;
+      padding: 0;
+      top: calc(50svh - (var(--phone-screen-w) * 844 / 390 + 2 * var(--phone-bezel)) / 2 + var(--barra-inset));
+      background-image: none;
+    }
+  }
+}

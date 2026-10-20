@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>L4 · Il ＋, la chat, la Partita live · laboratorio della landing</title>
+<link rel="stylesheet" href="../../src/styles/tokens.css">
+<link rel="stylesheet" href="../../src/styles/materials.css">
+<link rel="stylesheet" href="../../presentazione/styles/tokens.css">
+<link rel="stylesheet" href="./_lab.css">
+<link rel="stylesheet" href="./_landing.css">
+<style>
+@layer components {
+  .campo { min-height: 100svh; }
+  .campo:first-of-type { min-height: 80svh; }
+  @keyframes sali { from { opacity: 0; transform: translateY(calc(var(--rise-y) * var(--motion-scale))); } to { opacity: 1; transform: none; } }
+  @keyframes entra { from { opacity: 0; transform: translateY(calc(8px * var(--motion-scale))); } to { opacity: 1; transform: none; } }
+
+  /* ========================================== Il ＋ che si apre (LM4) */
+  .registra { display: grid; gap: var(--space-4); margin-top: var(--section-object-gap); max-width: 26.25rem; }
+  .piu-sez { width: var(--plus-size); height: var(--plus-size); border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: var(--on-accent); box-shadow: inset 0 0 0 1px var(--accent-strong); }
+  .piu-sez svg.i { width: 28px; height: 28px; stroke-width: 2.6; }
+  .piu-sez[data-premuto] { animation: premi var(--dur-press) var(--ease-press); }
+  @keyframes premi { from { transform: scale(0.94); } to { transform: none; } }
+  .voci { list-style: none; margin: 0; padding: var(--space-2); display: grid; gap: 10px; border-radius: calc(var(--radius-card) + var(--space-0-5)); background: var(--surface); border: 1px solid var(--edge);
+    transform-origin: calc(var(--plus-size) / 2) calc(-1 * var(--space-4) - var(--plus-size) / 2);
+    transition: opacity var(--dur-entrata) var(--ease-standard), transform var(--dur-molla) var(--ease-molla); }
+  /* Armato (RL3): chiuso, fuori vista. Scatta togliendo l'attributo. */
+  .registra[data-armato] .voci { opacity: 0; transform: translateY(calc(12px * var(--motion-scale))) scale(calc(1 - 0.04 * var(--motion-scale))); transition: none; }
+  .registra[data-armato] .voce { opacity: 0; }
+  .registra[data-aperto] .voce { animation: sali var(--dur-rise) var(--ease-rise) backwards; animation-delay: calc(var(--rise-i, 0) * var(--stagger-narrativo)); }
+  .voce { display: flex; align-items: center; gap: var(--space-3); width: 100%; min-height: 64px; padding: var(--space-2) var(--space-3); border-radius: calc(var(--radius-row) + var(--space-1)); text-align: left; color: var(--ink); }
+  .voce .ico { width: 44px; height: 44px; border-radius: var(--radius-track); display: grid; place-items: center; background: var(--bg); border: 1px solid var(--edge); flex: none; }
+  .voce[data-tono="live"] .ico { background: var(--accent); border-color: var(--accent-strong); color: var(--on-accent); }
+  .voce b { display: block; font: var(--type-headline); }
+  .voce small { font: var(--type-footnote); color: var(--ink-2); }
+  /* La voce scelta: filo d'inchiostro da 2px, di colpo (è uno stato). */
+  .voce[aria-selected="true"] { box-shadow: inset 0 0 0 2px var(--ink); }
+  .voce:active { transform: scale(var(--press-scale)); }
+  .voce { transition: transform var(--dur-press) var(--ease-press); }
+
+  /* ============================================================= Chat */
+  /* Altezza FISSA con scroll interno (ML10): una chat che cresce sposterebbe
+     la pagina sotto il dito a ogni messaggio. */
+  .chat { display: grid; grid-template-rows: 1fr auto; height: min(28rem, 60svh); border-radius: var(--radius-card); background: var(--surface); border: 1px solid var(--edge); overflow: hidden; }
+  .log { list-style: none; margin: 0; padding: var(--space-4); overflow-y: auto; overscroll-behavior: contain; display: flex; flex-direction: column; gap: var(--space-2); }
+  .msg { max-width: 82%; padding: var(--space-2-5) var(--space-3-5); border-radius: var(--bolla-r) var(--bolla-r) var(--bolla-r) var(--bolla-r-coda); background: var(--surface); border: 1px solid var(--edge); font: var(--type-callout); }
+  .msg[data-chi="tu"] { align-self: flex-end; background: var(--accent); border-color: var(--accent-strong); color: var(--on-accent); font-weight: 600; border-radius: var(--bolla-r) var(--bolla-r) var(--bolla-r-coda) var(--bolla-r); }
+  .msg[data-nuovo] { animation: entra var(--dur-entrata) var(--ease-standard) both; }
+  .scrive { display: inline-flex; gap: var(--space-1); padding: var(--space-3-5) var(--space-3-5); }
+  .scrive > span { width: 7px; height: 7px; border-radius: 50%; background: var(--ink-3); animation: puntino calc(var(--dur-racconto) * 1.5) var(--ease-respiro) infinite both; animation-delay: calc(var(--i, 0) * var(--dur-molla) / 2); }
+  @keyframes puntino { 0%, 70%, 100% { opacity: 0.3; transform: none; } 35% { opacity: 1; transform: translateY(calc(-3px * var(--motion-scale))); } }
+  :root.rm .scrive > span, :root[data-movimento="fermo"] .scrive > span { animation: none; opacity: 0.6; }
+  .risposte { display: flex; flex-wrap: wrap; gap: var(--space-2); padding: var(--space-3); border-top: 1px solid var(--edge); min-height: calc(var(--touch) + 2 * var(--space-3)); }
+  .risposte:focus { outline: none; }
+  .risposte button { min-height: var(--touch); padding: 0 var(--space-4); border-radius: var(--radius-capsule); background: var(--surface); border: 1px solid var(--edge); font: var(--type-subhead-strong); color: var(--ink); animation: sali var(--dur-rise) var(--ease-rise) backwards; animation-delay: calc(var(--rise-i, 0) * var(--stagger-narrativo)); transition: transform var(--dur-press) var(--ease-press); }
+  .risposte button:active { transform: scale(var(--press-scale)); }
+
+  /* ====================================================== Partita live */
+  .demo { display: grid; gap: var(--space-2-5); margin-top: var(--section-object-gap); max-width: var(--demo-max); position: relative; }
+  .demo:focus-within { outline: none; }
+  .demo h3 { font: var(--type-title-3); letter-spacing: var(--track-title-3); }
+  .demo h3:focus { outline: none; }
+  .set-pillole { display: flex; gap: var(--space-2); min-height: 32px; } /* altezza riservata */
+  .set-pillole span { height: 32px; padding: 0 var(--space-3); border-radius: var(--radius-capsule); border: 1px solid var(--edge); display: inline-flex; align-items: center; font: var(--type-footnote); animation: entra var(--dur-entrata) var(--ease-standard) both; }
+  .pannello-box { position: relative; }
+  .pannello { position: relative; width: 100%; height: var(--live-panel-h); border-radius: var(--radius-sheet); background: var(--surface); border: 1px solid var(--edge); display: grid; place-items: center; isolation: isolate; transition: transform var(--dur-press) var(--ease-press); }
+  .pannello[data-chi="noi"] { box-shadow: inset 0 0 0 2px var(--ink); border-color: transparent; }
+  .pannello::before { content: ""; position: absolute; inset: 0; border-radius: inherit; background: var(--ink); opacity: 0; z-index: -1; transition: opacity var(--dur-svelto) var(--ease-standard); }
+  .pannello:active, .pannello[data-premuto] { transform: scale(var(--press-scale)); }
+  .pannello:active::before, .pannello[data-premuto]::before { opacity: var(--state-press-soft); transition-duration: 0ms; }
+  .pannello .nome { position: absolute; top: var(--space-3); left: var(--space-4); font: var(--type-subhead-strong); color: var(--ink-2); }
+  .live-num { font: var(--type-live-num); letter-spacing: var(--track-live-num); font-variant-numeric: tabular-nums; }
+  /* Il pop dell'app (PartitaLive.css:115-121), ridichiarato con gli stessi valori. */
+  .live-num[data-pop="a"] { animation: pop-a var(--dur-press) var(--ease-press); }
+  .live-num[data-pop="b"] { animation: pop-b var(--dur-press) var(--ease-press); }
+  @keyframes pop-a { 0% { transform: scale(1); } 40% { transform: scale(1.16); } 100% { transform: scale(1); } }
+  @keyframes pop-b { 0% { transform: scale(1); } 40% { transform: scale(1.16); } 100% { transform: scale(1); } }
+  /* −1: `frost` (il riflesso del vetro, niente sfocatura), a 12 dall'angolo (ART A11). */
+  .meno { position: absolute; right: var(--space-3); bottom: var(--space-3); width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; color: var(--ink); background: var(--fill); }
+  .meno[aria-disabled="true"] { color: var(--ink-disabled); }
+  .mezzo { display: flex; align-items: center; gap: var(--space-3); min-height: 80px; }
+  .mezzo .ls-pallo { width: var(--pallo-demo); height: auto; }
+  .live-bolla { padding: var(--space-1-5) var(--space-3); border-radius: var(--radius-control); border: 1px solid var(--edge); background: var(--surface); font: var(--type-eyebrow); letter-spacing: var(--track-eyebrow); animation: live-bolla var(--dur-press) var(--ease-press) both; }
+  @keyframes live-bolla { from { opacity: 0; transform: translateY(calc(4px * var(--motion-scale))) scale(calc(1 - 0.08 * var(--motion-scale))); } to { opacity: 1; transform: none; } }
+  .azioni { display: flex; gap: var(--space-2-5); }
+  .azioni .ui-button { flex: 1; }
+  /* «Chiudi il set» ha il suo posto riservato: compare senza spostare niente. */
+  .chiudi-set { position: relative; isolation: isolate; visibility: hidden; opacity: 0; transform: scale(calc(1 - 0.04 * var(--motion-scale))); transition: opacity var(--dur-svelto) var(--ease-standard), transform var(--dur-svelto) var(--ease-standard), visibility 0s linear var(--dur-svelto); }
+  .chiudi-set[data-pronto] { visibility: visible; opacity: 1; transform: none; transition: opacity var(--dur-entrata) var(--ease-standard), transform var(--dur-entrata) var(--ease-standard), visibility 0s; }
+  /* L'anello: transform e opacità, TRE volte (ML8). L'app pulsa in box-shadow all'infinito. */
+  .chiudi-set::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: 0 0 0 var(--space-2) var(--accent-edge-tint); opacity: 0; z-index: -1; pointer-events: none; }
+  .chiudi-set[data-pronto]::after { animation: anello 1600ms var(--ease-respiro) var(--dur-entrata) 3; }
+  @keyframes anello { from { opacity: 0.6; transform: scale(0.96); } to { opacity: 0; transform: scale(1.12); } }
+  :root.rm :is(.live-num, .live-bolla, .chiudi-set::after, .msg, .risposte button, .set-pillole span), :root[data-movimento="fermo"] :is(.live-num, .live-bolla, .msg, .risposte button, .set-pillole span) { animation: none !important; }
+  :root.rm .chiudi-set[data-pronto]::after, :root[data-movimento="fermo"] .chiudi-set[data-pronto]::after { animation: none; }
+  .riepilogo { position: absolute; inset: 0; z-index: 3; border-radius: var(--radius-sheet); background: var(--surface); border: 2px solid var(--ink); display: grid; place-content: center; gap: var(--space-3); text-align: center; animation: sali var(--dur-rise) var(--ease-rise) both; }
+  .riepilogo h3:focus { outline: none; }
+}
+</style>
+</head>
+<body>
+<div class="ls-strumenti" aria-label="Strumenti della demo">
+  <button type="button" data-comando="fermo" aria-pressed="false">Ferma le animazioni</button>
+  <button type="button" id="da-capo">Da capo</button>
+  <button type="button" id="quasi">Live: 20–19</button>
+</div>
+<main>
+  <section id="inizio" class="campo" data-campo="carta" aria-labelledby="t-inizio"><div class="dentro">
+    <h2 id="t-inizio" tabindex="-1">Scorri</h2>
+    <p class="frase">Il ＋ si apre quando entra in vista per il 60%, una volta per sessione. Se ci arrivi col Tab prima, è già aperto (RL4).</p>
+  </div></section>
+
+  <section id="registra" class="campo" data-campo="carta" aria-labelledby="t-registra"><div class="dentro">
+    <h2 id="t-registra" tabindex="-1">Cosa registriamo?</h2>
+    <p class="frase">Scegli tu, al resto penso io.</p>
+    <div class="registra">
+      <span class="piu-sez" aria-hidden="true"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg></span>
+      <ul class="voci" role="tablist" aria-orientation="vertical" aria-label="Cosa registriamo?">
+        <li><button class="voce" role="tab" data-tono="live" aria-selected="false" tabindex="-1" style="--rise-i:0"><span class="ico"><svg class="i" data-size="20" aria-hidden="true"><use href="#i-clock"/></svg></span><span><b>Partita live</b><small>Segna i punti, in torneo o tra amici</small></span></button></li>
+        <li><button class="voce" role="tab" aria-selected="false" tabindex="-1" style="--rise-i:1"><span class="ico"><svg class="i" data-size="20" aria-hidden="true"><use href="#i-trophy"/></svg></span><span><b>Torneo</b><small>Luogo, formato, compagno, piazzamento</small></span></button></li>
+        <li><button class="voce" role="tab" aria-selected="false" tabindex="-1" style="--rise-i:2"><span class="ico"><svg class="i" data-size="20" aria-hidden="true"><use href="#i-bolt"/></svg></span><span><b>Torneo rapido</b><small>Nome e piazzamento, i dettagli dopo</small></span></button></li>
+        <li><button class="voce" role="tab" aria-selected="true" tabindex="0" style="--rise-i:3"><span class="ico"><svg class="i" data-size="20" aria-hidden="true"><use href="#i-chat-dots"/></svg></span><span><b>Raccontalo a Pallo</b><small>Ti faccio io le domande, una alla volta</small></span></button></li>
+      </ul>
+      <div class="pannello-voce" role="tabpanel" aria-label="Raccontalo a Pallo">
+        <div class="chat">
+          <ol class="log" role="log" aria-label="Conversazione con Pallo"></ol>
+          <div class="risposte" role="group" aria-label="Le tue risposte" tabindex="-1"></div>
+        </div>
+      </div>
+    </div>
+  </div></section>
+
+  <section id="live" class="campo" data-campo="carta" aria-labelledby="t-live"><div class="dentro">
+    <h2 id="t-live" tabindex="-1">Partita live</h2>
+    <p class="frase">Provala qui: tocca la squadra che fa punto. Da tastiera: ↑ loro, ↓ noi, con Maiusc togli.</p>
+    <div class="demo" tabindex="-1">
+      <p class="nota" style="margin:0">Tra amici · set a 21</p>
+      <h3 id="set-titolo" tabindex="-1">Set 1 di 3</h3>
+      <div class="set-pillole"></div>
+      <div class="pannello-box"><button type="button" class="pannello" data-chi="loro" aria-keyshortcuts="ArrowUp"><span class="nome">Loro</span><span class="live-num">0</span></button><button type="button" class="meno state" data-chi="loro" aria-label="Togli un punto a loro" aria-keyshortcuts="Shift+ArrowUp"><svg class="i" data-size="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12"/></svg></button></div>
+      <div class="mezzo"><span class="pallo-demo"></span><span class="live-bolla" aria-hidden="true"></span></div>
+      <div class="pannello-box"><button type="button" class="pannello" data-chi="noi" aria-keyshortcuts="ArrowDown"><span class="nome">Noi</span><span class="live-num">0</span></button><button type="button" class="meno state" data-chi="noi" aria-label="Togli un punto a noi" aria-keyshortcuts="Shift+ArrowDown"><svg class="i" data-size="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12"/></svg></button></div>
+      <div class="azioni">
+        <button type="button" class="ui-button state chiudi-set" data-variant="filled" data-size="lg">Chiudi il set</button>
+        <button type="button" class="ui-button state ricomincia" data-variant="neutral" data-size="lg">Ricomincia</button>
+      </div>
+      <p class="sr-only" role="status" aria-live="polite"></p>
+    </div>
+    <div class="lab-note ls-note"><b>Che cosa guardare.</b> L'autoplay (una volta per sessione, demo visibile al 60%): a +600ms il pannello «Noi» si mostra premuto e segna, a +1600ms «Loro» e «Cambio campo!», a +2600ms «Tocca tu». Un tocco o un tasto lo spengono e il punteggio resta. Ogni punto fa il pop (ogni tocco lo riavvia) e la battuta rientra. «Live: 20–19» porta al set point: «Chiudi il set» compare nel suo posto e l'anello pulsa tre volte. Il −1 sta nei pannelli (il bersaglio è il pannello intero; Maiusc+freccia per togliere).</div>
+  </div></section>
+</main>
+
+<script src="./_lab.js"></script>
+<script src="./_landing.js"></script>
+<script>
+Landing.pronto(() => {
+  'use strict'
+  const $ = (s, r = document) => r.querySelector(s)
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)]
+  $('#da-capo').addEventListener('click', () => { sessionStorage.removeItem('bvd_landing_visti'); location.reload() })
+
+  // =========================================================== Il ＋ (LM4)
+  const registra = $('.registra')
+  Landing.arma(registra, {
+    chiave: 'registra', soglia: 0.6,
+    prepara: () => {},
+    scatta: () => {
+      // A t0: il ＋ fa la pressione, il menu si apre da lui, le voci salgono.
+      $('.piu-sez').dataset.premuto = ''
+      registra.dataset.aperto = ''
+      setTimeout(() => delete $('.piu-sez').dataset.premuto, Lab.dur('press') + 50)
+    },
+    finale: () => {},
+  })
+  // Tablist: roving tabindex, frecce, Home, Fine; il pannello cambia di colpo.
+  const voci = $$('.voce')
+  function scegli(v, focus) {
+    voci.forEach((x) => { x.setAttribute('aria-selected', String(x === v)); x.tabIndex = x === v ? 0 : -1 })
+    if (focus) v.focus()
+  }
+  voci.forEach((v) => v.addEventListener('click', () => scegli(v, false)))
+  $('.voci').addEventListener('keydown', (e) => {
+    const i = voci.indexOf(document.activeElement)
+    const k = { ArrowDown: i + 1, ArrowUp: i - 1, Home: 0, End: voci.length - 1 }[e.key]
+    if (k === undefined) return
+    e.preventDefault()
+    scegli(voci[(k + voci.length) % voci.length], true)
+  })
+
+  // ================================================== La chat (LM6, F11)
+  const log = $('.log')
+  const risposte = $('.risposte')
+  const battitura = (n) => (Landing.movimentoFermo() ? 0 : Math.min(700, 250 + 6 * n) * Lab.slow())
+  const PASSI = [
+    { d: 'Come si chiama il torneo?', r: ['Rimini Open', 'Cervia Beach Cup'] },
+    { d: (x) => `Perfetto, «${x}». Con chi hai giocato?`, r: ['Luca', 'Giulia'] },
+    { d: 'Quando si è svolto?', r: ['Oggi', 'Ieri'] },
+    { d: 'Il torneo è già finito o è ancora in corso?', r: ['Finito', 'In corso'] },
+    { d: 'Ottimo. Che piazzamento hai ottenuto?', r: ['1°', '2°', '3°'] },
+    { d: 'Ecco il riepilogo. Confermo la creazione?', r: ['Conferma'] },
+    { d: 'Fatto. Nell\'app adesso sarebbe nel tuo diario.', r: ['Ricomincia'] },
+  ]
+  let passo = 0
+  let pausa = 0
+  let inPausa = null
+  function messaggio(testo, chi, nuovo = true) {
+    const vicino = log.scrollHeight - log.scrollTop - log.clientHeight < 80
+    const li = document.createElement('li')
+    li.className = 'msg'
+    li.dataset.chi = chi
+    if (nuovo) li.dataset.nuovo = ''
+    li.textContent = testo
+    log.appendChild(li)
+    // In fondo solo se chi legge era già lì (MOTION §5 F11).
+    if (vicino) log.scrollTo({ top: log.scrollHeight, behavior: Landing.movimentoFermo() ? 'auto' : 'smooth' })
+    return li
+  }
+  function mostraRisposte(r) {
+    risposte.innerHTML = ''
+    r.forEach((t, i) => {
+      const b = document.createElement('button')
+      b.type = 'button'
+      b.textContent = t
+      b.style.setProperty('--rise-i', i)
+      b.addEventListener('click', () => rispondi(t))
+      risposte.appendChild(b)
+    })
+    risposte.removeAttribute('aria-busy')
+  }
+  function rispondi(t) {
+    if (t === 'Ricomincia') return ricomincia()
+    messaggio(t, 'tu') // l'eco del tocco, subito
+    risposte.innerHTML = ''
+    risposte.setAttribute('aria-busy', 'true')
+    risposte.focus({ preventScroll: true }) // al gruppo, a t0
+    passo++
+    const p = PASSI[passo]
+    const testo = typeof p.d === 'function' ? p.d(t) : p.d
+    const dopo = () => { inPausa = null; clearTimeout(pausa); scrive && scrive.remove(); scrive = null; messaggio(testo, 'pallo'); mostraRisposte(p.r) }
+    const ms = battitura(testo.length)
+    let scrive = null
+    if (ms === 0) return dopo()
+    scrive = document.createElement('li')
+    scrive.className = 'msg scrive'
+    scrive.setAttribute('aria-hidden', 'true')
+    scrive.innerHTML = '<span style="--i:0"></span><span style="--i:1"></span><span style="--i:2"></span>'
+    log.appendChild(scrive)
+    inPausa = dopo
+    pausa = setTimeout(dopo, ms)
+  }
+  // Qualunque tocco o tasto nella chat salta la pausa: è ritmo, non un cancello.
+  for (const ev of ['pointerdown', 'keydown']) $('.chat').addEventListener(ev, () => { if (inPausa) inPausa() })
+  function ricomincia() {
+    log.innerHTML = ''
+    passo = 0
+    messaggio('Ripartiamo da capo.', 'pallo', false)
+    messaggio('Come si chiama il torneo?', 'pallo', false)
+    mostraRisposte(PASSI[0].r)
+    risposte.querySelector('button').focus({ preventScroll: true })
+  }
+  messaggio('Ciao! Sono Pallo. Ti faccio qualche domanda e il torneo lo compilo io.', 'pallo', false)
+  messaggio('Come si chiama il torneo?', 'pallo', false)
+  mostraRisposte(PASSI[0].r)
+
+  // ===================================================== Partita live
+  const demo = $('.demo')
+  const pan = { loro: $('.pannello[data-chi="loro"]'), noi: $('.pannello[data-chi="noi"]') }
+  const bolla = $('.live-bolla')
+  const stato = $('.demo [role="status"]')
+  $('.pallo-demo').innerHTML = Landing.pallo('saluta', 80)
+  const svgPallo = $('.pallo-demo svg')
+  const meno = { loro: $('.meno[data-chi="loro"]'), noi: $('.meno[data-chi="noi"]') }
+  for (const chi of ['loro', 'noi']) {
+    meno[chi].addEventListener('click', () => punto(chi, -1, true))
+    pan[chi].addEventListener('click', () => punto(chi, 1, true))
+  }
+  // Le regole, semplificate per la demo (le vere sono PartitaLive.regole.ts, ⟂ E).
+  let p = { set: 1, noi: 3, loro: 2, vinti: { noi: 0, loro: 0 }, colpo: 0, ultimo: null, finito: false }
+  const obiettivo = () => (p.set === 3 ? 15 : 21)
+  const cambioOgni = () => (p.set === 3 ? 5 : 7)
+  const setFinito = () => Math.max(p.noi, p.loro) >= obiettivo() && Math.abs(p.noi - p.loro) >= 2
+  function battuta() {
+    const o = obiettivo()
+    if (setFinito()) return p.noi > p.loro ? ['Set vostro! Chiudetelo.', 'festa'] : ['Set loro: chiudi e si riparte.', 'triste']
+    if (p.noi >= o - 1 && p.noi > p.loro) return [p.vinti.noi === 1 ? 'Match point per voi!' : 'Set point per voi!', p.vinti.noi === 1 ? 'sorpreso' : 'esulta']
+    if (p.loro >= o - 1 && p.loro > p.noi) return ['Set point per loro.', 'preoccupato']
+    if (p.noi >= o - 1 && p.noi === p.loro) return ['Ai vantaggi: servono due punti di fila.', 'pensa']
+    if (p.ultimo && (p.noi + p.loro) % cambioOgni() === 0 && p.noi + p.loro > 0) return ['Cambio campo!', 'contento']
+    return p.ultimo === 'noi' ? ['Bel punto!', 'esulta'] : p.ultimo === 'loro' ? ['Dai, si recupera.', 'preoccupato'] : ['Si comincia! Tocca chi fa punto.', 'saluta']
+  }
+  function dici(testo, umore) {
+    if (bollaRef.textContent !== testo) {
+      // La nuvoletta si rimonta (chiave = testo) e fa live-bolla.
+      const nuova = bollaRef.cloneNode(false)
+      nuova.textContent = testo
+      bollaRef.replaceWith(nuova)
+      bollaRef = nuova
+    }
+    Landing.umore(svgPallo, umore)
+  }
+  let bollaRef = bolla
+  function ripeti() { const t = bollaRef.textContent; const n = bollaRef.cloneNode(false); n.textContent = t; bollaRef.replaceWith(n); bollaRef = n }
+  function disegna() {
+    for (const chi of ['loro', 'noi']) {
+      const n = $('.live-num', pan[chi])
+      n.textContent = p[chi]
+      // Il pop: a/b alternati, così ogni punto lo riavvia anche sullo stesso numero.
+      if (p.ultimo === chi && p.colpo > 0) n.dataset.pop = p.colpo % 2 ? 'a' : 'b'
+      else delete n.dataset.pop
+      meno[chi].setAttribute('aria-disabled', String(p[chi] === 0))
+      pan[chi].setAttribute('aria-label', `Punto per ${chi}, ora ${p[chi]}`)
+    }
+    const [t, u] = battuta()
+    dici(t, u)
+    const chiudi = $('.chiudi-set')
+    if (setFinito()) chiudi.dataset.pronto = ''
+    else delete chiudi.dataset.pronto
+  }
+  function punto(chi, d, utente) {
+    if (p.finito) return
+    if (d > 0 && setFinito()) return ripeti() // «no, prima chiudi il set», senza scossone
+    if (d < 0 && p[chi] === 0) return
+    p[chi] += d
+    p.ultimo = chi
+    p.colpo++
+    disegna()
+    if (utente) {
+      stato.textContent = `${p.noi} a ${p.loro}. ${battuta()[0]}`
+      if (navigator.vibrate && !Landing.movimentoFermo()) navigator.vibrate(12)
+    }
+  }
+  $('.chiudi-set').addEventListener('click', () => {
+    if (!setFinito()) return
+    const vinto = p.noi > p.loro ? 'noi' : 'loro'
+    p.vinti[vinto]++
+    const pill = document.createElement('span')
+    pill.textContent = `Set ${p.set} ${p.noi}–${p.loro}`
+    $('.set-pillole').appendChild(pill)
+    if (p.vinti[vinto] === 2) return fine(vinto)
+    p.set++
+    p.noi = 0; p.loro = 0; p.ultimo = null; p.colpo = 0
+    $('#set-titolo').textContent = `Set ${p.set} di 3`
+    disegna()
+    $('#set-titolo').focus() // a t0
+  })
+  function fine(chi) {
+    p.finito = true
+    delete $('.chiudi-set').dataset.pronto
+    const r = document.createElement('div')
+    r.className = 'riepilogo'
+    r.innerHTML = `<h3 tabindex="-1">Partita ${chi === 'noi' ? 'vostra' : 'loro'}, ${p.vinti.noi}–${p.vinti.loro}</h3><p class="nota">${$$('.set-pillole span').map((s) => s.textContent).join(' · ')}</p>`
+    demo.appendChild(r)
+    r.querySelector('h3').focus() // prima il focus…
+    $$('.pannello-box').forEach((x) => (x.inert = true)) // …poi inert
+    Landing.umore(svgPallo, chi === 'noi' ? 'festa' : 'triste')
+  }
+  function ricominciaLive() {
+    const r = $('.riepilogo')
+    if (r) { r.style.transition = `opacity ${Lab.dur('svelto')}ms`; r.style.opacity = '0'; setTimeout(() => r.remove(), Lab.dur('svelto')) }
+    $$('.pannello-box').forEach((x) => (x.inert = false))
+    p = { set: 1, noi: 0, loro: 0, vinti: { noi: 0, loro: 0 }, colpo: 0, ultimo: null, finito: false }
+    $('.set-pillole').innerHTML = ''
+    $('#set-titolo').textContent = 'Set 1 di 3'
+    disegna()
+    $('.ricomincia').focus()
+  }
+  $('.ricomincia').addEventListener('click', ricominciaLive)
+  $('#quasi').addEventListener('click', () => { p.noi = 20; p.loro = 19; p.ultimo = null; disegna(); $('#live').scrollIntoView() })
+  // Scorciatoie SOLO col focus dentro la demo.
+  demo.addEventListener('keydown', (e) => {
+    const chi = { ArrowUp: 'loro', ArrowDown: 'noi' }[e.key]
+    if (!chi) return
+    e.preventDefault()
+    punto(chi, e.shiftKey ? -1 : 1, true)
+  })
+  disegna()
+
+  // ------------------------------------------------- L'autoplay (§L5.9)
+  const timers = []
+  let spento = Landing.visto('autoplay')
+  function spegni() { spento = true; timers.forEach(clearTimeout); timers.length = 0; Landing.segna('autoplay') }
+  for (const ev of ['pointerdown', 'keydown', 'focusin']) demo.addEventListener(ev, spegni)
+  Landing.alCambioDelMovimento((fermo) => { if (fermo && timers.length) spegni() })
+  const ioLive = new IntersectionObserver(([v]) => {
+    if (spento) return ioLive.disconnect()
+    if (timers.length && v.intersectionRatio < 0.6) return spegni() // uscita a metà: consumato
+    if (timers.length || v.intersectionRatio < 0.6 || Landing.movimentoFermo() || demo.contains(document.activeElement)) return
+    Landing.segna('autoplay')
+    const k = Lab.slow()
+    const ghost = (chi) => {
+      // La causa visibile: il pannello si mostra premuto, poi segna. Niente status, niente vibrazione.
+      pan[chi].dataset.premuto = ''
+      timers.push(setTimeout(() => { delete pan[chi].dataset.premuto; punto(chi, 1, false) }, 120))
+    }
+    timers.push(setTimeout(() => ghost('noi'), 600 * k))
+    timers.push(setTimeout(() => ghost('loro'), 1600 * k))
+    timers.push(setTimeout(() => { dici('Tocca tu: chi fa punto?', 'occhiolino'); timers.length = 0; spento = true }, 2600 * k))
+  }, { threshold: [0, 0.6] })
+  ioLive.observe(demo)
+})
+</script>
+</body>
+</html>

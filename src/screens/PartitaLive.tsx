@@ -47,7 +47,6 @@ import type { LiveTorneo, PartitaLiveProps } from '../app/contracts'
 import { PHASES } from '../lib/db.enums'
 import type { AnyForm, Phase } from '../lib/models'
 import { Pallo } from '../components/Pallo'
-import type { PalloUmore } from '../components/Pallo'
 import {
   Button,
   ConfirmDialog,
@@ -79,82 +78,20 @@ import {
   togliPartita,
 } from './PartitaLive.storico'
 import type { PartitaAmici } from './PartitaLive.storico'
+import { FORMATO_BEACH, battuta, obiettivo, partitaChiusa, setFinito, titoloSet, vinti } from './PartitaLive.regole'
+import type { Formato, Modo, PartitaInCorso, Squadra } from './PartitaLive.regole'
 import './PartitaLive.css'
 import { LiquidGlass } from '../components/ui/LiquidGlass'
 
 /** La chiave della partita in corso (una per scheda: è sessionStorage). */
 export const CHIAVE_LIVE = 'bvd_partita_live'
 
+// Le regole stanno in PartitaLive.regole.ts (le usa anche la landing): chi le
+// importava da qui continua a trovarle.
+export { FORMATO_BEACH, obiettivo }
+export type { Formato, Modo, PartitaInCorso }
+
 const TIMEOUT_S = 30
-
-type Squadra = 'noi' | 'loro'
-/** Chi ha mosso il punteggio per ultimo: decide Pallo, la nuvoletta e il «pop». */
-type Ultimo = Squadra | 'tolto' | null
-/** Dove va a finire la partita: nel torneo, o nello storico di questo telefono. */
-export type Modo = 'torneo' | 'amici'
-
-/** Quanti set e a quanti punti. Il torneo gioca sempre quello del beach. */
-export interface Formato {
-  set: 1 | 3
-  punti: 21 | 15
-}
-export const FORMATO_BEACH: Formato = { set: 3, punti: 21 }
-
-interface SetChiuso {
-  us: number
-  them: number
-}
-
-export interface PartitaInCorso {
-  v: 1
-  modo: Modo
-  /** La chiave nello storico tra amici (nel torneo non serve, ma c'è). */
-  id: string
-  /** Nel torneo: dove si salva. Tra amici: ''. */
-  torneoId: string
-  fase: Phase
-  /** Tra amici: il compagno scritto a mano ('' = la coppia è «Noi»). */
-  compagno: string
-  avversari: string
-  formato: Formato
-  chiusi: SetChiuso[]
-  /** I punti del set in corso. */
-  noi: number
-  loro: number
-  ultimo: Ultimo
-  /** Cresce a ogni punto: fa ripartire il «pop» anche sullo stesso numero. */
-  colpo: number
-  /** Il riepilogo: la partita è finita, manca solo il salvataggio. */
-  finita: boolean
-  /** Finita a mano («Finisci la partita» a 0–0), non per i set vinti. */
-  aMano: boolean
-  note: string
-}
-
-// ------------------------------------------------------------------ regole
-/**
- * Il set si vince a 21 (o a 15, la partitella), il terzo sempre a 15, con due
- * punti di scarto.
- */
-export const obiettivo = (indice: number, f: Formato = FORMATO_BEACH) => (f.set > 1 && indice >= f.set - 1 ? 15 : f.punti)
-const setFinito = (a: number, b: number, t: number) => Math.max(a, b) >= t && Math.abs(a - b) >= 2
-/** Il cambio campo del beach: ogni 7 punti nei set a 21, ogni 5 in quelli a 15. */
-const cambioOgni = (t: number) => (t >= 21 ? 7 : 5)
-/** I set da vincere: 2 su 3, o quello unico. */
-const daVincere = (f: Formato) => Math.ceil(f.set / 2)
-
-function vinti(chiusi: SetChiuso[]) {
-  return { noi: chiusi.filter((s) => s.us > s.them).length, loro: chiusi.filter((s) => s.them > s.us).length }
-}
-
-/** I set vinti che servono, o tutti i set giocati: la partita è chiusa. */
-function partitaChiusa(chiusi: SetChiuso[], f: Formato) {
-  const v = vinti(chiusi)
-  return v.noi >= daVincere(f) || v.loro >= daVincere(f) || chiusi.length >= f.set
-}
-
-/** «Set 2 di 3», o «Set unico». */
-const titoloSet = (indice: number, f: Formato) => (f.set === 1 ? 'Set unico' : `Set ${indice + 1} di ${f.set}`)
 
 /** Le regole del formato scelto, dette per intero sotto la scelta. */
 function regole(f: Formato) {
@@ -162,41 +99,6 @@ function regole(f: Formato) {
   return f.punti === 15
     ? 'Al meglio dei tre set, tutti a 15. Sempre due punti di scarto.'
     : 'Al meglio dei tre set: a 21, il terzo a 15. Sempre due punti di scarto.'
-}
-
-interface Battuta {
-  testo: string
-  umore: PalloUmore
-  /** Va detta anche allo screen reader, insieme al punteggio. */
-  notizia: boolean
-}
-
-/** Che cosa dice Pallo: la cosa più importante che sta succedendo. */
-function battuta(p: PartitaInCorso): Battuta {
-  const i = p.chiusi.length
-  const t = obiettivo(i, p.formato)
-  const ultimoSet = daVincere(p.formato) - 1
-  const { noi, loro, ultimo } = p
-  const umore: PalloUmore = ultimo === 'noi' ? 'esulta' : ultimo === 'loro' ? 'preoccupato' : ultimo === 'tolto' ? 'contento' : 'saluta'
-  if (setFinito(noi, loro, t)) {
-    return noi > loro
-      ? { testo: 'Set vostro! Chiudetelo.', umore: 'festa', notizia: true }
-      : { testo: 'Set loro: chiudi e si riparte.', umore: 'triste', notizia: true }
-  }
-  const v = vinti(p.chiusi)
-  // Il prossimo punto chiude il set: è set point (o match point).
-  // Il match point, nostro o loro, fa strabuzzare gli occhi a Pallo.
-  if (noi >= t - 1 && noi > loro) return { testo: v.noi === ultimoSet ? 'Match point per voi!' : 'Set point per voi!', umore: v.noi === ultimoSet ? 'sorpreso' : umore, notizia: true }
-  if (loro >= t - 1 && loro > noi) {
-    return { testo: v.loro === ultimoSet ? 'Match point loro: concentrati.' : 'Set point loro: concentrati.', umore: v.loro === ultimoSet ? 'sorpreso' : umore, notizia: true }
-  }
-  if (noi === loro && noi >= t - 1) return { testo: 'Ai vantaggi: servono due punti di fila.', umore, notizia: true }
-  const somma = noi + loro
-  if (ultimo !== 'tolto' && somma > 0 && somma % cambioOgni(t) === 0) return { testo: 'Cambio campo!', umore, notizia: true }
-  if (ultimo === 'noi') return { testo: 'Bel punto! Avanti così.', umore, notizia: false }
-  if (ultimo === 'loro') return { testo: 'Testa alta, il prossimo è nostro.', umore, notizia: false }
-  if (ultimo === 'tolto') return { testo: 'Punto tolto: si riparte da qui.', umore, notizia: false }
-  return { testo: i === 0 ? 'Si comincia! Tocca chi fa punto.' : `Set ${i + 1}: si riparte da zero.`, umore, notizia: false }
 }
 
 // --------------------------------------------------------------- memoria

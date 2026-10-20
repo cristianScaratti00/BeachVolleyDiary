@@ -78,10 +78,43 @@ const MESSAGGI = [
 
 const rise = (i: number) => ({ className: 'rise', style: { '--rise-i': i } as CSSProperties })
 
+/** Il parametro del deep link della landing: `/?accesso=registrati` o `/?accesso=accedi`. */
+export const PARAM_ACCESSO = 'accesso'
+
+/**
+ * La vista con cui si apre l'accesso. La landing porta «Crea il tuo diario» a
+ * `/?accesso=registrati` e «Ho già un account» a `/?accesso=accedi`, così il
+ * Benvenuto non fa ripetere una scelta appena fatta (UX LC5). Qualunque altro
+ * valore, o niente, è il Benvenuto.
+ */
+function vistaIniziale(): Vista {
+  try {
+    const v = new URLSearchParams(window.location.search).get(PARAM_ACCESSO)
+    return v === 'registrati' || v === 'accedi' ? v : 'benvenuto'
+  } catch {
+    return 'benvenuto'
+  }
+}
+
+/** Toglie `?accesso=` dall'indirizzo, lasciando il resto: si legge una volta sola. */
+function togliParamAccesso() {
+  try {
+    const url = new URL(window.location.href)
+    if (!url.searchParams.has(PARAM_ACCESSO)) return
+    url.searchParams.delete(PARAM_ACCESSO)
+    window.history.replaceState(window.history.state, '', url.pathname + url.search + url.hash)
+  } catch {
+    /* niente history (ambienti strani): il parametro resta, innocuo */
+  }
+}
+
 export default function Login() {
   const online = useOnline()
   const { login, register } = useAuth()
-  const [vista, setVista] = useState<Vista>('benvenuto')
+  // Letta una volta, al montaggio; il parametro si toglie subito dopo, così un
+  // ricaricamento o un «indietro» non riaprono la stessa vista.
+  const [vista, setVista] = useState<Vista>(vistaIniziale)
+  useEffect(togliParamAccesso, [])
   const [passo, setPasso] = useState<Passo>(1)
   const [direzione, setDirezione] = useState(1)
   const [name, setName] = useState('')

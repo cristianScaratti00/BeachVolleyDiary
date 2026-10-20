@@ -29,40 +29,22 @@
 import { forwardRef, useEffect, useId, useImperativeHandle, useRef, useState } from 'react'
 import type { CSSProperties, MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent, ReactNode, RefObject } from 'react'
 import { LIT } from '../lib/theme'
+import {
+  ALLEGRI,
+  CON_OMBRA,
+  OCCHIALI_MS,
+  PALLEGGIO_MS,
+  PRESSIONE_LUNGA_MS,
+  REAZIONE_MS,
+  TOCCHI_DI_FILA,
+  TOCCHI_GAP_MS,
+  avviaVita,
+} from './Pallo.vita'
+import type { PalloSorpresa, PalloUmore } from './Pallo.vita'
 import './Pallo.css'
 
-export type PalloUmore =
-  /** In piedi che saluta con la mano destra: Home, primo avvio. */
-  | 'saluta'
-  /** Braccia in alto, occhi felici, bocca aperta, saltella: punto fatto, Wrapped. */
-  | 'esulta'
-  /** Braccia in alto, occhi felici, sorriso: «grazie», segnalazione inviata. */
-  | 'contento'
-  /** Sopracciglia giù, bocca storta, tentenna: punto subito. */
-  | 'preoccupato'
-  /** Spunta dal bordo di uno sheet con le mani appoggiate. */
-  | 'sbircia'
-  /** Solo la testa, ferma: l'avatar dell'assistente. */
-  | 'testa'
-  /** Salta fra coriandoli e stelline agitando le braccia: un 1° posto, una vittoria. */
-  | 'festa'
-  /** Occhi giù, una lacrimuccia, si affloscia: una sconfitta. */
-  | 'triste'
-  /** Occhi in alto, mano sul mento, tre puntini: l'assistente che «scrive». */
-  | 'pensa'
-  /** Occhi chiusi, «z z z» che salgono, respiro lento: niente da fare, per ora. */
-  | 'dorme'
-  /** Occhi grandi, bocca a O, sobbalza: 404, match point. */
-  | 'sorpreso'
-  /** Strizza l'occhio con la mano alzata: un invito complice. */
-  | 'occhiolino'
-  /** Occhiali da sole, una mano sul fianco e l'altra alzata: siamo in spiaggia, una serie di vittorie. */
-  | 'cool'
-  /** Occhi a cuore che battono, guance rosse, braccia in alto: un record personale. */
-  | 'cuori'
-
-/** L'easter egg: un palleggio (vola, fa un giro e ricade) o gli occhiali da sole. */
-export type PalloSorpresa = 'palleggio' | 'occhiali'
+export type { PalloUmore, PalloSorpresa } from './Pallo.vita'
+export { PALLO_UMORI, REAZIONE_MS } from './Pallo.vita'
 
 export interface PalloHandle {
   /**
@@ -102,44 +84,6 @@ const BIANCO = '#FFFFFF'
 const SABBIA = '#FFC184'
 /** La lacrima: l'unico azzurro di Pallo. */
 const ACQUA = '#A8DCF5'
-
-/** Quanto dura la reazione a un tocco. */
-export const REAZIONE_MS = 1000
-/** I tempi delle sorprese: gli stessi delle animazioni in Pallo.css. */
-const PALLEGGIO_MS = 1500
-const OCCHIALI_MS = 2800
-const TOCCHI_DI_FILA = 5
-const TOCCHI_GAP_MS = 700
-const PRESSIONE_LUNGA_MS = 600
-/** Il gesto più lungo (gli sguardi, 1,8s): poi l'attributo si toglie. */
-const GESTO_MS = 1900
-
-/** Tutti gli umori, nell'ordine in cui sono nati: la tavola e i test li passano tutti. */
-export const PALLO_UMORI: readonly PalloUmore[] = [
-  'saluta', 'esulta', 'contento', 'preoccupato', 'sbircia', 'testa',
-  'festa', 'triste', 'pensa', 'dorme', 'sorpreso', 'occhiolino', 'cool', 'cuori',
-]
-
-/** Le allegre: una a caso a ogni tocco. Gli occhiali (`cool`) restano la sorpresa. */
-const ALLEGRI: PalloUmore[] = ['esulta', 'contento', 'occhiolino', 'cuori', 'festa']
-/** In piedi: l'ombra c'è di serie (`esulta` e `preoccupato` no, come prima). */
-const CON_OMBRA = new Set<PalloUmore>(['saluta', 'contento', 'festa', 'triste', 'pensa', 'dorme', 'sorpreso', 'occhiolino', 'cool', 'cuori'])
-/** Chi ha gli occhi aperti ammicca (non chi li ha chiusi, felici, a cuore o dietro gli occhiali). */
-const AMMICCA = new Set<PalloUmore>(['saluta', 'sbircia', 'testa', 'preoccupato', 'sorpreso', 'pensa', 'triste', 'occhiolino'])
-
-type Gesto = 'guarda-sx' | 'guarda-dx' | 'guarda-su' | 'inclina-sx' | 'inclina-dx' | 'saltello'
-/** I gesti «idle» di ogni umore. Chi ha già un'animazione piena (festa, esulta, dorme) non ne ha. */
-const GESTI: Partial<Record<PalloUmore, Gesto[]>> = {
-  saluta: ['guarda-sx', 'guarda-dx', 'guarda-su', 'inclina-sx', 'inclina-dx', 'saltello'],
-  contento: ['inclina-sx', 'inclina-dx', 'saltello'],
-  preoccupato: ['guarda-sx', 'guarda-dx'],
-  sbircia: ['guarda-sx', 'guarda-dx', 'guarda-su'],
-  testa: ['guarda-sx', 'guarda-dx', 'guarda-su', 'inclina-sx', 'inclina-dx'],
-  sorpreso: ['guarda-sx', 'guarda-dx'],
-  occhiolino: ['inclina-sx', 'saltello'],
-  cool: ['saltello', 'inclina-sx', 'inclina-dx'],
-  cuori: ['inclina-sx', 'inclina-dx', 'saltello'],
-}
 
 // ------------------------------------------------------------- le forme
 
@@ -505,170 +449,6 @@ function disegna(umore: PalloUmore, mani: string, lenti: string): Disegno {
   }
 }
 
-// ----------------------------------------------------------- la vita
-
-/** Fin dove si spostano gli occhi (unità del disegno): la faccia ne fa il 45%, le pupille il resto. */
-const SGUARDO_X = 4.5
-const SGUARDO_Y = 3.5
-
-/**
- * Lo sguardo che segue e la vita (ammiccare, gesti): attributi e transform
- * scritti sul DOM, mai uno stato React. Gira solo con Pallo in vista, la
- * pagina visibile e senza reduced-motion; si spegne e si riaccende da sé.
- */
-function useVita(
-  svgRef: RefObject<SVGSVGElement>,
-  segui: boolean,
-  vivo: boolean,
-  umoreRef: { readonly current: PalloUmore },
-  boxRef: { readonly current: readonly [number, number, number, number] },
-) {
-  useEffect(() => {
-    const svg = svgRef.current
-    if (!svg || (!segui && !vivo)) return
-    if (typeof IntersectionObserver === 'undefined') return
-    const ridotto = typeof window.matchMedia === 'function' ? window.matchMedia('(prefers-reduced-motion: reduce)') : null
-    const timers = new Set<number>()
-    const dopo = (ms: number, fn: () => void) => {
-      const t = window.setTimeout(() => {
-        timers.delete(t)
-        fn()
-      }, ms)
-      timers.add(t)
-    }
-    const caso = (a: number, b: number) => a + Math.random() * (b - a)
-    let inVista = false
-    let acceso = false
-    let raf = 0
-    let riposo = 0
-    let px = 0
-    let py = 0
-    let ditoA = -Infinity
-    let ultimoGesto: Gesto | null = null
-
-    // ---- lo sguardo
-    const posa = (x: number, y: number) => {
-      const t = (k: number) => (x || y ? `translate(${f(x * k)}px, ${f(y * k)}px)` : '')
-      const volto = svg.querySelector<SVGGElement>('.pallo-volto')
-      const occhi = svg.querySelector<SVGGElement>('.pallo-sguardo')
-      if (volto) volto.style.transform = t(0.45)
-      if (occhi) occhi.style.transform = t(0.55)
-    }
-    const guarda = () => {
-      raf = 0
-      const r = svg.getBoundingClientRect()
-      const [bx, by, bw, bh] = boxRef.current
-      // Il centro della faccia, (60, 60) nel disegno, sullo schermo.
-      const dx = px - (r.left + ((60 - bx) / bw) * r.width)
-      const dy = py - (r.top + ((60 - by) / bh) * r.height)
-      const d = Math.hypot(dx, dy)
-      if (d < 1) return posa(0, 0)
-      // Girato del tutto già a una volta e mezzo la sua larghezza: chi è
-      // vicino lo guarda dritto, chi è lontano lo guarda di lato.
-      const k = Math.min(1, d / Math.max(1, r.width * 1.5))
-      posa((dx / d) * k * SGUARDO_X, (dy / d) * k * SGUARDO_Y)
-    }
-    const muovi = (e: PointerEvent) => {
-      px = e.clientX
-      py = e.clientY
-      ditoA = performance.now()
-      window.clearTimeout(riposo)
-      if (!raf) raf = requestAnimationFrame(guarda)
-    }
-    // Il dito si stacca: dopo un attimo torna a guardare davanti.
-    const lascia = (e: PointerEvent) => {
-      if (e.pointerType === 'mouse') return
-      window.clearTimeout(riposo)
-      riposo = window.setTimeout(() => posa(0, 0), 1200)
-    }
-    // Il mouse esce dalla finestra.
-    const esce = (e: PointerEvent) => {
-      if (e.pointerType === 'mouse' && !e.relatedTarget) posa(0, 0)
-    }
-
-    // ---- la vita
-    const batti = () => {
-      svg.setAttribute('data-batti', '')
-      dopo(180, () => svg.removeAttribute('data-batti'))
-    }
-    const ammicca = () =>
-      dopo(caso(2200, 5600), () => {
-        if (AMMICCA.has(umoreRef.current) && !svg.hasAttribute('data-sorpresa')) {
-          batti()
-          // Ogni tanto due volte di fila, come fa chiunque.
-          if (Math.random() < 0.25) dopo(300, batti)
-        }
-        ammicca()
-      })
-    const gesticola = () =>
-      dopo(caso(3500, 8000), () => {
-        const occupato = svg.hasAttribute('data-tocco') || svg.hasAttribute('data-sorpresa') || svg.hasAttribute('data-gesto')
-        // Gli occhi li sta guidando il dito: niente sguardi per conto loro.
-        const dito = performance.now() - ditoA < 4000
-        let gesti = (GESTI[umoreRef.current] ?? []).filter((g) => !(dito && g.startsWith('guarda')))
-        if (gesti.length > 1) gesti = gesti.filter((g) => g !== ultimoGesto)
-        if (!occupato && gesti.length) {
-          ultimoGesto = gesti[Math.floor(Math.random() * gesti.length)]
-          svg.setAttribute('data-gesto', ultimoGesto)
-          dopo(GESTO_MS, () => svg.removeAttribute('data-gesto'))
-        }
-        gesticola()
-      })
-
-    const accendi = () => {
-      if (vivo) {
-        ammicca()
-        gesticola()
-      }
-      if (segui) {
-        window.addEventListener('pointermove', muovi, { passive: true })
-        window.addEventListener('pointerdown', muovi, { passive: true })
-        window.addEventListener('pointerup', lascia, { passive: true })
-        window.addEventListener('pointercancel', lascia, { passive: true })
-        document.addEventListener('pointerout', esce, { passive: true })
-      }
-    }
-    const spegni = () => {
-      timers.forEach((t) => window.clearTimeout(t))
-      timers.clear()
-      window.clearTimeout(riposo)
-      if (raf) cancelAnimationFrame(raf)
-      raf = 0
-      window.removeEventListener('pointermove', muovi)
-      window.removeEventListener('pointerdown', muovi)
-      window.removeEventListener('pointerup', lascia)
-      window.removeEventListener('pointercancel', lascia)
-      document.removeEventListener('pointerout', esce)
-      svg.removeAttribute('data-batti')
-      svg.removeAttribute('data-gesto')
-      posa(0, 0)
-    }
-    const aggiorna = () => {
-      const deve = inVista && document.visibilityState !== 'hidden' && !ridotto?.matches
-      if (deve === acceso) return
-      acceso = deve
-      if (deve) accendi()
-      else spegni()
-    }
-
-    const io = new IntersectionObserver((voci) => {
-      inVista = voci[voci.length - 1]?.isIntersecting ?? false
-      aggiorna()
-    })
-    io.observe(svg)
-    document.addEventListener('visibilitychange', aggiorna)
-    ridotto?.addEventListener?.('change', aggiorna)
-    return () => {
-      io.disconnect()
-      document.removeEventListener('visibilitychange', aggiorna)
-      ridotto?.removeEventListener?.('change', aggiorna)
-      if (acceso) spegni()
-    }
-    // Umore e inquadratura si leggono dai ref a ogni giro: cambiarli non
-    // riaccende niente.
-  }, [segui, vivo]) // eslint-disable-line react-hooks/exhaustive-deps
-}
-
 // ------------------------------------------------------------- Pallo
 
 export const Pallo = forwardRef<PalloHandle, PalloProps>(function Pallo(
@@ -689,7 +469,14 @@ export const Pallo = forwardRef<PalloHandle, PalloProps>(function Pallo(
   visibileRef.current = visibile
   const boxRef = useRef(box)
   boxRef.current = box
-  useVita(svgRef, segui, vivo, visibileRef, boxRef)
+  // Lo sguardo e la vita sono codice DOM (Pallo.vita.ts, lo usa anche la
+  // landing): umore e inquadratura si leggono dai ref a ogni giro, cambiarli
+  // non riaccende niente.
+  useEffect(() => {
+    const svg = svgRef.current
+    if (!svg) return
+    return avviaVita(svg, { segui, vivo, umore: () => visibileRef.current, box: () => boxRef.current })
+  }, [segui, vivo])
 
   const stato = useRef({ fine: 0, n: 0, tocchi: 0, ultimo: 0, turno: 0 })
   useEffect(() => {
