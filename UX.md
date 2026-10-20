@@ -753,6 +753,8 @@ Il widget dell'assistente, i grafici e "Ultimi tornei" **escono** dalla Home.
 | Conferma email richiesta | Avviso verde (`role=status`), si passa ad Accedi, l'email resta |
 | Offline | «Sei offline: non posso verificare le credenziali.» |
 | Consenso cookie | Il dialogo bloccante si apre sopra il Login alla prima visita (comportamento attuale) |
+| Benvenuto (dal 20 ottobre 2026) | Sulla carta, Solby su una card dell'app che cambia col messaggio (il diario, i numeri, i compagni); decorativo (`aria-hidden`). I tre messaggi scorrono da soli ogni 5,5s (pattern carosello WAI-ARIA, WCAG 2.2.2): il puntino acceso si riempie, il pannello è `aria-live="off"` mentre scorre e `polite` da fermo. Si fermano per sempre quando l'utente sceglie un messaggio (puntino, frecce, swipe) o il fuoco entra nei puntini; il pulsante accanto ai puntini («Ferma i messaggi» / «Fai scorrere i messaggi») li ferma e li fa ripartire; col mouse sopra aspettano; con reduced-motion partono fermi |
+| Accedi, Registrati (dal 20 ottobre 2026) | Solby da solo sopra il titolo (occhiolino; pensa sul nome, contento sull'ultimo passo). Quando l'altezza non basta (telefono piccolo, tastiera su) Solby si fa da parte: il modulo viene prima |
 
 ### 6.10 Assistente `/crea`
 

@@ -47,10 +47,10 @@ import type { LiveTorneo, PartitaLiveProps } from '../app/contracts'
 import { PHASES } from '../lib/db.enums'
 import type { AnyForm, Phase } from '../lib/models'
 import { Pallo } from '../components/Pallo'
+import { SheetChips } from '../components/modals/Sheet'
 import {
   Button,
   ConfirmDialog,
-  FilterChips,
   IconButton,
   List,
   ListGroup,
@@ -811,16 +811,10 @@ function Timeout({ resto, riprendiRef, onRiprendi }: { resto: number; riprendiRe
   )
 }
 
-/** La fase, con l'etichetta visibile sopra le chip (il gruppo ha la sua). */
+/** La fase: le chip che vanno a capo, come in «Nuova partita». Una riga che
+ *  scorre (i filtri) lasciava «Finale» fuori dallo schermo a 390. */
 function SceltaFase({ value, onChange }: { value: Phase; onChange: (f: Phase) => void }) {
-  return (
-    <div className="live-scelta">
-      <p className="live-label" aria-hidden="true">
-        Fase
-      </p>
-      <FilterChips label="Fase" value={value} onChange={(v) => onChange(PHASES.find((f) => f === v) ?? 'Girone')} options={PHASES.map((f) => ({ value: f, label: f }))} />
-    </div>
-  )
+  return <SheetChips label="Fase" value={value} onChange={(v) => v && onChange(v)} options={PHASES.map((f) => ({ value: f, label: f }))} />
 }
 
 function Impostazione({ tornei, torneoDefault, torneoOggi, iniziale, storico, onInizia, onEsci, onNuovoTorneo, onElimina, onSvuota }: {

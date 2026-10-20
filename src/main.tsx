@@ -23,6 +23,16 @@ import { analyticsPath } from './app/routes'
 // punto autorizzato ad accenderlo.
 avviaTracciamentoSeConsentito()
 
+// Il service worker (public/sw.js): la pagina di cortesia senza rete e
+// l'installazione. Lo registrava la landing quando aveva JavaScript; ora lo
+// registra l'app, che è anche dove porta l'icona sulla Home. Solo in
+// produzione: in sviluppo si metterebbe in mezzo alle navigazioni di Vite.
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(() => undefined)
+  })
+}
+
 // Vercel Analytics e Speed Insights non sono esenti "perché non usano cookie":
 // mandano comunque dati di navigazione a un terzo. Stanno quindi dietro la
 // stessa scelta di Clarity — un solo interruttore, così non c'è da spiegare

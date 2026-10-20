@@ -439,7 +439,7 @@ export default function Home({
               <p className="home-nuvola-nota">
                 Preferisci farti guidare?{' '}
                 <Link to={{ name: 'crea' }} className="home-link">
-                  Usa l'assistente
+                  Raccontalo a Solby
                 </Link>
               </p>
             }

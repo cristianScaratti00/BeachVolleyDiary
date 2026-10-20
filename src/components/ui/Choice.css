@@ -82,9 +82,12 @@
     overflow-x: auto;
     /* Lo spazio per l'anello di focus, che `overflow` taglierebbe: largo
        quanto l'anello esce dal bordo (2 + 2). Era 2px e l'anello usciva
-       mozzato sopra e sotto. Sono anche i 4px che portano il bersaglio a 44. */
-    padding: var(--focus-reach);
-    margin: calc(-1 * var(--focus-reach));
+       mozzato sopra e sotto. Sopra e sotto è anche lo spazio del bersaglio
+       da 44 (`::after` della chip), che `overflow` taglierebbe allo stesso
+       modo: con le chip da 34 servono 5px, e 4 lo fermavano a 42. */
+    --chips-y: max(var(--focus-reach), calc((var(--touch) - var(--chip-h)) / 2));
+    padding: var(--chips-y) var(--focus-reach);
+    margin: calc(-1 * var(--chips-y)) calc(-1 * var(--focus-reach));
   }
   /* Le righe che scorrono di lato nascondono la scrollbar solo sul touch. */
   @media (hover: none) {

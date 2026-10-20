@@ -62,7 +62,8 @@ await p.eval('__perf.ev.length = 0')
 out.menuOpen = await trace(async () => { const f = frames(700); await tap(w >= 900 ? 'button[aria-haspopup=menu]' : '.ui-tab-plus'); return { ...(await f), inp: await evs() } })
 await sleep(300)
 // 3. Nuovo torneo: menu → sheet swap
-out.sheetOpen = await trace(async () => { const f = frames(800); await tap('[role=menuitem]'); return { ...(await f), inp: await evs() } })
+// (la voce «Torneo», per nome: la prima del menu è la Partita live, a schermo intero)
+out.sheetOpen = await trace(async () => { const f = frames(800); const sel = await p.eval(`(() => { const m = [...document.querySelectorAll('[role=menuitem]')].find((m) => /Luogo, formato/.test(m.textContent)); if (!m) return '[role=menuitem]'; m.id = m.id || 'qa-torneo'; return '#' + CSS.escape(m.id) })()`); await tap(sel); return { ...(await f), inp: await evs() } })
 await sleep(300)
 // 4. Disclosure «Altri dettagli» (the only animated height)
 out.disclosure = await trace(async () => { const f = frames(600); const sel = await p.eval(`(() => { const b = [...document.querySelectorAll('[role=dialog] button[aria-expanded]')].find(b => /dettagli/i.test(b.textContent)); if (!b) return null; b.id = b.id || 'qa-disc'; return '#' + CSS.escape(b.id) })()`); if (sel) await tap(sel); return { ...(await f), inp: await evs() } })
@@ -71,15 +72,26 @@ await sleep(300)
 out.sheetClose = await trace(async () => { const f = frames(600); await p.key('Escape'); return { ...(await f), inp: await evs() } })
 await sleep(400)
 // 6. Tab switch Home → Tornei (route change, no transition)
-out.toTornei = await trace(async () => { const f = frames(800); await tap(w >= 900 ? '.ui-sidebar-item[href="/tornei"]' : '.ui-tab[href="/tornei"]'); return { ...(await f), inp: await evs() } })
+out.toTornei = await trace(async () => { const f = frames(800); await tap(w >= 900 ? '.ui-sidebar-item[href*="/tornei"]' : '.ui-tab[href*="/tornei"]'); return { ...(await f), inp: await evs() } })
 await sleep(400)
-// 7. Segmented: Lista → Timeline (lazy chunk)
-out.toTimeline = await trace(async () => { const f = frames(900); await p.eval(`[...document.querySelectorAll('.ui-segment')][1].click()`); return { ...(await f), inp: await evs() } })
-await sleep(400)
-// 8. Segmented: → Mappa (Leaflet chunk + tiles)
-out.toMappa = await trace(async () => { const f = frames(1500); await p.eval(`[...document.querySelectorAll('.ui-segment')][2].click()`); return { ...(await f), inp: await evs() } })
+// 7. Tornei: Lista → Mappa (Leaflet chunk + tiles). Dalla versione D le viste
+//    di Tornei sono due; il Diario è una tab a sé.
+out.toMappa = await trace(async () => { const f = frames(1500); await p.eval(`[...document.querySelectorAll('.ui-segment')][1].click()`); return { ...(await f), inp: await evs() } })
 await sleep(600)
-// 9. Back to Lista; scroll the long list under the glass TabBar
+// 8. Tab → Diario (lazy chunk della Timeline)
+out.toDiario = await trace(async () => { const f = frames(900); await tap(w >= 900 ? '.ui-sidebar-item[href*="/diario"]' : '.ui-tab[href*="/diario"]'); return { ...(await f), inp: await evs() } })
+await sleep(600)
+// 9. Scroll del Diario: la schermata con più vetro (i pulsanti «Storia» di
+//    ogni riga più la TabBar), sotto il dito
+out.scrollDiario = await trace(async () => {
+  const f = frames(1800)
+  await p.send('Input.synthesizeScrollGesture', { x: w / 2, y: h / 2, yDistance: -2400, speed: 2000, gestureSourceType: w >= 900 ? 'mouse' : 'touch' })
+  return { ...(await f) }
+})
+// 10. Torna a Tornei, Lista; scorre la lista lunga sotto la TabBar di vetro
+if (process.env.DEBUG) console.error('dopo il Diario:', await p.eval(`location.search + ' · tabbar ' + !!document.querySelector('.ui-tabbar') + ' · tab ' + [...document.querySelectorAll('.ui-tab')].map((t) => t.getAttribute('href')).join(' ')`))
+await tap(w >= 900 ? '.ui-sidebar-item[href*="/tornei"]' : '.ui-tab[href*="/tornei"]')
+await sleep(600)
 await p.eval(`[...document.querySelectorAll('.ui-segment')][0].click()`)
 await sleep(800)
 out.scroll = await trace(async () => {
@@ -87,10 +99,10 @@ out.scroll = await trace(async () => {
   await p.send('Input.synthesizeScrollGesture', { x: w / 2, y: h / 2, yDistance: -2400, speed: 2000, gestureSourceType: w >= 900 ? 'mouse' : 'touch' })
   return { ...(await f) }
 })
-// 10. Open a torneo detail from the list
+// 11. Apre il dettaglio di un torneo dalla lista
 await p.eval('scrollTo(0, 0); document.querySelector("main").scrollTop = 0')
 await sleep(300)
-out.toDetail = await trace(async () => { const f = frames(1000); await tap('a.ui-card-link'); return { ...(await f), inp: await evs() } })
+out.toDetail = await trace(async () => { const f = frames(1000); await tap('a.tornei-row-link, a.ui-card-link'); return { ...(await f), inp: await evs() } })
 out.clsTotal = await p.eval('({ cls: +__perf.cls.toFixed(4), shifts: __perf.shifts.slice(-12) })')
 out.animations = await p.eval(`document.getAnimations().map(a => a.effect?.getKeyframes?.().flatMap(k => Object.keys(k).filter(x => !['offset','easing','composite','computedOffset'].includes(x)))).flat().filter((v, i, s) => s.indexOf(v) === i)`)
 console.log(JSON.stringify(out, null, 1))

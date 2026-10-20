@@ -1,24 +1,12 @@
 /* ============================================================================
-   L'accesso del redesign: il tramonto a tutto schermo (--surface-brand), il
-   contenuto ancorato in basso, testo bianco. È una superficie scura
-   (`data-surface="dark"`): --ink, --ink-2, --ink-3 e l'anello di focus sono
-   già i bianchi di materials.css.
-
-   I campi sono quelli del design per il buio: il bianco all'8% col filo al
-   26%, focus arancio. Non si riscrive il campo: si ridefiniscono qui i token
-   che TextField legge (--field, --field-border, --field-h, --ink-label,
-   --ink-placeholder), come fa materials.css per l'inchiostro sul vetro.
+   L'accesso del redesign: la carta dell'app (--bg), Solby al centro
+   (Login.solby.css) e il contenuto ancorato in basso. Niente scena e niente
+   movimento d'ambiente: i campi, i pulsanti e i colori sono quelli dell'app.
    ============================================================================ */
 @layer components {
   .accesso {
-    --field: color-mix(in srgb, var(--on-glass-dark) 8%, transparent);
-    --field-border: color-mix(in srgb, var(--on-glass-dark) 26%, transparent);
+    /* I campi un poco più alti di quelli dell'app: si scrive col pollice. */
     --field-h: calc(var(--touch) + var(--space-2));
-    --ink-label: var(--on-glass-dark-2);
-    --ink-placeholder: color-mix(in srgb, var(--on-glass-dark) 55%, transparent);
-    /* L'errore di un campo sul buio: il rosso pieno farebbe 3:1 sul nero, il
-       suo fondo chiaro (--danger-wash) fa 17. L'icona dice che è un errore. */
-    --danger: var(--danger-wash);
     /* La cornice: ferma, alta quanto la parte visibile dello schermo. Con la
        tastiera su, `--vv-h` e `--vv-top` (useAccessoFermo) la stringono
        sopra la tastiera; senza JS è la viewport dinamica. Mai più alta. */
@@ -30,16 +18,16 @@
     isolation: isolate;
     overflow: hidden;
     overscroll-behavior: none;
-    background: var(--surface-brand);
+    background: var(--bg);
   }
   /* Finché c'è l'accesso (`<html data-accesso>`, messo e tolto da Login) la
-     pagina non scorre e non rimbalza; il fondo, se mai si vedesse, è il buio. */
+     pagina non scorre e non rimbalza; il fondo, se mai si vedesse, è la carta. */
   :root[data-accesso],
   :root[data-accesso] body {
     overflow: hidden;
     overscroll-behavior: none;
   }
-  :root[data-accesso] body { background-color: var(--surface-brand); }
+  :root[data-accesso] body { background-color: var(--bg); }
 
   /* ----------------------------------------------------------- Colonna */
   /* L'area del modulo riempie la cornice. È l'unica cosa che può scorrere, e
@@ -75,30 +63,20 @@
     gap: var(--space-3-5);
     margin-left: calc(-1 * var(--space-2));
   }
-  .accesso-indietro {
-    position: relative;
-    isolation: isolate;
-    flex: none;
-    display: grid;
-    place-items: center;
-    width: var(--touch);
-    height: var(--touch);
-    border-radius: 50%;
-    color: var(--on-glass-dark);
-  }
+  .accesso-indietro { flex: none; }
   .accesso-progresso { flex: 1; display: flex; gap: var(--space-1-5); }
   .accesso-segmento {
     flex: 1;
     height: var(--space-1);
     border-radius: var(--space-0-5);
-    background: color-mix(in srgb, var(--on-glass-dark) 30%, transparent);
+    background: var(--line-strong);
     overflow: hidden;
   }
   /* Il riempimento scorre in transform, dall'inizio del segmento. */
   .accesso-segmento > span {
     display: block;
     height: 100%;
-    background: var(--on-glass-dark);
+    background: var(--ink);
     transform: scaleX(0);
     transform-origin: 0 50%;
     transition: transform var(--dur-molla) var(--ease-molla);
@@ -109,7 +87,7 @@
   .accesso-benvenuto { gap: calc(var(--space-4) + var(--space-0-5)); }
   .accesso-marchio { display: flex; }
   /* 150: lo spazio di due righe di titolo e due di testo. I pulsanti sotto
-     non saltano quando un messaggio è più corto dell'altro. */
+     non saltano quando un messaggio è più corto dell'altro (né Solby sopra). */
   .accesso-carosello { position: relative; min-height: 150px; touch-action: pan-y; }
   .accesso-slide { display: flex; flex-direction: column; gap: var(--space-2-5); }
   .accesso-slide-titolo {
@@ -121,11 +99,17 @@
 
   /* I puntini: bersagli da 44 col segno al centro; il primo si allinea al
      testo. Quello acceso si allunga (la FORMA dice dove sei, non solo il
-     bianco). */
-  .accesso-punti {
+     colore). */
+  /* I puntini a sinistra, il pulsante pausa/riprendi a destra (l'icona
+     allineata al bordo del testo). */
+  .accesso-punti-riga {
     display: flex;
-    margin: calc(-1 * var(--space-3)) 0 calc(-1 * var(--space-2)) calc(-1 * var(--space-2-5));
+    align-items: center;
+    justify-content: space-between;
+    margin: calc(-1 * var(--space-3)) calc(-1 * (var(--touch) - var(--icon-20)) / 2) calc(-1 * var(--space-2)) calc(-1 * var(--space-2-5));
   }
+  .accesso-punti { display: flex; }
+  .accesso-auto { color: var(--ink-2); }
   .accesso-punto {
     display: grid;
     place-items: center;
@@ -134,13 +118,34 @@
     border-radius: var(--radius-capsule);
   }
   .accesso-punto-segno {
+    position: relative;
+    overflow: hidden;
     width: var(--space-2);
     height: var(--space-2);
     border-radius: var(--space-1);
-    background: color-mix(in srgb, var(--on-glass-dark) 40%, transparent);
+    background: var(--line-strong);
     transition: width var(--dur-press) var(--ease-press), background-color var(--dur-svelto) var(--ease-standard);
   }
-  .accesso-punto[aria-selected="true"] .accesso-punto-segno { width: 22px; background: var(--on-glass-dark); }
+  .accesso-punto[aria-selected="true"] .accesso-punto-segno { width: 22px; background: var(--ink); }
+  /* Mentre i messaggi scorrono da soli, il puntino acceso è una barretta che
+     si riempie: è il tempo del messaggio, e a fine corsa arriva il prossimo
+     (Login.tsx, `onAnimationEnd`). Col mouse sopra si ferma dov'è. */
+  .accesso-punto-pieno {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--ink);
+    transform: scaleX(0);
+    transform-origin: left center;
+  }
+  .accesso-punti[data-auto] .accesso-punto[aria-selected="true"] .accesso-punto-segno { background: var(--line-strong); }
+  .accesso-punti[data-auto] .accesso-punto[aria-selected="true"] .accesso-punto-pieno {
+    animation: accesso-avanza var(--auto-ms) linear both;
+  }
+  .accesso-punti[data-auto="pausa"] .accesso-punto-pieno { animation-play-state: paused; }
+  @keyframes accesso-avanza {
+    to { transform: none; }
+  }
 
   .accesso-azioni { display: flex; flex-direction: column; gap: var(--space-2-5); }
   .accesso-nota {
@@ -156,7 +161,7 @@
     margin-bottom: var(--space-1-5);
     font: 700 0.8125rem/1.25 var(--font-ui);
     letter-spacing: 0.015em;
-    color: var(--accent-edge);
+    color: var(--accent-text);
   }
   .accesso-h1 {
     font: 800 2.375rem/1.02 var(--font-ui);
@@ -172,27 +177,6 @@
   }
   .accesso-passo .accesso-sotto { font-size: 0.96875rem; }
 
-  /* I campi scuri: raggio 16 come nel design, e il fondo che si accende al focus. */
-  .accesso .ui-input {
-    border-radius: var(--radius-row);
-    padding: 0 var(--space-4);
-    transition: border-color var(--dur-svelto) var(--ease-standard), background-color var(--dur-svelto) var(--ease-standard);
-  }
-  .accesso .ui-input:focus { background: color-mix(in srgb, var(--on-glass-dark) 12%, transparent); }
-  /* L'occhio «Mostra password» col margine di questi campi (16): l'icona si
-     allinea al testo e il testo si ferma prima. Sul buio è il bianco al 66%
-     (--ink-3), pieno quando la password si vede o sotto il mouse. */
-  .accesso .ui-password > .ui-input { padding-right: calc(var(--touch) + var(--space-1)); }
-  .accesso .ui-password-toggle { right: calc(var(--space-4) - (var(--touch) - var(--icon-20)) / 2); }
-  .accesso .ui-password-toggle[aria-pressed="true"] { color: var(--ink); }
-  /* L'autocompletamento di Chrome dipinge il campo di azzurro chiaro: sul
-     buio diventerebbe una lastra bianca col testo bianco. */
-  .accesso .ui-input:-webkit-autofill {
-    -webkit-text-fill-color: var(--ink);
-    caret-color: var(--ink);
-    box-shadow: inset 0 0 0 100px var(--surface-brand);
-  }
-
   .accesso-nome { display: grid; gap: calc(var(--space-1) + var(--space-0-5)); }
   /* Sempre alta una riga: quando arriva l'esito il pulsante sotto non salta. */
   .accesso-nome-stato {
@@ -204,27 +188,30 @@
     color: var(--ink);
   }
   .accesso-nome-stato[data-status="checking"] { font-weight: 500; color: var(--ink-3); }
-  .accesso-nome-stato[data-status="taken"] .ui-icon { color: var(--accent); }
+  .accesso-nome-stato[data-status="taken"] .ui-icon { color: var(--danger); }
+  .accesso-nome-stato[data-status="available"] .ui-icon { color: var(--success); }
 
   .accesso-invia { margin-top: var(--space-2); }
 
-  /* Errori, conferma e offline: una lastra appena chiara, testo bianco;
-     l'icona dice il tipo (l'arancio fa 6.9 sul nero). */
+  /* Errori, conferma e offline: una lastra di carta bianca col filo, testo
+     d'inchiostro; l'icona dice il tipo. */
   .accesso-avviso {
     display: flex;
     align-items: flex-start;
     gap: var(--space-2);
     padding: var(--space-2-5) var(--space-3);
     border-radius: var(--radius-control);
-    background: var(--field);
-    box-shadow: inset 0 0 0 var(--border-w) var(--field-border);
+    background: var(--surface);
+    box-shadow: inset 0 0 0 var(--border-w) var(--edge);
     font: var(--type-subhead);
     letter-spacing: var(--track-subhead);
     color: var(--ink);
     animation: accesso-compari var(--dur-entrata) var(--ease-standard) both;
   }
   .accesso-avviso .ui-icon { flex: none; margin-top: var(--space-0-5); }
-  .accesso-avviso[data-tipo="errore"] .ui-icon { color: var(--accent); }
+  .accesso-avviso[data-tipo="errore"] .ui-icon { color: var(--danger); }
+  .accesso-avviso[data-tipo="conferma"] .ui-icon { color: var(--success); }
+  .accesso-avviso[data-tipo="offline"] .ui-icon { color: var(--ink-2); }
   @keyframes accesso-compari {
     from { opacity: 0; transform: translateY(calc(-4px * var(--motion-scale))); }
     to { opacity: 1; transform: none; }
@@ -253,7 +240,7 @@
     inset: calc(50% - var(--touch) / 2) calc(-1 * var(--space-2));
   }
   @media (hover: hover) and (pointer: fine) {
-    .accesso-link:hover { color: var(--accent-edge); }
+    .accesso-link:hover { color: var(--accent-text-state); }
   }
 
   @media (prefers-reduced-motion: reduce) {

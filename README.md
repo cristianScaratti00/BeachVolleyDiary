@@ -23,10 +23,12 @@ npm run preview        # anteprima della build
 
 ## Funzionalità
 
-- **Accesso** — Supabase Auth (email + password). Benvenuto con la scena del tramonto (due
-  giocatori che palleggiano sopra la rete, la stessa scena dietro Accedi e Registrati) e un
-  carosello di tre messaggi, Accedi, Registrati in due passi (nickname verificato live dalla Edge
-  Function `check-name`, poi email e password). Gate in `Root.tsx`: splash → login → app.
+- **Accesso** — Supabase Auth (email + password). Sulla carta dell'app, con Solby al centro
+  (`Login.solby.tsx`): nel Benvenuto in piedi su una card dell'app che cambia coi tre messaggi del
+  carosello (il diario, i numeri, i compagni), che scorrono da soli finché non ne scegli uno (c'è
+  il pulsante per fermarli); in Accedi e Registrati da solo, con l'umore del momento. Registrati in
+  due passi (nickname verificato live dalla Edge Function `check-name`, poi email e password).
+  Gate in `Root.tsx`: splash → login → app.
 - **Home** — una frase su come stai andando, periodo (Sempre / stagioni) e filtro per compagno;
   **Solby**, la mascotte, dà un consiglio alla volta calcolato dai dati (oggi si gioca → aggiungi
   partita, piazzamento da aggiornare, serie record, posto migliore, Wrapped pronto…); poi la % di

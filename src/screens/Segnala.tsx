@@ -19,6 +19,7 @@ import { AREE, DESCRIZIONE_MAX, DESCRIZIONE_MIN, TITOLO_MAX, TITOLO_MIN, validaS
 import type { AreaSegnalazione, NuovaSegnalazione } from '../lib/segnalazioni'
 import type { SegnalaProps } from '../app/contracts'
 import { NavBar, Page, Button, TextField, TextArea, Icon } from '../components/ui/index'
+import { SheetChips } from '../components/modals/Sheet'
 import { Pallo } from '../components/Pallo'
 import type { PalloHandle } from '../components/Pallo'
 import './Segnala.css'
@@ -131,24 +132,14 @@ export default function Segnala({ back, onBack, onInvia }: SegnalaProps) {
         </section>
       ) : (
         <form className="segnala-form rise" style={{ '--rise-i': 1 } as CSSProperties} onSubmit={(e) => void invia(e)} noValidate>
-          {/* Una scelta sola fra chip che vanno a capo: la scelta è la chip
-              d'inchiostro piena, e si annuncia con `aria-pressed`. */}
-          <fieldset className="segnala-aree">
-            <legend className="segnala-label">Dove succede</legend>
-            <div className="segnala-chips">
-              {AREE.map((a) => (
-                <button
-                  key={a.value}
-                  type="button"
-                  className="segnala-chip"
-                  aria-pressed={area === a.value}
-                  onClick={() => setArea(a.value)}
-                >
-                  {a.label}
-                </button>
-              ))}
-            </div>
-          </fieldset>
+          {/* Una scelta sola fra chip che vanno a capo: le chip dei fogli,
+              la scelta è quella d'inchiostro piena (`aria-pressed`). */}
+          <SheetChips
+            label="Dove succede"
+            options={AREE.map((a) => ({ value: a.value, label: a.label }))}
+            value={area}
+            onChange={(v) => v && setArea(v)}
+          />
           <TextField
             ref={titoloRef}
             label="Il problema in una riga"

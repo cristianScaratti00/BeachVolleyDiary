@@ -324,10 +324,12 @@
     color: var(--accent-text);
     text-decoration: none;
   }
+  /* Il bersaglio da 44 cresce più verso l'alto: sotto, a 6px, comincia il
+     collegamento della prima riga, che altrimenti se ne prendeva un pezzo. */
   .home-tutti::after {
     content: "";
     position: absolute;
-    inset: calc((1.35em - var(--touch)) / 2) calc(-1 * var(--space-2));
+    inset: calc((1.35em - var(--touch)) / 2 - var(--space-1-5)) calc(-1 * var(--space-2)) calc((1.35em - var(--touch)) / 2 + var(--space-1-5));
   }
   @media (hover: hover) and (pointer: fine) {
     .home-tutti:hover { color: var(--accent-text-state); text-decoration: underline; text-underline-offset: var(--space-0-5); }

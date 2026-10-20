@@ -238,7 +238,7 @@ describe('Tornei — con l\'orologio fermo', () => {
 
     it('il link secondario porta all\'assistente', () => {
       renderTornei([])
-      expect(screen.getByRole('link', { name: /Usa l'assistente/ })).toHaveAttribute('href', '/crea')
+      expect(screen.getByRole('link', { name: /Raccontalo a Solby/ })).toHaveAttribute('href', '/crea')
     })
   })
 

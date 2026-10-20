@@ -250,7 +250,7 @@ L'interfaccia usa **un inchiostro** (navy), **due superfici** (sabbia e carta) e
 | `--danger-wash` · `--success-wash` | `#FDE8EE` · `#E4F4EC` | fondi dei badge di stato (danger sopra 4.76, success 4.84) |
 | `--scrim` | `rgb(14 22 38 / .36)` | velo sotto sheet e dialoghi, **senza blur** |
 | `--viewer-bg` | `#0B111D` | fondo di Wrapped, Storia e lightbox |
-| `--surface-brand` | `#16233F` | il navy del marchio come superficie: pannello del Login (bianco sopra 15.6); è il fondo della palette `navy` dei PNG |
+| `--surface-brand` | `#16233F` | il navy del marchio come superficie: è il fondo della palette `navy` dei PNG. Il Login non lo usa più: dal 20 ottobre 2026 è sulla carta (`--bg`), con Solby al posto del tramonto |
 
 | Coppie su riempimento | Rapporto |
 |---|---|

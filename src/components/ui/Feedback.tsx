@@ -34,7 +34,7 @@ export function EmptyState({ variant = 'filtrato', zero, pallo = 'dorme', icon, 
   text?: ReactNode
   /** Il CTA principale: un solo pulsante. */
   action?: ReactNode
-  /** Il link secondario («Preferisci farti guidare? Usa l'assistente»). */
+  /** Il link secondario («Preferisci farti guidare? Raccontalo a Solby»). */
   secondary?: ReactNode
   level?: 2 | 3
   className?: string

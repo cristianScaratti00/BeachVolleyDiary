@@ -339,7 +339,7 @@ export default function TorneoSheet({
 
         {!modifica && (
           <Button variant="plain" icon="chat-dots" className="torneo-sheet-assistant" onClick={() => onUseAssistant(sporco)}>
-            Preferisci farti guidare? Usa l'assistente
+            Preferisci farti guidare? Raccontalo a Solby
           </Button>
         )}
 

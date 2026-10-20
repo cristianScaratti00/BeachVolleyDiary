@@ -84,6 +84,55 @@ PBASE=http://127.0.0.1:4173/docs/preview/index.html node docs/qa/fontcls.mjs
 
 `BASE` cambia l'URL dell'anteprima, `CHROME` l'eseguibile e `QA_OUT` la cartella degli screenshot. Gli script non fanno parte della build né dei test.
 
+## Il giro del 20 ottobre 2026: l'app dopo la versione D
+
+Un secondo giro sull'app intera, dopo il redesign Liquid Glass, Solby e la landing. Le stesse prove sull'anteprima (`docs/preview`) a 390 con la tacca simulata (`--safe-top: 59px`), più gli stati `?vuoto`, `?fallito` ed `?estremo`; le prestazioni sulla build di produzione dell'anteprima.
+
+### Cosa è stato sistemato
+
+| # | Difetto trovato (com'era misurato) | Correzione | Dopo |
+|---|---|---|---|
+| 1 | **Il service worker non lo registrava nessuno**: lo faceva `presentazione/js/install.ts`, uscito con «Controluce». Chi arrivava da allora non aveva la pagina offline | lo registra l'app (`src/main.tsx`), in produzione, al `load` | — |
+| 2 | **La Fase della Partita live usciva dallo schermo**: le chip erano il filtro che scorre (`FilterChips`), e a 390 «Finale» restava tagliata al bordo. Nel foglio «Nuova partita» la stessa scelta va a capo | `SheetChips`, come nel foglio | le cinque fasi su due righe, a 320 e a 390 |
+| 3 | **Le chip di «Dove succede» (Segnala) erano una copia a mano** di `SheetChips`: stesso disegno, stessa scelta con `aria-pressed`, un foglio a parte | `SheetChips`; tolto il CSS doppio | stesso aspetto, l'etichetta come gli altri campi |
+| 4 | **Bersagli delle chip a 42** (Tornei, Mappa): la riga che scorre teneva 4px sopra e sotto, tarati sulle chip da 36; con quelle da 34 il `::after` da 44 veniva tagliato | lo spazio della riga è `max(--focus-reach, (--touch − --chip-h) / 2)` | 44 |
+| 5 | **«Tutti i tornei» in Home a 38**: sotto, a 6px, comincia il collegamento della prima riga, che si prendeva un pezzo del bersaglio | il bersaglio cresce più verso l'alto | 44 |
+| 6 | **Col movimento ridotto la lente della TabBar scivolava ancora** (`reduced`: una transizione di `transform` da 200ms cambiando tab): la radice di `liquid-glass-react` porta un suo `transition: all 0.2s`, e la regola spegneva solo `.glass` | con reduced-motion, nessuna transizione in tutto lo strato di vetro | la lente salta |
+| 7 | **Due nomi per la stessa azione**: «Usa l'assistente» negli stati vuoti di Home e Tornei e nel foglio «Nuovo torneo», «Raccontalo a Solby» nel ＋ | «Raccontalo a Solby» ovunque (UX §12) | — |
+| 8 | **`Button` leggeva `offsetWidth` dopo ogni disegno** (la larghezza di riposo per «Salvataggio…»): ogni render di ogni pulsante costringeva il browser a impaginare | la misura la dà un solo `ResizeObserver` per tutti i pulsanti, a impaginazione fatta | aprendo «Nuovo torneo», da 2 fotogrammi lunghi a 1 |
+| 9 | **Gli script di QA erano rimasti alla struttura di prima**: `reduced.mjs` e `perf.mjs` cercavano la tab Tornei con `href="/tornei"` (oggi ricorda la vista: `/tornei/mappa`) e aprivano la prima voce del ＋ (oggi la Partita live, a schermo intero); `perf.mjs` cercava la terza vista di Tornei (il Diario è una tab) e righe `ui-card-link` | le tab per `href*=`, la voce «Torneo» per nome, i passi sulle viste di oggi; in più lo scroll del Diario | girano da capo a fondo |
+
+### Cosa è stato misurato
+
+| Cosa | Risultato |
+|---|---|
+| axe nel browser, 14 rotte e gli overlay a 390 e 1280 (FLAT=1) | 0 violazioni fuori dal menu ＋ (sotto, compromessi) |
+| Tab, a 390 e 1280 | nessun anello mancante, tagliato o coperto; i soli `ui-card-link` di Compagni, falsi positivi noti (l'anello è sul genitore) |
+| Bersagli (portati al centro dello schermo) | 44 ovunque, tranne il campo di ricerca (42, già fra i compromessi) |
+| Sweep 320 · 390 · 768 · 1280, dati normali ed estremi | nessuno scroll orizzontale, nessun testo che esce (il solo «SPILL» di «Tutti» è il suo `::after`, non il testo) |
+| Reduced motion | nessuno spostamento: restano le dissolvenze e le salite a 0px |
+| La TabBar ferma (`barra.mjs`) | ferma |
+| Contrasto in hover e premuto | ≥ 6.08 |
+| Prestazioni (CPU 4×, `?estremo`), tre giri | caricamento FCP 268–308 · LCP 1.112–1.140 · TBT 51–99ms; apertura di «Nuovo torneo» un fotogramma da 100–150ms, interazione 144–184ms; scroll del Diario e di Tornei 0 fotogrammi lenti |
+
+### Compromessi noti, di questo giro
+
+- **Le superfici di vetro visibili sono più di 3** (UX §10, MOTION R5): 6 nel Diario, 5 nel dettaglio torneo, nel dettaglio compagno e in Statistiche. È il vetro della versione D, voluto dall'utente in tutta l'app. Misurato: il Diario scorre senza un fotogramma lento a CPU 4× (109 su 109 sotto i 17ms). Il budget va riscritto o il vetro ridotto: è una scelta da fare, non un difetto.
+- **Aprire «Nuovo torneo» costa un fotogramma da 100–150ms a CPU 4×** (era 33–50 nel primo giro): è l'impaginazione del foglio sopra la Home, ~85ms a CPU 4× (~21ms veri). L'interazione resta sotto i 200ms («buona» per Web Vitals). Toglierlo vorrebbe dire non bloccare lo scroll della pagina sotto o tenere il foglio montato.
+- **axe, menu ＋ a 390: contrasto 2.63 sulle etichette della TabBar.** Mentre il foglio del menu sale, la TabBar sta sopra il velo; a foglio fermo è coperta e non si legge. Resta anche il `region` del primo giro.
+
+### Come rifare le misure di questo giro
+
+```sh
+# l'anteprima su una porta propria (mai la 5173)
+VITE_SUPABASE_URL=http://127.0.0.1:9 VITE_SUPABASE_ANON_KEY=x npx vite --port 5198 --strictPort
+BASE=http://127.0.0.1:5198/docs/preview/ node docs/qa/reduced.mjs
+# prestazioni: build di produzione dell'anteprima con una config temporanea
+# (input docs/preview/index.html, lo stesso manualChunks di vite.config.ts),
+# poi `vite preview` su 4173
+PBASE=http://127.0.0.1:4173/docs/preview/index.html QS=estremo node docs/qa/perf.mjs
+```
+
 ---
 
 ## Parte L — la landing `/presentazione`

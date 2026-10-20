@@ -114,7 +114,7 @@ describe('Home — diario vuoto', () => {
     expect(screen.getByText('Registra il primo torneo: bastano il nome e la data, il resto lo aggiungi dopo.')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Crea il primo torneo' }))
     expect(p.onNuovoTorneo).toHaveBeenCalledOnce()
-    expect(screen.getByRole('link', { name: "Usa l'assistente" })).toHaveAttribute('href', '/crea')
+    expect(screen.getByRole('link', { name: 'Raccontalo a Solby' })).toHaveAttribute('href', '/crea')
     // Pallo è un disegno, non un pulsante.
     expect(screen.queryByRole('button', { name: /Solby/ })).toBeNull()
     // Niente numeri, niente filtri: non c'è niente da filtrare.

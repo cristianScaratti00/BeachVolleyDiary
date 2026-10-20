@@ -69,6 +69,37 @@ describe('Benvenuto', () => {
     expect(screen.getByRole('tabpanel')).toHaveAccessibleName('Il diario')
   })
 
+  // WCAG 2.2.2: ciò che si muove da solo si può fermare. Il tempo lo dà la
+  // barretta del puntino acceso (un'animazione CSS): qui se ne simula la fine.
+  it('i messaggi scorrono da soli: a fine barretta arriva il prossimo, e il pulsante li ferma e li fa ripartire', async () => {
+    const user = userEvent.setup()
+    render(<Login />)
+    const fine = () => fireEvent.animationEnd(document.querySelector('.accesso-punto[aria-selected="true"] .accesso-punto-pieno') as Element)
+    expect(screen.getByRole('tablist')).toHaveAttribute('data-auto', 'corre')
+    expect(screen.getByRole('tabpanel')).toHaveAttribute('aria-live', 'off')
+    act(() => fine())
+    expect(screen.getByRole('tab', { name: 'Statistiche' })).toHaveAttribute('aria-selected', 'true')
+    expect(await screen.findByRole('heading', { level: 2, name: 'Scopri come stai giocando.' })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Ferma i messaggi' }))
+    expect(screen.getByRole('tablist')).not.toHaveAttribute('data-auto')
+    expect(screen.getByRole('tabpanel')).toHaveAttribute('aria-live', 'polite')
+    await user.click(screen.getByRole('button', { name: 'Fai scorrere i messaggi' }))
+    expect(screen.getByRole('tablist')).toHaveAttribute('data-auto', 'corre')
+    // L'ultimo torna al primo.
+    act(() => fine())
+    act(() => fine())
+    expect(screen.getByRole('tab', { name: 'Il diario' })).toHaveAttribute('aria-selected', 'true')
+  })
+
+  it('scegliere un messaggio ferma lo scorrimento per sempre', async () => {
+    const user = userEvent.setup()
+    render(<Login />)
+    await user.click(screen.getByRole('tab', { name: 'Compagni' }))
+    expect(screen.getByRole('tablist')).not.toHaveAttribute('data-auto')
+    expect(screen.getByRole('button', { name: 'Fai scorrere i messaggi' })).toBeInTheDocument()
+  })
+
   it('un puntino cambia messaggio', async () => {
     const user = userEvent.setup()
     render(<Login />)

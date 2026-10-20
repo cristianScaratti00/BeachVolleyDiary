@@ -403,6 +403,8 @@ Tempi in ms da `t0` = il tocco, salvo dove è scritto `t0 = esito` (la risposta 
 | 10.000 | «Ci sta mettendo più del solito.» con [Riprova], in ENTRATA |
 | primo caricamento fallito | ErrorState senza animazione; [Riprova] §8.4 |
 
+**L'accesso** (dal 20 ottobre 2026): nessun movimento d'ambiente. Il tramonto animato (il palleggio, le onde, la palma) è uscito; resta la carta con Solby fermo, nessun `vivo` né `segui`. Si muove solo ciò che cambia: nel Benvenuto i messaggi scorrono da soli (5,5s l'uno, la barretta del puntino acceso che si riempie in `linear` è il loro tempo, e con il mouse sopra si ferma dov'è), la card di Solby cambia in ENTRATA (dissolvenza e 8px di salita) e il «63%» gira da zero una volta per sessione (il tabellone, §10.3). Con reduced-motion i messaggi partono fermi.
+
 ### F1. Primo avvio
 
 Niente animazione di benvenuto. Lo «0» da tabellone dello stato vuoto (ART_DIRECTION §2.4.5) **non** sale: è fermo, perché è vero.

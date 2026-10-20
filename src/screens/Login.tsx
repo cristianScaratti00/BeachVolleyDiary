@@ -1,5 +1,6 @@
 // ============================================================================
-// L'accesso del redesign (UX §5 F0, §6.9): tre viste sullo stesso tramonto.
+// L'accesso del redesign (UX §5 F0, §6.9): tre viste sulla carta dell'app,
+// con Solby al centro (Login.solby.tsx) al posto del tramonto animato.
 //   - Benvenuto: il marchio, un carosello di tre messaggi (tablist con i
 //     puntini, frecce da tastiera, swipe col dito), «Crea il tuo diario» e
 //     «Ho già un account»;
@@ -29,16 +30,16 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import type { CSSProperties, FormEvent, KeyboardEvent, PointerEvent, ReactNode, RefObject } from 'react'
 import * as m from 'motion/react-m'
-import { AnimatePresence, useIsPresent } from 'motion/react'
+import { AnimatePresence, useIsPresent, useReducedMotion } from 'motion/react'
 import { useAuth } from '../hooks/useAuth'
 import { checkNameAvailable } from '../lib/auth'
 import { useOnline } from '../hooks/useConnection'
 import { OGGI_ATTIVO } from '../app/routes'
 import { BrandLockup } from '../components/Logo'
 import { ENTRATA, MOLLA, SVELTO } from '../components/Motion'
-import { LiquidGlass } from '../components/ui/LiquidGlass'
-import { Button, Icon, TextField } from '../components/ui/index'
-import { Scena } from './Login.scena'
+import { Button, Icon, IconButton, TextField } from '../components/ui/index'
+import { SolbyAccesso } from './Login.solby'
+import type { Momento } from './Login.solby'
 import './Login.css'
 
 type Vista = 'benvenuto' | 'accedi' | 'registrati'
@@ -54,6 +55,11 @@ const NOME_MAX = 40
 /** Quanto deve scorrere il dito in orizzontale perché il carosello cambi. */
 const SWIPE_PX = 40
 /**
+ * Quanto resta ogni messaggio del Benvenuto quando scorrono da soli: il
+ * tempo di leggere il titolo e le due righe sotto.
+ */
+const AUTO_MS = 5500
+/**
  * Di quanto si deve accorciare la parte visibile perché sia la tastiera: le
  * barre di Safari che entrano ed escono valgono meno di 100, una tastiera
  * più di 250.
@@ -63,12 +69,14 @@ const TASTIERA_PX = 150
 const MARGINE_FUOCO = 16
 
 // Le tre cose che l'app fa davvero. La terza nomina «Chi c'è oggi» solo se
-// la funzione è accesa: un carosello non promette quello che non c'è.
-const MESSAGGI = [
-  { tab: 'Il diario', titolo: 'Ogni partita, nel tuo diario.', testo: 'Tornei, set e compagni: tutta la tua stagione in spiaggia, in un posto solo.' },
-  { tab: 'Statistiche', titolo: 'Scopri come stai giocando.', testo: 'Percentuale di vittorie, serie record, punti di scarto. Stagione per stagione.' },
+// la funzione è accesa: un carosello non promette quello che non c'è. Ogni
+// messaggio ha il suo momento di Solby: la card che lo mostra e l'umore.
+const MESSAGGI: { tab: string; titolo: string; testo: string; momento: Momento }[] = [
+  { tab: 'Il diario', titolo: 'Ogni partita, nel tuo diario.', testo: 'Tornei, set e compagni: tutta la tua stagione in spiaggia, in un posto solo.', momento: 'diario' },
+  { tab: 'Statistiche', titolo: 'Scopri come stai giocando.', testo: 'Percentuale di vittorie, serie record, punti di scarto. Stagione per stagione.', momento: 'numeri' },
   {
     tab: 'Compagni',
+    momento: 'compagni',
     titolo: 'Trova con chi giochi meglio.',
     testo: OGGI_ATTIVO
       ? 'Confronta i compagni, condividi i tornei e scopri chi è in spiaggia oggi.'
@@ -245,8 +253,7 @@ export default function Login() {
   )
 
   return (
-    <div ref={cornice} className="accesso" data-surface="dark">
-      <Scena inquadratura={vista} />
+    <div ref={cornice} className="accesso">
       <main ref={area} className="accesso-main" id="contenuto">
         <AnimatePresence mode="wait" initial={false}>
           {vista === 'benvenuto' ? (
@@ -258,6 +265,7 @@ export default function Login() {
               <div className="accesso-top">
                 <Indietro label="Indietro" onClick={() => vai('benvenuto')} />
               </div>
+              <SolbyAccesso momento="accedi" />
               <form className="accesso-fondo" onSubmit={(e) => void invia(e)} noValidate>
                 <Titolo
                   focus={navigato.current}
@@ -323,6 +331,7 @@ export default function Login() {
                   <span className="accesso-segmento"><span data-pieno={passo === 2 ? '' : undefined} /></span>
                 </div>
               </div>
+              <SolbyAccesso momento={passo === 1 ? 'nome' : 'credenziali'} />
               <div className="accesso-fondo">
                 <AnimatePresence mode="wait" custom={direzione}>
                   {passo === 1 ? (
@@ -557,14 +566,9 @@ function PassoForm({ direzione, onSubmit, children }: {
   )
 }
 
-/** Il «‹» di vetro chiaro in alto a sinistra. Galleggia sulla scena: vetro liquido. */
+/** Il «‹» in alto a sinistra: lo stesso pulsante di vetro dei dettagli dell'app. */
 function Indietro({ label, onClick }: { label: string; onClick: () => void }) {
-  return (
-    <button type="button" className="accesso-indietro press" aria-label={label} onClick={onClick}>
-      <LiquidGlass layer material="glass-clear" />
-      <Icon name="chevron-left" size={20} />
-    </button>
-  )
+  return <IconButton icon="chevron-left" label={label} variant="glass" iconSize={20} className="accesso-indietro" onClick={onClick} />
 }
 
 /** Il titolo di una vista (h1, punto d'arrivo del focus) con la riga sotto. */
@@ -636,7 +640,7 @@ function Nickname({ inputRef, value, onChange, status, msg, error, busy }: {
   )
 }
 
-/** Errori (alert), conferma email e offline (status): sul buio, testo bianco e l'icona che dice il tipo. */
+/** Errori (alert), conferma email e offline (status): una lastra di carta, l'icona dice il tipo. */
 function Avviso({ tipo, children }: { tipo: 'errore' | 'conferma' | 'offline'; children: ReactNode }) {
   return (
     <p className="accesso-avviso" data-tipo={tipo} role={tipo === 'errore' ? 'alert' : 'status'}>
@@ -657,6 +661,16 @@ function Benvenuto({ focus, onCrea, onAccedi }: { focus: boolean; onCrea: () => 
   const titolo = useRef<HTMLHeadingElement>(null)
   const [i, setI] = useState(0)
   const [dir, setDir] = useState(1)
+  // I messaggi scorrono da soli (il pattern carosello di WAI-ARIA, WCAG
+  // 2.2.2): il puntino acceso si riempie e a fine corsa passa al messaggio
+  // dopo. Si fermano per sempre quando l'utente ne sceglie uno (puntino,
+  // frecce, swipe) o porta il fuoco sui puntini; il pulsante accanto li ferma
+  // e li fa ripartire. Col mouse sopra aspettano. Con reduced-motion partono
+  // fermi.
+  const ridotto = useReducedMotion()
+  const [auto, setAuto] = useState(() => !ridotto)
+  const [sospesa, setSospesa] = useState(false)
+  const corre = auto && !sospesa
   const tabs = useRef<(HTMLButtonElement | null)[]>([])
   const inizio = useRef<{ x: number; y: number } | null>(null)
   const base = useId()
@@ -668,11 +682,16 @@ function Benvenuto({ focus, onCrea, onAccedi }: { focus: boolean; onCrea: () => 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const mostra = (k: number, d: number, conFocus = false) => {
-    if (conFocus) tabs.current[k]?.focus()
+  const vaiA = (k: number, d: number) => {
     if (k === i) return
     setDir(d)
     setI(k)
+  }
+  // Una scelta dell'utente: lo scorrimento da solo finisce lì.
+  const mostra = (k: number, d: number, conFocus = false) => {
+    setAuto(false)
+    if (conFocus) tabs.current[k]?.focus()
+    vaiA(k, d)
   }
 
   // Le frecce girano in tondo (il pattern delle tab), Home e Fine agli estremi.
@@ -709,67 +728,96 @@ function Benvenuto({ focus, onCrea, onAccedi }: { focus: boolean; onCrea: () => 
   const slide = MESSAGGI[i]
 
   return (
-    <div className="accesso-fondo accesso-benvenuto">
+    <>
       <h1 ref={titolo} tabIndex={-1} className="accesso-marchio rise">
-        <BrandLockup size={24} bare light />
+        <BrandLockup size={24} bare />
       </h1>
-
+      <SolbyAccesso momento={slide.momento} />
       <div
-        id={pannello}
-        role="tabpanel"
-        aria-labelledby={`${base}-tab-${i}`}
-        className="accesso-carosello"
-        onPointerDown={giu}
-        onPointerUp={su}
-        onPointerCancel={() => {
-          inizio.current = null
-        }}
+        className="accesso-fondo accesso-benvenuto"
+        onPointerEnter={(e) => e.pointerType === 'mouse' && setSospesa(true)}
+        onPointerLeave={(e) => e.pointerType === 'mouse' && setSospesa(false)}
       >
-        <AnimatePresence mode="popLayout" initial={false} custom={dir}>
-          <m.div key={i} className="accesso-slide" custom={dir} variants={SLIDE} initial="entra" animate="fermo" exit="esce">
-            <h2 className="accesso-slide-titolo">{slide.titolo}</h2>
-            <p className="accesso-slide-testo">{slide.testo}</p>
-          </m.div>
-        </AnimatePresence>
-      </div>
+        <div
+          id={pannello}
+          role="tabpanel"
+          aria-labelledby={`${base}-tab-${i}`}
+          aria-live={corre ? 'off' : 'polite'}
+          className="accesso-carosello"
+          onPointerDown={giu}
+          onPointerUp={su}
+          onPointerCancel={() => {
+            inizio.current = null
+          }}
+        >
+          <AnimatePresence mode="popLayout" initial={false} custom={dir}>
+            <m.div key={i} className="accesso-slide" custom={dir} variants={SLIDE} initial="entra" animate="fermo" exit="esce">
+              <h2 className="accesso-slide-titolo">{slide.titolo}</h2>
+              <p className="accesso-slide-testo">{slide.testo}</p>
+            </m.div>
+          </AnimatePresence>
+        </div>
 
-      <div role="tablist" aria-label="Cosa puoi fare" className="accesso-punti">
-        {MESSAGGI.map((s, k) => (
-          <button
-            key={s.tab}
-            ref={(el) => {
-              tabs.current[k] = el
-            }}
-            type="button"
-            role="tab"
-            id={`${base}-tab-${k}`}
-            aria-selected={k === i}
-            aria-controls={pannello}
-            aria-label={s.tab}
-            tabIndex={k === i ? 0 : -1}
-            className="accesso-punto"
-            onClick={() => mostra(k, k > i ? 1 : -1)}
-            onKeyDown={(e) => tasto(e, k)}
+        <div className="accesso-punti-riga">
+          <div
+            role="tablist"
+            aria-label="Cosa puoi fare"
+            className="accesso-punti"
+            data-auto={corre ? 'corre' : auto ? 'pausa' : undefined}
+            style={{ '--auto-ms': `${AUTO_MS}ms` } as CSSProperties}
+            onFocus={() => setAuto(false)}
           >
-            <span className="accesso-punto-segno" aria-hidden="true" />
-          </button>
-        ))}
-      </div>
+            {MESSAGGI.map((s, k) => (
+              <button
+                key={s.tab}
+                ref={(el) => {
+                  tabs.current[k] = el
+                }}
+                type="button"
+                role="tab"
+                id={`${base}-tab-${k}`}
+                aria-selected={k === i}
+                aria-controls={pannello}
+                aria-label={s.tab}
+                tabIndex={k === i ? 0 : -1}
+                className="accesso-punto"
+                onClick={() => mostra(k, k > i ? 1 : -1)}
+                onKeyDown={(e) => tasto(e, k)}
+              >
+                <span className="accesso-punto-segno" aria-hidden="true">
+                  {/* Il riempimento è il tempo del messaggio: a fine corsa, il prossimo. */}
+                  <span className="accesso-punto-pieno" onAnimationEnd={k === i ? () => vaiA((i + 1) % n, 1) : undefined} />
+                </span>
+              </button>
+            ))}
+          </div>
+          <IconButton
+            icon={auto ? 'pause' : 'play'}
+            label={auto ? 'Ferma i messaggi' : 'Fai scorrere i messaggi'}
+            iconSize={20}
+            className="accesso-auto"
+            onClick={() => {
+              setAuto((a) => !a)
+              setSospesa(false)
+            }}
+          />
+        </div>
 
-      <div className="accesso-azioni rise" style={{ '--rise-i': 3 } as CSSProperties}>
-        <Button size="lg" block onClick={onCrea}>
-          Crea il tuo diario
-        </Button>
-        <Button variant="glass" material="glass-clear" size="lg" block onClick={onAccedi}>
-          Ho già un account
-        </Button>
-      </div>
+        <div className="accesso-azioni rise" style={{ '--rise-i': 3 } as CSSProperties}>
+          <Button size="lg" block onClick={onCrea}>
+            Crea il tuo diario
+          </Button>
+          <Button variant="neutral" size="lg" block onClick={onAccedi}>
+            Ho già un account
+          </Button>
+        </div>
 
-      {/* Termini e Informativa non sono ancora pagine del repo (né della
-          landing): la nota resta testo, senza link che non portano altrove. */}
-      <p className="accesso-nota rise" style={{ '--rise-i': 5 } as CSSProperties}>
-        Continuando accetti i Termini e l’Informativa privacy.
-      </p>
-    </div>
+        {/* Termini e Informativa non sono ancora pagine del repo (né della
+            landing): la nota resta testo, senza link che non portano altrove. */}
+        <p className="accesso-nota rise" style={{ '--rise-i': 5 } as CSSProperties}>
+          Continuando accetti i Termini e l’Informativa privacy.
+        </p>
+      </div>
+    </>
   )
 }

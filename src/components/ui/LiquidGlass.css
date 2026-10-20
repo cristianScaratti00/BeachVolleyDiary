@@ -71,9 +71,12 @@
     backdrop-filter: blur(10px) saturate(180%) !important;
   }
 
-  /* Chi chiede meno movimento: il vetro cambia senza transizione. */
+  /* Chi chiede meno movimento: il vetro cambia senza transizione. Tutto lo
+     strato, non solo `.glass`: la radice della libreria porta un suo
+     `transition: all 0.2s`, e cambiando tab la lente scivolava ancora. */
   @media (prefers-reduced-motion: reduce) {
-    .ui-liquid .glass { transition: none !important; }
+    .ui-liquid,
+    .ui-liquid * { transition: none !important; }
   }
 }
 

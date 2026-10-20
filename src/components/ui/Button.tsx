@@ -10,7 +10,7 @@
 //   `aria-busy`, larghezza bloccata alla misura di riposo; i tocchi successivi
 //   non fanno niente (il doppio tocco non crea due tornei).
 // ============================================================================
-import { forwardRef, useLayoutEffect, useRef } from 'react'
+import { forwardRef, useEffect, useLayoutEffect, useRef } from 'react'
 import type { ButtonHTMLAttributes, MouseEvent, ReactNode } from 'react'
 import { Link } from '../../app/router'
 import type { LinkProps } from '../../app/router'
@@ -18,6 +18,27 @@ import { Icon } from './Icon'
 import type { IconName } from './Icon'
 import { LiquidGlass } from './LiquidGlass'
 import './Button.css'
+
+// La larghezza di riposo di ogni pulsante, per bloccarla quando diventa
+// occupato. La dà un solo ResizeObserver per tutti, a impaginazione già fatta:
+// leggerla con `offsetWidth` a ogni disegno costringeva il browser a impaginare
+// tutto ciò che si era appena montato (aprendo «Nuovo torneo», 80ms a CPU 4×).
+// Mentre un pulsante è occupato la sua misura non si aggiorna.
+const riposi = new WeakMap<Element, number>()
+const occupati = new WeakSet<Element>()
+let osservatore: ResizeObserver | null = null
+function osserva(el: Element): () => void {
+  if (typeof ResizeObserver === 'undefined') return () => {}
+  osservatore ??= new ResizeObserver((voci) => {
+    for (const v of voci) {
+      if (occupati.has(v.target)) continue
+      const w = v.borderBoxSize?.[0]?.inlineSize ?? (v.target as HTMLElement).offsetWidth
+      if (w) riposi.set(v.target, Math.round(w))
+    }
+  })
+  osservatore.observe(el)
+  return () => osservatore?.unobserve(el)
+}
 
 /**
  * Il vetro del pulsante: il vetro LIQUIDO (liquid-glass-react, LiquidGlass)
@@ -98,12 +119,17 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   ref,
 ) {
   const own = useRef<HTMLButtonElement | null>(null)
-  const riposo = useRef<number | null>(null)
-  // La misura di riposo si prende a ogni disegno NON occupato: quando
-  // l'etichetta diventa «Salvataggio…» il pulsante non si restringe.
+  // La misura di riposo (sopra): quando l'etichetta diventa «Salvataggio…»
+  // il pulsante non si restringe. Occupato si segna prima che il browser
+  // impagini l'etichetta nuova, così la sua misura non entra.
+  useEffect(() => (own.current ? osserva(own.current) : undefined), [])
   useLayoutEffect(() => {
-    if (!busy && own.current) riposo.current = own.current.offsetWidth || null
-  })
+    const el = own.current
+    if (!el) return
+    if (busy) occupati.add(el)
+    else occupati.delete(el)
+  }, [busy])
+  const riposo = busy && own.current ? riposi.get(own.current) : undefined
 
   const handle = (e: MouseEvent<HTMLButtonElement>) => {
     if (busy) {
@@ -136,7 +162,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       aria-disabled={disabled || undefined}
       aria-busy={busy || undefined}
       onClick={handle}
-      style={busy && riposo.current ? { ...style, minWidth: riposo.current } : style}
+      style={riposo ? { ...style, minWidth: riposo } : style}
     >
       {vetro(variant, material).strato}
       {icon && <Icon name={icon} size={size === 'sm' ? 16 : 20} />}

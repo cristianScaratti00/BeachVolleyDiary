@@ -189,7 +189,7 @@ export default function Tornei({ vista, q, onVista, onQuery, list, entries, mapp
           secondary={
             <>
               Preferisci farti guidare?{' '}
-              <Link to={{ name: 'crea' }} className="tornei-link">Usa l'assistente</Link>
+              <Link to={{ name: 'crea' }} className="tornei-link">Raccontalo a Solby</Link>
             </>
           }
         />

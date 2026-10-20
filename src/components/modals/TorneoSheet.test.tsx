@@ -168,7 +168,7 @@ describe('TorneoSheet — «Nuovo torneo», il modulo intero (design 15)', () =>
     const user = userEvent.setup()
     const { props } = renderSheet()
     await user.type(nome(), 'X')
-    await user.click(screen.getByRole('button', { name: /Usa l'assistente/ }))
+    await user.click(screen.getByRole('button', { name: /Raccontalo a Solby/ }))
     expect(props.onUseAssistant).toHaveBeenCalledWith(true)
   })
 
@@ -239,7 +239,7 @@ describe('TorneoSheet — modifica', () => {
     expect(screen.queryByRole('button', { name: /Altri dettagli/ })).toBeNull()
     expect(gruppo('Con chi lo hai fatto')).toHaveAccessibleDescription('Cambiandolo, il compagno viene aggiornato su tutte le partite del torneo.')
     expect(chip('Con chi lo hai fatto', 'Giulia')).toHaveAttribute('aria-pressed', 'true')
-    expect(screen.queryByRole('button', { name: /Usa l'assistente/ })).toBeNull()
+    expect(screen.queryByRole('button', { name: /Raccontalo a Solby/ })).toBeNull()
   })
 
   it('in rapido la modifica resta il modulo intero', () => {
