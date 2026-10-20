@@ -1,8 +1,7 @@
 // ============================================================================
-// Le regole di Partita live, senza schermata (UX.md §L14.2): le stesse che
-// usano l'app (PartitaLive.tsx) e la demo della landing (presentazione/js/
-// live.ts). La schermata le prova giocando in PartitaLive.test.tsx; qui ogni
-// caso di confine e ogni battuta di Pallo, uno per uno.
+// Le regole di Partita live, senza schermata: le stesse che usa l'app
+// (PartitaLive.tsx). La schermata le prova giocando in PartitaLive.test.tsx;
+// qui ogni caso di confine e ogni battuta di Pallo, uno per uno.
 // ============================================================================
 import { describe, it, expect } from 'vitest'
 import { FORMATO_BEACH, battuta, cambioOgni, daVincere, obiettivo, partitaChiusa, setFinito, titoloSet, vinti } from './PartitaLive.regole'
@@ -17,7 +16,7 @@ function partita(p: Partial<PartitaInCorso> = {}): PartitaInCorso {
 }
 const UNICO: Formato = { set: 1, punti: 15 }
 
-describe('il set (UX §L12.6)', () => {
+describe('il set', () => {
   it('a 21, il terzo a 15; il set unico al suo punteggio', () => {
     expect([0, 1, 2].map((i) => obiettivo(i))).toEqual([21, 21, 15])
     expect(obiettivo(0, UNICO)).toBe(15)

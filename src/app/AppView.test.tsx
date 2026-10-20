@@ -353,7 +353,7 @@ describe('menu ＋ (UX §7.4)', () => {
     expect(voci[1]).toHaveAccessibleName(/^Torneo\s*Luogo, formato, compagno, piazzamento$/)
     expect(voci[2]).toHaveAccessibleName(/^Partita\s*Aggiungi un risultato a «Rimini Open»$/)
     expect(voci[3]).toHaveAccessibleName(/^Torneo rapido\s*Nome e piazzamento, i dettagli dopo$/)
-    expect(voci[4]).toHaveAccessibleName(/^Raccontalo a Pallo\s*Ti faccio io le domande, una alla volta$/)
+    expect(voci[4]).toHaveAccessibleName(/^Raccontalo a Solby\s*Ti faccio io le domande, una alla volta$/)
     expect(voci[5]).toHaveAccessibleName('Annulla')
     expect(voci[0]).toHaveFocus()
     await app.user.keyboard('{ArrowDown}')
@@ -445,12 +445,12 @@ describe('menu ＋ (UX §7.4)', () => {
     expect(screen.queryByRole('navigation', { name: 'Principale' })).not.toBeInTheDocument()
   })
 
-  it('«Raccontalo a Pallo» porta all\'assistente', async () => {
+  it('«Raccontalo a Solby» porta all\'assistente', async () => {
     const app = renderApp({ data: diario() })
     await app.user.click(await screen.findByRole('button', { name: 'Crea' }))
-    await app.user.click(screen.getByRole('menuitem', { name: /^Raccontalo a Pallo/ }))
+    await app.user.click(screen.getByRole('menuitem', { name: /^Raccontalo a Solby/ }))
     expect(window.location.pathname).toBe('/crea')
-    expect(await screen.findByRole('heading', { level: 1, name: 'Pallo' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: 'Solby' })).toBeInTheDocument()
   })
 
   it('desktop: «Nuovo» della Sidebar apre lo stesso menu come popover, senza «Annulla»', async () => {
@@ -984,7 +984,7 @@ describe('breakpoint (UX §9.1)', () => {
 
   it('/crea è a tutto schermo: niente TabBar su mobile, la Sidebar resta su desktop', async () => {
     renderApp({ data: diario(), path: '/crea' })
-    expect(await screen.findByRole('heading', { level: 1, name: 'Pallo' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { level: 1, name: 'Solby' })).toBeInTheDocument()
     expect(screen.queryByRole('navigation', { name: 'Principale' })).not.toBeInTheDocument()
     setViewport({ width: 1280 })
     expect(nav()).toBeInTheDocument()

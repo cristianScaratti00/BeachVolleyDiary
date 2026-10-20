@@ -156,7 +156,7 @@ function Voce({ entry, top, data, route, diary, actions, canAddPartner }: Omit<P
         },
         {
           key: 'pallo',
-          label: 'Raccontalo a Pallo',
+          label: 'Raccontalo a Solby',
           sub: 'Ti faccio io le domande, una alla volta',
           icon: 'chat-dots',
           onSelect: actions.apriAssistente,

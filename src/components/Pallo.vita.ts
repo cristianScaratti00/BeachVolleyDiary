@@ -1,16 +1,14 @@
 // ============================================================================
 // La vita di Pallo, senza React: lo sguardo che segue il dito e il puntatore,
 // l'ammiccare e i gesti «idle». È codice DOM puro (attributi e transform
-// scritti sull'<svg>, mai uno stato), così lo usano sia `Pallo.tsx` (da un
-// `useEffect`) sia la landing `/presentazione`, che non ha React.
+// scritti sull'<svg>, mai uno stato), che `Pallo.tsx` avvia da un
+// `useEffect`.
 //
-// Qui stanno anche i nomi degli umori e i tempi dei gesti di Pallo: la
-// landing li legge da questo file, che non tira dentro il framework.
+// Qui stanno anche i nomi degli umori e i tempi dei gesti di Pallo.
 //
 // La vita gira solo quando serve: Pallo in vista (IntersectionObserver), la
 // pagina visibile e il movimento permesso. Il «movimento permesso» è un
-// predicato iniettabile (`fermo`): nell'app è `prefers-reduced-motion`, nella
-// landing anche il comando «Ferma le animazioni» (MOTION.md §L3.1).
+// predicato iniettabile (`fermo`): nell'app è `prefers-reduced-motion`.
 // ============================================================================
 
 export type PalloUmore =

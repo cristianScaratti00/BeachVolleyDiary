@@ -1,35 +1,24 @@
 /* ============================================================================
    La landing /presentazione: il solo foglio che l'HTML carica. Mette in fila
-   i fogli nell'ordine di ART_DIRECTION.md §L12, e Vite li unisce in build:
+   i fogli nell'ordine di ART_DIRECTION.md §L4, e Vite li unisce in build:
 
      i token dell'app (e l'ordine dei @layer) → Geist servito dal sito →
-     base → vetro → le primitive dell'app in CSS puro (icone, pulsanti,
-     tabellone, Pallo, la scena del Benvenuto) → i token della landing →
-     i componenti della landing → gli spegnimenti del «fermo».
+     base → le icone dell'app → i token della landing → i componenti della
+     landing, sezione per sezione. Dopo l'hero, l'apertura della Home nel
+     suo telefono: le misure (generate da docs/qa/landing-shots.mjs) e il
+     movimento.
 
    Tutto sta in un livello: niente CSS fuori dai @layer (vincerebbe su tutto).
    ============================================================================ */
 @import '../../src/styles/tokens.css';
 @import '@fontsource-variable/geist/wght.css';
 @import '../../src/styles/base.css';
-@import '../../src/styles/materials.css';
 @import '../../src/components/ui/Icon.css';
-@import '../../src/components/ui/Button.css';
-@import '../../src/components/ui/Tabellone.css';
-@import '../../src/components/Pallo.css';
-@import '../../src/screens/Login.scena.css';
 @import './tokens.css';
 @import './pagina.css';
-@import './barra.css';
-@import './guida.css';
 @import './eroe.css';
-@import './diario.css';
-@import './registra.css';
-@import './live.css';
-@import './numeri.css';
-@import './mappa.css';
-@import './wrapped.css';
-@import './dati.css';
+@import './misure.css';
+@import './apertura.css';
+@import './funzionalita.css';
+@import './schermate.css';
 @import './finale.css';
-@import './foglio.css';
-@import './movimento.css';

@@ -210,18 +210,18 @@
     "semantic_hash": ""
   },
   "src/screens/CreaChat.tsx": {
-    "mtime": 1792431256.4439368,
-    "ast_hash": "1efcbb46af81f071a0779bd71f5f214a",
+    "mtime": 1792510667.4530342,
+    "ast_hash": "48d214439afc945e04bc1a34e75d45be",
     "semantic_hash": ""
   },
   "src/screens/Home.tsx": {
-    "mtime": 1792431256.4450295,
-    "ast_hash": "59f28b4275258d69609fb54b77b0181a",
+    "mtime": 1792510661.5641143,
+    "ast_hash": "6cce8f7f0aa5a98e7445aae16982f1a9",
     "semantic_hash": ""
   },
   "src/screens/Login.tsx": {
-    "mtime": 1792478010.3693254,
-    "ast_hash": "445b8303c242b12b4a85c2529aaaff5d",
+    "mtime": 1792507293.7822306,
+    "ast_hash": "c3bf707f982603d13de4ddf1263203d9",
     "semantic_hash": ""
   },
   "src/screens/Profilo.tsx": {
@@ -360,13 +360,13 @@
     "semantic_hash": ""
   },
   "tsconfig.json": {
-    "mtime": 1792478010.372423,
-    "ast_hash": "e6261e95d374741b1db1854ddb469016",
+    "mtime": 1792506406.1455548,
+    "ast_hash": "a3d39fa780ebff65444de257f291ce6c",
     "semantic_hash": ""
   },
   "tsconfig.node.json": {
-    "mtime": 1792478010.372984,
-    "ast_hash": "a75925d26713802b7fdc10330d502314",
+    "mtime": 1792506406.1451697,
+    "ast_hash": "08626be9c11999ce67d7496db582bdd6",
     "semantic_hash": ""
   },
   "tsconfig.test.json": {
@@ -375,18 +375,18 @@
     "semantic_hash": ""
   },
   "vite.config.ts": {
-    "mtime": 1792478010.373282,
-    "ast_hash": "8b45edc15285271a6492c16f7eb7fbb8",
+    "mtime": 1792506406.1448355,
+    "ast_hash": "0cd18557499214f85087abe1542db120",
     "semantic_hash": ""
   },
   "vitest.config.ts": {
-    "mtime": 1792478010.373538,
-    "ast_hash": "60c5859f341f0a6079a71ef6c5fc7a70",
+    "mtime": 1792506406.1457195,
+    "ast_hash": "f92d9831b3d74f9232b88ed5261159e2",
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1792478010.3238113,
-    "ast_hash": "b92a732640c9347171a46da0ebe87892",
+    "mtime": 1792516693.8590226,
+    "ast_hash": "18245393c19f9f55bf68828021b309de",
     "semantic_hash": ""
   },
   "docs/QA-tornei-formati.md": {
@@ -570,8 +570,8 @@
     "semantic_hash": ""
   },
   "presentazione/index.html": {
-    "mtime": 1792478010.3497,
-    "ast_hash": "e1c9c5899ce3a5fb34c379056f1c6603",
+    "mtime": 1792511411.7701035,
+    "ast_hash": "a4f021c2ec1b9ce5b4dbdfdaa8cc7768",
     "semantic_hash": ""
   },
   "public/offline.html": {
@@ -685,13 +685,13 @@
     "semantic_hash": ""
   },
   "ART_DIRECTION.md": {
-    "mtime": 1792478010.3218,
-    "ast_hash": "52f52206aff1f03cb1b15ae2e14dfea4",
+    "mtime": 1792511868.593968,
+    "ast_hash": "ac031a0a8d200435362060c1e0dda79b",
     "semantic_hash": ""
   },
   "UX.md": {
-    "mtime": 1792478010.3248873,
-    "ast_hash": "71192104261feb84567da14a26a73df5",
+    "mtime": 1792516693.857332,
+    "ast_hash": "6d146d1412279ea29203cdb247a754ff",
     "semantic_hash": ""
   },
   "docs/motion/_lab.js": {
@@ -700,8 +700,8 @@
     "semantic_hash": ""
   },
   "MOTION.md": {
-    "mtime": 1792478010.3230069,
-    "ast_hash": "9897eb5269daec1770ad9f4510ed5ba1",
+    "mtime": 1792516706.7484531,
+    "ast_hash": "078618ce8945dda7ab9088a772401689",
     "semantic_hash": ""
   },
   "docs/motion/01-crea.html": {
@@ -740,8 +740,8 @@
     "semantic_hash": ""
   },
   "docs/motion/index.html": {
-    "mtime": 1792478010.328548,
-    "ast_hash": "3151df5b4ff647aaa0758842b4324c32",
+    "mtime": 1792507337.414328,
+    "ast_hash": "710f747b9559ff43ad1b6da129968b78",
     "semantic_hash": ""
   },
   "docs/preview/main.tsx": {
@@ -760,8 +760,8 @@
     "semantic_hash": ""
   },
   "src/app/ModalHost.tsx": {
-    "mtime": 1792431256.4264426,
-    "ast_hash": "4dee6cd9005ed00c871871ffecd218e9",
+    "mtime": 1792510661.5635061,
+    "ast_hash": "6905978c837274580151941cc62f77e1",
     "semantic_hash": ""
   },
   "src/app/contracts.ts": {
@@ -805,8 +805,8 @@
     "semantic_hash": ""
   },
   "src/app/useActions.ts": {
-    "mtime": 1792431256.427441,
-    "ast_hash": "3660f44230e8db25ece0f1841137fcac",
+    "mtime": 1792510667.4488642,
+    "ast_hash": "5bb6d82df80eccc6d12e33869fc18dd9",
     "semantic_hash": ""
   },
   "src/app/useScreenData.test.tsx": {
@@ -1015,18 +1015,18 @@
     "semantic_hash": ""
   },
   "src/screens/CreaChat.test.tsx": {
-    "mtime": 1792431256.4437022,
-    "ast_hash": "e6c0b191e02e585072acab69d6543bec",
+    "mtime": 1792510661.566037,
+    "ast_hash": "0659177f145b431da272cdcb14786f61",
     "semantic_hash": ""
   },
   "src/screens/Home.test.tsx": {
-    "mtime": 1792431256.444817,
-    "ast_hash": "ce8b1c5087c31b24c80facd573484929",
+    "mtime": 1792510661.5658123,
+    "ast_hash": "a23e0704a34184a2f3bb4f01d0c50d4d",
     "semantic_hash": ""
   },
   "src/screens/Login.test.tsx": {
-    "mtime": 1792478010.3690479,
-    "ast_hash": "53572290237ab938e9fdfd5c1c8ef521",
+    "mtime": 1792507293.7823741,
+    "ast_hash": "5eb6ae201a989ae90c168e4ce66c90e1",
     "semantic_hash": ""
   },
   "src/screens/NonTrovato.tsx": {
@@ -1085,8 +1085,8 @@
     "semantic_hash": ""
   },
   "src/screens/crea/copione.ts": {
-    "mtime": 1792431256.450266,
-    "ast_hash": "c180f27359908ea3caabafc94fde5116",
+    "mtime": 1792510661.5648181,
+    "ast_hash": "8e678384be216c432ddb4b63e339ddd8",
     "semantic_hash": ""
   },
   "src/screens/crea/useAssistente.ts": {
@@ -1145,13 +1145,13 @@
     "semantic_hash": ""
   },
   "POLISH.md": {
-    "mtime": 1792478010.3234434,
-    "ast_hash": "ae25bc0a00b0ca3e39da121f82bace1c",
+    "mtime": 1792516706.7485921,
+    "ast_hash": "a66ee1e037ed81231ce1be9a16bb59d8",
     "semantic_hash": ""
   },
   "src/app/AppView.test.tsx": {
-    "mtime": 1792431256.4260387,
-    "ast_hash": "cfa33e59f7b1a1e38f026071d4f742a7",
+    "mtime": 1792510661.5655346,
+    "ast_hash": "473a8921f30edec7f0b1eb4714953b13",
     "semantic_hash": ""
   },
   "src/app/LazyBoundary.test.tsx": {
@@ -1205,8 +1205,8 @@
     "semantic_hash": ""
   },
   "src/components/ui/Menu.test.tsx": {
-    "mtime": 1792431256.4383607,
-    "ast_hash": "dfae0b4b6e8e5c94cfe84be2491e187e",
+    "mtime": 1792510661.5665162,
+    "ast_hash": "a9cc45df5401342f69c8d2c0ef01b492",
     "semantic_hash": ""
   },
   "src/components/ui/redesign.test.tsx": {
@@ -1230,8 +1230,8 @@
     "semantic_hash": ""
   },
   "src/screens/Login.scena.tsx": {
-    "mtime": 1792478010.368816,
-    "ast_hash": "d710a124cad7eefaa7f0ad0f945d74ac",
+    "mtime": 1792507293.782752,
+    "ast_hash": "32feda91bac27d2d661de9b2005baad2",
     "semantic_hash": ""
   },
   "src/screens/PartitaLive.test.tsx": {
@@ -1245,8 +1245,8 @@
     "semantic_hash": ""
   },
   ".claude/agent-memory/pixel-perfect-ui-builder/MEMORY.md": {
-    "mtime": 1792431256.4094014,
-    "ast_hash": "656dac6b5b13d15183a8a41b798afbfd",
+    "mtime": 1792510732.2178988,
+    "ast_hash": "9a0bdc2d669e576d627bcd6aeb444ac5",
     "semantic_hash": ""
   },
   ".claude/agent-memory/pixel-perfect-ui-builder/mappa-conquiste-leaflet.md": {
@@ -1305,8 +1305,8 @@
     "semantic_hash": ""
   },
   ".claude/agent-memory/pixel-perfect-ui-builder/project_pallo_mascotte.md": {
-    "mtime": 1792431256.4097161,
-    "ast_hash": "1a8dbe9205df70256bc26a6e200f3ba2",
+    "mtime": 1792510732.217784,
+    "ast_hash": "73b3ff513d6722e67072d78f55347f8a",
     "semantic_hash": ""
   },
   ".claude/agent-memory/pixel-perfect-ui-builder/qa-foto-vere-anteprima.md": {
@@ -1339,169 +1339,39 @@
     "ast_hash": "60276fe35394c27196baccf5c3155c73",
     "semantic_hash": ""
   },
-  "docs/motion/_landing.js": {
-    "mtime": 1792478010.327998,
-    "ast_hash": "05725858f5bb3469c4af9a80996eb89d",
-    "semantic_hash": ""
-  },
-  "docs/motion/L1-salto.html": {
-    "mtime": 1792478010.3255515,
-    "ast_hash": "f2dc6aa3d23d7f37c4ef3121fcafae41",
-    "semantic_hash": ""
-  },
-  "docs/motion/L2-barra.html": {
-    "mtime": 1792478010.3257651,
-    "ast_hash": "c44874bbd7c3404815d84d595bbec956",
-    "semantic_hash": ""
-  },
-  "docs/motion/L3-scroll.html": {
-    "mtime": 1792478010.3260763,
-    "ast_hash": "b40b6e59765b54ad9a4ad84b763822ad",
-    "semantic_hash": ""
-  },
-  "docs/motion/L4-gioca.html": {
-    "mtime": 1792478010.3263855,
-    "ast_hash": "4434cc3d65b4783ffbc2b5d19b2299a6",
-    "semantic_hash": ""
-  },
-  "docs/motion/L5-soglie.html": {
-    "mtime": 1792478010.3267338,
-    "ast_hash": "5b5ab3ad442a0bdc188c0615a7f09d8f",
-    "semantic_hash": ""
-  },
   "docs/preview/dati.ts": {
-    "mtime": 1792478010.3289022,
-    "ast_hash": "89f90d18181737170e713eb0f724ac5d",
+    "mtime": 1792507293.7835882,
+    "ast_hash": "58713258261f47fe2ca9f80e21a4593a",
     "semantic_hash": ""
   },
   "docs/qa/icone.mjs": {
-    "mtime": 1792478010.3321447,
-    "ast_hash": "53781aa8e95f47031b3fbd415149d012",
+    "mtime": 1792507293.7834575,
+    "ast_hash": "55cba44ffe9abd715f113b162092bc03",
     "semantic_hash": ""
   },
   "docs/qa/landing-og.mjs": {
-    "mtime": 1792478010.3325114,
-    "ast_hash": "221bb6c079e81405c774f7fcd7f915fe",
+    "mtime": 1792506559.125687,
+    "ast_hash": "b49d4e62ea236701642d77dfadea5a95",
     "semantic_hash": ""
   },
   "docs/qa/landing-shots.mjs": {
-    "mtime": 1792478010.332845,
-    "ast_hash": "d487119fd9a33b769b99ff67a5ff2472",
-    "semantic_hash": ""
-  },
-  "presentazione/js/chat.passi.ts": {
-    "mtime": 1792478010.350091,
-    "ast_hash": "0e3c48cab61231cdda8fcc7260313d87",
-    "semantic_hash": ""
-  },
-  "presentazione/js/chat.ts": {
-    "mtime": 1792478010.350338,
-    "ast_hash": "24d73a8b2d2c000982b0e32b658d5a90",
-    "semantic_hash": ""
-  },
-  "presentazione/js/generati/dati.ts": {
-    "mtime": 1792478010.3506417,
-    "ast_hash": "c4f37c3c8414e676522d0470755529e4",
-    "semantic_hash": ""
-  },
-  "presentazione/js/generati/pallo.ts": {
-    "mtime": 1792478010.3508432,
-    "ast_hash": "0d765b09827cf40d509ee664f0771cb3",
-    "semantic_hash": ""
-  },
-  "presentazione/js/generati/scena.ts": {
-    "mtime": 1792478010.3511007,
-    "ast_hash": "131c82a8a90e0e7dab39d285f55b230c",
-    "semantic_hash": ""
-  },
-  "presentazione/js/guida.ts": {
-    "mtime": 1792478010.351525,
-    "ast_hash": "604326e8f3a39b5c191962eed88c771d",
-    "semantic_hash": ""
-  },
-  "presentazione/js/install.ts": {
-    "mtime": 1792478010.3517683,
-    "ast_hash": "bee5392cebeda9c9bf3f2a42a9600bbd",
-    "semantic_hash": ""
-  },
-  "presentazione/js/live.ts": {
-    "mtime": 1792478010.3519998,
-    "ast_hash": "aba50a06ef9a1592363ea9481f6fb263",
-    "semantic_hash": ""
-  },
-  "presentazione/js/main.ts": {
-    "mtime": 1792478010.3522778,
-    "ast_hash": "4be2d4103ac254af81bb4c749b90886e",
-    "semantic_hash": ""
-  },
-  "presentazione/js/movimento.ts": {
-    "mtime": 1792478010.3525598,
-    "ast_hash": "3eb989b92c5ac6f3d0b8bb60fc016094",
-    "semantic_hash": ""
-  },
-  "presentazione/js/nav.ts": {
-    "mtime": 1792478010.352764,
-    "ast_hash": "a7ba256e09ea370d83514d2d1621703b",
-    "semantic_hash": ""
-  },
-  "presentazione/js/numeri.ts": {
-    "mtime": 1792478010.3529134,
-    "ast_hash": "d628b6493aa2be65f2b58ee3e1278f7e",
-    "semantic_hash": ""
-  },
-  "presentazione/js/pallo.disegno.ts": {
-    "mtime": 1792478010.3531075,
-    "ast_hash": "f1bfb504d0760f7142e2808bf8a1c0fe",
-    "semantic_hash": ""
-  },
-  "presentazione/js/pallo.ts": {
-    "mtime": 1792478010.3533814,
-    "ast_hash": "1d7c56182a92db6a47d2fdd80ebd0814",
-    "semantic_hash": ""
-  },
-  "presentazione/js/scene.ts": {
-    "mtime": 1792478010.3536482,
-    "ast_hash": "5268093d5cc3055f6808c4f25ec998f4",
-    "semantic_hash": ""
-  },
-  "presentazione/js/sezioni.ts": {
-    "mtime": 1792478010.353913,
-    "ast_hash": "300740d5832f40f4881ca59b00c048ec",
-    "semantic_hash": ""
-  },
-  "presentazione/js/tempi.ts": {
-    "mtime": 1792478010.35408,
-    "ast_hash": "e10343675f40ab3975ead0ea8385998c",
-    "semantic_hash": ""
-  },
-  "public/presentazione/fermo.js": {
-    "mtime": 1792478010.3604958,
-    "ast_hash": "e6d62a1032d7f30058fe5b62da06a636",
-    "semantic_hash": ""
-  },
-  "src/app/landing.dati.test.ts": {
-    "mtime": 1792478010.3652835,
-    "ast_hash": "39ee57f8fc16cd13f8a823d41c469dc0",
-    "semantic_hash": ""
-  },
-  "src/components/Pallo.landing.test.tsx": {
-    "mtime": 1792478010.3657613,
-    "ast_hash": "8d52eb7012e4d1d586e3378682c3bc7c",
+    "mtime": 1792511294.811082,
+    "ast_hash": "c88fc2fa9cc066d0854aa662bc0342fb",
     "semantic_hash": ""
   },
   "src/components/Pallo.vita.ts": {
-    "mtime": 1792478010.3665042,
-    "ast_hash": "220ef5ef11ef203343a9e18d304c3a22",
+    "mtime": 1792506804.151818,
+    "ast_hash": "0db085eb32087b2c7958139e67b31fa8",
     "semantic_hash": ""
   },
   "src/components/ui/Icon.paths.ts": {
-    "mtime": 1792478010.3667078,
-    "ast_hash": "225f537f161f4ff0f8a8a1a54518c1cf",
+    "mtime": 1792507293.7832143,
+    "ast_hash": "161310916f208d6886f1b7d6a4bc5d73",
     "semantic_hash": ""
   },
   "src/components/ui/Odometro.ts": {
-    "mtime": 1792478010.3673503,
-    "ast_hash": "0ce39c7d843977dba69eeebc33055fab",
+    "mtime": 1792506804.1522176,
+    "ast_hash": "f3cdbd3bb4d39a452ae4d7c876ba2b30",
     "semantic_hash": ""
   },
   "src/screens/Login.palleggio.dom.test.ts": {
@@ -1510,108 +1380,108 @@
     "semantic_hash": ""
   },
   "src/screens/Login.palleggio.dom.ts": {
-    "mtime": 1792478010.368247,
-    "ast_hash": "846bf8fbc3aacf18fca7b36156711433",
+    "mtime": 1792506804.152661,
+    "ast_hash": "ffb8eea460b39484ccce87fe303dba7c",
     "semantic_hash": ""
   },
   "src/screens/PartitaLive.regole.ts": {
-    "mtime": 1792478010.369975,
-    "ast_hash": "6840e1c5527e212651f12c1268e8fc97",
-    "semantic_hash": ""
-  },
-  "tsconfig.landing.json": {
-    "mtime": 1792478010.3726034,
-    "ast_hash": "37e9187172c9ce8480c0d1dfe8461c1b",
+    "mtime": 1792506804.152472,
+    "ast_hash": "0f9276685e2cf32daa0cdd9708e7fdca",
     "semantic_hash": ""
   },
   "public/presentazione/og.png": {
-    "mtime": 1792478010.3613923,
-    "ast_hash": "6bbc9efb7d1d1c2e2ff475cfa0861b6e",
-    "semantic_hash": ""
-  },
-  "public/presentazione/screens/compagni.webp": {
-    "mtime": 1792478010.3620372,
-    "ast_hash": "3611f41258a605820ab3fcb257904340",
-    "semantic_hash": ""
-  },
-  "public/presentazione/screens/diario.webp": {
-    "mtime": 1792478010.3624823,
-    "ast_hash": "d4f27eb569d576222577f998a03cbba9",
+    "mtime": 1792510697.0329227,
+    "ast_hash": "58681554c4f5b0b804b673dfabe25fde",
     "semantic_hash": ""
   },
   "public/presentazione/screens/home.webp": {
-    "mtime": 1792478010.3630292,
-    "ast_hash": "74b14cf266edbd9aaaa4770216d07fcb",
-    "semantic_hash": ""
-  },
-  "public/presentazione/screens/mappa.webp": {
-    "mtime": 1792478010.3634343,
-    "ast_hash": "652373226df63faeb8b35673f1307cca",
-    "semantic_hash": ""
-  },
-  "public/presentazione/screens/storia-foto.webp": {
-    "mtime": 1792478010.3637495,
-    "ast_hash": "b8ddf92f3056d65aa07570f34c939c31",
-    "semantic_hash": ""
-  },
-  "public/presentazione/screens/storia-polaroid.webp": {
-    "mtime": 1792478010.3640893,
-    "ast_hash": "b81b921d2f07153e49f2f172f38b88af",
-    "semantic_hash": ""
-  },
-  "public/presentazione/screens/storia-tabellone.webp": {
-    "mtime": 1792478010.3644114,
-    "ast_hash": "94556d80b206930d2fdf48f2d583c80b",
-    "semantic_hash": ""
-  },
-  "public/presentazione/screens/torneo.webp": {
-    "mtime": 1792478010.3649979,
-    "ast_hash": "6f8c812d7ad52b7553b1169826abfaa0",
+    "mtime": 1792511301.6070395,
+    "ast_hash": "b225e7d09d08bdcb55d430666ab2edd2",
     "semantic_hash": ""
   },
   "docs/qa/landing.mjs": {
-    "mtime": 1792478010.3332496,
-    "ast_hash": "6ae310bcbf015f79fccc43718ed4a803",
+    "mtime": 1792511746.6268656,
+    "ast_hash": "e9a5cc203c68f5d9637b07922855314e",
     "semantic_hash": ""
   },
   "src/screens/PartitaLive.regole.test.ts": {
-    "mtime": 1792478010.3696973,
-    "ast_hash": "fe4ce065aa493f7ec53a05978a35e839",
-    "semantic_hash": ""
-  },
-  "src/test/landing.installa.test.ts": {
-    "mtime": 1792478010.3710837,
-    "ast_hash": "4282b9cdc3379c2c08319932922f189c",
-    "semantic_hash": ""
-  },
-  "src/test/landing.sezioni.test.ts": {
-    "mtime": 1792478010.3713107,
-    "ast_hash": "c05b34abc3f577a799a91a86a0f984a2",
+    "mtime": 1792507293.7828596,
+    "ast_hash": "5ad3684702948e70fbb0037ef2427d96",
     "semantic_hash": ""
   },
   "src/test/landing.test.ts": {
-    "mtime": 1792478010.3715467,
-    "ast_hash": "4af6064806e0437dd81beb7b80a65829",
-    "semantic_hash": ""
-  },
-  "src/test/landing.ts": {
-    "mtime": 1792478010.3717775,
-    "ast_hash": "2453f8265dbd9558898c4ade681004aa",
-    "semantic_hash": ""
-  },
-  "src/test/landing.vivo.test.ts": {
-    "mtime": 1792478010.372035,
-    "ast_hash": "c2e451cd7922de534bc9b4f2d9bb7a46",
+    "mtime": 1792511464.552373,
+    "ast_hash": "dc30682afe7e07c35698ab696eb347f9",
     "semantic_hash": ""
   },
   "docs/QA-landing.md": {
-    "mtime": 1792478010.3253098,
-    "ast_hash": "56b9c87f1549c5dc6d280fd6ba7e3e15",
+    "mtime": 1792516693.8585212,
+    "ast_hash": "5c42bf88e8806c8119c1fce5ad6be064",
     "semantic_hash": ""
   },
   ".claude/settings.local.json": {
     "mtime": 1791143463.95555,
     "ast_hash": "cf3015dc37acdcbb7eede154630ce26e",
+    "semantic_hash": ""
+  },
+  "public/presentazione/screens/wrapped.webp": {
+    "mtime": 1792511322.4807336,
+    "ast_hash": "217858b38b05beecf779d7d4ebb2d7ab",
+    "semantic_hash": ""
+  },
+  ".impeccable/config.local.json": {
+    "mtime": 1792507680.1486657,
+    "ast_hash": "d9242cdb0e8a2f25b7645e2a4ceead1c",
+    "semantic_hash": ""
+  },
+  ".impeccable/hook.cache.json": {
+    "mtime": 1792511541.5830803,
+    "ast_hash": "805fc1de4adbe2bd21c8be0f9b5a7d4a",
+    "semantic_hash": ""
+  },
+  ".impeccable/live/config.json": {
+    "mtime": 1792507925.1791213,
+    "ast_hash": "74a060fc90637c5bbbb292bb44b21717",
+    "semantic_hash": ""
+  },
+  "PRODUCT.md": {
+    "mtime": 1792510722.0469215,
+    "ast_hash": "4efd5eb27e8ab634ba0bf53736b29410",
+    "semantic_hash": ""
+  },
+  "public/presentazione/screens/home-fondo.webp": {
+    "mtime": 1792511301.9876256,
+    "ast_hash": "17ff183232aed9ce20b83ec43330fe46",
+    "semantic_hash": ""
+  },
+  ".impeccable/config.json": {
+    "mtime": 1792510341.9709678,
+    "ast_hash": "f5d1a68894d7b61480bed0d43ec12260",
+    "semantic_hash": ""
+  },
+  "public/presentazione/screens/giro-compagni.webp": {
+    "mtime": 1792511319.4416032,
+    "ast_hash": "3611f41258a605820ab3fcb257904340",
+    "semantic_hash": ""
+  },
+  "public/presentazione/screens/giro-live.webp": {
+    "mtime": 1792511310.3323305,
+    "ast_hash": "b9ea46340e892a1f5d75dee8383c447e",
+    "semantic_hash": ""
+  },
+  "public/presentazione/screens/giro-solby.webp": {
+    "mtime": 1792511305.669405,
+    "ast_hash": "1344266fb75636d17f011cd32c3900d1",
+    "semantic_hash": ""
+  },
+  "public/presentazione/screens/giro-storia.webp": {
+    "mtime": 1792511317.1369267,
+    "ast_hash": "de4e16ca35553dcfb063f572fedf291c",
+    "semantic_hash": ""
+  },
+  "public/presentazione/screens/giro-torneo.webp": {
+    "mtime": 1792511314.50107,
+    "ast_hash": "76ba2b360468570d35f605f5bc954e7b",
     "semantic_hash": ""
   }
 }

@@ -1,9 +1,7 @@
 /* ============================================================================
    La scena dell'accesso (Login.scena.tsx): il tramonto in spiaggia, la camera,
    i movimenti del disegno e i due veli dal basso. Sta in un foglio suo, fuori
-   da Login.css, perché la usa anche la landing `/presentazione` senza
-   portarsi dietro gli stili del modulo d'accesso. Spostamento puro: le regole
-   sono quelle di prima.
+   da Login.css: la scena non si porta dietro gli stili del modulo d'accesso.
    ============================================================================ */
 @layer components {
   /* ------------------------------------------------------------- Scena */

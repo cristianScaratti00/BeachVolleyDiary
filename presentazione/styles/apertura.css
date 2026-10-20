@@ -1,0 +1,182 @@
+/* ============================================================================
+   L'apertura della Home nel telefono dell'hero (MOTION.md, Parte L): il
+   momento firmato della landing. È quello che fa l'app la prima volta che
+   apri la Home in una sessione, e nient'altro:
+
+     - i blocchi salgono uno dopo l'altro (la SALITA: 12px, --dur-rise,
+       sfalsati di --rise-step);
+     - le cifre del tabellone girano da zero (MOTION §10.3: le colonne nuove
+       entrano dal vuoto, quelle che c'erano rotolano e scivolano di lato;
+       RACCONTO, o MOLLA per un salto di uno);
+     - la barra delle vinte cresce da sinistra (6 e 9 passi, come Home.css).
+
+   Ferma, la schermata è la Home vera (home.webp, l'<img>). Mentre l'apertura
+   scorre ci stanno sopra due strati decorativi: le fasce (home-fondo.webp, la
+   Home senza cifre né barra, una striscia per blocco) e il tabellone (cifre e
+   barra disegnate qui). A fine corsa spariscono insieme e resta l'immagine:
+   le cifre ferme sono quelle che ha disegnato l'app, al pixel. Le misure
+   sono in pixel dell'app (misure.css, generato) per --px.
+
+   Perché non tenere ferme le cifre disegnate qui: il browser arrotonda
+   ascendente e discendente del carattere alla taglia a cui lo disegna, e a
+   18.7px (il telefono a .78) non arrotonda come a 24px (l'app). Le cifre
+   cadrebbero fino a un pixel più in alto, per sempre. Durante il giro non
+   si vede; da ferme sì.
+
+   Due modi, a seconda di dove sta il telefono quando la pagina si apre:
+     - tablet e desktop: è nella prima vista, e l'apertura parte al
+       caricamento, una volta;
+     - telefono (verticale, o orizzontale basso): l'hero sta sotto la piega,
+       e le cifre scattano mentre il telefono entra in vista, legate allo
+       scroll (una cifra intera per passo, mai una a metà). I blocchi sono
+       già fermi: non salgono.
+   Con reduced-motion non c'è nessuno dei due strati.
+   ============================================================================ */
+@layer components {
+  /* Lo schermo ha le proporzioni dell'app (390 × 844). `--px` è un pixel
+     dell'app: lo risolvono i figli, sul loro contenitore, che è lo schermo. */
+  .schermo {
+    position: relative;
+    aspect-ratio: 390 / 844;
+    container-type: inline-size;
+    --px: calc(100cqw / 390);
+  }
+
+  .bande,
+  .tabellone {
+    display: none;
+    position: absolute;
+    inset: 0;
+  }
+
+  /* --------------------------------------------------------- Le fasce */
+  /* Il fondo è la carta dell'app, quella su cui i blocchi salgono. */
+  .bande { background: var(--bg); }
+  .banda {
+    position: absolute;
+    inset-inline: 0;
+    top: calc(var(--y0) * var(--px));
+    height: calc((var(--y1) - var(--y0)) * var(--px));
+    background: url("/presentazione/screens/home-fondo.webp") 0 calc(var(--y0) * var(--px) * -1) / 100% auto no-repeat;
+  }
+
+  /* ------------------------------------------------------ Il tabellone */
+  .odo {
+    position: absolute;
+    left: calc(var(--x) * var(--px));
+    top: calc(var(--y) * var(--px));
+    display: flex;
+    color: var(--ink);
+    font: 700 calc(var(--fs) * var(--px)) / calc(var(--lh) * var(--px)) var(--font-ui);
+    letter-spacing: calc(var(--ls) * var(--px));
+    font-variant-numeric: tabular-nums;
+  }
+  /* Una colonna: ritagliata solo in verticale, come in Tabellone.css (in
+     orizzontale il glifo sborda, il tracking è negativo). */
+  .odo > span {
+    width: calc(var(--cw) * var(--px));
+    height: calc(var(--lh) * var(--px));
+    clip-path: inset(0 -0.2em);
+    overflow-y: clip;
+  }
+  /* La striscia [vuoto, 0–9, 0–9] di Odometro.ts, un'interlinea per riga;
+     la cifra è la sua posizione (--a). */
+  .odo > span::before {
+    content: "\00a0\A 0\A 1\A 2\A 3\A 4\A 5\A 6\A 7\A 8\A 9\A 0\A 1\A 2\A 3\A 4\A 5\A 6\A 7\A 8\A 9";
+    display: block;
+    white-space: pre;
+    transform: translateY(calc(var(--a) * var(--lh) * var(--px) * -1));
+  }
+
+  /* La barra delle vinte: inchiostro le vinte, filo forte le perse. */
+  .barra {
+    position: absolute;
+    left: calc(var(--x) * var(--px));
+    top: calc(var(--y) * var(--px));
+    width: calc(var(--w) * var(--px));
+    height: calc(var(--h) * var(--px));
+  }
+  .barra > span {
+    position: absolute;
+    inset-block: 0;
+    left: calc(var(--x) * var(--px));
+    width: calc(var(--w) * var(--px));
+    border-radius: var(--radius-capsule);
+    transform-origin: left center;
+  }
+  .barra-v { --passo: 6; background: var(--data-ink); }
+  .barra-p { --passo: 9; background: var(--line-strong); }
+
+  /* ------------------------------------------------------- L'apertura */
+  @media (prefers-reduced-motion: no-preference) {
+    /* Al caricamento. `--attesa` lascia arrivare lo sguardo sul titolo, poi
+       l'app si apre; `--fine` è l'ultima cosa che si muove (la barra delle
+       perse). Lì i due strati spariscono e resta la Home vera. */
+    .schermo {
+      --attesa: 400ms;
+      --fine: calc(9 * var(--rise-step) + var(--dur-racconto));
+    }
+    .bande,
+    .tabellone {
+      display: block;
+      animation: apertura-fine 1ms calc(var(--attesa) + var(--fine)) both;
+    }
+    .banda:not([data-b="fondo"]),
+    .odo,
+    .barra {
+      animation: apertura-sale var(--dur-rise) var(--ease-rise) calc(var(--attesa) + var(--i) * var(--rise-step)) both;
+    }
+    .odo > span { animation: apertura-scivola var(--dur) var(--ease) var(--attesa) both; }
+    .odo > span::before { animation: apertura-gira var(--dur) var(--ease) var(--attesa) both; }
+    .barra > span { animation: apertura-cresce var(--dur-racconto) var(--ease-racconto) calc(var(--attesa) + var(--passo) * var(--rise-step)) both; }
+
+    /* Sul telefono, legate allo scroll: le cifre scattano mentre il telefono
+       entra in vista (dalla metà del suo ingresso per 63% e +36, più in
+       basso per la fila dei tornei vinti e della serie). I blocchi non
+       salgono: le fasce stanno ferme e coprono solo le cifre vere finché il
+       giro non è finito. Le colonne non scivolano di lato: a scroll fermo lo
+       scivolamento resterebbe a metà, un buco fra la cifra e il «%». */
+    @media (max-aspect-ratio: 2/3), (max-height: 500px) {
+      @supports (animation-timeline: view()) {
+        .eroe .telefono { view-timeline: --telefono block; }
+        .banda:not([data-b="fondo"]),
+        .odo,
+        .odo > span,
+        .barra { animation: none; }
+        .bande,
+        .tabellone,
+        .odo > span::before,
+        .barra > span {
+          animation-duration: auto;
+          animation-delay: 0s;
+          animation-timing-function: linear;
+          animation-timeline: --telefono;
+          animation-range: var(--scorri, entry 50% contain 30%);
+        }
+        .odo > span::before { animation-timing-function: steps(var(--passi), jump-none); }
+        .odo[data-odo="vinti"],
+        .odo[data-odo="serie"] { --scorri: entry 82% contain 70%; }
+        /* Gli strati vanno via con l'ultima cifra, non prima. */
+        .bande,
+        .tabellone { animation-range: entry 50% contain 70%; }
+      }
+    }
+  }
+
+  /* --rise-y dell'app (12px), in pixel dell'app. */
+  @keyframes apertura-sale {
+    from { opacity: 0; transform: translateY(calc(12 * var(--px))); }
+  }
+  @keyframes apertura-gira {
+    from { transform: translateY(calc(var(--da) * var(--lh) * var(--px) * -1)); }
+  }
+  @keyframes apertura-scivola {
+    from { transform: translateX(calc(var(--dx) * var(--cw) * var(--px))); }
+  }
+  @keyframes apertura-cresce {
+    from { transform: scaleX(0); }
+  }
+  @keyframes apertura-fine {
+    to { visibility: hidden; }
+  }
+}

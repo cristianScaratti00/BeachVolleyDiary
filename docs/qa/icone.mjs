@@ -1,6 +1,6 @@
 // ============================================================================
 // Le icone dell'app installata e la favicon, col marchio della versione D
-// (ART_DIRECTION §L10.2): il pallone bianco con la fascia arancio, NUDO su una
+// (BrandMark): il pallone bianco con la fascia arancio, NUDO su una
 // tessera d'inchiostro. Le rasterizza Chrome headless (docs/qa/cdp.mjs):
 // nessuna dipendenza in più. Dalla radice del repo:
 //

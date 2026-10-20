@@ -84,7 +84,7 @@ export const PARAM_ACCESSO = 'accesso'
 /**
  * La vista con cui si apre l'accesso. La landing porta «Crea il tuo diario» a
  * `/?accesso=registrati` e «Ho già un account» a `/?accesso=accedi`, così il
- * Benvenuto non fa ripetere una scelta appena fatta (UX LC5). Qualunque altro
+ * Benvenuto non fa ripetere una scelta appena fatta (UX, Parte L §L2). Qualunque altro
  * valore, o niente, è il Benvenuto.
  */
 function vistaIniziale(): Vista {

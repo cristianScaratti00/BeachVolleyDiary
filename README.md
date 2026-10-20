@@ -28,7 +28,7 @@ npm run preview        # anteprima della build
   carosello di tre messaggi, Accedi, Registrati in due passi (nickname verificato live dalla Edge
   Function `check-name`, poi email e password). Gate in `Root.tsx`: splash → login → app.
 - **Home** — una frase su come stai andando, periodo (Sempre / stagioni) e filtro per compagno;
-  **Pallo**, la mascotte, dà un consiglio alla volta calcolato dai dati (oggi si gioca → aggiungi
+  **Solby**, la mascotte, dà un consiglio alla volta calcolato dai dati (oggi si gioca → aggiungi
   partita, piazzamento da aggiornare, serie record, posto migliore, Wrapped pronto…); poi la % di
   partite vinte (link a Statistiche), Beach Wrapped, tornei vinti, serie record, ultimi tornei.
   L'avatar in alto apre il Profilo.
@@ -48,7 +48,7 @@ npm run preview        # anteprima della build
   non serve un torneo (squadre e formato facoltativi: 1 set o 2 su 3, a 21 o a 15) e il risultato
   resta nello **storico locale** delle ultime 20 partite (`localStorage`, per account), da cui si può
   anche salvare in un torneo dopo. Ogni tocco su un pannello è un punto (−1 per correggere), due
-  punti di scarto, timeout da 30", Pallo che tifa. La partita in corso vive in `sessionStorage` (un
+  punti di scarto, timeout da 30", Solby che tifa. La partita in corso vive in `sessionStorage` (un
   refresh non la perde) e lo schermo resta acceso dove si può.
   Accanto al piazzamento si può indicare il **tabellone** in cui è arrivato (Gold / Silver / Bronze /
   Girone unico, facoltativo): compare nel badge ("2° · Silver"), nella story e nella ricerca del diario, ma non
@@ -78,7 +78,7 @@ npm run preview        # anteprima della build
 - **Storia Instagram** — immagine 1080×1920 del singolo torneo, generata con `html-to-image` e
   scaricabile: **3 layout** (Tabellone, Foto, Polaroid) × 3 colori, scelta ricordata per dispositivo;
   le foto restano sempre intere, con la loro proporzione.
-- **Assistente guidato («Raccontalo a Pallo»)** — creazione conversazionale del torneo in stile
+- **Assistente guidato («Raccontalo a Solby»)** — creazione conversazionale del torneo in stile
   chat. Nessun modello linguistico: è una macchina a stati scriptata (`src/screens/CreaChat.tsx`).
 - **Profilo** — si apre dall'avatar in Home (o dalla Sidebar) e si chiude col ×: nome visualizzato,
   password, foto profilo (bucket `avatars` + RPC `set_avatar`), condivisioni ricevute, l'interruttore
@@ -86,7 +86,7 @@ npm run preview        # anteprima della build
   bacheca delle segnalazioni (solo admin), logout con conferma.
 - **CRUD completo** — dal ＋ (o «Nuovo» della Sidebar) si apre «Cosa registriamo?»: *Partita
   live*, *Torneo* (il modulo completo), *Partita* (sa già in quale torneo), *Torneo rapido* (nome,
-  data e piazzamento; il resto dopo) e *Raccontalo a Pallo*. Partite con punteggi per set, foto e
+  data e piazzamento; il resto dopo) e *Raccontalo a Solby*. Partite con punteggi per set, foto e
   compagni negli sheet; ogni eliminazione chiede conferma (il torneo si elimina dal suo sheet di
   modifica). Un compagno nuovo si crea al volo dal torneo; la partita eredita il compagno del torneo.
 - **URL vere** — ogni schermata e ogni dettaglio ha il suo percorso (`/tornei/:id`,
@@ -197,10 +197,8 @@ di fabbrica con "oggi" congelato al `2026-07-22`, così la suite non cambia colo
 `src/test/contrast.test.ts` calcola il contrasto sui colori veri, che axe in jsdom non può misurare.
 `src/test/app.tsx` monta l'app intera (`AppView`) con un diario in memoria: ci girano i test dei
 flussi in `src/app/AppView.test.tsx` (menu ＋, sheet, conferme, focus, indietro, breakpoint).
-`src/test/landing.ts` fa lo stesso per la landing `/presentazione`: l'HTML finito e i moduli veri, con
-un'impaginazione finta misurata da un IntersectionObserver che segue la regola vera, scroll a passi e
-tempo finto. Ci girano `src/test/landing.{vivo,sezioni,installa}.test.ts`; `src/test/landing.test.ts`
-legge l'HTML e i fogli come testo (CSP, struttura, ruoli, layer, colori, movimento).
+`src/test/landing.test.ts` legge la landing `/presentazione` come testo (CSP, struttura, porte dell'app,
+immagini, layer, colori, movimento) e ci passa axe.
 I report QA per feature stanno in `docs/`; [`docs/QA-refactor.md`](docs/QA-refactor.md) dice dove è
 verificato ogni stato dell'interfaccia.
 
@@ -235,7 +233,7 @@ redesign Liquid Glass (prima sezione di ART_DIRECTION.md). In breve:
 - **Movimento**: `ENTRATA` / `SVELTO` / `MOLLA` (`src/components/Motion.tsx`, libreria Motion) =
   `--dur-*` + `--ease-*`, più la SALITA sfalsata (`.rise`) e la PRESSIONE a molla (`.press`) del
   redesign; solo `transform` e `opacity`; tutto rispetta `prefers-reduced-motion`.
-- **Pallo** (`src/components/Pallo.tsx`): la mascotte, decorativa, con 14 espressioni animate
+- **Solby** (`src/components/Pallo.tsx`: nel codice si chiama ancora Pallo): la mascotte, decorativa, con 14 espressioni animate
   (saluta, esulta, contento, preoccupato, sbircia, testa, festa, triste, pensa, dorme, sorpreso,
   occhiolino, cool, cuori), lo sguardo che segue il dito, le reazioni al tocco e un paio di
   sorprese; tutto fermo con reduced-motion.
@@ -245,30 +243,28 @@ redesign Liquid Glass (prima sezione di ART_DIRECTION.md). In breve:
 
 ## La landing `/presentazione`
 
-La pagina pubblica da cui si installa l'app («Controluce»: [`UX.md`](UX.md), [`ART_DIRECTION.md`](ART_DIRECTION.md)
-e [`MOTION.md`](MOTION.md), Parte L). Vite la costruisce come seconda pagina (`presentazione/index.html`) e
-**non** importa React né Supabase: chi la apre non scarica l'app. Dall'app prende solo moduli senza framework
-e i fogli dei token, del vetro e delle primitive:
+La pagina pubblica che presenta l'app: la tavola «Landing page» del canvas di Claude Design, in HTML e CSS
+([`UX.md`](UX.md), [`ART_DIRECTION.md`](ART_DIRECTION.md) e [`MOTION.md`](MOTION.md), Parte L). Vite la costruisce
+come seconda pagina (`presentazione/index.html`) e **non ha JavaScript**: chi la apre non scarica l'app. Dall'app
+prende i fogli dei token, della base e delle icone, e porta alla registrazione e all'accesso, che restano nell'app
+(`/?accesso=registrati`, `/?accesso=accedi`). Il telefono dell'hero rifà l'apertura della Home dell'app (i blocchi che
+salgono, il tabellone che gira da zero, la barra delle vinte), solo in CSS: a tempo su tablet e desktop, legata allo
+scroll sul telefono, ferma con reduced-motion. Le funzionalità sono nove carte; `#schermate` è il **giro**, sei momenti
+di una stagione (Solby, Partita live, il torneo, i compagni, la Storia, Wrapped) che si sfogliano scorrendo nello
+stesso telefono, e che senza movimento restano un elenco ([`MOTION.md`](MOTION.md), Parte L).
 
-- `src/components/Pallo.vita.ts` (lo sguardo e la vita di Pallo), `src/components/ui/Odometro.ts` (i numeri),
-  `src/screens/PartitaLive.regole.ts` (le regole della demo), `src/screens/crea/copione.ts` (la chat),
-  `src/screens/Login.palleggio.dom.ts` (il palleggio della scena), `src/components/ui/Icon.paths.ts` (le icone).
 - `presentazione/index.html` è un **modello**: al momento della build (e in sviluppo) il plugin `landing` di
-  `vite.config.ts` lo compone con `presentazione/build/componi.ts`, che ci mette dentro la scena, Pallo, il marchio,
-  la mappa, le slide, lo sprite delle icone e i numeri (`{{…}}`, `<!--@…-->`). Così il primo fotogramma è la pagina
-  intera anche senza JavaScript, e niente è copiato a mano.
-- `presentazione/js/main.ts` accende le parti una per una (ognuna nel suo try/catch); `presentazione/styles/landing.css`
-  importa i fogli nell'ordine di ART_DIRECTION §L12. Nei fogli della landing solo `var(--…)`: i letterali stanno in
-  `presentazione/styles/tokens.css`. `tsc -b` controlla anche la landing (`tsconfig.landing.json`).
+  `vite.config.ts` lo compone con `presentazione/build/componi.ts`, che ci mette il marchio (`BrandMark`) e lo sprite
+  delle icone (`Icon.paths.ts`), così niente è copiato a mano.
+- `presentazione/styles/landing.css` importa i fogli nell'ordine di ART_DIRECTION §L4. Nei fogli dei componenti solo
+  `var(--…)`: i letterali stanno in `presentazione/styles/tokens.css`.
 
-I file generati si rigenerano dalla radice:
+Le immagini si rigenerano dalla radice:
 
 ```bash
-# Pallo (14 umori) e la scena del Benvenuto in tre piani, dagli snapshot di Pallo.tsx e Login.scena.tsx
-npx vitest run src/components/Pallo.landing.test.tsx -u
-# I numeri, le battute di Pallo, la mappa, le slide e la chat: il diario dell'anteprima a OGGI_LANDING
-npx vitest run src/app/landing.dati.test.ts -u
-# Le schermate del telefono e della Storia (WebP), con la data fissata a OGGI_LANDING
+# Le schermate dei telefoni (WebP), dall'anteprima con la data fissata a OGGI_LANDING; nella stessa
+# passata la Home senza cifre (home-fondo.webp) e presentazione/styles/misure.css per l'apertura, e i sei momenti del
+# giro (giro-*.webp e wrapped.webp)
 node docs/qa/landing-shots.mjs
 # Le icone PWA col pallone del marchio, e l'anteprima social (og.png)
 node docs/qa/icone.mjs
@@ -279,6 +275,5 @@ node docs/qa/landing-og.mjs
 in `docs/qa/landing-shots.mjs`. Gli script avviano un loro Vite e un loro Chrome su porte proprie e li chiudono.
 
 La rifinitura si misura sulla build di produzione con `docs/qa/landing.mjs` (axe, tastiera con la visibilità
-dell'anello, overflow, bersagli, CLS, reduced-motion, prestazioni a CPU 4×, richieste di rete, tocchi veri;
-`H=390` per il telefono in orizzontale): comandi e risultati in [`POLISH.md`](POLISH.md), Parte L. Dove è
-verificato ogni stato della pagina (jsdom, browser o a mano) lo dice [`docs/QA-landing.md`](docs/QA-landing.md).
+dell'anello, la fila dei telefoni, overflow, bersagli, CLS, reduced-motion, prestazioni a CPU 4×, richieste di rete):
+comandi e risultati in [`POLISH.md`](POLISH.md), Parte L, e in [`docs/QA-landing.md`](docs/QA-landing.md).

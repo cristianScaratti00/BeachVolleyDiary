@@ -19,9 +19,8 @@ export default defineConfig({
     // ricalcolare il contrasto: senza questa riga il test vedrebbe "".
     // Solo loro: il CSS dei componenti resta fuori da jsdom come prima.
     // Il terzo sono i fogli della landing: src/styles/landing.tokens.test.ts
-    // legge i token, src/test/landing.test.ts i componenti (colori, layer,
-    // transizioni). Solo come testo: nessun modulo li importa, quindi in jsdom
-    // non entrano.
+    // legge i token, src/test/landing.test.ts i componenti (colori, layer).
+    // Solo come testo: nessun modulo li importa, quindi in jsdom non entrano.
     css: { include: [/src\/styles\/(tokens|materials)\.css/, /presentazione\/styles\/[a-z]+\.css/] },
   },
 })

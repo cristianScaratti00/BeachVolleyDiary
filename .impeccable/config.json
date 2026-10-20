@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "flat-type-hierarchy",
+        "value": "*",
+        "files": [
+          "presentazione/index.html"
+        ],
+        "createdAt": "2026-10-20T15:32:21.970Z",
+        "reason": "Claude (false positive): the sizes live in font shorthand tokens in presentazione/styles/tokens.css, which the scan of the HTML does not resolve. Real scale: h1 40→64px, h2 32→46px, h3 20px, phrases 18–19px, body 16px. h2→h3 is 1.6–2.3×, h1→h2 1.25–1.39×. This is the scale of the Claude Design board, not changed in this session"
+      }
+    ]
+  }
+}

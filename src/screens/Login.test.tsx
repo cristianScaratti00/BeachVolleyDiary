@@ -396,7 +396,7 @@ describe('Accesso — accessibilità', () => {
   })
 })
 
-// Il deep link della landing (UX LC5): «Crea il tuo diario» porta a
+// Il deep link della landing (UX, Parte L §L2): «Crea il tuo diario» porta a
 // `/?accesso=registrati`, «Ho già un account» a `/?accesso=accedi`. Il
 // parametro si legge una volta e si toglie dall'indirizzo.
 describe('il deep link ?accesso=', () => {

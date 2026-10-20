@@ -7,7 +7,7 @@
 | Livello dei token | `src/styles/tokens.css` (custom properties) · `src/styles/materials.css` (vetro) · `src/lib/theme.ts` (`TOKEN`, `LIT`, `BP`, `dataTone`) |
 | Verifica | `src/styles/tokens.test.ts`: legge i due fogli **come testo** e ricalcola ogni rapporto di contrasto citato qui (134 test). Specimen renderizzato a 390px in Chrome headless, sia con SF Pro (`-apple-system`) sia con Inter forzato |
 | Lingua | italiano; i nomi dei token sono in inglese, come nel piano |
-| Landing | la landing `/presentazione` ha la sua parte in fondo: **[Parte L, «Controluce»](#parte-l-la-landing-presentazione-controluce)** (ottobre 2026). Estende questo sistema, non lo cambia |
+| Landing | la landing `/presentazione` ha la sua parte in fondo: **[Parte L](#parte-l-la-landing-presentazione)** (la tavola «Landing page» di Claude Design, 20 ottobre 2026). Usa i token di questo sistema, non li cambia |
 
 Ogni valore in questo documento è un numero o un token. Se un componente ha bisogno di un valore che qui non c'è, il sistema va esteso qui (e nel test), non nel componente.
 
@@ -33,7 +33,7 @@ Ogni valore in questo documento è un numero o un token. Se un componente ha bis
 14. [Il test "admin Bootstrap"](#14-il-test-admin-bootstrap)
 15. [Dove questo documento corregge UX.md e il piano](#15-dove-questo-documento-corregge-uxmd-e-il-piano)
 16. [Seam per i ruoli successivi](#16-seam-per-i-ruoli-successivi)
-- [Parte L. La landing `/presentazione`: «Controluce»](#parte-l-la-landing-presentazione-controluce)
+- [Parte L. La landing `/presentazione`](#parte-l-la-landing-presentazione)
 
 ---
 
@@ -58,7 +58,7 @@ Il redesign è stato disegnato in Claude Design (19 schermate a 390×844, «vers
 | Vetro | `glass-regular` .72, blur 24 | vetro **liquido** alla Apple, non un pannello col bordo: bianco appena .32, `blur(10px) saturate(180%) brightness(1.05)`, **nessun bordo vero** ma la luce sul bordo direzionale (forte in alto a sinistra, tenue in basso a destra), lo spessore (luce dentro in alto, ombra appena in basso) e un'ombra morbida perché galleggia; il vetro di **liquid-glass-react** (rdev) in tutta l'app tramite `LiquidGlass`: sfocatura piegata dal filtro SVG e aberrazione sul bordo su Blink, sfocatura e bordi di luce su WebKit/Gecko; la tab accesa è una **lente** di vetro che scorre, l'arancio sta solo su icona ed etichetta |
 | Piazzamento | badge | **medaglia** (`Medal`): 1° arancio, podio col filo d'inchiostro, il resto grigia |
 | Esito partita | anello arancio/grigio | V = cerchio d'inchiostro pieno; set vinto col filo d'inchiostro, perso col filo chiaro |
-| Mascotte | — | **Pallo** (`src/components/Pallo.tsx`): consigli in Home, sbircia dal ＋, conduce l'assistente, tifa nella partita live e in Wrapped |
+| Mascotte | — | **Solby** (nel codice ancora Pallo, `src/components/Pallo.tsx`): consigli in Home, sbircia dal ＋, conduce l'assistente, tifa nella partita live e in Wrapped |
 | Movimento | ENTRATA · SVELTO · MOLLA | in più la **SALITA** (`.rise`: 12px, 600ms, sfalsata di 50ms) e la **PRESSIONE** (`.press`: .97 con rimbalzo `cubic-bezier(.3,1.6,.5,1)`, 400ms) |
 
 Il contrasto del testo resta sempre ≥ 4.5. Due scelte consapevoli del redesign, fissate come prove negative in `tokens.test.ts`: il **filo dei campi** è leggero (`#D6D6D1`, 1.46 sul bianco: il campo si riconosce dall'etichetta, dal fondo bianco e dal focus arancio + anello; con `prefers-contrast: more` diventa un filo vero da 5.35), e il vetro si misura sul **grigio di una foto in ombra** (`#8C8C8C`) invece che sul nero, perché sotto le barre di vetro passano solo carta, mappa e foto.
@@ -845,724 +845,96 @@ UX.md vince sul comportamento. Questo documento vince sull'aspetto. Le correzion
 
 ---
 
-# Parte L. La landing `/presentazione`: «Controluce»
+# Parte L. La landing `/presentazione`
 
 | | |
 |---|---|
-| Ruolo | Art director, ruolo 2 di 6 della squadra «REDESIN sito presentazione». Definisce il sistema visivo della landing; **non costruisce componenti** |
-| Base | `UX.md` Parte L (ruolo 1, commit `7f31fba`), su `be9c4bd` (`main` con la versione D). Questa parte ne rispetta i contratti e dice dove li corregge (§L13) |
-| Livello dei token | `presentazione/styles/tokens.css`: si importa **dopo** i fogli dell'app e aggiunge token, non ne cambia (§L12) |
-| Verifica | `src/styles/landing.tokens.test.ts`: legge il foglio della landing e quello dell'app **come testo** e ricalcola ogni rapporto citato in questa parte (59 test). Più una tavola renderizzata a 390×844 in Chrome headless, con i fogli veri, la scena vera del Login e Pallo vero |
-| Cosa vince | Sull'**aspetto** della landing vince questa parte; sul **comportamento** vince UX.md Parte L. Sui valori dell'app vince la sezione «Versione D» in cima a questo documento |
+| Data | 20 ottobre 2026 |
+| Fonte | la tavola **«Landing page»** del canvas di Claude Design «Beach Diary — Redesign Liquid Glass» ([canvas](https://claude.ai/artifact/Sr7p7hVVqwC6PNkJUzdsDd), file `project/Landing.dc.html`, 1440 × 3495). Le misure inline della tavola sono la fonte di verità |
+| Cosa sostituisce | «Controluce» (il tramonto, la capsula di vetro, Pallo guida). Resta nella storia di git fino al commit `a9793f3` |
+| Codice | `presentazione/index.html`, `presentazione/styles/*`, `presentazione/build/componi.ts` |
 
-Ogni valore qui sotto è un numero o un token. Se chi costruisce ha bisogno di un valore che qui non c'è, lo aggiunge a `presentazione/styles/tokens.css` e al test, non al componente.
+## L1. In una riga
 
-### Indice della Parte L
+La versione D dell'app su una pagina sola: carta piatta, carte bianche col filo, l'arancio solo sulle azioni, Geist pesante e stretto nei titoli, e le schermate vere dell'app dentro telefoni col filo. Niente vetro e niente scena. I movimenti che raccontano qualcosa sono due, presi dall'app: nel telefono dell'hero la Home si apre come la prima volta (i blocchi salgono, il tabellone gira da zero, la barra cresce), e in `#schermate` la stagione si sfoglia scorrendo, un momento per volta nello stesso telefono (MOTION.md, Parte L).
 
-- L0. [In una frase](#l0-in-una-frase)
-- L1. [Estendere o spingere: la decisione](#l1-estendere-o-spingere-la-decisione)
-- L2. [Direzione estetica](#l2-direzione-estetica)
-- L3. [Tipografia](#l3-tipografia)
-- L4. [Colore](#l4-colore)
-- L5. [Spazio e layout](#l5-spazio-e-layout)
-- L6. [Raggi e forme](#l6-raggi-e-forme)
-- L7. [Elevazione e ombre](#l7-elevazione-e-ombre)
-- L8. [Bordi e superfici](#l8-bordi-e-superfici)
-- L9. [Il vetro sulla landing](#l9-il-vetro-sulla-landing)
-- L10. [Iconografia e immagini](#l10-iconografia-e-immagini)
-- L11. [Movimento](#l11-movimento)
-- L12. [Il livello dei token: come si usa](#l12-il-livello-dei-token-come-si-usa)
-- L13. [Dove questa parte corregge UX.md](#l13-dove-questa-parte-corregge-uxmd)
-- L14. [Il test «landing da template»](#l14-il-test-landing-da-template)
-- L15. [Seam per i ruoli successivi](#l15-seam-per-i-ruoli-successivi)
+## L2. I token
 
----
+**Dall'app, per nome** (`src/styles/tokens.css`): `--bg` (la carta, #F6F6F4), `--surface` (le carte e il pulsante bianco), `--fill` (la fascia di `#schermate`, #EDEDEA), `--edge` (i fili delle carte e della testata), `--line-strong` (il filo del telefono e del pulsante bianco), `--ink`, `--ink-label` (le voci della testata), `--accent` / `--accent-strong` / `--on-accent` (il pulsante pieno), `--accent-text` (occhielli e icone), `--accent-text-state`, `--radius-capsule`, `--touch`, `--border-w`, la pressione (`--dur-press`, `--ease-press`, `--press-scale`), l'anello di focus. La tavola usa esattamente questi esadecimali: il colore della landing è quello dell'app.
 
-## L0. In una frase
+**Della landing** (`presentazione/styles/tokens.css`, prefisso `--lp-`): la colonna (1200 compresi i margini da 32; 16 sotto gli 820px), `--lp-testo` (#4A4A47, il testo lungo), la vetrina dell'hero (`--lp-vetrina` #FFE9DA col filo #F6D2B8), l'ombra del telefono, gli hover (`--lp-pieno-hover` #FF7A2E, `--lp-filo-hover` #A3A39E) e la scala dei titoli:
 
-**Controluce.** Il sito è l'app vista al tramonto. Sagome d'inchiostro contro una luce calda (i giocatori, la palma, Pallo), pagine di carta per il diario e un tabellone acceso per i numeri. Dove l'app è una lista calma, il sito è una sequenza di manifesti: una cosa per schermata, il carattere grande come immagine, e un solo salvagente arancio da toccare.
-
-Il nome viene dalla scena del Benvenuto, che è già in controluce: il sole basso dietro la rete, e davanti solo sagome. La landing comincia lì e finisce lì.
-
----
-
-## L1. Estendere o spingere: la decisione
-
-**Si estende il sistema, si spinge il registro.**
-
-L'utente ha chiesto un sito «coerente con l'app: stessi token, font, marchio, vetro e voce». C'è anche un motivo che pesa di più: la landing è la porta dell'app. Chi tocca «Crea il tuo diario» atterra sul Benvenuto, cioè sulla stessa scena al tramonto, con lo stesso titolo e lo stesso Pallo. Se il sito avesse un altro linguaggio, il primo tocco sarebbe un cambio di marca.
-
-Coerente però non vuol dire «l'app su una pagina più lunga». Con i titoli da 30px e le card bianche in colonna, la landing sembrerebbe la schermata Profilo. La landing di oggi, per contro, ha proprio la forma da template: telefono che galleggia accanto al titolo, tre card di funzioni con l'icona, barra mobile in fondo.
-
-| Si estende (preso dall'app così com'è, importato e non copiato) | Si spinge (solo sulla landing) |
+| Ruolo | Valore |
 |---|---|
-| I token: inchiostri, arancio, carta, raggi, spazi, curve (`src/styles/tokens.css`) | **La scala.** Sopra `--type-large-title` (30/34) c'è un gradino da manifesto: titolo fino a 84, numeri fino a 160 (§L3.2) |
-| Il vetro e i suoi ripieghi (`materials.css`), **senza ritocchi** ai materiali | **Le campiture.** L'app ha un fondo solo. La landing alterna tre fondi pieni a tutta larghezza: tramonto, carta, inchiostro (§L4.2). È la grammatica delle slide di Wrapped, che è già prodotto |
-| Geist, i pulsanti (`Button.css`), le icone (`Icon.tsx`), Pallo e i suoi 14 umori, il tabellone (`Odometro`) | **Il ritmo.** 96–144px fra le sezioni invece dei 24 dell'app: ogni sezione è un manifesto, e serve aria intorno |
-| La scena del Benvenuto, le palette dei PNG, il vocabolario dei pin della Mappa | **Il movimento legato allo scroll**, che l'app vieta (MOTION §9.2). Qui c'è, con i limiti di §L11 e di MOTION.md («Landing») |
+| h1 | Geist 800, 40 → 64 (`clamp(2.5rem, 5vw, 4rem)`), interlinea 1.02, −2px |
+| h2 | 800, 32 → 46 (`clamp(2rem, 3.6vw, 2.875rem)`), 1.05, −1.4px |
+| titoli dei momenti del giro (`--lp-type-passo`) | 800, 24 → 34 (`clamp(1.5rem, 2.6vw, 2.125rem)`), 1.12, −0.8px |
+| h3 delle carte | 700, 20, 1.25, −0.3px |
+| occhiello | 700, 14, `--accent-text` |
+| frase dell'hero | 500, 17 → 19, 1.55, `--lp-testo`, al più 480 |
+| frase di sezione | 400, 18, 1.5, `--lp-testo` |
+| testo delle carte | 400, 16, 1.5, `--lp-testo` |
+| voci della testata | 600, 15, `--ink-label` |
+| pulsanti | 700, 16 (il bianco a 600); 15 nella testata |
 
-**Perché non oltre** (un'altra palette, un altro carattere, un'illustrazione nuova): il marchio della versione D ha tre settimane, e chi si installa l'app dalla landing deve riconoscere l'icona, la scena e Pallo nel primo minuto. Un sito «più bello dell'app» farebbe sembrare l'app una versione povera del sito.
+L'unica ridefinizione di un nome dell'app è `--font-ui`: lo stesso Geist, con la riserva metrica «Geist Fallback» (Arial ridimensionato, una faccia per fascia di peso) prima del carattere di sistema.
 
-**Perché non meno**: con la scala dell'app non ci sarebbe gerarchia fra un capitolo e una sezione, e senza campiture le nove sezioni sarebbero una sola striscia beige.
+**Contrasti** (ricalcolati da `src/styles/landing.tokens.test.ts`): `--lp-testo` 8.22 sulla carta, 8.89 sul bianco, 7.58 sulla fascia; `--ink-label` 10.53; `--accent-text` 4.79 sulla carta; l'etichetta del pieno 5.97 (6.54 in hover).
 
----
+## L3. Le sezioni
 
-## L2. Direzione estetica
-
-### L2.1 Aggettivi (in ordine di priorità)
-
-1. **In controluce.** Le forme si leggono dal contorno, non dal dettaglio: sagome d'inchiostro su luce calda (la scena, Pallo davanti al sole del finale), numeri bianchi sul buio, schermate in una cornice d'inchiostro. Niente sfumature decorative, niente lucido.
-2. **Da manifesto.** Una cosa per schermata. Il titolo occupa la larghezza, il numero è l'immagine, il fondo è una campitura piena. È la grammatica della tela dei PNG (§10.4 e `WrappedSlideCard.tsx`), portata sulla pagina.
-3. **Vero.** Ogni immagine è il prodotto. Le schermate vengono dall'anteprima, le slide dalle palette dei PNG, le regole della demo da `PartitaLive.regole.ts` e i pin dalla Mappa. Non ci sono telefoni 3D, interfacce inventate o foto di repertorio.
-4. **Giocabile.** Quello che si muove, per lo più, risponde: Pallo al dito, la demo al tocco, la chat alla risposta. Il movimento è una reazione prima che uno spettacolo.
-5. **A prova di sole**, come l'app. Il testo sta sopra 4.5:1 nel caso peggiore **misurato**, anche sulla scena e sotto il vetro (§L4.8).
-6. **Leggero.** Nessun framework, al più 2 superfici sfocate nel caso tipico, carattere servito dal sito.
-
-Non è: carino, «tech», SaaS, una pagina prodotto Apple in nero.
-
-### L2.2 Riferimenti (che cosa si prende da ognuno)
-
-| Riferimento | Che cosa si prende | Che cosa **non** si prende |
-|---|---|---|
-| **Il Benvenuto dell'app** (`Login.scena.tsx`, `Login.css`) | La scena, il velo dal basso, il titolo 800 stretto, il vetro chiaro sul buio di «Ho già un account» | Il carosello dei messaggi: sulla landing il titolo è uno |
-| **La tela di Beach Wrapped e della Storia** (versione D) | Campitura unica; numero a peso 900 con tracking −0.052em e interlinea 0.9; le celle 2×2 separate da un filetto; Pallo come unica figura | Le misure della tela (1080): qui si scala a × 1/3 (§L3.2) |
-| **Tabelloni luminosi** dei campi, grafiche TV del Beach Pro Tour FIVB | Cifre bianche sul buio, tabellari, separate da filetti: è #numeri | Il nero lucido da broadcast, i gradienti metallici |
-| **Scrollytelling delle redazioni** (The Pudding, i grafici del New York Times) | Il grafico fermo e i paragrafi che scorrono e lo cambiano **a soglia**: è il telefono di #diario | Lo «scrub» per fotogramma (un video legato allo scroll) |
-| **Segnaletica dei bagni della Riviera** | Un solo oggetto saturo nel campo visivo, il salvagente arancio: il CTA | Righe degli ombrelloni, decori marinari |
-| **Otl Aicher, Monaco 1972** | Campiture piatte e numeri enormi su griglia | La policromia |
-| **iOS 26, Liquid Glass** | La capsula di vetro che cambia aspetto secondo quello che le passa sotto | La lente che deforma, il vetro colorato |
-
-### L2.3 Anti-riferimenti (se ci somiglia, è sbagliato)
-
-- **La landing SaaS da template**: titolo a sinistra e telefono inclinato a destra con una macchia di gradiente dietro; la griglia «Funzioni» con sei icone nei cerchi pastello; la fascia dei loghi; il carosello delle recensioni; i prezzi; le FAQ a fisarmonica; il footer con quattro colonne di link.
-- **Il «reveal» su tutto**: ogni paragrafo che sale in dissolvenza quando entra in vista. È il segno più riconoscibile di un template (vedi §L11.4).
-- **La pagina prodotto Apple rifatta**: tutto nero, video legato allo scroll, testo a gradiente da 120px.
-- **I separatori a onda** fra le sezioni, i blob, i gradienti mesh di sfondo. Il bagnasciuga è un taglio netto, non un'onda disegnata.
-- **Telefoni in 3D o in argilla**, inclinati, con riflessi e ombre portate; illustrazioni isometriche.
-- **Emoji come icone delle funzioni** (🏐 📊 🗺️) e coriandoli a ogni tocco.
-- **La landing di oggi**: navy e `#FF6B35`, Space Grotesk e Nunito, il vecchio pin, tre PNG del vecchio design in un carosello.
-
-### L2.4 Le sette mosse firmate della landing
-
-Le cose che la rendono riconoscibile con il marchio coperto. Chi costruisce e ne rompe una deve scrivere il motivo.
-
-1. **Il tramonto apre e chiude.** Hero e finale stanno sul tramonto (`--field-dusk`, #120E14), tutto il resto sulla carta o sull'inchiostro. Nell'hero il sole scende dietro il mare mentre si scorre (§L11.3, LM1). Nel finale lo stesso sole è un disco basso tagliato dall'orizzonte, e Pallo ci sta davanti, in controluce (§L5.4).
-2. **Una cosa per schermata.** Ogni sezione si apre con titolo, frase e **un** oggetto: il telefono, il menu ＋ con la chat, il tabellone della demo, il numero da manifesto, la mappa, le slide, le righe dei dati. Mai una griglia di funzioni.
-3. **Il numero è l'immagine.** In #numeri «66%» è alto 96–160px, bianco sull'inchiostro, e il «%» è arancio come il «%» della Home. Sotto ci sono le celle del tabellone separate da un filetto, non card.
-4. **Il prodotto vero, piatto e di fronte.** Le schermate stanno in una cornice d'inchiostro senza prospettiva, ombra né riflesso. Le slide sono quelle dei PNG, la demo usa le regole vere e la mappa la palette di OpenStreetMap.
-5. **Il salvagente resta uno.** Arancio pieno solo per ciò che si tocca per cominciare: il CTA (uno per schermata) e il ＋ della barra. Il resto dell'arancio è dato (il «%», il pin vinto, la voce Partita live) o è la slide arancio, che è prodotto.
-6. **Il vetro si guadagna.** È vetro solo la capsula, sempre, più il menu della guida e il foglio d'installazione quando sono aperti. «Ho già un account» è l'unico vetro dentro una sezione, ed è quello del Benvenuto (§L9).
-7. **Pallo è l'unico personaggio.** Oltre a lui ci sono solo le sagome della scena. Ce n'è uno solo che parla alla volta (UX §L3.2), e la sua misura dice il suo ruolo: grande quando la sezione è sua, 64px quando fa da guida (§L10.3).
-
----
-
-## L3. Tipografia
-
-### L3.1 Il carattere e la sua riserva
-
-- **Geist Variable** da `@fontsource-variable/geist`, servito dal sito: `font-src 'self'`, niente Google Fonts. Si importa il foglio del pacchetto (`@fontsource-variable/geist/wght.css`). Le sue `unicode-range` fanno scaricare all'italiano il solo file latino (`geist-latin-wght-normal.woff2`, assi 100–900), con `font-display: swap`.
-- **Riserva metrica** (`"Geist Fallback"`, in `presentazione/styles/tokens.css`): Arial ridimensionato per occupare la stessa larghezza di Geist. Così il cambio di carattere non sposta niente (UX §L6.0, CLS 0). Le misure sono state prese in Chrome con `measureText` su una frase della landing. Geist ha ascendente 1.005 e discendente 0.295 dell'em. Arial ha solo il tondo e il neretto, quindi c'è una faccia per fascia di peso:
-
-| Pesi | Sorgente | `size-adjust` | `ascent-override` | `descent-override` | Rapporto misurato (Geist ÷ Arial) |
-|---|---|---|---|---|---|
-| 100–549 | `local("Arial")` | 104.49% | 96.18% | 28.23% | 500: 62 850 ÷ 60 147 |
-| 550–649 | `local("Arial Bold")` | 98.86% | 101.66% | 29.84% | 600: 64 301 ÷ 65 042 |
-| 650–749 | `local("Arial Bold")` | 101.09% | 99.42% | 29.18% | 700: 65 752 ÷ 65 042 |
-| 750–849 | `local("Arial Bold")` | 103.32% | 97.27% | 28.55% | 800: 67 203 ÷ 65 042 |
-| 850–900 | `local("Arial Bold")` | 105.55% | 95.22% | 27.95% | 900: 68 654 ÷ 65 042 |
-
-- `--font-ui` della landing: `"Geist Variable", "Geist", "Geist Fallback", -apple-system, BlinkMacSystemFont, system-ui, sans-serif`. È l'unico nome dell'app che il foglio della landing ridefinisce sul `:root`, e il test lo controlla.
-- Su Android Arial non c'è. Lì la riserva salta e si scende a Roboto, come nell'app: un salto possibile solo al primo caricamento e solo su Android. `docs/qa/fontcls.mjs` misura su Chrome desktop, dove Arial c'è.
-- **Precaricamento** (`⟂ C`, PUÒ): il file latino con `<link rel="preload" as="font" type="font/woff2" crossorigin>`. Il nome del file ha l'hash di Vite, quindi serve un `transformIndexHtml` minimo, oppure niente: con la riserva metrica il salto non c'è comunque.
-
-### L3.2 La scala da manifesto
-
-Mobile first, gli stessi breakpoint dell'app (`BP`: 360 · 600 · 900 · 1280). La sintassi è quella dell'app: `font: var(--type-display-hero); letter-spacing: var(--track-display-hero);`. Le taglie sono in rem e reggono lo zoom al 200%. Niente `clamp()` con `vw`: la parte in `vw` non cresce con lo zoom della pagina (WCAG 1.4.4).
-
-| Token | < 360 | 360–599 | 600–899 | 900–1279 | ≥ 1280 | Peso | Interlinea | Tracking | Uso |
-|---|---|---|---|---|---|---|---|---|---|
-| `--type-display-hero` | 44 | 48 | 64 | 72 | 84 | 800 | 1.0 | −0.045em | l'`h1` dell'hero, l'unico |
-| `--type-display-section` | 34 | 34 | 44 | 52 | 56 | 800 | 1.04 | −0.04em | l'`h2` di ogni sezione |
-| `--type-display-chapter` | 22 | 22 | 24 | 26 | 26 | 700 | 1.2 | −0.02em | gli `h3` dei capitoli di #diario e della Storia (gli `h3` delle righe dei dati sono a 600 16, §L8) |
-| `--type-lede` | 18 | 18 | 19 | 20 | 20 | 500 | 1.45 | −0.01em | la frase sotto un `h2` (e sotto l'`h1`) |
-| `--type-kicker` | 14 | 14 | 14 | 14 | 14 | 600 | 1.25 | 0 | l'occhiello sopra un `h2`, quando c'è: il nome della funzione come lo scrive l'app, minuscolo |
-| `--type-num-poster` | 96 | 96 | 128 | 144 | 160 | 900 | 0.86 | −0.055em | il numero da manifesto di #numeri; cifre tabellari |
-| `--type-num-cell` | 44 | 44 | 44 | 56 | 56 | 800 | 1.0 | −0.04em | le celle del tabellone di #numeri |
-| `--type-live-num` | 112 | 112 | 112 | 112 | 112 | 800 | 1.0 | −0.045em | il punteggio della demo, come `live-num` dell'app |
-
-**Le slide di Wrapped** sono la tela 1080 dei PNG scalata a una slide larga circa 360, cioè × 1/3. Per il testo da leggere il minimo è 15px:
-
-| Token | px | Peso / interlinea | Tracking | Dalla tela (`WrappedSlideCard.tsx`) |
-|---|---|---|---|---|
-| `--type-slide-eyebrow` | 15 | 700 / 1.2 | 0 | 42 |
-| `--type-slide-headline` | 88 | 900 / 0.9 | −0.052em | 266 (`xl`) |
-| `--type-slide-headline-long` | 36 | 900 / 0.9 | −0.052em | 104 (`l`, i nomi) |
-| `--type-slide-title` | 24 | 700 / 1.1 | −0.023em | 72 |
-| `--type-slide-caption` | 15 | 500 / 1.3 | 0 | 42 |
-
-**Dall'app, così come sono**: il corpo (`--type-body`, 16/1.45/500), il callout (15), la footnote (13), le etichette delle tab (`--type-caption-2`, 10.5/600), le etichette dei pulsanti (`Button.css`: 15/600, `lg` 16, il pieno a 700).
-
-**Misure fatte** (Geist in Chrome, tracking compreso):
-
-| Testo | Taglia | Largo | Spazio disponibile |
-|---|---|---|---|
-| «nel tuo diario.» (la riga più lunga dell'`h1`) | 44 | 270 | 288 a 320px |
-| idem | 48 | 294 | 328 a 360px · 358 a 390px |
-| «Ogni partita, nel tuo diario.» | 72 | 865 | due righe in 560 |
-| «nel tuo diario.» | 84 | 515 | 560 (`--hero-text-max`) |
-| «La mappa delle conquiste» | 34 | 402 | due righe in 358 |
-| «66%» | 96 · 160 | 190 · 316 | 358 · 480 |
-| «Compagni» (l'etichetta di tab più larga dell'app; la landing ha «Wrapped», 46) | 10.5 | 51 | ~84 per tab |
-
-### L3.3 Regole
-
-1. **Il titolo è uno, il numero è uno.** Per sezione ci sono un solo `display-section` e al più un `num-poster` (che c'è solo in #numeri).
-2. **Due pesi per blocco di testo**: 500 per il testo e 600–700 per le etichette. I display sono a 800 e i numeri da manifesto a 900, come la tela dei PNG.
-3. **Niente maiuscolo, niente corsivo.** L'occhiello è minuscolo come l'eyebrow della versione D.
-4. **`text-wrap: balance`** sui titoli (lo fa già `base.css`), **`pretty`** sui paragrafi.
-5. **Cifre tabellari** su ogni numero (`base.css` le mette sul `body`).
-6. **Leggere costa ≥ 15px**: paragrafi a 16, note e fatti a 15, didascalie e meta a 13, etichette delle tab a 10.5 (l'eccezione dell'app, UX §7.1).
-7. **Sui fondi chiari nessun testo copre più dell'80% del vetro della capsula**, cioè al più 112px a peso 800 o 96 a peso 900. Il motivo e la misura sono in §L9.2. Il numero da manifesto per questo sta sull'inchiostro.
-8. **La misura**: la frase al più `--measure-lede` (34rem, ~60 caratteri a 20px), il corpo al più `--measure-body` (38rem).
-
----
-
-## L4. Colore
-
-### L4.1 Il principio
-
-Gli stessi token dell'app, nessun colore nuovo per l'interfaccia. La landing aggiunge **tre campiture** (fondi pieni a tutta larghezza), **quattro ruoli del testo** che si ridefiniscono da soli sul buio, e i letterali di tre disegni che esistono già: la palette OSM della mappa, i grigi delle slide di `palette.ts` e la luce della scena. I letterali stanno **solo** in `presentazione/styles/tokens.css`, e il test lo controlla (§L12).
-
-### L4.2 Le campiture e la loro sequenza
-
-| Sezione | Campitura | `data-surface` | La capsula sopra (`data-fondo`) | Perché |
-|---|---|---|---|---|
-| `#inizio` | **tramonto** `--field-dusk` (#120E14) + la scena | `dark` | `scuro` | È il Benvenuto: chi tocca il CTA ritrova la stessa scena |
-| `#diario` | **carta** `--field-paper` (#F6F6F4) | — | `chiaro` | Le pagine del diario; il telefono d'inchiostro ci si stacca a 15.72 |
-| `#registra` | carta | — | `chiaro` | Il ＋ e la chat sono quelli dell'app, che stanno sulla carta |
-| `#live` | carta | — | `chiaro` | La Partita live dell'app è carta: pannelli bianchi sul `--bg` |
-| `#numeri` | **inchiostro** `--field-ink` (#1C1C1E) | `dark` | `scuro` | Il tabellone acceso: numeri bianchi sul buio (§L13, A1) |
-| `#mappa` | carta | — | `chiaro` | La mappa ha la palette di OSM, che sta sulla carta |
-| `#wrapped` | inchiostro | `dark` | `scuro` | Il visore di Wrapped: le slide sono tessere sul buio (§L13, A2) |
-| `#dati` | carta | — | `chiaro` | Le righe raggruppate dell'app |
-| `#comincia` | tramonto + il sole basso | `dark` | `scuro` | Il tramonto chiude quello che ha aperto |
-| footer | tramonto, staccato dal filo dell'orizzonte | `dark` | `scuro` | È il mare sotto il sole del finale (§L5.4) |
-
-Il ritmo che ne viene: **buio · carta · carta · carta · buio · carta · buio · carta · buio**. Il primo cambio di registro cade dove la pagina passa da «che cosa fai» (registri, giochi) a «che cosa ti dà» (numeri, mappa, Wrapped).
-
-Fra due campiture il **taglio è netto**: niente onde, niente sfumature, niente ombre. L'unico gradiente di passaggio è il velo dell'hero, che sta dentro l'hero.
-
-### L4.3 I ruoli del testo
-
-Tre livelli più l'arancio. Sono definiti sul `:root` e ridefiniti in `[data-surface="dark"]`, così un componente scrive `color: var(--text)` e ha ragione su ogni fondo.
-
-| Ruolo | Sul chiaro | su carta · su bianco | Sul buio | sul tramonto · sull'inchiostro | Uso |
-|---|---|---|---|---|---|
-| `--text-strong` | `--ink` #1C1C1E | 15.72 · 17.01 | `--on-glass-dark` bianco | 19.11 · 17.01 | titoli, numeri, etichette forti |
-| `--text` | `--ink-label` #3A3A38 | 10.53 · 11.40 | bianco .82 | 12.88 · 11.73 | la frase, i capitoli, i paragrafi |
-| `--text-muted` | `--ink-2` #6B6B68 | 4.94 · 5.35 | bianco .66 | 8.57 · 8.01 | note, fatti, didascalie, footer |
-| `--text-accent` | `--accent-text` #C2410C | 4.79 · 5.18 | `--accent` #FF6B1A | 6.71 · 5.97 | occhiello, il «%» accanto a un numero |
-| `--rule` | `--edge` #E2E2DE | — | bianco .16 | — | filetti delle celle, separatori sul buio (decorativi: il testo porta l'informazione) |
-
-**Perché la frase è `--ink-label` e non `--ink-2`.** Sulla landing la frase sotto il titolo è la cosa che il visitatore legge per decidere, spesso al sole: 10.53 invece di 4.94. Il secondario (`--text-muted`) resta per ciò che si può saltare.
-
-**Prova negativa (nel test):** l'arancio-testo dell'app sul buio fa 3.29 sull'inchiostro e 3.69 sul tramonto. Per questo sul buio `--text-accent` è l'arancio del marchio.
-
-### L4.4 L'arancio sulla landing
-
-| Come | Token | Dove | Rapporto |
-|---|---|---|---|
-| Riempimento d'azione | `--accent` + etichetta `--on-accent` (700) | «Crea il tuo diario» (uno per schermata), il ＋ della barra, «Chiudi il set» nella demo quando compare | 5.97 |
-| Filo del riempimento | `--accent-strong` (inset 1px) | gli stessi: è il filo a staccarli dalla carta | 3.44 sulla carta (l'arancio da solo fa 2.63) |
-| Riempimento di prodotto | `--accent` | la bolla dell'utente nella chat, il riquadro dell'icona di «Partita live» nel ＋, la slide arancio, il pin «vinta» | testo sopra: inchiostro, 5.97 |
-| Testo | `--text-accent` | occhielli, il «%» | 4.79 / 5.97 |
-| Mai | — | bianco sull'arancio (2.85), arancio come sfondo di una sezione, arancio sui separatori, sulle icone spente o sui bordi decorativi | — |
-
-### L4.5 Le slide di Wrapped
-
-Sono le palette di `src/components/wrapped/palette.ts`, copiate nei token e **confrontate una a una** dal test: se la tela dei PNG cambia, la landing fallisce finché non si allinea.
-
-| Palette | Fondo | Testo | Accento | Secondario | Filetto | Rapporti (testo · secondario · accento) |
-|---|---|---|---|---|---|---|
-| arancio | `--accent` | `--ink` | `--ink` | #3E281D | #C6571B | 5.97 · 4.83 · 5.97 |
-| inchiostro | `--ink` | bianco | `--accent` | #D2D2D2 | #4E4E50 | 17.01 · 11.25 · 5.97 |
-| sabbia | `--bg` | `--ink` | `--accent-text` | #484849 | `--line-strong` | 15.72 · 8.44 · 4.79 |
-
-Ogni slide ha un filo interno bianco al 16% (`--slide-ring`): sulla campitura d'inchiostro la slide d'inchiostro altrimenti sparirebbe (1.00). Il ciclo resta quello dell'app: arancio → inchiostro → sabbia.
-
-### L4.6 La mappa disegnata
-
-| Token | Valore | Perché |
-|---|---|---|
-| `--map-land` | #F2EFE9 | la terra di OpenStreetMap |
-| `--map-sea` | #AAD3DF | l'acqua di OpenStreetMap: lo stesso fondo su cui `contrast.test.ts` misura i pin |
-| Etichette delle città | `--ink` 600 12px, alone bianco 3px (`paint-order: stroke`) | 14.83 sulla terra, 10.61 sul mare |
-| Pin | `--pin-win` (`--accent`) · `--pin-podium` (`--surface`) · `--pin-rest` (`--line-strong`) | i riempimenti di `ConquisteMap.tsx` (`RIEMPIMENTO`) |
-| Doppio bordo | alone `--pin-halo` 3px fuori + filo `--pin-line` (`--ink`) 1.6 / 1.8 / 1.4 dentro (vinta / podio / giocata) | il requisito di `contrast.test.ts`: sul mare lavora l'inchiostro (10.61), dove è scuro il bianco; fra loro 17.01 |
-| Raggio dei pin | 8–11px (il raggio della lib × 0.72, come l'app), più l'alone | la stessa scala della mappa vera |
-
-La legenda è quella della Mappa dell'app (`Mappa.css`, `.mappa-glyph`): cerchio da 12px con lo stesso riempimento e il filo d'inchiostro (`--ink-2` per «giocata»). Il colore non è mai l'unica informazione: l'elenco delle città dice il piazzamento in testo.
-
-### L4.7 La luce della scena e del finale
-
-Sono i letterali del disegno della scena (`Login.scena.tsx`), riportati nei token solo per il finale:
-
-| Token | Valore | Dove |
-|---|---|---|
-| `--sole-core` | #FFE1B8 | il disco del sole basso nel finale (sul tramonto 15.21: è un disegno, non un testo) |
-| `--sole-halo` | `radial-gradient(closest-side, #FFE3BC 0%, rgb(255 193 132 / .55) 55%, rgb(255 154 77 / 0) 100%)` | l'alone, lo stesso `radialGradient` della scena |
-| `--riflesso` | #FFC48A | i quattro tratti del riflesso sotto il sole, nel footer |
-| `--horizon` | bianco .16 | il filo dell'orizzonte: il bordo alto del footer |
-
-### L4.8 I casi peggiori, misurati
-
-Il contrasto dell'app si misura sui fondi piatti. Quello della landing no: il testo dell'hero sta sopra una scena col sole, e sotto la capsula passano numeri da 112px. Questi sono i casi peggiori, tutti ricalcolati da `landing.tokens.test.ts`:
-
-| Coppia | Fondo peggiore | Rapporto | Soglia |
-|---|---|---|---|
-| `h1` dell'hero (bianco, testo grande) | velo al 50% sopra il pallone #FFF7EE, il pixel più chiaro della scena | **3.76** | 3 |
-| La frase dell'hero (bianco .82) | velo al 72% sopra il pallone · dove la frase può cominciare più in alto (200px, titolo di due righe: velo al 65.5%) | **6.04** · 4.89 | 4.5 |
-| «Ho già un account» (bianco su `glass-clear`) | `glass-clear` sopra il velo al 72% sopra il pallone | **5.50** | 4.5 |
-| Testo dell'hero da 900px (bianco .82 · vetro chiaro) | velo laterale al 78% sopra il pallone | 7.34 · 6.59 | 4.5 |
-| Tab spenta sulla capsula chiara (`--on-glass`) | `glass-regular` .32 sopra il numero della demo sfocato (copertura 0.796) | **4.56** | 4.5 |
-| idem | sopra un titolo di sezione da 60px (0.655) · sopra una foto in ombra (#8C8C8C, il caso dell'app) | 6.04 · 7.92 | 4.5 |
-| Tab spenta sulla capsula scura (bianco) | `glass-dark` .66 sopra bianco pieno · sopra il «66%» da 160 (0.937) · sopra il sole · sopra l'arancio | **6.10** · 6.57 · 6.98 · 10.79 | 4.5 |
-| Tab accesa (`--accent-text` sulla lente bianca) | la lente è opaca | **5.18** | 4.5 |
-| Accesa contro spenta (senza vedere il colore) | `--accent-text` contro `--ink` | 3.29 | 3 |
-| La lente sulla capsula scura (la forma) | bianco contro `glass-dark` sopra l'inchiostro | 18.28 | 3 |
-| «Ferma le animazioni» nell'hero: anello | bianco .38 sul tramonto | 3.55 | 3 |
-| Anello di focus | inchiostro su carta 15.72 · bianco sul tramonto 19.11 e sull'inchiostro 17.01 | ≥ 15.72 | 3 |
-
-**Le coperture** sono una misura, non un calcolo. In Chrome si disegna il glifo d'inchiostro su bianco, lo si sfoca con lo stesso `blur(10px)` del vetro (canvas `filter`) e si legge il pixel più scuro:
-
-| Testo | Copertura |
+| Sezione | Misure |
 |---|---|
-| «66%» 900 / 160 | 0.937 |
-| «66%» 900 / 128 | 0.875 |
-| «21» 800 / 112 (la demo) | 0.796 |
-| «66%» 900 / 96 | 0.784 |
-| «I numeri» 800 / 60 | 0.655 |
-| «Ogni partita» 800 / 44 | 0.584 |
-| testo 500 / 16 | 0.169 |
+| Testata | riga flex, 22 sopra e sotto, filo `--edge` dentro la colonna. Marchio 28 (il `BrandMark` col filo d'inchiostro) e «Beach Diary» 18/700, distanza 10. Voci a 20 l'una dall'altra, «Iscriviti» pieno alto 44 |
+| `#inizio` | flex che va a capo, 88 sopra e 104 sotto, 56 fra testo e vetrina. Testo `flex: 1 1 420px`, 22 fra gli elementi, le porte 6 più in basso. Vetrina `flex: 0 1 460px`, raggio 32, 40 sopra e sotto, pesca col filo. Sotto gli 820px: 48/64, distanza 40, vetrina a tutta colonna. Sotto i 480px le due porte vanno una per riga, larghe quanto la colonna |
+| Telefono | 304 × 658 dentro un filo `--line-strong` (306 × 660), raggio 40, ombra `0 30px 60px -30px` inchiostro .35. Dentro, la schermata 390 × 844 dell'app a .78. Quello dell'hero ha lo schermo con le proporzioni dell'app (`.schermo`, un contenitore): sopra la Home vera, mentre l'apertura scorre, le fasce e il tabellone (`apertura.css`), misurati in pixel dell'app |
+| `#funzionalita` | 112 sopra, 104 sotto (80 e 72 sotto gli 820px); testa al più 640 (occhiello, h2, frase, 12 fra loro), 48 fino alla griglia. Griglia `repeat(auto-fit, minmax(300px, 1fr))`, 16 fra le carte. Carta bianca, filo `--edge`, raggio 22, 26 dentro, 10 fra gli elementi; tessera dell'icona 46 × 46, raggio 13, carta col filo, icona 22 in `--accent-text`. Nove carte, tre per riga, in tre gruppi: registrare (Diario, Partita live, Solby), capire (Statistiche, Compagni, Mappa delle conquiste), condividere e incontrarsi (Chi c'è oggi, Storia Instagram, Beach Wrapped); ognuna un titolo e una riga. Sotto i 600px le nove carte sono un gruppo solo, come le liste raggruppate dell'app: una carta col filo e raggio 22, nove righe (18 · 20 dentro) con la tessera accanto al titolo (14 fra loro, il titolo a 10 dalla cima) e un filo `--edge` fra l'una e l'altra, rientrato fino al testo (80) |
+| `#schermate` | fascia `--fill` fra due fili `--edge`, 104 sopra e 96 sotto (72 e 64 sotto gli 820px). Il giro: sei momenti in un `<ol>`, ognuno il titolo (`--lp-type-passo`), una frase (`--lp-type-frase`, `--lp-testo`, 14 fra loro) e il telefono. **Fermo**: 56 dalla testa, 72 fra un momento e l'altro; telefono da 306 a sinistra e testo al più 400 a destra, 72 fra loro; sotto i 760px il testo sopra e il telefono da 260 sotto, centrati, 24 fra loro. **Col movimento**: la scena alta `100svh`, al centro, con 28 fra la barra e il momento. Telefono `min(340, (100svh − 160) × 306/660)`, 80 fino al testo (al più 420). Barra delle storie larga quanto la composizione: sei segmenti da 4 di altezza, 6 fra loro, `--line-strong` che si riempie di `--ink`. Sotto i 760px: barra, telefono `min(260, (100svh − 270) × 306/660)`, testo sotto (8 fra titolo e frase), 20 fra l'uno e l'altro |
+| `#iscriviti` | 112 sopra, 120 sotto (80 e 88 sotto gli 820px). Testo `flex: 1 1 360px` (occhiello, h2, frase al più 440); le due porte in fondo a destra, sotto il testo quando non ci stanno |
 
-**Prove negative (nel test):**
-- l'inchiostro al 78% delle tab dell'app, sopra il numero della demo, fa 3.39. Per questo sulla landing le tab spente sono d'inchiostro pieno;
-- il «66%» da 160 sotto il vetro chiaro fa 3.36, quello da 128 fa 3.85. Per questo #numeri sta sull'inchiostro;
-- al 50% di velo la frase dell'hero non regge. Per questo il velo ha una seconda soglia, al 72%.
+Pulsanti: capsule da 52 (44 nella testata), 26 di lato (24 il bianco, 20 nella testata), filo dentro la misura. Il pieno è `--accent` col filo `--accent-strong` e l'etichetta `--on-accent`; il bianco è `--surface` col filo `--line-strong`. Fra due pulsanti 12.
 
-### L4.9 Chiaro e scuro: che cosa vuol dire qui
+## L4. I fogli
 
-La landing ha **fondi scuri per disegno** (il tramonto, l'inchiostro), non un tema scuro. Sul buio i ruoli del testo si invertono da soli (`[data-surface="dark"]`, §L4.3), e i rapporti di entrambe le varianti stanno nelle tabelle sopra.
+`presentazione/styles/landing.css` è il solo foglio che l'HTML carica, e li mette in fila: i token dell'app (e l'ordine dei `@layer`), Geist servito dal sito, `base.css`, `Icon.css`, poi i token della landing e i componenti, una sezione per foglio (`pagina`, `eroe`, `funzionalita`, `schermate` col giro, `finale`). Dopo `eroe` vengono `misure` (generato da `docs/qa/landing-shots.mjs`: non si tocca a mano) e `apertura`, l'apertura della Home nel telefono dell'hero. Le regole, controllate da `src/test/landing.test.ts`:
 
-Il **tema scuro di sistema** resta com'è nell'app: predisposto (`:root[data-theme="dark"]`) e spento. Nel CSS non c'è `prefers-color-scheme`: lo vieta `tokens.test.ts` per l'app, e `landing.tokens.test.ts` per il foglio della landing. La ragione è la stessa di §L1: dopo il CTA si apre l'app, che è chiara. Una landing che si fa scura da sola aprirebbe un'app che non lo fa.
+- ogni foglio dei componenti sta tutto in `@layer components`, il foglio dei token in `@layer tokens`;
+- i colori letterali stanno solo nel foglio dei token: i componenti leggono `var(--…)`;
+- niente `backdrop-filter`, niente `will-change`, niente `scroll-behavior`;
+- l'hover vale solo con un puntatore vero (`(hover: hover) and (pointer: fine)`);
+- ogni animazione sta dentro `prefers-reduced-motion: no-preference`, e i fotogrammi muovono solo `transform`, `opacity` e `visibility`.
 
----
+## L5. Immagini e icone
 
-## L5. Spazio e layout
+- **Le schermate** sono l'app vera: `docs/qa/landing-shots.mjs` le scatta dall'anteprima (`docs/preview`) col diario di prova al 17 ottobre 2026, 390 × 844 a dpr 2, WebP 82 (780 × 1688). Sono la Home (l'hero) e i sei momenti del giro:
+  - `giro-solby`: la chat di Solby dopo nome, compagno, giorno e luogo;
+  - `giro-live`: una partita live al Rimini Open sul 15–10;
+  - `giro-torneo`: il Cervia Beach Party, 1° nel Gold;
+  - `giro-compagni`: i compagni;
+  - `giro-storia`: il foglio della Storia Instagram;
+  - `wrapped`: la seconda storia di Beach Wrapped, le vittorie (la prima è la copertina con la foto del diario di prova).
 
-### L5.1 La scala, prolungata
+  Lo script toglie il fuoco prima di ogni scatto: un anello su una scelta sembrerebbe una selezione.
+- **La Home senza cifre** (`home-fondo.webp`): la stessa Home con le colonne del tabellone e la barra delle vinte nascoste (`visibility`, il layout non cambia). Sono le fasce dell'apertura; nella stessa passata lo script misura blocchi, colonne e barra e scrive `presentazione/styles/misure.css`.
+- **Le icone delle carte** sono quelle dell'app (`book`, `chart`, `people`, `pin`, `phone`, `chat-dots`), dallo sprite che `componi.ts` fa con i tracciati di `Icon.paths.ts`. La tavola le disegnava a mano: tre coincidono col tracciato dell'app, tre ne differiscono di poco.
+- **Il marchio** è il `BrandMark` di `Logo.tsx`, messo da `componi.ts`, col filo d'inchiostro sulla carta.
+- **L'anteprima social** (`og.png`, 1200 × 630) è la composizione dell'hero: `docs/qa/landing-og.mjs`.
 
-Restano i passi di 4 dell'app (`--space-*`). La landing ne aggiunge quattro:
+## L6. Dove la pagina si discosta dalla tavola
 
-| Token | `--space-14` | `--space-24` | `--space-30` | `--space-36` |
-|---|---|---|---|---|
-| px | 56 | 96 | 120 | 144 |
-
-### L5.2 Il ritmo
-
-| Dove | Token | < 600 | 600–899 | ≥ 900 |
-|---|---|---|---|---|
-| Sopra e sotto una sezione | `--section-pad` | 96 | 120 | 144 |
-| Margine laterale | `--gutter` (app) | 16 | 24 | 32 |
-| Occhiello → titolo | `--space-3` | 12 | 12 | 12 |
-| Titolo → frase | `--section-head-gap` | 16 | 16 | 16 |
-| Frase → oggetto | `--section-object-gap` | 40 | 40 | 56 |
-| Fra due blocchi dello stesso oggetto | `--block-gap` | 24 | 24 | 24 |
-| Fra due capitoli di #diario | `--space-12` | 48 | 48 | 48 |
-| Larghezza della frase · del corpo | `--measure-lede` · `--measure-body` | 34rem · 38rem | idem | idem |
-| Contenuto | `--content-max` (app) | — | — | 1120 |
-
-### L5.3 La griglia (da 900px)
-
-12 colonne, `--grid-gap` 32, larghezza massima `--content-max` (1120). Le sezioni a due colonne hanno tutte la stessa composizione:
-- **testo nelle colonne 1–5**: occhiello, titolo, frase, e i fatti dove ci sono;
-- **una colonna d'aria** (la 6);
-- **l'oggetto nelle colonne 7–12**: telefono, demo, numeri, mappa, righe.
-
-Il testo sta sempre a sinistra: lo sguardo scende lungo il bordo sinistro, e l'oggetto è la ricompensa a destra. L'unica eccezione è il finale, centrato in una colonna da 640: è un manifesto di chiusura, non una sezione da leggere.
-
-### L5.4 La composizione, sezione per sezione
-
-| Sezione | < 600 | ≥ 900 |
+| Nella tavola | Nella pagina | Perché |
 |---|---|---|
-| **Hero** | Altezza almeno `100svh` (da 560 di altezza in su, UX §L9.2). In cima, a `--safe-top` + `--page-top`, il marchio (28 + «Beach Diary» 700 17, bianco: 17.66 sul cielo scuro). La scena riempie la sezione (`slice`), alzata come fa la camera del Benvenuto: `translateY(min(0px, calc(60.2% - 520px)))`. I piedi dei giocatori stanno al 39.8% dell'altezza, e il blocco del testo a 390px è alto circa 500 dal fondo: 520 lascia 20px di sabbia fra i piedi e il titolo. Il blocco del testo è ancorato in basso, con `padding-bottom: --tabbar-clearance`. Contiene `h1`, frase, «Crea il tuo diario» (`filled lg`, a tutta larghezza), «Ho già un account» (`glass-clear lg`, a tutta larghezza), gap 10; la riga piccola (13/1.4, `--text`); la **riga dei comandi** (alta 44: «Installa sul telefono» a sinistra, «Ferma le animazioni» a destra, §L8). Pallo da 128 (`--pallo-hero`) sta in piedi sulla sabbia, a destra, coi piedi a 4px sopra il titolo | Testo a sinistra, largo al più `--hero-text-max` (35rem), centrato in verticale. Scena intera (il panorama), velo di lato (`--hero-velo-lato`). Pallo da 240 in piedi sulla linea della sabbia, a destra del centro. Pulsanti affiancati da 600px, larghi quanto il contenuto |
-| **Il diario in tasca** | La **fascia** sticky in cima: carta piena da `--scroll-pad-top` fino al fondo del telefono, poi 24px che sfumano (`--phone-band-fade`). Il testo che sale ci sparisce sotto e non passa mai sotto la cornice. Il telefono è centrato; sotto, i capitoli (`h3` + paragrafo `--type-body` in `--text`), 48 l'uno dall'altro | Telefono sticky nelle colonne 7–12, centrato in verticale fra la barra in alto e il fondo. Capitoli nelle colonne 1–5, ognuno alto almeno `70svh`, così sulla linea del 50% ce n'è uno solo |
-| **Cosa registriamo?** | Le quattro voci impilate (gap 10), sotto il pannello (la chat, larga al più 420) | Voci nelle colonne 1–5 (larghe come il menu dell'app, 380), pannello nelle 7–12 |
-| **Partita live** | La demo a tutta larghezza (al più `--demo-max`, 420), sotto i fatti | Fatti nelle colonne 1–5, demo nelle 7–12 |
-| **I numeri** | Titolo e frase, poi «66%» (`--type-num-poster`) con l'etichetta «partite vinte» (600 15, `--text`), la barra vinte/perse (alta 8, raggio 4: vinte `--text-strong`, perse `--rule`), poi le celle 2×2 (`--type-num-cell` + etichetta 600 15), separate da filetti `--rule` da 1px, padding 16 | Il numero nelle colonne 1–5 sotto il titolo, le celle nelle 7–12 |
-| **La mappa** | Il riquadro (`--map-ratio` 356/318, raggio 22, filo `--edge`), la legenda in riga (gap 16), poi l'elenco delle città (gruppo di righe da 44, §L8) | Riquadro nelle colonne 1–7, elenco nelle 8–12 |
-| **Wrapped** | Titolo e frase; poi la fila delle slide (`--slide-w` × `--slide-h`, al più 360 × 640; ~334 × 594 con le barre di Safari), gap 12, la prima allineata al gutter; poi la Storia a ventaglio, centrata, con la didascalia | Slide 9:16 alte al più 640 (360 di larghezza), la Storia accanto, nelle colonne 8–12 |
-| **I tuoi dati** | Un gruppo di righe a tutta larghezza (i 16 di margine), raggio 22 | Titolo nelle colonne 1–5, righe nelle 7–12 |
-| **Finale** | Centrato, una colonna. Titolo, frase, CTA, «Installa sul telefono» e «Ho già un account» come pulsanti di testo; poi l'**orizzonte**: un riquadro alto `--sole-halo-r` + 24, con il sole (`--sole-r` 64, alone 220) centrato sul bordo basso e tagliato a metà dal footer. Pallo da 160 (`--pallo-finale`) sta in piedi sull'orizzonte, davanti al sole | Idem in 640 di larghezza; sole 96, alone 330, Pallo 240. La riga «È fatta per il telefono…» sotto i CTA, in `--text-muted` |
-| **Footer** | Tramonto. Il bordo alto è l'orizzonte (`--horizon`, 1px), coi quattro tratti del riflesso del sole (`--riflesso`, larghi 76 · 56 · 36 · 20, alti 2, a 8px l'uno dall'altro, centrati, con opacità .6) che partono dal filo. Marchio (bare, 28), la riga, i tre comandi. Padding 32 sopra, `--tabbar-clearance` sotto | Marchio a sinistra, comandi a destra, padding sotto 48 |
-
-**Il testo non entra mai nell'alone del sole.** Il riquadro dell'orizzonte è alto almeno `--sole-halo-r` + 24, e il CTA ci sta sopra.
-
-### L5.5 Il telefono
-
-| Token | < 600 | 600–899 | 900–1279 | ≥ 1280 |
-|---|---|---|---|---|
-| `--phone-screen-w` | `min(15rem, (56svh − 2·bezel) × 0.4621)` | `min(17.5rem, …)` | `min(20rem, (100svh − 192px − 2·bezel) × 0.4621)` | `min(22.5rem, …)` |
-| `--phone-bezel` | 10 | 10 | 12 | 12 |
-| Schermo | `aspect-ratio: 390 / 844`, raggio `--phone-screen-r` = larghezza × 0.1214 (47.33 su 390, come un iPhone) | | | |
-| Cornice | `--phone-color` (`--ink`), raggio `--phone-r` = schermo + cornice (concentrico) | | | |
-
-Sul telefono di riferimento (390×844 nell'emulazione, `svh` = 844) lo schermo è largo 209. Ombra, riflessi, isola, tasti, barra di stato finta: niente. La cornice è un rettangolo d'inchiostro, ed è proprio quello il controluce. Mentre l'immagine arriva, lo schermo è `--fill`.
-
-### L5.6 La barra, Pallo guida, l'avanzamento
-
-| Cosa | < 900 | ≥ 900 |
-|---|---|---|
-| Capsula | Come la TabBar dell'app: `--tabbar-h` 64, ai lati `--tabbar-side` (14; 8 sotto i 360), in basso `--tabbar-bottom`, padding 6, `--elev-float` | In alto, a `--barra-inset` (16): marchio a sinistra (tessera 32 + «Beach Diary»), capsula al centro larga `--barra-capsule-w` (25rem), ＋ a destra |
-| ＋ | Cerchio da `--plus-size` (64), staccato di `--tabbar-gap` (10); solo icona fino a 599, capsula con «Apri il diario» da 600 | Capsula alta 64, icona 24 + «Apri il diario» (700 16), padding 0 24 |
-| Pallo guida | `--guida-size` 64 (56 sotto i 360), sopra il ＋ allineato a destra: `bottom: --guida-bottom` (safe-area + 64 + 8), `right: --guida-right` | 64, in basso a destra: `bottom: max(24px, safe-area + 16px)`, `right: --gutter` |
-| Nuvoletta | Sopra Pallo, allineata a destra, larga al più `--bolla-max` (min(280, 100vw − 32)), 8px sopra la sua testa | idem |
-| Avanzamento | Al bordo alto: `top: --progress-top` (safe-area + 6), largo quanto il contenuto meno i gutter, alto `--progress-box` 16: binario 2px, pallone 12 | Appena sotto la barra in alto (16 + 64 + 8), pallone 14 |
-| `scroll-padding` | in alto `--scroll-pad-top`, sotto l'avanzamento: `--progress-top` + `--progress-box` + 8 (safe-area + 30); in basso `--scroll-pad-bottom` (64 + safe-area + 64 + 8 + 16) | in alto lo stesso conto, 16 + 64 + 8 + 16 + 8 = 112; in basso 64 + 24 + 16 |
-
-**Livelli:** avanzamento `--z-progress` 25, barra `--z-tabbar` 30, Pallo e nuvoletta `--z-guida` 32, menu della guida `--z-guida-menu` 35. Velo e foglio sono quelli dell'app (`--z-scrim` 40, `--z-sheet` 50). Lo skip link è a `--z-skip-link` 100.
-
-### L5.7 Slide e Storia
-
-| Cosa | Valore |
-|---|---|
-| Slide, quando la fila è bloccata | `--slide-h` = `min(40rem, 100svh − safe-area − 28 − 64 − tabbar-bottom − 48)`; da 900 `min(40rem, 100svh − 16 − 64 − 64)`; `--slide-w` = h × 9/16. Il fondo della fila sta **sopra** la capsula: a riposo nessuna slide passa sotto il vetro |
-| Slide, nella riga a mano | larghe `--slide-w-manual` (280; 320 da 600), 9:16, `scroll-snap-align: start`, `scroll-padding-inline: --gutter` |
-| Dentro la slide | padding `--slide-pad` (24; 32 da 900), contenuto centrato in verticale con gap 10; Pallo da 96 (`--pallo-slide`) sopra l'occhiello |
-| Fra le slide | `--slide-gap` 12 |
-| La Storia | tre PNG 9:16 larghi `--story-w` (160; 216 da 900), raggio `--radius-card`. Aperti a ventaglio: −8° · 0° · +8° (`--story-tilt`), quelli ai lati spostati del 62% della larghezza, il centrale davanti. Fermi: affiancati, gap 12, nessuna rotazione |
-
----
-
-## L6. Raggi e forme
-
-La grammatica dell'app (§6.3) resta: **capsula = si preme, rettangolo arrotondato = contiene, cerchio = identità o risultato.**
-
-| Oggetto della landing | Raggio | Token |
-|---|---|---|
-| Card, gruppo di righe, riquadro della mappa, slide, Storia | 22 | `--radius-card` |
-| Menu della guida, foglio d'installazione, pannelli della demo | 34 | `--radius-sheet` |
-| Voci del ＋ in #registra | 20 | `calc(--radius-row + --space-1)`, come `.ui-menu-opt` |
-| Riquadro dell'icona di una voce | 13 | `--radius-track`, come `.ui-menu-ico` |
-| Nuvoletta di Pallo e bolle della chat | 20, con l'angolo verso chi parla a 6 | `--bolla-r`, `--bolla-r-coda` |
-| Pulsanti, capsula, lente, risposte rapide, pastiglia del set | capsula | `--radius-capsule` |
-| ＋ (sotto i 600), «Ferma le animazioni» nell'hero, −1 della demo, Pallo, pin | cerchio | 50% |
-| Schermo e cornice del telefono | 0.1214 × larghezza; + cornice | `--phone-screen-r`, `--phone-r` |
-| Barra vinte/perse, binario dell'avanzamento | metà dell'altezza (4, 1) | — |
-
-Le slide **non** sono capsule e il telefono non è una card: è un oggetto, con il raggio di un telefono.
-
----
-
-## L7. Elevazione e ombre
-
-Come nell'app: **il contenuto non ha ombre**, l'ombra è di ciò che galleggia ed è tinta d'inchiostro, mai nera.
-
-| Che cosa | Ombra |
-|---|---|
-| Capsula, ＋ | `--elev-float` (app) |
-| Lente | `--lente-elev`: il riflesso del vetro (`--glass-rim`) e `0 2px 8px -3px rgb(28 28 30 / .18)`, quello della pillola dell'app |
-| Nuvoletta | `--elev-toast`, più il filo `--edge` |
-| Menu della guida | `--elev-overlay` |
-| Foglio d'installazione | `--elev-overlay` sotto i 600, `--elev-dialog` da 600 |
-| «Ho già un account» | `--elev-glass` (app, il vetro posato nella pagina) |
-| Telefono, slide, Storia, card, celle, mappa, Pallo guida | **nessuna** |
-
-La Storia a ventaglio si stacca con un **taglio** del colore del fondo (`--story-keyline` 3px, come un adesivo), non con un'ombra. Pallo ha la sua ombra a ellisse negli umori in piedi (`ombra`). Da guida non ce l'ha: galleggia sulla pagina, non ci sta in piedi.
-
----
-
-## L8. Bordi e superfici
-
-| Elemento | Trattamento |
-|---|---|
-| **Campiture** | Piene, a tutta larghezza, taglio netto fra l'una e l'altra. L'hero ha la scena e il velo, il finale il sole. Nessun altro gradiente di fondo |
-| **Card, gruppi di righe** (sulla carta) | `--surface`, filo 1px `--edge`, raggio 22, padding 16 (20 da 600). Righe alte almeno 56, separatori `--separator` rientrati fino al testo |
-| **Righe di «Il diario resta tuo»** | A sinistra il riquadro dell'icona: 44, raggio 13, `--bg` col filo `--edge`, icona 20 `--ink`. Il titolo è `h3` a 600 16 `--text-strong`, il testo a 15/1.4 `--text-muted`. Niente chevron: non si toccano |
-| **Voci del ＋** | Come `.ui-menu-opt` dell'app, ma **opache** (`--surface` + filo `--edge`): sotto non scorre niente. Partita live col riquadro arancio (`--accent`, filo `--accent-strong`, icona `--on-accent`) e il filo `--accent-edge`. **La voce scelta**: filo d'inchiostro da 2px (inset, la misura non cambia), il segno dei pannelli «noi» della Partita live. Non un riempimento d'inchiostro: §L13, A7 |
-| **Chat** | Bolle di Pallo `--surface` col filo `--edge`, raggio 20/20/20/6. Bolle dell'utente `--accent` con l'inchiostro (5.97), raggio 20/20/6/20. Risposte rapide: capsule alte 44, `--surface` + filo `--edge`, 600 15 `--ink`, gap 8. I puntini di Pallo che scrive come in CreaChat (`--ink-3`) |
-| **Demo** | Come `PartitaLive.css`: pannello «loro» `--surface` + filo `--edge`, pannello «noi» filo 2px `--ink`, raggio 34, alti `--live-panel-h` (200 a ogni larghezza: a 168 Pallo copriva la cifra di «loro» e la battuta toccava «Noi», POLISH.md Parte L). Numero `--type-live-num`. −1: cerchio 44 `data-material="frost"` (opaco, col riflesso: niente sfocatura), a 12 dall'angolo. Pastiglia del set: capsula alta 32, filo `--edge` |
-| **Celle di #numeri** | Nessun riquadro: filetti `--rule` da 1px, in alto, in basso e al centro |
-| **Slide** | Campitura della palette + `--slide-ring` |
-| **Nuvoletta** | Opaca (`--surface` + `--edge`): porta testo su ogni fondo, anche scuro, e non conta nel budget del vetro |
-| **«Ferma le animazioni»** | Nell'hero e nel footer (sul buio): cerchio 44, anello `--glass-clear-border` (bianco .38, 3.55), icona bianca. **Premuto** (`aria-pressed="true"`): cerchio bianco pieno, icona `play` color tramonto (19.11). Nel menu della guida (sul chiaro): capsula `neutral` dell'app con icona ed etichetta; premuto = la capsula d'inchiostro pieno con il bianco, la selezione delle chip dell'app |
-| **Pulsanti** | Quelli di `Button.css`, importato così com'è: `filled`, `neutral`, `plain`, e il vetro chiaro sul buio (`data-material="glass-clear"` + `data-glass="clear"`). «Installa sul telefono» è un pulsante di testo con icona `download` 20: sul buio `--text`, sulla carta `--ink` |
-| **Anello di focus** | Quello di `base.css`: inchiostro sul chiaro, bianco dentro `[data-surface="dark"]`. Sui pulsanti arancio l'anello è fuori (offset 2), sul fondo: 15.72 sulla carta, 19.11 sul tramonto |
-
----
-
-## L9. Il vetro sulla landing
-
-### L9.1 Che cosa è vetro, e che cosa no
-
-| Superficie | Materiale | Conta |
-|---|---|---|
-| Capsula sulla carta | `glass-regular` dell'app (bianco .32, `blur(10px) saturate(180%) brightness(1.05)`), **senza ritocchi** | 1 |
-| Capsula sul buio | `glass-dark` dell'app (inchiostro .66, `blur(24px) saturate(160%)`), senza ritocchi | 1 |
-| Lente | **niente vetro**: pillola `--lente-bg` (bianco pieno) col riflesso e l'ombra, uguale sul chiaro e sul buio | 0 |
-| «Ho già un account» (hero) | `glass-clear`, come il Benvenuto | 1 |
-| Menu della guida | `glass-thick` (.92) | 1, solo aperto; mai nell'hero |
-| Foglio d'installazione | `glass-thick`; velo `--scrim` senza sfocatura | 1, solo aperto. La barra sta sotto il velo, `inert` |
-| ＋, Pallo, nuvoletta, «Ferma le animazioni», −1, telefono, slide, Storia, card, avanzamento | opachi (il −1 è `frost`) | 0 |
-
-### L9.2 La capsula: due materiali, inchiostro pieno
-
-- **Il materiale lo sceglie il fondo che le passa sotto**, a soglia (UX LC7): la sezione che contiene la linea mediana della capsula. `data-fondo="scuro"` vuol dire `glass-dark`, altrimenti `glass-regular`.
-- **Due strati, uno visibile.** Dentro la capsula ci sono due livelli, uno per materiale (`data-material="glass-regular"` e `data-material="glass-dark"`). Al cambio di soglia si scambiano l'**opacità** in SVELTO; chi esce passa a `visibility: hidden` a fine corsa. Il raggio della sfocatura e il colore non si animano mai. Nei 180ms del passaggio i livelli sfocati sono due: è il caso peggiore contato in §L9.3. Fermo: lo scambio è istantaneo.
-- **Le tab spente sono d'inchiostro pieno**: `--on-glass` sul chiaro (4.56 sopra il numero della demo sfocato), bianco sul buio (6.10 sopra il bianco pieno). L'inchiostro al 78% dell'app lì scende a 3.39.
-- **La tab accesa**: la lente bianca piena, con icona ed etichetta `--lente-label` (`--accent-text`, 5.18 sempre). Lo stato si legge dalla forma (la lente), dal colore e dalla differenza di luminosità fra accesa e spenta (3.29).
-- **Che cosa non deve passare sotto la capsula chiara**: un testo d'inchiostro che copra più dell'80% (oltre i 112px a 800 o i 96 a 900), e un blocco d'inchiostro pieno più alto di 16px. Per questo il numero da manifesto sta sull'inchiostro, e la voce scelta del ＋ ha un filo e non un riempimento.
-
-### L9.3 Il budget, stato per stato
-
-Il conteggio è quello di `?audit` in `docs/motion/_lab.js`: elementi visibili con `backdrop-filter` diverso da `none`.
-
-| Stato | Superfici sfocate |
-|---|---|
-| Hero | capsula + «Ho già un account» = **2** |
-| Uscita dall'hero (180ms, la capsula cambia materiale) | 2 strati della capsula + «Ho già un account» = **3**, il caso peggiore |
-| Qualunque sezione, a riposo | capsula = **1** |
-| Menu della guida aperto | capsula + menu = **2** |
-| Menu → foglio | il menu passa a `frost` a `t0` (MOTION §3.4): capsula sotto il velo + foglio = **2** |
-| Foglio aperto | foglio = **1** (la barra è sotto il velo) |
-
----
-
-## L10. Iconografia e immagini
-
-### L10.1 Le icone
-
-Sono quelle dell'app (`src/components/ui/Icon.tsx`): griglia 24, tratto arrotondato, `currentColor`, nessuna icona piena tranne quelle che l'app ha già. Sulla landing arrivano come SVG **generati** dalla stessa sorgente (`⟂ E`, come Pallo), non ridisegnati.
-
-| Misura | Tratto | Dove |
-|---|---|---|
-| 24 (23 nella barra, come la TabBar) | 2 | tab della barra |
-| 28 | 2.6 | il ＋ |
-| 20 | 2.1 | pulsanti, voci del ＋, righe dei dati, fatti della demo, comandi |
-| 16 | 2.4 | in linea nei meta |
-
-| Dove | Icone |
-|---|---|
-| Barra | Diario `book` · Live `clock` (quella di «Partita live» nel ＋ dell'app) · Numeri `chart` · Wrapped `sun` (il sole è il motivo della stagione, §10.1) · ＋ `plus` |
-| Voci del ＋ | `clock` · `trophy` · `bolt` · `chat-dots`: quelle di `ModalHost.tsx` |
-| Fatti della demo (UX §L12.6, uno per riga) | `volley` (set, scarto, cambio campo) · `trophy` (in torneo o tra amici) · `phone` (schermo acceso) · `refresh` (la partita resiste al refresh) · `bolt` (vibrazione) |
-| Righe dei dati | `shield` (permessi) · `lock` (foto private) · `link` (condividi) · `pin` (chi c'è oggi) · `chart` (statistiche) · `map` (chi altro sente) · `info` (questa pagina) |
-| Comandi | `download` (installa) · `pause` / `play` (ferma le animazioni) · `arrow-up` (torna su) · `close` (×) |
-
-**Due icone nuove**, da aggiungere a `PATHS` in `Icon.tsx` (`⟂ E`), così l'app le ha se un giorno le vuole:
-- `pause`: `M9 6v12M15 6v12`;
-- `play`: `M8 5.5v13l10.5-6.5z` (tratto arrotondato, nessun riempimento).
-
-Mai: emoji come icone, icone in un cerchio pastello, icone colorate a parte il ＋ e la tab accesa.
-
-### L10.2 Il marchio
-
-- È `BrandMark` dell'app: il pallone bianco con la fascia arancio. **Nudo** sul buio (hero, footer, slide d'inchiostro), **nella tessera d'inchiostro** sulla carta (la barra in alto da 900px). Raggio della tessera = 26% del lato.
-- **Misure**: 28 nell'hero e nel footer, 32 nella barra in alto. Il wordmark «Beach Diary» è 700, tracking −0.02em, 17px accanto al 28 e 18 accanto al 32, nell'inchiostro del fondo.
-- **Icone PWA e favicon** (`⟂ I`, risposta 3 dell'utente): il pallone nudo su una tessera d'inchiostro `#1C1C1E` a tutto campo (il sistema arrotonda da sé), col pallone in proporzione:
-  - `apple-touch-icon` 180 e `icon` 192/512: diametro del pallone 62% del lato;
-  - `maskable` 512: 56%, dentro la zona sicura (il cerchio dell'80%);
-  - favicon SVG: la tessera col raggio 26% e il pallone al 72%, come `index.html`.
-
-  Il manifest passa a `#F6F6F4` (`theme_color`, `background_color`).
-
-### L10.3 Pallo
-
-| Dove | Misura | Umore | Note |
-|---|---|---|---|
-| Hero | 128 (`--pallo-hero`); 240 da 900 | `saluta`, `segui` | in piedi sulla sabbia, con l'ombra |
-| Guida | 64 (56 sotto i 360) | quello della sezione (UX §L12.4) | senza ombra |
-| Chat | 38 (`soloTesta`) | `pensa` → `contento` | come CreaChat |
-| Demo | 80 | da `battuta()` | senza ombra, come PartitaLive |
-| Slide | 96 | `umoreSlide` | mani bianche sulla slide arancio (`palette.ts`, `mani`) |
-| Foglio d'installazione | 72 | `sbircia` | dal bordo alto, come il consenso |
-| Finale | 160; 240 da 900 | `cuori` → `festa` | in piedi sull'orizzonte, davanti al sole |
-
-Pallo non si ricolora, non si ridisegna e non si deforma. I 14 umori arrivano dallo snapshot di `Pallo.tsx` (`⟂ E`).
-
-### L10.4 La scena
-
-È la scena del Benvenuto, uguale: stesso disegno (lo snapshot di `Login.scena.tsx`, `⟂ E`), stessi colori, stesso palleggio (`avviaPalleggio`). Sulla landing ha in più il parallasse dell'uscita (§L11.3). Sotto il testo c'è sempre il velo (`--hero-velo`, §L4.8), attaccato al blocco del testo e non alla scena: parte 96px sopra il titolo e vale a qualunque altezza e a qualunque a capo.
-
-### L10.5 Le schermate del telefono
-
-- Dall'anteprima (`docs/preview`) con i dati di prova, a 390×844 @2x, salvate in **WebP 780×1688**, qualità 82, ≤ 120 KB l'una (UX §L13).
-- **Data fissata** a un giorno di ottobre (Wrapped esiste solo allora), tile caricate, **attribuzione © OpenStreetMap visibile**.
-- **Nessuna cornice dentro l'immagine** (la cornice è CSS), niente barra di stato finta («9:41», batteria), nessun ritocco: è l'app com'è.
-- Quattro schermate, una per capitolo: Home, Tornei · Mappa, Diario, Compagni. Chi le prepara scrive quale consiglio di Pallo si vede nella Home (UX §L12.4).
-
-### L10.6 La Storia
-
-I tre PNG veri (Tabellone, Foto, Polaroid) nelle tre palette, esportati da `StoryModal` col dataset di prova, in **WebP 540×960** (il doppio dei 216 di `--story-w` da 900px), qualità 82.
-
-### L10.7 La mappa disegnata
-
-Un SVG della costa romagnola, schematico: due campiture (`--map-land`, `--map-sea`), la linea di costa come confine fra le due (nessun filo in più), nessun rilievo, nessuna strada. Le etichette delle città sono quelle di §L4.6, i pin quelli della Mappa vera (§L4.6). La didascalia dice che è un'illustrazione (UX §L12.7).
-
-### L10.8 L'anteprima social (`og:image`, `⟂ I`)
-
-1200×630 PNG, la composizione dell'hero da 900px: tramonto, la scena a destra (il panorama), il velo laterale, «Ogni partita, nel tuo diario.» in Geist 800 da 76, tracking −0.045em, bianco, su due righe a 88 dal bordo sinistro, il marchio nudo da 48 sopra il titolo, Pallo `saluta` da 300 in piedi sulla sabbia. Nessun altro testo: le piattaforme ci scrivono già il titolo sotto.
-
-### L10.9 Mai
-
-Foto di repertorio, persone disegnate (a parte le sagome della scena), oggetti 3D, telefoni in prospettiva, illustrazioni nuove, macchie di gradiente, emoji come illustrazione. **Le illustrazioni della landing sono tre: la scena, Pallo, la mappa.** Più il sole del finale, che è un pezzo della scena.
-
----
-
-## L11. Movimento
-
-Questa sezione fissa il **linguaggio**: che cosa si muove, con che curva e che cosa resta fermo apposta. Le coreografie passo per passo, le soglie e le eccezioni scritte stanno nel paragrafo «Landing (`/presentazione`)» di MOTION.md (`⟂ M`), che parte da qui e da UX §L11.
-
-### L11.1 Il principio
-
-**Una cosa si muove per uno di tre motivi: l'hai toccata, lo scroll racconta, Pallo è vivo.** Niente si muove solo perché è entrato in vista. Il testo c'è dal primo fotogramma, e il movimento si aggiunge alla pagina, senza farla aspettare.
-
-### L11.2 Il vocabolario
-
-Le curve sono quelle dell'app. Nessuna curva nuova in CSS. In JS (Motion `animate`) la landing aggiunge due molle:
-
-| Nome | Valore | Per cosa |
-|---|---|---|
-| SVELTO | `--dur-svelto` 180ms, `--ease-standard` | opacità, uscite, il cambio di materiale della capsula, la nuvoletta che sparisce |
-| ENTRATA | `--dur-entrata` 260ms, `--ease-standard` | comparse: la nuvoletta, lo schermo nuovo del telefono (dissolvenza) |
-| MOLLA | `--dur-molla` 320ms, `--ease-molla` (460/38/0.9) | ciò che si sposta: Pallo che entra dal bordo, il ＋ che si apre, il ventaglio della Storia |
-| PRESSIONE | `--dur-press` 400ms, `--ease-press` | la pressione su capsule e pulsanti (`.press`), il pop del punteggio della demo |
-| SALITA | `--dur-rise` 600ms, `--ease-rise`, 12px, passo 50ms | le voci del ＋ quando si apre, le bolle della chat |
-| Lente | `--dur-rise` 600ms, `--ease-press` | la lente che scivola: la stessa transizione della TabBar dell'app |
-| RACCONTO | `--dur-racconto` 800ms, `--ease-racconto` | i numeri che salgono (`Odometro`), la barra vinte/perse in `translateX` |
-| RESPIRO | `--dur-respiro` 1400ms | i puntini di Pallo che scrive |
-| **SALTO** (nuovo, JS) | molla stiffness 300, damping 26, mass 1 (ζ 0.75, ~3% oltre il segno) | Pallo che salta dall'hero all'angolo (FLIP) |
-| **CADUTA** (nuovo, JS) | molla stiffness 500, damping 24, mass 1 (ζ 0.54, un rimbalzo) | i pin che cadono sulla mappa, da −24px |
-| Sfalsamento narrativo | `--stagger-narrativo` 50ms, al più `--stagger-max` 8 elementi | pin, bolle della chat, ventaglio: in tutto ≤ 50 × 7 + 320 = 670ms |
-| Nuvoletta | `--dur-bolla` 4000ms | quanto resta una battuta (come `TOAST_MS`) |
-
-### L11.3 Che cosa si anima
-
-Solo `transform` e `opacity` (più `visibility` a fine uscita).
-
-| # | Che cosa | Come | Fermo |
-|---|---|---|---|
-| LM1 | Uscita dall'hero | scroll legato, dall'inizio della sezione al suo fondo: cielo `translateY` × 0.5 dello scroll, sole e alone × 0.6 (scende dietro il mare, che nel disegno sta sopra), mare e barca × 0.3, sabbia, palma, rete e giocatori fermi con la pagina | fermo, fotogramma `FERMO` |
-| LM2 | Pallo nell'angolo | FLIP con SALTO, dalla posizione nell'hero a quella della guida, al primo passaggio della sessione | dissolvenza in ENTRATA |
-| LM3 | Schermo del telefono | a soglia, dissolvenza in ENTRATA dello schermo nuovo sopra quello vecchio | scambio istantaneo |
-| LM4 | Il ＋ che si apre | a soglia, una volta: `scale(.96 → 1)` + `translateY(12px → 0)` + opacità in MOLLA, con l'origine sull'icona ＋; le voci con la SALITA | già aperto |
-| LM5 | Pin | a soglia, una volta: CADUTA da −24px, sfalsati di 50ms, da nord a sud, al più 8 | già posati |
-| LM6 | Bolle della chat | dopo il tocco: la pausa `battitura(n)` coi puntini (RESPIRO), poi la SALITA | pausa 0, niente puntini |
-| LM7 | Numeri | a soglia, una volta per sessione: `Odometro` in RACCONTO; la barra cresce in `translateX` dentro il binario | valori finali |
-| LM8 | Slide | scroll legato, `translateX` lineare (lo scroll è la curva) | la riga a mano |
-| LM9 | Storia | a soglia, una volta: ventaglio in MOLLA, sfalsato di 50ms | già aperta |
-| LM10 | Pallone dell'avanzamento | scroll legato: `translateX` sul binario e `rotate` = distanza ÷ (π × diametro) × 360°, cioè rotola senza strisciare | non c'è |
-| LM11 | Capsula | lente: transizione della TabBar; materiale: scambio di opacità in SVELTO | lente a scatto (`transition: none`), materiale istantaneo |
-| — | Pressione | `.press` dell'app su pulsanti, voci, risposte, pannelli della demo | niente scala, resta lo strato |
-| — | Pop del punteggio | `live-pop` dell'app: scala 1.16 e ritorno, PRESSIONE | cambio istantaneo |
-| — | Pallo | la vita di `Pallo.vita.ts`: sguardo, ammiccare, gesti, sonno; solo in vista e a scheda visibile | fermo nell'umore |
-| — | Nuvoletta | ENTRATA in comparsa con `translateY(6px × --motion-scale)`, SVELTO in uscita | sola opacità |
-| — | Menu e foglio | quelli dell'app (MOTION §4.2): MOLLA, origine sul centro di Pallo; uscita SVELTO con `frost` a `t0` | dissolvenza |
-
-### L11.4 Che cosa NON si anima, di proposito
-
-- **I titoli e i paragrafi.** Niente parole che salgono una alla volta, niente testo che si «scrive», niente gradiente che scorre sul titolo. L'`h1` è l'elemento LCP e c'è dal primo fotogramma.
-- **Le sezioni che entrano.** Niente dissolvenza dal basso a ogni blocco che entra in vista: è il segno del template. Si muove solo ciò che sta nella tabella sopra.
-- **Le campiture e i loro tagli**: il colore del fondo non sfuma da una sezione all'altra.
-- **La sfocatura, i colori, le ombre, i raggi, le altezze.** Il vetro cambia solo in opacità.
-- **Lo scroll stesso**: niente `scroll-behavior: smooth` globale, niente scroll-snap verticale, niente scroll dirottato. I salti dalla barra sono istantanei (UX §L4.2).
-- **La barra**: non si nasconde scorrendo, e il ＋ non ruota in ×.
-- **Il cursore**: niente cursori personalizzati, niente pulsanti «magnetici», niente scie.
-- **All'apertura**: niente preloader, niente animazione d'ingresso della pagina, niente schermata di benvenuto.
-- **Video e Lottie**: nessuno.
-- **Numeri al ritorno**: salgono una volta per sessione, poi stanno fermi.
-- **L'anello di focus**: compare istantaneo.
-
-### L11.5 Due interruttori, un solo stato fermo
-
-`prefers-reduced-motion: reduce` **oppure** `<html data-movimento="fermo">` («Ferma le animazioni»). Il foglio dei token ripete per il secondo i valori del primo (`--motion-scale: 0`, `--press-scale: 1`, `--dur-racconto: 0ms`, `--dur-respiro: 0ms`), e il test controlla che coincidano. Le animazioni infinite (scena, Pallo) vanno spente **anche** sotto `:root[data-movimento="fermo"]`: i fogli dell'app che la landing importa (`Pallo.css`, `Login.scena.css`) le spengono solo con la media query (`⟂ M`, `⟂ C`).
-
----
-
-## L12. Il livello dei token: come si usa
-
-| File | Che cosa | Chi lo legge |
-|---|---|---|
-| `src/styles/tokens.css` | i token dell'app e l'ordine dei `@layer` | importato **per primo** dalla landing |
-| `src/styles/base.css`, `src/styles/materials.css` | reset, focus, `.rise`, `.press`; il vetro e `[data-surface="dark"]` | importati dopo, così come sono |
-| `src/components/ui/Button.css`, `src/components/ui/Tabellone.css`, `src/components/Pallo.css` (e `Login.scena.css`, `⟂ E`) | primitive dell'app in CSS puro, nel livello `components` | importati dalla landing: i pulsanti sono `.ui-button` veri, non copie |
-| **`presentazione/styles/tokens.css`** | i token della landing: scala da manifesto, campiture, ruoli del testo, velo dell'hero, capsula, telefono, slide, mappa, sole, movimento, livelli, la riserva metrica di Geist, i fondi scuri, il fermo | importato **dopo** i fogli dell'app, prima dei fogli dei componenti della landing |
-| `presentazione/styles/*.css` (`⟂ C`) | i componenti della landing, tutti in `@layer components` | leggono **solo** `var(--…)`: nessun colore letterale |
-| `src/styles/landing.tokens.test.ts` | 59 test (§L4.8 e sotto) | `npm test` |
-| `vitest.config.ts` | `css.include` ha in più il solo `presentazione/styles/tokens.css` | perché il test lo legga con `?raw` |
-
-**Regole d'uso.**
-1. Nei componenti della landing ci sono **solo token**. I colori letterali stanno nel foglio dei token e solo nei nomi `--map-*`, `--slide-*`, `--sole-*`, `--riflesso`, `--horizon`, `--lente-*` e `--rule`, e il test lo controlla.
-2. Il foglio dei token **aggiunge**. L'unico nome dell'app ridefinito sul `:root` è `--font-ui`, più il blocco `[data-movimento="fermo"]`: il test fallisce se se ne aggiunge un altro. Se serve un valore diverso dall'app, si crea un ruolo nuovo (com'è stato per `--text-accent`).
-3. I ruoli del testo (`--text-strong`, `--text`, `--text-muted`, `--text-accent`, `--rule`) si risolvono sul `:root`. Una sezione scura porta `data-surface="dark"`, e i ruoli si invertono da soli. **Non** si scrive `--ink` in un componente della landing che può finire su un fondo scuro: si scrive il ruolo.
-4. Le sezioni portano anche `data-fondo="chiaro|scuro"`, per la capsula (UX LC7). Una sezione scura ha tutti e due gli attributi.
-5. Le media query non leggono le custom property: i breakpoint si scrivono come numeri, sempre quei quattro (360 · 600 · 900 · 1280).
-6. **Cambiare un token** vuol dire cambiare insieme il foglio, questa parte e i numeri fissati nel test. Il test cade apposta.
-
----
-
-## L13. Dove questa parte corregge UX.md
-
-UX.md vince sul comportamento, questa parte sull'aspetto. Ecco i punti in cui si sovrappongono, ognuno col suo motivo.
-
-| # | UX.md Parte L dice | Qui | Perché |
-|---|---|---|---|
-| A1 | `#numeri` su fondo chiaro, «tre card come in Home» (§L3.2, §L6.5, §L7.7) | Campitura **d'inchiostro**: il numero da manifesto bianco col «%» arancio e le **celle del tabellone** (la grammatica delle celle della slide d'inchiostro), invece delle card bianche. Le etichette restano quelle della Home | La Home vera con le sue card è già nello schermo del capitolo 1. Un «66%» da 128–160 sotto il vetro chiaro va sotto AA (3.36–3.85), sull'inchiostro regge (6.57). La pagina ha bisogno di un cambio di registro a metà |
-| A2 | `#wrapped` «misto»: la capsula cambia materiale per slide (§L3.2, §L6.7) | Campitura d'inchiostro per tutta la sezione. Le slide sono tessere che, bloccate, finiscono **sopra** la capsula (§L5.7) | A riposo nessuna slide passa sotto il vetro, quindi la capsula non lampeggia a ogni slide. Prima e dopo il blocco, il vetro scuro regge anche sull'arancio (10.79) e sul bianco (6.10) |
-| A3 | Pin coi colori dei dati `--data-win` · `--data-podium` · `--data-rest` (§L6.6) | I pin di **ConquisteMap**: `--accent` · `--surface` · `--line-strong`, alone bianco 3px e filo d'inchiostro | La mappa disegnata deve dire la stessa cosa della mappa vera nello schermo del capitolo 2 |
-| A4 | Capsula: «una variante scura scelta a soglia», lente «tinta, filo di luce e ombra» (LC7, LC8) | Variante scura = `glass-dark` dell'app, quella chiara = `glass-regular` dell'app, senza ritocchi. Le tab spente sono d'inchiostro pieno. La lente è una pillola **bianca piena**, uguale sui due materiali | L'inchiostro al 78% delle tab dell'app fa 3.39 sopra i numeri della demo; quello pieno 4.56. Una lente piena regge l'arancio (5.18) su ogni fondo |
-| A5 | La lente si sposta in MOLLA (§L4.1) | La transizione della TabBar dell'app (`--dur-rise` + `--ease-press`) | La stessa barra si muove allo stesso modo nei due posti (`⟂ M` conferma) |
-| A6 | «Ferma le animazioni» nell'angolo in basso a sinistra della scena; vetro `glass-clear` oppure opaco (§L7.4, §L10) | In fondo al blocco dell'hero, sulla **riga dei comandi** a destra di «Installa sul telefono». Opaco: un anello bianco .38 | La riga esiste sempre (alta 44), quindi il posto del pulsante d'installazione è riservato senza un buco. L'ordine del Tab coincide con quello visivo. Nell'hero il vetro resta a 2 |
-| A7 | Le voci del ＋ come tablist; la scelta non ha un disegno (§L7.9) | Voce scelta = filo d'inchiostro da 2px, come il pannello «noi». Non la pillola d'inchiostro piena delle chip | Un blocco d'inchiostro pieno alto 72 sotto il vetro chiaro coprirebbe il 100%: le tab andrebbero a 3.0 |
-| A8 | Lo schermo del telefono cambia quando un capitolo passa la linea del 50% (§L7.5) | Sotto i 900px la linea è al **72%** dell'altezza; dai 900px resta al 50% | Sul telefono la cornice occupa il 56% in alto: la linea del 50% è dietro la cornice, e lì il testo non c'è |
-| A9 | Riga piccola dell'hero (non specificato) | Bianco .82 (`--text`), non .66 | Sopra la scena, col velo al 72%, il .66 sta al filo (4.57) e il .82 regge con margine (6.04) |
-| A10 | Finale scuro «PUÒ», footer `⟂ A` (§L3.2) | Finale e footer sul tramonto: **DEVE**. Il bordo del footer è l'orizzonte del sole del finale | È la mossa firmata 1 (§L2.4) |
-| A11 | −1 della demo «`frost` o opaco» (§L10) | `frost` | Il riflesso del vetro senza la sfocatura: si riconosce come il −1 di vetro dell'app |
-| A12 | Il contenuto decorativo «PUÒ» essere inserito nell'HTML in build (§L13) | Consigliato per la scena e per il Pallo dell'hero | Il primo fotogramma è la scena: con l'hero vuoto finché il modulo non parte, il primo colpo d'occhio sarebbe un rettangolo scuro (GL1) |
-
----
-
-## L14. Il test «landing da template»
-
-Prima di chiudere una sezione, chi la costruisce la confronta con questa lista. Un solo sì vuol dire rifarla.
-
-- [ ] C'è una griglia di funzioni con un'icona sopra ogni titolo?
-- [ ] Un blocco sale in dissolvenza solo perché è entrato in vista?
-- [ ] Il telefono è inclinato, in prospettiva, con un'ombra o un riflesso?
-- [ ] C'è un gradiente, una macchia o un'onda fra due sezioni?
-- [ ] Ci sono due CTA arancio nella stessa schermata (oltre al ＋ della barra)?
-- [ ] C'è testo bianco sull'arancio, o arancio-testo sul buio?
-- [ ] Un testo da leggere sta sotto i 15px, o un'etichetta sotto i 10.5?
-- [ ] Sulla carta c'è un testo d'inchiostro oltre i 112px a 800 (o i 96 a 900), o un blocco d'inchiostro pieno più alto di 16px?
-- [ ] Ci sono più di 2 superfici sfocate a riposo, o un vetro con niente che ci scorre sotto?
-- [ ] C'è un colore, una misura o una durata scritti a mano in un foglio di componente?
-- [ ] C'è un'illustrazione che non è la scena, Pallo o la mappa?
-- [ ] Ci sono due Pallo che parlano nella stessa schermata?
-- [ ] Il titolo o il paragrafo aspettano il JavaScript per comparire?
-- [ ] Un'icona è un'emoji, o sta in un cerchio pastello?
-- [ ] Una slide, una cifra o una regola della demo è diversa da quella dell'app?
-
----
-
-## L15. Seam per i ruoli successivi
-
-| Seam | Che cosa | Riferimento |
-|---|---|---|
-| **⟂ M** | Il paragrafo «Landing (`/presentazione`)» di MOTION.md: LM1–LM11 coi valori di §L11.3, le molle SALTO e CADUTA, lo sfalsamento narrativo (50ms, ≤ 8), lo scambio di materiale della capsula (due strati, opacità, SVELTO), `:root[data-movimento="fermo"]` che spegne **anche** le animazioni infinite di `Pallo.css` e della scena (lì oggi c'è solo la media query) | §L11 |
-| **⟂ E** | Generare anche le icone (le stesse `PATHS` di `Icon.tsx`) come si fa per Pallo; aggiungere `pause` e `play` a `Icon.tsx` | §L10.1 |
-| ⟂ E | Lo snapshot di Pallo deve tenere la prop `mani` (bianche sulla slide arancio) | §L10.3 |
-| **⟂ C** | Import nell'ordine di §L12; `data-surface="dark"` + `data-fondo` sulle sezioni di §L4.2; i ruoli del testo invece di `--ink`; il velo come `::before` del blocco del testo (`inset: calc(-1 * var(--hero-velo-rise)) calc(-1 * var(--gutter)) …`); la capsula a due strati; la riga dei comandi dell'hero; la fascia sticky del telefono; le voci del ＋ con il filo da 2px | §L5, §L8, §L9 |
-| ⟂ C | Le composizioni di §L5.4, la griglia di §L5.3; la lista di §L14 prima di chiudere ogni sezione | §L5, §L14 |
-| **⟂ I** | Schermate WebP 780×1688 q82 (§L10.5), Storia 540×960 (§L10.6), icone PWA e favicon (§L10.2), og:image (§L10.8), manifest `#F6F6F4` | §L10 |
-| **⟂ QA** | `src/test/landing.test.ts` deve **escludere** `presentazione/styles/tokens.css` dal controllo «niente colori letterali» (lì i letterali sono ammessi e già controllati da `landing.tokens.test.ts`). `docs/qa/landing.mjs`: il conteggio del vetro di §L9.3 compreso il passaggio di 180ms all'uscita dall'hero; la capsula nei due materiali; `fontcls.mjs` sulla landing | §L9.3, §L12 |
-| ⟂ QA | Su un iPhone vero: la lente bianca sul vetro chiaro (si vede come forma?), il velo dell'hero al sole, la riserva metrica (in Safari si vede Arial per un istante, ma senza salti) | §L3.1, §L9.2 |
+| il modulo d'iscrizione in `#iscriviti` (nome, email, password, «Crea account», la nota su Termini e Informativa, «Hai già un account? Accedi») | le due porte «Crea il tuo diario» e «Ho già un account» | la registrazione resta nell'app (decisione dell'utente, UX §L2) |
+| «Crea il tuo diario» e «Iscriviti» scendono al modulo (`#iscriviti`) | portano a `/?accesso=registrati` | senza modulo l'ancora porterebbe a due pulsanti uguali |
+| le tavole D · Home, D · Diario e D · Beach Wrapped nei telefoni | le schermate vere dell'app | la pagina mostra l'app com'è |
+| l'occhiello di `#schermate` in `--accent-text` (4.41 sulla fascia) | `--accent-text-state` (6.24) | AA, 4.5:1 |
+| le icone disegnate a mano | le icone dell'app | il sito non ridisegna l'app |
+| voci della testata alte 42, marchio 28 | area del tocco di 44 | bersagli minimi |
+| hover con transizione di colore | colore di colpo | `MOTION.md` R2 |
+| — | «Salta al contenuto», la fila dei telefoni che prende il Tab, il telefono che si stringe sotto i 340px, i margini fuori dalla tacca | accessibilità e telefoni stretti |
+| la pagina ferma, oltre alla pressione | l'apertura della Home nel telefono dell'hero; il giro di `#schermate`, che si sfoglia scorrendo | la richiesta dell'utente (20 ottobre 2026): un movimento che presenti l'app. È quello dell'app (MOTION.md, Parte L) |
+| sei carte: Diario, Statistiche, Compagni, Mappa delle conquiste, Beach Wrapped, Solby | nove: in più Partita live, Chi c'è oggi e Storia Instagram; la riga di Solby dice anche che compila il torneo | la richiesta dell'utente (20 ottobre 2026): le funzioni importanti dell'app, in poche parole |
+| le carte una sotto l'altra sul telefono | un gruppo solo, una riga per carta col filo | 1.400px di scroll per sei frasi; è il disegno delle liste dell'app |
+| tre telefoni in fila (Home, Diario, Beach Wrapped) con la sola didascalia | il giro: sei momenti, ognuno con la schermata e due righe | le schermate senza parole non dicevano a che cosa servono; la Home è già nell'hero |
+| due porte di larghezze diverse una sopra l'altra sul telefono | una per riga, larghe quanto la colonna | sotto i 480px non stanno su una riga |
+| 216px fra una sezione e l'altra anche sul telefono | 72–88 sotto gli 820px | sul telefono era mezza schermata vuota |

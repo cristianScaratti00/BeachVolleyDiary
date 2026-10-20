@@ -57,9 +57,8 @@ export function Scena({ inquadratura }: { inquadratura: Inquadratura }) {
       <div className="accesso-camera">
         <svg ref={svg} className="accesso-scena-svg" viewBox="-480 0 1350 844" preserveAspectRatio="xMidYMid slice" focusable="false">
           {/* Tre piani, dal fondo: cielo, sole, terra. Il disegno e l'ordine
-              di pittura sono quelli di sempre; i piani servono alla landing,
-              che li separa in tre <svg> e li fa scorrere a velocità diverse
-              (MOTION.md §L12). Ogni piano porta le sue definizioni. */}
+              di pittura sono quelli di sempre. Ogni piano porta le sue
+              definizioni. */}
           <g data-piano="cielo">
             <defs>
               <linearGradient id={id('cielo')} x1="0" y1="0" x2="0" y2="340" gradientUnits="userSpaceOnUse">

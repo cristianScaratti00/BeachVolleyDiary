@@ -1,14 +1,13 @@
 // ============================================================================
-// L'anteprima social della landing (`og:image`, ART_DIRECTION §L10.8): un PNG
-// 1200×630 con la composizione dell'hero da 900px. Il tramonto con la scena
-// a destra, il velo di lato, «Ogni partita, nel tuo diario.» in Geist 800 da
-// 76 su due righe a 88 dal bordo, il marchio nudo da 48 sopra il titolo, e
-// Pallo `saluta` da 300 in piedi sulla sabbia. Nessun altro testo: le
-// piattaforme ci scrivono già il titolo sotto.
+// L'anteprima social della landing (`og:image`, ART_DIRECTION §L5): un PNG
+// 1200×630 con la composizione dell'hero. A sinistra il marchio e il titolo
+// «Il diario delle tue partite di beach volley.»; a destra la vetrina color
+// pesca con la Home vera nel telefono, tagliata dal bordo in basso. Nessun
+// altro testo: le piattaforme ci scrivono già il titolo sotto.
 //
-// È la landing VERA (scena e Pallo dagli snapshot, Geist del sito), col
-// movimento ridotto (il fotogramma fermo) e le sole regole di composizione
-// qui sotto. Dalla radice del repo:
+// È la landing VERA (marchio dell'app, Geist del sito, la schermata di
+// public/presentazione/screens), con le sole regole di composizione qui
+// sotto. Dalla radice del repo:
 //
 //   node docs/qa/landing-og.mjs
 //
@@ -55,34 +54,33 @@ const finisci = () => {
 process.on('exit', finisci)
 process.on('SIGINT', () => process.exit(130))
 
-// La composizione: solo l'hero, e dentro solo titolo, marchio, scena e Pallo.
+// La composizione: solo l'hero, e dentro solo marchio, titolo e vetrina.
 const COMPOSIZIONE = `
-  .barra, .avanza, .guida, .guida-bolla, .guida-menu, .skip-link,
-  .eroe-frase, .eroe-cta, .eroe-riga, .eroe-comandi, .fermo-nota,
-  main > section:not(#inizio), footer, .velo, .foglio { display: none !important; }
-  .eroe { min-height: ${H}px !important; height: ${H}px; padding: 0 !important; justify-content: center !important; }
-  .eroe-testo { position: static !important; padding: 0 0 0 88px !important; max-width: none !important; }
-  .eroe h1 { font-size: 76px !important; line-height: 1 !important; letter-spacing: -0.045em !important; max-width: 540px; }
-  .eroe-marchio { display: block !important; position: absolute !important; left: 88px !important; top: var(--og-marchio) !important; }
-  .eroe-marchio > span { display: none !important; }
-  .eroe-marchio .marchio { width: 48px !important; height: 48px !important; }
-  .eroe-pallo { width: 300px !important; right: 15% !important; bottom: 6% !important; }
+  .skip-link, .testata-nav, .occhiello, .eroe-frase, .eroe-azioni,
+  main > section:not(#inizio) { display: none !important; }
+  .testata { position: absolute; left: 0; top: 0; width: 640px; z-index: 1; }
+  .testata .dentro { max-width: none; padding: 0 0 0 80px !important; }
+  .testata-riga { border: 0 !important; padding: 64px 0 0 !important; }
+  .testata-marchio { font-size: 26px !important; gap: 14px !important; }
+  .testata-marchio .marchio { width: 44px !important; height: 44px !important; }
+  .eroe-dentro { max-width: none !important; height: ${H}px; padding: 0 0 0 80px !important; flex-wrap: nowrap !important; align-items: center !important; gap: 48px !important; }
+  .eroe-testo h1 { font-size: 66px !important; max-width: 560px; }
+  .eroe-vetrina { flex: 0 0 440px !important; align-self: flex-end; height: 566px; margin-right: 72px; padding: 44px 0 0 !important; border-bottom: 0 !important; border-radius: 32px 32px 0 0 !important; overflow: hidden; align-items: flex-start; }
+  .eroe-vetrina .telefono { width: 320px !important; }
 `
 
 await launch(PORTA_CDP)
 const p = await page(PORTA_CDP)
 await p.viewport(W, H, { mobile: false, dpr: 1, touch: false })
 await p.media([{ name: 'prefers-reduced-motion', value: 'reduce' }])
-await p.go(BASE + '?nuova', 1500)
+await p.go(BASE, 1500)
 await p.eval(`(async () => {
   const s = document.createElement('style')
   s.textContent = ${JSON.stringify(COMPOSIZIONE)}
   document.head.append(s)
   window.scrollTo(0, 0)
   await document.fonts.ready
-  // Il marchio 24px sopra il titolo, comunque vada a capo.
-  const h = document.querySelector('.eroe h1').getBoundingClientRect()
-  document.documentElement.style.setProperty('--og-marchio', (h.top - 24 - 48) + 'px')
+  await Promise.all([...document.images].filter((i) => i.closest('#inizio')).map((i) => i.decode().catch(() => {})))
   await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))
 })()`)
 await sleep(400)

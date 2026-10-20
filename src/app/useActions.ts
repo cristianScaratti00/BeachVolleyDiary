@@ -174,7 +174,7 @@ export function useActions({ diary, data, route, session, perm, check, caricamen
 
   /** «Partita live» dal ＋: una rotta a schermo intero; la voce del menu diventa la destinazione. */
   const partitaLive = () => navigate({ name: 'live' })
-  /** «Raccontalo a Pallo» dal ＋: l'assistente, anche lui una rotta. */
+  /** «Raccontalo a Solby» dal ＋: l'assistente, anche lui una rotta. */
   const apriAssistente = () => navigate({ name: 'crea' })
 
   /** L'assistente: dallo sheet sporco si chiede prima (UX §5 F2). */

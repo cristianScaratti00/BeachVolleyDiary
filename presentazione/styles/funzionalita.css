@@ -1,0 +1,80 @@
+/* ============================================================================
+   `#funzionalita` (ART_DIRECTION §L3): sei carte bianche col filo, come le
+   card dell'app, ognuna con la sua icona dell'app in una tessera di carta.
+   La griglia mette quante carte da 300 ci stanno (tre a 1200, una sul
+   telefono); sotto i 300 di colonna la carta si stringe con lei.
+   ============================================================================ */
+@layer components {
+  #funzionalita { padding-block: 112px 104px; }
+
+  .carte {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+    gap: 16px;
+  }
+  .carta {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 26px;
+    border: var(--border-w) solid var(--edge);
+    border-radius: 22px;
+    background: var(--surface);
+  }
+  .carta-ico {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    border: var(--border-w) solid var(--edge);
+    border-radius: 13px;
+    background: var(--bg);
+    color: var(--accent-text);
+  }
+  /* 22 col tratto da 24: la misura della tavola. */
+  .carta-ico .ui-icon { width: 22px; height: 22px; stroke-width: var(--icon-stroke-24); }
+  .carta h3 { margin-top: 6px; font: var(--lp-type-h3); letter-spacing: var(--lp-track-h3); }
+  .carta p { color: var(--lp-testo); font: var(--lp-type-carta); }
+
+  /* Sul telefono le sei carte, alte una sopra l'altra, facevano 1.400px di
+     scroll per sei frasi. Diventano un gruppo solo, come le liste raggruppate
+     dell'app: una carta, sei righe col filo fra l'una e l'altra (rientrato
+     fino al testo), la tessera dell'icona accanto al titolo. */
+  /* Sul telefono le fasce respirano meno: 216px vuoti fra hero e carte
+     erano una schermata a metà. */
+  @media (max-width: 820px) {
+    #funzionalita { padding-block: 80px 72px; }
+  }
+
+  @media (max-width: 600px) {
+    .carte {
+      gap: 0;
+      border: var(--border-w) solid var(--edge);
+      border-radius: 22px;
+      background: var(--surface);
+    }
+    .carta {
+      position: relative;
+      display: grid;
+      grid-template-columns: 46px minmax(0, 1fr);
+      gap: 4px 14px;
+      align-items: start;
+      padding: 18px 20px;
+      border: 0;
+      border-radius: 0;
+      background: none;
+    }
+    .carta-ico { grid-row: span 2; }
+    /* Il titolo a metà della tessera (46 di tessera, 25 di riga). */
+    .carta h3 { margin-top: 10px; }
+    .carta + .carta::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 80px;
+      right: 0;
+      border-top: var(--border-w) solid var(--edge);
+    }
+  }
+}

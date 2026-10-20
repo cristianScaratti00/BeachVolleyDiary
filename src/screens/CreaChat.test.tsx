@@ -66,7 +66,7 @@ beforeEach(() => impostaRiduzione(true))
 describe('CreaChat — da tastiera', () => {
   it('si apre con le domande già pronte e il focus nel campo, che ha un nome', () => {
     renderChat()
-    expect(within(log()).getByText(/Sono Pallo\. Ti faccio qualche domanda/)).toBeInTheDocument()
+    expect(within(log()).getByText(/Sono Solby\. Ti faccio qualche domanda/)).toBeInTheDocument()
     const campo = screen.getByRole('textbox', { name: 'Come si chiama il torneo?' })
     expect(campo).toHaveFocus()
     expect(screen.getByRole('button', { name: 'Invia' })).toHaveAttribute('type', 'submit')
@@ -111,7 +111,7 @@ describe('CreaChat — la testata e la capsula (design 14)', () => {
   it('la testata dice chi parla e a che passo si è', async () => {
     const user = userEvent.setup()
     renderChat()
-    expect(screen.getByRole('heading', { level: 1, name: 'Pallo' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 1, name: 'Solby' })).toBeInTheDocument()
     expect(screen.getByText('Nuovo torneo · passo 1 di 8')).toBeInTheDocument()
     await user.keyboard('Rimini Open{Enter}')
     expect(await screen.findByText('Nuovo torneo · passo 2 di 8')).toBeInTheDocument()
@@ -190,7 +190,7 @@ describe('CreaChat — la pausa "sta scrivendo"', () => {
     const user = userEvent.setup()
     renderChat()
     await user.keyboard('Rimini Open{Enter}')
-    expect(screen.queryByText('Pallo sta scrivendo')).not.toBeInTheDocument()
+    expect(screen.queryByText('Solby sta scrivendo')).not.toBeInTheDocument()
     expect(within(log()).getByText('Perfetto, «Rimini Open». Con chi hai giocato?')).toBeInTheDocument()
   })
 
@@ -202,7 +202,7 @@ describe('CreaChat — la pausa "sta scrivendo"', () => {
     const testa = container.querySelector('.crea-head svg.pallo')!
     expect(testa).toHaveAttribute('data-umore', 'testa')
     await user.keyboard('Rimini Open{Enter}')
-    expect(screen.getAllByText('Pallo sta scrivendo')).toHaveLength(1)
+    expect(screen.getAllByText('Solby sta scrivendo')).toHaveLength(1)
     expect(testa).toHaveAttribute('data-umore', 'pensa')
     expect(testa).toHaveAttribute('viewBox', '12 12 96 96')
     expect(within(log()).queryByText('Perfetto, «Rimini Open». Con chi hai giocato?')).not.toBeInTheDocument()
@@ -210,7 +210,7 @@ describe('CreaChat — la pausa "sta scrivendo"', () => {
     // comparire subito la domanda.
     fireEvent.pointerDown(screen.getByRole('button', { name: 'Giulia' }))
     expect(within(log()).getByText('Perfetto, «Rimini Open». Con chi hai giocato?')).toBeInTheDocument()
-    expect(screen.queryByText('Pallo sta scrivendo')).not.toBeInTheDocument()
+    expect(screen.queryByText('Solby sta scrivendo')).not.toBeInTheDocument()
     expect(testa).toHaveAttribute('data-umore', 'testa')
   })
 })

@@ -103,7 +103,7 @@ export const coloreDelNome = (name: string) => LABEL_COLORS[name.length % LABEL_
 export const FINISHED_PLACEMENTS: Placement[] = ['1° 🏆', '2°', '3°', 'Semifinale', 'Quarti', 'Ottavi', 'Gironi']
 
 /** L'apertura: c'è già quando la schermata si apre, senza pausa (MOTION.md §5 F11). Parla Pallo. */
-export const INTRO = ['Ciao! Sono Pallo. Ti faccio qualche domanda e il torneo lo compilo io.', 'Come si chiama il torneo?']
+export const INTRO = ['Ciao! Sono Solby. Ti faccio qualche domanda e il torneo lo compilo io.', 'Come si chiama il torneo?']
 
 export const RIPARTENZA = ['Ripartiamo da capo.', 'Come si chiama il torneo?']
 

@@ -20,14 +20,12 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  /* vite.config.ts compone la landing (presentazione/build): i file generati
-     e i tracciati delle icone sono puri, senza DOM. */
+  /* vite.config.ts compone la landing (presentazione/build): i tracciati
+     delle icone sono puri, senza DOM. */
   "include": [
     "vite.config.ts",
     "vitest.config.ts",
     "presentazione/build",
-    "presentazione/js/generati",
-    "presentazione/js/pallo.disegno.ts",
     "src/components/ui/Icon.paths.ts"
   ]
 }

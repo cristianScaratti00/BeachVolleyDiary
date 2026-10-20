@@ -1,8 +1,7 @@
 // ============================================================================
-// Le regole della Partita live, pure: niente React, niente DOM. Le usano il
-// segnapunti dell'app (PartitaLive.tsx) e la demo giocabile della landing
-// `/presentazione`, così le due giocano con le stesse regole e Pallo dice le
-// stesse battute.
+// Le regole della Partita live, pure: niente React, niente DOM. Le usa il
+// segnapunti dell'app (PartitaLive.tsx), e si provano da sole, caso per caso
+// (PartitaLive.regole.test.ts).
 //
 // Le regole sono quelle del beach volley: set a 21 (il terzo a 15) con due
 // punti di scarto, cambio campo ogni 7 punti (ogni 5 nei set a 15), al meglio

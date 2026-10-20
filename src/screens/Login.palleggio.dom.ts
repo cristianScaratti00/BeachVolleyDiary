@@ -1,9 +1,8 @@
 // ============================================================================
 // Il pilota del palleggio, senza React: a ogni fotogramma calcola lo scambio
 // (Login.palleggio.ts, puro) e lo scrive negli attributi dei tratti dei due
-// giocatori, del pallone e della sua ombra. Lo usano la scena dell'accesso
-// (Login.scena.tsx, da un `useEffect`) e l'hero della landing
-// `/presentazione`, che ha la stessa scena senza un framework.
+// giocatori, del pallone e della sua ombra. Lo usa la scena dell'accesso
+// (Login.scena.tsx, da un `useEffect`).
 //
 // Il loop gira solo quando si vede: la scena in vista (IntersectionObserver,
 // dove c'è), la scheda visibile, il movimento permesso. Fermo, o fuori vista,

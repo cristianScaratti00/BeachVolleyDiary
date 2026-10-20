@@ -8,7 +8,7 @@
 | Verifica | Ogni demo è stata pilotata in Chrome headless (tocchi, tasti, trascinamenti veri via CDP), **con e senza** `prefers-reduced-motion`. Il badge `?audit` ha registrato zero animazioni fuori da transform/opacità (salvo l'eccezione dichiarata E1) e al massimo 2 superfici sfocate contemporanee |
 | Lingua | italiano; nomi di token, classi e costanti come nel codice |
 | Livelli di obbligo | **DEVE** = criterio di accettazione · **DOVREBBE** = atteso, salvo motivo scritto · **PUÒ** = facoltativo |
-| Landing | la landing `/presentazione` ha la sua parte in fondo: **[Parte L, il movimento di «Controluce»](#parte-l-la-landing-presentazione-il-movimento-di-controluce)** (ottobre 2026). Le regole di questo documento valgono anche lì; la Parte L aggiunge due eccezioni (scroll legato e sfalsamento narrativo) **solo** per la landing |
+| Landing | la landing `/presentazione` ha la sua parte in fondo: **[Parte L](#parte-l-la-landing-presentazione-il-movimento)** (20 ottobre 2026). Le regole di questo documento valgono anche lì, senza eccezioni: si muove solo la pressione dei pulsanti |
 
 **Chi vince su cosa.** UX.md decide *cosa* succede (stati, flussi, focus, history). ART_DIRECTION.md decide *con che cosa* si muove (le cinque curve, le durate, i materiali). Questo documento decide *come si passa* da uno stato all'altro: cosa fa partire il movimento, in che ordine, quali proprietà, quanto dura, che cosa resta con reduced-motion. I seam per le fasi successive sono marcati `⟂ Fn` come in UX.md (indice in §17).
 
@@ -34,7 +34,7 @@
 15. [Le demo](#15-le-demo)
 16. [Verifica e test](#16-verifica-e-test)
 17. [Seam per i ruoli successivi](#17-seam-per-i-ruoli-successivi)
-- [Parte L. La landing `/presentazione`: il movimento di «Controluce»](#parte-l-la-landing-presentazione-il-movimento-di-controluce)
+- [Parte L. La landing `/presentazione`: il movimento](#parte-l-la-landing-presentazione-il-movimento)
 
 ---
 
@@ -604,7 +604,7 @@ Un trascinamento che non può chiudere (modulo sporco, salvataggio in corso) **r
 | Effetto | Perché no |
 |---|---|
 | Large title che si rimpicciolisce con lo scroll | scalare del testo grande lo ri-rasterizza (sfocato a metà corsa) e lega un'animazione al thread dello scroll; ART_DIRECTION §11.3 |
-| Parallasse, sole basso che si muove | decorazione; `background-attachment: fixed` non funziona su iOS; ART_DIRECTION §4.2 (`--bg-canvas` non è `fixed`). **Nell'app.** Sulla landing il tramonto dell'hero è permesso, con timeline native e i limiti della Parte L (EL1, §L5.6) |
+| Parallasse, sole basso che si muove | decorazione; `background-attachment: fixed` non funziona su iOS; ART_DIRECTION §4.2 (`--bg-canvas` non è `fixed`). Vale anche per la landing (Parte L) |
 | TabBar che si nasconde scorrendo in giù (iOS 26) | sposta la navigazione principale sotto il pollice in modo imprevedibile, proprio per la persona che usa una mano sola (UX P1) |
 | Pull-to-refresh | il `reload()` scatta già a ogni rotta, focus e ritorno visibile (UX §4.9); in modalità standalone combatte con l'overscroll di iOS |
 | CSS scroll-driven animations (`animation-timeline: scroll()`) | supporto su Safari troppo recente per la persona primaria, e servirebbero solo agli effetti qui sopra |
@@ -898,719 +898,69 @@ Con `fs`, non con `import '?raw'`: Vitest svuota gli import di CSS, e allargare 
 
 ---
 
-# Parte L. La landing `/presentazione`: il movimento di «Controluce»
+# Parte L. La landing `/presentazione`: il movimento
 
-| | |
-|---|---|
-| Ruolo | Interaction e motion designer, ruolo 3 di 6 della squadra «REDESIN sito presentazione». Specifica i momenti **fra** gli stati della landing; **nessun componente di produzione** in questo commit |
-| Base | `UX.md` Parte L (ruolo 1, `7f31fba`) per il comportamento, `ART_DIRECTION.md` Parte L «Controluce» (ruolo 2, `3f14b2c`) per il vocabolario, su `be9c4bd` (`main` con la versione D). Dove questa parte li corregge lo dice in §L13 |
-| Token | due molle nuove in `presentazione/styles/tokens.css` (`--ease-salto`, `--dur-salto`, `--ease-caduta`, `--dur-caduta`, `--caduta-y`), ricalcolate da `src/styles/landing.tokens.test.ts` (3 test in più, 62 in tutto) |
-| Demo di riferimento | `docs/motion/L1-salto.html` … `L5-soglie.html`, più `docs/motion/_landing.js` (§L14). Leggono i token veri dell'app **e** della landing; si aprono senza build |
-| Verifica | le cinque demo pilotate in Chrome headless via CDP a 390×844 (L1 anche a 1280×800), con `prefers-reduced-motion` simulato (`?reduce`) e con `data-movimento="fermo"`: scroll, tocchi veri, tasti, salti. Il badge `?audit` non ha registrato proprietà animate fuori da transform/opacità; il vetro non ha mai superato 2 superfici, nemmeno nel passaggio menu → foglio (§L14) |
-| Chi vince | UX.md Parte L decide **che cosa** succede; ART_DIRECTION Parte L **con che cosa** si muove; questa parte **come si passa** da uno stato all'altro. Le Parti 0–17 di questo documento restano il contratto dell'app: qui si citano, non si ripetono |
+La landing (20 ottobre 2026) è la tavola «Landing page» del canvas di Claude Design (`ART_DIRECTION.md`, Parte L). Il movimento di «Controluce» (scroll legato al tramonto, il salto di Pallo, le soglie, le molle SALTO e CADUTA, le demo `L1`–`L5`) è uscito con lei: resta nella storia di git fino al commit `a9793f3`.
 
-### Indice della Parte L
+Dalla rifinitura dello stesso giorno la landing ha **due movimenti che raccontano qualcosa, tutti e due presi dall'app**. Il primo è l'apertura della Home nel telefono dell'hero (L1). Il secondo è il giro di `#schermate`, sei momenti di una stagione che si sfogliano scorrendo (L2). La pagina resta senza JavaScript: è tutto CSS (`presentazione/styles/apertura.css`, `schermate.css`).
 
-- L0. [In una frase](#l0-in-una-frase)
-- L1. [Le regole dure della landing](#l1-le-regole-dure-della-landing)
-- L2. [Vocabolario e costanti](#l2-vocabolario-e-costanti)
-- L3. [I due interruttori, e cambiare a metà](#l3-i-due-interruttori-e-cambiare-a-metà)
-- L4. [Dal primo fotogramma: caricamento, ricarica, deep link](#l4-dal-primo-fotogramma-caricamento-ricarica-deep-link)
-- L5. [Specifica per elemento](#l5-specifica-per-elemento)
-- L6. [Caricamento delle immagini: lo skeleton che ha la forma vera](#l6-caricamento-delle-immagini-lo-skeleton-che-ha-la-forma-vera)
-- L7. [Feedback immediato](#l7-feedback-immediato)
-- L8. [Recupero dagli errori](#l8-recupero-dagli-errori)
-- L9. [Scroll](#l9-scroll)
-- L10. [Il momento firmato: «Il passaggio di consegne»](#l10-il-momento-firmato-il-passaggio-di-consegne)
-- L11. [La matrice ferma](#l11-la-matrice-ferma)
-- L12. [Costi: cosa è caro e cosa usare al suo posto](#l12-costi-cosa-è-caro-e-cosa-usare-al-suo-posto)
-- L13. [Deviazioni da UX.md e ART_DIRECTION.md (Parte L)](#l13-deviazioni-da-uxmd-e-art_directionmd-parte-l)
-- L14. [Le demo della landing](#l14-le-demo-della-landing)
-- L15. [Verifica](#l15-verifica)
-- L16. [Seam per i ruoli successivi](#l16-seam-per-i-ruoli-successivi)
+## L1. Il momento firmato: l'apertura della Home
 
----
+La landing dice che il diario diventa numeri. Il telefono dell'hero lo fa vedere con il gesto con cui l'app lo dice già: **la prima volta che apri la Home in una sessione**, i blocchi salgono uno dopo l'altro (la SALITA), le cifre del tabellone girano da zero (§10.3, la «salita da zero» di `Tabellone.tsx`) e la barra delle vinte cresce da sinistra (`Home.css`). Non c'è niente d'inventato: tempi, curve, ordine e misure sono quelli dell'app.
 
-## L0. In una frase
+**Come è fatto.** Ferma, la schermata è l'`<img>` della Home vera (`home.webp`). Mentre l'apertura scorre ci stanno sopra due strati decorativi (`aria-hidden`):
 
-**Si muove ciò che hai toccato, ciò che lo scroll sta raccontando, e Pallo. Il resto sta fermo, perché il testo c'era già.**
+- **le fasce**: `home-fondo.webp` (la Home senza cifre né barra), una striscia per blocco, che sale come il blocco dell'app;
+- **il tabellone**: le colonne delle cifre (la striscia `[vuoto, 0–9, 0–9]` di `Odometro.ts`, in un `::before`) e le due parti della barra.
 
-È il principio di ART §L11.1 («l'hai toccata, lo scroll racconta, Pallo è vivo») tradotto in sei regole di regia:
+Le misure sono in pixel dell'app (390 × 844) per `--px` (`100cqw / 390`, lo schermo è un contenitore). Le scrive `docs/qa/landing-shots.mjs` in `presentazione/styles/misure.css`, nella stessa passata che scatta `home-fondo.webp`: si rigenerano insieme e restano al pixel. Lo script si ferma se l'hero di `presentazione/index.html` non ha le colonne o le fasce che servono.
 
-1. **La pagina è completa senza movimento.** Lo stato fermo è l'HTML di base (UX §L6.0); il movimento è uno strato sopra, che arriva col modulo e se ne va con un comando. Niente diventa leggibile, cliccabile o raggiungibile «a fine animazione».
-2. **Lo scroll legato gira sul compositor, o non gira.** Parallasse, slide orizzontali e pallone dell'avanzamento usano le timeline native del browser. Dove non ci sono, quell'effetto resta nella sua versione ferma: niente `scroll` in JavaScript che scrive stili (RL1).
-3. **Una volta per sessione.** Numeri, pin, ＋ che si apre, ventaglio, salto di Pallo: la prima volta raccontano, poi stanno fermi. Così, quando una cosa si muove, vuol dire qualcosa (è M1 dell'app, allargato).
-4. **Niente lavoro fuori vista.** Ogni ciclo (scena, palleggio, vita di Pallo, autoplay) si sospende quando la sua sezione esce o la scheda si nasconde.
-5. **Un Pallo alla volta, anche nei passaggi.** Il Pallo dell'hero sparisce nel fotogramma in cui parte quello che vola; quello che parla ha sempre accanto il suo testo.
-6. **Mai aspettare.** Il primo tocco va a segno anche mentre qualcosa si muove: la demo accetta punti durante il pop, la chat salta la pausa, il menu si chiude mentre entra.
+A fine corsa i due strati spariscono e resta l'immagine. **Le cifre ferme sono quelle disegnate dall'app**, non quelle della landing: il browser arrotonda ascendente e discendente del carattere alla taglia a cui lo disegna. A 18.7px (il telefono a .78) le cifre cadrebbero fino a un pixel più in alto di quelle dell'app a 24px, misurato sovrapponendo le due in `difference`. Durante il giro lo scarto non si vede; da ferme sì.
 
----
+**Tablet e desktop** (il telefono è nella prima vista): parte al caricamento, una volta.
 
-## L1. Le regole dure della landing
-
-Valgono tutte le regole dell'app (R1–R6, §1.1): reduced-motion ovunque, solo transform e opacità sui percorsi caldi, niente che blocca l'input, il movimento chiarisce, il vetro non sfora, mai `transition: all`. La landing ne aggiunge sette.
-
-| # | Regola | Come si verifica |
+| t | Che cosa | Tempo |
 |---|---|---|
-| **RL1** | **Lo scroll legato usa solo timeline native**: `animation-timeline: view()` / `scroll()` in CSS, dietro `@supports`. Motion `scroll()` è ammesso solo dove si aggancia da sé a `ScrollTimeline`/`ViewTimeline` (offset preset), **mai** nel suo ripiego JavaScript. Senza supporto, l'effetto resta fermo (§L9.3) | `@supports` nel CSS; `perf.mjs` adattato: 0 fotogrammi lunghi con la CPU a 4× |
-| **RL2** | **Nessuna lettura del layout durante lo scroll.** Le soglie sono `IntersectionObserver`. L'unico listener di `scroll` (passivo) legge `scrollY` e `event.timeStamp` per la velocità (FL7) e la quiete (§L5.2): mai `getBoundingClientRect`, mai `offsetTop`. Le misure (FLIP, larghezze) si prendono **una volta**, nel fotogramma della decisione o al `resize` | revisione; profilo di `perf.mjs` (nessun «Forced reflow» durante lo scroll) |
-| **RL3** | **Gli effetti a soglia si armano solo fuori vista.** All'avvio ogni effetto parte nello stato finale (è l'HTML). Se la sua prima notizia dall'`IntersectionObserver` dice «fuori vista» e non è già stato visto in questa sessione, si **arma** (numeri a zero, pin sollevati, menu chiuso): il cambio avviene dove nessuno guarda. Se dice «in vista», resta finale e si segna come visto | jsdom (§L15.1) |
-| **RL4** | **Un effetto armato che riceve il focus scatta subito allo stato finale.** Chi arriva da tastiera dentro un pannello ancora chiuso (il ＋ di `#registra`, la Storia) lo trova aperto, senza animazione | jsdom: `focusin` → stato finale nello stesso task |
-| **RL5** | **Niente lavoro fuori vista** (UX §L11.2). rAF, timer e animazioni CSS infinite di una sezione girano solo con la sezione in vista e la scheda visibile. Le animazioni CSS si fermano con `animation-play-state: paused` sotto un attributo (`data-fuori`), i cicli JS con l'`IntersectionObserver` della loro sezione | `document.getAnimations().filter(a => a.playState === 'running')` vuoto per la scena con l'hero fuori vista |
-| **RL6** | **Due interruttori, una funzione, un evento.** `movimentoFermo()` e `alCambioDelMovimento(fn)` (§L3) sono la sola fonte: nessun modulo legge la media query da sé. Cambiare a metà porta ogni effetto in corso al suo **stato finale** (`finish()`), mai a quello iniziale | demo `?fermo` (§L14) |
-| **RL7** | **Lo sfalsamento narrativo vive solo in LM4, LM5, LM6 e LM9**: passo `--stagger-narrativo` (50ms), al più `--stagger-max` (8) elementi, al più ~670ms in tutto, una volta per sessione. Fuori da lì vale «sfalsamento: zero» (§2.2.4) | revisione; demo `L4`, `L5` |
+| 0 | lo schermo è la carta dell'app; la TabBar c'è già (nell'app è cornice, non sale) | — |
+| 400ms (`--attesa`) | i blocchi salgono: testa, filtri, il consiglio di Solby, rendimento, Beach Wrapped, la coppia | SALITA (`--dur-rise`, `--ease-rise`), +`--rise-step` per blocco |
+| 400ms | le cifre girano da zero: 63 e +36 e 5 in RACCONTO, l'1 in MOLLA (un salto di uno). Le colonne nuove entrano dal vuoto, quella che c'era scivola di una colonna a destra (il FLIP) | 800 / 320ms |
+| 700 · 850ms | la barra cresce da sinistra: le vinte, poi le perse (6 e 9 passi, come `Home.css`) | RACCONTO |
+| 1650ms (`--fine`) | gli strati spariscono, resta la Home vera | — |
 
-### L1.1 Le eccezioni della landing (tutte e sole)
+**Telefono** (verticale, o in orizzontale sotto i 500px di altezza): l'hero sta sotto la piega, e un'apertura al caricamento la vedrebbe nessuno. Le cifre e la barra sono legate allo scroll: girano mentre il telefono entra in vista (`view-timeline` sul telefono). 63% e +36 partono a metà del suo ingresso; la fila dei tornei vinti e della serie, più in basso, parte più tardi. Tre differenze:
 
-| # | Che cosa | Dove | Limiti | Come è marcata |
-|---|---|---|---|---|
-| **EL1** | **Scroll legato** (l'app lo vieta, §9.2) | LM1 parallasse dell'hero, LM8 slide di Wrapped, LM10 pallone dell'avanzamento | solo `transform`; timeline native (RL1); spento col fermo; mai sul vetro | nel CSS, sempre dentro `@supports (animation-timeline: …)` |
-| **EL2** | **Sfalsamento narrativo** (l'app lo vieta, §2.2.4) | LM4 voci del ＋, LM5 pin, LM6 risposte della chat, LM9 Storia | RL7 | `--rise-i` / `--i` sull'elemento; nessun ritardo scritto a mano |
-| E2 (dell'app) | La linea di Andamento, se la sezione Numeri la mostra (PUÒ, UX §L7.7) | `#numeri` | `stroke-dashoffset`, RACCONTO, una volta per sessione | `data-motion-exception="grafico"` |
+- le cifre scattano **una intera per passo** (`steps(n, jump-none)`): a scroll fermo non resta mai una cifra a metà;
+- le colonne **non scivolano**: fermo a metà, lo scivolamento lascerebbe un buco fra la cifra e il «%»;
+- i blocchi **non salgono**: quando il telefono compare sono già fermi.
 
-Nient'altro anima proprietà diverse da `transform` e `opacity` (più `visibility` a fine uscita). In particolare: il pulsante «Chiudi il set» della demo **non** copia la pulsazione in `box-shadow` dell'app (§L12).
+Dove `animation-timeline` non c'è, il telefono fa l'apertura a tempo al caricamento, fuori vista, e arriva comunque alla Home vera.
 
----
+## L2. Il giro: la stagione che si sfoglia scorrendo
 
-## L2. Vocabolario e costanti
+`#schermate` racconta l'app in sei momenti, ognuno con la sua schermata vera e due righe: Solby che compila il torneo, la Partita live, il torneo nel diario, i compagni, la Storia Instagram, Beach Wrapped. **Lo scroll è il tempo del racconto**: scorrendo si va avanti nella stagione, e tornando su si torna indietro.
 
-### L2.1 Le curve (ART §L11.2), e dove le usa la landing
+**Come è fatto.** `.giro` è alto una schermata più 60svh per ogni momento dopo il primo, e ha la view timeline `--giro`. Dentro, `.giro-scena` (`position: sticky`, alta `100svh`) resta incollata allo schermo per tutta la fase `contain` della timeline. I sei momenti stanno uno sopra l'altro nella stessa cella della griglia, e ognuno ha un sesto della fase `contain`:
 
-| Nome | Token | Sulla landing |
+| Che cosa | Come | Perché |
 |---|---|---|
-| **SVELTO** | `--dur-svelto` 180ms + `--ease-standard` | uscite (guida, nuvoletta, menu, foglio, Storia chiusa dal fermo); scambio di materiale della capsula; sparizione della lente |
-| **ENTRATA** | `--dur-entrata` 260ms + `--ease-standard` | comparse: nuvoletta, schermo nuovo del telefono, pulsante d'installazione, riepilogo della demo, bolle della chat, la guida che compare dove la vista è ferma |
-| **MOLLA** | `--dur-molla` 320ms + `--ease-molla` | ciò che si sposta: la guida dal bordo, il menu della guida, il foglio, il ＋ di `#registra` che si apre, il ventaglio della Storia, lo scambio dell'inchiostro delle tab (M8) |
-| **PRESSIONE** | `--dur-press` 400ms + `--ease-press` | `.press` su pulsanti, voci, pannelli della demo; il pop del punteggio; il ＋ di `#registra` premuto |
-| **SALITA** | `--dur-rise` 600ms + `--ease-rise`, passo `--rise-step` | le voci del ＋ (LM4), le risposte rapide della chat (LM6) |
-| **Lente** | `--dur-rise` + `--ease-press` | la lente della capsula, come `.ui-tabbar-pill` dell'app (ART A5) |
-| **RACCONTO** | `--dur-racconto` 800ms + `--ease-racconto` | i numeri che salgono (`Odometro`), la barra vinte/perse |
-| **RESPIRO** | `--dur-respiro` 1400ms + `--ease-respiro` | i puntini di Pallo che scrive; il respiro dello skeleton delle schermate |
-| **SALTO** (nuova) | `--dur-salto` 510ms + `--ease-salto` | il passaggio di consegne (§L10) |
-| **CADUTA** (nuova) | `--dur-caduta` 400ms + `--ease-caduta`, da `--caduta-y` (−24px) | i pin (LM5) |
-| **lineare** | `linear`, durata = lo scroll | LM1, LM8, LM10: la curva la fa il dito |
+| La schermata | entra sopra la precedente nel primo 14% del suo tratto (`opacity`) e poi resta; tornando su se ne va e ricompare quella di prima | il telefono è uno solo (la cornice la disegna il primo momento, gli altri portano solo la schermata): cambia schermata come quando si sfoglia l'app, senza un fotogramma vuoto in mezzo |
+| Il testo | sale di 16px entrando (14%), sale ancora uscendo (ultimo 14%), prima che arrivi il prossimo | due testi di altezza diversa non possono stare a metà uno sull'altro |
+| La barra | sei segmenti, uno per momento, che si riempiono da sinistra (`scaleX`) lungo il loro tratto | sono le storie di Beach Wrapped: dicono quanti momenti ci sono e dove sei |
 
-**SALTO e CADUTA sono `linear()` campionati**, come `--ease-molla` dell'app, e non molle di una libreria. Le ha fissate ART (stiffness, damping, mass); qui diventano token che CSS e Web Animations usano direttamente:
+Il primo momento c'è già mentre la scena arriva (`--in: 1`), l'ultimo resta mentre se ne va (`--out: 1`). La scena resta ferma per 300svh di scroll (cinque volte 60svh), e ogni momento ne ha un sesto, 50svh: 422px su un telefono alto 844, 400 su un portatile alto 800.
 
-| | Molla | ζ | Superamento | Ferma entro | Durata | Note |
-|---|---|---|---|---|---|---|
-| SALTO | 300 / 26 / 1 | 0.75 | +2.8% | 2‰ della corsa (≈ 1px su 600) | **510ms** | 30 campioni equidistanti, errore d'interpolazione ≤ 0.009 |
-| CADUTA | 500 / 24 / 1, **riflessa** | 0.54 | nessuno: il superamento torna in alto | 1% (¼ px su 24) | **400ms** | contatti con la mappa a 113ms e 280ms, scritti come punti della curva (`1 28.47%`, `1 70.31%`) |
+**Fermo**, con reduced-motion, sotto i 500px di altezza (il telefono in orizzontale) e dove `animation-timeline` non c'è, il giro è l'elenco ordinato che è nel modello: sei coppie una sotto l'altra, il testo accanto al telefono (sopra di lui sul telefono), tutte visibili.
 
-Perché **riflessa**: una molla che supera il segno, applicata a un pin che cade, lo fa **affondare** 3px sotto la sua città e poi riemergere. Riflettere il superamento (`v > 1 ? 2 − v : v`) dà il rimbalzo che ART chiede («un rimbalzo») senza mai passare il punto d'arrivo. `landing.tokens.test.ts` ricalcola i campioni dalla forma chiusa, controlla le durate e che CADUTA non superi mai 1.
+## L3. Le regole
 
-Con Motion (`animate` di `motion`, senza React) le stesse molle si scrivono `{ type: 'spring', stiffness, damping, mass }`: è ammesso, purché l'animazione resti una Web Animation di `transform`/`opacity`. Il contratto sono i **valori**, non la libreria.
-
-### L2.2 Costanti (contratto per `presentazione/js/*`, `⟂ C`)
-
-| Nome | Valore | Dove | Per cosa |
-|---|---|---|---|
-| `LINEA_SEZIONE` | `0.40` | `nav.ts`, `guida.ts` | la sezione corrente contiene la linea al 40% del viewport: `rootMargin: '-40% 0px -59% 0px'` (UX §L4.1) |
-| `LINEA_CAPITOLO` | `0.72` sotto i 900px, `0.50` da 900 | `scene.ts` | il capitolo del telefono (ART A8); fascia dell'1% |
-| `SALTO_PX` / `RITORNO_PX` | `24` / `96` | `guida.ts` | la testa del Pallo dell'hero sale a 24px dalla cima del viewport: salta, ancora tutto in vista; torna sotto i 96px: la guida esce. Isteresi di 72px di scroll. Due sentinelle sopra la testa (§L9.1, §L10.2, ML2) |
-| `BOLLA_MS` | `4000` | `guida.ts` | quanto resta una battuta (= `--dur-bolla`, = `TOAST_MS`) |
-| `QUIETE_MS` | `250` | `guida.ts` | la battuta aspetta che lo scroll sia fermo da tanto (ML4) |
-| `SONNO_MS` | `10000` | `guida.ts` | inattività prima di `dorme` (UX FL7) |
-| `VELOCE_PX_S` / `VELOCE_MS` / `SORPRESO_OGNI_MS` | `3000` / `150` / `8000` | `guida.ts` | scroll veloce → `sorpreso` (UX FL7) |
-| `TOCCHI_GAP_MS`, `PRESSIONE_LUNGA_MS`, `REAZIONE_MS` | `700`, `600`, `1000` | da `Pallo.tsx`, non riscritte | i tocchi di Pallo |
-| `PROGRAMMATICO_MS` | `300` | `nav.ts` | dopo un salto da tab o menu, lo scroll non conta come «veloce» e non sveglia la battuta del passaggio |
-| `AUTOPLAY` | partenza Noi 3 · Loro 2; punti `['noi', 'loro']`; primo a +600ms, poi ogni 1000ms; battuta finale a +1000ms | `live.ts` | §L5.10. Deterministico: il test lo può fissare |
-| `SOGLIA_LIVE` | `0.6` | `live.ts` | l'autoplay parte con la demo visibile almeno al 60% (UX §L6.4) |
-| `SOGLIA_EFFETTO` | `0.5` (numeri, mappa, Storia), `0.6` (il ＋ di `#registra`) | `numeri.ts`, `scene.ts`, `chat.ts` | quando un effetto armato scatta |
-| `SESSIONE` | `sessionStorage['bvd_landing_visti']`, un array JSON di chiavi: `salto`, `registra`, `numeri`, `mappa`, `storia`, `autoplay`, `bolla:{sezione o capitolo}` | `movimento.ts` | RL3; letto e scritto in try/catch: se manca, è sempre la prima visita (UX §L6.0) |
-| `FERMO` | `localStorage['bvd_landing_fermo'] = '1'` | `movimento.ts`, `fermo.js` | §L3 |
-
----
-
-## L3. I due interruttori, e cambiare a metà
-
-### L3.1 Una funzione, un evento, un attributo
-
-```ts
-// presentazione/js/movimento.ts (⟂ C). Il riferimento eseguibile è docs/motion/_landing.js.
-export function movimentoFermo(): boolean          // prefers-reduced-motion OPPURE <html data-movimento="fermo">
-export function alCambioDelMovimento(fn: (fermo: boolean) => void): () => void  // media query + comando
-export function impostaFermo(on: boolean): void    // scrive l'attributo, localStorage (try/catch), aria-pressed sulle tre istanze
-```
-
-- `Pallo.vita.ts`, `Odometro.ts` e il pilota del palleggio (`⟂ E`) **ricevono** il predicato e l'iscrizione: oggi `useVita` legge `matchMedia` da sé (`Pallo.tsx:530`) e non saprebbe del comando. La firma è `avviaVita(svg, { segui, vivo, fermo: () => boolean, alCambio: (fn) => () => void })`, con i valori di serie che leggono la media query (così l'app non cambia).
-- **Prima del primo disegno.** Chi ha scelto «Ferma le animazioni» in una visita passata non deve vedere la scena muoversi per i 200–300ms che servono al modulo. La CSP vieta gli script in linea (`script-src 'self'`), quindi un file minuscolo e bloccante nel `<head>`, `presentazione/js/fermo.js` (script classico, ~200 byte, **non** `defer`), legge `localStorage` in try/catch e scrive `data-movimento="fermo"` sull'`<html>`. Il modulo vero arriva dopo e trova lo stato già giusto. (`⟂ C`, ML15)
-
-### L3.2 Il CSS: un blocco che spegne, con due selettori
-
-I fogli dell'app che la landing importa spengono le animazioni **solo** con la media query (`Pallo.css:369`, `Login.css:163`, `Tabellone.css:39`). Il comando della pagina non la attiva, quindi la landing aggiunge, in `presentazione/styles/movimento.css` (`@layer components`, `⟂ C`), lo stesso spegnimento sotto il suo attributo:
-
-```css
-@layer components {
-  /* «Ferma le animazioni» vale quanto prefers-reduced-motion: gli stessi spegnimenti dei fogli dell'app. */
-  :root[data-movimento="fermo"] :is(.pallo, .pallo *) { animation: none !important; transition: none !important; }
-  :root[data-movimento="fermo"] :is(.pallo-volto, .pallo-sguardo) { transform: none !important; }
-  :root[data-movimento="fermo"] :is(.accesso-scena-svg, .accesso-scena-svg *) { animation: none !important; }
-  :root[data-movimento="fermo"] :is(.ui-odo-strip, .ui-odo-d) { transition: none !important; }
-}
-```
-
-Le variabili (`--motion-scale: 0`, `--press-scale: 1`, `--dur-racconto: 0ms`, `--dur-respiro: 0ms`) le mette già il blocco `:root[data-movimento="fermo"]` dei token (ART §L11.5). I fogli della landing scrivono ogni loro animazione **una volta**, e la spengono così:
-
-```css
-@media (prefers-reduced-motion: reduce) { .x { animation: none; } }
-:root[data-movimento="fermo"] .x { animation: none; }
-```
-
-e gli spostamenti fra stati di riposo (lente, pillole, cifre) con `transition: none` negli stessi due posti (§2.2.3: moltiplicarli per zero lascerebbe la lente sulla tab vecchia).
-
-### L3.3 Cambiare a metà
-
-Il comando si tocca a pagina viva, anche mentre qualcosa si muove (il menu di Pallo si apre ovunque). Le regole:
-
-| Effetto | Fermo **acceso** a metà | Fermo **spento** dopo |
-|---|---|---|
-| Web Animation in corso (salto, pin, ventaglio, menu, foglio, lente) | `finish()`: salta allo stato finale. Mai `cancel()`, che lo riporterebbe all'inizio | le prossime partono normali |
-| Animazioni CSS infinite (scena, Pallo, puntini, «Chiudi il set») | si fermano dal CSS (§L3.2), nel disegno di riposo | ripartono dal CSS, solo in vista (RL5) |
-| Scroll legato (LM1, LM8, LM10) | si stacca dal CSS: piani della scena a riposo, pallone nascosto, Wrapped → riga a mano | si riaggancia |
-| Vita di Pallo, palleggio | spenti: sguardo a riposo (`posa(0, 0)`), palleggio al fotogramma `FERMO` | riaccesi se in vista |
-| Autoplay della demo | se sta girando, il punto in corso arriva subito e l'autoplay **finisce** (consumato) | non riparte mai: uno per visita |
-| Pausa «Pallo scrive» | finisce subito: il messaggio compare | — |
-| Effetti armati non ancora scattati | restano armati; quando scattano, arrivano fermi | scattano animati |
-| **Telefono sticky, Wrapped bloccato, Storia** | cambiano **layout** (capitoli in linea, riga a mano, carte affiancate): vedi sotto | tornano al layout vivo, con lo stesso aggancio |
-
-**Riaggancio dello scroll.** Spegnere il telefono sticky o il blocco di Wrapped cambia l'altezza della pagina sotto chi legge. Prima del cambio si prende la sezione sotto la `LINEA_SEZIONE` e la distanza del suo `h2` dalla cima del viewport; dopo il cambio (nel fotogramma successivo) si fa `scrollBy` istantaneo della differenza. Chi aveva davanti `#wrapped` lo ritrova lì. Lo stesso vale quando un `resize` accende o spegne il telefono sticky (soglie d'altezza, UX §L9.2).
-
-**Il comando stesso** non si anima: `aria-pressed` cambia nel fotogramma del tocco, l'icona passa da pausa a play senza dissolvenza (è la lettura di uno stato), il cerchio si riempie di colpo. Il feedback del tocco è lo strato di pressione, come ogni pulsante.
-
----
-
-## L4. Dal primo fotogramma: caricamento, ricarica, deep link
-
-### L4.1 La sequenza d'avvio (FL1)
-
-| t | Che cosa si vede | Movimento |
-|---|---|---|
-| **0** (HTML, CSS) | La pagina intera: `h1`, frase, CTA, la scena al tramonto e il Pallo dell'hero (inseriti in build, ART A12), i testi di ogni sezione, i telefoni con le cornici misurate, la demo come tabellone fermo, Wrapped come riga a mano | **nessuno.** Le animazioni CSS della scena e di Pallo sono **in pausa** finché il modulo non dice `data-viva` (sotto). `fermo.js` ha già scritto `data-movimento` se serve |
-| font | Geist sostituisce la riserva metrica | nessuno (CLS 0, ART §L3.1) |
-| **modulo pronto** (obiettivo < 300ms dopo il DOMContentLoaded su 4G) | ogni sezione riceve `data-viva` quando il **suo** modulo ha finito l'init senza errori | la scena e Pallo riprendono **dal fotogramma 0** delle loro animazioni (erano in pausa lì: nessun salto). Il palleggio parte dal fotogramma `FERMO` (`⟂ E`: il primo fotogramma di `avviaPalleggio` deve coincidere con `FERMO`, altrimenti i giocatori saltano) |
-| installabile | «Installa sul telefono» nel posto riservato della riga dei comandi | `opacity 0 → 1` in ENTRATA, nessuno spostamento (il posto c'era) |
-| sotto l'hero all'avvio | la guida c'è già nell'angolo, con l'umore della sezione | `opacity 0 → 1` in ENTRATA: è contenuto che arriva. **Niente salto** (§L10): il salto è il passaggio che si vede, non un'entrata in scena |
-
-**Perché la scena aspetta il modulo.** Senza JavaScript, «Ferma le animazioni» non funziona: le nuvole (26s), i gabbiani, la barca, la schiuma e la palma si muoverebbero per sempre senza un modo per fermarli (WCAG 2.2.2). Quindi `#inizio:not([data-viva]) :is(.accesso-scena, .pallo) * { animation-play-state: paused; }`: senza modulo la scena è un quadro. Con il modulo, il comando esiste e la scena si muove (ML14).
-
-**Mai all'apertura** (ART §L11.4): preloader, dissolvenza della pagina, titolo che sale, testo che si scrive, schermata di benvenuto.
-
-### L4.2 Ricarica, deep link, ritorno nella sessione
-
-| Caso | Regola |
+| # | Regola |
 |---|---|
-| Un effetto è **in vista** al primo `IntersectionObserver` (deep link a `#numeri`, ricarica a metà) | resta nello stato finale e si segna visto (RL3) |
-| Un effetto è **fuori vista**, sopra o sotto | si arma; scatta la prima volta che entra, da qualunque lato |
-| L'effetto è già **visto** in questa sessione (`bvd_landing_visti`) | stato finale, mai armato |
-| Deep link sotto l'hero | la guida è già nell'angolo (§L4.1); il salto non c'è stato e **non** viene segnato: tornando all'hero e riscendendo, Pallo salta |
-| `history.scrollRestoration` `auto` (UX §L4.2) | il browser rimette lo scroll **prima** del primo `IntersectionObserver`: le sezioni sotto la posizione ripristinata risultano in vista o sopra, e si comportano come sopra |
-| Stampa (`@media print`) | tutto allo stato finale, scena ferma, guida e barra nascoste |
-
----
-
-## L5. Specifica per elemento
-
-Colonne come §4: **Momento** · **Innesco** · **Proprietà** · **Tempo** · **Fermo** (= reduced-motion **o** «Ferma le animazioni») · **Chiarisce**. Dove la colonna «Fermo» dice «uguale» resta la dissolvenza o lo strato di stato: §11.2.
-
-### L5.1 La barra (≙ TabBar; demo `L2`)
-
-| Momento | Innesco | Proprietà | Tempo | Fermo | Chiarisce |
-|---|---|---|---|---|---|
-| **Lente si sposta** | cambio della sezione corrente (`LINEA_SEZIONE`), anche dopo un salto da tab | `translateX(calc(var(--i) * (100% + var(--space-0-5))))`, un elemento | Lente (`--dur-rise` + `--ease-press`) | salta (`transition: none`) | da quale tab a quale |
-| **Inchiostro della tab** | idem | due livelli sovrapposti per tab (spento, d'inchiostro pieno; acceso, `--lente-label`): si scambiano l'**opacità** | MOLLA (M8: l'arancio non arriva prima della lente bianca) | dissolvenza | stato acceso con forma (lente) e colore |
-| **Lente sparisce** | la sezione corrente non ha tab (hero, `#dati`, finale) | `opacity → 0` | SVELTO | uguale | nessuna tab è «qui» |
-| **Lente ricompare** | torna una sezione con tab | **prima** si mette sulla tab nuova senza transizione (è invisibile), **poi** `opacity → 1` | ENTRATA | uguale | compare dove sei, non scivola da una tab vecchia (ML12) |
-| **Materiale della capsula** | la sezione sotto la linea mediana della capsula cambia `data-fondo` | due strati (`glass-regular`, `glass-dark`) si scambiano l'opacità; chi esce prende `visibility: hidden` a fine corsa | SVELTO | istantaneo | il vetro segue il fondo (ART §L9.2) |
-| **Inchiostro delle tab spente** (inchiostro ↔ bianco) | idem | `color` cambia **di colpo a metà** dello scambio: il JS scrive `data-inchiostro` mezzo SVELTO dopo `data-sopra`; nessuna transizione nomina `color` | discreto, a +90ms | subito | una pittura sola, nessun colore animato (ML13) |
-| Pressione di una tab | `:active` | `scale(0.94)` | PRESSIONE | nessuna scala | |
-| Hover di una tab (`hover: hover`) | `:hover` | strato di stato `opacity 0 → var(--state-hover)` sotto l'etichetta | SVELTO | uguale | |
-| ＋ «Apri il diario» | `:active` / hover | `scale(0.94)` / strato | PRESSIONE / SVELTO | strato | **mai** ruota in × |
-| Tocco su una tab | `click` | salto **istantaneo** + focus all'`h2` a `t0` (§L9.2); la lente si sposta perché cambia la sezione | — | uguale | |
-| Foglio d'installazione aperto | | la barra resta dov'è, sotto il velo e `inert`: nessun movimento suo | — | — | |
-| Da 900px (in alto) | | identico | | | |
-
-**Il budget.** Nei 180ms dello scambio le superfici sfocate della capsula sono due: è il caso peggiore contato da ART §L9.3 (2 + «Ho già un account» = 3, all'uscita dall'hero). Mai tre strati: lo scambio successivo, se arriva a metà, inverte quello in corso (transizione) invece di aggiungerne uno.
-
-### L5.2 Pallo guida (demo `L1`, `L2`)
-
-| Momento | Innesco | Proprietà | Tempo | Fermo | Chiarisce |
-|---|---|---|---|---|---|
-| **Il salto** dall'hero | §L10 | FLIP con SALTO | 510ms | dissolvenze incrociate | la guida **è** il Pallo dell'hero |
-| **Entra dal bordo** (dopo il primo salto, o tornando da una sezione «fuori») | la sezione corrente lo vuole (UX §L3.2) | `translateX(calc(100% + var(--guida-right) + var(--space-2))) → 0` (× `--motion-scale`) e `opacity 0 → 1`; `visibility: visible` e via `inert` a `t0` | transform MOLLA, opacità ENTRATA | sola opacità | da dove arriva: il bordo vicino, il lato del pollice |
-| **Esce** | sezione «fuori», foglio aperto | lo stesso all'indietro; `inert` a `t0`, `visibility: hidden` a fine corsa | SVELTO | sola opacità | |
-| Non esce | ha il focus o il menu è aperto | aspetta `focusout` / la chiusura, poi esce subito | | | il focus non sparisce sotto la mano (UX §L6.10) |
-| **Cambio d'umore** | cambio di sezione o di capitolo | il disegno si sostituisce **nello stesso fotogramma** (nessuna dissolvenza fra umori: Pallo non si «trasforma», cambia faccia) | — | uguale | |
-| **Battuta** | la sezione o il capitolo diventano correnti **per la prima volta nella sessione**, e lo scroll è fermo da `QUIETE_MS` | nuvoletta: `opacity 0 → 1` + `translateY(calc(6px * var(--motion-scale))) → 0`, `transform-origin` in basso a destra (verso Pallo) | ENTRATA; resta `BOLLA_MS`; esce SVELTO | sola opacità | chi parla e di che cosa |
-| Battuta sostituita | arriva quella di un'altra sezione | la vecchia esce (SVELTO) e la nuova entra **nello stesso istante** | | | |
-| Battuta tolta | cambio di sezione, Esc, apertura del menu, uscita della guida | esce SVELTO; la battuta saltata **non** è segnata come detta | | | |
-| **Tocco** | `click` (anche Invio, Spazio) | `reagisci()`: `data-tocco` (il «boing» di `Pallo.css`, 620ms) **e** il menu si apre a `t0`, non a fine boing | 620ms | il disegno allegro per `REAZIONE_MS`, fermo | |
-| Tocchi di fila | entro `TOCCHI_GAP_MS` | ogni tocco riavvia il boing (`data-tocco` 0/1 alternati); il menu resta aperto | | | |
-| **Sorpresa** | 5° tocco di fila o pressione da `PRESSIONE_LUNGA_MS` | `data-sorpresa` (palleggio 1.4s o occhiali 0.7s, `Pallo.css`); il menu esce SVELTO | | il disegno (`esulta` o `cool`) per la durata, fermo | |
-| **Sguardo** | `pointermove` (`segui`) | `.pallo-volto` / `.pallo-sguardo` in `transform`, `Pallo.vita.ts` | transizione .24s del disegno | spento | Pallo ti vede |
-| **Scroll veloce** | > `VELOCE_PX_S` per `VELOCE_MS`, non programmatico | umore `sorpreso` per `REAZIONE_MS` | | uguale, senza animazione | |
-| **Dorme** | `SONNO_MS` senza scroll, tocchi, puntatore, tasti; mai col menu aperto né con una battuta in vista | umore `dorme` (le «z» di `Pallo.css`) | | il disegno `dorme`, fermo | |
-| **Sveglia** | primo gesto | `sorpreso` per `REAZIONE_MS`, poi l'umore della sezione; nessuna battuta | | uguale | |
-
-**Il bersaglio.** È il `<button>` a muoversi, non solo il disegno: durante il salto e l'entrata il tocco va dove l'occhio vede Pallo (R3). Il disegno può sbordare dal pulsante (il palleggio sale di 58px), ma solo il pulsante riceve i tocchi.
-
-**Isteresi della sezione.** Una sezione «fuori» seguita da una «dentro» a meno di `QUIETE_MS` di distanza (uno scroll che attraversa `#live`) non fa uscire e rientrare la guida: le decisioni di presenza si prendono nel fotogramma dopo l'ultimo cambio (un solo `requestAnimationFrame` che raccoglie tutte le notizie degli observer, §L9.1).
-
-### L5.3 Il menu «Dove vuoi andare?» (disclosure; demo `L2`)
-
-| Momento | Innesco | Proprietà | Tempo | Fermo | Chiarisce |
-|---|---|---|---|---|---|
-| **Apertura** | tocco, Invio, Spazio su Pallo | `hidden` tolto e `aria-expanded="true"` a `t0`; `opacity 0 → 1`; `translateY(calc(12px * var(--motion-scale))) scale(calc(1 - .04 * var(--motion-scale))) → none`; `transform-origin` sul **centro di Pallo** (sotto i 600: `calc(100% - var(--guida-size) / 2) calc(100% + var(--guida-gap) + var(--guida-size) / 2)`) | opacità ENTRATA, transform MOLLA | dissolvenza | il menu esce da Pallo |
-| Focus | apertura | alla prima voce, **a `t0`** (§3.5) | | | |
-| Nuvoletta | apertura | esce SVELTO a `t0` | | | |
-| **Chiusura** (Esc, tocco fuori, focus che esce, scelta) | | `inert` e `data-material="frost"` a `t0`; `opacity → 0` + lo stesso scostamento all'indietro; `hidden` a fine uscita (con una rete di `--dur-svelto` + 80ms se `transitionend` non arriva) | SVELTO | dissolvenza | |
-| Scelta di una sezione | `click` su un link | il menu esce **mentre** la pagina salta e il focus va all'`h2` (tutto a `t0`) | SVELTO ∥ istantaneo | | |
-| «Installa l'app» | `click` | menu → `frost` a `t0` ed esce; il foglio entra nello stesso istante (§L5.4) | SVELTO ∥ MOLLA | | |
-| «Ferma le animazioni» | `click` | `aria-pressed` cambia; il menu **resta aperto**; la sua uscita, quando verrà, sarà di sola opacità | — | | |
-| Riapertura durante l'uscita | tocco | la transizione si inverte dal punto in cui è (§3.2) | | | |
-
-Il menu non ha velo (non è modale) ed è `glass-thick`: con la capsula fa **2** superfici.
-
-### L5.4 Il foglio d'installazione (demo `L2`)
-
-| Momento | Innesco | Proprietà | Tempo | Fermo |
-|---|---|---|---|---|
-| **Apertura < 600** | pulsante o voce del menu | velo `--scrim` `opacity 0 → 1` (ENTRATA, **senza** sfocatura); foglio `translateY(calc(100% * var(--motion-scale))) → 0`; `inert` sul resto della pagina e focus al titolo a `t0`; scroll bloccato | MOLLA | dissolvenza |
-| **Apertura ≥ 600** | idem | form sheet: `opacity` + `scale(calc(1 - .04 * var(--motion-scale))) → 1`, origine al centro | ENTRATA | dissolvenza |
-| **Pallo sbircia** | il foglio è arrivato (`t0 + --dur-molla`; da 600, `t0 + --dur-entrata`) | sale da dietro il bordo alto: `translateY(40%) → 0`, `opacity 0 → 1` | MOLLA | c'è da `t0`, fermo |
-| **Chiusura** (Esc, ×, «Ho capito», velo) | | foglio → `frost` a `t0`, `translateY → 100%` (< 600) o `opacity → 0` (≥ 600); velo SVELTO; via `inert` dalla pagina **e poi** focus a chi l'ha aperto, entrambi a `t0` | SVELTO | dissolvenza |
-| Scroll bloccato | apertura / chiusura | `overflow: hidden` sull'`<html>` **più** `scrollbar-gutter: stable` sempre attivo: su desktop la barra di scorrimento non sparisce, e la pagina non si sposta di 15px | — | — |
-
-Nessun trascinamento per chiudere: il foglio non disegna la maniglia (UX §L7.12 elenca le chiusure, e il gesto non c'è).
-
-**Installata** (`appinstalled`): se il foglio è aperto si chiude come con ×. Poi **ogni pulsante d'installazione diventa la sua conseguenza, nello stesso posto**: il pulsante esce in SVELTO e, nello stesso riquadro, entra in ENTRATA lo status «Fatto: Beach Diary è tra le tue app.» (`role="status"`). Niente collassa, niente si sposta (ML9). La guida, se è in scena, passa a `festa` con la battuta di UX §L12.4.
-
-### L5.5 Pallone dell'avanzamento (LM10; demo `L2`)
-
-| Momento | Innesco | Proprietà | Tempo | Fermo |
-|---|---|---|---|---|
-| Scorrere la pagina | scroll | `transform: translateX(calc(var(--corsa) * p)) rotate(calc(var(--giri) * p * 1turn))`, con `p` dato da `animation-timeline: scroll(root block)` | lineare (lo scroll) | **non c'è** (`display: none`) |
-
-- `--corsa` è la larghezza del binario meno il pallone, in unità di contenitore: il binario ha `container-type: inline-size` e i keyframe scrivono `translateX(calc(100cqw - var(--progress-ball)))`.
-- `--giri` = corsa ÷ (π × diametro): **rotola senza strisciare**. CSS non divide una lunghezza per un'altra su Safari, quindi lo scrive `scene.ts` con un `ResizeObserver` sul binario (un numero, una volta per ridimensionamento).
-- Senza `@supports (animation-timeline: scroll())` non c'è: un pallone fermo all'inizio direbbe «sei in cima» a chi è in fondo.
-
-### L5.6 Hero `#inizio` (LM1; demo `L1`)
-
-| Momento | Innesco | Proprietà | Tempo | Fermo | Chiarisce |
-|---|---|---|---|---|---|
-| **Uscita: il tramonto** | scroll, mentre l'hero esce dal viewport (`view-timeline` dell'hero, `animation-range: exit-crossing 0% exit-crossing 100%`) | **tre piani** della scena (§L12): `cielo` (cielo, nuvole, gabbiani) `translateY(0 → 15%)`; `sole` (alone e disco) `translateY(0 → 30%)`; `terra` (mare, riflesso, barca, sabbia, schiuma, palma, rete, giocatori, pallone) **fermo con la pagina**. Le percentuali sono dell'altezza della scena, cioè dello scroll | lineare | fermo, fotogramma `FERMO` | il sole tramonta mentre lasci la spiaggia; la profondità (il sole più lontano del cielo, il cielo più lontano della sabbia) |
-| Palleggio, scena viva | hero in vista, scheda visibile, movimento permesso | il loop di `avviaPalleggio` e le animazioni CSS della scena | — | fermi (`FERMO`) | |
-| Hero fuori vista | `IntersectionObserver` | palleggio sospeso; `data-fuori` → `animation-play-state: paused` sulla scena e sul Pallo dell'hero (RL5) | | | |
-| CTA, «Ho già un account» | `:active` / hover | `.press` e strato di stato (`Button.css`) | PRESSIONE / SVELTO | strato | |
-| «Installa sul telefono» compare | installabile | `opacity` nel posto riservato | ENTRATA | uguale | |
-| `theme-color` | il fondo dell'hero passa la cima del viewport (sentinella) | il `<meta>` passa a `#F6F6F4`, e viceversa (UX LC13) | istantaneo | uguale | la barra del browser continua il fondo |
-| **Il salto** | §L10 | | | | |
-| Ritorno nell'hero | la testa del Pallo dell'hero torna sotto `RITORNO_PX` | la guida esce (SVELTO); il Pallo dell'hero `opacity 0 → 1` | ENTRATA | uguale | **niente** salto al contrario (UX §L6.1) |
-
-**Perché i fattori sono quelli** (ART chiedeva cielo × 0.5, sole × 0.6, mare × 0.3, ML1). La fascia del mare, fra l'orizzonte e la riva, è alta **46px** nel disegno. Se il mare scorresse a 0.3 rispetto alla sabbia, la sabbia (disegnata sopra) lo coprirebbe tutto dopo 46 ÷ 0.3 ≈ **153px** di scroll, con l'orizzonte ancora a metà schermo: il mare sparirebbe a vista. Il mare quindi sta con la terra. Il sole deve tramontare **dietro il mare** mentre l'orizzonte è ancora visibile (a 390×844 l'orizzonte esce dall'alto dopo ~290px): a × 0.30 il disco (raggio 42) è sotto l'orizzonte dopo 140px, e a 290px l'alone si è abbassato di 87px, con il bagliore ancora sopra l'orizzonte. Il cielo a × 0.15 si abbassa di ~45px: la fascia arancio vicino all'orizzonte scende e il cielo sopra il mare si fa più scuro. Profondità coerente: sul viewport il sole va a 0.70, il cielo a 0.85, la terra a 1.
-
-### L5.7 Il diario in tasca `#diario` (LM3; demo `L3`)
-
-| Momento | Innesco | Proprietà | Tempo | Fermo | Chiarisce |
-|---|---|---|---|---|---|
-| **Schermo nuovo** | il testo di un capitolo contiene `LINEA_CAPITOLO` (fascia dell'1%) | le quattro schermate sono impilate; quella del capitolo passa in cima e fa `opacity 0 → 1`; quella sotto resta piena finché la nuova non lo è, poi scende a 0 senza transizione | ENTRATA | (sticky spento: capitoli in linea) | quale schermata va con quale testo |
-| Andata e ritorno veloci | quattro capitoli in 300ms | ogni schermata nuova parte dall'opacità in cui è: nessun lampo di bianco, nessuna coda di dissolvenze | | | |
-| Fascia sticky | scroll | nessun movimento suo: è `position: sticky` (il compositor) | | | |
-| Battuta del capitolo | §L5.2 | | | | |
-| Immagine in arrivo | §L6 | | | | |
-
-La cornice non si muove, non s'inclina, non entra: è un oggetto fermo, ed è proprio quello che lo fa leggere come il telefono in mano (ART §L2.4, mossa 4).
-
-### L5.8 Cosa registriamo? `#registra` (LM4, LM6; demo `L4`)
-
-| Momento | Innesco | Proprietà | Tempo | Fermo | Chiarisce |
-|---|---|---|---|---|---|
-| **Il ＋ si apre** (una volta per sessione) | il ＋ decorativo in testa al menu è visibile almeno al 60%, l'effetto è armato (RL3) | a `t0`: il ＋ fa la pressione (`scale(.94) → 1`, PRESSIONE) e il pannello del menu `opacity 0 → 1` + `translateY(calc(12px * var(--motion-scale))) scale(calc(1 - .04 * var(--motion-scale))) → none`, origine sul centro del ＋; le quattro voci con la SALITA (`--rise-i` 0–3) | pannello: opacità ENTRATA, transform MOLLA; voci 600 + 3 × 50ms | il menu è già aperto | è il ＋ dell'app: lo premi, si apre il menu |
-| Focus dentro mentre è armato | `focusin` | stato finale subito (RL4) | | | |
-| **Scelta di una voce** (tablist) | `click`, frecce, Home, Fine | il pannello cambia **nello stesso fotogramma**, senza dissolvenza; la voce scelta prende il filo d'inchiostro da 2px di colpo (è uno stato) | — | uguale | il contenuto non balla (§0, principio 5) |
-| Pressione di una voce | `:active` | `.press` + strato | PRESSIONE | strato | |
-| **Chat: la tua risposta** | tocco su una risposta rapida | la tua bolla compare **subito** a destra: `opacity` + `translateY(calc(8px * var(--motion-scale)))`, nessuna scala (§5 F11); le risposte vecchie escono dal DOM a `t0`; focus al gruppo delle risposte (`tabindex="-1"`, `aria-busy="true"`) a `t0` | ENTRATA | sola opacità | l'eco del tocco |
-| **Pallo scrive** | subito dopo | avatar `pensa`; i tre puntini (`crea-puntino` dell'app, RESPIRO, sfalsati di metà MOLLA) per `battitura(n)` ms (`copione.ts`) | `min(700, 250 + 6·n)` | pausa 0, niente puntini | c'è qualcuno dall'altra parte |
-| Salta la pausa | `pointerdown` o `keydown` dentro la chat | il messaggio compare subito; il tocco o il tasto vanno a segno (§5 F11, R3) | | | |
-| **Domanda nuova** | fine della pausa | bolla di Pallo ENTRATA; le risposte nuove con la SALITA (`--rise-i` 0–2); `aria-busy` tolto | ENTRATA; SALITA | sole dissolvenze | |
-| Scorrimento del registro | messaggio nuovo | il registro ha **altezza fissa** e scorre dentro (ML10); si porta in fondo `smooth` **solo se** chi legge era entro 80px dal fondo | smooth | `auto` | |
-| **Fine** | «Conferma» | card del riepilogo ENTRATA, avatar `contento`, focus al messaggio finale a `t0` | | | |
-| «Ricomincia» | `click` | il registro si sostituisce di colpo con `RIPARTENZA` già scritta (niente pausa: la conversazione riparte, non arriva); focus alla prima risposta | — | uguale | |
-
-L'altezza fissa del registro non è un dettaglio di layout: una chat che cresce spinge giù `#live` e tutto il resto **mentre l'utente sta toccando le risposte**, e ogni messaggio sarebbe uno spostamento (CLS, e la risposta dopo che scappa da sotto il dito).
-
-### L5.9 Partita live `#live` (demo `L4`)
-
-| Momento | Innesco | Proprietà | Tempo | Fermo | Chiarisce |
-|---|---|---|---|---|---|
-| **Punto** (+1 o −1) | `click`, ↑ ↓, Maiusc+↑ ↓ (focus dentro la demo) | il numero cambia a `t0` e fa il **pop** dell'app: `scale(1 → 1.16 → 1)` su `.live-num[data-pop]`, `a`/`b` alternati così ogni punto lo riavvia (`PartitaLive.css:115-121`, ridichiarato nel foglio della landing con gli stessi valori) | PRESSIONE | cambio istantaneo | quale numero è cambiato |
-| Pressione del pannello | `:active` | `.press` + strato | PRESSIONE | strato | |
-| **Battuta** | `battuta()` cambia testo | la nuvoletta si rimonta (chiave = testo) e fa `live-bolla`: `opacity` + `translateY(calc(4px * var(--motion-scale))) scale(calc(1 - .08 * var(--motion-scale)))` | PRESSIONE | sola opacità | Pallo commenta **questo** punto |
-| Umore di Pallo | `battuta().umore` | il disegno cambia nello stesso fotogramma | — | uguale | |
-| **−1 a zero** | `click` | niente (`aria-disabled`): nessun movimento, nessuna nuvoletta | — | — | |
-| **+1 a set finito** | `click` | nessun punto; la nuvoletta del set **rientra** (rimontata: stessa animazione) | PRESSIONE | sola opacità | «no, prima chiudi il set», senza scossone (§8.1) |
-| **«Chiudi il set» compare** | set finito | nel suo posto riservato della riga delle azioni: `opacity 0 → 1` + `scale(calc(1 - .04 * var(--motion-scale))) → 1`; poi l'**anello**: un `::after` capsula col filo `--accent-edge-tint` che fa `scale(1 → 1.12)` e `opacity .6 → 0`, **3 volte** | ENTRATA; anello 1600ms × 3, `--ease-respiro` | compare; nessun anello | il passo successivo, una volta, poi basta (ML8) |
-| **«Chiudi il set»** | `click` | titolo «Set 2 di 3» e punteggi a zero **di colpo** (non è un punto: niente pop); la pillola «Set 1 21–18» compare nella riga dei set (altezza riservata) con `opacity`; focus al titolo del set a `t0` | ENTRATA (pillola) | uguale | |
-| **Partita finita** | ultimo set chiuso | il riepilogo copre i pannelli **nello stesso riquadro** (`live-entra` dell'app: `opacity` + `translateY(calc(var(--rise-y) * var(--motion-scale)))` + `scale(calc(1 - .02 * var(--motion-scale)))`); focus al suo titolo a `t0`, **poi** `inert` sui pannelli | SALITA | sola opacità | |
-| «Ricomincia» | `click` | il riepilogo esce (SVELTO) e lo stato riparte nello stesso fotogramma; il focus va al «Ricomincia» della riga delle azioni (sempre presente), a `t0` | SVELTO | uguale | |
-| Vibrazione | tocco dell'utente | `navigator.vibrate(12)`, mai nell'autoplay, mai col fermo (è movimento del telefono) | | spenta | |
-
-**L'autoplay** (UX FL3), deterministico:
-
-| t (da quando la demo è visibile al 60% la prima volta, movimento permesso, focus fuori) | Che cosa |
-|---|---|
-| 0 | punteggio di partenza già scritto (Noi 3 · Loro 2), Pallo `saluta`: «Si comincia! Tocca chi fa punto.» |
-| +600 | **il pannello «Noi» mostra il suo stato premuto per 120ms** (strato, niente scala) e poi segna: 4–2, pop, battuta |
-| +1600 | lo stesso su «Loro»: 4–3, somma 7 → «Cambio campo!» |
-| +2600 | nuvoletta «Tocca tu: chi fa punto?» e l'autoplay è finito |
-
-- Il pannello che «si preme da solo» è la causa visibile del punto: un numero che cambia senza nessuno che tocca sembra un errore.
-- Lo status (`role="status"`) **non** viene scritto (UX §L7.6); la vibrazione non c'è.
-- `pointerdown`, `keydown` o `focusin` nella demo prima della fine: i timer si cancellano, il punteggio resta quello che è (niente ritorno indietro), l'autoplay è consumato.
-- La demo scende sotto il 60% durante l'autoplay: si ferma e si consuma. Uno per visita (`autoplay` in `bvd_landing_visti`).
-- Con il fermo: non parte.
-
-### L5.10 I numeri `#numeri` (LM7; demo `L5`)
-
-| Momento | Innesco | Proprietà | Tempo | Fermo |
-|---|---|---|---|---|
-| **Salita** (una volta per sessione) | la sezione è visibile al 50% ed è armata | `Odometro`: strisce di cifre in `translateY` da 0 al valore (il «66%» e le celle insieme: stessa causa, **nessuno sfalsamento**); il «%» e il «/» fermi | RACCONTO | valori finali |
-| Barra vinte/perse | idem | la barra, larga quanto il binario, `translateX(calc((v - 100) * 1%)) → translateX(calc((V - 100) * 1%))` dentro il binario `overflow: hidden` (§4.4: **non** `scaleX`, schiaccerebbe le estremità) | RACCONTO | ferma |
-| Andamento (PUÒ) | idem | E2 | RACCONTO | ferma |
-| Lettura | sempre | il valore finale è già nel testo nascosto a `t0` (come `Tabellone`) | | |
-
-### L5.11 La mappa `#mappa` (LM5; demo `L5`)
-
-| Momento | Innesco | Proprietà | Tempo | Fermo | Chiarisce |
-|---|---|---|---|---|---|
-| **Pin che cadono** (una volta per sessione) | il riquadro della mappa visibile al 50%, armato | ogni pin: `translateY(var(--caduta-y)) → 0` con CADUTA, e `opacity 0 → 1` nel primo quarto (100ms, lineare); `--i` da nord a sud, passo `--stagger-narrativo`; al più 8: dal nono in poi compaiono in opacità insieme all'ottavo | 400ms + 7 × 50 = 750ms in tutto | già posati | ogni città è un luogo dove sei stato, una dopo l'altra lungo la costa |
-| Etichette, legenda, elenco delle città | | **nessuno**: sono testo | — | — | |
-| Pin e doppio bordo | | il pin è **un** elemento: alone, filo e riempimento cadono insieme | | | |
-
-I pin DOVREBBERO essere elementi HTML posati sopra l'SVG della costa (`left`/`top` in percentuale, una volta): così cadono sul compositor. Dentro l'SVG, un `transform` animato su un `<g>` ridipinge tutta la mappa a ogni fotogramma (§L12, ML11).
-
-### L5.12 Beach Wrapped e la Storia `#wrapped` (LM8, LM9; demo `L3`)
-
-| Momento | Innesco | Proprietà | Tempo | Fermo | Chiarisce |
-|---|---|---|---|---|---|
-| **Slide che scorrono** | scroll dentro la sezione bloccata | la fila: `translateX(0) → translateX(calc(-1 * var(--wrapped-corsa)))` con `animation-timeline: view()` della sezione e `animation-range: contain 0% contain 100%` | lineare | riga a mano | lo scroll verticale diventa lo sfoglio delle slide |
-| La pista | CSS sotto `[data-viva]` | il titolo e la frase della sezione scorrono via sopra (restano il bersaglio del focus nei salti); sotto c'è la **pista**, alta `100svh` più la corsa, che porta la `view-timeline`; dentro, il blocco `position: sticky; top: 0; height: 100svh; container-type: inline-size`. La corsa: `--wrapped-corsa: calc(var(--n-slide) * (var(--slide-w) + var(--slide-gap)) - var(--slide-gap) - 100cqw)` (il blocco è largo quanto il contenuto, cioè viewport meno i gutter). 1px di scroll = 1px di slide, nessun calcolo per fotogramma | | | |
-| Capsula durante il blocco | | nessun cambio: le slide stanno sopra la capsula (ART A2) | | | |
-| **Storia a ventaglio** (una volta per sessione) | la figura visibile al 50%, armata | le tre carte, impilate al centro, si aprono: sinistra `translateX(-62%) rotate(calc(-1 * var(--story-tilt)))`, destra `translateX(62%) rotate(var(--story-tilt))`, la centrale ferma e davanti; sinistra poi destra (`--i` 0, 1) | MOLLA, passo 50ms | affiancate (layout di base) | da un torneo, tre Storie |
-
-- **Il blocco è nativo o non c'è.** Senza `@supports (animation-timeline: view()) and (animation-range: contain 0%)`, oppure sotto i 600px d'altezza (UX §L9.2), oppure col fermo: la riga a mano (`overflow-x: auto`, `scroll-snap-type: x mandatory`), che sul telefono è anche il gesto naturale.
-- Il blocco non intrappola: Pagina giù e spazio scorrono come sempre; nessuna slide ha controlli (UX §L7.10).
-- La Storia ha **due layout**: impilata (viva, poi aperta in `transform`) e affiancata (base e fermo). Passare dall'uno all'altro col comando riaggancia lo scroll (§L3.3).
-- **Per `⟂ A` / `⟂ C`**: a 390×844 senza le barre di Safari, `--slide-h` dà 688px e quindi slide larghe **387px**, più dei 358 del contenuto. Bloccata, la fila mostra una slide alla volta e la prima tocca il bordo destro. Va deciso se limitare `--slide-w` alla larghezza del contenuto (e la `--slide-h` di conseguenza). Il movimento non cambia: cambia solo la corsa.
-
-### L5.13 Il diario resta tuo `#dati`, finale, footer
-
-| Dove | Movimento |
-|---|---|
-| `#dati` | **nessuno**, a parte la guida (`sbircia`). Le righe non salgono quando entrano (ART §L11.4) |
-| Finale | Pallo grande `cuori`, con la sua vita (solo in vista). Hover (`hover: hover`) o `:focus-visible` sul CTA → `festa`, **nello stesso fotogramma**; uscita dall'hover o blur → `cuori`. Al tocco no: il CTA porta via subito (UX §L6.9). Il sole è fermo: è un disegno, non un effetto |
-| Footer | nessuno. «Torna su» salta all'`#inizio` (istantaneo) e mette il focus sull'`h1` (`tabindex="-1"`, `⟂ C`); la guida esce e il Pallo dell'hero ricompare (§L5.6) |
-
----
-
-## L6. Caricamento delle immagini: lo skeleton che ha la forma vera
-
-Sulla landing non c'è rete da aspettare, tranne le immagini (le quattro schermate del telefono, i tre PNG della Storia). Niente spinner, mai: lo spinner dell'app esiste solo nel visore foto e sull'avatar (§6.1).
-
-| Da quando la cornice è in vista con l'immagine non ancora `complete` | Che cosa si vede (demo `L3`) |
-|---|---|
-| **0ms** | la cornice d'inchiostro alle misure giuste (`width`/`height`, `aspect-ratio`), lo schermo `--fill` |
-| **150ms** (`--delay-skeleton`) | lo strato dello skeleton compare in ENTRATA: fondo `--bg` (la pagina dell'app) e le **forme della schermata vera** in `--fill`, come gli skeleton dell'app. Per la Home il titolo-frase (barra 70% × 4%), la card delle partite vinte, la coppia di card, la capsula della TabBar in fondo; per la Mappa il riquadro della mappa e due righe; per il Diario l'intestazione del mese e due voci con la copertina; per Compagni due card persona. Posizionate in percentuale dello schermo, `aria-hidden` |
-| **600ms** (`--delay-respiro`) | il respiro `opacity 1 ↔ .55` (RESPIRO, `alternate infinite`) su un elemento **annidato** dentro quello che compare (due `animation` sullo stesso nodo si annullano, §6.2) |
-| **immagine arrivata** | l'immagine `opacity 0 → 1` sopra lo skeleton in SVELTO, poi lo skeleton si toglie. Arrivata prima dei 150ms: nessuna dissolvenza (non c'era niente da sostituire) |
-| **errore** (offline, 404) | il respiro si ferma (`animation: none; opacity: .75`), le forme restano, l'`<img>` prende `visibility: hidden` (niente icona d'immagine rotta, niente `alt` disegnato sopra la cornice): «una cornice vuota non deve sembrare rotta» (UX §L6.0). L'`alt` resta nell'albero d'accessibilità |
-
-- Lo skeleton nasce col modulo (`data-attesa` sulla cornice); senza JavaScript la cornice resta `--fill` e l'immagine arriva quando arriva.
-- Lo skeleton è **una** forma per schermata, scritta una volta nel CSS: costa zero quando l'immagine è in cache, perché i 150ms non passano mai.
-- Fermo: forme ferme a `.75`, nessun respiro; le dissolvenze restano.
-- **Il markup di Pallo in un chunk a parte** (UX §L13, se `⟂ C` lo separa): se l'umore che serve non è ancora arrivato, la guida tiene il disegno che ha e cambia faccia quando arriva. Nessun segnaposto: Pallo non è un contenuto da aspettare.
-
----
-
-## L7. Feedback immediato
-
-Sulla landing tutto è **locale**: ogni risposta è nel fotogramma del tocco, e niente è «ottimistico» perché niente può essere smentito dalla rete.
-
-| Tocco | Nello stesso fotogramma |
-|---|---|
-| Tab, voce del menu, «Torna su» | scroll istantaneo, focus all'`h2`, `replaceState` |
-| Pallo | boing, `aria-expanded`, menu visibile, focus alla prima voce |
-| +1 / −1 | numero nuovo, pop, battuta, status (UX §L7.6) |
-| Risposta della chat | la tua bolla, focus al gruppo delle risposte |
-| Voce del ＋ | il pannello nuovo |
-| «Ferma le animazioni» | `data-movimento`, `aria-pressed` sulle tre istanze, ogni effetto al suo stato finale (§L3.3) |
-| «Installa» | `prompt()` nativo (o il foglio). Nessuna etichetta occupata: l'interfaccia del browser è la risposta |
-| CTA verso `/` | lo strato premuto; la navigazione parte nello stesso task (nessuna attesa artificiale) |
-
-**Niente aspetta un'animazione**: le voci del menu sono cliccabili mentre entrano, i pannelli della demo accettano tocchi durante il pop (ogni tocco lo riavvia), le risposte della chat mentre salgono, la guida mentre vola.
-
----
-
-## L8. Recupero dagli errori
-
-| Errore | Che cosa si vede | Movimento |
-|---|---|---|
-| Il modulo non parte (CSP, browser vecchio, eccezione) | la versione di base (UX §L6.0) | nessuno: **chi arma, arma per ultimo**. Uno stato di partenza (numeri a zero, pin sollevati, ＋ chiuso) si scrive solo **dopo** che il suo observer è in piedi. Se l'init lancia prima, l'elemento resta nello stato finale: mai una sezione lasciata a opacità 0 |
-| `IntersectionObserver` assente | stati finali | gli effetti a soglia non si armano mai |
-| `Element.animate` assente | stati finali | salti al valore finale |
-| `linear()` assente | SALTO e CADUTA con `--ease-standard` (token) | |
-| Timeline di scroll assenti | parallasse ferma, nessun pallone, Wrapped a mano (RL1) | |
-| Immagine non arrivata | §L6, errore | |
-| `prompt()` rifiutato o in errore | il foglio, variante `altro` (UX FL5), che entra subito | §L5.4 |
-| `localStorage` / `sessionStorage` che lanciano | in memoria: ogni visita è la prima, il fermo vale fino alla ricarica | |
-| Tocco non ammesso (−1 a zero, +1 a set finito) | §L5.9 | la nuvoletta che rientra; mai uno scossone |
-
----
-
-## L9. Scroll
-
-### L9.1 Soglie (tutte `IntersectionObserver`)
-
-| Soglia | Osserva | `rootMargin` / `threshold` | Decide |
-|---|---|---|---|
-| Sezione corrente | ogni `<section>` | `-40% 0px -59% 0px` | lente, materiale (con la sua linea), guida dentro/fuori, umore, battuta |
-| Materiale della capsula | ogni `<section>` | una fascia dell'1% sulla linea mediana della capsula (sotto i 900: `100% − --tabbar-bottom − --tabbar-h/2`; da 900: `--barra-inset + --tabbar-h/2` dall'alto) | `data-sopra` |
-| Capitolo | i quattro testi di `#diario` | fascia dell'1% su `LINEA_CAPITOLO` | lo schermo del telefono |
-| Testa di Pallo | due sentinelle da 1px, 24px e 96px sopra la testa del Pallo dell'hero | **una** radice = tutto ciò che sta sopra il viewport: `rootMargin: '99999px 0px -100% 0px'`. «Interseca» vuol dire «ha passato il bordo alto», e conta anche un salto istantaneo che le porta molto più su (con una radice al 20% in alto, una sentinella che va da sotto la fascia a sopra lo schermo senza toccarla non manda notizie) | salto e ritorno (§L10) |
-| `theme-color` | una sentinella in fondo all'hero | `0px 0px -100% 0px` più `boundingClientRect` della notizia | il `<meta>` |
-| Effetti armati | numeri, pin, ＋, Storia, demo | `threshold: [0, 0.5, 0.6]` | §L5 |
-
-**Un solo arbitro.** Le notizie degli observer arrivano in callback separate. `guida.ts` e `nav.ts` le raccolgono e decidono in **un** `requestAnimationFrame`, con lo stato di tutte le soglie. Così un salto da `#inizio` a `#wrapped` (dove la guida è «fuori») non fa partire il salto di Pallo, e uno scroll che attraversa `#live` in 100ms non fa uscire e rientrare la guida.
-
-### L9.2 Salti programmatici
-
-- **Sempre istantanei** (`scrollIntoView({ block: 'start', behavior: 'auto' })`), anche oltre `SALTO_SCROLL`. UX §L4.2 permetteva il salto composto: qui non si usa (ML7). Ogni salto lungo della landing attraversa sezioni a soglia o bloccate; il focus all'`h2` dice già dove sei; e uno smooth che passa per l'hero farebbe partire il salto di Pallo a metà corsa.
-- Focus all'`h2` **dopo** lo scroll, nello stesso task, con `preventScroll: true`.
-- `PROGRAMMATICO_MS`: per 300ms dopo un salto, lo scroll non conta come veloce (UX §L4.3) e non conta per `QUIETE_MS`: la battuta della sezione d'arrivo esce appena il salto è fatto.
-- Un salto istantaneo non disegna le sezioni di mezzo: i loro observer non scattano, e i loro effetti restano armati per quando ci arriverai davvero.
-
-### L9.3 Scroll legato: come, e dove no
-
-| Effetto | Timeline | Range | Gate (`@supports`) | Senza supporto |
-|---|---|---|---|---|
-| LM1 tramonto | `view-timeline: --inizio block` su `#inizio`, `animation-timeline: --inizio` sui piani | `exit-crossing 0%` → `exit-crossing 100%` (dall'hero in cima al viewport all'hero sopra il viewport, qualunque sia la sua altezza) | `(animation-timeline: view()) and (animation-range: exit-crossing 0%)` | scena ferma (si muovono solo le animazioni del disegno) |
-| LM8 slide | `view-timeline: --wrapped block` sulla **pista** di `#wrapped` (§L5.12) | `contain 0%` → `contain 100%` (il tratto in cui la pista copre il viewport, cioè il blocco) | `(animation-timeline: view()) and (animation-range: contain 0%)` | riga a mano |
-| LM10 pallone | `scroll(root block)` | tutta la pagina | `(animation-timeline: scroll())` | non c'è |
-
-- **Perché non Motion `scroll()`**: per un `target`, Motion si aggancia a `ViewTimeline` solo con gli offset preset (`offset-to-range.mjs`), e `exit-crossing` non ci sta; altrimenti ripiega su `scrollInfo`, che misura in JavaScript a ogni scroll (RL1). Il CSS dice la stessa cosa in tre righe, e si spegne col fermo senza codice.
-- Supporto, ottobre 2026: Chrome e Edge (dalla 115), Safari 26. Firefox e Safari fino a 18: la versione ferma di quegli effetti, e il resto della pagina uguale.
-- `scroll-behavior: smooth` globale, scroll-snap verticale, scroll dirottato: mai (ART §L11.4).
-- `content-visibility: auto` sulle sezioni: **no**. Con `contain-intrinsic-size` stimato, la pagina cambia altezza mentre la si scorre e i deep link atterrano nel posto sbagliato; sulla landing costa più di quanto risparmi.
-
----
-
-## L10. Il momento firmato: «Il passaggio di consegne»
-
-### L10.1 Che cos'è
-
-Pallo ti saluta dalla spiaggia, in piedi sopra il titolo. **Appena cominci a scorrere, salta giù dalla scena e ti atterra accanto, sopra il ＋**, strizza l'occhio e ti dice: «Quando vuoi, il ＋ arancio apre il diario.» Da lì ti accompagna.
-
-Non è decorazione. Dice tre cose che nessun altro movimento della pagina può dire:
-- **identità**: la guida nell'angolo **è** il Pallo dell'hero, non un'icona nuova. Una dissolvenza fra due Pallo direbbe il contrario;
-- **causa**: è partito perché tu hai cominciato a scorrere, e viene con te;
-- **gerarchia**: atterra sopra il ＋, l'unica azione che conta in ogni punto della pagina, e la nomina.
-
-È il gemello del «Punto segnato» dell'app (§10): là il tabellone scatta perché hai segnato una partita, qui il personaggio si sposta perché hai fatto il primo passo. Demo `L1` (`docs/motion/L1-salto.html`).
-
-### L10.2 L'innesco
-
-**Quando la testa del Pallo dell'hero arriva a 24px dalla cima del viewport** (`SALTO_PX`), nel fotogramma dell'arbitro (§L9.1), se:
-- la sezione sotto `LINEA_SEZIONE` vuole la guida «dentro», oppure è ancora l'hero (che a quel punto non ha più il suo Pallo);
-- il salto non è già avvenuto in questa sessione (`salto` in `bvd_landing_visti`);
-- non è un salto programmatico;
-- c'è stato almeno uno scroll dell'utente. Su uno schermo basso la testa può stare sopra i 24px già all'avvio: lì Pallo aspetta il primo scroll, non salta da solo.
-
-Stimato sulla composizione di ART §L5.4 a 390×844: i piedi stanno a ~320px dalla cima e la testa a ~154; Pallo salta dopo ~130px di scroll, **interamente visibile**. Una linea in percentuale dell'altezza non va: il punto in cui la testa esce dipende da quanto è alto il telefono, e nella demo `L1` una linea al 20% faceva partire Pallo con la testa già tagliata. UX diceva «quando il fondo dell'hero passa il 30%»: a quel punto il Pallo dell'hero è già ~270px **sopra** lo schermo, e il salto partirebbe da fuori (ML2).
-
-### L10.3 La coreografia
-
-`t0` = il fotogramma della decisione. Misure prese **una volta**, a `t0`: il riquadro del Pallo dell'hero (`first`) e quello della guida a riposo (`last`).
-
-| t | Che cosa | Proprietà | Tempo |
-|---|---|---|---|
-| **`t0`** | il Pallo dell'hero va a `opacity: 0` **di colpo** (è lui che parte, non svanisce); la sua vita si spegne | `opacity` | istantaneo |
-| `t0` | la guida (il `<button>`) è visibile e interattiva, con l'umore `saluta` dell'hero; la sua posizione di partenza è quella dell'hero: `translate(Δx, Δy) scale(s₀)`, con `s₀ = first.width / last.width`, `transform-origin: 0 0` | `transform` | — |
-| `t0 → t0 + 510` | **la corsa**: il pulsante va a `none` | `transform` | SALTO (`--ease-salto`, `--dur-salto`) |
-| `t0 → t0 + 215` | **l'arco**: la figura dentro il pulsante sale e ricade: `translateY(0 → −h → 0)`, `h = min(48px, 12% di |Δy|)`; picco al 20% della corsa con `ease-out`, ricaduta al 42% con `ease-in` | `transform` (elemento annidato: due transform sullo stesso nodo si coprono) | keyframe, 215ms |
-| `t0 + 215` | **atterra**: SALTO tocca il segno per la prima volta al 42% della durata. `data-tocco` (il boing di `Pallo.css`, 620ms) e l'umore passa a `occhiolino` | | |
-| `t0 + 215 → 510` | il superamento di SALTO (+2.8%) e il ritorno: lo schiaccio del boing ci cade sopra | | |
-| `t0 + 510` e scroll fermo da `QUIETE_MS` | la nuvoletta «Quando vuoi, il ＋ arancio apre il diario.» (§L5.2), segnata come la battuta `bolla:diario-1` | ENTRATA | |
-
-Tutto è `transform` e `opacity` su **un** livello composto (il pulsante) più la figura annidata. Il ritardo della nuvoletta è **causale** (§2.2.4): non parla prima di essere arrivato.
-
-### L10.4 Interruzioni
-
-| Mentre vola… | Allora |
-|---|---|
-| si torna su, con la testa sotto `RITORNO_PX` | la corsa si ferma dov'è (`commitStyles` + `cancel`), e la guida esce **da lì** (SVELTO, verso il bordo); il Pallo dell'hero torna in ENTRATA. Il salto è consumato: la prossima volta la guida entrerà dal bordo |
-| si tocca Pallo | è il pulsante: il menu si apre a `t0`, la corsa continua. Il menu è ancorato alla posizione di riposo, dove Pallo sta arrivando |
-| si accende il fermo | `finish()`: Pallo è nell'angolo |
-| `resize` | `finish()` (le misure non valgono più) |
-| la sezione corrente diventa «fuori» (scroll molto veloce fino a `#registra`) | la corsa finisce e la guida esce subito dopo, da ferma: niente uscita a metà volo verso un posto che cambia |
-
-### L10.5 Fermo
-
-Il Pallo dell'hero `opacity → 0` in SVELTO; la guida `opacity 0 → 1` in ENTRATA, già nell'angolo, già `occhiolino`. La battuta arriva come sempre (sola opacità). Stesso significato («è lui, ora è qui»), nessuno spostamento.
-
-### L10.6 Nitidezza, e perché non altro
-
-- **La scala va da `s₀ > 1` a 1**: la figura parte grande (128 o 240) e diventa 64. Chrome rasterizza un livello animato alla scala massima dell'animazione; WebKit può non farlo, e i primi fotogrammi sarebbero un 64 ingrandito. Se in QA su iPhone si vede, la ricetta è: la figura della guida è disegnata **alla misura dell'hero** e scalata in giù a riposo (`scale(var(--guida-size) / --pallo-hero)`, un numero scritto da JS al `resize`). Così la scala è sempre ≤ 1. DOVREBBE, `⟂ C` `⟂ QA`.
-- Un **clone** che vola mentre la guida aspetta invisibile: no. Per 510ms il bersaglio sarebbe un pulsante invisibile nell'angolo, e il Pallo che si vede non si potrebbe toccare (R3).
-- Una **traiettoria su curva** calcolata in rAF: no. Thread principale durante lo scroll, proprio quando la pagina deve scorrere liscia; l'arco annidato fa lo stesso effetto sul compositor.
-- Una **dissolvenza incrociata** fra i due Pallo, anche senza fermo: no. Perde l'identità, che è il motivo del momento.
-
-**Costo**: un livello composto per ~510ms, più le animazioni dell'umore dentro la figura (già pagate). Nessuna lettura di layout dopo `t0`.
-
----
-
-## L11. La matrice ferma
-
-Con `prefers-reduced-motion: reduce` **o** `data-movimento="fermo"` (UX §L11.3, completata con i meccanismi):
-
-| Elemento | Normale | Fermo | Meccanismo |
-|---|---|---|---|
-| Scena dell'hero | palleggio, nuvole, gabbiani, barca, schiuma, palma, sole | fotogramma `FERMO` | §L3.2 (CSS), predicato (`avviaPalleggio`) |
-| Parallasse, sole che scende (LM1) | scroll legato | fermo | CSS: il gate esclude il fermo |
-| Pallo, ovunque | vita, sguardo, umori animati, boing, sorprese, «z» | il disegno dell'umore; gli umori cambiano lo stesso | §L3.2 + predicato in `Pallo.vita.ts` |
-| Il salto (LM2) | FLIP SALTO | dissolvenze incrociate | JS |
-| Guida: entra / esce | MOLLA dal bordo / SVELTO | sola opacità | `--motion-scale` |
-| Nuvoletta, menu, foglio | opacità + spostamento | sola opacità | `--motion-scale` |
-| Pallo sbircia dal foglio | sale dopo il foglio | c'è da `t0` | JS |
-| Lente | si sposta | salta | `transition: none` |
-| Inchiostro delle tab, materiale della capsula | dissolvenze | dissolvenza (inchiostro) / istantaneo (materiale) | |
-| Pallone dell'avanzamento | rotola | **non c'è** | CSS |
-| Telefono sticky (LM3) | schermo a soglia, dissolvenza | capitoli in linea | `data-viva` + gate |
-| ＋ che si apre (LM4) | MOLLA + SALITA | già aperto | RL3 col predicato: mai armato |
-| Chat (LM6) | pausa e puntini; bolle con spostamento | pausa 0, niente puntini; bolle in opacità | predicato; `--motion-scale` |
-| Demo: autoplay | sì | no | predicato |
-| Demo: pop, «Chiudi il set» | pop, anello × 3 | cambio istantaneo, nessun anello | CSS |
-| Numeri, barra (LM7) | RACCONTO | valori finali | predicato (`Odometro`) + `--dur-racconto: 0ms` |
-| Pin (LM5) | CADUTA sfalsata | posati | predicato: mai armati |
-| Wrapped (LM8) | bloccato | riga a mano | gate + `data-viva` |
-| Storia (LM9) | ventaglio | affiancata | predicato + layout di base |
-| Skeleton delle schermate | forme a 150ms, respiro a 600ms | forme a 150ms, ferme a .75 | `animation: none` esplicito |
-| Pressione | scala + strato | strato | `--press-scale: 1` |
-| Scroll programmatici | istantanei | istantanei | — |
-| Vibrazione della demo | sì | no | predicato |
-
-**Che cosa resta sempre**: le dissolvenze (guida, nuvoletta, menu, foglio, schermo del telefono, immagini), lo strato di pressione, gli umori di Pallo (cambiano senza muoversi), la lente come forma (salta), il focus e i suoi anelli.
-
----
-
-## L12. Costi: cosa è caro e cosa usare al suo posto
-
-| Effetto | Perché costa | Al suo posto |
-|---|---|---|
-| **Parallasse dentro un solo SVG** (`transform` su `<g>` della scena) | i figli di un SVG non hanno un livello loro: ogni fotogramma ridipinge tutta la scena (1350×844 di viewBox, tre gradienti e un pattern) sul thread principale, durante lo scroll | **tre piani**: tre `<svg>` con lo stesso `viewBox` e lo stesso `preserveAspectRatio`, impilati in `position: absolute` e allineati per costruzione. Si muovono i contenitori HTML di `cielo` e `sole` (compositor); `terra` sta con la pagina. I gradienti si citano da un piano all'altro (`url(#…)` vale in tutto il documento). Lo snapshot di `⟂ E` emette i tre piani: in `Login.scena.tsx` bastano tre `<g data-piano="cielo|sole|terra">` che non cambiano il disegno |
-| …i piani in memoria | due livelli in più grandi quanto la scena: ~12MB l'uno a 390×844 @3x | il gate li crea solo con l'hero in vista (la timeline ferma, fuori range, non anima); niente `will-change` fisso |
-| Le animazioni infinite della scena (nuvole, gabbiani, barca, schiuma, palma, ali) | animazioni CSS su figli di SVG: pittura sul thread principale per tutto il tempo in cui l'hero è in vista. È il costo che il Login paga già | in pausa fuori vista e senza `data-viva` (RL5, §L4.1). **Se** `perf.mjs` a CPU 4× trova fotogrammi lunghi nello scroll dell'hero: in pausa anche durante lo scroll attivo (`data-scorre` sull'hero dal primo `scroll` a 150ms dall'ultimo; due ricalcoli di stile per gesto). Prima si misura |
-| **«Chiudi il set» che pulsa in `box-shadow`**, all'infinito (`PartitaLive.css:243-247`) | ridipinge il pulsante e la sua ombra a ogni fotogramma, per sempre; e un'animazione infinita che dura più di 5s senza comando | un `::after` a capsula con il filo dell'arancio che fa `scale` e `opacity`, **tre** volte (4.8s) e poi basta. Proposto anche per l'app come attività a parte |
-| Pin dentro l'SVG della mappa | come sopra: pittura della mappa intera per 750ms | pin HTML sopra l'SVG, posati in percentuale (ML11). Se restano nell'SVG: ammesso, è una volta per sessione e la mappa è piccola (356×318) |
-| Lettura del layout nello scroll (offsetTop per il telefono sticky, getBoundingClientRect per la velocità) | layout forzato a ogni evento | `IntersectionObserver` per le soglie; `scrollY` e `timeStamp` per la velocità (RL2) |
-| Motion `scroll()` col ripiego JS | `scrollInfo` misura a ogni scroll sul thread principale | CSS `animation-timeline` dietro `@supports`, e la versione ferma dove manca (RL1) |
-| Etichette delle tab con `transition: color` (come `.ui-tab` dell'app) | durante lo scroll, a ogni cambio di sezione, quattro etichette si ridipingono per 180ms | inchiostro acceso/spento su due livelli in opacità; spento chiaro/scuro con un cambio **discreto** a metà dello scambio del vetro (`data-inchiostro`, scritto dal JS): una pittura sola (ML13). Un `transition: color 0s` con ritardo farebbe lo stesso, ma è comunque una transizione di `color` e il badge `?audit` (giustamente) la segna |
-| Due strati di vetro della capsula | durante i 180ms dello scambio, due sfocature | è il prezzo dichiarato (ART §L9.3); lo strato che esce prende `visibility: hidden` alla fine, e uno scambio a metà si inverte invece di sommarsi |
-| Guida che vola con la figura a 64 ingrandita | rasterizzazione alla scala di riposo su WebKit: primi fotogrammi sfocati | figura alla misura dell'hero, scalata in giù (§L10.6), solo se si vede |
-| Chat che cresce nella pagina | ogni messaggio sposta tutto ciò che sta sotto (CLS, bersagli che scappano) | registro ad altezza fissa con scroll interno (ML10) |
-| Bottoni che collassano dopo `appinstalled` | spostamento del finale (CLS) | il pulsante diventa lo status, nello stesso riquadro (ML9) |
-| `will-change` scritto nel CSS | memoria della GPU per tutta la vita della pagina | lo mettono le Web Animations e le timeline mentre corrono |
-| Markup dei 14 umori sempre nel DOM | migliaia di nodi SVG che non si vedono | un umore alla volta: la stringa generata si sostituisce (`innerHTML` di un `<g>`), nello stesso fotogramma del cambio |
-| `content-visibility: auto` sulle sezioni | altezze stimate che cambiano scorrendo, deep link che sbagliano posto | non si usa (§L9.3) |
-
----
-
-## L13. Deviazioni da UX.md e ART_DIRECTION.md (Parte L)
-
-| # | Il documento dice | Qui | Perché |
-|---|---|---|---|
-| **ML1** | ART §L11.3 LM1: cielo × 0.5, sole × 0.6, mare e barca × 0.3 | cielo **0.15**, sole **0.30**, mare e barca **con la terra** (0) | la fascia del mare è alta 46px: a × 0.3 la sabbia la copre in ~153px di scroll, con l'orizzonte a metà schermo. A × 0.6 il sole tramonterebbe in 70px. Così il disco è sotto l'orizzonte dopo 140px e il bagliore resta finché l'orizzonte è in vista (§L5.6) |
-| **ML2** | UX §L6.1: Pallo salta quando il fondo dell'hero passa il 30% del viewport | quando **la sua testa** arriva a 24px dalla cima (`SALTO_PX`); la guida esce quando torna sotto i 96px (`RITORNO_PX`); mai senza uno scroll dell'utente | col fondo dell'hero al 30%, a 390×844 il Pallo dell'hero è già ~270px sopra lo schermo: il salto partirebbe da fuori. Una soglia in pixel sulla testa, e non in percentuale del viewport, vale su ogni altezza di telefono. L'isteresi evita l'andirivieni sul filo |
-| **ML3** | UX §L12.4: la prima battuta («il ＋ arancio…») al capitolo 1 di `#diario` | all'**atterraggio** del salto | Pallo atterra sopra il ＋ e lo nomina: causa ed effetto nello stesso posto. Al capitolo 1 non si ripete |
-| **ML4** | UX §L6.10: la battuta compare al cambio di sezione | compare quando lo scroll è fermo da `QUIETE_MS` (250ms); se nel frattempo la sezione cambia, vale quella nuova | una nuvoletta che spunta durante una scorsa veloce è rumore; UX L0 chiede che Pallo «non parli mai durante lo scroll» |
-| **ML5** | Piano: Motion `scroll()` per gli effetti a scroll | timeline native in CSS; la versione ferma dove mancano | Motion ripiega su JavaScript proprio dove il compositor non c'è (§L9.3); `exit-crossing` non è tra i suoi preset |
-| **ML6** | Piano: le molle con Motion | SALTO e CADUTA come token `linear()` + Web Animations (Motion ammesso coi valori uguali) | una dipendenza in meno nel bundle della landing (≤ 70KB gzip, UX §L13), e la stessa curva in CSS e in JS |
-| **ML7** | UX §L4.2: oltre `SALTO_SCROLL` PUÒ fare il salto composto | sempre istantaneo | ogni salto lungo attraversa effetti a soglia o bloccati; uno smooth dall'hero farebbe partire il salto di Pallo |
-| **ML8** | UX §L6.4 e l'app: «Chiudi il set» pulsa (`box-shadow`, infinito) | anello in `transform`/`opacity`, tre volte | R2; WCAG 2.2.2 |
-| **ML9** | UX FL5: dopo `appinstalled` «pulsanti via» | il pulsante si trasforma nello status, nello stesso riquadro | niente collassa (CLS 0); il risultato appare dove l'hai causato |
-| **ML10** | UX §L6.3 / ART §L5.4: la chat nel pannello, larga al più 420 | anche **alta** al più `min(28rem, 60svh)`, con scroll interno (`overscroll-behavior: contain`) | una chat che cresce sposta la pagina sotto il dito a ogni messaggio |
-| **ML11** | ART §L10.7: pin nell'SVG della costa | DOVREBBERO essere HTML sopra l'SVG | cadono sul compositor (§L12) |
-| **ML12** | App (`.ui-tabbar-pill`): la lente nascosta torna scivolando | ricompare sulla tab nuova, senza scivolare | dopo una sezione senza tab, la posizione vecchia non vuol dire niente |
-| **ML13** | App: etichette delle tab con `transition: color` | due livelli d'inchiostro in opacità; spento chiaro/scuro con un attributo scritto a metà scambio, senza transizione | percorso caldo (§1.2): succede durante lo scroll |
-| **ML14** | UX §L6.0: senza JS, la versione ferma | anche la scena è ferma senza JS (animazioni CSS in pausa fino a `data-viva`) | senza JS il comando «Ferma le animazioni» non c'è, e la scena si muoverebbe per sempre (WCAG 2.2.2) |
-| **ML15** | UX §L7.13: lo stato del fermo in `localStorage`, letto dal modulo | letto **prima del primo disegno** da `presentazione/js/fermo.js`, classico e bloccante | il modulo arriva dopo il primo disegno: chi ha chiesto il fermo vedrebbe la scena muoversi per un attimo |
-| **ML16** | UX FL3: autoplay «pochi punti, ~1 al secondo» | sequenza fissa (3–2 → 4–2 → 4–3, «Cambio campo!», «Tocca tu») col pannello che si mostra premuto | un punto senza una causa visibile sembra un errore; deterministico per i test |
-| **ML17** | UX §L6.3: il ＋ «si apre nel menu come nell'app» | il ＋ fa la pressione a `t0` e il menu si apre da lui; un focus dentro un effetto armato lo apre subito (RL4) | causa visibile; nessun focus dentro qualcosa di invisibile |
-| **ML18** | ART §L5.7: Storia «aperta a ventaglio», «ferma: affiancata» | viva: impilata, poi a ventaglio in `transform`; base e fermo: affiancata | il ventaglio è uno stato raggiunto col movimento; da ferma la Storia si legge meglio affiancata |
-
----
-
-## L14. Le demo della landing
-
-Cinque pagine in `docs/motion/`, fuori dalla build come le altre. Leggono `src/styles/tokens.css`, `materials.css` **e** `presentazione/styles/tokens.css`; usano `_lab.js` (molle, audit, `?reduce`, `?slow`, `?audit`) e `_landing.js`, che è il riferimento eseguibile di `movimento.ts` (`movimentoFermo`, `alCambioDelMovimento`, `impostaFermo`, la memoria di sessione, gli effetti armati di RL3/RL4, l'arbitro di §L9.1). Pallo è un **segnaposto** disegnato con due cerchi: le demo mostrano il movimento, non il disegno (quello lo porta lo snapshot di `⟂ E`).
-
-| File | Che cosa mostra | Sezioni |
-|---|---|---|
-| `L1-salto.html` | l'hero coi tre piani e il tramonto legato allo scroll; **il passaggio di consegne** (FLIP con SALTO e l'arco annidato, atterraggio, battuta dopo la quiete); ritorno con isteresi; guida dentro/fuori per sezione; tocco, cinque tocchi, sonno | §L5.2, §L5.6, §L10 |
-| `L2-barra.html` | la capsula a due materiali su fondi chiari e scuri, la lente con l'inchiostro a due livelli, la lente che ricompare; il pallone dell'avanzamento; il menu della guida dal centro di Pallo; il foglio d'installazione dal menu (`frost` a `t0`, conto del vetro); il comando «Ferma le animazioni» in tre istanze | §L3, §L5.1–§L5.5 |
-| `L3-scroll.html` | il telefono sticky con la linea al 72%/50% e lo skeleton delle schermate (immagini lente simulate, e una che fallisce); Wrapped bloccato con la timeline nativa e la riga a mano; la Storia a ventaglio; il riaggancio dello scroll quando si accende il fermo | §L3.3, §L5.7, §L5.12, §L6 |
-| `L4-gioca.html` | il ＋ che si apre una volta (armato, e aperto dal focus); la chat con la pausa interrompibile e il registro ad altezza fissa; la demo live con l'autoplay deterministico, il pop, le battute, «Chiudi il set» con l'anello × 3, il riepilogo | §L5.8, §L5.9 |
-| `L5-soglie.html` | gli effetti armati di RL3: numeri che salgono, barra vinte/perse, pin con CADUTA sfalsati, una volta per sessione; il caso «già in vista all'avvio» (`#numeri` in fondo all'URL) | §L4.2, §L5.10, §L5.11 |
-
-**Parametri in più** (oltre a `?reduce`, `?slow`, `?audit`): `?fermo` accende «Ferma le animazioni» all'apertura; `?nuova` svuota la memoria di sessione (`bvd_landing_visti`) **e** la scelta del fermo salvata nel dispositivo (`bvd_landing_fermo`), per rivedere gli effetti «una volta». L1 accetta anche `?sonno=3` (il sonno di Pallo dopo 3s invece di 10). L4 ha «Live: 20–19» per arrivare al set point.
-
-**Una trappola trovata provandole**: la scelta del fermo resta nel `localStorage` dell'origine. Una demo in cui si è premuto «Ferma le animazioni» lascia ferme anche le altre aperte dopo dallo stesso server, finché non si ripreme il comando o si apre con `?nuova`. È il comportamento giusto per la landing, ma in QA va azzerato a ogni pagina.
-
----
-
-## L15. Verifica
-
-### L15.1 In jsdom (`⟂ QA`)
-
-- **Armare solo fuori vista** (RL3): con un `IntersectionObserver` finto, prima notizia «in vista» → nessun attributo di partenza scritto, chiave in `bvd_landing_visti`; «fuori vista» → armato; poi «in vista» → scatta.
-- **Focus dentro un effetto armato** (RL4): `focusin` → stato finale nello stesso task.
-- **Il fermo a metà** (RL6): con `Element.prototype.animate` finto che registra, accendere il fermo chiama `finish()` su ogni animazione aperta, mai `cancel()`.
-- **Autoplay**: con i timer finti, i due punti a +600 e +1600 e la battuta a +2600; un `pointerdown` a +900 lascia 4–2 e non scrive lo status; mai con `matchMedia` ridotto né con `data-movimento="fermo"`.
-- **Battuta e quiete**: cambio di sezione durante uno scroll → nessuna nuvoletta finché non passano `QUIETE_MS` senza `scroll`.
-- **Salto**: il FLIP non parte se l'arbitro vede una sezione «fuori»; parte una volta per sessione; col fermo, nessun `transform`.
-- **Statico sul CSS della landing** (si aggiunge a `src/test/landing.test.ts`, UX §L14.1): ogni `animation-timeline` sta dentro un `@supports`; ogni `@keyframes` infinito ha il suo `animation: none` **sia** sotto `prefers-reduced-motion` **sia** sotto `:root[data-movimento="fermo"]`; nessuna `transition`/`@keyframes` nomina proprietà diverse da `transform`, `opacity`, `visibility` (salvo E2 marcata); niente `will-change`.
-
-### L15.2 Nel browser (`docs/qa/landing.mjs`, `⟂ QA`)
-
-- A ogni fermata e **durante** i passaggi (uscita dall'hero, menu → foglio): vetro ≤ 3, e ≤ 2 a riposo, contato come `?audit`.
-- Col fermo e con `prefers-reduced-motion`: dopo 1s, `document.getAnimations()` senza animazioni in corso (UX §L14.3), a parte le timeline staccate.
-- Hero fuori vista: nessuna animazione della scena in corso (RL5).
-- `perf.mjs` adattato (build di produzione, CPU 4×, scroll completo): 0 fotogrammi lunghi, nessun layout forzato nei gestori di scroll, CLS 0.
-- Salto di Pallo: screenshot a `t0 + 0`, `+ 215`, `+ 510` a 390×844 e a 1280×800; la figura non deve apparire sfocata (su iPhone vero: §L10.6).
-
-### L15.3 A mano
-
-| Dove | Che cosa |
-|---|---|
-| iPhone, Safari 26 | il tramonto e le slide bloccate (timeline native); il salto di Pallo (nitidezza); la pila in basso con la barra di Safari che si compatta mentre Pallo atterra |
-| iPhone, Safari 18 | la versione ferma degli effetti a scroll, senza buchi: scena ferma, Wrapped a mano, niente pallone |
-| Android economico | lo scroll dell'hero con la scena viva (§L12, «se `perf.mjs` trova fotogrammi lunghi») |
-| Ogni demo `L*` con `?audit`, `?reduce`, `?fermo` | nessun ✗, vetro mai oltre 3 |
-
----
-
-## L16. Seam per i ruoli successivi
-
-| Seam | Che cosa | Riferimento |
-|---|---|---|
-| **⟂ E** | `Pallo.vita.ts`, `Odometro.ts`, `avviaPalleggio`: il predicato del fermo e l'iscrizione ai cambi **iniettati** (default = la media query), così il comando della pagina li spegne; il primo fotogramma di `avviaPalleggio` = `FERMO` | §L3.1, §L4.1 |
-| ⟂ E | `Login.scena.tsx`: tre `<g data-piano="cielo|sole|terra">` (nessun cambio visivo); lo snapshot emette tre piani con lo stesso `viewBox` | §L12 |
-| **⟂ C** | `presentazione/js/fermo.js` (classico, bloccante, nel `<head>`); `movimento.ts` sul modello di `docs/motion/_landing.js`; `presentazione/styles/movimento.css` col blocco di §L3.2 | §L3 |
-| ⟂ C | le costanti di §L2.2 coi loro nomi; l'arbitro unico delle soglie (§L9.1); armare per ultimo (§L8) | §L2.2, §L8, §L9 |
-| ⟂ C | `data-viva` per sezione; scena in pausa senza (ML14); `data-fuori` fuori vista (RL5) | §L4.1 |
-| ⟂ C | gli effetti a scroll in CSS dietro `@supports` (§L9.3); `--giri` dal `ResizeObserver` del binario | §L5.5, §L5.6, §L5.12 |
-| ⟂ C | il salto di §L10 (anche l'arco annidato e il boing all'atterraggio); la guida come `<button>` che si muove | §L10 |
-| ⟂ C | la chat ad altezza fissa (ML10); il pulsante d'installazione che diventa status (ML9); «Chiudi il set» con l'anello × 3 (ML8); i pin HTML (ML11) | §L5 |
-| ⟂ C | lo skeleton delle quattro schermate e della Storia, con le forme vere (§L6) | §L6 |
-| **⟂ QA** | i test di §L15.1 (jsdom e statico); `docs/qa/landing.mjs` con il conto del vetro nei passaggi, le animazioni ferme fuori vista e col fermo, il salto in tre fotogrammi | §L15 |
-| fuori scope | «Chiudi il set» dell'app (`PartitaLive.css:243`) pulsa in `box-shadow` all'infinito: stessa correzione di ML8, proposta come attività a parte | §L12 |
+| ML1 | **Si muovono tre cose sole**: la pressione dei pulsanti (`scale(var(--press-scale))` all'`:active`, gli stessi `--dur-press` e `--ease-press` dell'app), l'apertura della Home (L1) e il giro (L2). Nient'altro ha `transition` né `animation` |
+| ML2 | **Si animano solo `transform`, `opacity` e `visibility`**, nelle transizioni e nei fotogrammi (R2). I colori dell'hover cambiano di colpo, e l'hover vale solo con un puntatore vero |
+| ML3 | **Reduced motion**: ogni animazione sta dentro `prefers-reduced-motion: no-preference`. Con reduced-motion non ci sono gli strati dell'apertura (la Home vera, ferma), il giro è un elenco fermo con tutti i momenti visibili, e `--press-scale` vale 1: non si muove niente |
+| ML4 | **Le cifre ferme sono quelle dell'app** (L1): gli strati esistono solo mentre l'apertura scorre |
+| ML5 | **Lo scroll guida un'animazione solo dove la relazione dice qualcosa** (il telefono che entra in vista; lo scroll come tempo della stagione nel giro) e mai da solo: c'è sempre un ripiego senza `animation-timeline`, e il contenuto è lo stesso nei due casi. Nell'app gli effetti legati allo scroll restano rifiutati (§9.2); qui nessuna funzione ne dipende |
+| ML6 | **Le ancore della testata saltano**, senza `scroll-behavior: smooth` (§9.3) |
+| ML7 | **L'anello di focus compare istantaneo**: nessuna transizione nomina `outline`, e nessuna è `all` (R6) |
+
+Lo verificano `src/test/landing.test.ts` (transizioni e fotogrammi dei fogli, animazioni solo con il movimento consentito, l'apertura coerente con `misure.css`, il giro coerente col suo foglio, l'hover) e `docs/qa/landing.mjs` (`reduced`: niente in moto, la pressione a 1; `apertura`: gli strati se ne vanno a fine corsa, a tempo o con lo scroll; `giro`: la scena ferma e un momento solo, quello giusto, per tratto).

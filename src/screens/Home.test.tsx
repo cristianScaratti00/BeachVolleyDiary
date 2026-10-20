@@ -116,7 +116,7 @@ describe('Home — diario vuoto', () => {
     expect(p.onNuovoTorneo).toHaveBeenCalledOnce()
     expect(screen.getByRole('link', { name: "Usa l'assistente" })).toHaveAttribute('href', '/crea')
     // Pallo è un disegno, non un pulsante.
-    expect(screen.queryByRole('button', { name: /Pallo/ })).toBeNull()
+    expect(screen.queryByRole('button', { name: /Solby/ })).toBeNull()
     // Niente numeri, niente filtri: non c'è niente da filtrare.
     expect(screen.queryByRole('heading', { name: 'Partite vinte' })).toBeNull()
     expect(screen.queryByRole('group', { name: 'Periodo' })).toBeNull()
@@ -136,8 +136,8 @@ const OGGI_SI_GIOCA = 'Oggi si gioca: «Summer Cup Rimini».'
 const WRAPPED = "Beach Wrapped è pronto. Ci diamo un'occhiata?"
 const STORIA = 'Hai vinto «Sunset Series Cervia»: lo racconti in una storia?'
 
-/** La nuvoletta: il «Pallo» che firma e il consiglio sotto. */
-const nuvola = () => screen.getByText('Pallo').parentElement!
+/** La nuvoletta: il «Solby» che firma e il consiglio sotto. */
+const nuvola = () => screen.getByText('Solby').parentElement!
 /** Pallo da toccare: il contenitore del disegno. */
 const palloDa = (container: HTMLElement) => container.querySelector('svg.pallo')!.parentElement!
 /** Fa passare il tempo finto (timer e animazioni). */
@@ -304,7 +304,7 @@ describe('Home — Pallo', () => {
 
     it('Pallo è un disegno da toccare, non un pulsante: niente nome, niente fermata di Tab', () => {
       const { container } = renderHome(pieno, conWrapped)
-      expect(screen.queryByRole('button', { name: /Pallo/ })).toBeNull()
+      expect(screen.queryByRole('button', { name: /Solby/ })).toBeNull()
       const pallo = palloDa(container)
       expect(pallo.tagName).not.toBe('BUTTON')
       expect(pallo).toHaveAttribute('aria-hidden', 'true')

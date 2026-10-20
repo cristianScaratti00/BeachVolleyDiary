@@ -61,10 +61,6 @@ export const PATHS = {
   'check-circle': 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM8 12.5l2.7 2.7L16 10',
   check: 'M5 12.5l4.5 4.5L19 7.5',
   info: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 11v5.5M12 7.5h.01',
-  // «Ferma le animazioni» della landing (ART_DIRECTION §L10.1): due aste e un
-  // triangolo a tratto, nessun riempimento.
-  pause: 'M9 6v12M15 6v12',
-  play: 'M8 5.5v13l10.5-6.5z',
 } as const
 
 // Le varianti piene delle tab: sagoma piena, dettagli interni ritagliati. La

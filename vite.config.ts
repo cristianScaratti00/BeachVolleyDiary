@@ -3,10 +3,9 @@ import type { Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import { componiLanding } from './presentazione/build/componi'
 
-// La landing `/presentazione` è un modello: scena, Pallo, marchio, mappa,
-// icone e numeri ci entrano qui, dalle stesse fonti dell'app (gli snapshot in
-// presentazione/js/generati e Icon.paths.ts). Così il primo fotogramma è già
-// la pagina intera, anche senza JavaScript (ART_DIRECTION §L13 A12).
+// La landing `/presentazione` è un modello: il marchio e le icone ci entrano
+// qui, dalle stesse fonti dell'app (BrandMark e Icon.paths.ts). La pagina è
+// solo HTML e CSS: il primo fotogramma è già la pagina intera.
 function landing(): Plugin {
   return {
     name: 'landing',
@@ -19,7 +18,7 @@ function landing(): Plugin {
 
 // Geist (il sottoinsieme latino) parte insieme al CSS, non dopo di lui: sulla
 // rete lenta (Slow 4G) il titolo dell'hero restava ~1.3s nel carattere di
-// riserva (POLISH.md, Parte L). Solo in build, dove il nome ha l'hash; il
+// riserva. Solo in build, dove il nome ha l'hash; il
 // `crossorigin` serve anche dallo stesso sito, o il font si scarica due volte.
 function landingFont(): Plugin {
   return {
@@ -43,12 +42,9 @@ export default defineConfig({
   build: {
     rollupOptions: {
       // Due pagine indipendenti: l'app (index.html, React + Supabase) e la
-      // landing pubblica su /presentazione/. La landing non importa React né
-      // Supabase: da src/ prende solo moduli senza framework (Pallo.vita,
-      // Odometro, le regole della Partita live, il copione della chat, il
-      // palleggio della scena) e i fogli dei token, del vetro e delle
-      // primitive. Restano due bundle separati: chi apre la landing non
-      // scarica l'app.
+      // landing pubblica su /presentazione/. La landing non ha JavaScript: da
+      // src/ prende solo i fogli dei token, della base e delle icone. Restano
+      // due bundle separati: chi apre la landing non scarica l'app.
       input: {
         main: 'index.html',
         presentazione: 'presentazione/index.html',

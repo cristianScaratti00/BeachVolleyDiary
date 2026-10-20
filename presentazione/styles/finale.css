@@ -1,127 +1,23 @@
 /* ============================================================================
-   Il finale `#comincia` e il footer (UX §L6.9, ART §L2.4 mossa 1 e §L5.4):
-   il tramonto chiude quello che ha aperto. Titolo, frase, il CTA; sotto,
-   l'orizzonte: il sole basso tagliato a metà dal footer, e Pallo in piedi
-   davanti, in controluce. Il bordo alto del footer è l'orizzonte, e da lì
-   partono i quattro tratti del riflesso. Il testo non entra mai nell'alone.
+   `#iscriviti` (ART_DIRECTION §L3): il titolo che chiude e le due porte
+   dell'app. Nella tavola qui c'era il modulo di registrazione; la
+   registrazione resta nell'app (nickname verificato dal vivo, poi email e
+   password), e al suo posto stanno i pulsanti, in fondo alla frase.
    ============================================================================ */
 @layer components {
-  .finale { padding-bottom: 0; text-align: center; }
-  .finale-dentro { max-width: calc(var(--space-16) * 10); }
-  .finale h2 { margin-inline: auto; }
-  .finale .frase { margin-inline: auto; }
-  .finale-cta {
-    display: grid;
-    justify-items: center;
-    gap: var(--space-2-5);
-    margin-top: var(--block-gap);
-  }
-  .finale-crea { width: 100%; }
-  .finale-cta .ui-button[data-variant="filled"]:focus-visible { outline-offset: var(--focus-offset); }
-  .finale-cta .installa-posto { justify-content: center; }
-  .finale-desktop { display: none; margin-inline: auto; }
-  @media (min-width: 600px) {
-    .finale-crea { width: auto; }
-  }
-  /* Dal computer (puntatore fine, da 900): l'app è fatta per il telefono. */
-  @media (min-width: 900px) and (pointer: fine) {
-    .finale-desktop { display: block; }
-  }
+  #iscriviti { padding-block: 112px calc(120px + var(--safe-bottom)); }
 
-  /* ----------------------------------------------------------- Orizzonte */
-  /* Alto almeno l'alone + 24: il CTA sta sopra, il testo non ci entra. Il
-     sole è centrato sul bordo basso e il footer lo taglia a metà. */
-  .orizzonte {
-    position: relative;
-    height: calc(var(--sole-halo-r) + var(--space-6));
-    /* A tutta larghezza: l'alone non si taglia ai margini. */
-    margin: var(--section-object-gap) calc(-1 * var(--gutter)) 0;
-    overflow: hidden;
-    pointer-events: none;
+  .finale {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 32px 48px;
   }
-  .sole { position: absolute; left: 50%; bottom: 0; }
-  .sole-alone {
-    position: absolute;
-    left: calc(-1 * var(--sole-halo-r));
-    top: calc(-1 * var(--sole-halo-r));
-    width: calc(2 * var(--sole-halo-r));
-    height: calc(2 * var(--sole-halo-r));
-    background-image: var(--sole-halo);
-  }
-  .sole-disco {
-    position: absolute;
-    left: calc(-1 * var(--sole-r));
-    top: calc(-1 * var(--sole-r));
-    width: calc(2 * var(--sole-r));
-    height: calc(2 * var(--sole-r));
-    border-radius: 50%;
-    background-color: var(--sole-core);
-  }
-  /* Pallo davanti al sole, in piedi sull'orizzonte. Fuori vista si ferma
-     (RL5); col CTA in hover o a fuoco passa a `festa` (scene.ts). */
-  .finale-pallo {
-    position: absolute;
-    left: 50%;
-    bottom: 0;
-    width: var(--pallo-finale);
-    transform: translateX(-50%);
-  }
-  .finale-pallo .pallo { width: 100%; height: auto; }
-  .finale-pallo .pallo-ombra { display: none; }
+  .finale-testo { flex: 1 1 360px; min-width: 0; gap: 14px; }
+  .finale-testo .frase { max-width: 440px; }
 
-  /* ---------------------------------------------------------------- Footer */
-  .piede {
-    position: relative;
-    padding: var(--space-8) var(--gutter) var(--tabbar-clearance);
-    background-color: var(--field-dusk);
-    border-top: var(--border-w) solid var(--horizon);
-    color: var(--text-strong);
-  }
-  /* Il riflesso del sole: quattro tratti che partono dal filo, centrati. */
-  .riflesso {
-    position: absolute;
-    left: 50%;
-    top: var(--space-2);
-    display: grid;
-    justify-items: center;
-    gap: var(--space-2);
-    transform: translateX(-50%);
-    opacity: var(--riflesso-opacita);
-    pointer-events: none;
-  }
-  .riflesso > span { display: block; height: var(--riflesso-h); border-radius: var(--riflesso-h); background-color: var(--riflesso); }
-  .riflesso > span:nth-child(1) { width: var(--riflesso-1); }
-  .riflesso > span:nth-child(2) { width: var(--riflesso-2); }
-  .riflesso > span:nth-child(3) { width: var(--riflesso-3); }
-  .riflesso > span:nth-child(4) { width: var(--riflesso-4); }
-  .piede-dentro {
-    position: relative;
-    display: grid;
-    gap: var(--space-6);
-    max-width: var(--content-max);
-    margin: var(--space-12) auto 0;
-  }
-  .piede-nome {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2-5);
-    font: var(--type-marchio);
-    letter-spacing: var(--track-marchio);
-    color: var(--text-strong);
-  }
-  .piede-nome .marchio { width: var(--marchio-s); height: var(--marchio-s); flex: none; }
-  .piede-riga {
-    font: var(--type-footnote);
-    letter-spacing: var(--track-footnote);
-    color: var(--text-muted);
-    margin-top: var(--space-2);
-  }
-  .piede-comandi { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin-inline: calc(-1 * var(--space-3)); }
-  .piede-dentro > .fermo-nota { margin-top: calc(-1 * var(--space-4)); }
-  @media (min-width: 900px) {
-    .piede { padding-bottom: var(--space-12); }
-    .piede-dentro { grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
-    .piede-comandi { margin-inline: 0; }
-    .piede-dentro > .fermo-nota { grid-column: 2; margin-top: 0; }
+  @media (max-width: 820px) {
+    #iscriviti { padding-block: 80px calc(88px + var(--safe-bottom)); }
   }
 }

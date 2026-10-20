@@ -5,6 +5,8 @@ metadata:
   type: project
 ---
 
+**Nome:** dal 2026-10-20 la mascotte si chiama **Solby** nell'interfaccia (rinominata dall'utente). Nel codice resta `Pallo` (`Pallo.tsx`, `PalloUmore`, classi `*-pallo`): ogni testo che si vede (etichette, `aria-label`, battute, «Raccontalo a Solby») dice Solby.
+
 L'utente ha chiesto (2026-10-19) più espressioni e interazioni per Pallo, la mascotte del redesign: «mi piace un sacco ma ha poche interazioni». Ora ha 14 umori (i 6 storici + festa, triste, pensa, dorme, sorpreso, occhiolino, cool, cuori), lo sguardo che segue il dito (`segui`), l'ammiccare e i gesti «idle» casuali (`vivo`), la reazione al tocco e un easter egg (5 tocchi o tocco lungo: palleggio / occhiali). PartitaLive, Wrapped e StoryModal sono stati lasciati all'orchestratore da collegare.
 
 **Why:** l'utente lo vede come il personaggio che dà voce all'app; un Pallo sempre uguale gli sembra povero.

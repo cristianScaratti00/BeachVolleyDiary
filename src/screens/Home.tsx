@@ -262,7 +262,7 @@ function PalloConsiglia({ consigli, ultimi, on, dopo }: { consigli: Consiglio[];
         onFocus={() => setAFuoco(true)}
         onBlur={esce}
       >
-        <p className="home-nuvola-chi">Pallo</p>
+        <p className="home-nuvola-chi">Solby</p>
         <AltezzaMorbida>
           <AnimatePresence mode="wait" initial={false}>
             <m.div

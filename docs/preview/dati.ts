@@ -1,16 +1,12 @@
 // ============================================================================
 // I diari di fabbrica dell'anteprima (fuori dalla build, come docs/motion).
-// Stanno qui e non in main.tsx perché li usano in tre:
+// Stanno qui e non in main.tsx perché li usano in due:
 //   - l'anteprima (`main.tsx`), con la data vera;
-//   - le schermate del telefono della landing (`docs/qa/landing-shots.mjs`),
-//     che fissano la data a OGGI_LANDING;
-//   - i numeri della landing: `src/app/landing.dati.test.ts` passa
-//     `datiDiProva(OGGI_LANDING)` dalle funzioni vere dell'app e scrive
-//     `presentazione/js/generati/dati.ts` (UX §L15.2, Q-L3). Così le schermate
-//     e i numeri del sito dicono la stessa cosa.
+//   - le schermate dei telefoni della landing (`docs/qa/landing-shots.mjs`),
+//     che fissano la data a OGGI_LANDING.
 //
 // «Oggi» e gli id sono iniettabili: con la stessa data e lo stesso contatore
-// di id il diario è sempre identico, e il file generato non cambia a ogni giro.
+// di id il diario è sempre identico, e le schermate non cambiano a ogni giro.
 // ============================================================================
 import type { DiaryData, Match, Partner, Photo, Tournament, Venue } from '../../src/lib/models'
 

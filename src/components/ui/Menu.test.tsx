@@ -13,7 +13,7 @@ import { expectNoA11yViolations } from '../../test/axe'
 const voci = (onSelect = vi.fn()): MenuViewItem[] => [
   { key: 'live', label: 'Partita live', sub: 'Segna i punti mentre giochi', icon: 'clock', tone: 'accent', onSelect },
   { key: 'torneo', label: 'Torneo', sub: 'Luogo, formato, compagno, piazzamento', icon: 'trophy', onSelect: vi.fn() },
-  { key: 'pallo', label: 'Raccontalo a Pallo', icon: 'chat-dots', onSelect: vi.fn() },
+  { key: 'pallo', label: 'Raccontalo a Solby', icon: 'chat-dots', onSelect: vi.fn() },
 ]
 
 describe('Menu — lo sheet del ＋', () => {
@@ -30,7 +30,7 @@ describe('Menu — lo sheet del ＋', () => {
     expect(items.map((i) => i.textContent)).toEqual([
       'Partita liveSegna i punti mentre giochi',
       'TorneoLuogo, formato, compagno, piazzamento',
-      'Raccontalo a Pallo',
+      'Raccontalo a Solby',
       'Annulla',
     ])
     expect(items[0]).toHaveAttribute('data-tone', 'accent')

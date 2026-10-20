@@ -2,19 +2,18 @@
 <html lang="it">
   <head>
     <meta charset="utf-8" />
-    <!-- La landing di Beach Diary (UX.md, ART_DIRECTION.md e MOTION.md, Parte L).
-         Questo file è un MODELLO: i disegni (scena, Pallo, marchio, mappa,
-         icone) e i numeri del diario di fabbrica li mette dentro
-         `presentazione/build/componi.ts` al momento della build, dalle stesse
-         fonti dell'app. Niente stili né script in linea: la CSP vuole
-         `script-src 'self'`. La versione ferma è QUESTO HTML: il modulo
-         (`js/main.ts`) la arricchisce, sezione per sezione (`data-viva`). -->
+    <!-- La landing di Beach Diary (UX.md, ART_DIRECTION.md e MOTION.md, Parte L):
+         la tavola «Landing page» del canvas di Claude Design, in HTML e CSS.
+         Questo file è un MODELLO: il marchio e lo sprite delle icone li mette
+         dentro `presentazione/build/componi.ts` al momento della build, dalle
+         stesse fonti dell'app. Niente stili né script in linea (la CSP vuole
+         `script-src 'self'`), e niente JavaScript: la pagina è tutta qui.
+         La registrazione sta nell'app: i pulsanti portano a
+         `/?accesso=registrati` e `/?accesso=accedi`. -->
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>Beach Diary · Ogni partita, nel tuo diario</title>
-    <meta name="description" content="Il diario dei tuoi tornei di beach volley: partite, set, compagni e statistiche. Segni i punti in torneo o tra amici, e a ottobre arriva Beach Wrapped." />
-    <!-- Il primo fondo è il tramonto dell'hero; quando l'hero esce di vista il
-         modulo passa a #F6F6F4, la carta (UX LC13). -->
-    <meta name="theme-color" content="#120E14" />
+    <title>Beach Diary · Il diario delle tue partite di beach volley</title>
+    <meta name="description" content="Registra tornei e partite di beach volley, segui le tue statistiche e scopri con chi giochi meglio." />
+    <meta name="theme-color" content="#F6F6F4" />
     <link rel="canonical" href="https://bv-diary.vercel.app/presentazione/" />
     <link
       rel="icon"
@@ -31,482 +30,241 @@
     <meta property="og:site_name" content="Beach Diary" />
     <meta property="og:locale" content="it_IT" />
     <meta property="og:title" content="Beach Diary" />
-    <meta property="og:description" content="Ogni partita, nel tuo diario. Tornei, set e compagni: tutta la tua stagione in spiaggia." />
+    <meta property="og:description" content="Il diario delle tue partite di beach volley: tornei, statistiche e compagni, stagione per stagione." />
     <meta property="og:url" content="https://bv-diary.vercel.app/presentazione/" />
     <meta property="og:image" content="https://bv-diary.vercel.app/presentazione/og.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Pallo, la mascotte di Beach Diary, saluta accanto alla scritta &quot;Ogni partita, nel tuo diario.&quot;" />
+    <meta property="og:image:alt" content="Il marchio di Beach Diary e la scritta &quot;Il diario delle tue partite di beach volley.&quot;, accanto alla Home dell'app su un telefono." />
     <meta name="twitter:card" content="summary_large_image" />
 
-    <!-- «Ferma le animazioni» scelto in una visita passata vale dal primo
-         disegno: un file classico e bloccante, minuscolo (MOTION §L3.1, ML15). -->
-    <script src="/presentazione/fermo.js"></script>
     <link rel="stylesheet" href="./styles/landing.css" />
-    <script type="module" src="./js/main.ts"></script>
+    <!-- Le fasce dell'apertura (apertura.css): la Home senza cifre, chiesta
+         subito invece che quando il foglio la scopre. Senza movimento non
+         serve. -->
+    <link rel="preload" href="/presentazione/screens/home-fondo.webp" as="image" type="image/webp" media="(prefers-reduced-motion: no-preference)" />
   </head>
   <body>
     <!--@icone-->
     <a class="skip-link" href="#contenuto">Salta al contenuto</a>
 
-    <!-- L'avanzamento: il pallone del marchio rotola sulla sabbia (LM10). Solo
-         con le timeline native e col movimento permesso; decorativo. -->
-    <div class="avanza" aria-hidden="true"><span class="avanza-palla"></span></div>
-
-    <!-- La barra: la TabBar dell'app. In basso sotto i 900px, in alto da lì. -->
-    <nav class="barra" aria-label="Sezioni">
-      <a class="barra-marchio" href="#inizio"><!--@marchio--><span>Beach Diary</span></a>
-      <div class="capsula" data-sopra="scuro" data-inchiostro="scuro">
-        <span class="capsula-vetro" data-material="glass-regular" aria-hidden="true"></span>
-        <span class="capsula-vetro" data-material="glass-dark" aria-hidden="true"></span>
-        <span class="lente" data-nascosta aria-hidden="true"></span>
-        <ul class="tabs">
-          <li>
-            <a class="tab" href="#diario" data-tab="diario">
-              <span class="tab-liv" data-liv="spento"><svg class="ui-icon" data-size="24" aria-hidden="true"><use href="#i-book" /></svg><span class="tab-etichetta">Diario</span></span>
-              <span class="tab-liv" data-liv="acceso" aria-hidden="true"><svg class="ui-icon" data-size="24"><use href="#i-book" /></svg><span class="tab-etichetta">Diario</span></span>
-            </a>
-          </li>
-          <li>
-            <a class="tab" href="#live" data-tab="live">
-              <span class="tab-liv" data-liv="spento"><svg class="ui-icon" data-size="24" aria-hidden="true"><use href="#i-clock" /></svg><span class="tab-etichetta">Live</span></span>
-              <span class="tab-liv" data-liv="acceso" aria-hidden="true"><svg class="ui-icon" data-size="24"><use href="#i-clock" /></svg><span class="tab-etichetta">Live</span></span>
-            </a>
-          </li>
-          <li>
-            <a class="tab" href="#numeri" data-tab="numeri">
-              <span class="tab-liv" data-liv="spento"><svg class="ui-icon" data-size="24" aria-hidden="true"><use href="#i-chart" /></svg><span class="tab-etichetta">Numeri</span></span>
-              <span class="tab-liv" data-liv="acceso" aria-hidden="true"><svg class="ui-icon" data-size="24"><use href="#i-chart" /></svg><span class="tab-etichetta">Numeri</span></span>
-            </a>
-          </li>
-          <li>
-            <a class="tab" href="#wrapped" data-tab="wrapped">
-              <span class="tab-liv" data-liv="spento"><svg class="ui-icon" data-size="24" aria-hidden="true"><use href="#i-sun" /></svg><span class="tab-etichetta">Wrapped</span></span>
-              <span class="tab-liv" data-liv="acceso" aria-hidden="true"><svg class="ui-icon" data-size="24"><use href="#i-sun" /></svg><span class="tab-etichetta">Wrapped</span></span>
-            </a>
-          </li>
-        </ul>
-      </div>
-      <a class="piu" href="/"><svg class="ui-icon" aria-hidden="true"><use href="#i-plus" /></svg><span class="piu-etichetta">Apri il diario</span></a>
-    </nav>
-
-    <!-- Pallo guida: un pulsante vero, che apre «Dove vuoi andare?». Senza
-         JavaScript non c'è (`hidden`). La nuvoletta è la sua descrizione,
-         mai una live region (UX §L7.2). -->
-    <button type="button" class="guida" aria-label="Pallo: dove vuoi andare?" aria-expanded="false" aria-controls="guida-menu" aria-describedby="guida-bolla" hidden>
-      <span class="guida-figura"><!--@pallo saluta--></span>
-    </button>
-    <p id="guida-bolla" class="guida-bolla" aria-hidden="true"></p>
-    <div id="guida-menu" class="guida-menu" data-material="glass-thick" hidden>
-      <nav aria-labelledby="guida-titolo">
-        <h2 id="guida-titolo" class="guida-menu-titolo">Dove vuoi andare?</h2>
-        <p id="guida-vai" class="guida-menu-gruppo">Vai a</p>
-        <ul class="guida-menu-voci" aria-labelledby="guida-vai">
-          <li><a href="#diario">Il diario in tasca</a></li>
-          <li><a href="#registra">Raccontalo a Pallo</a></li>
-          <li><a href="#live">Partita live</a></li>
-          <li><a href="#numeri">I numeri e la mappa</a></li>
-          <li><a href="#wrapped">Beach Wrapped</a></li>
-          <li><a href="#dati">I tuoi dati</a></li>
-          <li><a href="#inizio">Torna su</a></li>
-        </ul>
-        <div class="guida-menu-azioni">
-          <button type="button" class="ui-button" data-variant="neutral" data-installa hidden><svg class="ui-icon" aria-hidden="true"><use href="#i-download" /></svg>Installa l'app</button>
-          <button type="button" class="ui-button comando-fermo" data-variant="neutral" data-comando="fermo" aria-pressed="false" aria-describedby="fermo-nota-menu">
-            <svg class="ui-icon fermo-pausa" aria-hidden="true"><use href="#i-pause" /></svg><svg class="ui-icon fermo-play" aria-hidden="true"><use href="#i-play" /></svg>Ferma le animazioni
-          </button>
-          <p id="fermo-nota-menu" class="fermo-nota">Animazioni già ridotte dalle impostazioni del telefono.</p>
+    <header class="testata">
+      <div class="dentro">
+        <div class="testata-riga">
+          <a class="testata-marchio" href="#inizio"><!--@marchio--><span>Beach Diary</span></a>
+          <nav class="testata-nav" aria-label="Sezioni">
+            <ul class="testata-voci">
+              <li><a class="testata-voce" href="#funzionalita">Funzionalità</a></li>
+              <li><a class="testata-voce" href="#schermate">Schermate</a></li>
+              <li><a class="testata-voce" href="/?accesso=accedi">Accedi</a></li>
+            </ul>
+            <a class="cta" data-variant="pieno" data-size="sm" href="/?accesso=registrati">Iscriviti</a>
+          </nav>
         </div>
-        <a class="ui-button guida-menu-cta" data-variant="filled" data-size="lg" href="/">Apri il diario</a>
-      </nav>
-    </div>
+      </div>
+    </header>
 
     <main id="contenuto">
       <!-- ============================================================ Hero -->
-      <section id="inizio" class="campo eroe" data-campo="tramonto" data-surface="dark" data-fondo="scuro" aria-labelledby="inizio-titolo">
-        <div class="eroe-scena" aria-hidden="true">
-          <div class="eroe-camera"><!--@scena--></div>
-        </div>
-        <p class="eroe-marchio"><!--@marchio--><span>Beach Diary</span></p>
-        <div class="eroe-testo">
-          <div class="eroe-pallo" aria-hidden="true">
-            <!--@pallo saluta-->
-            <span class="eroe-sentinella" data-linea="salto"></span>
-            <span class="eroe-sentinella" data-linea="ritorno"></span>
+      <section id="inizio" class="eroe" aria-labelledby="inizio-titolo">
+        <div class="dentro eroe-dentro">
+          <div class="eroe-testo">
+            <p class="occhiello">Per chi gioca a beach volley</p>
+            <h1 id="inizio-titolo">Il diario delle tue partite di beach volley.</h1>
+            <p class="eroe-frase">Registra tornei e partite, segui le tue statistiche e scopri con chi giochi meglio.</p>
+            <div class="azioni eroe-azioni">
+              <a class="cta" data-variant="pieno" href="/?accesso=registrati">Crea il tuo diario</a>
+              <a class="cta" data-variant="bianco" href="/?accesso=accedi">Ho già un account</a>
+            </div>
           </div>
-          <h1 id="inizio-titolo" tabindex="-1">Ogni partita, nel tuo diario.</h1>
-          <p class="eroe-frase">Tornei, set e compagni: tutta la tua stagione in spiaggia, in un posto solo.</p>
-          <div class="eroe-cta">
-            <a class="ui-button" data-variant="filled" data-size="lg" href="/?accesso=registrati">Crea il tuo diario</a>
-            <a class="ui-button" data-variant="glass" data-material="glass-clear" data-glass="clear" data-size="lg" href="/?accesso=accedi">Ho già un account</a>
-          </div>
-          <p class="eroe-riga">Si usa dal browser e si installa sul telefono. Gratis.</p>
-          <!-- La riga dei comandi è sempre alta 44: il posto del pulsante
-               d'installazione è riservato (ART A6, CLS 0). -->
-          <div class="eroe-comandi">
-            <span class="installa-posto">
-              <button type="button" class="installa" data-installa hidden><svg class="ui-icon" aria-hidden="true"><use href="#i-download" /></svg>Installa sul telefono</button>
-              <span class="installa-fatto" hidden>Fatto: Beach Diary è tra le tue app.</span>
-            </span>
-            <button type="button" class="comando-fermo comando-tondo" data-comando="fermo" aria-pressed="false" aria-label="Ferma le animazioni" aria-describedby="fermo-nota-eroe">
-              <svg class="ui-icon fermo-pausa" aria-hidden="true"><use href="#i-pause" /></svg><svg class="ui-icon fermo-play" aria-hidden="true"><use href="#i-play" /></svg>
-            </button>
-          </div>
-          <p id="fermo-nota-eroe" class="fermo-nota">Animazioni già ridotte dalle impostazioni del telefono.</p>
-        </div>
-      </section>
-
-      <!-- ================================================ Il diario in tasca -->
-      <section id="diario" class="campo" data-campo="carta" data-fondo="chiaro" aria-labelledby="diario-titolo">
-        <div class="dentro diario">
-          <div class="testa diario-testa">
-            <h2 id="diario-titolo" tabindex="-1">Il diario in tasca</h2>
-          </div>
-          <!-- Il telefono sticky (vivo): le quattro schermate impilate. Sono
-               copie decorative; le immagini lette sono quelle dei capitoli. -->
-          <div class="telefono-fascia" aria-hidden="true">
+          <!-- Il telefono dell'hero rifà l'apertura della Home (MOTION.md,
+               Parte L): i blocchi salgono uno dopo l'altro, le cifre del
+               tabellone girano da zero e la barra delle vinte cresce. Fasce e
+               tabellone sono decorativi e ci sono solo mentre l'apertura
+               scorre: sono la Home senza cifre né barra (home-fondo.webp) con
+               le cifre disegnate sopra, al pixel di misure.css. Ferma, la
+               schermata è la Home vera. -->
+          <div class="eroe-vetrina">
             <div class="telefono">
               <div class="schermo">
-                <div class="pagina" data-k="0"><span class="scheletro"><span class="scheletro-respiro"><!--@scheletro home--></span></span><img src="/presentazione/screens/home.webp" alt="" width="390" height="844" decoding="async" loading="lazy" /></div>
-                <div class="pagina" data-k="1"><span class="scheletro"><span class="scheletro-respiro"><!--@scheletro mappa--></span></span><img src="/presentazione/screens/mappa.webp" alt="" width="390" height="844" decoding="async" loading="lazy" /></div>
-                <div class="pagina" data-k="2"><span class="scheletro"><span class="scheletro-respiro"><!--@scheletro diario--></span></span><img src="/presentazione/screens/diario.webp" alt="" width="390" height="844" decoding="async" loading="lazy" /></div>
-                <div class="pagina" data-k="3"><span class="scheletro"><span class="scheletro-respiro"><!--@scheletro compagni--></span></span><img src="/presentazione/screens/compagni.webp" alt="" width="390" height="844" decoding="async" loading="lazy" /></div>
+                <img src="/presentazione/screens/home.webp" alt="La Home di Beach Diary: «Stai vincendo più di prima.», il consiglio di Solby, il 63% di partite vinte e +36 punti di scarto." width="390" height="844" fetchpriority="high" decoding="async" />
+                <span class="bande" aria-hidden="true">
+                  <span class="banda" data-b="testa"></span>
+                  <span class="banda" data-b="filtri"></span>
+                  <span class="banda" data-b="pallo"></span>
+                  <span class="banda" data-b="rendimento"></span>
+                  <span class="banda" data-b="wrapped"></span>
+                  <span class="banda" data-b="coppia"></span>
+                  <span class="banda" data-b="fondo"></span>
+                </span>
+                <span class="tabellone" aria-hidden="true">
+                  <span class="odo" data-odo="pct"><span></span><span></span></span>
+                  <span class="odo" data-odo="scarto"><span></span><span></span></span>
+                  <span class="barra"><span class="barra-v"></span><span class="barra-p"></span></span>
+                  <span class="odo" data-odo="vinti"><span></span></span>
+                  <span class="odo" data-odo="serie"><span></span></span>
+                </span>
               </div>
             </div>
           </div>
-          <ol class="capitoli">
-            <li class="capitolo" data-k="0">
-              <h3>La Home ti dice come va</h3>
-              <p>Una frase sola, dai tuoi numeri: «{{home.frase}}». Sotto, le partite vinte, i punti di scarto e un consiglio di Pallo.</p>
-              <div class="capitolo-schermo"><div class="schermo"><div class="pagina"><span class="scheletro"><span class="scheletro-respiro"><!--@scheletro home--></span></span><img src="/presentazione/screens/home.webp" alt="La Home: &quot;{{home.frase}}&quot;, {{numeri.winPct}}% di partite vinte, {{numeri.diff}} punti di scarto e il consiglio di Pallo." width="390" height="844" decoding="async" loading="lazy" /></div></div></div>
-            </li>
-            <li class="capitolo" data-k="1">
-              <h3>Tornei e mappa delle conquiste</h3>
-              <p>Ogni torneo col suo luogo, il formato e il piazzamento. La mappa segna le città dove hai giocato: vinta, podio o giocata.</p>
-              <div class="capitolo-schermo"><div class="schermo"><div class="pagina"><span class="scheletro"><span class="scheletro-respiro"><!--@scheletro mappa--></span></span><img src="/presentazione/screens/mappa.webp" alt="La mappa delle conquiste con i pin di {{mappa.citta}} città della costa." width="390" height="844" decoding="async" loading="lazy" /></div></div></div>
-            </li>
-            <li class="capitolo" data-k="2">
-              <h3>Il diario, mese per mese</h3>
-              <p>Tornei, partite e foto in fila. La ricerca trova un torneo dal nome, dalla città, da un avversario o da una nota.</p>
-              <div class="capitolo-schermo"><div class="schermo"><div class="pagina"><span class="scheletro"><span class="scheletro-respiro"><!--@scheletro diario--></span></span><img src="/presentazione/screens/diario.webp" alt="Il Diario con i tornei di {{diario.mese}}, le foto e il campo di ricerca." width="390" height="844" decoding="async" loading="lazy" /></div></div></div>
-            </li>
-            <li class="capitolo" data-k="3">
-              <h3>Compagni, e chi c'è oggi</h3>
-              <p>Con chi vinci di più, partita per partita. E da Compagni vedi chi è in spiaggia oggi nella tua città, e chi cerca un compagno.</p>
-              <div class="capitolo-schermo"><div class="schermo"><div class="pagina"><span class="scheletro"><span class="scheletro-respiro"><!--@scheletro compagni--></span></span><img src="/presentazione/screens/compagni.webp" alt="Compagni: le card dei compagni con le partite vinte insieme, e la card &quot;Chi c'è in spiaggia oggi?&quot;." width="390" height="844" decoding="async" loading="lazy" /></div></div></div>
-            </li>
-          </ol>
         </div>
       </section>
 
-      <!-- =============================================== Cosa registriamo? -->
-      <section id="registra" class="campo" data-campo="carta" data-fondo="chiaro" aria-labelledby="registra-titolo">
-        <div class="dentro colonne">
+      <!-- ==================================================== Funzionalità -->
+      <section id="funzionalita" class="fascia" aria-labelledby="funzionalita-titolo">
+        <div class="dentro fascia-dentro">
           <div class="testa">
-            <h2 id="registra-titolo" tabindex="-1">Cosa registriamo?</h2>
-            <p class="frase">Scegli tu, al resto penso io.</p>
-            <p class="nota">Con un torneo in corso c'è anche «Partita»: un risultato in più, dritto nel torneo.</p>
+            <p class="occhiello">Funzionalità</p>
+            <h2 id="funzionalita-titolo">Tutta la stagione, in un posto solo.</h2>
+            <p class="frase">Ogni partita che registri alimenta statistiche, confronti e ricordi.</p>
           </div>
-          <div class="registra">
-            <span class="registra-piu" aria-hidden="true"><svg class="ui-icon" aria-hidden="true"><use href="#i-plus" /></svg></span>
-            <!-- Senza JavaScript: un elenco. Il modulo lo fa una tablist
-                 verticale (UX §L7.9). -->
-            <ul class="voci" aria-label="Cosa registriamo?">
-              <li class="voce" data-voce="live" data-tono="live">
-                <span class="voce-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-clock" /></svg></span>
-                <span class="voce-testo"><span class="voce-nome">Partita live</span> <span class="voce-sotto">Segna i punti, in torneo o tra amici</span></span>
-              </li>
-              <li class="voce" data-voce="torneo">
-                <span class="voce-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-trophy" /></svg></span>
-                <span class="voce-testo"><span class="voce-nome">Torneo</span> <span class="voce-sotto">Luogo, formato, compagno, piazzamento</span></span>
-              </li>
-              <li class="voce" data-voce="rapido">
-                <span class="voce-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-bolt" /></svg></span>
-                <span class="voce-testo"><span class="voce-nome">Torneo rapido</span> <span class="voce-sotto">Nome e piazzamento, i dettagli dopo</span></span>
-              </li>
-              <li class="voce" data-voce="chat">
-                <span class="voce-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-chat-dots" /></svg></span>
-                <span class="voce-testo"><span class="voce-nome">Raccontalo a Pallo</span> <span class="voce-sotto">Ti faccio io le domande, una alla volta</span></span>
-              </li>
-            </ul>
+          <!-- Nove carte, tre per riga: registrare (diario, partita live,
+               Solby), capire (statistiche, compagni, mappa), condividere e
+               incontrarsi (chi c'è oggi, storia, Wrapped). -->
+          <div class="carte">
+            <article class="carta">
+              <span class="carta-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-book" /></svg></span>
+              <h3>Diario</h3>
+              <p>Ogni torneo con data, luogo, compagno, risultato e foto. Cerca per città o avversario.</p>
+            </article>
+            <article class="carta">
+              <span class="carta-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-clock" /></svg></span>
+              <h3>Partita live</h3>
+              <p>Il segnapunti da bordo campo: un tocco per punto, in torneo o tra amici.</p>
+            </article>
+            <article class="carta">
+              <span class="carta-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-chat-dots" /></svg></span>
+              <h3>Solby, l’assistente</h3>
+              <p>Ti segnala record e serie, e compila il torneo con te, una domanda alla volta.</p>
+            </article>
+            <article class="carta">
+              <span class="carta-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-chart" /></svg></span>
+              <h3>Statistiche</h3>
+              <p>Percentuale di vittorie, punti di scarto e serie record, stagione per stagione.</p>
+            </article>
+            <article class="carta">
+              <span class="carta-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-people" /></svg></span>
+              <h3>Compagni</h3>
+              <p>Confronta i risultati con ogni compagno e scopri la coppia che funziona meglio.</p>
+            </article>
+            <article class="carta">
+              <span class="carta-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-pin" /></svg></span>
+              <h3>Mappa delle conquiste</h3>
+              <p>Le spiagge dove hai giocato e quelle dove hai vinto, su una mappa.</p>
+            </article>
+            <article class="carta">
+              <span class="carta-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-sun" /></svg></span>
+              <h3>Chi c’è oggi</h3>
+              <p>Fai check-in in spiaggia e trova chi cerca un compagno.</p>
+            </article>
+            <article class="carta">
+              <span class="carta-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-instagram" /></svg></span>
+              <h3>Storia Instagram</h3>
+              <p>Un’immagine per ogni torneo, pronta per le storie. Tre stili, tre colori.</p>
+            </article>
+            <article class="carta">
+              <span class="carta-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-phone" /></svg></span>
+              <h3>Beach Wrapped</h3>
+              <p>A fine stagione, il riepilogo in storie da scaricare e condividere.</p>
+            </article>
+          </div>
+        </div>
+      </section>
 
-            <div class="pannello-voce" data-voce="live" hidden>
-              <p class="pannello-voce-testo">Il segnapunti da bordo campo: due pannelli enormi, uno per squadra, e Pallo che commenta ogni punto.</p>
-              <p class="pannello-voce-testo">A fine partita la salvi nel torneo, o resta sul telefono se giocavi tra amici.</p>
-              <a class="ui-button" data-variant="tinted" href="#live">Provala qui sotto</a>
-            </div>
-            <div class="pannello-voce" data-voce="torneo" hidden>
-              <div class="pannello-voce-schermo"><div class="schermo"><img src="/presentazione/screens/torneo.webp" alt="Il foglio «Nuovo torneo» dell'app: nome, data, luogo, formato, compagno e piazzamento." width="390" height="844" decoding="async" loading="lazy" /></div></div>
-              <p class="pannello-voce-testo">Luogo, formato, compagno, piazzamento.</p>
-            </div>
-            <div class="pannello-voce" data-voce="rapido" hidden>
-              <p class="pannello-voce-testo">Nome e piazzamento, i dettagli dopo.</p>
-              <p class="pannello-voce-testo">Quando hai fretta a bordo campo: il resto lo completi con calma, dal diario.</p>
-            </div>
-            <div class="pannello-voce" data-voce="chat">
-              <div class="chat">
-                <p class="chat-testa"><span class="chat-avatar" aria-hidden="true"><!--@pallo testa--></span><span>Raccontalo a Pallo</span></p>
-                <!-- Il ruolo `log` sta sul contenitore che scorre: su un <ol> l'HTML
-                     non lo ammette, e le bolle smetterebbero di essere un elenco. -->
-                <div class="chat-log" role="log" aria-label="Conversazione con Pallo" tabindex="0">
-                  <ol class="chat-righe">
-                    <!--@trascrizione-->
-                    <li class="msg chat-riepilogo" data-chi="pallo"><dl><!--@riepilogo--></dl></li>
-                  </ol>
+      <!-- ======================================================= Schermate -->
+      <!-- Il giro (MOTION.md, Parte L): sei momenti di una stagione, ognuno con
+           la sua schermata vera e due righe. È un elenco ordinato, e senza
+           movimento resta questo: sei coppie, una sotto l'altra. Col movimento
+           la scena si ferma al centro dello schermo mentre si scorre: il
+           telefono resta lì e cambia schermata, il testo cambia accanto, e la
+           barra in cima (le storie di Wrapped) dice a che punto sei. -->
+      <section id="schermate" class="fascia" aria-labelledby="schermate-titolo">
+        <div class="dentro fascia-dentro">
+          <div class="testa">
+            <p class="occhiello">Schermate</p>
+            <h2 id="schermate-titolo">Semplice da usare, a bordo campo.</h2>
+            <p class="frase">Dal torneo di oggi al riepilogo di fine stagione.</p>
+          </div>
+        </div>
+        <div class="giro">
+          <div class="giro-scena dentro">
+            <div class="giro-barra" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <ol class="giro-passi">
+              <li class="passo">
+                <div class="passo-testo">
+                  <h3>Prima del torneo, lo racconti a Solby.</h3>
+                  <p>Nome, compagno, giorno e luogo: rispondi a qualche domanda e il torneo è pronto.</p>
                 </div>
-                <div class="chat-risposte" role="group" aria-label="Le tue risposte" tabindex="-1"></div>
-              </div>
-              <p class="nota chat-nota">Nell'app, Pallo segue un copione scritto a mano, una domanda alla volta: nessuna intelligenza artificiale. Niente esce dal telefono finché non salvi.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ===================================================== Partita live -->
-      <section id="live" class="campo" data-campo="carta" data-fondo="chiaro" aria-labelledby="live-titolo">
-        <div class="dentro colonne">
-          <div class="testa">
-            <h2 id="live-titolo" tabindex="-1">Partita live</h2>
-            <p class="frase">Il segnapunti da bordo campo, in torneo o tra amici.</p>
-            <ul class="fatti">
-              <li><svg class="ui-icon" aria-hidden="true"><use href="#i-volley" /></svg><span>Set a 21, il terzo a 15, sempre due punti di scarto. Cambio campo ogni 7 punti, ogni 5 nei set a 15.</span></li>
-              <li><svg class="ui-icon" aria-hidden="true"><use href="#i-trophy" /></svg><span>In torneo, a fine partita la salvi nel torneo. Tra amici, le ultime 20 restano sul telefono.</span></li>
-              <li><svg class="ui-icon" aria-hidden="true"><use href="#i-phone" /></svg><span>Lo schermo resta acceso mentre giochi.</span></li>
-              <li><svg class="ui-icon" aria-hidden="true"><use href="#i-refresh" /></svg><span>Se ricarichi la pagina, la partita è ancora lì.</span></li>
-              <li><svg class="ui-icon" aria-hidden="true"><use href="#i-bolt" /></svg><span>Una vibrazione leggera a ogni punto, sui telefoni che la sanno fare.</span></li>
-            </ul>
-          </div>
-          <div class="demo-colonna">
-            <p class="demo-invito" data-solo-vivo>Provala qui: tocca la squadra che fa punto.</p>
-            <p class="demo-invito demo-tasti" data-solo-vivo>Da tastiera: ↑ loro, ↓ noi, con Maiusc togli.</p>
-            <!-- Senza JavaScript: un tabellone fermo, un'immagine fatta di
-                 testo (UX §L6.4). Il modulo lo fa giocabile. -->
-            <div class="demo">
-              <p class="demo-occhiello">Tra amici · set a 21</p>
-              <h3 class="demo-set" tabindex="-1">Set 1 di 3</h3>
-              <div class="demo-pillole"></div>
-              <div class="demo-campo" role="img" aria-label="Esempio: Noi 20, Loro 18, set point per voi">
-                <div class="demo-box"><div class="pannello" data-chi="loro"><span class="pannello-nome">Loro</span><span class="live-num">18</span></div></div>
-                <div class="demo-mezzo" aria-hidden="true">
-                  <div class="demo-mezzo-in">
-                    <span class="demo-pallo"><!--@pallo esulta--></span>
-                    <span class="live-bolla">Set point per voi!</span>
-                  </div>
+                <div class="telefono">
+                  <img src="/presentazione/screens/giro-solby.webp" alt="Raccontalo a Solby: la chat che crea il torneo. Solby chiede nome, compagno, giorno e luogo; le risposte sono Rimini Open, Giulia, Oggi e Bagno 26 · Rimini." width="390" height="844" loading="lazy" decoding="async" />
                 </div>
-                <div class="demo-box"><div class="pannello" data-chi="noi"><span class="pannello-nome">Noi</span><span class="live-num">20</span></div></div>
-                <div class="demo-riepilogo" hidden><h3 class="demo-riepilogo-titolo" tabindex="-1"></h3><p class="demo-riepilogo-set"></p></div>
-              </div>
-              <div class="demo-azioni">
-                <button type="button" class="ui-button chiudi-set" data-variant="filled" data-size="lg" hidden>Chiudi il set</button>
-                <button type="button" class="ui-button ricomincia" data-variant="neutral" data-size="lg" hidden>Ricomincia</button>
-              </div>
-              <p class="sr-only demo-stato" role="status" aria-live="polite"></p>
-            </div>
+              </li>
+              <li class="passo">
+                <div class="passo-testo">
+                  <h3>In campo, un tocco per ogni punto.</h3>
+                  <p>Il segnapunti conosce set e vantaggi. A fine partita, il risultato va nel torneo.</p>
+                </div>
+                <div class="telefono">
+                  <img src="/presentazione/screens/giro-live.webp" alt="La Partita live al Rimini Open, primo set: Tu e Giulia 15, Bianchi / Verdi 10, e Solby che dice «Bel punto! Avanti così.»" width="390" height="844" loading="lazy" decoding="async" />
+                </div>
+              </li>
+              <li class="passo">
+                <div class="passo-testo">
+                  <h3>Dopo, il torneo resta nel diario.</h3>
+                  <p>Partite, set, piazzamento e foto in un posto solo. Lo ritrovi cercando la città o l’avversario.</p>
+                </div>
+                <div class="telefono">
+                  <img src="/presentazione/screens/giro-torneo.webp" alt="Il torneo Cervia Beach Party: primo posto nel tabellone Gold, record 2–0, la finale e la semifinale con i set, e le foto." width="390" height="844" loading="lazy" decoding="async" />
+                </div>
+              </li>
+              <li class="passo">
+                <div class="passo-testo">
+                  <h3>Scopri con chi giochi meglio.</h3>
+                  <p>Vittorie e sconfitte con ogni compagno. Collegalo all’app e vedrà i vostri tornei.</p>
+                </div>
+                <div class="telefono">
+                  <img src="/presentazione/screens/giro-compagni.webp" alt="I compagni: Giulia, 60% di vittorie in 5 partite insieme; Marco, collegato all’app, 100% in una partita." width="390" height="844" loading="lazy" decoding="async" />
+                </div>
+              </li>
+              <li class="passo">
+                <div class="passo-testo">
+                  <h3>La Storia del torneo, pronta da pubblicare.</h3>
+                  <p>Risultato, numeri e le tue foto in un’immagine per Instagram. Tre stili, tre colori.</p>
+                </div>
+                <div class="telefono">
+                  <img src="/presentazione/screens/giro-storia.webp" alt="La Storia Instagram del Cervia Beach Party: primo posto, 100% di vittorie, record 2–0 e le foto; sotto, gli stili Tabellone, Foto e Polaroid e tre colori." width="390" height="844" loading="lazy" decoding="async" />
+                </div>
+              </li>
+              <li class="passo">
+                <div class="passo-testo">
+                  <h3>A ottobre, la stagione in storie.</h3>
+                  <p>Beach Wrapped mette in fila vittorie, serie, il compagno e il rivale dell’anno. Da sfogliare e condividere.</p>
+                </div>
+                <div class="telefono">
+                  <img src="/presentazione/screens/wrapped.webp" alt="Beach Wrapped: «Vittorie totali», 5 partite vinte su 8 giocate, il 63% di win rate e il record 5–3, con Solby che festeggia." width="390" height="844" loading="lazy" decoding="async" />
+                </div>
+              </li>
+            </ol>
           </div>
         </div>
       </section>
 
-      <!-- ========================================================== Numeri -->
-      <section id="numeri" class="campo" data-campo="inchiostro" data-surface="dark" data-fondo="scuro" aria-labelledby="numeri-titolo">
-        <div class="dentro colonne">
-          <div class="testa">
-            <p class="occhiello">statistiche</p>
-            <h2 id="numeri-titolo" tabindex="-1">I numeri li fa l'app</h2>
-            <p class="frase">Tu giochi. Partite vinte, punti di scarto, tornei vinti e serie record si aggiornano a ogni risultato.</p>
-            <div class="poster">
-              <p class="poster-num"><span class="odo" data-odo>{{numeri.winPct}}</span><span class="poster-pct">%</span></p>
-              <p class="poster-etichetta">partite vinte</p>
-              <!--@barra-vp-->
-              <p class="poster-piede"><span><strong>{{numeri.vinte}}</strong> vinte</span><span>{{numeri.perse}} perse · {{numeri.giocate}} giocate</span></p>
-            </div>
+      <!-- ======================================================= Iscriviti -->
+      <!-- La registrazione resta nell'app (nickname verificato dal vivo, poi
+           email e password): qui ci sono solo le due porte. -->
+      <section id="iscriviti" class="fascia" aria-labelledby="iscriviti-titolo">
+        <div class="dentro finale">
+          <div class="testa finale-testo">
+            <p class="occhiello">Iscriviti</p>
+            <h2 id="iscriviti-titolo">Crea il tuo diario.</h2>
+            <p class="frase">Ti bastano nome, email e password. Subito dopo puoi registrare il primo torneo.</p>
           </div>
-          <div class="celle-colonna">
-            <div class="celle">
-              <p class="cella"><span class="cella-num"><span class="odo" data-odo>{{numeri.diff}}</span></span><span class="cella-etichetta">punti di scarto</span></p>
-              <p class="cella"><span class="cella-num"><span class="odo" data-odo>{{numeri.torneiVinti}}</span><span class="cella-di"> <span aria-hidden="true">/</span><span class="sr-only">su</span> {{numeri.tornei}}</span></span><span class="cella-etichetta">Tornei vinti</span></p>
-              <p class="cella"><span class="cella-num"><span class="odo" data-odo>{{numeri.serie}}</span></span><span class="cella-etichetta">Serie record</span></p>
-              <p class="cella"><span class="cella-num"><span class="odo" data-odo>{{numeri.podi}}</span></span><span class="cella-etichetta">podi</span></p>
-            </div>
-            <p class="nota">In Statistiche c'è il resto: l'andamento mese per mese, la resa per fase e per compagno, i piazzamenti.</p>
+          <div class="azioni">
+            <a class="cta" data-variant="pieno" href="/?accesso=registrati">Crea il tuo diario</a>
+            <a class="cta" data-variant="bianco" href="/?accesso=accedi">Ho già un account</a>
           </div>
-        </div>
-      </section>
-
-      <!-- =========================================================== Mappa -->
-      <section id="mappa" class="campo" data-campo="carta" data-fondo="chiaro" aria-labelledby="mappa-titolo">
-        <div class="dentro colonne">
-          <div class="testa">
-            <h2 id="mappa-titolo" tabindex="-1">La mappa delle conquiste</h2>
-            <p class="frase">Ogni città dove hai giocato diventa un pin, e il pin dice com'è andata: vinta, podio o giocata.</p>
-          </div>
-          <div class="mappa-colonna">
-            <figure class="mappa">
-              <div class="mappa-riquadro"><!--@mappa--></div>
-              <figcaption id="mappa-didascalia" class="nota">Illustrazione: {{mappa.citta}} città della costa romagnola. Nell'app la mappa è vera, con OpenStreetMap.</figcaption>
-            </figure>
-            <div class="mappa-elenco">
-              <ul class="mappa-legenda" aria-label="Legenda">
-                <li><span class="mappa-segno" data-esito="vinta" aria-hidden="true"></span>Vinta</li>
-                <li><span class="mappa-segno" data-esito="podio" aria-hidden="true"></span>Podio</li>
-                <li><span class="mappa-segno" data-esito="giocata" aria-hidden="true"></span>Giocata</li>
-              </ul>
-              <!-- L'esito in testo, città per città: il colore non è mai l'unica informazione. -->
-              <ul class="mappa-citta"><!--@mappa-citta--></ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ========================================================= Wrapped -->
-      <section id="wrapped" class="campo" data-campo="inchiostro" data-surface="dark" data-fondo="scuro" aria-labelledby="wrapped-titolo">
-        <div class="dentro wrapped-testa">
-          <div class="testa">
-            <p class="occhiello">a ottobre</p>
-            <h2 id="wrapped-titolo" tabindex="-1">Beach Wrapped</h2>
-            <p class="frase">A ottobre la tua stagione diventa una storia: vittorie, serie, il compagno migliore, il rivale.</p>
-            <p class="nota">Le slide si scaricano in PNG, o si condividono dal telefono.</p>
-          </div>
-        </div>
-        <!-- La pista: viva e con le timeline native, lo scroll verticale
-             sfoglia le slide (LM8). Altrimenti la riga si scorre a mano. -->
-        <div class="pista">
-          <div class="blocco">
-            <div class="slides" role="region" aria-label="Slide di Beach Wrapped" tabindex="0">
-              <ol class="slides-fila">
-                <!--@slide-->
-              </ol>
-            </div>
-          </div>
-        </div>
-        <div class="dentro storia-testa">
-          <h3 class="storia-titolo">E ogni torneo, una Storia</h3>
-          <p class="frase">Tre impaginazioni (Tabellone, Foto, Polaroid) in inchiostro, sabbia o arancio, pronte per Instagram.</p>
-          <figure class="storia">
-            <div class="storia-carte">
-              <img class="storia-carta" data-carta="tabellone" src="/presentazione/screens/storia-tabellone.webp" alt="Storia, layout Tabellone, in inchiostro" width="540" height="960" decoding="async" loading="lazy" />
-              <img class="storia-carta" data-carta="foto" src="/presentazione/screens/storia-foto.webp" alt="Storia, layout Foto, in sabbia" width="540" height="960" decoding="async" loading="lazy" />
-              <img class="storia-carta" data-carta="polaroid" src="/presentazione/screens/storia-polaroid.webp" alt="Storia, layout Polaroid, in arancio" width="540" height="960" decoding="async" loading="lazy" />
-            </div>
-            <figcaption class="nota">La Storia di un torneo, in tre impaginazioni: un PNG 1080 × 1920 per Instagram.</figcaption>
-          </figure>
-        </div>
-      </section>
-
-      <!-- ============================================== Il diario resta tuo -->
-      <section id="dati" class="campo" data-campo="carta" data-fondo="chiaro" aria-labelledby="dati-titolo">
-        <div class="dentro colonne">
-          <div class="testa">
-            <h2 id="dati-titolo" tabindex="-1">Il diario resta tuo</h2>
-          </div>
-          <!-- Solo fatti verificati nel codice (UX §L12.8): ogni riga ha la sua
-               fonte. Niente promesse su cancellazione o esportazione. -->
-          <ul class="righe">
-            <li class="riga">
-              <span class="riga-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-shield" /></svg></span>
-              <div><h3>I permessi stanno nel database</h3><p>Ogni tabella ha le sue regole d'accesso nel database (Row Level Security), non solo nell'app: gli altri utenti non leggono i tuoi tornei.</p></div>
-            </li>
-            <li class="riga">
-              <span class="riga-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-lock" /></svg></span>
-              <div><h3>Le foto dei tornei sono private</h3><p>Stanno in uno spazio privato e si aprono con link firmati che scadono dopo 8 ore.</p></div>
-            </li>
-            <li class="riga">
-              <span class="riga-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-link" /></svg></span>
-              <div><h3>Condividi solo se colleghi</h3><p>Se colleghi un compagno al suo account, lui vede in sola lettura i tornei giocati con te: partite, punteggi e note, non le foto. Puoi scollegarlo quando vuoi.</p></div>
-            </li>
-            <li class="riga">
-              <span class="riga-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-pin" /></svg></span>
-              <div><h3>Chi c'è oggi lo vede chi è lì</h3><p>Il tuo check-in lo vede solo chi è in spiaggia nella stessa città, lo stesso giorno: nome, foto del profilo, nota e se cerchi un compagno.</p></div>
-            </li>
-            <li class="riga">
-              <span class="riga-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-chart" /></svg></span>
-              <div><h3>Statistiche solo se dici sì</h3><p>Microsoft Clarity e Vercel Analytics partono solo se li accetti, e li spegni quando vuoi dal Profilo. Senza, l'app funziona uguale.</p></div>
-            </li>
-            <li class="riga">
-              <span class="riga-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-map" /></svg></span>
-              <div><h3>Chi altro sente</h3><p>La mappa scarica le tile da OpenStreetMap; cercando un luogo, il testo che scrivi va a Photon (Komoot). Nient'altro, senza il tuo sì.</p></div>
-            </li>
-            <li class="riga">
-              <span class="riga-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-info" /></svg></span>
-              <div><h3>Questa pagina</h3><p>Niente cookie né statistiche qui: caratteri e immagini arrivano da questo sito.</p></div>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <!-- ========================================================== Finale -->
-      <section id="comincia" class="campo finale" data-campo="tramonto" data-surface="dark" data-fondo="scuro" aria-labelledby="comincia-titolo">
-        <div class="dentro finale-dentro">
-          <h2 id="comincia-titolo" tabindex="-1">La prossima stagione te la ricordi per intero</h2>
-          <p class="frase">Ti registri con email e password, segni il primo torneo, e da lì il diario si scrive quasi da solo.</p>
-          <div class="finale-cta">
-            <a class="ui-button finale-crea" data-variant="filled" data-size="lg" href="/?accesso=registrati">Crea il tuo diario</a>
-            <span class="installa-posto">
-              <button type="button" class="installa" data-installa hidden><svg class="ui-icon" aria-hidden="true"><use href="#i-download" /></svg>Installa sul telefono</button>
-              <span class="installa-fatto" hidden>Fatto: Beach Diary è tra le tue app.</span>
-            </span>
-            <a class="ui-button" data-variant="quiet" href="/?accesso=accedi">Ho già un account</a>
-          </div>
-          <p class="nota finale-desktop">È fatta per il telefono: apri bv-diary.vercel.app dal tuo.</p>
-        </div>
-        <div class="orizzonte" aria-hidden="true">
-          <span class="sole"><span class="sole-alone"></span><span class="sole-disco"></span></span>
-          <span class="finale-pallo"><!--@pallo cuori--></span>
         </div>
       </section>
     </main>
-
-    <footer class="piede" data-surface="dark" data-fondo="scuro">
-      <span class="riflesso" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
-      <div class="piede-dentro">
-        <div class="piede-marchio">
-          <p class="piede-nome"><!--@marchio--><span>Beach Diary</span></p>
-          <p class="piede-riga">Tornei · Partite · Compagni · Statistiche</p>
-        </div>
-        <div class="piede-comandi">
-          <a class="ui-button" data-variant="quiet" href="/">Apri il diario</a>
-          <button type="button" class="comando-fermo comando-tondo" data-comando="fermo" aria-pressed="false" aria-label="Ferma le animazioni" aria-describedby="fermo-nota-piede">
-            <svg class="ui-icon fermo-pausa" aria-hidden="true"><use href="#i-pause" /></svg><svg class="ui-icon fermo-play" aria-hidden="true"><use href="#i-play" /></svg>
-          </button>
-          <a class="ui-button piede-su" data-variant="quiet" href="#inizio"><svg class="ui-icon" aria-hidden="true"><use href="#i-arrow-up" /></svg>Torna su</a>
-        </div>
-        <p id="fermo-nota-piede" class="fermo-nota">Animazioni già ridotte dalle impostazioni del telefono.</p>
-      </div>
-    </footer>
-
-    <!-- Il foglio d'installazione: modale, fuori da main, nascosto finché non
-         serve (UX §L7.12). Le quattro varianti dei passi le sceglie il modulo
-         dallo user agent. -->
-    <div class="velo" hidden></div>
-    <div id="installa" class="foglio" role="dialog" aria-modal="true" aria-labelledby="installa-titolo" aria-describedby="installa-testo" data-material="glass-thick" hidden>
-      <span class="foglio-sbircia" aria-hidden="true"><!--@pallo sbircia--></span>
-      <div class="foglio-corpo">
-        <button type="button" class="ui-icon-button foglio-chiudi" aria-label="Chiudi" data-chiude><svg class="ui-icon" aria-hidden="true"><use href="#i-close" /></svg></button>
-        <h2 id="installa-titolo" class="foglio-titolo" tabindex="-1">Aggiungi alla schermata Home</h2>
-        <p id="installa-testo" class="foglio-testo">Beach Diary si apre a tutto schermo, come un'app.</p>
-        <ol class="foglio-passi" data-passi="ios26">
-          <li>Tocca <b>⋯</b> in basso a destra, accanto all'indirizzo.</li>
-          <li>Tocca <b>Condividi</b>, poi <b>Aggiungi alla schermata Home</b>.</li>
-          <li>Conferma con <b>Aggiungi</b>: trovi l'icona tra le tue app.</li>
-        </ol>
-        <ol class="foglio-passi" data-passi="ios" hidden>
-          <li>Tocca <b>Condividi</b> nella barra di Safari.</li>
-          <li>Scorri e scegli <b>Aggiungi alla schermata Home</b>.</li>
-          <li>Conferma con <b>Aggiungi</b>.</li>
-        </ol>
-        <ol class="foglio-passi" data-passi="ios-altro" hidden>
-          <li>Tocca <b>Condividi</b>, nella barra dell'indirizzo o nel menu.</li>
-          <li>Scegli <b>Aggiungi alla schermata Home</b>.</li>
-          <li>Conferma.</li>
-        </ol>
-        <ol class="foglio-passi" data-passi="altro" hidden>
-          <li>Apri il <b>menu del browser</b> (i tre puntini).</li>
-          <li>Scegli <b>Installa app</b> o <b>Aggiungi a schermata Home</b>.</li>
-          <li>Conferma: trovi l'icona tra le tue app.</li>
-        </ol>
-        <p class="foglio-nota" data-solo-ios>Se l'hai già aggiunta, la trovi tra le tue app.</p>
-        <button type="button" class="ui-button foglio-ok" data-variant="neutral" data-size="lg" data-chiude>Ho capito</button>
-      </div>
-    </div>
-    <p id="installa-annuncio" class="sr-only" role="status"></p>
   </body>
 </html>

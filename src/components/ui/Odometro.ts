@@ -1,8 +1,8 @@
 // ============================================================================
 // Il contachilometri del tabellone (MOTION.md §10.3), senza React: la classe
-// che possiede il DOM delle colonne di cifre. La usano `Tabellone.tsx` (che
-// possiede solo il contenitore) e la landing `/presentazione`, che non ha un
-// framework. Le classi (`ui-odo*`) sono quelle di Tabellone.css.
+// che possiede il DOM delle colonne di cifre. La usa `Tabellone.tsx`, che
+// possiede solo il contenitore. Le classi (`ui-odo*`) sono quelle di
+// Tabellone.css.
 //
 // Ogni cifra è una colonna ritagliata in verticale che contiene una striscia
 // [vuoto, 0–9, 0–9]; il valore è la posizione della striscia. Cambiare valore =

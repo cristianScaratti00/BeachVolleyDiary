@@ -1,7 +1,7 @@
 // ============================================================================
 // L'assistente guidato (UX §5 F11, §6.10; MOTION.md §5 F11; design 14): la
 // creazione del torneo come conversazione con Pallo. È un percorso
-// FACOLTATIVO (risposta 6): ci si arriva dal ＋ («Raccontalo a Pallo»), dallo
+// FACOLTATIVO (risposta 6): ci si arriva dal ＋ («Raccontalo a Solby»), dallo
 // sheet «Nuovo torneo», dagli stati vuoti e da `/crea`.
 //
 // Il copione sta in `crea/copione.ts`, lo stato in `crea/useAssistente.ts`;
@@ -118,7 +118,7 @@ export default function CreaChat({ partners, venues, onCreate, onDone, onExit, r
             creato è contento. Gli occhi seguono il dito. */}
         <Pallo umore={a.typing ? 'pensa' : a.step === 'done' ? 'contento' : 'testa'} soloTesta size={38} segui />
         <div className="crea-title">
-          <h1 tabIndex={-1}>Pallo</h1>
+          <h1 tabIndex={-1}>Solby</h1>
           <p>Nuovo torneo · {passo}</p>
         </div>
       </header>
@@ -131,7 +131,7 @@ export default function CreaChat({ partners, venues, onCreate, onDone, onExit, r
           vicino.current = el.scrollHeight - el.scrollTop - el.clientHeight <= VICINO_AL_FONDO
         }}
       >
-        <div className="crea-log" role="log" aria-live="polite" aria-label="Conversazione con Pallo">
+        <div className="crea-log" role="log" aria-live="polite" aria-label="Conversazione con Solby">
           {a.messages.map((m) => (
             <Bubble key={m.id} m={m} partners={partners} venues={venues} />
           ))}
@@ -166,7 +166,7 @@ export default function CreaChat({ partners, venues, onCreate, onDone, onExit, r
             onChange={(e) => a.setText(e.target.value)}
             placeholder={p.campo?.placeholder ?? 'Scrivi una risposta…'}
             // Il nome del campo è la domanda (UX F11.3).
-            aria-label={a.domandaCorrente ?? 'Scrivi a Pallo'}
+            aria-label={a.domandaCorrente ?? 'Scrivi a Solby'}
             autoComplete="off"
             enterKeyHint="send"
             disabled={!p.campo}
@@ -203,7 +203,7 @@ function Typing() {
           <span style={{ '--i': 1 } as CSSProperties} />
           <span style={{ '--i': 2 } as CSSProperties} />
         </span>
-        <span className="sr-only">Pallo sta scrivendo</span>
+        <span className="sr-only">Solby sta scrivendo</span>
       </div>
     </div>
   )

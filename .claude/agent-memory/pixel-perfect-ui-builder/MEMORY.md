@@ -1,6 +1,6 @@
 - [mappa-conquiste-leaflet](mappa-conquiste-leaflet.md) — Why the redesigned "Mappa delle conquiste" keeps Leaflet+OSM (not the design's schematic Italy SVG) and the Leaflet styling traps met while dressing it
 - [preview-schermate-senza-sessione](preview-schermate-senza-sessione.md) — How to screenshot Login/Splash/ConsensoCookie and other logged-out UI, since docs/preview always mounts the authenticated app
-- [project-pallo-mascotte](project_pallo_mascotte.md) — L'utente ama la mascotte Pallo e la vuole espressiva; umori, interazioni e regole che l'illustrazione deve rispettare (redesign versione D, ott 2026)
+- [project-pallo-mascotte](project_pallo_mascotte.md) — L'utente ama la mascotte (Solby nella UI dal 20/10/2026, Pallo nel codice) e la vuole espressiva; umori, interazioni e regole che l'illustrazione deve rispettare (redesign versione D, ott 2026)
 - [project-redesign-versione-d](project_redesign_versione_d.md) — Oct 2026 redesign "versione D" (Liquid Glass) from Claude Design, reproduced screen by screen by parallel agents on branch `redesign`; what Home/Statistiche became
 - [qa-export-png-preview](qa_export_png_preview.md) — How to check the real PNG export (Story/Wrapped canvases) in the live docs/preview without a build, and what the canvases look like after the 2026-10 redesign
 - [qa-tastiera-ios](qa-tastiera-ios.md) — Simulating the iPhone keyboard (fake visualViewport) and touch-drag checks in headless Chrome; the headless :focus trap

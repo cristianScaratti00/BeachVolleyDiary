@@ -1,7 +1,7 @@
 // ============================================================================
-// Le schermate del telefono della landing (/presentazione), scattate
-// dall'anteprima VERA (docs/preview) con i dati di prova: UX §L6.2, LC10, ART
-// §L10.5–§L10.6. Si rigenerano con un comando, dalla radice del repo:
+// Le schermate dei telefoni della landing (/presentazione), scattate
+// dall'anteprima VERA (docs/preview) con i dati di prova: ART_DIRECTION §L5.
+// Si rigenerano con un comando, dalla radice del repo:
 //
 //   node docs/qa/landing-shots.mjs
 //
@@ -12,18 +12,25 @@
 //     quel server e non ne avvia uno;
 //   - FISSA LA DATA a OGGI_LANDING prima di ogni script della pagina: Wrapped
 //     esiste solo a ottobre (`wrappedAOttobre`) e i tornei «di oggi» si
-//     spostano col calendario. DEVE coincidere con `OGGI_LANDING` di
-//     `docs/preview/dati.ts`, da cui `presentazione/js/generati/dati.ts`
-//     prende i numeri del sito: schermate e numeri dicono la stessa cosa;
+//     spostano col calendario. È lo stesso giorno di `OGGI_LANDING` in
+//     `docs/preview/dati.ts`;
 //   - 390×844 a dpr 2, telefono col tocco, movimento ridotto (ogni umore di
 //     Pallo e ogni numero al suo fotogramma fermo: niente scatti a metà
 //     salita). Nient'altro è nascosto: è l'app com'è;
-//   - WebP qualità 82: le quattro schermate dei capitoli (780×1688), il
-//     foglio «Nuovo torneo», e le tre impaginazioni della Storia di un
-//     torneo vinto, ritagliate sulla tela (540×960).
+//   - WebP qualità 82, 780×1688: la Home (l'hero) e i sei momenti del giro
+//     di #schermate: la chat di Solby a metà, una partita live sul 15–10, il
+//     torneo Cervia Beach Party, la sua Storia Instagram, i compagni e la
+//     storia delle vittorie di Beach Wrapped;
+//   - la Home una seconda volta SENZA le cifre del tabellone e la barra delle
+//     vinte (`home-fondo.webp`): è lo schermo del telefono dell'hero, dove
+//     cifre e barra le disegna la landing per rifare l'apertura della Home
+//     (MOTION.md, Parte L). Nella stessa passata misura le fasce dei blocchi
+//     che salgono, le colonne delle cifre e la barra, e scrive
+//     `presentazione/styles/misure.css`. Se l'hero di presentazione/index.html
+//     non ha le colonne che servono, si ferma e dice quali.
 //
 // Escono in public/presentazione/screens/. Per ognuna stampa misure e peso
-// (obiettivo ≤ 120 KB, UX §L13).
+// (obiettivo ≤ 120 KB).
 // ============================================================================
 import { spawn } from 'node:child_process'
 import { mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
@@ -36,6 +43,8 @@ const OGGI_LANDING = { anno: 2026, mese: 10, giorno: 17, ora: 10 }
 
 const RADICE = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const OUT = join(RADICE, 'public', 'presentazione', 'screens')
+const MISURE = join(RADICE, 'presentazione', 'styles', 'misure.css')
+const MODELLO = join(RADICE, 'presentazione', 'index.html')
 const PORTA_VITE = Number(process.env.PORTA_VITE ?? 5198)
 const PORTA_CDP = Number(process.env.PORTA_CDP ?? 9341)
 const QUALITA = 82
@@ -136,20 +145,6 @@ async function pronta() {
   await sleep(700)
 }
 
-/** Clic sull'elemento (il primo che corrisponde, o quello col testo). */
-async function tocca(sel, testo) {
-  const c = await p.eval(`(() => {
-    const tutti = [...document.querySelectorAll(${JSON.stringify(sel)})]
-    const e = ${testo ? `tutti.find((x) => x.textContent.includes(${JSON.stringify(testo)}))` : 'tutti[0]'}
-    if (!e) return null
-    e.scrollIntoView({ block: 'center' })
-    const r = e.getBoundingClientRect()
-    return [r.x + r.width / 2, r.y + r.height / 2]
-  })()`)
-  if (!c) throw new Error(`manca ${sel}${testo ? ` «${testo}»` : ''}`)
-  await p.click(c[0], c[1])
-}
-
 mkdirSync(OUT, { recursive: true })
 const fatte = []
 async function salva(nome, opts = {}) {
@@ -169,80 +164,218 @@ async function apri(rotta) {
   await sleep(300)
 }
 
-// ------------------------------------------------- i quattro capitoli
+// ------------------------------------------- le misure dell'hero (misure.css)
+// Le fasce della Home che salgono una dopo l'altra, come nell'app: ogni
+// blocco `.rise` dalla metà dello spazio sopra di lui alla metà di quello
+// sotto. L'ultimo blocco sta sotto la TabBar, che nell'app non sale: da lì in
+// giù è una fascia ferma («fondo»).
+const FASCE = [
+  ['home-head', 'testa'],
+  ['home-filtri', 'filtri'],
+  ['home-pallo', 'pallo'],
+  ['home-rend-wrap', 'rendimento'],
+  ['dash-wrapped', 'wrapped'],
+  ['home-coppia', 'coppia'],
+  ['home-ultimi', 'fondo'],
+]
+const NUMERI = ['pct', 'scarto', 'vinti', 'serie']
+const r2 = (n) => Math.round(n * 100) / 100
+/** L'indice nella striscia [vuoto, 0–9, 0–9] (Odometro.ts). */
+const IDX = (ch) => (ch === ' ' ? 0 : 1 + Number(ch))
+
+function scriviMisure(m) {
+  const errori = []
+  const blocco = (cls) => m.blocchi.find((b) => b.cls.split(/\s+/).includes(cls))
+  const fasce = FASCE.map(([cls, nome]) => ({ nome, b: blocco(cls) }))
+  for (const f of fasce) if (!f.b) errori.push(`manca il blocco della fascia «${f.nome}»`)
+  if (!m.tabbar) errori.push('manca la TabBar')
+  if (errori.length) throw new Error('landing-shots: ' + errori.join('; '))
+
+  const righe = []
+  fasce.forEach((f, k) => {
+    const y0 = k === 0 ? 0 : r2((fasce[k - 1].b.b + f.b.y) / 2)
+    const y1 = f.nome === 'fondo' ? m.h : r2((f.b.b + fasce[k + 1].b.y) / 2)
+    const i = f.nome === 'fondo' ? '' : ` --i: ${f.b.i || k};`
+    righe.push(`  .banda[data-b="${f.nome}"] { --y0: ${y0}; --y1: ${y1};${i} }`)
+  })
+  if (m.tabbar.y < Number(/--y0: ([\d.]+)/.exec(righe[righe.length - 1])[1])) errori.push('la TabBar comincia sopra la fascia ferma')
+
+  // Le cifre: la salita da zero di Tabellone.tsx (`rise`), cioè
+  // Odometro.set('0' → valore). Le colonne nuove entrano dal vuoto; quelle
+  // che c'erano rotolano e scivolano di una colonna a destra (il FLIP).
+  // Un salto di uno è MOLLA, il resto RACCONTO.
+  const modello = readFileSync(MODELLO, 'utf8')
+  for (const nome of NUMERI) {
+    const n = m.numeri.find((x) => x.dove === nome)
+    if (!n) { errori.push(`manca il numero «${nome}» nella Home`); continue }
+    const num = /\d+/.exec(n.valore)?.[0] ?? ''
+    const voce = FASCE.find(([cls]) => n.blocco.split(/\s+/).includes(cls))
+    const fascia = voce && fasce.find((f) => f.nome === voce[1])
+    const c0 = n.cols[0]
+    const tempo = Number(num) <= 1 ? 'molla' : 'racconto'
+    righe.push(`  .odo[data-odo="${nome}"] { --x: ${c0.x}; --y: ${c0.y}; --cw: ${c0.w}; --lh: ${c0.h}; --fs: ${n.fs}; --ls: ${n.ls}; --i: ${fascia?.b.i ?? 0}; --dur: var(--dur-${tempo}); --ease: var(--ease-${tempo}); } /* ${n.valore} */`)
+    const da = '0'.padStart(num.length, ' ')
+    const guadagno = num.length - 1
+    for (let k = 0; k < num.length; k++) {
+      const stabile = da[k] !== ' '
+      const from = IDX(da[k])
+      let to = IDX(num[k])
+      if (stabile && to < from) to += 10
+      righe.push(`  .odo[data-odo="${nome}"] > :nth-child(${k + 1}) { --da: ${from}; --a: ${to}; --passi: ${to - from + 1}; --dx: ${stabile ? -guadagno : 0}; }`)
+    }
+    const nelModello = new RegExp(`data-odo="${nome}">((?:<span></span>)*)</span>`).exec(modello)
+    const colonne = nelModello ? nelModello[1].split('<span></span>').length - 1 : 0
+    if (colonne !== num.length) errori.push(`l'hero di presentazione/index.html ha ${colonne} colonne per «${nome}» (${n.valore}): ne servono ${num.length}`)
+  }
+  for (const [, nome] of FASCE) if (!modello.includes(`data-b="${nome}"`)) errori.push(`manca la fascia «${nome}» nell'hero di presentazione/index.html`)
+
+  // La barra delle vinte: le due parti, ognuna dalla sua x dentro la barra.
+  const barra = m.barra.find((b) => b.cls === 'home-barra')
+  const v = m.barra.find((b) => b.cls.includes('home-barra-v'))
+  const pp = m.barra.find((b) => b.cls.includes('home-barra-p'))
+  if (!barra || !v || !pp) errori.push('manca la barra delle vinte')
+  else {
+    const i = blocco('home-rend-wrap')?.i || 3
+    righe.push(`  .barra { --x: ${barra.x}; --y: ${barra.y}; --w: ${barra.w}; --h: ${barra.h}; --i: ${i}; }`)
+    righe.push(`  .barra-v { --x: ${r2(v.x - barra.x)}; --w: ${v.w}; }`)
+    righe.push(`  .barra-p { --x: ${r2(pp.x - barra.x)}; --w: ${pp.w}; }`)
+  }
+  if (errori.length) throw new Error('landing-shots: ' + errori.join('; '))
+
+  const css = `/* ============================================================================
+   GENERATO da docs/qa/landing-shots.mjs: non si modifica a mano, si rigenera.
+
+   Le misure della Home (${m.w} × ${m.h}, in pixel dell'app) per il telefono
+   dell'hero: le fasce dei blocchi che salgono, le colonne del tabellone e la
+   barra delle vinte, prese dall'anteprima nella stessa passata che scatta
+   home-fondo.webp. Le usa apertura.css (MOTION.md, Parte L).
+   ============================================================================ */
+@layer components {
+${righe.join('\n')}
+}
+`
+  writeFileSync(MISURE, css)
+  fatte.push({ nome: 'misure.css', w: m.w, h: m.h, kb: +(Buffer.byteLength(css) / 1024).toFixed(1) })
+}
+
+// ------------------------------------------------- le tre schermate
 await apri('/')
 const home = await p.eval(`(() => {
   const t = (s) => document.querySelector(s)?.textContent?.trim() ?? null
-  return {
-    frase: t('h1'),
-    bolla: [...document.querySelectorAll('.home-pallo-bolla, [class*="consiglio"], [class*="bolla"]')].map((e) => e.textContent.trim()).filter(Boolean)[0] ?? null,
-    testo: document.querySelector('main')?.innerText.slice(0, 1200) ?? null,
-  }
+  return { frase: t('h1'), testo: document.querySelector('main')?.innerText.slice(0, 800) ?? null }
 })()`)
 await salva('home.webp')
 
-await apri('/tornei/mappa')
-// Le tile di OpenStreetMap: tutte caricate, e l'attribuzione in vista.
-await quando(`document.querySelectorAll('.leaflet-tile').length > 0 && [...document.querySelectorAll('.leaflet-tile')].every((i) => i.complete && i.naturalWidth > 0)`, 25000, 'tile OSM')
-await quando(`/OpenStreetMap/.test(document.querySelector('.leaflet-control-attribution')?.textContent ?? '')`, 5000, 'attribuzione OSM')
-await reteQuieta(1000)
-await sleep(600)
-const mappa = await p.eval(`({ pin: document.querySelectorAll('.leaflet-marker-icon').length, attribuzione: document.querySelector('.leaflet-control-attribution')?.textContent.trim(), testo: document.querySelector('main')?.innerText.slice(0, 600) })`)
-await salva('mappa.webp')
+// ------------------------------- la Home dell'hero: lo schermo senza cifre
+// Le colonne delle cifre e le due parti della barra spariscono senza toccare
+// il layout (visibility): il «%», il «+» e «/ 7» restano dove sono.
+const misure = await p.eval(`(() => {
+  const r2 = (n) => Math.round(n * 100) / 100
+  const R = (el) => { const r = el.getBoundingClientRect(); return { x: r2(r.x), y: r2(r.y), w: r2(r.width), h: r2(r.height), b: r2(r.bottom) } }
+  const blocchi = [...document.querySelectorAll('main .rise')].map((el) => ({ cls: el.className, i: getComputedStyle(el).getPropertyValue('--rise-i').trim(), ...R(el) }))
+  const tabbar = document.querySelector('.ui-tabbar')
+  const numeri = [...document.querySelectorAll('main .ui-tabellone')].map((el) => {
+    const d = el.querySelector('.ui-odo-d')
+    const cs = getComputedStyle(d)
+    const mini = el.closest('.home-mini')
+    const dove = el.closest('.home-pct') ? 'pct' : el.closest('.home-scarto-n') ? 'scarto' : mini ? (mini.previousElementSibling ? 'serie' : 'vinti') : null
+    return {
+      dove,
+      valore: el.querySelector('.sr-only')?.textContent ?? '',
+      blocco: el.closest('.rise')?.className ?? '',
+      fs: parseFloat(cs.fontSize), ls: parseFloat(cs.letterSpacing), fw: cs.fontWeight,
+      cols: [...el.querySelectorAll('.ui-odo-d')].map(R),
+    }
+  })
+  const barra = [...document.querySelectorAll('.home-barra, .home-barra > span')].map((el) => ({ cls: el.className, ...R(el) }))
+  const s = document.createElement('style')
+  s.textContent = '.ui-tabellone .ui-odo-cols, .home-barra > span { visibility: hidden !important; }'
+  document.head.append(s)
+  return { blocchi, tabbar: tabbar && R(tabbar), numeri, barra, w: innerWidth, h: innerHeight }
+})()`)
+await sleep(300)
+await salva('home-fondo.webp')
+scriviMisure(misure)
 
-await apri('/diario')
-const diario = await p.eval(`(() => { const t = document.querySelector('main')?.innerText ?? ''; return t.slice(0, 400) })()`)
-await salva('diario.webp')
-
-await apri('/compagni')
-await salva('compagni.webp')
-
-// ------------------------------------------------- il foglio «Nuovo torneo»
-await apri('/')
-await tocca('.ui-tab-plus')
-await quando(`document.querySelector('[role="menuitem"]')`, 5000, 'menu ＋')
-await tocca('[role="menuitem"]', 'Torneo')
-await quando(`[...document.querySelectorAll('[role="dialog"]')].some((d) => /Nuovo torneo/.test(d.textContent))`, 5000, 'foglio Nuovo torneo')
-await sleep(900)
-await p.eval('document.activeElement?.blur?.()')
-await sleep(200)
-await salva('torneo.webp')
-
-// ------------------------------------------------- la Storia, tre impaginazioni
-await apri('/tornei')
-await tocca('main a, main button, main [role="link"]', 'Cervia Beach Party')
-await quando(`/Cervia Beach Party/.test(document.querySelector('h1')?.textContent ?? '')`, 8000, 'dettaglio del torneo')
-await pronta()
-await tocca('[aria-label="Storia Instagram"]')
-await quando(`document.querySelector('.storia-canvas')`, 8000, 'Storia')
-await p.eval(`Promise.all(['900 100px "Geist Variable"', '800 100px "Geist Variable"', '700 100px "Geist Variable"', '600 100px "Geist Variable"', '500 100px "Geist Variable"'].map((f) => document.fonts.load(f))).then(() => true)`)
-const STORIE = [
-  { nome: 'storia-tabellone.webp', layout: 'Tabellone', colore: 'Inchiostro' },
-  { nome: 'storia-foto.webp', layout: 'Foto', colore: 'Sabbia' },
-  { nome: 'storia-polaroid.webp', layout: 'Polaroid', colore: 'Arancio' },
-]
-for (const s of STORIE) {
-  await tocca('[role="radiogroup"][aria-label="Layout della storia"] [role="radio"]', s.layout)
-  await tocca(`[role="radiogroup"][aria-label="Colore della storia"] [role="radio"][aria-label="${s.colore}"]`)
-  await reteQuieta(600)
-  await sleep(700)
-  // La tela 1080×1920 portata a 270×480 px CSS (× dpr 2 = 540×960): la stessa
-  // tela del PNG, a una scala tonda. Il PNG della Storia è un rettangolo: gli
-  // angoli tondi sono della cornice d'anteprima, non della tela.
-  const r = await p.eval(`(() => {
-    const box = document.querySelector('.storia-preview')
-    const tela = document.querySelector('.storia-canvas')
-    Object.assign(box.style, { width: '270px', height: '480px', borderRadius: '0' })
-    tela.style.transform = 'scale(0.25)'
-    const r = tela.getBoundingClientRect()
-    return { x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width), h: Math.round(r.height) }
-  })()`)
+// ------------------------------------------- il giro di #schermate
+// Sei momenti dell'app, uno per passo del giro (MOTION.md, Parte L): la chat
+// di Solby a metà, una partita live in corso, il torneo nel diario, i
+// compagni, la Storia Instagram e Beach Wrapped (più sotto). Il fuoco va via
+// prima dello scatto: un anello su una scelta sembrerebbe una selezione.
+async function salvaFerma(nome) {
+  await p.eval('document.activeElement?.blur?.()')
   await sleep(300)
-  await salva(s.nome, { clip: { x: r.x, y: r.y, width: r.w, height: r.h, scale: 1 } })
+  await salva(nome)
 }
+const clicca = (sel, testo) => p.eval(`(() => { const b = [...document.querySelectorAll(${JSON.stringify(sel)})].find((e) => ${testo}.test(e.getAttribute('aria-label') || e.innerText)); if (!b) return false; b.click(); return true })()`)
+
+// Raccontalo a Solby: il nome scritto, poi compagno, giorno e luogo scelti.
+await apri('/crea')
+await quando(`document.querySelector('input.crea-input:not(:disabled)')`, 8000, 'il campo della chat')
+await p.eval(`document.querySelector('input.crea-input').focus()`)
+await p.type('Rimini Open')
+await p.key('Enter')
+for (let k = 0; k < 3; k++) {
+  await quando(`document.querySelector('.crea-dock button')`, 8000, 'le scelte della chat')
+  await sleep(400)
+  await p.eval(`document.querySelector('.crea-dock button').click()`)
+}
+await quando(`document.querySelectorAll('.crea-dock button').length > 3`, 8000, 'la domanda sulla categoria')
+const solby = await p.eval(`document.querySelector('.crea-log')?.innerText.slice(0, 400) ?? ''`)
+await salvaFerma('giro-solby.webp')
+
+// Partita live al Rimini Open: 15–10, l'ultimo punto è nostro.
+await apri('/live')
+await p.eval(`document.querySelector('main input')?.focus()`)
+await p.type('Bianchi / Verdi')
+if (!(await clicca('button', '/^Inizia$/'))) throw new Error('landing-shots: manca «Inizia» nella partita live')
+await quando(`document.querySelector('.live-punto')`, 8000, 'il segnapunti')
+for (const c of 'NLNNLNLLNNLNNLNLNNLLNNLNN') {
+  await clicca('.live-punto', c === 'N' ? '/^Punto per noi/' : '/^Punto per Bianchi/')
+  await sleep(60)
+}
+await sleep(600)
+const live = await p.eval(`document.querySelector('main')?.innerText.slice(0, 200) ?? ''`)
+await salvaFerma('giro-live.webp')
+
+// Il torneo nel diario: Cervia Beach Party, 1° nel tabellone Gold.
+await apri('/tornei')
+if (!(await clicca('a', '/Cervia Beach Party/'))) throw new Error('landing-shots: manca «Cervia Beach Party» in Tornei')
+await quando(`/Cervia Beach Party/.test(document.querySelector('h1')?.textContent ?? '')`, 8000, 'il dettaglio del torneo')
+await pronta()
+await p.eval('scrollTo(0, 0)')
+const torneo = await p.eval(`document.querySelector('main')?.innerText.slice(0, 300) ?? ''`)
+await salvaFerma('giro-torneo.webp')
+
+// La sua Storia Instagram: il foglio con l'anteprima, gli stili e i colori.
+if (!(await clicca('button', '/^Condividi come storia Instagram$/'))) throw new Error('landing-shots: manca la Storia nel dettaglio')
+await quando(`[...document.querySelectorAll('button')].some((b) => b.innerText.trim() === 'Polaroid')`, 8000, 'il foglio della Storia')
+await reteQuieta(600)
+await sleep(900)
+await salvaFerma('giro-storia.webp')
+
+// I compagni: con chi giochi meglio, e chi è collegato all'app.
+await apri('/compagni')
+const compagni = await p.eval(`document.querySelector('main')?.innerText.slice(0, 300) ?? ''`)
+await salvaFerma('giro-compagni.webp')
+
+// Beach Wrapped: la seconda storia, le vittorie (la prima è la copertina,
+// con la foto del diario di prova). Ferma: con reduced-motion la barra non
+// avanza da sola; ci si arriva con la freccia, come dalla tastiera.
+await apri('/wrapped')
+await quando(`document.querySelector('.wrapped-head')`, 8000, 'Beach Wrapped')
+await p.eval(`document.querySelector('[role="group"][tabindex="0"]')?.focus()`)
+await p.key('ArrowRight')
+await quando(`/slide 2 di/i.test(document.querySelector('[role="group"][tabindex="0"]')?.getAttribute('aria-label') ?? '')`, 5000, 'seconda slide')
+await p.eval(`document.activeElement?.blur?.()`)
+await p.eval(`Promise.all(['900 100px "Geist Variable"', '800 100px "Geist Variable"', '700 100px "Geist Variable"'].map((f) => document.fonts.load(f))).then(() => true)`)
+await reteQuieta(600)
+await sleep(900)
+const wrapped = await p.eval(`(() => (document.querySelector('[class*="wrapped"]')?.innerText ?? document.body.innerText).slice(0, 400))()`)
+await salva('wrapped.webp')
 
 // ------------------------------------------------------------- resoconto
-console.log(JSON.stringify({ oggi: OGGI_LANDING, home, mappa, diario }, null, 2))
+console.log(JSON.stringify({ oggi: OGGI_LANDING, home, solby, live, torneo, compagni, wrapped }, null, 2))
 for (const f of fatte) {
   const fuori = f.kb * 1024 > PESO_MAX ? '  ⚠ oltre 120 KB' : ''
   console.log(`${f.nome.padEnd(24)} ${f.w}×${f.h}  ${f.kb} KB${fuori}`)

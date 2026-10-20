@@ -1,0 +1,30 @@
+/* ============================================================================
+   GENERATO da docs/qa/landing-shots.mjs: non si modifica a mano, si rigenera.
+
+   Le misure della Home (390 × 844, in pixel dell'app) per il telefono
+   dell'hero: le fasce dei blocchi che salgono, le colonne del tabellone e la
+   barra delle vinte, prese dall'anteprima nella stessa passata che scatta
+   home-fondo.webp. Le usa apertura.css (MOTION.md, Parte L).
+   ============================================================================ */
+@layer components {
+  .banda[data-b="testa"] { --y0: 0; --y1: 116.72; --i: 0; }
+  .banda[data-b="filtri"] { --y0: 116.72; --y1: 173.72; --i: 1; }
+  .banda[data-b="pallo"] { --y0: 173.72; --y1: 360.81; --i: 2; }
+  .banda[data-b="rendimento"] { --y0: 360.81; --y1: 538.2; --i: 3; }
+  .banda[data-b="wrapped"] { --y0: 538.2; --y1: 624.2; --i: 4; }
+  .banda[data-b="coppia"] { --y0: 624.2; --y1: 744.7; --i: 5; }
+  .banda[data-b="fondo"] { --y0: 744.7; --y1: 844; }
+  .odo[data-odo="pct"] { --x: 37; --y: 402.06; --cw: 32.19; --lh: 58.89; --fs: 54; --ls: -2.16; --i: 3; --dur: var(--dur-racconto); --ease: var(--ease-racconto); } /* 63 */
+  .odo[data-odo="pct"] > :nth-child(1) { --da: 0; --a: 7; --passi: 8; --dx: 0; }
+  .odo[data-odo="pct"] > :nth-child(2) { --da: 1; --a: 4; --passi: 4; --dx: -1; }
+  .odo[data-odo="scarto"] { --x: 323.66; --y: 383.81; --cw: 14.67; --lh: 25.3; --fs: 24; --ls: -0.6; --i: 3; --dur: var(--dur-racconto); --ease: var(--ease-racconto); } /* +36 */
+  .odo[data-odo="scarto"] > :nth-child(1) { --da: 0; --a: 4; --passi: 5; --dx: 0; }
+  .odo[data-odo="scarto"] > :nth-child(2) { --da: 1; --a: 7; --passi: 7; --dx: -1; }
+  .odo[data-odo="vinti"] { --x: 33; --y: 669.45; --cw: 18.03; --lh: 25.3; --fs: 30; --ls: -1.05; --i: 5; --dur: var(--dur-molla); --ease: var(--ease-molla); } /* 1 */
+  .odo[data-odo="vinti"] > :nth-child(1) { --da: 1; --a: 2; --passi: 2; --dx: 0; }
+  .odo[data-odo="serie"] { --x: 218; --y: 669.45; --cw: 18.03; --lh: 25.3; --fs: 30; --ls: -1.05; --i: 5; --dur: var(--dur-racconto); --ease: var(--ease-racconto); } /* 5 */
+  .odo[data-odo="serie"] > :nth-child(1) { --da: 1; --a: 6; --passi: 6; --dx: 0; }
+  .barra { --x: 37; --y: 476.95; --w: 316; --h: 8; --i: 3; }
+  .barra-v { --x: 0; --w: 196.25; }
+  .barra-p { --x: 198.25; --w: 117.75; }
+}

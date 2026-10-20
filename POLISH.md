@@ -2,7 +2,7 @@
 
 Giro di rifinitura (ruolo 5) sull'interfaccia già costruita: breakpoint veri, dati veri e dati estremi, tastiera senza mouse, axe nel browser, contrasto anche in hover, reduced-motion, prestazioni misurate sulla build di produzione. Tutto quello che si cita qui si rifà con gli script in [`docs/qa/`](docs/qa/) (in fondo il come).
 
-La landing `/presentazione` ha avuto il suo giro, con un suo script: è la [Parte L](#parte-l--la-landing-presentazione), in fondo.
+La landing `/presentazione` ha il suo giro, con un suo script: è la [Parte L](#parte-l--la-landing-presentazione), in fondo.
 
 ## Cosa è stato sistemato
 
@@ -88,71 +88,63 @@ PBASE=http://127.0.0.1:4173/docs/preview/index.html node docs/qa/fontcls.mjs
 
 ## Parte L — la landing `/presentazione`
 
-Il giro di rifinitura sulla landing rifatta su «Controluce» (UX, ART_DIRECTION e MOTION, Parte L). Misurata sulla **build di produzione** servita da `vite preview`, in Chrome headless: a 320, 360, 390, 768, 1024, 1280 e 1440, con i dati veri della pagina e con numeri enormi. Sotto i 900px la pagina si apre come Safari su iPhone, il telefono per cui è fatta. Lo script è uno solo: [`docs/qa/landing.mjs`](docs/qa/landing.mjs). Gli altri script di `docs/qa` navigano le rotte di `docs/preview` e qui misurerebbero sempre la cima della pagina.
+Il giro sulla landing rifatta dalla tavola «Landing page» di Claude Design (UX, ART_DIRECTION e MOTION, Parte L), il 20 ottobre 2026, e la sua rifinitura dello stesso giorno: l'apertura della Home nel telefono dell'hero, il telefono come primo schermo, la pulizia di «Controluce»; poi, la sera, il giro di `#schermate` e le nove carte. Misurata sulla **build di produzione** servita da `vite preview`, in Chrome headless, con [`docs/qa/landing.mjs`](docs/qa/landing.mjs). Sotto i 900px la pagina si apre come Safari su iPhone. Il giro su «Controluce», che c'era prima, è nella storia di git fino al commit `a9793f3`.
 
 ### Cosa è stato sistemato
 
-| # | Difetto (come lo si è visto) | Correzione | Dopo |
+| # | Difetto trovato (com'era misurato) | Correzione | Dopo |
 |---|---|---|---|
-| L1 | **Anello di focus invisibile sulla barra** alle prime fermate del Tab. Sopra il tramonto l'anello delle tab e del ＋ era d'inchiostro su vetro scuro: contrasto misurato 1.12 e 1.23. Il vetro scuro della capsula è uno strato *fratello* delle tab, quindi il bianco di `materials.css` non arrivava | `barra.css`: l'anello segue il fondo come l'inchiostro (`.capsula[data-inchiostro="scuro"]`). Sulla tab corrente cade sulla lente bianca e lì è sempre d'inchiostro | 14.8–19.1 |
-| L2 | **Pallo guida e ＋ galleggiano su ogni fondo**: sull'inchiostro di `#numeri` l'anello di Pallo misurava 1.0 | token `--anello-alone`: un alone bianco nel distacco più l'anello d'inchiostro dell'app (tecnica a due colori, WCAG C40) | 17.0 su `#numeri`, 15.7 sulla carta |
-| L3 | **Un fotogramma da 72ms** (CPU 4×) uscendo dall'hero, a ogni giro. Il trace porta al layout della nuvoletta «Quando vuoi, il ＋ arancio…»: il «＋» a tutta larghezza (U+FF0B) non c'è in Geist, e la prima volta il browser cerca un carattere di ripiego nel sistema (85–109ms da solo, contro 1.6ms per una frase latina). In più il glifo usciva da un font CJK, più largo e più nero | `guida.ts`: «+» ASCII nel testo visibile. Nei documenti «＋» resta come notazione | 0 task lunghi in uscita dall'hero (3 giri su 3) |
-| L4 | **Il «%» del 63% scattava di lato** quando i numeri salgono: partono da uno zero di una cifra e l'Odometro aggiunge la colonna a sinistra. CLS 0.0035 sul `poster-pct` | `numeri.ts` scrive `data-fin`; `numeri.css` tiene il valore finale invisibile nella stessa cella della griglia, così la larghezza è quella finale da subito. `Odometro.ts` non è cambiato | CLS 0 a 390 e 1280, anche col font in ritardo |
-| L5 | **«1/ 7»**: lo spazio prima della barra cadeva a inizio riga del secondo pezzo flex. E coi numeri enormi («144 / 1440») il totale usciva dalla cella e dallo schermo: in emulazione mobile il viewport si allargava a 401 (320) e 436 (390), cioè la pagina si rimpiccioliva | `.cella-num`: `column-gap` col token `--num-spazio` (lo spazio di Geist col tracking, 0.18em, misurato) e `flex-wrap`: «/ 1440» va a capo intero | «1 / 7» come nella Home; nessun viewport allargato coi numeri enormi |
-| L6 | **Le slide di Wrapped tagliate a 16px dal bordo**: il blocco bloccato era largo quanto il contenuto, con `overflow: hidden`, e Pallo e i numeri si spezzavano su una riga verticale netta. Dopo la pista c'erano 221px di inchiostro vuoto (390), 224 a 1280 | pista e blocco a tutta larghezza (la fila parte dal gutter con `padding-inline`, `100cqw` della corsa resta la colonna); `--palco` (il vuoto del blocco centrato) si sottrae ai margini prima e dopo | taglio al bordo dello schermo; 103px dopo la pista (390), 144 a 1280 |
-| L7 | **La demo Partita live sotto i 600px**: coi pannelli da 168 la testa di Pallo copriva il fondo della cifra di «loro», e la battuta toccava la scritta «Noi» (misurato: −3px di distacco a 390) | token `--live-panel-h` a 200 a ogni larghezza (come già da 600) | 15px fra battuta e «Noi», cifra libera |
-| L8 | **Il velo dell'hero finiva a 592px** fra 600 e 899: era largo quanto il blocco del testo (`--hero-text-max`), e lasciava uno spigolo netto sulla sabbia | `eroe.css`: il velo è largo quanto l'hero (l'eccesso lo taglia `overflow: clip`) | nessuno spigolo a 768 |
-| L9 | **Il telefono sticky di `#diario` si fermava sotto l'avanzamento**: il pallone gli rotolava sulla cornice. `--scroll-pad-top` (safe-area + 12) stava sotto la riga dell'avanzamento, anche per il fuoco | token: `--scroll-pad-top` = `--progress-top` + `--progress-box` + 8, da cui seguono sia lo `scroll-padding` sia il telefono sticky | safe-area + 30 (112 da 900) |
-| L10 | **Il wordmark della barra da 900px** non ha vetro: oltre l'hero il testo delle sezioni gli passava attraverso, e sull'arancio delle slide il bianco faceva 2.9 | `nav.ts` segna `data-marchio="tessera"` quando l'hero lascia la barra; `barra.css` fa svanire il nome in SVELTO (torna col fuoco). La tessera è piena e resta | niente testo su testo |
-| L11 | **Il titolo dell'hero nel carattere di riserva per ~1.3s** su Slow 4G: Geist partiva solo dopo il CSS | `vite.config.ts` (`landingFont`, solo in build): `<link rel="preload">` del sottoinsieme latino, con `crossorigin` | il font è pronto prima del primo disegno (4 giri su 4) |
-| L12 | **Pannello disattivo muto per gli screen reader**: a set finito il tocco rifà la battuta, ma la nuvoletta non è una live region | `live.ts`: lo status della demo dice «Set finito, 21 a 19: prima chiudi il set.» | — |
-| L13 | **CLS 0.0009 a 1280 nella demo**: la scatola di Pallo e della battuta (`.demo-mezzo-in`) era centrata dalla sua posizione statica, e l'autoplay (che non è un gesto dell'utente) ne cambiava la larghezza a ogni battuta | `live.css`: la scatola va da bordo a bordo e centra i figli | CLS 0 |
+| 1 | **La vecchia landing ancora nel repository**: `presentazione/js/` (15 moduli), 11 fogli, `fermo.js`, 6 schermate WebP, `tsconfig.landing.json` e cinque file di test che la montavano. 85 test rossi, fra cui quello che vuole ogni foglio della cartella importato | tolti (restano nella storia, `a9793f3`), con le demo `L1`–`L5` di `docs/motion` | 64 file, tutti verdi |
+| 2 | **La pagina era ferma**, e la richiesta era presentare l'app | l'apertura della Home nel telefono dell'hero, quella dell'app (MOTION.md, Parte L) | sotto |
+| 3 | **Le sei carte sul telefono**: alte una sopra l'altra, ~1.400px di scroll per sei frasi | un gruppo solo, come le liste raggruppate dell'app | con le altre correzioni sul telefono (5, 6), la pagina a 390 passa da 4.744 a 4.047px |
+| 4 | **La fila dei telefoni** trabocca già a 1024: il terzo telefono tagliato al bordo della colonna, e lo scorrimento taglia l'ombra lunga dei telefoni in un rettangolo chiaro (visibile a 768 e 1024) | prima una fila in riga e un carosello sotto i 700px; la sera la fila è diventata il giro (sotto) | nessun taglio |
+| 5 | **Le due porte sul telefono**: due capsule di larghezze diverse (180 e 185) una sopra l'altra | sotto i 480px una per riga, larghe quanto la colonna | — |
+| 6 | **216px fra una sezione e l'altra** anche sul telefono | 72–88 sotto gli 820px | — |
+| 7 | **Anello della fila fuori dallo schermo** (introdotto dal carosello da bordo a bordo: `tab` CLIP:BODY a 390) | anello rientrato; poi la fila è uscita col giro, e con lei la sua fermata | 0 difetti |
+| 8 | **Le schermate senza parole e le funzioni che mancavano**: Partita live, Raccontalo a Solby, Storia Instagram, Chi c'è oggi e i compagni collegati non comparivano | il giro: sei momenti con la schermata vera e due righe, che si sfogliano scorrendo (MOTION.md, Parte L, L2); le carte da sei a nove | `giro`: la scena resta ferma e a ogni tratto si vede il suo momento, 6 su 6 |
+
+E un difetto trovato e **non** sistemato qui, perché sta nell'app: il service worker (`public/sw.js`, la pagina offline e l'installabilità) lo registrava `presentazione/js/install.ts`. La landing nuova non ha JavaScript, e oggi nessuno lo registra: chi arriva adesso non ha la pagina offline. Va registrato da `src/main.tsx`.
+
+### L'apertura: le misure
+
+Il tabellone disegnato dalla landing contro le cifre della Home vera, sovrapposti in `difference` e allineati cercando lo scarto che li fa coincidere (dpr 4, telefono a 304px): in orizzontale 0; in verticale 0.3 (63), 1.0 (+36 e 5) e 1.6 (1) pixel dell'app, tutti verso l'alto. È l'arrotondamento delle metriche del carattere alla taglia del telefono (18.7px invece di 24). Per questo le cifre della landing ci sono solo mentre girano: da ferma la schermata è l'immagine della Home vera, e il cambio a 1.650ms non si vede (i fotogrammi a 1.640 e 1.700ms sono uguali).
 
 ### Cosa è stato misurato
 
-Tutto sulla build di produzione. «Prima» è il commit `0457f1d` (la landing com'era arrivata a questo giro). Dove non c'è scritto altro, i numeri valgono a 390 (Safari su iPhone) e a 1280.
-
-| Cosa | Prima | Dopo |
-|---|---|---|
-| axe nel browser (WCAG 2.0/2.1/2.2 AA e best practice). Scene: le 9 sezioni, il menu della guida, il foglio d'installazione, una tab di `#registra`, la chat dopo una risposta, la demo dopo 4 punti, il fermo premuto | 0 violazioni | 0 |
-| Anello di focus che si vede: contrasto fra il pixel acceso e quello spento, mediana dei 4 lati, sull'intero giro da tastiera. In più Pallo e la tab corrente sopra `#numeri` e `#mappa` | 5 fermate sotto 3:1, proprio le prime: tab e ＋ sul tramonto (1.12 e 1.23), tab corrente sulla lente col buio (1.04), Pallo sull'inchiostro (1.0) | tutte da 14.8 in su (21 fermate a 390, 22 a 1280) |
-| Fermate coperte da barra o guida, oppure con l'anello tagliato | 0 | 0 |
-| Ritorno del fuoco | menu della guida: Invio porta alla prima voce, Esc torna a Pallo. Foglio: Invio porta al titolo, Tab resta dentro, Esc torna al pulsante | invariato |
-| Contrasto in hover e premuto (strato composto): ＋, voci di `#registra`, risposte della chat, `tinted`, comandi sul tramonto, piede | — | il più basso 4.66 (`tinted` a riposo; 5.82 in hover). ＋ 5.97 → 5.23; tutti gli altri ≥ 13.9 |
-| CLS al caricamento, con Geist in ritardo di 1.5s | 0 | 0 |
-| CLS scorrendo tutta la pagina giù e su | 0.0035 (il «%», 390) | 0 |
-| CLS a fine giro, interazioni comprese (CPU 4×) | 0.0009 (1280, la demo) | 0 |
-| Viewport allargato o scroll orizzontale, da 320 a 1440 | 0 coi dati veri; coi numeri enormi 401 a 320, 436 a 390 | 0, anche coi numeri enormi |
-| Testo che esce o è tagliato (SPILL/CLIP) | 0 | 0 |
-| Bersagli sotto 44 (l'area che risponde davvero) | 0 | 0 |
-| Superfici sfocate a schermo (budget 3) | 2 a riposo | 2 a riposo, 2 col menu della guida, 3 col foglio |
-| Reduced motion e «Ferma le animazioni» | niente si muove, numeri già finali, demo senza autoplay, Wrapped da scorrere a mano, Pallo fermo | invariato |
-| Caricamento con CPU 4× (FCP · TBT) | 92–156ms · 7–8ms | 108–172ms · 0–33ms (variano da un giro all'altro, sono la stessa cosa) |
-| Fotogrammi sopra 25ms scorrendo tutta la pagina con un gesto vero (CPU 4×) | a 390 un task da 72ms uscendo dall'hero, a ogni giro | 0 in uscita dall'hero (3 giri su 3); per il resto vedi i compromessi |
-| Interazioni (Event Timing, come INP): guida, foglio, tab, chat, demo ±1 | ≤ 24ms | ≤ 24ms |
-| Proprietà animate | `transform`, `opacity` | invariato |
-| Geist su Slow 4G (150ms RTT, 1.6 Mbps) | pronto ~1.3s dopo il primo disegno | pronto prima del primo disegno (4 giri su 4); FCP +~150ms |
-| Bundle gzip: JS (pagina + 3 moduli dell'app) · CSS · HTML | 25.16 · 20.56 · 15.40 KB | 25.22 · 20.78 · 15.46 KB |
+| Cosa | Risultato |
+|---|---|
+| axe nel browser (WCAG 2.0/2.1/2.2 AA e best practice), a ogni sezione, a 390, 1280 e 844 × 390 | 0 violazioni |
+| Giro del Tab: anello presente, non tagliato, non coperto, e quanto si vede (pixel acceso contro spento, almeno 3) | 0 difetti: 7 fermate a 390, 10 a 1280 |
+| Il giro di `#schermate`: a metà di ogni tratto la scena è in cima e si vede un momento solo, quello giusto | 6 su 6 a 390 (422px per momento) e a 1280 (400px); con reduced-motion e a 844 × 390 è l'elenco fermo, 6 momenti visibili su 6 |
+| Viewport allargato, scroll orizzontale, testo che esce o tagliato, immagini senza misure: 320, 360, 390, 768, 820, 1024, 1280, 1440 e 844 × 390 | 0 |
+| Bersagli sotto 44 (l'area che risponde davvero), a 390, 1280 e 844 × 390 | 0 |
+| CLS al caricamento con Geist in ritardo di 1.5s, poi tutta la pagina giù e su | 0 a 390; 0.0001 a 1280 (le voci della testata) |
+| Reduced motion | niente in moto; la pressione a 1; nessuno strato sopra la Home |
+| L'apertura | a 1280 e 768 parte al caricamento e dopo 2.4s gli strati non ci sono più; a 390 e a 844 × 390 è legata allo scroll e gli strati se ne vanno col telefono in vista |
+| Caricamento con CPU 4× (FCP · LCP · TBT) | 80ms · 80ms (il telefono dell'hero) · 0 |
+| Fotogrammi sopra 25ms scorrendo ogni sezione con un gesto vero (CPU 4×), il giro compreso | 0 |
+| Richieste dal caricamento al fondo | 13, tutte verso il sito |
+| Bundle gzip: HTML · CSS · JS | 5.03 · 8.39 KB · nessuno |
 
 ### Compromessi noti
 
-- **Il preload di Geist costa ~150ms di FCP su Slow 4G.** Il font si contende la banda col CSS, che blocca il disegno. In cambio il titolo dell'hero non cambia carattere sotto gli occhi. Sulle reti veloci non si misura differenza.
-- **Restano fotogrammi lenti isolati in Chrome headless**: 0–1 per giro (33–117ms), ogni volta in una sezione diversa. Nel trace non c'è nessun task del main thread sopra i 12ms, e uno era un `GPUTask` da 92ms: è la rasterizzazione software di headless (SwiftShader). Si attribuiscono all'ambiente, ma su un telefono vero non è verificato.
-- **axe lascia «contrasto incompleto» su 25–33 nodi per scena.** Sono i nodi su vetro, gradienti e sovrapposizioni, dove axe non sa dire il fondo. I ruoli del testo li ricalcola `landing.tokens.test.ts`; l'anello e gli stati li misura questo giro. Non c'è una misura a pixel nodo per nodo.
-- **Il wordmark che svanisce resta un link largo quanto il nome.** Il nome è trasparente e non c'è più, ma un tocco su quello spazio porta comunque in cima. Accorciare il link sarebbe un cambio di layout.
-- **Il −1 a zero** è `--ink-disabled` (1.9:1): esente da WCAG, e non è mai l'unico segnale, come nell'app. Un tocco sul pannello a set finito rifà la battuta e ora lo dice anche allo screen reader (L12).
-- **`theme-color` resta carta anche sopra l'inchiostro di `#numeri` e `#wrapped`.** È la regola di UX LC13, non toccata.
-- **Non verificato su dispositivi veri**: Safari iOS (vetro `-webkit-`, nessuna timeline di scroll, quindi la versione ferma voluta da MOTION RL1) e Android.
+- **CLS 0.0001 a 1280 col font in ritardo**: le voci della testata (Geist 600) e la loro riserva Arial differiscono di un soffio in larghezza. È mille volte sotto la soglia di 0.1.
+- **axe lascia «contrasto incompleto» su 2 nodi a 390**: nodi che axe non sa leggere sopra il fondo; i ruoli del testo li ricalcola `landing.tokens.test.ts`.
+- **Il giro è lungo**: la scena resta ferma per 300svh di scroll (2.400px su un portatile alto 800). È il prezzo della scena che si ferma; chi va di fretta ha «Iscriviti» nella testata.
+- **Col giro in movimento i momenti nascosti restano nel documento**: un «trova nella pagina» li trova anche quando non si vedono.
+- **Dove `animation-timeline` non c'è** (Firefox), sul telefono l'apertura va a tempo al caricamento, fuori vista: si arriva comunque alla Home vera, senza aver visto il giro delle cifre. Il giro di `#schermate` lì è l'elenco fermo.
+- **+1.5 KB gz di CSS e una schermata in più (50 KB)** per l'apertura; la schermata si chiede solo con il movimento consentito.
+- **Non verificato su dispositivi veri** (Safari iOS, dove le animazioni legate allo scroll ci sono da Safari 26; Android).
 
 ### Come rifare le misure
 
 ```sh
 npm run build && npx vite preview --port 5199 --strictPort --host 127.0.0.1   # una porta propria, mai la 5173
-node docs/qa/landing.mjs tutto            # oppure: axe | tab | sweep | targets | cls | reduced | perf | numeri | rete | tocco
-W=844 H=390 node docs/qa/landing.mjs sweep,axe,targets   # il telefono in orizzontale
-FLAT=1 V=1 INC=1 node docs/qa/landing.mjs axe   # senza gradienti, coi nodi e coi contrasti incompleti
+node docs/qa/landing.mjs tutto            # oppure: axe | tab | giro | sweep | targets | cls | reduced | apertura | perf | rete
+W=844 H=390 node docs/qa/landing.mjs sweep,axe,targets,apertura,giro   # il telefono in orizzontale
 ALL=1 node docs/qa/landing.mjs tab        # ogni fermata, con quanto si vede l'anello
-CSS='.barra{--focus-ring:#1C1C1E!important}' node docs/qa/landing.mjs tab   # rimette un difetto: la prova deve trovarlo
+CSS='.cta{outline:none!important}' node docs/qa/landing.mjs tab   # rimette un difetto: la prova deve trovarlo
+node docs/qa/landing-shots.mjs            # schermate, Home senza cifre e misure.css, insieme
 ```
 
-`LBASE` cambia l'URL, `W` le larghezze e `H` l'altezza; `PORTA_CDP` vale 9343 di serie. Sotto i 900px la pagina si apre come Safari 26 su iPhone; `ANDROID=1` usa invece Chrome. Ogni caricamento è una prima visita: `bvd_landing_fermo` e `bvd_landing_visti` si azzerano, perché il profilo di Chrome resta fra un giro e l'altro.
+`LBASE` cambia l'URL, `W` le larghezze e `H` l'altezza; `PORTA_CDP` vale 9343 di serie. `ANDROID=1` apre la pagina come Chrome invece che come Safari.
