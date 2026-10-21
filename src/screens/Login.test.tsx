@@ -203,6 +203,21 @@ describe('Accedi', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('Credenziali non valide.')
   })
 
+  it('un errore sull\'email lo dice il campo, che prende il fuoco', async () => {
+    const user = userEvent.setup()
+    login.mockResolvedValue({ ok: false, error: 'Email non valida.', campo: 'email' })
+    await apriAccedi(user)
+    await user.type(screen.getByLabelText('Email'), 'marta@')
+    await user.type(screen.getByLabelText('Password'), 'segreta')
+    await user.click(screen.getByRole('button', { name: 'Entra' }))
+    const email = screen.getByLabelText('Email')
+    await vi.waitFor(() => expect(email).toHaveAttribute('aria-invalid', 'true'))
+    expect(email).toHaveAccessibleDescription('Email non valida.')
+    expect(email).toHaveFocus()
+    // Un alert solo, quello del campo: niente doppione sotto il modulo.
+    expect(screen.getAllByRole('alert')).toHaveLength(1)
+  })
+
   it('senza rete lo dice e non prova nemmeno', async () => {
     const user = userEvent.setup()
     Object.defineProperty(navigator, 'onLine', { value: false, configurable: true })
@@ -393,12 +408,70 @@ describe('Registrati', () => {
     expect(screen.getByLabelText('Password')).toHaveValue('')
   })
 
-  it('un errore della registrazione resta sul passo 2 come alert', async () => {
+  it('un errore della registrazione senza un campo resta sul passo 2 come alert', async () => {
     const user = userEvent.setup()
-    register.mockResolvedValue({ ok: false, error: 'Email già registrata. Prova ad accedere.' })
+    register.mockResolvedValue({ ok: false, error: 'Troppi tentativi, riprova tra poco.' })
     await finoAlPasso2(user)
     await user.click(screen.getByRole('button', { name: 'Crea account' }))
-    expect(await screen.findByRole('alert')).toHaveTextContent('Email già registrata')
+    expect(await screen.findByRole('alert')).toHaveTextContent('Troppi tentativi')
+  })
+
+  /** Il passo 2 compilato bene, poi «Crea account». */
+  async function creaAccount(user: ReturnType<typeof userEvent.setup>) {
+    await user.type(screen.getByLabelText('Email'), 'marta@example.com')
+    await user.type(screen.getByLabelText('Password'), 'segreta')
+    await user.type(screen.getByLabelText('Ripeti la password'), 'segreta')
+    await user.click(screen.getByRole('button', { name: 'Crea account' }))
+  }
+
+  it('l\'email già registrata la dice il campo Email, che prende il fuoco', async () => {
+    const user = userEvent.setup()
+    register.mockResolvedValue({ ok: false, error: 'Email già registrata. Prova ad accedere.', campo: 'email' })
+    await finoAlPasso2(user)
+    await creaAccount(user)
+    const email = screen.getByLabelText('Email')
+    await vi.waitFor(() => expect(email).toHaveAttribute('aria-invalid', 'true'))
+    expect(email).toHaveAccessibleDescription('Email già registrata. Prova ad accedere.')
+    expect(email).toHaveFocus()
+    // Correggere l'email toglie l'errore.
+    await user.type(email, 'x')
+    expect(email).not.toHaveAttribute('aria-invalid')
+  })
+
+  it('un nome preso scoperto dalla registrazione riporta al passo 1, col fuoco sul nickname', async () => {
+    const user = userEvent.setup()
+    register.mockResolvedValue({ ok: false, error: 'Questo nome è già in uso, scegline un altro.', campo: 'nome' })
+    await finoAlPasso2(user)
+    await creaAccount(user)
+    await h1('Come ti chiamano in spiaggia?')
+    const nome = screen.getByLabelText('Nickname')
+    await vi.waitFor(() => expect(nome).toHaveFocus())
+    expect(nome).toHaveValue('Marta')
+    expect(nome).toHaveAccessibleDescription('Questo nome è già in uso, scegline un altro.')
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '1')
+    // Con lo stesso nome «Continua» non passa.
+    await user.click(screen.getByRole('button', { name: 'Continua' }))
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '1')
+    expect(nome).toHaveFocus()
+  })
+
+  it('il controllo dal vivo dice «già in uso» dopo «Continua»: «Crea account» riporta al nome senza registrare', async () => {
+    const user = userEvent.setup()
+    let rispondi: (r: { status: 'taken' }) => void = () => {}
+    checkNameAvailable.mockImplementation(() => new Promise((r) => { rispondi = r }))
+    await apriRegistrati(user)
+    await user.type(screen.getByLabelText('Nickname'), 'Marta')
+    // Il controllo non ha ancora risposto: si passa (fail-open, come prima).
+    await user.click(screen.getByRole('button', { name: 'Continua' }))
+    await h1('Ciao Marta, ultimo passo.')
+    await vi.waitFor(() => expect(checkNameAvailable).toHaveBeenCalledWith('Marta'))
+    await act(async () => rispondi({ status: 'taken' }))
+    await creaAccount(user)
+    expect(register).not.toHaveBeenCalled()
+    await h1('Come ti chiamano in spiaggia?')
+    const nome = screen.getByLabelText('Nickname')
+    await vi.waitFor(() => expect(nome).toHaveFocus())
+    expect(nome).toHaveAccessibleDescription('Nome già in uso')
   })
 })
 

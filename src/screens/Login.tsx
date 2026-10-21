@@ -40,6 +40,7 @@ import * as m from 'motion/react-m'
 import { AnimatePresence, useIsPresent, useReducedMotion } from 'motion/react'
 import { useAuth } from '../hooks/useAuth'
 import { EMAIL_RE, PASSWORD_DIVERSE, PASSWORD_MIN, checkNameAvailable } from '../lib/auth'
+import type { AuthResult } from '../lib/auth'
 import { LIMITI } from '../lib/lunghezze'
 import { ritornoDaMostrare, ritornoMostrato } from '../lib/ritorno'
 import { useOnline } from '../hooks/useConnection'
@@ -169,6 +170,8 @@ export default function Login() {
   // da lì in poi ogni cambio di vista o di passo lo porta al nuovo titolo,
   // come la navigazione dell'app (UX §4.4).
   const navigato = useRef(false)
+  // Si torna al passo 1 per un nome che non va: il fuoco va al campo, non al titolo.
+  const [fuocoAlNome, setFuocoAlNome] = useState(false)
 
   const inRegistrazione = vista === 'registrati'
 
@@ -217,6 +220,7 @@ export default function Login() {
     setConfermaErr('')
     setEmailErr('')
     setScaduto(false)
+    setFuocoAlNome(false)
   }
 
   // Passo 1 → 2. Il nome vuoto lo dice con le parole di `registerUser`; un
@@ -238,6 +242,7 @@ export default function Login() {
     navigato.current = true
     setNameErr('')
     setError('')
+    setFuocoAlNome(false)
     setDirezione(1)
     setPasso(2)
   }
@@ -246,8 +251,39 @@ export default function Login() {
     if (busy) return
     navigato.current = true
     setError('')
+    setFuocoAlNome(false)
     setDirezione(-1)
     setPasso(1)
+  }
+
+  // Il nome è già preso (lo dice il controllo dal vivo arrivato tardi, o la
+  // registrazione): si torna al passo 1, con il motivo nella riga di stato
+  // del campo, che prende il fuoco. Lì «Continua» non passa finché non cambia.
+  const tornaAlNome = (motivo: string) => {
+    navigato.current = true
+    setNameStatus('taken')
+    setNameMsg(motivo)
+    setError('')
+    setFuocoAlNome(true)
+    setDirezione(-1)
+    setPasso(1)
+  }
+
+  // Un errore che riguarda un campo lo dice il campo, che prende il fuoco;
+  // gli altri (rete, limiti, password corta) il modulo, in fondo.
+  const mostraErrore = (r: AuthResult) => {
+    const msg = r.error || 'Si è verificato un errore.'
+    if (r.campo === 'email') {
+      setEmailErr(msg)
+      emailRef.current?.focus()
+    } else if (inRegistrazione && r.campo === 'nome') {
+      tornaAlNome(msg)
+    } else if (inRegistrazione && r.campo === 'conferma') {
+      setConfermaErr(msg)
+      confermaRef.current?.focus()
+    } else {
+      setError(msg)
+    }
   }
 
   // «Ripeti la password»: l'errore si mostra all'uscita dal campo (se c'è
@@ -272,11 +308,17 @@ export default function Login() {
       confermaRef.current?.focus()
       return
     }
+    // Il controllo dal vivo ha risposto «già in uso» dopo «Continua»: lo si
+    // sa già, senza chiederlo di nuovo al server.
+    if (inRegistrazione && nameStatus === 'taken') {
+      tornaAlNome(nameMsg)
+      return
+    }
     setError('')
     setBusy(true)
     const r = inRegistrazione ? await register(name, email, password, conferma) : await login(email, password)
     if (!r.ok) {
-      setError(r.error || 'Si è verificato un errore.')
+      mostraErrore(r)
     } else if (r.notice) {
       // Registrazione con conferma email: si torna su Accedi, l'email resta.
       navigato.current = true
@@ -313,7 +355,7 @@ export default function Login() {
       setScaduto(false)
       setNotice(r.notice ?? '')
     } else {
-      setError(r.error || 'Si è verificato un errore.')
+      mostraErrore(r)
     }
     setBusy(false)
   }
@@ -441,11 +483,13 @@ export default function Login() {
                         onChange={(v) => {
                           setName(v)
                           setNameErr('')
+                          setFuocoAlNome(false)
                         }}
                         status={nameStatus}
                         msg={nameMsg}
                         error={nameErr}
                         busy={busy}
+                        fuoco={fuocoAlNome}
                       />
                       <Button type="submit" size="lg" block className="accesso-invia">
                         Continua
@@ -460,14 +504,19 @@ export default function Login() {
                         sotto="Email e password per ritrovare il tuo diario."
                       />
                       <TextField
+                        ref={emailRef}
                         label="Email"
                         type="email"
                         inputMode="email"
                         value={email}
-                        onChange={setEmail}
+                        onChange={(v) => {
+                          setEmail(v)
+                          setEmailErr('')
+                        }}
                         placeholder="tu@email.com"
                         autoComplete="email"
                         readOnly={busy}
+                        error={emailErr || undefined}
                       />
                       <TextField
                         id={passwordId}
@@ -716,8 +765,12 @@ function Titolo({ focus, passo, titolo, sotto, className, style }: {
   )
 }
 
-/** Il nickname con la sua riga di stato dal vivo, sempre montata (così la annuncia). */
-function Nickname({ inputRef, value, onChange, status, msg, error, busy }: {
+/**
+ * Il nickname con la sua riga di stato dal vivo, sempre montata (così la
+ * annuncia). Con `fuoco` il campo prende il fuoco al montaggio, dopo il
+ * titolo: si è tornati qui per un nome che non va.
+ */
+function Nickname({ inputRef, value, onChange, status, msg, error, busy, fuoco }: {
   inputRef: RefObject<HTMLInputElement>
   value: string
   onChange: (v: string) => void
@@ -725,8 +778,14 @@ function Nickname({ inputRef, value, onChange, status, msg, error, busy }: {
   msg: string
   error: string
   busy: boolean
+  fuoco: boolean
 }) {
   const statoId = useId()
+  useEffect(() => {
+    if (fuoco) inputRef.current?.focus({ preventScroll: true })
+    // Solo al montaggio, come il titolo (che il suo effetto lo esegue prima).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   const stato =
     status === 'checking'
       ? { icon: null, text: 'Verifico disponibilità…' }

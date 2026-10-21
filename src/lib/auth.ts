@@ -22,9 +22,14 @@ export interface Session {
   hasPassword: boolean // false per chi è entrato solo con Google/Apple
 }
 
+/** Il campo di un modulo d'accesso a cui si riferisce un errore. */
+export type CampoAuth = 'nome' | 'email' | 'conferma'
+
 export interface AuthResult {
   ok: boolean
   error?: string
+  /** L'errore riguarda questo campo: il Login lo mostra lì e ci porta il fuoco. */
+  campo?: CampoAuth
   notice?: string // messaggio informativo/di successo (es. conferma email inviata)
   session?: Session
 }
@@ -146,18 +151,18 @@ export async function updatePassword(password: string, confirm: string): Promise
 export async function registerUser(name: string, email: string, password: string, confirm: string): Promise<AuthResult> {
   const n = name.trim()
   const e = email.trim().toLowerCase()
-  if (!n) return { ok: false, error: 'Inserisci il tuo nome.' }
-  if (n.length > LIMITI.nome.max) return { ok: false, error: `Il nome è troppo lungo (massimo ${LIMITI.nome.max} caratteri).` }
-  if (!EMAIL_RE.test(e)) return { ok: false, error: 'Email non valida.' }
+  if (!n) return { ok: false, error: 'Inserisci il tuo nome.', campo: 'nome' }
+  if (n.length > LIMITI.nome.max) return { ok: false, error: `Il nome è troppo lungo (massimo ${LIMITI.nome.max} caratteri).`, campo: 'nome' }
+  if (!EMAIL_RE.test(e)) return { ok: false, error: 'Email non valida.', campo: 'email' }
   if (password.length < PASSWORD_MIN) return { ok: false, error: `La password deve avere almeno ${PASSWORD_MIN} caratteri.` }
-  if (password !== confirm) return { ok: false, error: PASSWORD_DIVERSE }
+  if (password !== confirm) return { ok: false, error: PASSWORD_DIVERSE, campo: 'conferma' }
 
   // Verifica che il nome non sia già usato da un altro utente (Edge Function).
   // Fail-open: se la function non risponde non blocchiamo la registrazione.
   try {
     const { data: check } = await supabase.functions.invoke('check-name', { body: { name: n } })
     if (check && check.available === false) {
-      return { ok: false, error: check.error || 'Questo nome è già in uso, scegline un altro.' }
+      return { ok: false, error: check.error || 'Questo nome è già in uso, scegline un altro.', campo: 'nome' }
     }
   } catch {
     /* rete/funzione non disponibile: si prosegue con la registrazione */
@@ -174,7 +179,7 @@ export async function registerUser(name: string, email: string, password: string
       emailRedirectTo: URL_APP,
     },
   })
-  if (error) return { ok: false, error: translateAuthError(error.message) }
+  if (error) return { ok: false, error: translateAuthError(error.message), campo: campoDellErrore(error.message) }
   track('registrazione')
   // Se la conferma email è attiva, signUp non restituisce una sessione: NON è un
   // errore, è un successo con un avviso (mostrato in verde) di controllare la mail.
@@ -187,7 +192,7 @@ export async function registerUser(name: string, email: string, password: string
 // La mail di conferma di nuovo: il link è scaduto, o è già stato usato.
 export async function resendConfirmation(email: string): Promise<AuthResult> {
   const e = email.trim().toLowerCase()
-  if (!EMAIL_RE.test(e)) return { ok: false, error: 'Email non valida.' }
+  if (!EMAIL_RE.test(e)) return { ok: false, error: 'Email non valida.', campo: 'email' }
   const { error } = await supabase.auth.resend({ type: 'signup', email: e, options: { emailRedirectTo: URL_APP } })
   if (error) return { ok: false, error: translateAuthError(error.message) }
   return { ok: true, notice: 'Ti abbiamo mandato una nuova mail di conferma: apri il link che contiene, poi accedi.' }
@@ -202,14 +207,18 @@ export async function resendConfirmation(email: string): Promise<AuthResult> {
 let chiusura: Promise<void> | null = null
 export function closeLinkSession(): Promise<void> {
   chiusura ??= supabase.auth.getSession().then(async ({ data }) => {
-    if (data.session) await supabase.auth.signOut({ scope: 'local' })
+    if (!data.session) return
+    // Senza rete supabase-js non chiude la sessione: si resta dentro l'app,
+    // confermati e con l'accesso fatto (AuthProvider). Si dice, non si tace.
+    const { error } = await supabase.auth.signOut({ scope: 'local' })
+    if (error) console.warn('[auth] la sessione del link resta aperta', error)
   })
   return chiusura
 }
 
 export async function loginUser(email: string, password: string): Promise<AuthResult> {
   const e = email.trim().toLowerCase()
-  if (!EMAIL_RE.test(e)) return { ok: false, error: 'Email non valida.' }
+  if (!EMAIL_RE.test(e)) return { ok: false, error: 'Email non valida.', campo: 'email' }
   if (!password) return { ok: false, error: 'Inserisci la password.' }
 
   const { error } = await supabase.auth.signInWithPassword({ email: e, password })
@@ -262,4 +271,14 @@ function translateAuthError(msg: string): string {
   if (m.includes('popup') || m.includes('cancel')) return 'Accesso annullato.'
   if (m.includes('email')) return 'Email non valida.'
   return msg
+}
+
+// Gli errori di Supabase che riguardano l'email scritta (già registrata, non
+// valida) li dice il campo; gli altri (rete, limiti, password) il modulo.
+function campoDellErrore(msg: string): CampoAuth | undefined {
+  const m = msg.toLowerCase()
+  if (m.includes('rate limit') || m.includes('password')) return undefined
+  if (m.includes('already registered') || m.includes('already been registered') || m.includes('user already exists')) return 'email'
+  if (m.includes('email') && (m.includes('invalid') || m.includes('validate'))) return 'email'
+  return undefined
 }
