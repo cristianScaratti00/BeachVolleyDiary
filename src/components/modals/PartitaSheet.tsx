@@ -24,6 +24,7 @@ import { RigaSet, SetIntestazione } from './RigaSet'
 import { Button } from '../ui/Button'
 import { Select, TextArea, TextField } from '../ui/Field'
 import { PHASES } from '../../lib/db.enums'
+import { LIMITI } from '../../lib/lunghezze'
 import type { AnyForm, Phase } from '../../lib/models'
 import type { PartitaSheetProps } from '../../app/contracts'
 import './PartitaSheet.css'
@@ -259,6 +260,7 @@ export default function PartitaSheet({
             onChange={(v) => setCampi((c) => ({ ...c, opponents: v }))}
             placeholder="es. Bianchi / Verdi"
             autoComplete="off"
+            maxLength={LIMITI.avversari.max}
           />
 
           <div className="ui-field">

@@ -56,6 +56,15 @@ export interface TextFieldProps extends Omit<InputHTMLAttributes<HTMLInputElemen
    * lo toglie.
    */
   revealable?: boolean
+  /**
+   * L'occhio condiviso: con `revealed` e `onRevealedChange` lo stato lo tiene
+   * chi usa il campo, così due campi (la password e «Ripeti la password») si
+   * mostrano e si nascondono insieme. Senza, ogni campo ha il suo.
+   */
+  revealed?: boolean
+  onRevealedChange?: (revealed: boolean) => void
+  /** Gli id degli altri campi che l'occhio mostra insieme a questo (`aria-controls`). */
+  revealControls?: string
 }
 
 // Una password mostrata è un `type="text"`: senza questi, iOS le metterebbe la
@@ -63,13 +72,31 @@ export interface TextFieldProps extends Omit<InputHTMLAttributes<HTMLInputElemen
 const SENZA_CORRETTORE = { autoCapitalize: 'none', autoCorrect: 'off', spellCheck: false } as const
 
 export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function TextField(
-  { label, labelHidden, hint, error, trailing, className, id, value, onChange, type = 'text', revealable = true, ...rest },
+  {
+    label,
+    labelHidden,
+    hint,
+    error,
+    trailing,
+    className,
+    id,
+    value,
+    onChange,
+    type = 'text',
+    revealable = true,
+    revealed,
+    onRevealedChange,
+    revealControls,
+    ...rest
+  },
   ref,
 ) {
   const auto = useId()
   const fid = id ?? auto
   const segreto = type === 'password' && revealable
-  const [mostra, setMostra] = useState(false)
+  const [proprio, setProprio] = useState(false)
+  const mostra = revealed ?? proprio
+  const setMostra = onRevealedChange ?? setProprio
   const own = useRef<HTMLInputElement | null>(null)
   const cursore = useRef<[number, number] | null>(null)
 
@@ -115,7 +142,7 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function T
             className="ui-password-toggle"
             aria-label="Mostra password"
             aria-pressed={mostra}
-            aria-controls={fid}
+            aria-controls={revealControls ? `${fid} ${revealControls}` : fid}
             disabled={rest.disabled}
             onPointerDown={(e) => e.preventDefault()}
             onMouseDown={(e) => e.preventDefault()}
@@ -124,7 +151,7 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function T
               if (el && document.activeElement === el && el.selectionStart !== null && el.selectionEnd !== null) {
                 cursore.current = [el.selectionStart, el.selectionEnd]
               }
-              setMostra((v) => !v)
+              setMostra(!mostra)
             }}
           >
             <Icon name={mostra ? 'eye-off' : 'eye'} size={20} />

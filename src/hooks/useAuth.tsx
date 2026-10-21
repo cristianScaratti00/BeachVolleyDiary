@@ -3,14 +3,17 @@ import type { ReactNode } from 'react'
 import Clarity from '@microsoft/clarity'
 import { supabase } from '../lib/supabase'
 import { useScelta } from '../lib/consenso'
-import { loginUser, registerUser, logoutUser, sessionForUser, signInWithProvider } from '../lib/auth'
+import { closeLinkSession, loginUser, registerUser, logoutUser, resendConfirmation, sessionForUser, signInWithProvider } from '../lib/auth'
 import type { Session, AuthResult, OAuthProvider } from '../lib/auth'
+import { SESSIONE_DEL_LINK, pulisciIndirizzo } from '../lib/ritorno'
 
 interface AuthContextValue {
   session: Session | null
   loading: boolean // true finché non si conosce lo stato iniziale della sessione
   login: (email: string, password: string) => Promise<AuthResult>
-  register: (name: string, email: string, password: string) => Promise<AuthResult>
+  register: (name: string, email: string, password: string, confirm: string) => Promise<AuthResult>
+  /** La mail di conferma di nuovo (link scaduto o già usato). */
+  resend: (email: string) => Promise<AuthResult>
   loginWithProvider: (provider: OAuthProvider) => Promise<AuthResult>
   logout: () => Promise<void>
   refresh: () => Promise<void> // rilegge il profilo (es. dopo cambio avatar/piano)
@@ -23,18 +26,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    let attivo = true
+    // Il profilo arriva dalla rete: vince l'ultimo evento, non l'ultima
+    // risposta (un SIGNED_IN lento non rimette una sessione appena chiusa).
+    let ultimo = 0
+    const applica = (user: Parameters<typeof sessionForUser>[0]) => {
+      const n = ++ultimo
+      sessionForUser(user).then((sess) => {
+        if (!attivo || n !== ultimo) return
+        setSession(sess)
+        setLoading(false)
+      })
+    }
+    // Arrivati dal link della mail di conferma, la sua sessione si chiude
+    // prima di tutto: si atterra su Accedi (ritorno.ts), senza che l'app si
+    // affacci per un attimo. Fino ad allora gli eventi non contano.
+    let pronto = !SESSIONE_DEL_LINK
+    const avvio = SESSIONE_DEL_LINK ? closeLinkSession().then(pulisciIndirizzo, pulisciIndirizzo) : Promise.resolve()
     // Sessione iniziale (ripristinata da localStorage da supabase-js)...
-    supabase.auth.getSession().then(async ({ data }) => {
-      setSession(await sessionForUser(data.session?.user))
-      setLoading(false)
+    void avvio.then(async () => {
+      pronto = true
+      const { data } = await supabase.auth.getSession()
+      applica(data.session?.user)
     })
     // ...e sincronizzazione ad ogni cambiamento (login / logout / refresh token).
     // Il callback resta sincrono (profilo caricato via .then) per evitare il
     // deadlock noto quando si await-a supabase-js dentro onAuthStateChange.
     const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
-      sessionForUser(s?.user).then((sess) => { setSession(sess); setLoading(false) })
+      if (pronto) applica(s?.user)
     })
-    return () => sub.subscription.unsubscribe()
+    return () => {
+      attivo = false
+      sub.subscription.unsubscribe()
+    }
   }, [])
 
   // Lega le sessioni registrate da Clarity all'utente. Clarity fa l'hash
@@ -81,14 +105,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback((email: string, password: string) => loginUser(email, password), [])
   const register = useCallback(
-    (name: string, email: string, password: string) => registerUser(name, email, password),
+    (name: string, email: string, password: string, confirm: string) => registerUser(name, email, password, confirm),
     [],
   )
+  const resend = useCallback((email: string) => resendConfirmation(email), [])
   const loginWithProvider = useCallback((provider: OAuthProvider) => signInWithProvider(provider), [])
   const logout = useCallback(() => logoutUser(), [])
 
   return (
-    <AuthContext.Provider value={{ session, loading, login, register, loginWithProvider, logout, refresh }}>
+    <AuthContext.Provider value={{ session, loading, login, register, resend, loginWithProvider, logout, refresh }}>
       {children}
     </AuthContext.Provider>
   )

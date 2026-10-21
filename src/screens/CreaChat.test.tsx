@@ -167,6 +167,103 @@ describe('CreaChat — la testata e la capsula (design 14)', () => {
   })
 })
 
+// I limiti (crea/limiti.ts): il campo non lascia scrivere oltre il massimo
+// del passo; un testo più lungo può arrivare lo stesso (incollato, dettato,
+// riempito dal sistema), e lì è Solby a dirlo. `fireEvent.change` mette nel
+// campo quello che `maxLength` avrebbe tagliato.
+describe('CreaChat — i limiti delle risposte scritte', () => {
+  const MOTIVO_TORNEO = 'Mi serve un nome più corto: massimo 60 caratteri. Riprova?'
+
+  it('il campo ha il massimo del passo: 60 il torneo, 40 il compagno', async () => {
+    const user = userEvent.setup()
+    renderChat()
+    expect(screen.getByRole('textbox', { name: 'Come si chiama il torneo?' })).toHaveAttribute('maxlength', '60')
+    await user.keyboard('Rimini Open{Enter}')
+    expect(await screen.findByRole('textbox', { name: /Con chi hai giocato/ })).toHaveAttribute('maxlength', '40')
+  })
+
+  it('un nome di 200 caratteri: Solby dice perché e richiede, lo step non avanza, niente si salva', async () => {
+    const user = userEvent.setup()
+    const { onCreate } = renderChat()
+    const campo = screen.getByRole('textbox', { name: 'Come si chiama il torneo?' })
+    const lungo = 'Torneo estivo '.repeat(15).trim()
+    expect(lungo.length).toBeGreaterThan(200)
+    fireEvent.change(campo, { target: { value: lungo } })
+    await user.click(screen.getByRole('button', { name: 'Invia' }))
+    // L'eco resta (si vede che cosa si è scritto), poi la risposta di Solby nel log.
+    expect(within(log()).getByText(lungo)).toBeInTheDocument()
+    expect(await within(log()).findByText(MOTIVO_TORNEO)).toBeInTheDocument()
+    expect(screen.getByText('Nuovo torneo · passo 1 di 8')).toBeInTheDocument()
+    // Il campo tiene il testo da correggere, e ha il fuoco.
+    expect(campo).toHaveValue(lungo)
+    await waitFor(() => expect(campo).toHaveFocus())
+    expect(onCreate).not.toHaveBeenCalled()
+
+    // Corretto, il copione va avanti col nome pulito.
+    await user.clear(campo)
+    await user.type(campo, '  Rimini   Open {Enter}')
+    expect(await within(log()).findByText('Perfetto, «Rimini Open». Con chi hai giocato?')).toBeInTheDocument()
+    expect(screen.getByText('Nuovo torneo · passo 2 di 8')).toBeInTheDocument()
+  })
+
+  it('un compagno troppo lungo, scritto sul passo a scelte: stessa cosa, col limite del compagno', async () => {
+    const user = userEvent.setup()
+    renderChat()
+    await user.keyboard('Rimini Open{Enter}')
+    const campo = await screen.findByRole('textbox', { name: /Con chi hai giocato/ })
+    fireEvent.change(campo, { target: { value: 'Giulia Rossi Bianchi Verdi detta la Schiacciatrice' } })
+    await user.click(screen.getByRole('button', { name: 'Invia' }))
+    expect(await within(log()).findByText('Mi serve un nome più corto: massimo 40 caratteri. Riprova?')).toBeInTheDocument()
+    expect(screen.getByText('Nuovo torneo · passo 2 di 8')).toBeInTheDocument()
+    await waitFor(() => expect(campo).toHaveFocus())
+    // Le scelte restano lì sotto.
+    expect(screen.getByRole('button', { name: 'Giulia' })).toBeInTheDocument()
+  })
+
+  it('solo emoji o un link: Solby spiega come rimediare', async () => {
+    const user = userEvent.setup()
+    renderChat()
+    const campo = screen.getByRole('textbox', { name: 'Come si chiama il torneo?' })
+    await user.type(campo, '🏐🏐🏐{Enter}')
+    expect(await within(log()).findByText('Nel nome mi serve almeno una lettera, non solo numeri, simboli o emoji. Riprova?')).toBeInTheDocument()
+    await user.clear(campo)
+    await user.type(campo, 'www.torneo.it{Enter}')
+    expect(await within(log()).findByText(/^Niente link/)).toBeInTheDocument()
+    expect(screen.getByText('Nuovo torneo · passo 1 di 8')).toBeInTheDocument()
+  })
+
+  it('vicino al limite compare «47/60», e si annuncia una volta sola, al passaggio', async () => {
+    const user = userEvent.setup()
+    const { container } = renderChat()
+    const campo = screen.getByRole('textbox', { name: 'Come si chiama il torneo?' })
+    await user.type(campo, 'Rimini Open')
+    expect(container.querySelector('.crea-conta')).toBeNull()
+    const stato = within(container.querySelector('.crea-bar') as HTMLElement).getByRole('status')
+    expect(stato).toHaveTextContent('')
+    await user.clear(campo)
+    await user.type(campo, 'Coppa '.repeat(8).trim())
+    expect(container.querySelector('.crea-conta')).toHaveTextContent('47/60')
+    expect(stato).toHaveTextContent('Massimo 60 caratteri: ne restano 15.')
+    // Un tasto in più non cambia l'annuncio (niente annuncio a ogni tasto).
+    await user.type(campo, 'x')
+    expect(container.querySelector('.crea-conta')).toHaveTextContent('48/60')
+    expect(stato).toHaveTextContent('Massimo 60 caratteri: ne restano 15.')
+  })
+
+  it('«Invia» col campo vuoto è disattivo, lo spiega e riporta al campo', async () => {
+    const user = userEvent.setup()
+    renderChat()
+    const invia = screen.getByRole('button', { name: 'Invia' })
+    expect(invia).toHaveAttribute('aria-disabled', 'true')
+    expect(invia).toHaveAccessibleDescription('Prima scrivi una risposta.')
+    await user.click(invia)
+    expect(screen.getByRole('textbox', { name: 'Come si chiama il torneo?' })).toHaveFocus()
+    await user.keyboard('R')
+    expect(invia).not.toHaveAttribute('aria-disabled')
+    expect(invia).not.toHaveAccessibleDescription()
+  })
+})
+
 describe('copione — passi e risposte scritte', () => {
   it('le domande della stessa cosa stanno nello stesso passo', () => {
     expect(passoDi('name')).toBe(1)

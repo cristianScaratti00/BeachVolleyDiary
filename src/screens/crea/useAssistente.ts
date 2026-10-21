@@ -7,6 +7,10 @@
 // "scrive", e qualunque input sul dock fa comparire subito la domanda — il
 // tasto o il tocco vanno comunque a segno. Con reduced-motion la pausa è 0 e
 // l'indicatore non c'è.
+//
+// Le risposte scritte passano da `validaRisposta` (crea/limiti.ts): una che
+// non va resta nella trascrizione, Solby dice perché e richiede, lo step non
+// cambia e il campo tiene il testo, col fuoco (`campoTick`).
 // ============================================================================
 import { useEffect, useRef, useState } from 'react'
 import { useReducedMotion } from 'motion/react'
@@ -24,6 +28,7 @@ import {
   todayISO,
 } from './copione'
 import type { Draft, Step } from './copione'
+import { validaRisposta } from './limiti'
 
 export interface Msg {
   id: number
@@ -67,6 +72,8 @@ export function useAssistente({ partners, venues, onCreate }: Deps) {
   const [createdId, setCreatedId] = useState<string | null>(null)
   /** Cresce quando una domanda nuova è entrata nel DOM: il focus va al dock. */
   const [focusTick, setFocusTick] = useState(1)
+  /** Cresce quando una risposta scritta è rifiutata: il focus torna al campo. */
+  const [campoTick, setCampoTick] = useState(0)
 
   const [text, setText] = useState('')
   const [dateVal, setDateVal] = useState(todayISO())
@@ -143,10 +150,25 @@ export function useAssistente({ partners, venues, onCreate }: Deps) {
     if (alive.current) setFocusTick((t) => t + 1)
   }
 
+  /**
+   * Una risposta scritta che non va: l'eco resta (si vede che cosa si è
+   * scritto), Solby dice perché e chiede di riprovare, lo step resta quello.
+   * Il testo resta nel campo da correggere, e il campo riprende il fuoco.
+   */
+  const rifiuta = (raw: string, motivo: string) => {
+    pushUser(raw.trim())
+    void (async () => {
+      await say({ text: motivo })
+      if (alive.current) setCampoTick((t) => t + 1)
+    })()
+  }
+
   // ------------------------------------------------------------ risposte
   const submitName = (raw: string) => {
-    const v = raw.trim()
-    if (!v) return
+    if (!raw.trim()) return
+    const r = validaRisposta('name', raw)
+    if (!r.ok) return rifiuta(raw, r.motivo)
+    const v = r.valore
     pushUser(v)
     setText('')
     patch({ name: v, color: coloreDelNome(v) })
@@ -169,8 +191,10 @@ export function useAssistente({ partners, venues, onCreate }: Deps) {
     void goStep('partnerName')
   }
   const submitPartnerName = (raw: string, fromResults: boolean) => {
-    const v = raw.trim()
-    if (!v) return
+    if (!raw.trim()) return
+    const r = validaRisposta('partnerName', raw)
+    if (!r.ok) return rifiuta(raw, r.motivo)
+    const v = r.valore
     pushUser(v)
     setText('')
     patch({ partnerId: 'new', newPartnerName: v })
@@ -197,8 +221,10 @@ export function useAssistente({ partners, venues, onCreate }: Deps) {
   // Luogo nuovo: la chat chiede una riga sola (non è un form), quindi il nome
   // vale anche da città. Nello sheet del torneo i due campi restano separati.
   const submitVenueName = (raw: string) => {
-    const v = raw.trim()
-    if (!v) return
+    if (!raw.trim()) return
+    const r = validaRisposta('venueName', raw)
+    if (!r.ok) return rifiuta(raw, r.motivo)
+    const v = r.valore
     pushUser(v)
     setText('')
     patch({ venueId: 'new', newVenueName: v, city: v })
@@ -267,7 +293,9 @@ export function useAssistente({ partners, venues, onCreate }: Deps) {
     void goStep('matchOpponents')
   }
   const submitOpponents = (raw: string) => {
-    const v = raw.trim()
+    const r = validaRisposta('matchOpponents', raw)
+    if (!r.ok) return rifiuta(raw, r.motivo)
+    const v = r.valore
     pushUser(v || 'Avversari')
     setText('')
     pendingMatch.current = { opponents: v || 'Avversari', phase: 'Girone', sets: [] }
@@ -381,6 +409,7 @@ export function useAssistente({ partners, venues, onCreate }: Deps) {
     step,
     createdId,
     focusTick,
+    campoTick,
     text,
     setText,
     dateVal,

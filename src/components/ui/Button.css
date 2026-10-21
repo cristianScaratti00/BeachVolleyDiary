@@ -58,6 +58,27 @@
   .ui-button[data-size="lg"] { min-height: var(--control-lg); padding: 0 var(--space-6); font-size: 1rem; }
   .ui-button[data-block] { display: flex; width: 100%; }
 
+  /* Con la seconda riga (`sub`) è una scelta, non un comando: l'icona a
+     sinistra, il titolo e la spiegazione allineati a sinistra e liberi di
+     andare a capo, alta almeno 56. La spiegazione ha lo stesso colore
+     dell'etichetta (sull'arancio l'inchiostro fa 5.98), più leggera. */
+  .ui-button[data-sub] {
+    justify-content: flex-start;
+    gap: var(--space-3);
+    min-height: var(--control-lg);
+    padding: var(--space-3) var(--space-6) var(--space-3) var(--space-5);
+    white-space: normal;
+    text-align: start;
+  }
+  .ui-button-testo { display: flex; flex-direction: column; gap: var(--space-0-5); min-width: 0; }
+  .ui-button[data-sub] .ui-button-label { overflow: visible; overflow-wrap: anywhere; }
+  .ui-button-sub {
+    font: var(--type-footnote);
+    font-weight: 500;
+    letter-spacing: var(--track-footnote);
+    text-wrap: pretty;
+  }
+
   /* Il pieno: arancio, filo arancio scuro (dentro, così non cambia la
      misura), etichetta d'inchiostro più pesante. */
   .ui-button[data-variant="filled"] {

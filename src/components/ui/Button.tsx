@@ -10,7 +10,7 @@
 //   `aria-busy`, larghezza bloccata alla misura di riposo; i tocchi successivi
 //   non fanno niente (il doppio tocco non crea due tornei).
 // ============================================================================
-import { forwardRef, useEffect, useLayoutEffect, useRef } from 'react'
+import { forwardRef, useEffect, useId, useLayoutEffect, useRef } from 'react'
 import type { ButtonHTMLAttributes, MouseEvent, ReactNode } from 'react'
 import { Link } from '../../app/router'
 import type { LinkProps } from '../../app/router'
@@ -81,6 +81,28 @@ interface CommonProps {
   material?: Material
   /** Solo per `variant="glass"`: l'etichetta rossa di «Elimina», «Esci». */
   tone?: 'danger'
+  /**
+   * Una seconda riga sotto l'etichetta: la scelta con la sua spiegazione
+   * (la Home vuota). È la descrizione, non il nome (`aria-describedby`): il
+   * pulsante si chiama con l'etichetta e basta.
+   */
+  sub?: ReactNode
+}
+
+function describedBy(...ids: (string | false | undefined)[]): string | undefined {
+  const v = ids.filter(Boolean).join(' ')
+  return v || undefined
+}
+
+/** L'etichetta, e con `sub` la riga sotto (nascosta all'albero: è la descrizione). */
+function Etichetta({ label, sub, subId }: { label: ReactNode; sub?: ReactNode; subId: string }) {
+  if (!sub) return <span className="ui-button-label">{label}</span>
+  return (
+    <span className="ui-button-testo">
+      <span className="ui-button-label">{label}</span>
+      <span id={subId} className="ui-button-sub" aria-hidden="true">{sub}</span>
+    </span>
+  )
 }
 
 export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'disabled' | 'type'>, CommonProps {
@@ -105,6 +127,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     block,
     material,
     tone,
+    sub,
     disabled,
     onDisabledClick,
     busy,
@@ -119,6 +142,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   ref,
 ) {
   const own = useRef<HTMLButtonElement | null>(null)
+  const subId = useId()
   // La misura di riposo (sopra): quando l'etichetta diventa «Salvataggio…»
   // il pulsante non si restringe. Occupato si segna prima che il browser
   // impagini l'etichetta nuova, così la sua misura non entra.
@@ -157,16 +181,18 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       data-variant={variant}
       data-size={size}
       data-block={block ? '' : undefined}
+      data-sub={sub ? '' : undefined}
       {...vetro(variant, material).attr}
       data-tone={tone}
       aria-disabled={disabled || undefined}
       aria-busy={busy || undefined}
+      aria-describedby={describedBy(sub ? subId : false, rest['aria-describedby'])}
       onClick={handle}
       style={riposo ? { ...style, minWidth: riposo } : style}
     >
       {vetro(variant, material).strato}
       {icon && <Icon name={icon} size={size === 'sm' ? 16 : 20} />}
-      <span className="ui-button-label">{busy && busyLabel ? busyLabel : children}</span>
+      <Etichetta label={busy && busyLabel ? busyLabel : children} sub={sub} subId={subId} />
     </button>
   )
 })
@@ -177,9 +203,10 @@ export interface ButtonLinkProps extends Omit<LinkProps, 'children'>, CommonProp
 
 /** Un pulsante che porta a una rotta: è un link vero, vestito da pulsante. */
 export const ButtonLink = forwardRef<HTMLAnchorElement, ButtonLinkProps>(function ButtonLink(
-  { variant = 'filled', size = 'md', icon, block, material, tone, children, className, ...rest },
+  { variant = 'filled', size = 'md', icon, block, material, tone, sub, children, className, ...rest },
   ref,
 ) {
+  const subId = useId()
   return (
     <Link
       {...rest}
@@ -188,12 +215,14 @@ export const ButtonLink = forwardRef<HTMLAnchorElement, ButtonLinkProps>(functio
       data-variant={variant}
       data-size={size}
       data-block={block ? '' : undefined}
+      data-sub={sub ? '' : undefined}
       {...vetro(variant, material).attr}
       data-tone={tone}
+      aria-describedby={describedBy(sub ? subId : false, rest['aria-describedby'])}
     >
       {vetro(variant, material).strato}
       {icon && <Icon name={icon} size={size === 'sm' ? 16 : 20} />}
-      <span className="ui-button-label">{children}</span>
+      <Etichetta label={children} sub={sub} subId={subId} />
     </Link>
   )
 })

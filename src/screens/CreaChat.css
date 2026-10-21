@@ -228,6 +228,16 @@
     text-overflow: ellipsis;
   }
   .crea-input::placeholder { color: var(--ink-placeholder); }
+  /* «45/60» dentro la capsula, dopo il testo: compare a tre quarti del
+     massimo. Sul vetro si scrive solo d'inchiostro; al massimo pesa di più. */
+  .crea-conta {
+    flex: none;
+    margin-left: var(--space-2);
+    font: var(--type-caption-1);
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+  }
+  .crea-conta[data-pieno] { font-weight: 700; }
   .crea-input:disabled { cursor: default; }
   /* Il pulsante d'invio: arancio tondo da 52 col filo, la freccia d'inchiostro. */
   .crea-send {

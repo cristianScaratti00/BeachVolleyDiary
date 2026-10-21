@@ -8,6 +8,8 @@
 import type { User } from '@supabase/supabase-js'
 import { track } from '@vercel/analytics'
 import { supabase } from './supabase'
+import { URL_APP } from './sito'
+import { LIMITI } from './lunghezze'
 import type { Role, Plan } from './db.enums'
 
 export interface Session {
@@ -51,6 +53,10 @@ export async function checkNameAvailable(name: string): Promise<NameCheck> {
 export type OAuthProvider = 'google' | 'apple'
 
 export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+/** La password: il minimo di Supabase Auth. */
+export const PASSWORD_MIN = 6
+export const PASSWORD_DIVERSE = 'Le due password non coincidono.'
 
 // Legge nome, ruolo e piano dal profilo dell'utente (default se non c'è ancora:
 // con i piani sospesi il fallback è premium, come il default della colonna).
@@ -102,7 +108,7 @@ export async function sessionForUser(user: User | null | undefined): Promise<Ses
 export async function updateDisplayName(next: string, current: string): Promise<AuthResult> {
   const n = next.trim()
   if (!n) return { ok: false, error: 'Inserisci il tuo nome.' }
-  if (n.length > 40) return { ok: false, error: 'Il nome è troppo lungo (massimo 40 caratteri).' }
+  if (n.length > LIMITI.nome.max) return { ok: false, error: `Il nome è troppo lungo (massimo ${LIMITI.nome.max} caratteri).` }
 
   // Il check di unicità confronta con TUTTI i profili, incluso il proprio: se
   // cambiano solo le maiuscole dello stesso nome l'unico match sarebbe l'utente
@@ -126,8 +132,8 @@ export async function updateDisplayName(next: string, current: string): Promise<
 // Cambia la password dell'utente loggato (nessuna vecchia password richiesta:
 // Supabase si fida della sessione attiva).
 export async function updatePassword(password: string, confirm: string): Promise<AuthResult> {
-  if (password.length < 6) return { ok: false, error: 'La password deve avere almeno 6 caratteri.' }
-  if (password !== confirm) return { ok: false, error: 'Le due password non coincidono.' }
+  if (password.length < PASSWORD_MIN) return { ok: false, error: `La password deve avere almeno ${PASSWORD_MIN} caratteri.` }
+  if (password !== confirm) return { ok: false, error: PASSWORD_DIVERSE }
 
   const { error } = await supabase.auth.updateUser({ password })
   if (error) return { ok: false, error: translateAuthError(error.message) }
@@ -135,12 +141,16 @@ export async function updatePassword(password: string, confirm: string): Promise
   return { ok: true, notice: 'Password aggiornata.' }
 }
 
-export async function registerUser(name: string, email: string, password: string): Promise<AuthResult> {
+// `confirm` è «Ripeti la password»: un errore di battitura chiuderebbe fuori
+// dall'account appena creato. Si controlla prima di `check-name`: non costa rete.
+export async function registerUser(name: string, email: string, password: string, confirm: string): Promise<AuthResult> {
   const n = name.trim()
   const e = email.trim().toLowerCase()
   if (!n) return { ok: false, error: 'Inserisci il tuo nome.' }
+  if (n.length > LIMITI.nome.max) return { ok: false, error: `Il nome è troppo lungo (massimo ${LIMITI.nome.max} caratteri).` }
   if (!EMAIL_RE.test(e)) return { ok: false, error: 'Email non valida.' }
-  if (password.length < 6) return { ok: false, error: 'La password deve avere almeno 6 caratteri.' }
+  if (password.length < PASSWORD_MIN) return { ok: false, error: `La password deve avere almeno ${PASSWORD_MIN} caratteri.` }
+  if (password !== confirm) return { ok: false, error: PASSWORD_DIVERSE }
 
   // Verifica che il nome non sia già usato da un altro utente (Edge Function).
   // Fail-open: se la function non risponde non blocchiamo la registrazione.
@@ -158,10 +168,10 @@ export async function registerUser(name: string, email: string, password: string
     password,
     options: {
       data: { name: n },
-      // La mail di conferma reindirizza all'app da cui ci si registra
-      // (dev: localhost, prod: dominio), non al solo "Site URL" del progetto.
-      // NB: l'URL dev'essere in Supabase → Auth → URL Configuration → Redirect URLs.
-      emailRedirectTo: window.location.origin,
+      // La mail di conferma torna all'app (sito.ts): la produzione anche da
+      // un deploy di anteprima, localhost in sviluppo. NB: l'URL dev'essere
+      // fra le Redirect URLs del progetto (supabase/templates/README.md).
+      emailRedirectTo: URL_APP,
     },
   })
   if (error) return { ok: false, error: translateAuthError(error.message) }
@@ -172,6 +182,29 @@ export async function registerUser(name: string, email: string, password: string
     return { ok: true, notice: 'Registrazione completata! Ti abbiamo inviato una mail di conferma: controlla la casella per attivare l’account, poi accedi.' }
   }
   return { ok: true }
+}
+
+// La mail di conferma di nuovo: il link è scaduto, o è già stato usato.
+export async function resendConfirmation(email: string): Promise<AuthResult> {
+  const e = email.trim().toLowerCase()
+  if (!EMAIL_RE.test(e)) return { ok: false, error: 'Email non valida.' }
+  const { error } = await supabase.auth.resend({ type: 'signup', email: e, options: { emailRedirectTo: URL_APP } })
+  if (error) return { ok: false, error: translateAuthError(error.message) }
+  return { ok: true, notice: 'Ti abbiamo mandato una nuova mail di conferma: apri il link che contiene, poi accedi.' }
+}
+
+/**
+ * Il link di conferma porta con sé una sessione, ma per scelta si rientra da
+ * Accedi: la si chiude (anche sul server: `scope: 'local'` revoca questa
+ * sessione e nessun'altra). Una volta sola per pagina, anche se AuthProvider
+ * si monta due volte (StrictMode).
+ */
+let chiusura: Promise<void> | null = null
+export function closeLinkSession(): Promise<void> {
+  chiusura ??= supabase.auth.getSession().then(async ({ data }) => {
+    if (data.session) await supabase.auth.signOut({ scope: 'local' })
+  })
+  return chiusura
 }
 
 export async function loginUser(email: string, password: string): Promise<AuthResult> {
@@ -193,7 +226,7 @@ export async function signInWithProvider(provider: OAuthProvider): Promise<AuthR
   const { error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
-      redirectTo: window.location.origin,
+      redirectTo: URL_APP,
       // Google: mostra il selettore account invece di entrare subito con l'ultimo.
       queryParams: provider === 'google' ? { prompt: 'select_account' } : undefined,
     },
@@ -221,6 +254,8 @@ function translateAuthError(msg: string): string {
   if (m.includes('reauthentication')) return 'Per sicurezza esci e rientra, poi riprova a cambiare la password.'
   if (m.includes('password')) return 'Password non valida (minimo 6 caratteri).'
   if (m.includes('rate limit') || m.includes('too many')) return 'Troppi tentativi, riprova tra poco.'
+  // «For security purposes, you can only request this after N seconds» (resend).
+  if (m.includes('security purposes')) return 'Hai appena chiesto una mail: riprova fra un minuto.'
   if (m.includes('provider is not enabled') || m.includes('unsupported provider')) {
     return 'Accesso con questo provider non ancora disponibile. Riprova più tardi.'
   }

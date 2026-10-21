@@ -45,6 +45,7 @@ import type { ReactNode, RefObject } from 'react'
 import { AnimatePresence } from 'motion/react'
 import type { LiveTorneo, PartitaLiveProps } from '../app/contracts'
 import { PHASES } from '../lib/db.enums'
+import { LIMITI } from '../lib/lunghezze'
 import type { AnyForm, Phase } from '../lib/models'
 import { Pallo } from '../components/Pallo'
 import { SheetChips } from '../components/modals/Sheet'
@@ -886,7 +887,7 @@ function Impostazione({ tornei, torneoDefault, torneoOggi, iniziale, storico, on
           hint={scelto?.partner ? `Compagno: ${scelto.partner}, come nel torneo` : 'Nessun compagno nel torneo: si gioca come «Tu».'}
         />
         <SceltaFase value={fase} onChange={setFase} />
-        <TextField label="Avversari (coppia)" value={avversari} onChange={setAvversari} placeholder="es. Bianchi / Verdi" autoComplete="off" />
+        <TextField label="Avversari (coppia)" value={avversari} onChange={setAvversari} placeholder="es. Bianchi / Verdi" autoComplete="off" maxLength={LIMITI.avversari.max} />
         <Button type="submit" size="lg" block className="live-inizia">
           Inizia
         </Button>
@@ -903,14 +904,14 @@ function Impostazione({ tornei, torneoDefault, torneoOggi, iniziale, storico, on
             onInizia(avvio('amici'))
           }}
         >
-          <TextField label="Il tuo compagno (facoltativo)" value={compagno} onChange={setCompagno} placeholder="es. Luca" autoComplete="off" maxLength={40} />
+          <TextField label="Il tuo compagno (facoltativo)" value={compagno} onChange={setCompagno} placeholder="es. Luca" autoComplete="off" maxLength={LIMITI.compagno.max} />
           <TextField
             label="Avversari (facoltativo)"
             value={avversari}
             onChange={setAvversari}
             placeholder="es. Marco / Gio"
             autoComplete="off"
-            maxLength={60}
+            maxLength={LIMITI.avversari.max}
             hint="Se li lasci vuoti, sul tabellone siete «Noi» e «Loro»."
           />
           <div className="live-formato">
