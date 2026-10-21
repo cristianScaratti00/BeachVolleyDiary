@@ -15,9 +15,12 @@
 //   5. Beach Wrapped, quando è pronto;
 //   6. tornei vinti (porta a Tornei) e serie record;
 //   7. gli ultimi tornei, con la medaglia.
-// Diario vuoto: solo Pallo che invita a creare il primo torneo. Tornei senza
-// partite: niente numeri (una fila di zeri non informa, UX F1), è Pallo a dire
-// di aggiungere la prima partita.
+// Diario vuoto (`HomeVuota`): Solby grande che chiede come cominciare, le due
+// strade a tutta larghezza (le stesse del ＋: «Raccontalo a Solby» e
+// «Compila da solo») e sotto, sbiadite, le card vere della Home con un
+// esempio: «Qui compariranno i tuoi numeri». Tornei senza partite: niente
+// numeri (una fila di zeri non informa, UX F1), è Pallo a dire di aggiungere
+// la prima partita.
 //
 // I blocchi salgono uno dopo l'altro (`.rise`, 50ms fra l'uno e l'altro);
 // `.rise` sta sui contenitori e `.press` su ciò che si preme dentro di loro,
@@ -222,7 +225,7 @@ function AltezzaMorbida({ children }: { children: ReactNode }) {
  * niente. Per questo non è un pulsante: niente nome, niente fermata di Tab,
  * `aria-hidden`; a chi non lo vede non manca nulla. Gli occhi seguono il dito.
  */
-function PalloConsiglia({ consigli, ultimi, on, dopo }: { consigli: Consiglio[]; ultimi: UltimoTorneo[]; on: AzioniConsiglio; dopo?: ReactNode }) {
+function PalloConsiglia({ consigli, ultimi, on }: { consigli: Consiglio[]; ultimi: UltimoTorneo[]; on: AzioniConsiglio }) {
   const [scelto, setScelto] = useState<string | null>(null)
   const [sopra, setSopra] = useState(false)
   const [aFuoco, setAFuoco] = useState(false)
@@ -278,7 +281,6 @@ function PalloConsiglia({ consigli, ultimi, on, dopo }: { consigli: Consiglio[];
                   <Azione a={c.azione} on={on} />
                 </div>
               )}
-              {dopo}
             </m.div>
           </AnimatePresence>
         </AltezzaMorbida>
@@ -287,12 +289,17 @@ function PalloConsiglia({ consigli, ultimi, on, dopo }: { consigli: Consiglio[];
   )
 }
 
+/** Quello che la card «Partite vinte» legge dei numeri. */
+type NumeriRendimento = Pick<DashboardStats, 'winPct' | 'diffStr' | 'won' | 'lost' | 'played'>
+
 /**
  * «Partite vinte»: il numero grande col «%» arancio, lo scarto, la barra che
  * cresce (vinte d'inchiostro, perse sul filo forte). Tutta la card porta a
  * Statistiche: il chevron accanto all'etichetta è il link, esteso alla card.
+ * `rise`: la chiave della salita da zero (MOTION.md §10); senza, i numeri
+ * stanno fermi (l'esempio della Home vuota non consuma la salita vera).
  */
-function Rendimento({ s }: { s: DashboardStats }) {
+function Rendimento({ s, rise = 'home' }: { s: NumeriRendimento; rise?: string | null }) {
   const id = useId()
   return (
     <Card as="section" className="home-rend" aria-labelledby={`${id}-t`}>
@@ -305,12 +312,12 @@ function Rendimento({ s }: { s: DashboardStats }) {
             </Link>
           </div>
           <p className="home-pct">
-            <Tabellone value={s.winPct} size="hero" rise="home" />
+            <Tabellone value={s.winPct} size="hero" rise={rise ?? undefined} />
             <span className="home-pct-s">%</span>
           </p>
         </div>
         <p className="home-scarto">
-          <span className="home-scarto-n"><Tabellone value={s.diffStr} size="l" rise="home" /></span>
+          <span className="home-scarto-n"><Tabellone value={s.diffStr} size="l" rise={rise ?? undefined} /></span>
           <span className="home-scarto-l">punti di scarto</span>
         </p>
       </div>
@@ -369,10 +376,15 @@ function Coppia({ s }: { s: DashboardStats }) {
   )
 }
 
-function UltimiTornei({ ultimi, rise }: { ultimi: UltimoTorneo[]; rise: number }) {
+function UltimiTornei({ ultimi, rise }: { ultimi: UltimoTorneo[]; rise?: number }) {
   const id = useId()
   return (
-    <Card as="section" className="home-ultimi rise" style={sale(rise)} aria-labelledby={`${id}-t`}>
+    <Card
+      as="section"
+      className={rise === undefined ? 'home-ultimi' : 'home-ultimi rise'}
+      style={rise === undefined ? undefined : sale(rise)}
+      aria-labelledby={`${id}-t`}
+    >
       <div className="home-ultimi-head">
         <h2 className="home-h2" id={`${id}-t`}>Ultimi tornei</h2>
         <Link to={{ name: 'tornei', vista: 'lista' }} className="home-tutti" aria-label="Tutti i tornei">
@@ -404,6 +416,77 @@ function UltimiTornei({ ultimi, rise }: { ultimi: UltimoTorneo[]; rise: number }
   )
 }
 
+/**
+ * L'esempio sbiadito della Home vuota: i numeri e i tornei del diario di
+ * prova dell'accesso (Login.solby.tsx), così le due schermate raccontano la
+ * stessa stagione. 5 vinte e 3 perse = 63%.
+ */
+const ESEMPIO_NUMERI: NumeriRendimento = { winPct: 63, diffStr: '+36', won: 5, lost: 3, played: 8 }
+const ESEMPIO_ULTIMI: UltimoTorneo[] = [
+  { id: 'esempio-1', name: 'Cervia Beach Party', placement: '1° 🏆', meta: '8 ott · con Giulia', record: { won: 2, lost: 0 }, shared: false },
+  { id: 'esempio-2', name: 'Summer Cup Rimini', placement: '3°', meta: '21 set · con Giulia', record: { won: 3, lost: 3 }, shared: false },
+]
+
+/**
+ * Il diario vuoto. Solby, grande, chiede come cominciare: la domanda è un
+ * titolo vero (h2) nel flusso della pagina, non una nuvoletta che compare.
+ * Sotto, le due strade a tutta larghezza con la loro spiegazione: le stesse
+ * parole del ＋ (ModalHost). Più giù, sbiadite e solo da guardare (`inert`,
+ * `aria-hidden`: le dice già il titolo sopra), le card vere della Home con un
+ * esempio. Niente illustrazioni: Solby e i componenti dell'app.
+ *
+ * Solby si tocca come nella Home piena (salta; cinque tocchi, la sorpresa)
+ * ma non è un controllo.
+ */
+function HomeVuota({ onNuovoTorneo }: { onNuovoTorneo: () => void }) {
+  const id = useId()
+  const pallo = useRef<PalloHandle>(null)
+  const gesti = usePalloTocco(pallo)
+  return (
+    <div className="home-corpo home-vuota">
+      <section className="home-vuota-invito" aria-labelledby={`${id}-t`}>
+        <div className="home-vuota-solby rise" style={sale(1)}>
+          <span className="home-vuota-pallo press pallo-toccabile" aria-hidden="true" {...gesti}>
+            <Pallo ref={pallo} umore="saluta" size={140} ombra segui />
+          </span>
+          <div className="home-vuota-nuvola">
+            <p className="home-nuvola-chi">Solby</p>
+            <h2 className="home-vuota-domanda" id={`${id}-t`}>
+              Il tuo diario è ancora vuoto. Partiamo dal primo torneo: come preferisci?
+            </h2>
+          </div>
+        </div>
+        <div className="home-vuota-scelte rise" style={sale(2)}>
+          <ButtonLink to={{ name: 'crea' }} size="lg" block icon="chat-dots" sub="Ti faccio io le domande, una alla volta">
+            Raccontalo a Solby
+          </ButtonLink>
+          <Button
+            variant="tinted"
+            size="lg"
+            block
+            icon="pencil"
+            sub="Bastano il nome e la data, il resto lo aggiungi dopo"
+            onClick={onNuovoTorneo}
+          >
+            Compila da solo
+          </Button>
+        </div>
+      </section>
+
+      <section className="home-anteprima rise" style={sale(3)} aria-labelledby={`${id}-a`}>
+        <div className="home-anteprima-testa">
+          <h2 className="home-h2" id={`${id}-a`}>Qui compariranno i tuoi numeri</h2>
+          <p className="home-anteprima-sotto">Un esempio, dopo un paio di tornei con le partite segnate.</p>
+        </div>
+        <div className="home-anteprima-carte" aria-hidden="true" {...{ inert: '' }}>
+          <Rendimento s={ESEMPIO_NUMERI} rise={null} />
+          <UltimiTornei ultimi={ESEMPIO_ULTIMI} />
+        </div>
+      </section>
+    </div>
+  )
+}
+
 export default function Home({
   nome,
   avatar,
@@ -424,27 +507,13 @@ export default function Home({
   const on = { onNuovoTorneo, onAggiungiPartita, onAggiornaPiazzamento, onStoria }
   const intestazione = <Intestazione today={today} frase={frase} nome={nome} avatar={avatar} />
 
-  // Diario vuoto: Pallo invita a creare il primo torneo, e c'è l'assistente
-  // per chi preferisce farsi guidare.
+  // Diario vuoto: Solby chiede come cominciare. Il consiglio «primo torneo»
+  // di `deriveConsigli` resta (il fallback dei selettori) ma qui non si usa.
   if (!hasTornei) {
     return (
       <Page className="home">
         {intestazione}
-        <div className="home-corpo">
-          <PalloConsiglia
-            consigli={consigli}
-            ultimi={ultimi}
-            on={on}
-            dopo={
-              <p className="home-nuvola-nota">
-                Preferisci farti guidare?{' '}
-                <Link to={{ name: 'crea' }} className="home-link">
-                  Raccontalo a Solby
-                </Link>
-              </p>
-            }
-          />
-        </div>
+        <HomeVuota onNuovoTorneo={onNuovoTorneo} />
       </Page>
     )
   }

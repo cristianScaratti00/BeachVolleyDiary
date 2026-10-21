@@ -18,11 +18,12 @@ import { useEffect, useId, useRef, useState } from 'react'
 import type { ChangeEvent, CSSProperties, FormEvent } from 'react'
 import type { ProfiloProps } from '../app/contracts'
 import { NavBar, Page, ListGroup, ListItem, ListRow, Avatar, Badge, Button, Grow, Icon, Switch, TextField } from '../components/ui/index'
+import { LIMITI } from '../lib/lunghezze'
 import './Profilo.css'
 
 type Esito = { ok: boolean; text: string } | null
 
-const NOME_MAX = 40
+const NOME_MAX = LIMITI.nome.max
 
 function anteprima(file: File): string | null {
   return typeof URL !== 'undefined' && typeof URL.createObjectURL === 'function' ? URL.createObjectURL(file) : null

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light only">
+<meta name="supported-color-schemes" content="light only">
+<title>Conferma il tuo Beach Volley Diary</title>
+</head>
+<body style="margin:0;padding:0;background-color:#F6F6F4;-webkit-text-size-adjust:100%;">
+<!-- Preheader: la riga che i client mostrano accanto all'oggetto. -->
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;mso-hide:all;font-size:1px;line-height:1px;color:#F6F6F4;">Un tocco sul pulsante e il tuo diario di beach volley è pronto.&#8202;&#847;&#8202;&#847;&#8202;&#847;&#8202;&#847;&#8202;&#847;&#8202;&#847;&#8202;&#847;&#8202;&#847;</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#F6F6F4" style="background-color:#F6F6F4;">
+  <tr>
+    <td align="center" style="padding:32px 16px 40px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:480px;">
+        <!-- Solby saluta, in piedi sopra la card. -->
+        <tr>
+          <td align="center" style="padding:0 0 4px;">
+            <img src="https://bv-diary.vercel.app/email/solby.png" width="96" height="104" alt="Solby, la mascotte di Beach Diary, che saluta" style="display:block;width:96px;height:104px;border:0;outline:none;text-decoration:none;">
+          </td>
+        </tr>
+        <tr>
+          <td bgcolor="#FFFFFF" style="background-color:#FFFFFF;border:1px solid #E2E2DE;border-radius:20px;padding:28px 24px 24px;font-family:Geist,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;color:#1C1C1E;">
+            <p style="margin:0 0 8px;font-size:13px;line-height:16px;font-weight:600;color:#6B6B68;">Beach Diary</p>
+            <h1 style="margin:0 0 12px;font-size:26px;line-height:30px;font-weight:800;letter-spacing:-0.5px;color:#1C1C1E;">{{ if .Data.name }}Ciao, {{ .Data.name }}!{{ else }}Ciao!{{ end }}</h1>
+            <p style="margin:0 0 24px;font-size:16px;line-height:23px;font-weight:500;color:#1C1C1E;">Manca solo un passo: conferma la tua email e il tuo diario di beach volley è pronto. Poi accedi con la password che hai scelto.</p>
+            <!-- Il pulsante: arancio con l'etichetta d'inchiostro (5.98:1), mai bianco sull'arancio. -->
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td align="center" bgcolor="#FF6B1A" style="background-color:#FF6B1A;border-radius:28px;">
+                  <a href="{{ .ConfirmationURL }}" target="_blank" style="display:block;padding:17px 24px;font-family:Geist,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;font-size:16px;line-height:22px;font-weight:700;color:#1C1C1E;text-decoration:none;border-radius:28px;">Conferma la mail</a>
+                </td>
+              </tr>
+            </table>
+            <p style="margin:24px 0 6px;font-size:13px;line-height:18px;font-weight:400;color:#6B6B68;">Il link vale un’ora. Se il pulsante non funziona, copia questo indirizzo nel browser:</p>
+            <p style="margin:0;font-size:13px;line-height:18px;font-weight:500;word-break:break-all;"><a href="{{ .ConfirmationURL }}" target="_blank" style="color:#1C1C1E;text-decoration:underline;">{{ .ConfirmationURL }}</a></p>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" style="padding:20px 8px 0;font-family:Geist,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;font-size:13px;line-height:19px;color:#6B6B68;">
+            Non hai chiesto tu di registrarti? Ignora questa mail: senza conferma l’account non si attiva.<br>
+            Beach Diary · il diario delle tue partite di beach volley
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

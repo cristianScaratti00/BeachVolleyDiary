@@ -5,6 +5,7 @@
 // ============================================================================
 import { useEffect, useId, useRef, useState } from 'react'
 import type { CompagnoSheetProps } from '../../app/contracts'
+import { LIMITI } from '../../lib/lunghezze'
 import { Avatar, Button, TextField } from '../ui/index'
 import { Sheet, SheetBar } from './Sheet'
 import './CompagnoSheet.css'
@@ -88,7 +89,7 @@ export default function CompagnoSheet({ onClose, top, byTouch, opener, setDirty,
             }}
             placeholder="es. Giulia"
             autoComplete="off"
-            maxLength={40}
+            maxLength={LIMITI.compagno.max}
             readOnly={busy}
             enterKeyHint="done"
             error={errore && vuoto ? 'Scrivi il nome del compagno.' : undefined}

@@ -6,7 +6,13 @@
 //     «Ho già un account»;
 //   - Accedi: «Bentornato.», email e password, «Entra»;
 //   - Registrati, in due passi: il nickname (verificato dal vivo con
-//     `check-name`), poi email e password. Il «‹» torna al passo prima.
+//     `check-name`), poi email, password e «Ripeti la password» (un errore di
+//     battitura chiuderebbe fuori dall'account appena creato; l'occhio le
+//     mostra insieme). Il «‹» torna al passo prima.
+//
+// Dal link della mail di conferma si arriva su Accedi (ritorno.ts): «Email
+// confermata, ora accedi» con l'email già scritta, oppure, col link scaduto o
+// già usato, l'avviso e «Invia di nuovo la mail».
 //
 // Si mostra su QUALUNQUE percorso senza sessione e non cambia l'URL: dopo
 // l'accesso si arriva esattamente dove si voleva andare (UX §4.5). Per questo
@@ -18,7 +24,8 @@
 //   - gli errori sono `role="alert"`, la conferma email un `role="status"`:
 //     si passa ad Accedi e l'email resta;
 //   - senza rete non si prova nemmeno, e lo si dice.
-// La logica di autenticazione (useAuth, checkNameAvailable) non cambia.
+// La logica di autenticazione sta in useAuth e lib/auth (registrazione con la
+// password ripetuta, reinvio della mail); qui c'è solo la vista.
 //
 // «Password dimenticata?» non c'è: nel repo non esiste un flusso di recupero,
 // e un link che non porta da nessuna parte è peggio di nessun link.
@@ -32,7 +39,10 @@ import type { CSSProperties, FormEvent, KeyboardEvent, PointerEvent, ReactNode, 
 import * as m from 'motion/react-m'
 import { AnimatePresence, useIsPresent, useReducedMotion } from 'motion/react'
 import { useAuth } from '../hooks/useAuth'
-import { checkNameAvailable } from '../lib/auth'
+import { EMAIL_RE, PASSWORD_DIVERSE, PASSWORD_MIN, checkNameAvailable } from '../lib/auth'
+import type { AuthResult } from '../lib/auth'
+import { LIMITI } from '../lib/lunghezze'
+import { ritornoDaMostrare, ritornoMostrato } from '../lib/ritorno'
 import { useOnline } from '../hooks/useConnection'
 import { OGGI_ATTIVO } from '../app/routes'
 import { BrandLockup } from '../components/Logo'
@@ -50,8 +60,9 @@ const OFFLINE = 'Sei offline: non posso verificare le credenziali.'
 
 /** Il ritardo del controllo del nome: non si chiama la Edge Function a ogni tasto. */
 const NOME_DEBOUNCE_MS = 450
-/** Lo stesso limite del nome nel Profilo (`updateDisplayName`). */
-const NOME_MAX = 40
+const CONFERMATA = 'Email confermata, ora accedi con la password che hai scelto.'
+const SCADUTO = 'Il link è scaduto o è già stato usato: accedi, o chiedi una nuova mail.'
+const EMAIL_PER_REINVIO = 'Scrivi qui la tua email: ti rimando la mail di conferma.'
 /** Quanto deve scorrere il dito in orizzontale perché il carosello cambi. */
 const SWIPE_PX = 40
 /**
@@ -96,6 +107,7 @@ export const PARAM_ACCESSO = 'accesso'
  * valore, o niente, è il Benvenuto.
  */
 function vistaIniziale(): Vista {
+  if (ritornoDaMostrare()) return 'accedi'
   try {
     const v = new URLSearchParams(window.location.search).get(PARAM_ACCESSO)
     return v === 'registrati' || v === 'accedi' ? v : 'benvenuto'
@@ -118,23 +130,39 @@ function togliParamAccesso() {
 
 export default function Login() {
   const online = useOnline()
-  const { login, register } = useAuth()
+  const { login, register, resend } = useAuth()
   // Letta una volta, al montaggio; il parametro si toglie subito dopo, così un
-  // ricaricamento o un «indietro» non riaprono la stessa vista.
+  // ricaricamento o un «indietro» non riaprono la stessa vista. Lo stesso per
+  // l'esito del link della mail di conferma.
+  const [ritorno] = useState(ritornoDaMostrare)
   const [vista, setVista] = useState<Vista>(vistaIniziale)
-  useEffect(togliParamAccesso, [])
+  useEffect(() => {
+    togliParamAccesso()
+    ritornoMostrato()
+  }, [])
   const [passo, setPasso] = useState<Passo>(1)
   const [direzione, setDirezione] = useState(1)
   const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
+  const [email, setEmail] = useState(() => (ritorno?.tipo === 'confermata' ? ritorno.email : ''))
+  const [emailErr, setEmailErr] = useState('')
   const [password, setPassword] = useState('')
+  const [conferma, setConferma] = useState('')
+  const [confermaErr, setConfermaErr] = useState('')
+  // L'occhio di «Password» e «Ripeti la password» è uno: si controlla quello
+  // che si è scritto nei due campi insieme.
+  const [mostraPassword, setMostraPassword] = useState(false)
   const [error, setError] = useState('')
-  const [notice, setNotice] = useState('')
+  const [notice, setNotice] = useState(ritorno?.tipo === 'confermata' ? CONFERMATA : '')
+  const [scaduto, setScaduto] = useState(ritorno?.tipo === 'scaduto')
   const [busy, setBusy] = useState(false)
   const [nameStatus, setNameStatus] = useState<NameStatus>('idle')
   const [nameMsg, setNameMsg] = useState('')
   const [nameErr, setNameErr] = useState('')
   const nomeRef = useRef<HTMLInputElement>(null)
+  const emailRef = useRef<HTMLInputElement>(null)
+  const confermaRef = useRef<HTMLInputElement>(null)
+  const passwordId = useId()
+  const confermaId = useId()
   const cornice = useRef<HTMLDivElement>(null)
   const area = useRef<HTMLElement>(null)
   useAccessoFermo(cornice, area)
@@ -142,6 +170,8 @@ export default function Login() {
   // da lì in poi ogni cambio di vista o di passo lo porta al nuovo titolo,
   // come la navigazione dell'app (UX §4.4).
   const navigato = useRef(false)
+  // Si torna al passo 1 per un nome che non va: il fuoco va al campo, non al titolo.
+  const [fuocoAlNome, setFuocoAlNome] = useState(false)
 
   const inRegistrazione = vista === 'registrati'
 
@@ -187,6 +217,10 @@ export default function Login() {
     setError('')
     setNotice('')
     setNameErr('')
+    setConfermaErr('')
+    setEmailErr('')
+    setScaduto(false)
+    setFuocoAlNome(false)
   }
 
   // Passo 1 → 2. Il nome vuoto lo dice con le parole di `registerUser`; un
@@ -208,6 +242,7 @@ export default function Login() {
     navigato.current = true
     setNameErr('')
     setError('')
+    setFuocoAlNome(false)
     setDirezione(1)
     setPasso(2)
   }
@@ -216,8 +251,45 @@ export default function Login() {
     if (busy) return
     navigato.current = true
     setError('')
+    setFuocoAlNome(false)
     setDirezione(-1)
     setPasso(1)
+  }
+
+  // Il nome è già preso (lo dice il controllo dal vivo arrivato tardi, o la
+  // registrazione): si torna al passo 1, con il motivo nella riga di stato
+  // del campo, che prende il fuoco. Lì «Continua» non passa finché non cambia.
+  const tornaAlNome = (motivo: string) => {
+    navigato.current = true
+    setNameStatus('taken')
+    setNameMsg(motivo)
+    setError('')
+    setFuocoAlNome(true)
+    setDirezione(-1)
+    setPasso(1)
+  }
+
+  // Un errore che riguarda un campo lo dice il campo, che prende il fuoco;
+  // gli altri (rete, limiti, password corta) il modulo, in fondo.
+  const mostraErrore = (r: AuthResult) => {
+    const msg = r.error || 'Si è verificato un errore.'
+    if (r.campo === 'email') {
+      setEmailErr(msg)
+      emailRef.current?.focus()
+    } else if (inRegistrazione && r.campo === 'nome') {
+      tornaAlNome(msg)
+    } else if (inRegistrazione && r.campo === 'conferma') {
+      setConfermaErr(msg)
+      confermaRef.current?.focus()
+    } else {
+      setError(msg)
+    }
+  }
+
+  // «Ripeti la password»: l'errore si mostra all'uscita dal campo (se c'è
+  // scritto qualcosa) o all'invio, non a ogni tasto (UX §8.9).
+  const controllaConferma = () => {
+    if (conferma && conferma !== password) setConfermaErr(PASSWORD_DIVERSE)
   }
 
   const invia = async (e: FormEvent) => {
@@ -228,25 +300,70 @@ export default function Login() {
       setError(OFFLINE)
       return
     }
+    // Lo stesso ordine di `registerUser`: la password corta la dice lui, sotto
+    // il modulo; due password diverse le dice il campo, che prende il focus.
+    if (inRegistrazione && password.length >= PASSWORD_MIN && password !== conferma) {
+      setError('')
+      setConfermaErr(PASSWORD_DIVERSE)
+      confermaRef.current?.focus()
+      return
+    }
+    // Il controllo dal vivo ha risposto «già in uso» dopo «Continua»: lo si
+    // sa già, senza chiederlo di nuovo al server.
+    if (inRegistrazione && nameStatus === 'taken') {
+      tornaAlNome(nameMsg)
+      return
+    }
     setError('')
     setBusy(true)
-    const r = inRegistrazione ? await register(name, email, password) : await login(email, password)
+    const r = inRegistrazione ? await register(name, email, password, conferma) : await login(email, password)
     if (!r.ok) {
-      setError(r.error || 'Si è verificato un errore.')
+      mostraErrore(r)
     } else if (r.notice) {
       // Registrazione con conferma email: si torna su Accedi, l'email resta.
       navigato.current = true
       setNotice(r.notice)
       setVista('accedi')
       setPassword('')
+      setConferma('')
+      setMostraPassword(false)
+    } else {
+      setScaduto(false)
     }
     setBusy(false)
     // Con l'accesso riuscito AuthProvider aggiorna la sessione e Root passa all'app.
   }
 
+  // Il link della mail era scaduto o già usato: se ne chiede un altro per
+  // l'email scritta in Accedi. Senza un'email valida lo dice il campo.
+  const emailValida = EMAIL_RE.test(email.trim())
+  const reinvia = async () => {
+    if (busy) return
+    if (!emailValida) {
+      setEmailErr(EMAIL_PER_REINVIO)
+      emailRef.current?.focus()
+      return
+    }
+    if (!online) {
+      setError(OFFLINE)
+      return
+    }
+    setError('')
+    setBusy(true)
+    const r = await resend(email)
+    if (r.ok) {
+      setScaduto(false)
+      setNotice(r.notice ?? '')
+    } else {
+      mostraErrore(r)
+    }
+    setBusy(false)
+  }
+
   const messaggi = (
     <>
       {!online && <Avviso tipo="offline">{OFFLINE}</Avviso>}
+      {scaduto && <Avviso tipo="errore">{SCADUTO}</Avviso>}
       {notice && <Avviso tipo="conferma">{notice}</Avviso>}
       {error && <Avviso tipo="errore">{error}</Avviso>}
     </>
@@ -275,14 +392,19 @@ export default function Login() {
                 />
                 <div {...rise(1)}>
                   <TextField
+                    ref={emailRef}
                     label="Email"
                     type="email"
                     inputMode="email"
                     value={email}
-                    onChange={setEmail}
+                    onChange={(v) => {
+                      setEmail(v)
+                      setEmailErr('')
+                    }}
                     placeholder="tu@email.com"
                     autoComplete="email"
                     readOnly={busy}
+                    error={emailErr || undefined}
                   />
                 </div>
                 <div {...rise(2)}>
@@ -297,10 +419,23 @@ export default function Login() {
                   />
                 </div>
                 {messaggi}
-                <div {...rise(3)}>
+                <div {...rise(3)} className={scaduto ? 'rise accesso-azioni' : 'rise'}>
                   <Button type="submit" size="lg" block busy={busy} busyLabel="Attendere…" className="accesso-invia">
                     Entra
                   </Button>
+                  {scaduto && (
+                    <Button
+                      variant="neutral"
+                      size="lg"
+                      block
+                      icon="send"
+                      disabled={!emailValida}
+                      onDisabledClick={() => void reinvia()}
+                      onClick={() => void reinvia()}
+                    >
+                      Invia di nuovo la mail
+                    </Button>
+                  )}
                 </div>
                 <p className="accesso-cambio rise" style={{ '--rise-i': 4 } as CSSProperties}>
                   Non hai un account?{' '}
@@ -348,11 +483,13 @@ export default function Login() {
                         onChange={(v) => {
                           setName(v)
                           setNameErr('')
+                          setFuocoAlNome(false)
                         }}
                         status={nameStatus}
                         msg={nameMsg}
                         error={nameErr}
                         busy={busy}
+                        fuoco={fuocoAlNome}
                       />
                       <Button type="submit" size="lg" block className="accesso-invia">
                         Continua
@@ -367,23 +504,56 @@ export default function Login() {
                         sotto="Email e password per ritrovare il tuo diario."
                       />
                       <TextField
+                        ref={emailRef}
                         label="Email"
                         type="email"
                         inputMode="email"
                         value={email}
-                        onChange={setEmail}
+                        onChange={(v) => {
+                          setEmail(v)
+                          setEmailErr('')
+                        }}
                         placeholder="tu@email.com"
                         autoComplete="email"
                         readOnly={busy}
+                        error={emailErr || undefined}
                       />
                       <TextField
+                        id={passwordId}
                         label="Password"
                         type="password"
                         value={password}
-                        onChange={setPassword}
-                        placeholder="Almeno 6 caratteri"
+                        onChange={(v) => {
+                          setPassword(v)
+                          setConfermaErr('')
+                        }}
+                        placeholder={`Almeno ${PASSWORD_MIN} caratteri`}
                         autoComplete="new-password"
+                        minLength={PASSWORD_MIN}
                         readOnly={busy}
+                        revealed={mostraPassword}
+                        onRevealedChange={setMostraPassword}
+                        revealControls={confermaId}
+                      />
+                      <TextField
+                        ref={confermaRef}
+                        id={confermaId}
+                        label="Ripeti la password"
+                        type="password"
+                        value={conferma}
+                        onChange={(v) => {
+                          setConferma(v)
+                          setConfermaErr('')
+                        }}
+                        onBlur={controllaConferma}
+                        placeholder="La stessa di sopra"
+                        autoComplete="new-password"
+                        minLength={PASSWORD_MIN}
+                        readOnly={busy}
+                        error={confermaErr || undefined}
+                        revealed={mostraPassword}
+                        onRevealedChange={setMostraPassword}
+                        revealControls={passwordId}
                       />
                       {messaggi}
                       <Button type="submit" size="lg" block busy={busy} busyLabel="Attendere…" className="accesso-invia">
@@ -595,8 +765,12 @@ function Titolo({ focus, passo, titolo, sotto, className, style }: {
   )
 }
 
-/** Il nickname con la sua riga di stato dal vivo, sempre montata (così la annuncia). */
-function Nickname({ inputRef, value, onChange, status, msg, error, busy }: {
+/**
+ * Il nickname con la sua riga di stato dal vivo, sempre montata (così la
+ * annuncia). Con `fuoco` il campo prende il fuoco al montaggio, dopo il
+ * titolo: si è tornati qui per un nome che non va.
+ */
+function Nickname({ inputRef, value, onChange, status, msg, error, busy, fuoco }: {
   inputRef: RefObject<HTMLInputElement>
   value: string
   onChange: (v: string) => void
@@ -604,8 +778,14 @@ function Nickname({ inputRef, value, onChange, status, msg, error, busy }: {
   msg: string
   error: string
   busy: boolean
+  fuoco: boolean
 }) {
   const statoId = useId()
+  useEffect(() => {
+    if (fuoco) inputRef.current?.focus({ preventScroll: true })
+    // Solo al montaggio, come il titolo (che il suo effetto lo esegue prima).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   const stato =
     status === 'checking'
       ? { icon: null, text: 'Verifico disponibilità…' }
@@ -623,7 +803,7 @@ function Nickname({ inputRef, value, onChange, status, msg, error, busy }: {
         onChange={onChange}
         placeholder="es. Marco"
         autoComplete="nickname"
-        maxLength={NOME_MAX}
+        maxLength={LIMITI.nome.max}
         readOnly={busy}
         error={error || undefined}
         aria-describedby={statoId}

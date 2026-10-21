@@ -108,17 +108,58 @@ describe('Home — intestazione', () => {
 })
 
 describe('Home — diario vuoto', () => {
-  it('Pallo invita a creare il primo torneo, con l\'assistente per chi vuole farsi guidare', async () => {
-    const user = userEvent.setup()
-    const { p } = renderHome(makeData())
-    expect(screen.getByText('Registra il primo torneo: bastano il nome e la data, il resto lo aggiungi dopo.')).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: 'Crea il primo torneo' }))
-    expect(p.onNuovoTorneo).toHaveBeenCalledOnce()
-    expect(screen.getByRole('link', { name: 'Raccontalo a Solby' })).toHaveAttribute('href', '/crea')
+  const DOMANDA = 'Il tuo diario è ancora vuoto. Partiamo dal primo torneo: come preferisci?'
+
+  it('Solby chiede come cominciare: la domanda è un titolo vero, non una nuvoletta che compare', () => {
+    renderHome(makeData())
+    expect(screen.getByRole('heading', { level: 1, name: 'Ciao, Marta.' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 2, name: DOMANDA })).toBeInTheDocument()
     // Pallo è un disegno, non un pulsante.
     expect(screen.queryByRole('button', { name: /Solby/ })).toBeNull()
-    // Niente numeri, niente filtri: non c'è niente da filtrare.
+    // Il consiglio «primo torneo» non c'è più: le due strade lo sostituiscono.
+    expect(screen.queryByRole('button', { name: 'Crea il primo torneo' })).toBeNull()
+  })
+
+  it('le due strade a tutta larghezza, con le parole del ＋: il titolo è il nome, la riga sotto la descrizione', async () => {
+    const user = userEvent.setup()
+    const { p } = renderHome(makeData())
+    const solby = screen.getByRole('link', { name: 'Raccontalo a Solby' })
+    expect(solby).toHaveAttribute('href', '/crea')
+    expect(solby).toHaveAttribute('data-block')
+    expect(solby).toHaveAttribute('data-variant', 'filled')
+    expect(solby).toHaveAccessibleDescription('Ti faccio io le domande, una alla volta')
+    const daSolo = screen.getByRole('button', { name: 'Compila da solo' })
+    expect(daSolo).toHaveAttribute('data-block')
+    expect(daSolo).toHaveAttribute('data-variant', 'tinted')
+    expect(daSolo).toHaveAccessibleDescription('Bastano il nome e la data, il resto lo aggiungi dopo')
+    await user.click(daSolo)
+    expect(p.onNuovoTorneo).toHaveBeenCalledOnce()
+  })
+
+  it('l\'ordine del Tab: l\'intestazione, poi la prima strada, poi la seconda', async () => {
+    const user = userEvent.setup()
+    renderHome(makeData())
+    await user.tab()
+    expect(screen.getByRole('link', { name: 'Profilo' })).toHaveFocus()
+    await user.tab()
+    expect(screen.getByRole('link', { name: 'Raccontalo a Solby' })).toHaveFocus()
+    await user.tab()
+    expect(screen.getByRole('button', { name: 'Compila da solo' })).toHaveFocus()
+  })
+
+  it('sotto, l\'esempio sbiadito delle card vere: si guarda, non si tocca, e i numeri non salgono', () => {
+    const { container } = renderHome(makeData())
+    expect(screen.getByRole('heading', { level: 2, name: 'Qui compariranno i tuoi numeri' })).toBeInTheDocument()
+    const carte = container.querySelector('.home-anteprima-carte')!
+    expect(carte).toHaveAttribute('inert')
+    expect(carte).toHaveAttribute('aria-hidden', 'true')
+    // Le card vere, coi numeri del diario di prova…
+    expect(within(carte as HTMLElement).getByText('Partite vinte')).toBeInTheDocument()
+    expect(within(carte as HTMLElement).getByText('Cervia Beach Party')).toBeInTheDocument()
+    // …che non sono dell'utente: fuori dall'albero, e la salita da zero resta ai numeri veri.
     expect(screen.queryByRole('heading', { name: 'Partite vinte' })).toBeNull()
+    expect(window.sessionStorage.getItem('bvd_salito:home')).toBeNull()
+    // Niente filtri: non c'è niente da filtrare.
     expect(screen.queryByRole('group', { name: 'Periodo' })).toBeNull()
   })
 
@@ -239,9 +280,9 @@ describe('Home — Pallo', () => {
     })
 
     it('un consiglio solo resta fermo', () => {
-      renderHome(makeData())
+      renderHome(pieno, { consigli: [{ id: 'solo', testo: 'Un consiglio solo, per tutto il tempo.' }] })
       passa(GIRO * 3)
-      expect(nuvola()).toHaveTextContent('Registra il primo torneo')
+      expect(nuvola()).toHaveTextContent('Un consiglio solo, per tutto il tempo.')
     })
 
     it('la Storia dell\'ultimo torneo e il link a Beach Wrapped', () => {

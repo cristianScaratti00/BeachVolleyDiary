@@ -38,6 +38,7 @@ import * as m from 'motion/react-m'
 import { useDragControls, useIsPresent, useReducedMotion } from 'motion/react'
 import type { PanInfo } from 'motion/react'
 import { CITTA_SUGGERITE } from '../../lib/geo'
+import { LIMITI } from '../../lib/lunghezze'
 import { ENTRATA, MOLLA, SVELTO } from '../Motion'
 import { useSheetCentered } from '../../hooks/useMedia'
 import { Button } from '../ui/Button'
@@ -403,6 +404,7 @@ export function CityInput({ id, value, onChange, describedBy }: {
         value={value}
         onChange={(e: ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
         placeholder="es. Rimini"
+        maxLength={LIMITI.citta.max}
         list={CITTA_LIST_ID}
         autoComplete="off"
         aria-describedby={describedBy}

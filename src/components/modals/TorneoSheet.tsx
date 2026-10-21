@@ -25,6 +25,7 @@ import { Disclosure, SwatchPicker, TextField } from '../ui/Field'
 import { placementText } from '../ui/Badge'
 import { BRACKETS, CATEGORIES, FORMATS, PLACEMENTS, SURFACES } from '../../lib/db.enums'
 import { SWATCH_COLORS } from '../../lib/theme'
+import { LIMITI } from '../../lib/lunghezze'
 import type { AnyForm, Bracket, Category, Format, Placement, SetField, Surface } from '../../lib/models'
 import type { TorneoSheetProps } from '../../app/contracts'
 import './TorneoSheet.css'
@@ -158,6 +159,7 @@ export default function TorneoSheet({
       placeholder="es. Summer Cup Rimini"
       autoComplete="off"
       enterKeyHint="done"
+      maxLength={LIMITI.torneo.max}
       required
       aria-required="true"
       error={errNome || undefined}
@@ -191,6 +193,7 @@ export default function TorneoSheet({
           onChange={(v) => setField('newPartnerName', v)}
           placeholder="es. Giulia"
           autoComplete="off"
+          maxLength={LIMITI.compagno.max}
           // Scelto «Nuovo compagno», il campo del nome è la cosa da fare.
           autoFocus
         />

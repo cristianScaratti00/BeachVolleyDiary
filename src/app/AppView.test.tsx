@@ -282,13 +282,24 @@ describe('stati di §6 — non trovato, primo avvio, primo caricamento fallito',
     expect(screen.getByRole('link', { name: 'Vai alla Home' })).toHaveAttribute('href', '/')
   })
 
-  it('primo avvio: Home vuota con un solo invito, niente numeri, assistente come link', async () => {
+  it('primo avvio: Home vuota con Solby che chiede come cominciare, le due strade, niente numeri veri', async () => {
     const app = renderApp({ data: makeData() })
-    expect(await screen.findByText('Registra il primo torneo: bastano il nome e la data, il resto lo aggiungi dopo.')).toBeInTheDocument()
-    expect(screen.queryByText('Partite vinte')).not.toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { level: 2, name: 'Il tuo diario è ancora vuoto. Partiamo dal primo torneo: come preferisci?' }),
+    ).toBeInTheDocument()
+    // L'esempio delle card è fuori dall'albero: nessun numero si legge come dell'utente.
+    expect(screen.queryByRole('heading', { name: 'Partite vinte' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Crea il primo torneo' })).not.toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Raccontalo a Solby' })).toHaveAttribute('href', '/crea')
-    await app.user.click(screen.getByRole('button', { name: 'Crea il primo torneo' }))
+    await app.user.click(screen.getByRole('button', { name: 'Compila da solo' }))
     expect(screen.getByRole('dialog', { name: 'Nuovo torneo' })).toBeInTheDocument()
+  })
+
+  it('primo avvio: «Raccontalo a Solby» apre l\'assistente', async () => {
+    const app = renderApp({ data: makeData() })
+    await app.user.click(await screen.findByRole('link', { name: 'Raccontalo a Solby' }))
+    expect(await screen.findByRole('textbox', { name: 'Come si chiama il torneo?' })).toBeInTheDocument()
+    expect(window.location.pathname).toBe('/crea')
   })
 
   it('primo avvio: Tornei ha UN EmptyState, senza ricerca né segmented', async () => {
@@ -1010,7 +1021,7 @@ describe('axe sui flussi principali', () => {
 
   it('Home al primo avvio', async () => {
     renderApp({ data: makeData() })
-    await screen.findByText(/Registra il primo torneo/)
+    await screen.findByRole('link', { name: 'Raccontalo a Solby' })
     await expectNoA11yViolations(document.body)
   })
 

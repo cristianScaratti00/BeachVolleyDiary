@@ -7,6 +7,9 @@
 // Le viste si scambiano con un'uscita animata (AnimatePresence «wait»): la
 // vista nuova arriva quando la vecchia è uscita, quindi si aspetta con
 // `findBy…`.
+//
+// Il ritorno dal link della mail di conferma (lib/ritorno.ts) è mockato: il
+// valore che il Login trova al montaggio lo decide il test.
 // ============================================================================
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { act, fireEvent, render, screen } from '@testing-library/react'
@@ -15,10 +18,20 @@ import { expectNoA11yViolations } from '../test/axe'
 
 const login = vi.hoisted(() => vi.fn())
 const register = vi.hoisted(() => vi.fn())
+const resend = vi.hoisted(() => vi.fn())
 const checkNameAvailable = vi.hoisted(() => vi.fn())
+const ritorno = vi.hoisted(() => ({ valore: null as import('../lib/ritorno').Ritorno | null }))
 
-vi.mock('../hooks/useAuth', () => ({ useAuth: () => ({ login, register }) }))
-vi.mock('../lib/auth', () => ({ checkNameAvailable }))
+vi.mock('../hooks/useAuth', () => ({ useAuth: () => ({ login, register, resend }) }))
+// Le regole (EMAIL_RE, PASSWORD_MIN, il messaggio) sono quelle vere: si
+// sostituisce solo la rete.
+vi.mock('../lib/auth', async (originale) => ({ ...(await originale<typeof import('../lib/auth')>()), checkNameAvailable }))
+vi.mock('../lib/ritorno', () => ({
+  ritornoDaMostrare: () => ritorno.valore,
+  ritornoMostrato: () => {
+    ritorno.valore = null
+  },
+}))
 
 import Login from './Login'
 
@@ -36,10 +49,20 @@ async function apriRegistrati(user: ReturnType<typeof userEvent.setup>) {
   await h1('Come ti chiamano in spiaggia?')
 }
 
+/** Dal passo 1 al passo 2, col nome. */
+async function finoAlPasso2(user: ReturnType<typeof userEvent.setup>, nome = 'Marta') {
+  await apriRegistrati(user)
+  await user.type(screen.getByLabelText('Nickname'), nome)
+  await user.click(screen.getByRole('button', { name: 'Continua' }))
+  await h1(`Ciao ${nome}, ultimo passo.`)
+}
+
 beforeEach(() => {
   login.mockReset().mockResolvedValue({ ok: true })
   register.mockReset().mockResolvedValue({ ok: true })
+  resend.mockReset().mockResolvedValue({ ok: true, notice: 'Ti abbiamo mandato una nuova mail di conferma.' })
   checkNameAvailable.mockReset().mockResolvedValue({ status: 'available' })
+  ritorno.valore = null
 })
 
 afterEach(() => {
@@ -180,6 +203,21 @@ describe('Accedi', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('Credenziali non valide.')
   })
 
+  it('un errore sull\'email lo dice il campo, che prende il fuoco', async () => {
+    const user = userEvent.setup()
+    login.mockResolvedValue({ ok: false, error: 'Email non valida.', campo: 'email' })
+    await apriAccedi(user)
+    await user.type(screen.getByLabelText('Email'), 'marta@')
+    await user.type(screen.getByLabelText('Password'), 'segreta')
+    await user.click(screen.getByRole('button', { name: 'Entra' }))
+    const email = screen.getByLabelText('Email')
+    await vi.waitFor(() => expect(email).toHaveAttribute('aria-invalid', 'true'))
+    expect(email).toHaveAccessibleDescription('Email non valida.')
+    expect(email).toHaveFocus()
+    // Un alert solo, quello del campo: niente doppione sotto il modulo.
+    expect(screen.getAllByRole('alert')).toHaveLength(1)
+  })
+
   it('senza rete lo dice e non prova nemmeno', async () => {
     const user = userEvent.setup()
     Object.defineProperty(navigator, 'onLine', { value: false, configurable: true })
@@ -278,41 +316,91 @@ describe('Registrati', () => {
     expect(screen.getByLabelText('Nickname')).toHaveValue('Marta')
   })
 
-  it('passo 2: anche la nuova password si può mostrare', async () => {
+  it('passo 2: password e «Ripeti la password», entrambe nuove, entrambe da almeno 6', async () => {
     const user = userEvent.setup()
-    await apriRegistrati(user)
-    await user.type(screen.getByLabelText('Nickname'), 'Marta')
-    await user.click(screen.getByRole('button', { name: 'Continua' }))
-    await h1('Ciao Marta, ultimo passo.')
-    const campo = screen.getByLabelText('Password')
-    await user.type(campo, 'segreta')
-    await user.click(screen.getByRole('button', { name: 'Mostra password' }))
-    expect(campo).toHaveAttribute('type', 'text')
-    expect(campo).toHaveAttribute('autocomplete', 'new-password')
-    expect(campo).toHaveFocus()
+    await finoAlPasso2(user)
+    for (const nome of ['Password', 'Ripeti la password']) {
+      const campo = screen.getByLabelText(nome)
+      expect(campo).toHaveAttribute('type', 'password')
+      expect(campo).toHaveAttribute('autocomplete', 'new-password')
+      expect(campo).toHaveAttribute('minlength', '6')
+    }
   })
 
-  it('«Crea account» registra con nome, email e password', async () => {
+  it('passo 2: l\'occhio mostra le due password insieme, e il fuoco resta dov\'era', async () => {
     const user = userEvent.setup()
-    await apriRegistrati(user)
-    await user.type(screen.getByLabelText('Nickname'), 'Marta')
-    await user.click(screen.getByRole('button', { name: 'Continua' }))
-    await h1('Ciao Marta, ultimo passo.')
+    await finoAlPasso2(user)
+    const campo = screen.getByLabelText('Password')
+    const ripeti = screen.getByLabelText('Ripeti la password')
+    await user.type(campo, 'segreta')
+    const [occhio, occhio2] = screen.getAllByRole('button', { name: 'Mostra password' })
+    expect(occhio).toHaveAttribute('aria-controls', `${campo.id} ${ripeti.id}`)
+    await user.click(occhio)
+    expect(campo).toHaveAttribute('type', 'text')
+    expect(ripeti).toHaveAttribute('type', 'text')
+    expect(campo).toHaveAttribute('autocomplete', 'new-password')
+    expect(campo).toHaveFocus()
+    // I due occhi dicono la stessa cosa, e l'altro le richiude tutte e due.
+    expect(occhio2).toHaveAttribute('aria-pressed', 'true')
+    await user.click(occhio2)
+    expect(campo).toHaveAttribute('type', 'password')
+    expect(ripeti).toHaveAttribute('type', 'password')
+    expect(occhio).toHaveAttribute('aria-pressed', 'false')
+  })
+
+  it('«Crea account» registra con nome, email, password e la sua ripetizione', async () => {
+    const user = userEvent.setup()
+    await finoAlPasso2(user)
     await user.type(screen.getByLabelText('Email'), 'marta@example.com')
     await user.type(screen.getByLabelText('Password'), 'segreta')
+    await user.type(screen.getByLabelText('Ripeti la password'), 'segreta')
     await user.click(screen.getByRole('button', { name: 'Crea account' }))
-    expect(register).toHaveBeenCalledWith('Marta', 'marta@example.com', 'segreta')
+    expect(register).toHaveBeenCalledWith('Marta', 'marta@example.com', 'segreta', 'segreta')
+  })
+
+  it('due password diverse: l\'errore sta sul secondo campo, che prende il fuoco, e non si registra niente', async () => {
+    const user = userEvent.setup()
+    await finoAlPasso2(user)
+    await user.type(screen.getByLabelText('Email'), 'marta@example.com')
+    await user.type(screen.getByLabelText('Password'), 'segreta')
+    await user.type(screen.getByLabelText('Ripeti la password'), 'segreto')
+    await user.click(screen.getByRole('button', { name: 'Crea account' }))
+    const ripeti = screen.getByLabelText('Ripeti la password')
+    expect(register).not.toHaveBeenCalled()
+    expect(ripeti).toHaveAttribute('aria-invalid', 'true')
+    expect(ripeti).toHaveAccessibleDescription('Le due password non coincidono.')
+    expect(screen.getByRole('alert')).toHaveTextContent('Le due password non coincidono.')
+    expect(ripeti).toHaveFocus()
+    // Correggere toglie l'errore; con le due uguali si registra.
+    await user.type(ripeti, '{Backspace}a')
+    expect(ripeti).not.toHaveAttribute('aria-invalid')
+    await user.click(screen.getByRole('button', { name: 'Crea account' }))
+    expect(register).toHaveBeenCalledWith('Marta', 'marta@example.com', 'segreta', 'segreta')
+  })
+
+  it('l\'errore delle password diverse compare anche uscendo dal secondo campo, non a ogni tasto', async () => {
+    const user = userEvent.setup()
+    await finoAlPasso2(user)
+    await user.type(screen.getByLabelText('Password'), 'segreta')
+    await user.type(screen.getByLabelText('Ripeti la password'), 'seg')
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+    await user.tab()
+    expect(screen.getByLabelText('Ripeti la password')).toHaveAttribute('aria-invalid', 'true')
+  })
+
+  it('il nickname non va oltre i 40 caratteri del Profilo', async () => {
+    const user = userEvent.setup()
+    await apriRegistrati(user)
+    expect(screen.getByLabelText('Nickname')).toHaveAttribute('maxlength', '40')
   })
 
   it('conferma email: avviso di stato, si passa ad Accedi e l\'email resta', async () => {
     const user = userEvent.setup()
     register.mockResolvedValue({ ok: true, notice: 'Ti abbiamo mandato un\'email di conferma.' })
-    await apriRegistrati(user)
-    await user.type(screen.getByLabelText('Nickname'), 'Marta')
-    await user.click(screen.getByRole('button', { name: 'Continua' }))
-    await h1('Ciao Marta, ultimo passo.')
+    await finoAlPasso2(user)
     await user.type(screen.getByLabelText('Email'), 'marta@example.com')
     await user.type(screen.getByLabelText('Password'), 'segreta')
+    await user.type(screen.getByLabelText('Ripeti la password'), 'segreta')
     await user.click(screen.getByRole('button', { name: 'Crea account' }))
     await h1('Bentornato.')
     expect(screen.getByRole('status')).toHaveTextContent('email di conferma')
@@ -320,15 +408,70 @@ describe('Registrati', () => {
     expect(screen.getByLabelText('Password')).toHaveValue('')
   })
 
-  it('un errore della registrazione resta sul passo 2 come alert', async () => {
+  it('un errore della registrazione senza un campo resta sul passo 2 come alert', async () => {
     const user = userEvent.setup()
-    register.mockResolvedValue({ ok: false, error: 'Email già registrata. Prova ad accedere.' })
+    register.mockResolvedValue({ ok: false, error: 'Troppi tentativi, riprova tra poco.' })
+    await finoAlPasso2(user)
+    await user.click(screen.getByRole('button', { name: 'Crea account' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('Troppi tentativi')
+  })
+
+  /** Il passo 2 compilato bene, poi «Crea account». */
+  async function creaAccount(user: ReturnType<typeof userEvent.setup>) {
+    await user.type(screen.getByLabelText('Email'), 'marta@example.com')
+    await user.type(screen.getByLabelText('Password'), 'segreta')
+    await user.type(screen.getByLabelText('Ripeti la password'), 'segreta')
+    await user.click(screen.getByRole('button', { name: 'Crea account' }))
+  }
+
+  it('l\'email già registrata la dice il campo Email, che prende il fuoco', async () => {
+    const user = userEvent.setup()
+    register.mockResolvedValue({ ok: false, error: 'Email già registrata. Prova ad accedere.', campo: 'email' })
+    await finoAlPasso2(user)
+    await creaAccount(user)
+    const email = screen.getByLabelText('Email')
+    await vi.waitFor(() => expect(email).toHaveAttribute('aria-invalid', 'true'))
+    expect(email).toHaveAccessibleDescription('Email già registrata. Prova ad accedere.')
+    expect(email).toHaveFocus()
+    // Correggere l'email toglie l'errore.
+    await user.type(email, 'x')
+    expect(email).not.toHaveAttribute('aria-invalid')
+  })
+
+  it('un nome preso scoperto dalla registrazione riporta al passo 1, col fuoco sul nickname', async () => {
+    const user = userEvent.setup()
+    register.mockResolvedValue({ ok: false, error: 'Questo nome è già in uso, scegline un altro.', campo: 'nome' })
+    await finoAlPasso2(user)
+    await creaAccount(user)
+    await h1('Come ti chiamano in spiaggia?')
+    const nome = screen.getByLabelText('Nickname')
+    await vi.waitFor(() => expect(nome).toHaveFocus())
+    expect(nome).toHaveValue('Marta')
+    expect(nome).toHaveAccessibleDescription('Questo nome è già in uso, scegline un altro.')
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '1')
+    // Con lo stesso nome «Continua» non passa.
+    await user.click(screen.getByRole('button', { name: 'Continua' }))
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '1')
+    expect(nome).toHaveFocus()
+  })
+
+  it('il controllo dal vivo dice «già in uso» dopo «Continua»: «Crea account» riporta al nome senza registrare', async () => {
+    const user = userEvent.setup()
+    let rispondi: (r: { status: 'taken' }) => void = () => {}
+    checkNameAvailable.mockImplementation(() => new Promise((r) => { rispondi = r }))
     await apriRegistrati(user)
     await user.type(screen.getByLabelText('Nickname'), 'Marta')
+    // Il controllo non ha ancora risposto: si passa (fail-open, come prima).
     await user.click(screen.getByRole('button', { name: 'Continua' }))
     await h1('Ciao Marta, ultimo passo.')
-    await user.click(screen.getByRole('button', { name: 'Crea account' }))
-    expect(await screen.findByRole('alert')).toHaveTextContent('Email già registrata')
+    await vi.waitFor(() => expect(checkNameAvailable).toHaveBeenCalledWith('Marta'))
+    await act(async () => rispondi({ status: 'taken' }))
+    await creaAccount(user)
+    expect(register).not.toHaveBeenCalled()
+    await h1('Come ti chiamano in spiaggia?')
+    const nome = screen.getByLabelText('Nickname')
+    await vi.waitFor(() => expect(nome).toHaveFocus())
+    expect(nome).toHaveAccessibleDescription('Nome già in uso')
   })
 })
 
@@ -423,6 +566,74 @@ describe('Accesso — accessibilità', () => {
     await user.type(screen.getByLabelText('Nickname'), 'Marta')
     await user.click(screen.getByRole('button', { name: 'Continua' }))
     await h1('Ciao Marta, ultimo passo.')
+    await expectNoA11yViolations(container)
+    // Con l'errore delle password diverse.
+    await user.type(screen.getByLabelText('Password'), 'segreta')
+    await user.type(screen.getByLabelText('Ripeti la password'), 'segreto')
+    await user.click(screen.getByRole('button', { name: 'Crea account' }))
+    await expectNoA11yViolations(container)
+  })
+})
+
+// Il ritorno dal link della mail di conferma (scelta dell'utente: dopo la
+// conferma si rientra da Accedi). Il valore lo legge ritorno.ts al caricamento.
+describe('il ritorno dalla mail di conferma', () => {
+  it('confermata: si apre Accedi con l\'avviso e l\'email già scritta', async () => {
+    ritorno.valore = { tipo: 'confermata', email: 'marta@example.com' }
+    render(<Login />)
+    expect(await h1('Bentornato.')).toBeInTheDocument()
+    expect(screen.getByRole('status')).toHaveTextContent('Email confermata, ora accedi con la password che hai scelto.')
+    expect(screen.getByLabelText('Email')).toHaveValue('marta@example.com')
+    expect(screen.queryByRole('button', { name: 'Invia di nuovo la mail' })).not.toBeInTheDocument()
+  })
+
+  it('si mostra una volta sola: uscire e rientrare riapre il Benvenuto', async () => {
+    ritorno.valore = { tipo: 'confermata', email: 'marta@example.com' }
+    const { unmount } = render(<Login />)
+    await h1('Bentornato.')
+    unmount()
+    render(<Login />)
+    expect(screen.getByRole('button', { name: 'Crea il tuo diario' })).toBeInTheDocument()
+  })
+
+  it('scaduto o già usato: l\'avviso, e «Invia di nuovo la mail» per l\'email scritta', async () => {
+    const user = userEvent.setup()
+    ritorno.valore = { tipo: 'scaduto' }
+    render(<Login />)
+    expect(await h1('Bentornato.')).toBeInTheDocument()
+    expect(screen.getByRole('alert')).toHaveTextContent('Il link è scaduto o è già stato usato: accedi, o chiedi una nuova mail.')
+    const reinvia = screen.getByRole('button', { name: 'Invia di nuovo la mail' })
+    // Senza email: annunciato disattivo, e il tocco porta al campo con la spiegazione.
+    expect(reinvia).toHaveAttribute('aria-disabled', 'true')
+    await user.click(reinvia)
+    expect(resend).not.toHaveBeenCalled()
+    const email = screen.getByLabelText('Email')
+    expect(email).toHaveFocus()
+    expect(email).toHaveAccessibleDescription('Scrivi qui la tua email: ti rimando la mail di conferma.')
+    await user.type(email, 'marta@example.com')
+    await user.click(reinvia)
+    expect(resend).toHaveBeenCalledWith('marta@example.com')
+    expect(await screen.findByRole('status')).toHaveTextContent('Ti abbiamo mandato una nuova mail di conferma.')
+    expect(screen.queryByRole('button', { name: 'Invia di nuovo la mail' })).not.toBeInTheDocument()
+    expect(screen.queryByText(/Il link è scaduto/)).not.toBeInTheDocument()
+  })
+
+  it('un errore del reinvio resta come alert, e il pulsante c\'è ancora', async () => {
+    const user = userEvent.setup()
+    resend.mockResolvedValue({ ok: false, error: 'Hai appena chiesto una mail: riprova fra un minuto.' })
+    ritorno.valore = { tipo: 'scaduto' }
+    render(<Login />)
+    await h1('Bentornato.')
+    await user.type(screen.getByLabelText('Email'), 'marta@example.com')
+    await user.click(screen.getByRole('button', { name: 'Invia di nuovo la mail' }))
+    expect(await screen.findByText('Hai appena chiesto una mail: riprova fra un minuto.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Invia di nuovo la mail' })).toBeInTheDocument()
+  })
+
+  it('nessuna violazione axe con l\'avviso del link scaduto', async () => {
+    ritorno.valore = { tipo: 'scaduto' }
+    const { container } = render(<Login />)
+    await h1('Bentornato.')
     await expectNoA11yViolations(container)
   })
 })

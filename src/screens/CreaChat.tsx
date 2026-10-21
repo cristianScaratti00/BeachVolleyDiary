@@ -20,8 +20,12 @@
 // domanda il focus va al primo controllo (il campo, sui passi da scrivere; la
 // prima scelta, altrimenti), i campi hanno un nome (la domanda), il pulsante
 // d'invio si chiama «Invia».
+//
+// I limiti (crea/limiti.ts): il campo non lascia scrivere oltre il massimo
+// del passo, e vicino al limite mostra «45/60» (annunciato una volta, al
+// passaggio). Una risposta che non va la dice Solby, e il campo la tiene.
 // ============================================================================
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import type { CSSProperties, FormEvent, ReactNode } from 'react'
 import { useReducedMotion } from 'motion/react'
 import { BRACKETS, CATEGORIES, FORMATS, PHASES, SURFACES } from '../lib/db.enums'
@@ -35,12 +39,15 @@ import { Pallo } from '../components/Pallo'
 import { RigaSet, SetIntestazione } from '../components/modals/RigaSet'
 import { FINISHED_PLACEMENTS, PASSI, fmtSets, passoDi, righeRiepilogo, shiftISO, todayISO, trovaRisposta } from './crea/copione'
 import type { Draft } from './crea/copione'
+import { maxDelPasso } from './crea/limiti'
 import { useAssistente } from './crea/useAssistente'
 import type { Assistente, Msg } from './crea/useAssistente'
 import './CreaChat.css'
 
 /** Si segue il fondo della trascrizione solo se ci si è già vicini (MOTION.md §5 F11). */
 const VICINO_AL_FONDO = 80
+/** Il contatore compare da qui: tre quarti del massimo del passo. */
+const VICINO_AL_LIMITE = 0.75
 
 /** iOS non ridimensiona il layout con la tastiera: la colonna segue il visualViewport. */
 function useAltezzaVisibile(): number | null {
@@ -65,6 +72,7 @@ export default function CreaChat({ partners, venues, onCreate, onDone, onExit, r
   const vicino = useRef(true)
   const altezza = useAltezzaVisibile()
   const p = descriviPasso(a, partners, venues, onDone)
+  const perche = useId()
 
   // Il tasto indietro equivale a ✕, con la stessa conferma (UX F11.6).
   const isDirty = useRef(a.isDirty)
@@ -89,6 +97,11 @@ export default function CreaChat({ partners, venues, onCreate, onDone, onExit, r
     if (dock) focusables(dock)[0]?.focus({ preventScroll: true })
   }, [a.focusTick]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Una risposta rifiutata: il fuoco torna al campo, col testo da correggere.
+  useEffect(() => {
+    if (a.campoTick) campoRef.current?.focus({ preventScroll: true })
+  }, [a.campoTick])
+
   // In fondo alla trascrizione solo se l'utente era già lì: chi sta rileggendo
   // più su non viene strappato via.
   useEffect(() => {
@@ -104,9 +117,25 @@ export default function CreaChat({ partners, venues, onCreate, onDone, onExit, r
   const inviabile = !!p.campo && (!vuoto || !!p.campo.vuotoOk)
   const passo = a.step === 'done' ? 'fatto' : `passo ${passoDi(a.step)} di ${PASSI}`
 
+  // Il contatore: in UTF-16 come `maxLength`, quindi non sbaglia mai di uno.
+  const max = maxDelPasso(a.step)
+  const scritti = a.text.length
+  const alLimite = !!p.campo && scritti >= Math.ceil(max * VICINO_AL_LIMITE)
+  const [annuncio, setAnnuncio] = useState('')
+  useEffect(() => {
+    setAnnuncio(alLimite ? `Massimo ${max} caratteri: ne restano ${max - scritti}.` : '')
+    // Solo al passaggio della soglia, non a ogni tasto.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [alLimite, max])
+
   const invia = (e: FormEvent) => {
     e.preventDefault()
-    if (!p.campo || !inviabile) return
+    if (!p.campo) return
+    // Disattivato (`aria-disabled`): il tocco riporta al campo vuoto.
+    if (!inviabile) {
+      campoRef.current?.focus()
+      return
+    }
     p.campo.invia(a.text)
   }
 
@@ -169,12 +198,28 @@ export default function CreaChat({ partners, venues, onCreate, onDone, onExit, r
             aria-label={a.domandaCorrente ?? 'Scrivi a Solby'}
             autoComplete="off"
             enterKeyHint="send"
+            maxLength={max}
             disabled={!p.campo}
           />
+          {alLimite && (
+            <span className="crea-conta" data-pieno={scritti >= max ? '' : undefined} aria-hidden="true">
+              {scritti}/{max}
+            </span>
+          )}
+          <span className="sr-only" role="status">{annuncio}</span>
         </div>
-        <button type="submit" className="crea-send" aria-label="Invia" aria-disabled={inviabile ? undefined : true}>
+        <button
+          type="submit"
+          className="crea-send"
+          aria-label="Invia"
+          aria-disabled={inviabile ? undefined : true}
+          aria-describedby={inviabile ? undefined : perche}
+        >
           <Icon name="arrow-up" size={20} />
         </button>
+        <span id={perche} hidden>
+          {p.campo ? 'Prima scrivi una risposta.' : 'Qui si risponde con i pulsanti sopra.'}
+        </span>
       </form>
     </div>
   )

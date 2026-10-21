@@ -154,29 +154,77 @@
     gap: var(--space-1) var(--space-3);
     margin-top: var(--space-2-5);
   }
-  .home-nuvola-nota {
+
+  /* ------------------------------------------------------ Diario vuoto */
+  /* Dall'alto: Solby grande al centro, la nuvoletta con la domanda (la punta
+     sale verso di lui), le due scelte a tutta larghezza; poi, staccato di
+     una sezione, l'esempio sbiadito. Dai 1280 l'invito a sinistra e
+     l'esempio a destra (le colonne di `.home-corpo`). */
+  .home-vuota { gap: var(--section-gap); }
+  .home-vuota-invito { display: flex; flex-direction: column; gap: var(--space-5); min-width: 0; }
+  .home-vuota-solby { display: flex; flex-direction: column; align-items: center; }
+  /* Come in Home piena: si tocca (salta) ma non è un controllo. La misura è
+     quella del disegno a 140, ombra compresa: il salto non sposta niente. */
+  .home-vuota-pallo {
+    position: relative;
+    z-index: 1;
+    display: block;
+    width: 140px;
+    height: 152px;
+    cursor: pointer;
+  }
+  .home-vuota-nuvola {
+    position: relative;
+    align-self: stretch;
+    margin-top: var(--space-2-5);
+    padding: var(--space-3-5) var(--space-5) var(--space-5);
+    background: var(--surface);
+    border: var(--border-w) solid var(--edge);
+    border-radius: var(--radius-card);
+    text-align: center;
+  }
+  /* La punta: un quadratino ruotato col filo su due lati, centrato sul filo
+     della nuvoletta; la metà di sotto copre il filo, quella di sopra sporge. */
+  .home-vuota-nuvola::before {
+    content: "";
+    position: absolute;
+    top: calc(-1 * (var(--space-1-5) + var(--border-w)));
+    left: 50%;
+    width: var(--space-3);
+    height: var(--space-3);
+    background: var(--surface);
+    border-top: var(--border-w) solid var(--edge);
+    border-left: var(--border-w) solid var(--edge);
+    border-top-left-radius: var(--space-0-5);
+    transform: translateX(-50%) rotate(45deg);
+  }
+  .home-vuota-domanda {
     margin-top: var(--space-1);
+    font: var(--type-title-2);
+    letter-spacing: var(--track-title-2);
+    text-wrap: balance;
+    overflow-wrap: anywhere;
+  }
+  .home-vuota-scelte { display: flex; flex-direction: column; gap: var(--space-3); }
+
+  .home-anteprima { display: flex; flex-direction: column; gap: var(--space-3); min-width: 0; }
+  .home-anteprima-testa { display: flex; flex-direction: column; gap: var(--space-1); padding: 0 var(--space-1); }
+  .home-anteprima-sotto {
     font: var(--type-footnote);
     letter-spacing: var(--track-footnote);
     color: var(--ink-2);
   }
-  /* «Usa l'assistente»: un link nella frase, sottolineato; il bersaglio
-     arriva a 44 in altezza senza spostare la riga. */
-  .home-link {
-    position: relative;
-    font-weight: 600;
-    color: var(--accent-text);
-    text-decoration: underline;
-    text-underline-offset: var(--space-0-5);
+  /* Sbiadite come le risposte dell'assistente in attesa (.55) e ferme: è un
+     esempio da guardare, non da toccare (`inert`). */
+  .home-anteprima-carte {
+    display: flex;
+    flex-direction: column;
+    gap: var(--stack);
+    opacity: 0.55;
+    user-select: none;
+    -webkit-user-select: none;
   }
-  .home-link::after {
-    content: "";
-    position: absolute;
-    inset: calc((1.35em - var(--touch)) / 2) 0;
-  }
-  @media (hover: hover) and (pointer: fine) {
-    .home-link:hover { color: var(--accent-text-state); }
-  }
+  .home-anteprima-carte .home-barra > span { animation: none; }
 
   /* ------------------------------------------------------ Partite vinte */
   /* Sale sotto l'ombra di Pallo, come nel design. */

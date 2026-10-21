@@ -16,6 +16,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ChangeEvent, KeyboardEvent, ReactNode } from 'react'
 import { venueLabel, parseLatLng, formatLatLng } from '../../lib/derive'
+import { LIMITI } from '../../lib/lunghezze'
 import { Icon } from '../ui/Icon'
 import { Badge } from '../ui/Badge'
 import './VenuePicker.css'
@@ -289,7 +290,7 @@ function CittaAutocomplete({ value, onChange }: { value: string; onChange: (citt
   }, [attivo])
 
   const scegli = (c: CittaTrovata) => {
-    onChange(c.nome)
+    onChange(c.nome.slice(0, LIMITI.citta.max))
     setAperto(false)
     setAttivo(-1)
     setStato('fermo')
@@ -348,6 +349,7 @@ function CittaAutocomplete({ value, onChange }: { value: string; onChange: (citt
           onBlur={() => { setAperto(false); setAttivo(-1) }}
           placeholder="es. Riccione"
           autoComplete="off"
+          maxLength={LIMITI.citta.max}
           role="combobox"
           aria-expanded={aperto}
           aria-controls="venue-city-list"
@@ -433,10 +435,11 @@ function NewVenueFields({ form, setField }: { form: AnyForm; setField: SetField 
   // Un risultato scelto riempie i tre campi in un colpo. Restano tutti
   // modificabili: la ricerca è un punto di partenza, non un vincolo — il nome
   // OSM di un bagno non sempre è quello con cui lo chiami tu.
+  // I nomi di OpenStreetMap entrano nei limiti dei campi (e dei CHECK del DB).
   const usaRisultato = (l: LuogoTrovato) => {
     setGeoErr('')
-    setField('newVenueName', l.nome)
-    setField('newVenueCity', l.citta)
+    setField('newVenueName', l.nome.slice(0, LIMITI.luogo.max))
+    setField('newVenueCity', l.citta.slice(0, LIMITI.citta.max))
     setField('newVenueCoords', formatLatLng(l.lat, l.lng))
   }
 
@@ -452,6 +455,7 @@ function NewVenueFields({ form, setField }: { form: AnyForm; setField: SetField 
           value={form.newVenueName ?? ''}
           onChange={(e: ChangeEvent<HTMLInputElement>) => setField('newVenueName', e.target.value)}
           placeholder="es. Bagno 26"
+          maxLength={LIMITI.luogo.max}
         />
       </div>
 
