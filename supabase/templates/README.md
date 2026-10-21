@@ -27,9 +27,16 @@ lì, e il modo di rimetterlo.
 - **Redirect URLs:** `https://bv-diary.vercel.app/**`, `http://localhost:5173`,
   `http://localhost:5173/**`
 
-Il ritorno della mail (`emailRedirectTo`) lo decide `src/lib/sito.ts`: la
-produzione in build (anche da un deploy di anteprima), localhost in sviluppo,
-`VITE_SITE_URL` se c'è. Un `redirect_to` che non è fra le Redirect URLs (e non
+Il ritorno della mail (`emailRedirectTo`) lo decide `src/lib/sito.ts`: sempre
+la produzione, anche da un deploy di anteprima e dal server locale, salvo
+`VITE_SITE_URL` (per provare il giro in locale: `http://localhost:5173` in
+`.env.local`). Dal 2026-10-21 sera: prima in sviluppo era localhost, e chi si
+registrava dal server locale riceveva una mail che apriva localhost.
+
+**L'immagine di Solby c'è solo dopo il deploy**: finché la produzione non ha
+`public/email/solby.png` (e la regola di `vercel.json` che la esclude dalla
+riscrittura), l'indirizzo risponde con la pagina dell'app e la mail mostra
+un'immagine rotta. Un `redirect_to` che non è fra le Redirect URLs (e non
 ha l'host della Site URL) fa ripiegare Supabase sulla Site URL.
 
 **Perché (2026-10-21):** le Redirect URLs avevano solo gli indirizzi del team
