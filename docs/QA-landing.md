@@ -2,8 +2,9 @@
 
 La landing dalla tavola «Landing page» di Claude Design ([UX.md](../UX.md), Parte L) come lista di controllo: per ogni cosa, **dove** è verificata. Tre livelli, come per l'app ([QA-refactor.md](QA-refactor.md)):
 
-- **jsdom**: Vitest e axe (`npm test`). La pagina non ha JavaScript, quindi si legge come testo:
-  - [`landing.test.ts`](../src/test/landing.test.ts): CSP, meta, struttura, porte dell'app, immagini, l'apertura della Home, sprite e marchio, regole dei fogli (anche fotogrammi e reduced-motion), axe;
+- **jsdom**: Vitest e axe (`npm test`). La pagina è HTML e CSS e si legge come testo; l'unico modulo, `presentazione/js/installa.ts`, ha il suo test:
+  - [`landing.test.ts`](../src/test/landing.test.ts): CSP, meta, struttura, porte dell'app, #installa, immagini, l'apertura della Home, sprite e marchio, regole dei fogli (anche fotogrammi e reduced-motion), axe;
+  - [`landing.installa.test.ts`](../src/test/landing.installa.test.ts): il pulsante «Aggiungi alla Home» con `beforeinstallprompt`, `appinstalled`, iPhone/iPad (dialogo coi passi per Safari 26, Safari, Chrome su iOS), già installata (standalone);
   - [`landing.tokens.test.ts`](../src/styles/landing.tokens.test.ts): i contrasti dei token e la riserva metrica di Geist.
 - **browser**: [`docs/qa/landing.mjs`](qa/landing.mjs) sulla **build di produzione** (`npx vite preview --port 5199`), Chrome headless su CDP 9343. Layout per larghezza, anello di focus con la sua visibilità in pixel, la fila dei telefoni, bersagli, CLS, reduced-motion, l'apertura della Home, prestazioni a CPU 4× e richieste di rete. I risultati sono in [POLISH.md](../POLISH.md), Parte L.
 - **manuale**: quello che serve un dispositivo vero.
@@ -14,9 +15,11 @@ Il giro di oggi: 2026-10-20 (dopo la rifinitura), Chrome headless (macOS). Largh
 
 | Che cosa | jsdom | browser | manuale |
 |---|---|---|---|
-| Niente script, niente stili in linea, niente risorse da altri host | `landing.test.ts › CSP` | `landing.mjs rete` (13 richieste, tutte al sito) | — |
+| Un solo script (il modulo `js/installa.ts`, stesso sito), niente codice né stili in linea, niente risorse da altri host | `landing.test.ts › CSP` | `landing.mjs rete` (tutte al sito) | — |
 | Titolo, description, canonical, og:*, theme-color | `landing.test.ts › documento e meta` | — | anteprima del link in un'app di messaggi |
-| Le quattro sezioni in ordine, ognuna col suo titolo; testata fuori da `<main>` | `landing.test.ts › struttura` | — | — |
+| Le cinque sezioni in ordine, ognuna col suo titolo; testata fuori da `<main>` | `landing.test.ts › struttura` | — | — |
+| #installa: i passi scritti per iPhone, Android e computer (anche senza JavaScript); il pulsante e la riga «già tra le tue app» nel posto riservato; il dialogo fuori da `<main>` con quattro varianti | `landing.test.ts › #installa` | `landing.mjs tab` (il pulsante è una fermata quando c'è) | — |
+| Il pulsante: installa col prompt nativo dove c'è `beforeinstallprompt`, apre i passi su iPhone/iPad, sparisce da installata | `landing.installa.test.ts` | CDP: a 1280 «Installa l'app» compare (Chrome headless lancia l'evento); sotto UA iPhone (evento fermato) il dialogo mostra i passi ios26, fuoco al titolo, Esc lo chiude e il fuoco torna al pulsante | Safari su iPhone: i passi corrispondono ai menu veri; Chrome su Android: il prompt nativo |
 | Id unici, riferimenti ARIA e ancore che esistono | `landing.test.ts › struttura` | — | — |
 | Nessun modulo: la registrazione resta nell'app | `landing.test.ts › le porte dell'app` | — | — |
 | Ogni link verso l'app apre la vista giusta (`?accesso=registrati` / `accedi`) | `landing.test.ts › le porte dell'app`; `Login.test.tsx › il deep link ?accesso=` | — | da iPhone: «Crea il tuo diario» apre Registrati |
@@ -49,5 +52,6 @@ Il giro di oggi: 2026-10-20 (dopo la rifinitura), Chrome headless (macOS). Largh
 
 ## Non verificato
 
+- L'installazione vera: il prompt nativo di Chrome/Edge e l'«Aggiungi alla schermata Home» di Safari sono provati solo con eventi finti e UA emulati.
 - Safari su iPhone e Chrome su Android veri: il giro sopra è in Chrome headless, con lo user agent di Safari sotto i 900px. Le animazioni legate allo scroll (l'apertura sul telefono, il giro) sono verificate solo nel motore di Chrome.
 - L'anteprima del link (`og.png`) nelle app che la mostrano.

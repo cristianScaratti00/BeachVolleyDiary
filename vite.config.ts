@@ -5,7 +5,8 @@ import { componiLanding } from './presentazione/build/componi'
 
 // La landing `/presentazione` è un modello: il marchio e le icone ci entrano
 // qui, dalle stesse fonti dell'app (BrandMark e Icon.paths.ts). La pagina è
-// solo HTML e CSS: il primo fotogramma è già la pagina intera.
+// HTML e CSS, e il primo fotogramma è già la pagina intera; l'unico modulo
+// (presentazione/js/installa.ts) accende solo il pulsante «Aggiungi alla Home».
 function landing(): Plugin {
   return {
     name: 'landing',
@@ -42,9 +43,10 @@ export default defineConfig({
   build: {
     rollupOptions: {
       // Due pagine indipendenti: l'app (index.html, React + Supabase) e la
-      // landing pubblica su /presentazione/. La landing non ha JavaScript: da
-      // src/ prende solo i fogli dei token, della base e delle icone. Restano
-      // due bundle separati: chi apre la landing non scarica l'app.
+      // landing pubblica su /presentazione/. La landing ha un solo modulo
+      // (presentazione/js/installa.ts, senza import) e da src/ prende solo i
+      // fogli dei token, della base e delle icone. Restano due bundle
+      // separati: chi apre la landing non scarica l'app.
       input: {
         main: 'index.html',
         presentazione: 'presentazione/index.html',

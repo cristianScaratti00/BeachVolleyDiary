@@ -1,16 +1,16 @@
-# Graph Report - 1ebb79c7-d8a5-4c27-8441-47b2db918a1c  (2026-10-21)
+# Graph Report - 1ebb79c7-d8a5-4c27-8441-47b2db918a1c  (2026-10-26)
 
 ## Corpus Check
-- 274 files · ~353,352 words
+- 275 files · ~356,290 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 3669 nodes · 6857 edges · 299 communities (290 shown, 9 thin omitted)
+- 3556 nodes · 6695 edges · 286 communities (279 shown, 7 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 39 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `e38309f5`
+- Built from commit: `627438c4`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -152,7 +152,6 @@
 - [[_COMMUNITY_Community 138|Community 138]]
 - [[_COMMUNITY_Community 139|Community 139]]
 - [[_COMMUNITY_Community 140|Community 140]]
-- [[_COMMUNITY_Community 141|Community 141]]
 - [[_COMMUNITY_Community 142|Community 142]]
 - [[_COMMUNITY_Community 143|Community 143]]
 - [[_COMMUNITY_Community 144|Community 144]]
@@ -198,20 +197,16 @@
 - [[_COMMUNITY_Community 204|Community 204]]
 - [[_COMMUNITY_Community 205|Community 205]]
 - [[_COMMUNITY_Community 206|Community 206]]
-- [[_COMMUNITY_Community 207|Community 207]]
 - [[_COMMUNITY_Community 208|Community 208]]
 - [[_COMMUNITY_Community 209|Community 209]]
 - [[_COMMUNITY_Community 210|Community 210]]
 - [[_COMMUNITY_Community 211|Community 211]]
-- [[_COMMUNITY_Community 212|Community 212]]
 - [[_COMMUNITY_Community 213|Community 213]]
-- [[_COMMUNITY_Community 214|Community 214]]
 - [[_COMMUNITY_Community 215|Community 215]]
 - [[_COMMUNITY_Community 217|Community 217]]
 - [[_COMMUNITY_Community 218|Community 218]]
 - [[_COMMUNITY_Community 219|Community 219]]
 - [[_COMMUNITY_Community 220|Community 220]]
-- [[_COMMUNITY_Community 221|Community 221]]
 - [[_COMMUNITY_Community 222|Community 222]]
 - [[_COMMUNITY_Community 223|Community 223]]
 - [[_COMMUNITY_Community 224|Community 224]]
@@ -253,19 +248,11 @@
 - [[_COMMUNITY_Community 262|Community 262]]
 - [[_COMMUNITY_Community 263|Community 263]]
 - [[_COMMUNITY_Community 264|Community 264]]
-- [[_COMMUNITY_Community 266|Community 266]]
-- [[_COMMUNITY_Community 267|Community 267]]
-- [[_COMMUNITY_Community 268|Community 268]]
-- [[_COMMUNITY_Community 269|Community 269]]
-- [[_COMMUNITY_Community 271|Community 271]]
-- [[_COMMUNITY_Community 272|Community 272]]
 - [[_COMMUNITY_Community 275|Community 275]]
 - [[_COMMUNITY_Community 276|Community 276]]
 - [[_COMMUNITY_Community 277|Community 277]]
-- [[_COMMUNITY_Community 278|Community 278]]
 - [[_COMMUNITY_Community 279|Community 279]]
 - [[_COMMUNITY_Community 280|Community 280]]
-- [[_COMMUNITY_Community 281|Community 281]]
 - [[_COMMUNITY_Community 283|Community 283]]
 - [[_COMMUNITY_Community 284|Community 284]]
 - [[_COMMUNITY_Community 285|Community 285]]
@@ -308,41 +295,41 @@
   docs/preview/dati.ts → src/app/router.ts
 - `datiEstremi()` --calls--> `BASE`  [INFERRED]
   docs/preview/main.tsx → src/app/router.ts
+- `coriandolo()` --calls--> `P`  [INFERRED]
+  src/components/Pallo.tsx → src/app/useScreenData.test.tsx
 - `App()` --calls--> `renderScreen()`  [INFERRED]
   src/App.tsx → src/screens/ChiCeOggi.test.tsx
-- `quandoDetto()` --calls--> `dataRelativa()`  [INFERRED]
-  src/screens/PartitaLive.storico.ts → src/app/selectors.ts
-- `formaRecente()` --calls--> `pct()`  [INFERRED]
-  src/app/selectors.ts → src/components/dashboard/PointsCard.tsx
+- `NavState` --references--> `Route`  [EXTRACTED]
+  src/app/router.ts → src/app/routes.ts
 
 ## Import Cycles
 - 1-file cycle: `src/screens/PartitaLive.tsx -> src/screens/PartitaLive.tsx`
 
-## Communities (299 total, 9 thin omitted)
+## Communities (286 total, 7 thin omitted)
 
 ### Community 0 - "Community 0"
-Cohesion: 0.15
-Nodes (13): files, footerShown, updatedAt, /Users/cristianscaratti/Desktop/PROJECTS_ICIB/BeachVolleyDiary/presentazione/index.html, /Users/cristianscaratti/Desktop/PROJECTS_ICIB/BeachVolleyDiary/presentazione/styles/landing.css, b443cce1-4f85-407b-965e-3be557cc5ad4, cleanAcked, editCount (+5 more)
+Cohesion: 0.08
+Nodes (12): btnBase, dangerBtn, darkBtn, fieldStyle, labelStyle, primaryBtn, ChoiceProps, FilterChips() (+4 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.08
-Nodes (33): ProfiloProps, AuthContext, AuthContextValue, AuthResult, CampoAuth, campoDellErrore(), checkNameAvailable(), closeLinkSession() (+25 more)
+Cohesion: 0.07
+Nodes (39): AuthContext, AuthContextValue, CampoAuth, campoDellErrore(), checkNameAvailable(), closeLinkSession(), fetchProfile(), hasPasswordIdentity() (+31 more)
 
 ### Community 2 - "Community 2"
 Cohesion: 0.09
-Nodes (24): PalloUmore, PHASES, Battuta, cambioOgni(), daVincere(), Dialogo, Formato, formatoValido() (+16 more)
+Nodes (24): PalloUmore, Battuta, cambioOgni(), daVincere(), Dialogo, Formato, formatoValido(), intero() (+16 more)
 
 ### Community 3 - "Community 3"
-Cohesion: 0.05
-Nodes (43): battitura(), coloreDelNome(), Contesto, domanda(), FINISHED_PLACEMENTS, fmtDate(), fmtSets(), formDaBozza() (+35 more)
+Cohesion: 0.06
+Nodes (38): battitura(), coloreDelNome(), domanda(), FINISHED_PLACEMENTS, fmtDate(), fmtSets(), formDaBozza(), initialDraft() (+30 more)
 
 ### Community 4 - "Community 4"
 Cohesion: 0.06
 Nodes (30): devDependencies, axe-core, jsdom, @testing-library/dom, @testing-library/jest-dom, @testing-library/react, @testing-library/user-event, @types/leaflet (+22 more)
 
 ### Community 5 - "Community 5"
-Cohesion: 0.09
-Nodes (29): diario(), ID, OWN, diarioDi(), diario, entries(), entry(), mappa() (+21 more)
+Cohesion: 0.10
+Nodes (29): diario(), ID, OWN, diarioDi(), deriveDiary(), diario, entries(), entry() (+21 more)
 
 ### Community 6 - "Community 6"
 Cohesion: 0.13
@@ -354,55 +341,55 @@ Nodes (34): dependencies, html-to-image, leaflet, react, react-dom, @supabase/su
 
 ### Community 8 - "Community 8"
 Cohesion: 0.14
-Nodes (30): compagnoDefault(), dataBreve(), dataCorta(), dataRelativa(), deriveAdesso(), deriveConsigli(), deriveHome(), etichettaStagione() (+22 more)
+Nodes (29): compagnoDefault(), dataBreve(), dataCorta(), dataRelativa(), deriveAdesso(), deriveConsigli(), deriveHome(), etichettaStagione() (+21 more)
 
 ### Community 9 - "Community 9"
-Cohesion: 0.07
-Nodes (30): CompagnoDetailProps, NonTrovatoProps, TorneoDetailProps, LazyBoundary, lazyRetry(), Props, Pallo, Diario() (+22 more)
+Cohesion: 0.06
+Nodes (33): LazyBoundary, lazyRetry(), Props, sottotitoloTornei(), Shot, deriveDiarySearch(), mappaSubtitle(), Diario() (+25 more)
 
 ### Community 10 - "Community 10"
-Cohesion: 0.06
-Nodes (59): CompagnoMatchRow, DatedMatch, decorateTournament(), deriveCompagno(), deriveStory(), deriveTorneiSections(), deriveTorneoDetail(), deriveTorneoDetailServer() (+51 more)
+Cohesion: 0.07
+Nodes (36): FORMATS, CompagnoMatchRow, DatedMatch, deriveTorneiSections(), deriveWhoIsHere(), DiaryMatchHit, DiarySearchData, DiarySearchFields (+28 more)
 
 ### Community 11 - "Community 11"
 Cohesion: 0.10
 Nodes (20): compilerOptions, composite, isolatedModules, jsx, lib, module, moduleDetection, moduleResolution (+12 more)
 
 ### Community 12 - "Community 12"
-Cohesion: 0.09
-Nodes (35): Draft, citySnapshot(), cleanCity(), EMPTY, ResolvedVenue, Bracket, BRACKETS, CATEGORIES (+27 more)
+Cohesion: 0.17
+Nodes (22): Draft, UseCheckInDeps, citySnapshot(), cleanCity(), EMPTY, ResolvedVenue, Bracket, Category (+14 more)
 
 ### Community 13 - "Community 13"
 Cohesion: 0.11
 Nodes (17): compilerOptions, composite, isolatedModules, lib, module, moduleDetection, moduleResolution, noEmit (+9 more)
 
 ### Community 14 - "Community 14"
-Cohesion: 0.06
-Nodes (26): PALLO_UMORI, Compagni(), salita(), Adesso(), Gruppo(), plurale(), RigaTorneo(), rise() (+18 more)
+Cohesion: 0.08
+Nodes (33): Compagni(), salita(), searchInput, TONO, BadgeTone, ButtonLink, IconButton, Card() (+25 more)
 
 ### Community 15 - "Community 15"
 Cohesion: 0.16
 Nodes (20): allToasts(), arm(), check(), countGlass(), describe(), dismiss(), dur(), ease() (+12 more)
 
 ### Community 16 - "Community 16"
-Cohesion: 0.27
-Nodes (10): sottotitoloTornei(), deriveDiarySearch(), mappaSubtitle(), isSubsequence(), matchesAllTokens(), normalizeText(), tokenize(), tokenMatchesField() (+2 more)
+Cohesion: 0.12
+Nodes (25): deriveCompagno(), deriveStory(), deriveTorneoDetail(), deriveTorneoDetailServer(), deriveWrapped(), fmtDateFull(), formatLatLng(), nelPeriodo() (+17 more)
 
 ### Community 17 - "Community 17"
 Cohesion: 0.13
 Nodes (17): computeSlow(), getConnection(), NetworkInformation, subscribe(), useSlowConnection(), dismiss(), dismissKey(), emit() (+9 more)
 
 ### Community 18 - "Community 18"
-Cohesion: 0.14
-Nodes (15): clusterIcona(), ConquisteMapProps, disponiEtichette(), escape(), FILO_W, ITALIA, MARGINE, pinIcona() (+7 more)
+Cohesion: 0.13
+Nodes (16): clusterIcona(), ConquisteMapProps, disponiEtichette(), escape(), FILO_W, ITALIA, MARGINE, pinIcona() (+8 more)
 
 ### Community 19 - "Community 19"
 Cohesion: 0.15
 Nodes (11): #1 — Il sottotitolo della pagina non segue il filtro · media, #2 — Un filtro scartato si riattiva da solo · bassa, #3 — Contatori di sezione sotto AA · bassa (preesistente, non una regressione), #4 — Le azioni dell'header non sono raggiungibili da tastiera · media (preesistente), #5 — `role="button"` sulla card nasconde il contenuto agli screen reader · media, Come far girare la suite, Cosa è stato verificato, Da verificare a mano (fuori dalla portata di jsdom) (+3 more)
 
 ### Community 20 - "Community 20"
-Cohesion: 0.07
-Nodes (33): StoriaViewerProps, StoryData, CORNICE_PIU, CORNICE_UNA, CORTO, DA_ETICHETTA, didascalie(), differenziale() (+25 more)
+Cohesion: 0.08
+Nodes (32): StoriaViewerProps, StoryData, CORNICE_PIU, CORNICE_UNA, CORTO, DA_ETICHETTA, differenziale(), Esito() (+24 more)
 
 ### Community 21 - "Community 21"
 Cohesion: 0.13
@@ -426,7 +413,7 @@ Nodes (7): Avvio, 🏐 Beach Volley Diary, Design tokens, Funzionalità, La land
 
 ### Community 26 - "Community 26"
 Cohesion: 0.05
-Nodes (45): esito(), PartitaSheet(), Riga, RigaSet(), SetIntestazione(), ActionsProps, CityInput(), Ctx (+37 more)
+Nodes (46): SWATCH_COLORS, esito(), PartitaSheet(), Riga, RigaSet(), SetIntestazione(), ActionsProps, CityInput() (+38 more)
 
 ### Community 27 - "Community 27"
 Cohesion: 0.53
@@ -445,24 +432,24 @@ Cohesion: 0.11
 Nodes (17): compilerOptions, composite, isolatedModules, lib, module, moduleDetection, moduleResolution, noEmit (+9 more)
 
 ### Community 37 - "Community 37"
-Cohesion: 0.17
-Nodes (24): CollegaSheetProps, CompagniProps, CompagnoSheetProps, CreaChatProps, FotoSheetProps, HomeProps, LightboxProps, OverlayBase (+16 more)
+Cohesion: 0.08
+Nodes (50): CollegaSheetProps, CompagniProps, CompagnoDetailProps, CompagnoSheetProps, CreaChatProps, FotoSheetProps, HomeProps, LightboxProps (+42 more)
 
 ### Community 38 - "Community 38"
-Cohesion: 0.13
-Nodes (15): files, updatedAt, /Users/cristianscaratti/Library/Application Support/claude-queuer/worktrees/d8ac0497-7853-4b26-b1e9-910aad220737/4442d6af-09e5-4693-b874-05f83aef36b2/1ebb79c7-d8a5-4c27-8441-47b2db918a1c/src/lib/ritorno.ts, /Users/cristianscaratti/Library/Application Support/claude-queuer/worktrees/d8ac0497-7853-4b26-b1e9-910aad220737/4442d6af-09e5-4693-b874-05f83aef36b2/1ebb79c7-d8a5-4c27-8441-47b2db918a1c/src/screens/crea/limiti.ts, /Users/cristianscaratti/Library/Application Support/claude-queuer/worktrees/d8ac0497-7853-4b26-b1e9-910aad220737/4442d6af-09e5-4693-b874-05f83aef36b2/1ebb79c7-d8a5-4c27-8441-47b2db918a1c/supabase/templates/conferma.html, 47add20e-962d-4556-8051-17c27a4d258e, editCount, findings (+7 more)
+Cohesion: 0.16
+Nodes (17): dotForRank(), cittaFuoriMappa(), deriveMappa(), formaDelPin(), grafiaPiuRecente(), Gruppo, MappaCitta, MappaLegendaRow (+9 more)
 
 ### Community 39 - "Community 39"
 Cohesion: 0.12
 Nodes (15): Accessibilità — perché il contorno dei pin non è una rifinitura, Cablaggio al data layer, Come è nato il tracciato dell'Italia, Cosa resta fuori, Cosa è stato verificato (automatico), Decisioni e assunzioni, Difetti noti (preesistenti, ereditati e resi visibili), Due scelte da non disfare per sbaglio (+7 more)
 
 ### Community 40 - "Community 40"
-Cohesion: 0.18
-Nodes (10): WrappedSlide, ancore, CON_RECAP, conFoto(), deck(), installati, makeWrapped(), renderModal() (+2 more)
+Cohesion: 0.12
+Nodes (14): WrappedProps, WrappedData, WrappedSlide, ancore, CON_RECAP, conFoto(), deck(), installati (+6 more)
 
 ### Community 41 - "Community 41"
-Cohesion: 0.20
-Nodes (14): dialog(), velo(), accendi(), analiticiAttivi(), annuncia(), ascoltatori, avviaTracciamentoSeConsentito(), clarityCaricato() (+6 more)
+Cohesion: 0.14
+Nodes (18): dialog(), velo(), accendi(), analiticiAttivi(), annuncia(), ascoltatori, avviaTracciamentoSeConsentito(), clarityCaricato() (+10 more)
 
 ### Community 42 - "Community 42"
 Cohesion: 0.25
@@ -477,12 +464,12 @@ Cohesion: 0.25
 Nodes (7): Avvio, 🏐 Beach Volley Diary, Design tokens, Funzionalità, La landing `/presentazione`, Struttura, Test
 
 ### Community 46 - "Community 46"
-Cohesion: 0.07
-Nodes (18): ENTRATA, MOLLA, MotionRootProps, SVELTO, PhotoLightboxProps, Shot, Stato, btnBase (+10 more)
+Cohesion: 0.13
+Nodes (25): bottone(), ConsensoCookie(), Pannello(), ENTRATA, MOLLA, MotionRootProps, SVELTO, Pallo (+17 more)
 
 ### Community 47 - "Community 47"
-Cohesion: 0.10
-Nodes (26): Link, TabKey, Avatar(), AvatarSize, Spinner(), ButtonLinkProps, ButtonProps, ButtonSize (+18 more)
+Cohesion: 0.08
+Nodes (31): Link, TabKey, Avatar(), AvatarSize, Spinner(), ButtonLinkProps, ButtonProps, ButtonSize (+23 more)
 
 ### Community 48 - "Community 48"
 Cohesion: 0.17
@@ -493,32 +480,32 @@ Cohesion: 0.14
 Nodes (11): Automatico (`src/lib/derive.venues.server.test.ts`, 11 test), Come far girare la suite, Cosa è stato verificato, Da verificare a mano (fuori dalla portata di jsdom), Decisioni e assunzioni (documentate), Follow-up, La decisione che cambia la forma dello schema, ⚠️ Limitazione nota: il merge di un luogo condiviso (+3 more)
 
 ### Community 50 - "Community 50"
-Cohesion: 0.19
-Nodes (17): Avvio, battuta, cambioOgni(), daVincere(), Formato, FORMATO_BEACH, Modo, obiettivo() (+9 more)
+Cohesion: 0.18
+Nodes (19): Phase, PartitaForm, Avvio, PartitaInCorso, battuta, cambioOgni(), daVincere(), Formato (+11 more)
 
 ### Community 51 - "Community 51"
-Cohesion: 0.16
-Nodes (9): HarnessProps, renderTornei(), RIQUADRO_MAPPA, STAGIONE, TorneiConVista(), TorneiProps, TorneiVista, makeList() (+1 more)
+Cohesion: 0.11
+Nodes (16): cervia, jesolo, renderMappa(), rimini, spiaMappa, HarnessProps, renderTornei(), RIQUADRO_MAPPA (+8 more)
 
 ### Community 52 - "Community 52"
 Cohesion: 0.05
-Nodes (42): resolveVenue(), parseLatLng(), venueLabel(), BIAS, cercaCitta(), cercaLuoghi(), chiediAPhoton(), CittaTrovata (+34 more)
+Nodes (39): resolveVenue(), parseLatLng(), BIAS, cercaCitta(), cercaLuoghi(), chiediAPhoton(), CittaTrovata, comuneDi() (+31 more)
 
 ### Community 53 - "Community 53"
 Cohesion: 0.06
 Nodes (36): Etichetta(), useOnline(), DiaryPhotoThumb, DiarySearchResult, MedagliaTela(), Piazzamento(), BadgeRisultato(), CHIP (+28 more)
 
 ### Community 54 - "Community 54"
-Cohesion: 0.32
+Cohesion: 0.33
 Nodes (6): headers, rewrites, $schema, headers, rewrites, $schema
 
 ### Community 55 - "Community 55"
-Cohesion: 0.08
-Nodes (19): inputStyle, Label(), searchInput, Esito, ETICHETTA_CONSENSO, hintStyle, Msg, ProfiloProps (+11 more)
+Cohesion: 0.14
+Nodes (9): Label(), Esito, ETICHETTA_CONSENSO, hintStyle, Msg, Profilo(), ProfiloProps, readOnlyStyle (+1 more)
 
 ### Community 56 - "Community 56"
-Cohesion: 0.17
-Nodes (21): PhotoLightbox(), useSheetCentered(), Sheet(), StoryModal(), ConfirmDialog(), ConfirmDialogProps, MatchRow(), MatchRowProps (+13 more)
+Cohesion: 0.16
+Nodes (11): avviaInstalla(), BeforeInstallPromptEvent, giaInstallata(), monta(), Passi, passiDelBrowser(), suIOS(), monta() (+3 more)
 
 ### Community 57 - "Community 57"
 Cohesion: 0.15
@@ -529,36 +516,36 @@ Cohesion: 0.12
 Nodes (15): 0. Sintesi, 10. Mappa d'uso del vetro, 11. Immagini esportate (Storia e Wrapped), 12. Contenuti e microcopy, 13. Analytics: contratto da preservare, 15.1 Già deciso dall'utente (da non riaprire), 15.2 Domande aperte (con la risposta raccomandata), 15. Decisioni prese e domande aperte (+7 more)
 
 ### Community 59 - "Community 59"
-Cohesion: 0.19
-Nodes (15): ChartCard(), EmptyNote(), KeyNumbers(), PartnerCard(), PhaseCard(), PlacementCard(), TONO, pct() (+7 more)
+Cohesion: 0.17
+Nodes (19): ChartCard(), EmptyNote(), FiltroSelect(), KeyNumbers(), PartnerCard(), PhaseCard(), PlacementCard(), pct() (+11 more)
 
 ### Community 61 - "Community 61"
-Cohesion: 0.20
-Nodes (6): DiarioProps, dati, searchBox(), type(), makeDiaryEntry(), makeDiaryMatchHit()
+Cohesion: 0.22
+Nodes (6): DiarioProps, DiaryEntry, dati, searchBox(), type(), makeDiaryMatchHit()
 
 ### Community 62 - "Community 62"
-Cohesion: 0.09
-Nodes (34): torneiConCompagno(), Voce(), routeKey(), TorneiVista, setup(), useScreenData(), byAgendaDate(), deriveCompagni() (+26 more)
+Cohesion: 0.10
+Nodes (23): getDashboardStats(), ServerDashboard, ServerPartnerRow, ServerPhaseRow, ServerPlacement, ServerTrendPoint, PLACEMENTS, dashServer() (+15 more)
 
 ### Community 63 - "Community 63"
 Cohesion: 0.12
-Nodes (16): BugReport, Database, Json, Match, MatchScore, MatchSet, Partner, Photo (+8 more)
+Nodes (15): BugReport, Database, Json, Match, MatchScore, MatchSet, Partner, Photo (+7 more)
 
 ### Community 64 - "Community 64"
 Cohesion: 0.12
-Nodes (17): FiltroOpzione, FiltroSelect(), ambiente(), GlassComponent, Lib, LibProps, LiquidGlass(), LiquidGlassProps (+9 more)
+Nodes (16): FiltroOpzione, ambiente(), GlassComponent, Lib, LibProps, LiquidGlass(), LiquidGlassProps, Misura (+8 more)
 
 ### Community 65 - "Community 65"
-Cohesion: 0.14
-Nodes (20): BASE, MotionRoot(), datiDiProva(), datiEstremi(), foto(), oggiVero(), swatch(), Anteprima() (+12 more)
+Cohesion: 0.15
+Nodes (19): BASE, datiDiProva(), datiEstremi(), foto(), oggiVero(), swatch(), Anteprima(), datiDiProva() (+11 more)
 
 ### Community 66 - "Community 66"
-Cohesion: 0.12
-Nodes (16): 0. In una frase, 12. Il livello dei token: come si usa, 13. Migrazione dal linguaggio vecchio, 14. Il test "admin Bootstrap", 15. Dove questo documento corregge UX.md e il piano, 16. Seam per i ruoli successivi, 1. Estendere o spingere: la decisione, 3.1 Famiglie (+8 more)
+Cohesion: 0.17
+Nodes (12): 0. In una frase, 12. Il livello dei token: come si usa, 13. Migrazione dal linguaggio vecchio, 14. Il test "admin Bootstrap", 15. Dove questo documento corregge UX.md e il piano, 16. Seam per i ruoli successivi, 1. Estendere o spingere: la decisione, 7. Elevazione e ombre (+4 more)
 
 ### Community 67 - "Community 67"
 Cohesion: 0.09
-Nodes (32): P, ALLEGRI, AMMICCA, CON_OMBRA, CORIANDOLI, coriandolo(), cuore(), disegna() (+24 more)
+Nodes (30): ALLEGRI, AMMICCA, CON_OMBRA, CORIANDOLI, coriandolo(), cuore(), disegna(), Disegno (+22 more)
 
 ### Community 68 - "Community 68"
 Cohesion: 0.09
@@ -573,12 +560,12 @@ Cohesion: 0.17
 Nodes (12): 7.10 SegmentedControl e FilterChips, 7.11 Altri controlli, 7.1 TabBar (sotto i 900px), 7.2 Sidebar (dai 900px in su), 7.3 NavBar con large title, 7.4 Action sheet del ＋ e popover desktop, 7.5 Sheet (restyle di `Sheet.tsx`), 7.6 Card cliccabili e righe (difetti #4 e #5) (+4 more)
 
 ### Community 71 - "Community 71"
-Cohesion: 0.10
-Nodes (15): ritornoDaMostrare(), FEATURES, inputStyle, Login(), MESSAGGI, Mode, NameStatus, Passo (+7 more)
+Cohesion: 0.06
+Nodes (29): useAuth(), useIsWide(), useMediaQuery(), CHIAVI, emailDelToken(), leggiRitorno(), parametri(), pulisciIndirizzo() (+21 more)
 
 ### Community 72 - "Community 72"
-Cohesion: 0.40
-Nodes (5): /Users/cristianscaratti/Desktop/PROJECTS_ICIB/BeachVolleyDiary/src/screens/Login.solby.css, cleanAcked, editCount, findings, stopBaseline
+Cohesion: 0.18
+Nodes (6): PALLO_UMORI, usePalloTocco(), PALLO_UMORI, HomeVuota(), Bottone(), TabBar
 
 ### Community 73 - "Community 73"
 Cohesion: 0.18
@@ -597,8 +584,8 @@ Cohesion: 0.20
 Nodes (10): 8.1 Difetti accertati da chiudere, 8.2 Percorsi da tastiera, 8.3 Focus: regole, 8.4 Ruoli e attributi ARIA, 8.5 Contrasto: obiettivi e calcolo sul vetro, 8.6 Bersagli tattili, 8.7 Movimento e trasparenza, 8.8 Testo, zoom e lingua (+2 more)
 
 ### Community 77 - "Community 77"
-Cohesion: 0.07
-Nodes (42): cittaFuoriMappa(), deriveMappa(), formaDelPin(), grafiaPiuRecente(), Gruppo, MappaCitta, MappaLegendaRow, MappaTorneoRow (+34 more)
+Cohesion: 0.11
+Nodes (21): pinDi(), ALIASES, CITTA_SUGGERITE, GAZETTEER, geocodeCity(), geoKey(), GeoPoint, PinSeed (+13 more)
 
 ### Community 78 - "Community 78"
 Cohesion: 0.25
@@ -609,8 +596,8 @@ Cohesion: 0.11
 Nodes (11): durata(), IDX(), Odometro, parse(), Tempo, durata(), IDX(), Odometro (+3 more)
 
 ### Community 80 - "Community 80"
-Cohesion: 0.38
-Nodes (7): deriveDashboard(), filteredMatches(), filtri(), Harness(), props(), renderHome(), Harness()
+Cohesion: 0.26
+Nodes (8): deriveDashboard(), conWrapped, filtri(), Harness(), pieno, props(), renderHome(), Harness()
 
 ### Community 81 - "Community 81"
 Cohesion: 0.40
@@ -685,32 +672,32 @@ Cohesion: 0.50
 Nodes (4): 1.1 Il contratto, 1.2 Che cosa è un "percorso caldo", 1.3 Le eccezioni (tutte e sole), 1. Le regole dure
 
 ### Community 100 - "Community 100"
-Cohesion: 0.18
-Nodes (10): files, updatedAt, /Users/cristianscaratti/Library/Application Support/claude-queuer/worktrees/d8ac0497-7853-4b26-b1e9-910aad220737/4442d6af-09e5-4693-b874-05f83aef36b2/1ebb79c7-d8a5-4c27-8441-47b2db918a1c/src/hooks/useAuth.test.tsx, sessions, 937852d3-d2fa-43c5-bdef-70fe7e40d337, cleanAcked, editCount, findings (+2 more)
+Cohesion: 0.21
+Nodes (8): FOTO, gruppo(), radio(), renderConFoto(), renderStoria(), scelto(), STORY, FotoTela
 
 ### Community 101 - "Community 101"
-Cohesion: 0.40
-Nodes (5): /Users/cristianscaratti/Desktop/PROJECTS_ICIB/BeachVolleyDiary/src/screens/Login.solby.tsx, cleanAcked, editCount, findings, stopBaseline
+Cohesion: 0.33
+Nodes (3): aggiornaStato, back, elencoSegnalazioni
 
 ### Community 102 - "Community 102"
-Cohesion: 0.17
-Nodes (18): RigaStorico(), chiave(), conPartita(), due(), esitoAmici, giornoLocale(), leggiStorico(), nomeLoro() (+10 more)
+Cohesion: 0.18
+Nodes (17): RigaStorico(), chiave(), conPartita(), due(), esitoAmici, giornoLocale(), leggiStorico(), nomeLoro() (+9 more)
 
 ### Community 103 - "Community 103"
-Cohesion: 0.40
-Nodes (5): /Users/cristianscaratti/Desktop/PROJECTS_ICIB/BeachVolleyDiary/src/screens/Login.test.tsx, cleanAcked, editCount, findings, stopBaseline
+Cohesion: 0.50
+Nodes (4): 3.1 Famiglie, 3.2 Scala, 3.3 Regole, 3. Tipografia
 
 ### Community 104 - "Community 104"
-Cohesion: 0.40
-Nodes (4): carica(), consent, init, Modulo
+Cohesion: 0.50
+Nodes (4): L9.1 Che cosa è vetro, e che cosa no, L9.2 La capsula: due materiali, inchiostro pieno, L9.3 Il budget, stato per stato, L9. Il vetro sulla landing
 
 ### Community 105 - "Community 105"
-Cohesion: 0.12
-Nodes (7): LiveTorneo, PartitaLiveProps, FORMATO_BEACH, PartitaInCorso, inMemoria(), TORNEI, traAmici()
+Cohesion: 0.13
+Nodes (6): LiveTorneo, FORMATO_BEACH, PartitaAmici, inMemoria(), TORNEI, traAmici()
 
 ### Community 106 - "Community 106"
 Cohesion: 0.09
-Nodes (27): AdessoTorneo, AzioneConsiglio, Consiglio, oggiEsteso(), UltimoTorneo, usePalloTocco(), TorneoCard, AzioniConsiglio (+19 more)
+Nodes (28): AdessoTorneo, AzioneConsiglio, Consiglio, iniziali(), oggiEsteso(), stagioniHome(), UltimoTorneo, TorneoCard (+20 more)
 
 ### Community 107 - "Community 107"
 Cohesion: 0.11
@@ -725,8 +712,8 @@ Cohesion: 0.15
 Nodes (13): dependencies, @fontsource-variable/geist, html-to-image, leaflet, leaflet.markercluster, liquid-glass-react, @microsoft/clarity, react (+5 more)
 
 ### Community 110 - "Community 110"
-Cohesion: 0.29
-Nodes (7): cervia, jesolo, renderMappa(), rimini, spiaMappa, makeMappaPin(), makeMappaTorneoRow()
+Cohesion: 0.67
+Nodes (3): dati(), Props, renderScreen()
 
 ### Community 111 - "Community 111"
 Cohesion: 0.15
@@ -737,8 +724,8 @@ Cohesion: 0.29
 Nodes (10): contrast(), flatten(), luminance(), parse(), RGB, contrast(), luminance(), over() (+2 more)
 
 ### Community 113 - "Community 113"
-Cohesion: 0.11
-Nodes (25): WrappedProps, WrappedData, WrappedSlideKind, Chip(), adatta(), annoDi(), fotoStretta(), tagliaTitolo (+17 more)
+Cohesion: 0.17
+Nodes (16): WrappedSlideKind, adatta(), annoDi(), fotoStretta(), tagliaTitolo, umoreSlide(), Slide(), eyebrow() (+8 more)
 
 ### Community 114 - "Community 114"
 Cohesion: 0.12
@@ -765,12 +752,12 @@ Cohesion: 0.17
 Nodes (11): accesso(), apriAccedi(), apriRegistrati(), checkNameAvailable, finoAlPasso2(), h1(), login, register (+3 more)
 
 ### Community 121 - "Community 121"
-Cohesion: 0.07
-Nodes (36): TorneiProps, ScreenData, getDashboardStats(), ServerDashboard, ServerPartnerRow, ServerPhaseRow, ServerPlacement, ServerTrendPoint (+28 more)
+Cohesion: 0.09
+Nodes (32): torneiConCompagno(), Voce(), routeKey(), setup(), useScreenData(), byAgendaDate(), DashboardData, deriveCompagni() (+24 more)
 
 ### Community 122 - "Community 122"
-Cohesion: 0.18
-Nodes (7): agosto, dati, giugno1, giugno2, luglio, searchBox(), type()
+Cohesion: 0.17
+Nodes (8): agosto, dati, giugno1, giugno2, luglio, searchBox(), type(), makeTorneo()
 
 ### Community 123 - "Community 123"
 Cohesion: 0.17
@@ -809,8 +796,8 @@ Cohesion: 0.22
 Nodes (5): BrandLockup(), BrandMark(), BrandMarkProps, CUCITURE_CENTRO, CUCITURE_ESTERNE
 
 ### Community 132 - "Community 132"
-Cohesion: 0.40
-Nodes (3): useIsWide(), useMediaQuery(), BP
+Cohesion: 0.67
+Nodes (3): Chip(), pad2(), WrappedModal()
 
 ### Community 133 - "Community 133"
 Cohesion: 0.22
@@ -843,10 +830,6 @@ Nodes (5): 4.1 Shell, 4.2 Overlay, 4.3 Primitive, 4.4 Dati, 4. Specifica per ele
 ### Community 140 - "Community 140"
 Cohesion: 0.40
 Nodes (5): 6.1 Spinner: solo due, e nessun altro, 6.2 Lo skeleton in tre tempi (demo 05), 6.3 Inventario degli skeleton, 6.4 Chunk lazy fallito, 6. Caricamento
-
-### Community 141 - "Community 141"
-Cohesion: 0.33
-Nodes (7): analyticsPath(), bottone(), ConsensoCookie(), Pannello(), AuthProvider(), useScelta(), Tracciamento()
 
 ### Community 142 - "Community 142"
 Cohesion: 0.14
@@ -889,20 +872,20 @@ Cohesion: 0.50
 Nodes (4): 9.1 Breakpoint, 9.2 Per schermata, 9.3 Aree sicure, tastiera e orientamento, 9. Comportamento responsive
 
 ### Community 152 - "Community 152"
-Cohesion: 0.13
-Nodes (15): Indice della Parte L, L0. In una frase, L12. Il livello dei token: come si usa, L13. Dove questa parte corregge UX.md, L14. Il test «landing da template», L15. Seam per i ruoli successivi, L1. Estendere o spingere: la decisione, L6. Raggi e forme (+7 more)
+Cohesion: 0.18
+Nodes (11): Indice della Parte L, L0. In una frase, L12. Il livello dei token: come si usa, L13. Dove questa parte corregge UX.md, L14. Il test «landing da template», L15. Seam per i ruoli successivi, L1. Estendere o spingere: la decisione, L6. Raggi e forme (+3 more)
 
 ### Community 153 - "Community 153"
-Cohesion: 0.10
-Nodes (17): FOTO, gruppo(), radio(), renderConFoto(), renderStoria(), scelto(), STORY, caricaFoto() (+9 more)
+Cohesion: 0.16
+Nodes (9): caricaFoto(), disponi(), Posto, righeDi(), Riquadro, ALTA, BOX, ORIZZONTALE (+1 more)
 
 ### Community 154 - "Community 154"
 Cohesion: 0.17
 Nodes (12): L6.0 Stati trasversali (valgono per ogni sezione), L6.10 Pallo guida (lo stato globale), L6.1 Hero `#inizio`, L6.2 Il diario in tasca `#diario`, L6.3 Cosa registriamo? `#registra`, L6.4 Partita live `#live`, L6.5 I numeri li fa l'app `#numeri`, L6.6 La mappa delle conquiste `#mappa` (+4 more)
 
 ### Community 162 - "Community 162"
-Cohesion: 0.09
-Nodes (19): MARTA, Props, renderSheet(), renderSheet(), renderSheet(), renderSheet(), renderSheet(), renderScreen() (+11 more)
+Cohesion: 0.10
+Nodes (15): MARTA, Props, renderSheet(), renderSheet(), renderSheet(), renderSheet(), renderScreen(), renderLive() (+7 more)
 
 ### Community 163 - "Community 163"
 Cohesion: 0.20
@@ -926,7 +909,7 @@ Nodes (10): L4.1 Il principio, L4.2 Le campiture e la loro sequenza, L4.3 I ruol
 
 ### Community 168 - "Community 168"
 Cohesion: 0.15
-Nodes (12): ASSE, riassunto(), StyleWithVars, TrendCard(), TrendPoint, C, DATA_TONE, LIB_PODIUM (+4 more)
+Nodes (13): TONO, ASSE, riassunto(), StyleWithVars, TrendCard(), TrendPoint, C, DATA_TONE (+5 more)
 
 ### Community 169 - "Community 169"
 Cohesion: 0.20
@@ -942,15 +925,15 @@ Nodes (15): Indice della Parte L, L0. In una frase, L12. Il livello dei token: c
 
 ### Community 172 - "Community 172"
 Cohesion: 0.05
-Nodes (80): AppShell(), radiceDellaTab(), ShellUser, tabsFor(), useRitardoSpegnimento(), TorneoOption, ModalHost(), overlayEntryAncoraAperta() (+72 more)
+Nodes (76): AppShell(), radiceDellaTab(), ShellUser, tabsFor(), useRitardoSpegnimento(), overlayEntryAncoraAperta(), ConfirmSpec, discardSpec() (+68 more)
 
 ### Community 173 - "Community 173"
 Cohesion: 0.22
 Nodes (8): react, react-dom, name, overrides, liquid-glass-react, private, type, version
 
 ### Community 174 - "Community 174"
-Cohesion: 0.10
-Nodes (34): ChiCeOggiProps, ViaCreazione, Props, Actions, conseguenzaTorneo(), Deps, erroreEliminazione(), erroreSalvataggio() (+26 more)
+Cohesion: 0.06
+Nodes (56): ChiCeOggiProps, ModalHost(), PhotoLightbox, Props, SENZA_VELO, StoryModal, Route, Actions (+48 more)
 
 ### Community 178 - "Community 178"
 Cohesion: 0.25
@@ -1028,10 +1011,6 @@ Nodes (4): L3.1 Il carattere e la sua riserva, L3.2 La scala da manifesto, L3.3 
 Cohesion: 0.29
 Nodes (7): L10.1 Che cos'è, L10.2 L'innesco, L10.3 La coreografia, L10.4 Interruzioni, L10.5 Fermo, L10.6 Nitidezza, e perché non altro, L10. Il momento firmato: «Il passaggio di consegne»
 
-### Community 207 - "Community 207"
-Cohesion: 0.50
-Nodes (4): useAuth(), Profilo(), sale(), Root()
-
 ### Community 208 - "Community 208"
 Cohesion: 0.25
 Nodes (7): motion, L1. Il momento firmato: l'apertura della Home, L2. Il giro: la stagione che si sfoglia scorrendo, L2. La fila dei telefoni sotto i 700px, L3. Le regole, Parte L. La landing `/presentazione`: il movimento, motion
@@ -1048,17 +1027,13 @@ Nodes (4): L9.1 Soglie (tutte `IntersectionObserver`), L9.2 Salti programmatici,
 Cohesion: 0.15
 Nodes (13): 5. Flussi, F0. Avvio e autenticazione, F10. Segnala un problema e bacheca admin, F11. Assistente guidato, F1. Primo avvio (account appena creato), F2. Creare un torneo (sheet unificato), F3. Aggiungere una partita, F4. Ritrovare un torneo (Tornei) (+5 more)
 
-### Community 212 - "Community 212"
-Cohesion: 0.40
-Nodes (5): /Users/cristianscaratti/Desktop/PROJECTS_ICIB/BeachVolleyDiary/src/components/ui/LiquidGlass.tsx, cleanAcked, editCount, findings, stopBaseline
-
-### Community 214 - "Community 214"
-Cohesion: 0.22
-Nodes (9): /Users/cristianscaratti/Desktop/PROJECTS_ICIB/BeachVolleyDiary/src/components/ui/Icon.paths.ts, /Users/cristianscaratti/Library/Application Support/claude-queuer/worktrees/d8ac0497-7853-4b26-b1e9-910aad220737/4442d6af-09e5-4693-b874-05f83aef36b2/1ebb79c7-d8a5-4c27-8441-47b2db918a1c/src/lib/lunghezze.ts, engine, editCount, findings, stopBaseline, editCount, findings (+1 more)
+### Community 213 - "Community 213"
+Cohesion: 0.13
+Nodes (6): AREE, ascoltatori, Props, renderChat(), Props, renderScreen()
 
 ### Community 215 - "Community 215"
-Cohesion: 0.10
-Nodes (25): SegnalaProps, SegnalazioniProps, aggiornaStato(), AreaSegnalazione, AREE, browserCorrente(), coloreStato(), elencoSegnalazioni() (+17 more)
+Cohesion: 0.15
+Nodes (18): SegnalaProps, aggiornaStato(), AreaSegnalazione, browserCorrente(), coloreStato(), elencoSegnalazioni(), EsitoInvio, etichettaArea() (+10 more)
 
 ### Community 217 - "Community 217"
 Cohesion: 0.14
@@ -1075,10 +1050,6 @@ Nodes (14): L7.10 Wrapped e la Storia, L7.11 «Il diario resta tuo», L7.12 Fogl
 ### Community 220 - "Community 220"
 Cohesion: 0.17
 Nodes (12): L6.0 Stati trasversali (valgono per ogni sezione), L6.10 Pallo guida (lo stato globale), L6.1 Hero `#inizio`, L6.2 Il diario in tasca `#diario`, L6.3 Cosa registriamo? `#registra`, L6.4 Partita live `#live`, L6.5 I numeri li fa l'app `#numeri`, L6.6 La mappa delle conquiste `#mappa` (+4 more)
-
-### Community 221 - "Community 221"
-Cohesion: 0.40
-Nodes (5): /Users/cristianscaratti/Desktop/PROJECTS_ICIB/BeachVolleyDiary/src/main.tsx, cleanAcked, editCount, findings, stopBaseline
 
 ### Community 222 - "Community 222"
 Cohesion: 0.18
@@ -1240,30 +1211,6 @@ Nodes (3): L2.1 Le curve (ART §L11.2), e dove le usa la landing, L2.2 Costanti 
 Cohesion: 0.67
 Nodes (3): L4.1 La sequenza d'avvio (FL1), L4.2 Ricarica, deep link, ritorno nella sessione, L4. Dal primo fotogramma: caricamento, ricarica, deep link
 
-### Community 266 - "Community 266"
-Cohesion: 0.10
-Nodes (21): files, updatedAt, /Users/cristianscaratti/Desktop/PROJECTS_ICIB/BeachVolleyDiary/presentazione/styles/tokens.css, /Users/cristianscaratti/Desktop/PROJECTS_ICIB/BeachVolleyDiary/src/components/ui/LiquidGlass.css, /Users/cristianscaratti/Desktop/PROJECTS_ICIB/BeachVolleyDiary/src/styles/base.css, /Users/cristianscaratti/Desktop/PROJECTS_ICIB/BeachVolleyDiary/src/styles/materials.css, /Users/cristianscaratti/Desktop/PROJECTS_ICIB/BeachVolleyDiary/src/styles/tokens.css, 28e57a3b-e1df-4ee1-b6f0-0a71fef03237 (+13 more)
-
-### Community 267 - "Community 267"
-Cohesion: 0.40
-Nodes (5): /Users/cristianscaratti/Desktop/PROJECTS_ICIB/BeachVolleyDiary/presentazione/styles/apertura.css, cleanAcked, editCount, findings, stopBaseline
-
-### Community 268 - "Community 268"
-Cohesion: 0.40
-Nodes (5): /Users/cristianscaratti/Desktop/PROJECTS_ICIB/BeachVolleyDiary/presentazione/styles/finale.css, cleanAcked, editCount, findings, stopBaseline
-
-### Community 269 - "Community 269"
-Cohesion: 0.17
-Nodes (12): e4e4d7baac5a1bdbb8d3f3d0e1ebbfe1b8cbde51168182e7e323237197716ce6, /Users/cristianscaratti/Desktop/PROJECTS_ICIB/BeachVolleyDiary/presentazione/styles/funzionalita.css, /Users/cristianscaratti/Desktop/PROJECTS_ICIB/BeachVolleyDiary/presentazione/styles/pagina.css, counts, cleanAcked, editCount, findings, stopBaseline (+4 more)
-
-### Community 271 - "Community 271"
-Cohesion: 0.40
-Nodes (5): /Users/cristianscaratti/Desktop/PROJECTS_ICIB/BeachVolleyDiary/presentazione/styles/schermate.css, cleanAcked, editCount, findings, stopBaseline
-
-### Community 272 - "Community 272"
-Cohesion: 0.22
-Nodes (9): /Users/cristianscaratti/Desktop/PROJECTS_ICIB/BeachVolleyDiary/src/test/landing.test.ts, /Users/cristianscaratti/Library/Application Support/claude-queuer/worktrees/d8ac0497-7853-4b26-b1e9-910aad220737/4442d6af-09e5-4693-b874-05f83aef36b2/1ebb79c7-d8a5-4c27-8441-47b2db918a1c/src/lib/sito.ts, version, editCount, findings, stopBaseline, editCount, findings (+1 more)
-
 ### Community 275 - "Community 275"
 Cohesion: 0.18
 Nodes (11): 4.10 Primo caricamento fallito: come riconoscerlo senza toccare `useDiary`, 4.1 Tabella delle rotte, 4.2 Semantica della history, 4.3 Sheet, dialoghi e visori nella history, 4.4 Gestione del focus al cambio di rotta, 4.5 Autenticazione e deep link, 4.6 Gating funzionale, 4.7 Vercel e service worker (+3 more)
@@ -1276,10 +1223,6 @@ Nodes (10): L0. In una frase, L1. Le sezioni, L2. Le porte dell'app, L3. Che cos
 Cohesion: 0.20
 Nodes (10): 8.1 Difetti accertati da chiudere, 8.2 Percorsi da tastiera, 8.3 Focus: regole, 8.4 Ruoli e attributi ARIA, 8.5 Contrasto: obiettivi e calcolo sul vetro, 8.6 Bersagli tattili, 8.7 Movimento e trasparenza, 8.8 Testo, zoom e lingua (+2 more)
 
-### Community 278 - "Community 278"
-Cohesion: 0.29
-Nodes (7): CHIAVI, emailDelToken(), leggiRitorno(), parametri(), pulisciIndirizzo(), Ritorno, ritornoMostrato()
-
 ### Community 279 - "Community 279"
 Cohesion: 0.22
 Nodes (9): 0. In una frase, 12. Costi: cosa è caro e cosa usare al suo posto, 13. Cosa cambia nel codice di oggi, 14. Deviazioni da UX.md e ART_DIRECTION.md, 15. Le demo, 17. Seam per i ruoli successivi, 7. Feedback immediato e ottimistico, Indice (+1 more)
@@ -1288,10 +1231,6 @@ Nodes (9): 0. In una frase, 12. Costi: cosa è caro e cosa usare al suo posto, 1
 Cohesion: 0.22
 Nodes (9): 3.1 La scala dei tempi di risposta, 3.2 Interrompibilità, 3.3 Chi esce non blocca, chi entra risponde, 3.4 Il vetro durante le transizioni, 3.5 Focus e animazione (M3), 3.6 Origine: ciò che tocchi è ciò che si apre, 3.7 Overlay impilati, 3.8 History e animazioni (+1 more)
 
-### Community 281 - "Community 281"
-Cohesion: 0.43
-Nodes (6): StatisticheProps, WrappedRow(), etichettaPeriodo(), partite(), sale(), Statistiche()
-
 ### Community 283 - "Community 283"
 Cohesion: 0.25
 Nodes (8): 4.1 Principio, 4.2 Ruoli semantici: tema chiaro (attivo), 4.3 Le regole del colore, 4.4 Il testo sul vetro (fondo peggiore), 4.5 I colori dei dati, 4.6 Tema scuro: predisposto, non attivo, 4.7 Palette dei PNG esportati (Storia e Wrapped, `⟂ F4`), 4. Colore
@@ -1299,6 +1238,10 @@ Nodes (8): 4.1 Principio, 4.2 Ruoli semantici: tema chiaro (attivo), 4.3 Le rego
 ### Community 284 - "Community 284"
 Cohesion: 0.25
 Nodes (7): L1. In una riga, L2. I token, L3. Le sezioni, L4. I fogli, L5. Immagini e icone, L6. Dove la pagina si discosta dalla tavola, Parte L. La landing `/presentazione`
+
+### Community 285 - "Community 285"
+Cohesion: 0.29
+Nodes (4): BRACKETS, chip(), gruppo(), renderSheet()
 
 ### Community 286 - "Community 286"
 Cohesion: 0.29
@@ -1385,24 +1328,24 @@ Cohesion: 0.50
 Nodes (4): 9.1 Breakpoint, 9.2 Per schermata, 9.3 Aree sicure, tastiera e orientamento, 9. Comportamento responsive
 
 ## Knowledge Gaps
-- **1791 isolated node(s):** `ignoreRules`, `ignoreFiles`, `ignoreValues`, `version`, `updatedAt` (+1786 more)
+- **1723 isolated node(s):** `ignoreRules`, `ignoreFiles`, `ignoreValues`, `qs`, `oggi` (+1718 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **9 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **7 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Button` connect `Community 26` to `Community 2`, `Community 131`, `Community 3`, `Community 71`, `Community 9`, `Community 106`, `Community 12`, `Community 141`, `Community 46`, `Community 14`, `Community 47`, `Community 113`, `Community 20`, `Community 53`, `Community 55`, `Community 56`?**
-  _High betweenness centrality (0.006) - this node is a cross-community bridge._
-- **Why does `Icon()` connect `Community 47` to `Community 64`, `Community 3`, `Community 71`, `Community 9`, `Community 106`, `Community 12`, `Community 46`, `Community 14`, `Community 17`, `Community 113`, `Community 20`, `Community 52`, `Community 53`, `Community 55`, `Community 56`, `Community 26`?**
-  _High betweenness centrality (0.006) - this node is a cross-community bridge._
+- **Why does `spring()` connect `Community 15` to `Community 162`?**
+  _High betweenness centrality (0.008) - this node is a cross-community bridge._
+- **Why does `monta()` connect `Community 97` to `Community 1`, `Community 162`?**
+  _High betweenness centrality (0.007) - this node is a cross-community bridge._
 - **Why does `MOTION.md: il movimento di "Bagnasciuga"` connect `Community 75` to `Community 96`, `Community 257`, `Community 98`, `Community 99`, `Community 129`, `Community 74`, `Community 208`, `Community 246`, `Community 92`, `Community 93`, `Community 94`?**
-  _High betweenness centrality (0.005) - this node is a cross-community bridge._
+  _High betweenness centrality (0.007) - this node is a cross-community bridge._
 - **What connects `ignoreRules`, `ignoreFiles`, `ignoreValues` to the rest of the system?**
-  _1791 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _1723 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `Community 0` be split into smaller, more focused modules?**
+  _Cohesion score 0.07671957671957672 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.0824524312896406 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06693877551020408 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
   _Cohesion score 0.0946969696969697 - nodes in this community are weakly interconnected._
-- **Should `Community 3` be split into smaller, more focused modules?**
-  _Cohesion score 0.04801864801864802 - nodes in this community are weakly interconnected._

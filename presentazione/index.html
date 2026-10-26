@@ -7,7 +7,10 @@
          Questo file è un MODELLO: il marchio e lo sprite delle icone li mette
          dentro `presentazione/build/componi.ts` al momento della build, dalle
          stesse fonti dell'app. Niente stili né script in linea (la CSP vuole
-         `script-src 'self'`), e niente JavaScript: la pagina è tutta qui.
+         `script-src 'self'`): la pagina è tutta qui, e si legge anche senza
+         JavaScript. L'unico modulo, `js/installa.ts`, fa installare l'app
+         dove il browser lo permette e apre i passi per iPhone; senza di lui
+         i passi restano scritti in #installa.
          La registrazione sta nell'app: i pulsanti portano a
          `/?accesso=registrati` e `/?accesso=accedi`. -->
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -43,6 +46,7 @@
          subito invece che quando il foglio la scopre. Senza movimento non
          serve. -->
     <link rel="preload" href="/presentazione/screens/home-fondo.webp" as="image" type="image/webp" media="(prefers-reduced-motion: no-preference)" />
+    <script type="module" src="./js/installa.ts"></script>
   </head>
   <body>
     <!--@icone-->
@@ -56,6 +60,7 @@
             <ul class="testata-voci">
               <li><a class="testata-voce" href="#funzionalita">Funzionalità</a></li>
               <li><a class="testata-voce" href="#schermate">Schermate</a></li>
+              <li><a class="testata-voce" href="#installa">Installa</a></li>
               <li><a class="testata-voce" href="/?accesso=accedi">Accedi</a></li>
             </ul>
             <a class="cta" data-variant="pieno" data-size="sm" href="/?accesso=registrati">Iscriviti</a>
@@ -249,6 +254,62 @@
         </div>
       </section>
 
+      <!-- ========================================================= Installa -->
+      <!-- Come mettere l'app sulla Home: tre gruppi di passi scritti, che
+           valgono anche senza JavaScript. Il pulsante e la riga «già tra le
+           tue app» li accende js/installa.ts, nello stesso posto riservato:
+           installa davvero dove il browser lo permette (Chrome, Edge, Samsung
+           Internet), apre il dialogo coi passi su iPhone e iPad, e altrove
+           resta nascosto. -->
+      <section id="installa" class="fascia" aria-labelledby="installa-titolo">
+        <div class="dentro fascia-dentro">
+          <div class="installa-testa">
+            <div class="testa">
+              <p class="occhiello">Installa</p>
+              <h2 id="installa-titolo">Aggiungi Beach Diary alla Home.</h2>
+              <p class="frase">Si apre come un’app, a tutto schermo e senza la barra del browser. Niente store e niente download: bastano tre tocchi.</p>
+            </div>
+            <div class="installa-azione">
+              <button type="button" class="cta" data-variant="pieno" data-installa hidden>Aggiungi alla Home</button>
+              <p class="installa-fatto" hidden><svg class="ui-icon" aria-hidden="true"><use href="#i-check-circle" /></svg>Beach Diary è già tra le tue app.</p>
+            </div>
+          </div>
+          <div class="installa-gruppi">
+            <article class="installa-gruppo" aria-labelledby="installa-ios">
+              <span class="carta-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-phone" /></svg></span>
+              <h3 id="installa-ios">iPhone e iPad</h3>
+              <p class="installa-dove">Con Safari</p>
+              <ol class="installa-passi">
+                <li><span class="installa-passo-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-share-up" /></svg></span><span>Tocca <b>Condividi</b>. Su iOS 26 è nel menu <b>⋯</b> accanto all’indirizzo.</span></li>
+                <li><span class="installa-passo-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-plus" /></svg></span><span>Scegli <b>Aggiungi alla schermata Home</b>.</span></li>
+                <li><span class="installa-passo-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-check" /></svg></span><span>Su iOS 26 lascia acceso <b>Apri come app web</b>, poi tocca <b>Aggiungi</b>.</span></li>
+              </ol>
+            </article>
+            <article class="installa-gruppo" aria-labelledby="installa-android">
+              <span class="carta-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-phone" /></svg></span>
+              <h3 id="installa-android">Android</h3>
+              <p class="installa-dove">Con Chrome</p>
+              <ol class="installa-passi">
+                <li><span class="installa-passo-ico" data-verticale><svg class="ui-icon" aria-hidden="true"><use href="#i-ellipsis" /></svg></span><span>Apri il menu <b>⋮</b> in alto a destra.</span></li>
+                <li><span class="installa-passo-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-download" /></svg></span><span>Scegli <b>Installa app</b> o <b>Aggiungi a schermata Home</b>.</span></li>
+                <li><span class="installa-passo-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-check" /></svg></span><span>Conferma con <b>Installa</b>: l’icona è tra le tue app.</span></li>
+              </ol>
+            </article>
+            <article class="installa-gruppo" aria-labelledby="installa-computer">
+              <span class="carta-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-download" /></svg></span>
+              <h3 id="installa-computer">Computer</h3>
+              <p class="installa-dove">Con Chrome o Edge</p>
+              <ol class="installa-passi">
+                <li><span class="installa-passo-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-download" /></svg></span><span>Fai clic sull’icona <b>Installa</b> a destra nella barra degli indirizzi.</span></li>
+                <li><span class="installa-passo-ico" data-verticale><svg class="ui-icon" aria-hidden="true"><use href="#i-ellipsis" /></svg></span><span>Non c’è? Cercala nel menu del browser: <b>Installa Beach Diary</b>.</span></li>
+                <li><span class="installa-passo-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-check" /></svg></span><span>Conferma con <b>Installa</b>: si apre nella sua finestra.</span></li>
+              </ol>
+            </article>
+          </div>
+          <p id="installa-annuncio" class="sr-only" role="status" aria-live="polite"></p>
+        </div>
+      </section>
+
       <!-- ======================================================= Iscriviti -->
       <!-- La registrazione resta nell'app (nickname verificato dal vivo, poi
            email e password): qui ci sono solo le due porte. -->
@@ -266,5 +327,38 @@
         </div>
       </section>
     </main>
+
+    <!-- Il dialogo dei passi (js/installa.ts): su iPhone e iPad nessuna API
+         installa, quindi il pulsante apre questo, coi passi del browser che
+         legge. Un <dialog> nativo: tiene il fuoco dentro, rende inerte il
+         resto e si chiude con Esc. Fuori da <main>, chiuso finché non serve. -->
+    <dialog class="installa-dialogo" aria-labelledby="installa-dialogo-titolo" aria-describedby="installa-dialogo-testo">
+      <div class="installa-dialogo-corpo">
+        <button type="button" class="installa-chiudi" aria-label="Chiudi" data-chiude><svg class="ui-icon" aria-hidden="true"><use href="#i-close" /></svg></button>
+        <h2 id="installa-dialogo-titolo" tabindex="-1">Aggiungi alla schermata Home</h2>
+        <p id="installa-dialogo-testo" class="installa-dialogo-testo">Beach Diary si apre a tutto schermo, come un’app.</p>
+        <ol class="installa-passi" data-passi="ios26">
+          <li><span class="installa-passo-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-ellipsis" /></svg></span><span>Tocca <b>⋯</b> in basso a destra, accanto all’indirizzo.</span></li>
+          <li><span class="installa-passo-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-share-up" /></svg></span><span>Tocca <b>Condividi</b>, poi <b>Aggiungi alla schermata Home</b>.</span></li>
+          <li><span class="installa-passo-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-check" /></svg></span><span>Lascia acceso <b>Apri come app web</b> e tocca <b>Aggiungi</b>.</span></li>
+        </ol>
+        <ol class="installa-passi" data-passi="ios" hidden>
+          <li><span class="installa-passo-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-share-up" /></svg></span><span>Tocca <b>Condividi</b> nella barra di Safari.</span></li>
+          <li><span class="installa-passo-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-plus" /></svg></span><span>Scorri e scegli <b>Aggiungi alla schermata Home</b>.</span></li>
+          <li><span class="installa-passo-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-check" /></svg></span><span>Conferma con <b>Aggiungi</b>.</span></li>
+        </ol>
+        <ol class="installa-passi" data-passi="ios-altro" hidden>
+          <li><span class="installa-passo-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-share-up" /></svg></span><span>Tocca <b>Condividi</b>, nella barra dell’indirizzo o nel menu.</span></li>
+          <li><span class="installa-passo-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-plus" /></svg></span><span>Scegli <b>Aggiungi alla schermata Home</b> e conferma.</span></li>
+          <li><span class="installa-passo-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-external" /></svg></span><span>Non c’è? Apri questa pagina in <b>Safari</b> e ripeti da lì.</span></li>
+        </ol>
+        <ol class="installa-passi" data-passi="altro" hidden>
+          <li><span class="installa-passo-ico" data-verticale><svg class="ui-icon" aria-hidden="true"><use href="#i-ellipsis" /></svg></span><span>Apri il <b>menu del browser</b> (i tre puntini).</span></li>
+          <li><span class="installa-passo-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-download" /></svg></span><span>Scegli <b>Installa app</b> o <b>Aggiungi a schermata Home</b>.</span></li>
+          <li><span class="installa-passo-ico"><svg class="ui-icon" aria-hidden="true"><use href="#i-check" /></svg></span><span>Conferma: l’icona è tra le tue app.</span></li>
+        </ol>
+        <button type="button" class="cta installa-ok" data-variant="pieno" data-chiude>Ho capito</button>
+      </div>
+    </dialog>
   </body>
 </html>

@@ -6,7 +6,7 @@
      base → le icone dell'app → i token della landing → i componenti della
      landing, sezione per sezione. Dopo l'hero, l'apertura della Home nel
      suo telefono: le misure (generate da docs/qa/landing-shots.mjs) e il
-     movimento.
+     movimento. Dopo le schermate, come installare l'app.
 
    Tutto sta in un livello: niente CSS fuori dai @layer (vincerebbe su tutto).
    ============================================================================ */
@@ -21,4 +21,5 @@
 @import './apertura.css';
 @import './funzionalita.css';
 @import './schermate.css';
+@import './installa.css';
 @import './finale.css';
