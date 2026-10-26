@@ -122,10 +122,50 @@ describe('dove il browser installa (beforeinstallprompt)', () => {
     const { pulsante, dialogo } = await monta()
     const { e, prompt } = promptFinto()
     prompt.mockImplementation(() => Promise.reject(new Error('già usato')))
+    const avviso = vi.spyOn(console, 'warn').mockImplementation(() => {})
     window.dispatchEvent(e)
     await userEvent.setup().click(pulsante)
     await vi.waitFor(() => expect(dialogo.open).toBe(true))
     expect(variante(dialogo)).toEqual(['altro'])
+    // L'errore non sparisce: resta in console.
+    expect(avviso).toHaveBeenCalledWith('[installa] prompt non riuscito', expect.any(Error))
+  })
+
+  it('un sì nel prompt mostra subito la riga «già tra le tue app», senza aspettare appinstalled', async () => {
+    const { pulsante, fatto, annuncio } = await monta()
+    window.dispatchEvent(promptFinto('accepted').e)
+    await userEvent.setup().click(pulsante)
+    await vi.waitFor(() => expect(fatto.hidden).toBe(false))
+    expect(pulsante.hidden).toBe(true)
+    expect(annuncio.textContent).toBe('Fatto: Beach Diary è tra le tue app.')
+    // Un evento tardivo non rimette il pulsante sopra la riga.
+    window.dispatchEvent(promptFinto().e)
+    expect(pulsante.hidden).toBe(true)
+  })
+
+  it('un no nel prompt toglie il pulsante e non annuncia niente', async () => {
+    const { pulsante, fatto, annuncio } = await monta()
+    window.dispatchEvent(promptFinto('dismissed').e)
+    await userEvent.setup().click(pulsante)
+    await vi.waitFor(() => expect(pulsante.hidden).toBe(true))
+    expect(fatto.hidden).toBe(true)
+    expect(annuncio.textContent).toBe('')
+  })
+
+  it('il doppio clic mentre il prompt è aperto non lo chiama due volte', async () => {
+    const { pulsante, dialogo } = await monta()
+    const { e, prompt } = promptFinto()
+    let risolvi!: () => void
+    prompt.mockImplementation(() => new Promise<void>((r) => (risolvi = r)))
+    window.dispatchEvent(e)
+    const user = userEvent.setup()
+    await user.click(pulsante)
+    expect(pulsante.getAttribute('aria-busy')).toBe('true')
+    await user.click(pulsante)
+    expect(prompt).toHaveBeenCalledTimes(1)
+    expect(dialogo.open).toBe(false)
+    risolvi()
+    await vi.waitFor(() => expect(pulsante.hasAttribute('aria-busy')).toBe(false))
   })
 
   it('appinstalled: al posto del pulsante la riga «già tra le tue app», e la regione di stato lo dice', async () => {

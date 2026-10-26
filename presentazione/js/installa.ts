@@ -84,6 +84,8 @@ function monta(pulsante: HTMLButtonElement, fatto: HTMLElement, annuncio: HTMLEl
   window.addEventListener('beforeinstallprompt', (e) => {
     // Niente mini-infobar di Chrome: il prompt parte dal pulsante.
     e.preventDefault()
+    // Già installata in questa visita: il pulsante non torna sopra la riga.
+    if (!fatto.hidden) return
     differito = e as BeforeInstallPromptEvent
     mostra(true)
   })
@@ -103,25 +105,36 @@ function monta(pulsante: HTMLButtonElement, fatto: HTMLElement, annuncio: HTMLEl
     if (e.target === dialogo || (e.target as Element).closest('[data-chiude]')) dialogo.close()
   })
 
+  // Un secondo clic mentre il prompt nativo è aperto lo chiamerebbe di nuovo
+  // (e Chrome lo rifiuta): finché non c'è l'esito, il pulsante tace.
+  let inCorso = false
   pulsante.addEventListener('click', async () => {
+    if (inCorso) return
     if (!differito) {
       apri(passiDelBrowser())
       return
     }
     const evento = differito
+    differito = null
+    inCorso = true
+    pulsante.setAttribute('aria-busy', 'true')
     try {
       await evento.prompt()
-      await evento.userChoice
-      // Il prompt si consuma comunque: il pulsante va via finché Chrome non
-      // rilancia l'evento. Se era un sì, arriva `appinstalled` e al suo posto
-      // compare la conseguenza.
-      differito = null
-      mostra(false)
-    } catch {
+      const { outcome } = await evento.userChoice
+      // Il prompt si consuma comunque. Con un sì la conseguenza compare
+      // subito, senza aspettare `appinstalled` (che non tutti i Chromium
+      // mandano); con un no il pulsante va via finché Chrome non rilancia
+      // l'evento.
+      if (outcome === 'accepted') installata('Fatto: Beach Diary è tra le tue app.')
+      else mostra(false)
+    } catch (err) {
       // Il prompt nativo non è partito (evento già consumato): si spiega la
       // strada a mano. Un pulsante muto sarebbe peggio.
-      differito = null
+      console.warn('[installa] prompt non riuscito', err)
       apri('altro')
+    } finally {
+      inCorso = false
+      pulsante.removeAttribute('aria-busy')
     }
   })
 }
@@ -130,7 +143,7 @@ function monta(pulsante: HTMLButtonElement, fatto: HTMLElement, annuncio: HTMLEl
 // produzione: in sviluppo si metterebbe in mezzo alle navigazioni di Vite.
 function registraServiceWorker() {
   if (!import.meta.env.PROD || !('serviceWorker' in navigator)) return
-  const registra = () => navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(() => undefined)
+  const registra = () => navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch((err) => console.warn('[installa] service worker non registrato', err))
   if (document.readyState === 'complete') registra()
   else window.addEventListener('load', registra)
 }
