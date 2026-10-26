@@ -3,9 +3,10 @@
 // modello, l'HTML finito che esce da `componiLanding` e i fogli dei
 // componenti.
 //
-// La pagina è solo HTML e CSS: quello che si legge qui è tutta la pagina.
+// La pagina è HTML e CSS: quello che si legge qui è tutta la pagina. L'unico
+// modulo, js/installa.ts, ha il suo test (landing.installa.test.ts).
 // Si fissano la CSP (niente script né stili in linea), la struttura della
-// tavola «Landing page» (le quattro sezioni, la testata, gli id), le porte
+// tavola «Landing page» (le cinque sezioni, la testata, gli id), le porte
 // verso l'app (la registrazione resta lì) e le regole del colore e del
 // movimento che i fogli non devono rompere. Layout, anello di focus e
 // bersagli li misura docs/qa/landing.mjs nel browser.
@@ -30,7 +31,7 @@ const COMPONENTI = IMPORTATI.filter((n) => n !== 'tokens.css').map((n) => [n, FO
 const SCHERMATE = Object.keys(import.meta.glob('../../public/presentazione/screens/*.webp')).map((k) => `/presentazione/screens/${nome(k)}`)
 
 const SITO = 'https://bv-diary.vercel.app/'
-const SEZIONI = ['inizio', 'funzionalita', 'schermate', 'iscriviti']
+const SEZIONI = ['inizio', 'funzionalita', 'schermate', 'installa', 'iscriviti']
 const REGISTRATI = `/?${PARAM_ACCESSO}=registrati`
 const ACCEDI = `/?${PARAM_ACCESSO}=accedi`
 
@@ -43,8 +44,10 @@ describe('CSP: niente script né stili in linea (`script-src \'self\'`)', () => 
   it.each([
     ['modello', modello],
     ['finito', finito],
-  ])('%s: nessuno script (la pagina non ha JavaScript) e nessun attributo on*', (_, d) => {
-    expect(d.querySelectorAll('script')).toHaveLength(0)
+  ])('%s: un solo script, il modulo d\'installazione dallo stesso sito, senza codice in linea; nessun attributo on*', (_, d) => {
+    const script = [...d.querySelectorAll('script')]
+    expect(script.map((x) => [x.getAttribute('type'), x.getAttribute('src'), x.textContent?.trim()])).toEqual([['module', './js/installa.ts', '']])
+    expect(script[0].closest('head')).toBeTruthy()
     const conOn = [...d.querySelectorAll('*')].flatMap((el) => [...el.attributes].filter((a) => /^on/i.test(a.name)).map((a) => `${el.tagName}[${a.name}]`))
     expect(conOn).toEqual([])
   })
@@ -58,7 +61,7 @@ describe('CSP: niente script né stili in linea (`script-src \'self\'`)', () => 
   })
 
   it('caratteri, fogli e immagini arrivano da questo sito (niente Google Fonts né CDN)', () => {
-    const esterni = [...finito.querySelectorAll('link[href], img[src], source[srcset]')]
+    const esterni = [...finito.querySelectorAll('link[href], img[src], source[srcset], script[src]')]
       .filter((e) => e.getAttribute('rel') !== 'canonical')
       .map((e) => e.getAttribute('href') ?? e.getAttribute('src') ?? e.getAttribute('srcset') ?? '')
       .filter((u) => /^(https?:)?\/\//i.test(u))
@@ -102,7 +105,7 @@ describe('documento e meta', () => {
 })
 
 describe('struttura: la tavola «Landing page»', () => {
-  it('le quattro sezioni, in quest\'ordine, dentro <main id="contenuto">', () => {
+  it('le cinque sezioni, in quest\'ordine, dentro <main id="contenuto">', () => {
     const ids = [...finito.querySelectorAll('main#contenuto > section')].map((s) => s.id)
     expect(ids).toEqual(SEZIONI)
   })
@@ -124,6 +127,7 @@ describe('struttura: la tavola «Landing page»', () => {
     expect(voci).toEqual([
       ['Funzionalità', '#funzionalita'],
       ['Schermate', '#schermate'],
+      ['Installa', '#installa'],
       ['Accedi', ACCEDI],
     ])
   })
@@ -166,8 +170,11 @@ describe('struttura: la tavola «Landing page»', () => {
 })
 
 describe('le porte dell\'app: la registrazione resta lì', () => {
-  it('nessun modulo né campo nella landing', () => {
-    expect(finito.querySelectorAll('form, input, select, textarea, button')).toHaveLength(0)
+  it('nessun modulo né campo nella landing; gli unici pulsanti sono quelli dell\'installazione', () => {
+    expect(finito.querySelectorAll('form, input, select, textarea')).toHaveLength(0)
+    const pulsanti = [...finito.querySelectorAll('button')]
+    for (const b of pulsanti) expect(b.getAttribute('type')).toBe('button')
+    expect(pulsanti.filter((b) => !b.closest('dialog.installa-dialogo')).map((b) => b.closest('section')?.id)).toEqual(['installa'])
   })
 
   it('ogni link verso l\'app apre l\'accesso nella vista giusta (Login.tsx, `?accesso=`)', () => {
@@ -190,6 +197,66 @@ describe('le porte dell\'app: la registrazione resta lì', () => {
         ['bianco', ACCEDI],
       ])
     }
+  })
+})
+
+// «Aggiungi Beach Diary alla Home»: i passi sono testo e valgono senza
+// JavaScript; il pulsante, la riga «già tra le tue app» e il dialogo li
+// accende js/installa.ts (landing.installa.test.ts).
+describe('#installa', () => {
+  const s = finito.getElementById('installa') as HTMLElement
+  const dialogo = finito.querySelector('dialog.installa-dialogo') as HTMLDialogElement
+
+  it('tre gruppi di passi scritti: iPhone e iPad, Android, computer; tre passi ciascuno', () => {
+    const gruppi = [...s.querySelectorAll('.installa-gruppo')]
+    expect(gruppi.map((g) => g.querySelector('h3')?.textContent)).toEqual(['iPhone e iPad', 'Android', 'Computer'])
+    for (const g of gruppi) {
+      expect(g.getAttribute('aria-labelledby')).toBe(g.querySelector('h3')?.id)
+      expect(g.querySelectorAll('ol.installa-passi > li')).toHaveLength(3)
+    }
+    expect(s.textContent).toContain('Aggiungi alla schermata Home')
+    expect(s.textContent).toContain('Apri come app web')
+    expect(s.textContent).toContain('Installa app')
+  })
+
+  it('il pulsante è il pieno, nascosto finché il modulo non lo accende; accanto, la riga «già tra le tue app», nascosta', () => {
+    const azione = s.querySelector('.installa-azione') as HTMLElement
+    const b = azione.querySelector('button[data-installa]') as HTMLButtonElement
+    expect(b.className).toBe('cta')
+    expect(b.getAttribute('data-variant')).toBe('pieno')
+    expect(b.hasAttribute('hidden')).toBe(true)
+    expect(b.textContent).toBe('Aggiungi alla Home')
+    const fatto = azione.querySelector('.installa-fatto') as HTMLElement
+    expect(fatto.hasAttribute('hidden')).toBe(true)
+    expect(fatto.textContent).toBe('Beach Diary è già tra le tue app.')
+  })
+
+  it('una regione di stato, vuota, annuncia l\'installazione', () => {
+    const annuncio = s.querySelector('#installa-annuncio') as HTMLElement
+    expect(annuncio.getAttribute('role')).toBe('status')
+    expect(annuncio.className).toBe('sr-only')
+    expect(annuncio.textContent).toBe('')
+  })
+
+  it('il dialogo dei passi sta fuori da <main>, chiuso, col suo titolo e le quattro varianti (la prima visibile)', () => {
+    expect(dialogo.parentElement?.tagName).toBe('BODY')
+    expect(dialogo.hasAttribute('open')).toBe(false)
+    const titolo = finito.getElementById(dialogo.getAttribute('aria-labelledby') ?? '') as HTMLElement
+    expect(dialogo.contains(titolo)).toBe(true)
+    expect(titolo.getAttribute('tabindex')).toBe('-1')
+    const varianti = [...dialogo.querySelectorAll('[data-passi]')]
+    expect(varianti.map((v) => [v.getAttribute('data-passi'), v.hasAttribute('hidden')])).toEqual([
+      ['ios26', false],
+      ['ios', true],
+      ['ios-altro', true],
+      ['altro', true],
+    ])
+    expect([...dialogo.querySelectorAll('[data-chiude]')].map((b) => b.getAttribute('aria-label') ?? b.textContent)).toEqual(['Chiudi', 'Ho capito'])
+  })
+
+  it('installa.css rimette `display: none` su ciò che il modulo nasconde (il suo `display` batterebbe `hidden`)', () => {
+    const css = FOGLI['../../presentazione/styles/installa.css'] ?? ''
+    expect(css).toMatch(/\.installa-azione > \[hidden\],\s*\.installa-passi\[hidden\] \{ display: none; \}/)
   })
 })
 

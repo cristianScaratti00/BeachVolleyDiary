@@ -45,7 +45,7 @@ const LBASE = process.env.LBASE ?? 'http://127.0.0.1:5199/presentazione/'
 const PORTA = Number(process.env.PORTA_CDP ?? 9343)
 const PROVE = (process.argv[2] ?? 'tutto').split(',')
 const fa = (k) => PROVE.includes(k) || PROVE.includes('tutto')
-const SEZIONI = ['inizio', 'funzionalita', 'schermate', 'iscriviti']
+const SEZIONI = ['inizio', 'funzionalita', 'schermate', 'installa', 'iscriviti']
 const AXE = readFileSync(new URL('../../node_modules/axe-core/axe.min.js', import.meta.url), 'utf8')
 
 await launch(PORTA)

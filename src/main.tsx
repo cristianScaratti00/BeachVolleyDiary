@@ -24,9 +24,10 @@ import { analyticsPath } from './app/routes'
 avviaTracciamentoSeConsentito()
 
 // Il service worker (public/sw.js): la pagina di cortesia senza rete e
-// l'installazione. Lo registrava la landing quando aveva JavaScript; ora lo
-// registra l'app, che è anche dove porta l'icona sulla Home. Solo in
-// produzione: in sviluppo si metterebbe in mezzo alle navigazioni di Vite.
+// l'installazione. Lo registra l'app, che è dove porta l'icona sulla Home, e
+// lo registra anche la landing (presentazione/js/installa.ts), da cui si
+// installa senza aver mai aperto l'app. Solo in produzione: in sviluppo si
+// metterebbe in mezzo alle navigazioni di Vite.
 if (import.meta.env.PROD && 'serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(() => undefined)

@@ -1,0 +1,168 @@
+/* ============================================================================
+   `#installa`: come mettere Beach Diary sulla Home. La testa della sezione
+   con, in fondo alla frase, il posto del pulsante (lo accende
+   js/installa.ts); sotto, tre carte di passi (iPhone, Android, computer)
+   con la stessa carta e la stessa tessera d'icona di #funzionalita.
+
+   Il posto del pulsante è riservato anche quando il pulsante non c'è: arriva
+   tardi (con `beforeinstallprompt`) e non deve spostare niente (CLS 0). Il
+   pulsante e la riga «già tra le tue app» si danno il cambio lì dentro.
+
+   Il dialogo dei passi (iPhone e iPad) è un <dialog> nativo: una carta
+   bianca opaca sul velo, in basso sul telefono e al centro da 600px. Opaca
+   e non di vetro: la landing non carica materials.css e non sfoca niente.
+   ============================================================================ */
+@layer components {
+  #installa { padding-block: 112px 104px; }
+
+  .installa-testa {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 32px 48px;
+  }
+  .installa-testa .testa { flex: 1 1 360px; min-width: 0; }
+  .installa-azione { display: flex; align-items: center; min-height: 52px; }
+  .installa-fatto {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--ink);
+    font: var(--lp-type-cta);
+  }
+  .installa-fatto .ui-icon { width: 22px; height: 22px; stroke-width: var(--icon-stroke-24); color: var(--success); }
+  /* `hidden` è un `display: none` dello user agent: ogni `display` qui sopra
+     (la capsula, la riga, i passi del dialogo) lo batterebbe. */
+  .installa-azione > [hidden],
+  .installa-passi[hidden] { display: none; }
+
+  /* ------------------------------------------------------- Le tre carte */
+  .installa-gruppi {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+    gap: 16px;
+  }
+  .installa-gruppo {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 26px;
+    border: var(--border-w) solid var(--edge);
+    border-radius: 22px;
+    background: var(--surface);
+  }
+  .installa-gruppo .carta-ico .ui-icon { width: 22px; height: 22px; stroke-width: var(--icon-stroke-24); }
+  .installa-gruppo h3 { margin-top: 6px; font: var(--lp-type-h3); letter-spacing: var(--lp-track-h3); }
+  .installa-dove { color: var(--lp-testo); font: var(--lp-type-didascalia); }
+
+  /* I passi: la tessera piccola col gesto, poi la frase. I nomi dei comandi
+     (Condividi, Installa app…) sono in inchiostro pieno, il resto è testo. */
+  .installa-passi {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .installa-passi li {
+    display: grid;
+    grid-template-columns: 32px minmax(0, 1fr);
+    align-items: start;
+    gap: 12px;
+    color: var(--lp-testo);
+    font: var(--lp-type-carta);
+  }
+  .installa-passi b { color: var(--ink); font-weight: 600; }
+  .installa-passo-ico {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    margin-top: -4px;
+    border: var(--border-w) solid var(--edge);
+    border-radius: var(--radius-chip);
+    background: var(--bg);
+    color: var(--ink-label);
+  }
+  .installa-passo-ico .ui-icon { width: var(--icon-16); height: var(--icon-16); stroke-width: var(--icon-stroke-16); }
+  /* I tre puntini del menu di Chrome sono in colonna (⋮). */
+  .installa-passo-ico[data-verticale] .ui-icon { transform: rotate(90deg); }
+
+  @media (max-width: 820px) {
+    #installa { padding-block: 80px 72px; }
+  }
+
+  /* ---------------------------------------------------------- Il dialogo */
+  .installa-dialogo {
+    width: min(440px, calc(100% - 2 * var(--lp-margine)));
+    max-width: none;
+    max-height: calc(100% - 2 * var(--lp-margine));
+    margin: auto auto calc(var(--lp-margine) + var(--safe-bottom));
+    padding: 0;
+    overflow: auto;
+    border: var(--border-w) solid var(--edge);
+    border-radius: var(--radius-sheet);
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: var(--elev-float);
+    overscroll-behavior: contain;
+  }
+  .installa-dialogo::backdrop { background: var(--scrim); }
+  @media (min-width: 600px) {
+    .installa-dialogo { margin: auto; }
+  }
+
+  .installa-dialogo-corpo {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 28px 24px 24px;
+  }
+  .installa-dialogo h2 {
+    padding-right: 48px;
+    font: var(--type-title-1);
+    letter-spacing: var(--track-title-1);
+  }
+  .installa-dialogo-testo { color: var(--lp-testo); font: var(--lp-type-carta); }
+  .installa-dialogo .installa-passi { margin-block: 6px 4px; }
+
+  .installa-chiudi {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--touch);
+    height: var(--touch);
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-capsule);
+    background: var(--fill);
+    color: var(--ink);
+    cursor: pointer;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .installa-chiudi:hover { background: var(--edge); }
+  }
+  .installa-ok { width: 100%; margin-top: 6px; }
+
+  /* ----------------------------------------------------------- Movimento */
+  /* Il dialogo sale di poco mentre compare; il pulsante e la riga «già tra
+     le tue app» compaiono nel loro posto, senza muoversi. Con reduced-motion
+     ci sono e basta. */
+  @media (prefers-reduced-motion: no-preference) {
+    .installa-dialogo[open] { animation: installa-sale var(--dur-entrata) var(--ease-standard); }
+    .installa-azione > :not([hidden]) { animation: installa-compare var(--dur-entrata) var(--ease-standard); }
+    @keyframes installa-sale {
+      from { opacity: 0; transform: translateY(16px); }
+    }
+    @keyframes installa-compare {
+      from { opacity: 0; }
+    }
+  }
+}
