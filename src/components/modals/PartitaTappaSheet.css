@@ -1,0 +1,19 @@
+/* La partita di una tappa: il modulo della partita dei tornei
+   (PartitaSheet.css) più la società delle avversarie con i suggerimenti. */
+@layer components {
+  .partita-tappa-societa { display: grid; gap: var(--space-2-5); }
+  .partita-tappa-sugg { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .partita-tappa-chip {
+    min-height: 44px;
+    padding: 0 var(--space-3-5);
+    border: 0;
+    border-radius: var(--radius-capsule);
+    background: var(--fill);
+    color: var(--ink-label);
+    font: var(--type-subhead-strong);
+    cursor: pointer;
+  }
+  .partita-tappa-chip:hover { background: var(--line-strong); }
+  .partita-tappa-chip:focus-visible { outline: 2px solid var(--field-focus); outline-offset: 2px; }
+  .partita-tappa-tua { font-weight: 500; color: var(--ink-2); }
+}

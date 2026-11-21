@@ -27,6 +27,17 @@ import type { NavBarBack } from '../components/ui/NavBar'
 import type { TorneiVista } from './routes'
 import type { HomeVista } from './selectors'
 import type { Filtri } from './useScreenData'
+import type {
+  CampionatoIngresso,
+  CampionatoVista,
+  Iscrizione,
+  IscrizioneForm,
+  PartitaTappa,
+  PartitaTappaForm,
+  Tappa,
+  TappaForm,
+  TappaVista,
+} from '../lib/campionato'
 
 // ------------------------------------------------------------------ overlay
 /** Quello che ModalHost passa a ogni sheet, visore o dialogo. */
@@ -181,6 +192,8 @@ export interface StatisticheProps {
   filtri: Filtri
   back: NavBarBack
   wrapped: { visibile: boolean; titolo: string }
+  /** Il rimando al Campionato per Società, i cui numeri NON entrano qui. null = nessuna iscrizione. */
+  campionato?: CampionatoIngresso | null
 }
 
 export interface TorneiProps {
@@ -198,6 +211,8 @@ export interface TorneiProps {
   onStoria: (tournamentId: string) => void
   /** Id dell'entità appena creata o cambiata: la sua riga porta la traccia. */
   traccia?: string
+  /** La card del Campionato per Società in cima alla Lista. null = nessuna iscrizione. */
+  campionato?: CampionatoIngresso | null
 }
 
 export interface DiarioProps {
@@ -380,4 +395,63 @@ export interface NonTrovatoProps {
   testo: ReactNode
   azione: ReactNode
   back?: NavBarBack
+}
+
+// ================================================= Campionato per Società
+/** La pagina `/campionato`: numeri suoi, che non entrano nelle Statistiche. */
+export interface CampionatoProps {
+  /** null = il caricamento è fallito. */
+  vista: CampionatoVista | null
+  back: NavBarBack
+  /** L'iscrizione scelta nel selettore delle stagioni. */
+  onStagione: (iscrizioneId: string) => void
+  onNuovaTappa: () => void
+  onModificaIscrizione: (iscrizioneId: string) => void
+  onRiprova: () => void
+  traccia?: string
+}
+
+/** Il dettaglio `/campionato/:id`. */
+export interface TappaDetailProps {
+  /** null = non trovata (eliminata). */
+  t: TappaVista | null
+  back: NavBarBack
+  traccia?: string
+  onAddPartita: () => void
+  onOpenMatch: (matchId: string) => void
+  onModifica: () => void
+}
+
+/** «Nuova tappa» / «Modifica tappa». */
+export interface TappaSheetProps extends OverlayBase {
+  mode: 'nuova' | 'modifica'
+  tappa?: Tappa
+  iscrizioni: Iscrizione[]
+  partners: Option[]
+  compagnoDefault: string
+  today: string
+  canAddPartner: boolean
+  onSave: (form: TappaForm) => Promise<boolean>
+  onDelete?: () => void
+}
+
+/** «Nuova partita» / «Modifica partita» di una tappa. */
+export interface PartitaTappaSheetProps extends OverlayBase {
+  mode: 'nuova' | 'modifica'
+  match?: PartitaTappa
+  stageId: string
+  /** «Tappa Silver · Milano · con Giulia · set a 15». */
+  contesto: string
+  setPoints: 15 | 21
+  /** La propria società e quelle già incontrate: i suggerimenti del campo. */
+  societa: string[]
+  ownClub: string
+  onSave: (form: PartitaTappaForm) => Promise<boolean>
+  onDelete?: () => void
+}
+
+/** «La tua società»: nome e classifica di un'iscrizione. */
+export interface IscrizioneSheetProps extends OverlayBase {
+  iscrizione: Iscrizione
+  onSave: (form: IscrizioneForm) => Promise<boolean>
 }

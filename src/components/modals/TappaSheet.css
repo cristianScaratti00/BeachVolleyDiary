@@ -1,0 +1,31 @@
+/* Il modulo della tappa del Campionato: lo stesso ritmo del modulo del torneo
+   (TorneoSheet.css). In cima, solo alla prima tappa di una stagione, la
+   società con Solby che dice a cosa serve. */
+@layer components {
+  .tappa-sheet-form { display: grid; gap: var(--space-6); }
+  .tappa-sheet-fields { border: 0; margin: 0; padding: 0; min-width: 0; }
+  .tappa-sheet-partner,
+  .tappa-sheet-posto,
+  .tappa-sheet-club,
+  .tappa-sheet-societa { display: grid; gap: var(--space-3); }
+  .tappa-sheet-more { padding-top: var(--space-4); }
+
+  .tappa-sheet-solby { display: flex; align-items: flex-end; gap: var(--space-2); }
+  .tappa-sheet-pallo { flex: none; }
+  .tappa-sheet-nuvola {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    padding: var(--space-3) var(--space-4);
+    display: grid;
+    gap: var(--space-1);
+    font: var(--type-subhead);
+    color: var(--ink);
+    background: var(--surface);
+    border: var(--border-w) solid var(--edge);
+    border-radius: var(--radius-card) var(--radius-card) var(--radius-card) var(--radius-xs);
+  }
+  .tappa-sheet-firma { font: var(--type-caption-1); font-weight: 600; color: var(--accent-text); }
+
+  .tappa-sheet-dopo { margin: 0; text-align: center; font: var(--type-footnote); color: var(--ink-2); }
+}

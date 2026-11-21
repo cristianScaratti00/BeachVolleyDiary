@@ -25,11 +25,15 @@ import { deriveStory, partnerOptions, todayISO, tournamentOptions } from '../lib
 import type { DiaryData } from '../lib/models'
 import type { UseCheckIn } from '../hooks/useCheckIn'
 import type { UseDiary } from '../hooks/useDiary'
+import type { UseCampionato } from '../hooks/useCampionato'
+import { nomeTappa } from '../lib/campionato'
+import type { CampionatoData } from '../lib/campionato'
+import type { CampionatoActions } from './useCampionatoActions'
 import type { Route } from './routes'
 import { closeOverlay, closeOverlays, overlayStack, replaceNextOverlay, setOverlayFlags, useOverlays } from './router'
 import type { OverlayEntry } from './overlays'
 import type { Actions } from './useActions'
-import { compagnoDefault, partitaDestinazione } from './selectors'
+import { compagnoDefault, destinazionePartita, partitaDestinazione } from './selectors'
 import type { OverlayBase, TorneoOption } from './contracts'
 import TorneoSheet from '../components/modals/TorneoSheet'
 import PartitaSheet from '../components/modals/PartitaSheet'
@@ -37,6 +41,9 @@ import FotoSheet from '../components/modals/FotoSheet'
 import CompagnoSheet from '../components/modals/CompagnoSheet'
 import CollegaSheet from '../components/modals/CollegaSheet'
 import PasswordSheet from '../components/modals/PasswordSheet'
+import TappaSheet from '../components/modals/TappaSheet'
+import PartitaTappaSheet from '../components/modals/PartitaTappaSheet'
+import IscrizioneSheet from '../components/modals/IscrizioneSheet'
 import './ModalHost.css'
 
 // La Storia trascina `html-to-image`, il visore delle foto è leggero ma fuori
@@ -55,9 +62,12 @@ interface Props {
   check?: UseCheckIn
   actions: Actions
   canAddPartner: boolean
+  /** Il Campionato per Società: dati e azioni suoi, a parte da quelli dei tornei. */
+  campionato: UseCampionato
+  campAct: CampionatoActions
 }
 
-export function ModalHost({ data, route, diary, actions, canAddPartner }: Props) {
+export function ModalHost({ data, route, diary, actions, canAddPartner, campionato, campAct }: Props) {
   const stack = useOverlays()
   useScrollLock(stack.length > 0)
 
@@ -94,6 +104,8 @@ export function ModalHost({ data, route, diary, actions, canAddPartner }: Props)
             diary={diary}
             actions={actions}
             canAddPartner={canAddPartner}
+            campionato={campionato}
+            campAct={campAct}
           />
         ))}
       </AnimatePresence>
@@ -102,7 +114,7 @@ export function ModalHost({ data, route, diary, actions, canAddPartner }: Props)
   )
 }
 
-function Voce({ entry, top, data, route, diary, actions, canAddPartner }: Omit<Props, 'check'> & { entry: OverlayEntry; top: boolean }) {
+function Voce({ entry, top, data, route, diary, actions, canAddPartner, campionato, campAct }: Omit<Props, 'check'> & { entry: OverlayEntry; top: boolean }) {
   const o = entry.overlay
   const base: OverlayBase = {
     onClose: () => closeOverlay(),
@@ -117,7 +129,8 @@ function Voce({ entry, top, data, route, diary, actions, canAddPartner }: Omit<P
     case 'azioni': {
       // Lo sheet «Cosa registriamo?» (design 13): le stesse voci nel popover
       // di «Nuovo» della Sidebar. Il check-in non sta più qui: è in Compagni.
-      const dest = partitaDestinazione(data, route)
+      // «Partita» va al torneo o alla tappa più recente (destinazionePartita).
+      const dest = destinazionePartita(data, campionato.data, route)
       const items: MenuViewItem[] = [
         {
           key: 'live',
@@ -141,9 +154,9 @@ function Voce({ entry, top, data, route, diary, actions, canAddPartner }: Omit<P
         items.push({
           key: 'partita',
           label: 'Partita',
-          sub: `Aggiungi un risultato a «${dest.name}»`,
+          sub: `Aggiungi un risultato a «${dest.tipo === 'torneo' ? dest.t.name : nomeTappa(dest.t)}»`,
           icon: 'volley',
-          onSelect: () => actions.nuovaPartita(dest.id, true),
+          onSelect: () => (dest.tipo === 'torneo' ? actions.nuovaPartita(dest.t.id, true) : campAct.nuovaPartitaTappa(dest.t.id, true)),
         })
       }
       items.push(
@@ -160,6 +173,14 @@ function Voce({ entry, top, data, route, diary, actions, canAddPartner }: Omit<P
           sub: 'Ti faccio io le domande, una alla volta',
           icon: 'chat-dots',
           onSelect: actions.apriAssistente,
+        },
+        // Il Campionato per Società in fondo: le voci di sempre restano dove sono.
+        {
+          key: 'tappa',
+          label: 'Tappa del Campionato',
+          sub: 'Categoria, piazzamento, punti FIPAV',
+          icon: 'shield',
+          onSelect: () => campAct.nuovaTappa(true),
         },
       )
       return (
@@ -298,6 +319,57 @@ function Voce({ entry, top, data, route, diary, actions, canAddPartner }: Omit<P
       )
     }
 
+    case 'tappa': {
+      const tappa = o.mode === 'modifica' ? campionato.data.tappe.find((t) => t.id === o.id) : undefined
+      if (o.mode === 'modifica' && !tappa) return null
+      const ultima = [...campionato.data.tappe].sort((a, b) => b.date.localeCompare(a.date)).find((t) => t.partnerId)
+      return (
+        <TappaSheet
+          {...base}
+          mode={o.mode}
+          tappa={tappa}
+          iscrizioni={campionato.data.iscrizioni}
+          // Solo i compagni propri: la tappa non si aggancia a una riga condivisa.
+          partners={data.partners.filter((p) => !p.shared).map((p) => ({ id: p.id, name: p.name }))}
+          // Il compagno dell'ultima tappa; senza tappe, quello dei tornei.
+          compagnoDefault={ultima?.partnerId ?? compagnoDefault(data)}
+          today={todayISO()}
+          canAddPartner={canAddPartner}
+          onSave={(form) => campAct.salvaTappa(form, o.mode === 'modifica' ? o.id : null)}
+          onDelete={o.mode === 'modifica' ? () => campAct.eliminaTappa(o.id) : undefined}
+        />
+      )
+    }
+
+    case 'partitaTappa': {
+      const match = o.mode === 'modifica' ? campionato.data.partite.find((p) => p.id === o.matchId) : undefined
+      const stageId = o.mode === 'modifica' ? match?.stageId : o.stageId
+      const tappa = campionato.data.tappe.find((t) => t.id === stageId)
+      if (!tappa || (o.mode === 'modifica' && !match)) return null
+      const club = campionato.data.iscrizioni.find((i) => i.id === tappa.seasonId)?.club ?? ''
+      const con = tappa.partnerId ? data.partners.find((p) => p.id === tappa.partnerId)?.name : undefined
+      return (
+        <PartitaTappaSheet
+          {...base}
+          mode={o.mode}
+          match={match}
+          stageId={tappa.id}
+          contesto={[nomeTappa(tappa), con && `con ${con}`, `set a ${tappa.setPoints}`].filter(Boolean).join(' · ')}
+          setPoints={tappa.setPoints}
+          societa={societaIncontrate(campionato.data, club)}
+          ownClub={club}
+          onSave={(form) => campAct.salvaPartitaTappa(form, o.mode === 'modifica' ? o.matchId : null)}
+          onDelete={o.mode === 'modifica' ? () => campAct.eliminaPartitaTappa(o.matchId) : undefined}
+        />
+      )
+    }
+
+    case 'iscrizione': {
+      const isc = campionato.data.iscrizioni.find((i) => i.id === o.id)
+      if (!isc) return null
+      return <IscrizioneSheet {...base} iscrizione={isc} onSave={(form) => campAct.salvaIscrizione(form, o.id)} />
+    }
+
     case 'conferma': {
       const spec = o.spec
       return (
@@ -333,6 +405,23 @@ function torneiConCompagno(data: DiaryData): TorneoOption[] {
     const pid = data.tournaments.find((t) => t.id === o.id)?.partnerId
     return { ...o, partner: (pid && data.partners.find((p) => p.id === pid)?.name) || '' }
   })
+}
+
+/** La propria società, poi quelle incontrate più spesso: i suggerimenti della partita di una tappa. */
+function societaIncontrate(camp: CampionatoData, propria: string): string[] {
+  const conteggio = new Map<string, { nome: string; n: number }>()
+  for (const p of camp.partite) {
+    const nome = p.opponentsClub.trim()
+    if (!nome) continue
+    const k = nome.toLowerCase()
+    const c = conteggio.get(k)
+    conteggio.set(k, { nome: c?.nome ?? nome, n: (c?.n ?? 0) + 1 })
+  }
+  const altre = [...conteggio.values()]
+    .filter((c) => c.nome.toLowerCase() !== propria.trim().toLowerCase())
+    .sort((a, b) => b.n - a.n)
+    .map((c) => c.nome)
+  return propria.trim() ? [propria.trim(), ...altre] : altre
 }
 
 function overlayEntryAncoraAperta(key: string) {

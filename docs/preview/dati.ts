@@ -9,6 +9,8 @@
 // di id il diario è sempre identico, e le schermate non cambiano a ogni giro.
 // ============================================================================
 import type { DiaryData, Match, Partner, Photo, Tournament, Venue } from '../../src/lib/models'
+import { stagioneDi } from '../../src/lib/campionato'
+import type { CampionatoData, Iscrizione, PartitaTappa, Tappa } from '../../src/lib/campionato'
 
 /**
  * Il giorno in cui «vive» la landing: a ottobre, perché Beach Wrapped esiste
@@ -110,4 +112,40 @@ export function datiEstremi(oggi = oggiVero(), uuid: () => string = uuidVero): D
     { id: uuid(), tournamentId: tornei[0].id, color: '#00B4D8', caption: '', url: null },
   ]
   return { tournaments: tornei, matches: partite, partners: [p1, p2, p3], photos: foto3, venues: [v1, v2] }
+}
+
+/**
+ * Il Campionato per Società di prova: la stagione di `oggi` con tre tappe
+ * Silver (le partite di una, con un derby della stessa società e un forfait)
+ * e una tappa della stagione prima, per il selettore delle stagioni.
+ */
+export function campionatoDiProva(oggi = oggiVero(), compagna: string | null = null, uuid: () => string = uuidVero): CampionatoData {
+  const stagione = stagioneDi(oggi)
+  const [y] = stagione.split('/').map(Number)
+  const prima = `${y - 1}/${String(y % 100).padStart(2, '0')}`
+  const iNow: Iscrizione = { id: uuid(), season: stagione, club: 'Lido Nord Volley', gender: 'F' }
+  const iPrima: Iscrizione = { id: uuid(), season: prima, club: 'Lido Nord Volley', gender: 'F' }
+  const tappa = (o: Partial<Tappa>): Tappa => ({
+    id: uuid(), seasonId: iNow.id, kind: 'Tappa', category: 'Silver', date: oggi, city: 'Milano', organizer: '', partnerId: compagna,
+    partnerOtherClub: false, setPoints: 15, placement: 3, teams: null, pairPoints: null, countsForClub: true, clubPoints: null, note: '', ...o,
+  })
+  const tappe = [
+    tappa({ date: giorniDa(oggi, -6), city: 'Milano', organizer: 'Duna Rossa BV', placement: 3, teams: 14, pairPoints: 56, clubPoints: 80 }),
+    tappa({ date: giorniDa(oggi, -13), city: 'Albissola', placement: 2, teams: 12, pairPoints: 63, clubPoints: 90 }),
+    tappa({ date: giorniDa(oggi, -27), city: 'Bologna', placement: 3, pairPoints: 56, clubPoints: 80 }),
+    tappa({ seasonId: iPrima.id, date: `${y}-03-15`, city: 'Marina di Massa', placement: 5, pairPoints: 27, countsForClub: false }),
+  ]
+  const p = (stageId: string, phase: PartitaTappa['phase'], opponents: string, opponentsClub: string, sets: [number, number][], outcome: PartitaTappa['outcome'] = 'giocata'): PartitaTappa => ({
+    id: uuid(), stageId, phase, opponents, opponentsClub, outcome, note: '', sets: sets.map(([us, them]) => ({ us, them })),
+  })
+  const partite = [
+    p(tappe[0].id, 'Pool', 'Conti / Gallo', 'Riviera Sand Club', [[15, 12], [15, 13]]),
+    p(tappe[0].id, 'Pool', 'Ferri / Riva', 'Duna Rossa BV', [[13, 15], [15, 11], [12, 15]]),
+    p(tappe[0].id, 'Pool', 'Neri / Sala', 'Lido Nord Volley', [[15, 9], [15, 10]]),
+    p(tappe[0].id, 'Semifinale', 'Monti / Greco', 'Duna Rossa BV', [[11, 15], [14, 16]]),
+    p(tappe[0].id, '3° posto', 'Ferri / Riva', 'Duna Rossa BV', [[16, 14], [9, 15], [15, 11]]),
+    p(tappe[1].id, 'Vincenti', 'Bassi / Fontana', 'CUS Mare', [], 'forfait_loro'),
+    p(tappe[1].id, 'Finale', 'Rossi / Leone', 'Riviera Sand Club', [[12, 15], [13, 15]]),
+  ]
+  return { iscrizioni: [iPrima, iNow], tappe, partite }
 }

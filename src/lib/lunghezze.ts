@@ -24,6 +24,8 @@ export const LIMITI = {
   luogo: { min: 2, max: 60 },
   /** La coppia avversaria («Bianchi / Verdi»), come in Partita live. */
   avversari: { min: 2, max: 60 },
+  /** Una società del Campionato per Società (la propria, l'organizzatrice, quella avversaria). */
+  societa: { min: 2, max: 60 },
 } as const satisfies Record<string, Lunghezza>
 
 export type CampoTesto = keyof typeof LIMITI

@@ -9,6 +9,8 @@ import { matchesWithDates, normalizeCity, todayISO, venueOf } from '../lib/deriv
 import type { DiaryData, Tournament } from '../lib/models'
 import type { Route } from './routes'
 import { dataTone } from '../lib/theme'
+import { ultimaTappa } from '../lib/campionato'
+import type { CampionatoData, Tappa } from '../lib/campionato'
 
 /** «In corso»: un torneo non ancora chiuso (Q12). */
 const IN_CORSO = 'In corso'
@@ -36,6 +38,30 @@ export function partitaDestinazione(data: DiaryData, route: Route, today = today
   if (inCorso.length) return inCorso[0]
   const tutti = [...miei].sort(piuRecentePrima)
   return tutti[0] ?? null
+}
+
+/**
+ * Dove va «Partita» nel ＋ quando c'è anche il Campionato per Società: la
+ * regola dei tornei (partitaDestinazione), più le tappe.
+ *   1. sei sul dettaglio di una tappa → quella;
+ *   2. sei sul dettaglio di un torneo, o un tuo torneo è di oggi → il torneo;
+ *   3. la tappa più recente fino a oggi, se è più recente del torneo di
+ *      destinazione (o se quel torneo è nel futuro, o non c'è);
+ *   4. altrimenti il torneo.
+ * D'inverno, quando si gioca il Campionato, la partita va alla tappa.
+ */
+export type DestinazionePartita = { tipo: 'torneo'; t: Tournament } | { tipo: 'tappa'; t: Tappa }
+
+export function destinazionePartita(data: DiaryData, camp: CampionatoData, route: Route, today = todayISO()): DestinazionePartita | null {
+  if (route.name === 'tappa') {
+    const qui = camp.tappe.find((t) => t.id === route.id)
+    if (qui) return { tipo: 'tappa', t: qui }
+  }
+  const torneo = partitaDestinazione(data, route, today)
+  if (torneo && (route.name === 'torneo' || torneo.date === today)) return { tipo: 'torneo', t: torneo }
+  const tappa = ultimaTappa(camp, today)
+  if (tappa && (!torneo || torneo.date > today || tappa.date >= torneo.date)) return { tipo: 'tappa', t: tappa }
+  return torneo ? { tipo: 'torneo', t: torneo } : null
 }
 
 /** Il compagno di default nello sheet (Q21): quello del tuo torneo più recente. */

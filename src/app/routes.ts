@@ -21,6 +21,8 @@ export type Route =
   | { name: 'torneo'; id: string }
   | { name: 'compagni' }
   | { name: 'compagno'; id: string }
+  | { name: 'campionato'; s?: string }
+  | { name: 'tappa'; id: string }
   | { name: 'profilo' }
   | { name: 'segnala' }
   | { name: 'segnalazioni' }
@@ -91,6 +93,13 @@ export function parseLocation(pathname: string, search: string): Route {
     case 'compagni':
       if (!b) return { name: 'compagni' }
       return UUID.test(b) ? { name: 'compagno', id: b.toLowerCase() } : { name: 'nonTrovato' }
+    case 'campionato': {
+      // Campionato per Società: la pagina (con l'iscrizione scelta in `?s=`)
+      // e il dettaglio di una tappa.
+      if (b) return UUID.test(b) ? { name: 'tappa', id: b.toLowerCase() } : { name: 'nonTrovato' }
+      const s = new URLSearchParams(search).get('s')?.trim().toLowerCase()
+      return s && UUID.test(s) ? { name: 'campionato', s } : { name: 'campionato' }
+    }
     case 'profilo':
       if (!b) return { name: 'profilo' }
       if (b === 'segnala') return { name: 'segnala' }
@@ -120,6 +129,10 @@ export function routeHref(r: Route): string {
       return `/tornei/${r.id}`
     case 'compagno':
       return `/compagni/${r.id}`
+    case 'campionato':
+      return r.s ? `/campionato?s=${r.s}` : '/campionato'
+    case 'tappa':
+      return `/campionato/${r.id}`
     case 'segnala':
       return '/profilo/segnala'
     case 'segnalazioni':
@@ -146,6 +159,8 @@ export function routeTab(r: Route): TabKey | null {
       return 'home'
     case 'tornei':
     case 'torneo':
+    case 'campionato':
+    case 'tappa':
       return 'tornei'
     case 'compagni':
     case 'compagno':
@@ -171,6 +186,7 @@ export function routeHasTabBar(r: Route): boolean {
     case 'tornei':
     case 'compagni':
     case 'compagno':
+    case 'campionato':
     case 'diario':
     case 'nonTrovato':
       return true
@@ -198,7 +214,10 @@ export function routeParent(r: Route, vista: TorneiVista = 'lista'): Route | nul
       return { name: 'home' }
     case 'torneo':
     case 'crea':
+    case 'campionato':
       return { name: 'tornei', vista }
+    case 'tappa':
+      return { name: 'campionato' }
     case 'compagno':
     case 'oggi':
       return { name: 'compagni' }
@@ -253,6 +272,10 @@ export function routeTitle(r: Route, entity?: string): string {
         return 'Compagni'
       case 'compagno':
         return entity || 'Compagno'
+      case 'campionato':
+        return 'Campionato per Società'
+      case 'tappa':
+        return entity || 'Tappa'
       case 'profilo':
         return 'Profilo'
       case 'segnala':
@@ -275,6 +298,7 @@ export function routeKey(r: Route): string {
       return `tornei:${r.vista}`
     case 'torneo':
     case 'compagno':
+    case 'tappa':
       return `${r.name}:${r.id}`
     default:
       return r.name
@@ -284,7 +308,7 @@ export function routeKey(r: Route): string {
 /** Percorsi con un UUID normalizzati per Vercel Analytics (UX §4.8, Q11). */
 export function analyticsPath(url: string): string {
   return url.replace(
-    /\/(tornei|compagni)\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?=$|[/?#])/gi,
+    /\/(tornei|compagni|campionato)\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?=$|[/?#])/gi,
     '/$1/[id]',
   )
 }

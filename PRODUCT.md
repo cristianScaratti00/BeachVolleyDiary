@@ -51,7 +51,7 @@ Il diario è l'ingresso, i numeri e i ricordi sono l'uscita. La Partita live (se
 
 ## Capabilities and Constraints
 
-**Che cosa fa oggi** (dettagli in README.md): accesso con email e password (nickname verificato dal vivo); Home con la frase su come stai andando e il consiglio di Solby; Statistiche; Tornei con lista, mappa delle conquiste e ricerca fuzzy; Diario della stagione; dettaglio torneo con partite, set, foto e luogo; Partita live in torneo o fra amici; luoghi condivisi fra utenti con geocoding Photon; Chi c'è oggi (check-in reciproco per città e giorno); Compagni con collegamento a un utente e tornei condivisi in sola lettura; Storia Instagram; Beach Wrapped; Raccontalo a Solby; Profilo; Segnala un problema e bacheca admin.
+**Che cosa fa oggi** (dettagli in README.md): accesso con email e password (nickname verificato dal vivo); Home con la frase su come stai andando e il consiglio di Solby; Statistiche; Tornei con lista, mappa delle conquiste e ricerca fuzzy; Diario della stagione; dettaglio torneo con partite, set, foto e luogo; Partita live in torneo o fra amici; luoghi condivisi fra utenti con geocoding Photon; Chi c'è oggi (check-in reciproco per città e giorno); Compagni con collegamento a un utente e tornei condivisi in sola lettura; Storia Instagram; Beach Wrapped; Raccontalo a Solby; Profilo; Segnala un problema e bacheca admin. Campionato per Società (`/campionato`, dal 21 novembre 2026): le tappe del Campionato Italiano per Società FIPAV con categoria, piazzamento in numero, punti di coppia e punti alla società.
 
 **Vincoli di prodotto**:
 
@@ -61,6 +61,7 @@ Il diario è l'ingresso, i numeri e i ricordi sono l'uscita. La Partita live (se
 - **Il compagno appartiene al torneo**: la partita lo eredita, e un compagno eliminato diventa «Nessuno» senza cancellare tornei o partite.
 - **I valori dei piazzamenti stanno nel database** (per esempio `1° 🏆`, CHECK in SQL): l'interfaccia può cambiarne la resa, non il valore salvato.
 - **Doppia manutenzione**: ogni aggregazione vive sia in una RPC SQL sia nel suo `derive*` di ripiego nel client; si cambiano insieme.
+- **Il Campionato per Società è separato dalle statistiche** (scelta dell'utente, 21 novembre 2026): le tappe stanno in tabelle loro (`club_seasons`, `club_stages`, `club_matches`, `club_match_sets`) che nessuna RPC, nessun `derive*`, Wrapped e l'app Expo leggono; i loro numeri vivono solo in `src/lib/campionato.ts`. Nel CIPS non esistono incontri fra società: è un circuito di tornei 2vs2 in cui la coppia gioca per la sua società. I punti si propongono dalle tabelle del regolamento solo dove le scrive, e restano correggibili.
 - **Dark mode**: no (decisione dell'utente); i token sono comunque predisposti.
 
 **Terminologia** (UX.md §12): nella UI si dice sempre «compagno», mai «socio»; «Esci» vuol dire solo logout, il check-in si chiude con «Termina check-in»; «Storia Instagram», «Beach Wrapped», «Chi c'è oggi», «Raccontalo a Solby», «piazzamento», «tabellone».

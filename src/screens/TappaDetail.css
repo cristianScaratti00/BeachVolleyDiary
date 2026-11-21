@@ -1,0 +1,70 @@
+/* ============================================================================
+   Dettaglio tappa del Campionato per Società: le misure del dettaglio torneo
+   (TorneoDetail.css), con la sola «Aggiungi partita» nella barra in fondo.
+   ============================================================================ */
+@layer components {
+  .tappa-tags,
+  .tappa-stats { --rise-i: 1; }
+  .tappa-sez { --rise-i: 2; }
+
+  .tappa-traccia .ui-largetitle { position: relative; isolation: isolate; }
+  .tappa-traccia .ui-largetitle::after {
+    content: "";
+    position: absolute;
+    inset: calc(-1 * var(--space-1)) calc(-1 * var(--space-3));
+    border-radius: var(--radius-control);
+    background: var(--accent-wash);
+    z-index: -1;
+    pointer-events: none;
+    animation: traccia var(--dur-racconto) var(--ease-respiro) var(--dur-svelto) both;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tappa-traccia .ui-largetitle::after { animation-duration: var(--dur-entrata); }
+  }
+
+  .tappa-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1-5);
+    margin: var(--space-2-5) 0 0;
+    padding: 0 var(--space-1);
+  }
+  .tappa-stats { margin-top: var(--stack); }
+  .tappa-stats .ui-stat-value { line-height: 1.875rem; }
+
+  .tappa-sez { margin-top: var(--section-gap); }
+  .tappa-vuoto { padding-top: 0; padding-bottom: 0; }
+  .tappa-vuoto .ui-empty { padding: var(--space-6) 0; }
+
+  /* La barra in fondo, fissa come la TabBar che su questa rotta non c'è. */
+  .tappa-azioni {
+    position: fixed;
+    left: var(--tabbar-side);
+    right: var(--tabbar-side);
+    bottom: var(--tabbar-bottom);
+    z-index: var(--z-tabbar);
+    max-width: var(--tabbar-max);
+    margin: 0 auto;
+    display: flex;
+    pointer-events: none;
+  }
+  .tappa-azioni > * { pointer-events: auto; }
+  @media (min-width: 900px) {
+    .tappa-azioni { left: calc(var(--sidebar-w) + 2 * var(--sidebar-inset) + var(--gutter)); right: var(--gutter); }
+    .tappa-page { padding-bottom: calc(var(--control-lg) + var(--space-6)); }
+  }
+  .tappa-aggiungi.ui-button {
+    flex: 1;
+    min-width: 0;
+    box-shadow: inset 0 0 0 var(--border-w) var(--accent-strong), var(--elev-float);
+  }
+
+  .tappa-missing {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-4);
+    margin-top: var(--space-4);
+    padding: 0 var(--space-1);
+  }
+  .tappa-missing-text { margin: 0; font: var(--type-body); color: var(--ink-2); }
+}

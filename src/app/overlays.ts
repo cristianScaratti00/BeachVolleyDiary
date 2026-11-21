@@ -61,6 +61,12 @@ export type Overlay =
   | { kind: 'storia'; tournamentId: string }
   | { kind: 'lightbox'; tournamentId: string; index: number }
   | { kind: 'conferma'; spec: ConfirmSpec }
+  // Campionato per Società: i moduli delle tappe, a parte da quelli dei tornei.
+  | { kind: 'tappa'; mode: 'nuova' }
+  | { kind: 'tappa'; mode: 'modifica'; id: string }
+  | { kind: 'partitaTappa'; mode: 'nuova'; stageId: string }
+  | { kind: 'partitaTappa'; mode: 'modifica'; matchId: string }
+  | { kind: 'iscrizione'; id: string }
 
 export type OverlayKind = Overlay['kind']
 

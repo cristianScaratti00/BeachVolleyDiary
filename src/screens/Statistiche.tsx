@@ -31,6 +31,7 @@ import {
   WinLossCard,
   WrappedRow,
 } from '../components/dashboard'
+import { CampionatoCard } from './CampionatoCard'
 import './Statistiche.css'
 
 function etichettaPeriodo(fYear: string, compagno: string | null): string {
@@ -41,7 +42,7 @@ function etichettaPeriodo(fYear: string, compagno: string | null): string {
 const sale = (i: number) => ({ '--rise-i': i }) as CSSProperties
 const partite = (n: number) => (n === 0 ? 'Nessuna partita' : n === 1 ? '1 partita' : `${n} partite`)
 
-export default function Statistiche({ s, filtri, back, wrapped }: StatisticheProps) {
+export default function Statistiche({ s, filtri, back, wrapped, campionato }: StatisticheProps) {
   const { fPartner, fYear, setFPartner, setFYear, partnerOptions, yearOptions, canFilter } = filtri
   const compagno = fPartner !== 'all' ? partnerOptions.find((p) => p.id === fPartner)?.name ?? null : null
   const periodo = etichettaPeriodo(fYear, compagno)
@@ -112,6 +113,10 @@ export default function Statistiche({ s, filtri, back, wrapped }: StatistichePro
         <PlacementCard s={s} rise={i++} />
         <PartnerCard s={s} rise={i++} />
       </div>
+
+      {/* Le tappe del Campionato per Società hanno i loro numeri: qui si dice
+          che non entrano, e si porta là. */}
+      {campionato && <CampionatoCard c={campionato} dove="statistiche" className="stat-campionato rise" style={sale(i++)} />}
     </Page>
   )
 }

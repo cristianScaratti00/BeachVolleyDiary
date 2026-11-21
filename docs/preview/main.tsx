@@ -25,7 +25,9 @@ import { AppView } from '../../src/App'
 import type { UseDiary } from '../../src/hooks/useDiary'
 import type { UseCheckIn } from '../../src/hooks/useCheckIn'
 import type { AnyForm, CheckIn, DiaryData, GuidedMatch, Match, Partner, PresentUser, Tournament } from '../../src/lib/models'
-import { datiDiProva, datiEstremi, oggiVero } from './dati'
+import { campionatoDiProva, datiDiProva, datiEstremi, oggiVero } from './dati'
+import { useCampionatoInMemoria } from '../../src/hooks/useCampionato.memoria'
+import { CAMPIONATO_VUOTO } from '../../src/lib/campionato'
 import type { Session } from '../../src/lib/auth'
 
 const qs = new URLSearchParams(location.search)
@@ -148,11 +150,17 @@ const SESSIONE: Session = qs.has('estremo')
 function Anteprima() {
   const diary = useDiarioFinto()
   const check = useCheckInFinto()
+  // Il Campionato per Società di prova, con la stessa Giulia del diario.
+  const [campIniziale] = useState(() =>
+    qs.has('vuoto') || qs.has('fallito') ? CAMPIONATO_VUOTO : campionatoDiProva(oggi, diary.data.partners.find((p) => p.name === 'Giulia')?.id ?? null),
+  )
+  const campionato = useCampionatoInMemoria(campIniziale, { prima: async () => (await pausa(), true) })
   const [session, setSession] = useState<Session | null>(SESSIONE)
   return (
     <AppView
       diary={diary}
       check={check}
+      campionato={campionato}
       auth={{ session, logout: async () => setSession(null), refresh: async () => undefined }}
     />
   )

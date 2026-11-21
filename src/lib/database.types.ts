@@ -467,6 +467,195 @@ export type Database = {
           },
         ]
       }
+      // ---- Campionato per Società (20261121120000_campionato_societa.sql):
+      // tabelle a parte, che nessuna statistica dei tornei legge.
+      club_seasons: {
+        Row: {
+          id: string
+          user_id: string
+          season: string
+          club: string
+          gender: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string
+          season: string
+          club: string
+          gender: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          season?: string
+          club?: string
+          gender?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'club_seasons_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      club_stages: {
+        Row: {
+          id: string
+          user_id: string
+          season_id: string
+          kind: string
+          category: string
+          date: string
+          city: string
+          organizer: string
+          partner_id: string | null
+          partner_other_club: boolean
+          set_points: number
+          placement: number | null
+          teams: number | null
+          pair_points: number | null
+          counts_for_club: boolean
+          club_points: number | null
+          note: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string
+          season_id: string
+          kind?: string
+          category: string
+          date: string
+          city?: string
+          organizer?: string
+          partner_id?: string | null
+          partner_other_club?: boolean
+          set_points?: number
+          placement?: number | null
+          teams?: number | null
+          pair_points?: number | null
+          counts_for_club?: boolean
+          club_points?: number | null
+          note?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          season_id?: string
+          kind?: string
+          category?: string
+          date?: string
+          city?: string
+          organizer?: string
+          partner_id?: string | null
+          partner_other_club?: boolean
+          set_points?: number
+          placement?: number | null
+          teams?: number | null
+          pair_points?: number | null
+          counts_for_club?: boolean
+          club_points?: number | null
+          note?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'club_stages_season_id_fkey'
+            columns: ['season_id']
+            isOneToOne: false
+            referencedRelation: 'club_seasons'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'club_stages_partner_id_fkey'
+            columns: ['partner_id']
+            isOneToOne: false
+            referencedRelation: 'partners'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      club_matches: {
+        Row: {
+          id: string
+          user_id: string
+          stage_id: string
+          phase: string
+          opponents: string
+          opponents_club: string
+          outcome: string
+          note: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string
+          stage_id: string
+          phase?: string
+          opponents?: string
+          opponents_club?: string
+          outcome?: string
+          note?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          stage_id?: string
+          phase?: string
+          opponents?: string
+          opponents_club?: string
+          outcome?: string
+          note?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'club_matches_stage_id_fkey'
+            columns: ['stage_id']
+            isOneToOne: false
+            referencedRelation: 'club_stages'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      club_match_sets: {
+        Row: {
+          id: string
+          match_id: string
+          set_number: number
+          us: number
+          them: number
+        }
+        Insert: {
+          id?: string
+          match_id: string
+          set_number: number
+          us: number
+          them: number
+        }
+        Update: {
+          set_number?: number
+          us?: number
+          them?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'club_match_sets_match_id_fkey'
+            columns: ['match_id']
+            isOneToOne: false
+            referencedRelation: 'club_matches'
+            referencedColumns: ['id']
+          },
+        ]
+      }
     }
     Views: {
       match_scores: {

@@ -48,6 +48,7 @@ import {
 } from '../components/ui/index'
 import { Medal } from '../components/ui/Medal'
 import Mappa from './Mappa'
+import { CampionatoCard } from './CampionatoCard'
 import './Tornei.css'
 
 // I risultati della ricerca hanno la forma delle voci del Diario: stanno nel
@@ -80,7 +81,7 @@ function sottotitoloLista(cards: TorneoCard[]): string {
   return `${base} · miglior piazzamento ${primo(migliore)}`
 }
 
-export default function Tornei({ vista, q, onVista, onQuery, list, entries, mappa, stagione, onNuovoTorneo, onStoria, traccia }: TorneiProps) {
+export default function Tornei({ vista, q, onVista, onQuery, list, entries, mappa, stagione, onNuovoTorneo, onStoria, traccia, campionato }: TorneiProps) {
   // ------------------------------------------------------------ ricerca
   const [testo, setTesto] = useState(q)
   const inviato = useRef(q)
@@ -181,6 +182,9 @@ export default function Tornei({ vista, q, onVista, onQuery, list, entries, mapp
       </NavBar>
 
       {vuoto ? (
+        <>
+        {/* Solo tappe del Campionato e nessun torneo: la card c'è lo stesso. */}
+        {campionato && <CampionatoCard c={campionato} dove="tornei" className="tornei-campionato rise" style={rise(1)} />}
         <EmptyState
           variant="primo"
           zero="Tornei"
@@ -193,6 +197,7 @@ export default function Tornei({ vista, q, onVista, onQuery, list, entries, mapp
             </>
           }
         />
+        </>
       ) : ricerca.active ? (
         ricerca.results.length === 0 ? (
           <EmptyState
@@ -230,6 +235,7 @@ export default function Tornei({ vista, q, onVista, onQuery, list, entries, mapp
             <Mappa m={mappa} stagione={stagione} onNuovoTorneo={onNuovoTorneo} />
           ) : (
             <>
+              {campionato && <CampionatoCard c={campionato} dove="tornei" className="tornei-campionato rise" style={rise(blocco++)} />}
               <Gruppo titolo="Prossimi tornei" tornei={prossimi} conFormato traccia={traccia} i={blocco++}>
                 {prossimi.length === 0 && <ProssimiVuoto onNuovoTorneo={onNuovoTorneo} />}
               </Gruppo>

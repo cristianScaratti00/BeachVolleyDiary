@@ -15,6 +15,10 @@ import { useAuth } from './hooks/useAuth'
 import { useCheckIn } from './hooks/useCheckIn'
 import type { UseCheckIn } from './hooks/useCheckIn'
 import { useOnline } from './hooks/useConnection'
+import { useCampionato } from './hooks/useCampionato'
+import type { UseCampionato } from './hooks/useCampionato'
+import { campionatoIngresso, deriveCampionato, deriveTappa } from './lib/campionato'
+import { useCampionatoActions } from './app/useCampionatoActions'
 import { permissionsFor } from './lib/permissions'
 import { partnerOptions, venueOptions, todayISO, wrappedRangeForYear, deriveWrapped, WRAPPED_MIN_MATCHES } from './lib/derive'
 import { inviaSegnalazione, elencoSegnalazioni, aggiornaStato } from './lib/segnalazioni'
@@ -45,6 +49,8 @@ import Profilo from './screens/Profilo'
 import Segnala from './screens/Segnala'
 import Segnalazioni from './screens/Segnalazioni'
 import NonTrovato from './screens/NonTrovato'
+import Campionato from './screens/Campionato'
+import TappaDetail from './screens/TappaDetail'
 
 // Lazy: l'assistente (1600 righe di copione) e Wrapped (trascina html-to-image).
 // Con «Riprova» se il chunk non arriva (deploy nuovo, rete): UX §6.0.
@@ -58,26 +64,29 @@ const TRACCIA_MS = 1200
 export default function App() {
   const auth = useAuth()
   const diary = useDiary()
+  // Il Campionato per Società: dati suoi, a parte dal diario (e dalle statistiche).
+  const campionato = useCampionato()
   const check = useCheckIn({
     tournaments: diary.data.tournaments,
     venues: diary.data.venues,
     saveCompagno: diary.saveCompagno,
     linkPartner: diary.linkPartner,
   })
-  return <AppView diary={diary} auth={auth} check={check} />
+  return <AppView diary={diary} auth={auth} check={check} campionato={campionato} />
 }
 
 export interface AppDeps {
   diary: UseDiary
   auth: Pick<ReturnType<typeof useAuth>, 'session' | 'logout' | 'refresh'>
   check: UseCheckIn
+  campionato: UseCampionato
 }
 
 /**
  * La composizione vera, con i dati e la rete iniettati: App la usa con gli hook
  * di Supabase, l'anteprima (docs/preview) e i test con dati di fabbrica.
  */
-export function AppView({ diary, auth, check }: AppDeps) {
+export function AppView({ diary, auth, check, campionato }: AppDeps) {
   const { session, logout, refresh } = auth
   const { data, loading, error, reload } = diary
   const nav = useNav()
@@ -122,6 +131,9 @@ export function AppView({ diary, auth, check }: AppDeps) {
     refreshSession: refresh,
     torneiVista: () => ({ name: 'tornei', vista: vistaRef.current }),
   })
+
+  const campAct = useCampionatoActions({ campionato, diary, route })
+  const ingresso = campionatoIngresso(campionato.data)
 
   // La traccia arriva con la navigazione (state.traccia) e si spegne da sola.
   const [traccia, setTraccia] = useState<string | undefined>(undefined)
@@ -216,7 +228,7 @@ export function AppView({ diary, auth, check }: AppDeps) {
         )
       }
       case 'statistiche':
-        return <Statistiche s={s} filtri={screen.filtri} back={back} wrapped={{ visibile: wrappedPronto, titolo: wrappedTitolo }} />
+        return <Statistiche s={s} filtri={screen.filtri} back={back} wrapped={{ visibile: wrappedPronto, titolo: wrappedTitolo }} campionato={ingresso} />
       case 'wrapped': {
         const motivo = !wrappedAOttobre() ? 'stagione' : s.played < WRAPPED_MIN_MATCHES ? 'dati' : null
         const wrapped = motivo ? null : deriveWrapped(data, wrappedRangeForYear(data, anno), perm.canUseFilters ? screen.filtri.fPartner : 'all')
@@ -261,6 +273,7 @@ export function AppView({ diary, auth, check }: AppDeps) {
             onNuovoTorneo={() => actions.nuovoTorneo()}
             onStoria={actions.apriStoria}
             traccia={traccia}
+            campionato={ingresso}
           />
         )
       case 'diario':
@@ -320,6 +333,31 @@ export function AppView({ diary, auth, check }: AppDeps) {
           />
         )
       }
+      case 'campionato':
+        return (
+          <Campionato
+            // Senza dati e con il caricamento fallito: lo stato d'errore della pagina.
+            vista={campionato.error && !campionato.data.iscrizioni.length ? null : deriveCampionato(campionato.data, data.partners, route.s)}
+            back={back}
+            onStagione={(id) => navigate({ name: 'campionato', s: id }, { replace: true, keepFocus: true, keepScroll: true })}
+            onNuovaTappa={() => campAct.nuovaTappa()}
+            onModificaIscrizione={campAct.modificaIscrizione}
+            onRiprova={campionato.reload}
+            traccia={traccia}
+          />
+        )
+      case 'tappa':
+        return (
+          <TappaDetail
+            key={route.id}
+            t={deriveTappa(campionato.data, data.partners, route.id)}
+            back={back}
+            traccia={traccia}
+            onAddPartita={() => campAct.nuovaPartitaTappa(route.id)}
+            onOpenMatch={campAct.modificaPartitaTappa}
+            onModifica={() => campAct.modificaTappa(route.id)}
+          />
+        )
       case 'compagni':
         return (
           <Compagni
@@ -394,7 +432,13 @@ export function AppView({ diary, auth, check }: AppDeps) {
   }
 
   const entityTitle =
-    route.name === 'torneo' ? screen.torneo?.name ?? 'Torneo non trovato' : route.name === 'compagno' ? screen.compagno?.name ?? 'Compagno non trovato' : undefined
+    route.name === 'torneo'
+      ? screen.torneo?.name ?? 'Torneo non trovato'
+      : route.name === 'compagno'
+        ? screen.compagno?.name ?? 'Compagno non trovato'
+        : route.name === 'tappa'
+          ? deriveTappa(campionato.data, data.partners, route.id)?.nome ?? 'Tappa non trovata'
+          : undefined
 
   return (
     <>
@@ -407,7 +451,16 @@ export function AppView({ diary, auth, check }: AppDeps) {
       >
         {render()}
       </AppShell>
-      <ModalHost data={data} route={route} diary={diary} check={check} actions={actions} canAddPartner={perm.canCreatePartner} />
+      <ModalHost
+        data={data}
+        route={route}
+        diary={diary}
+        check={check}
+        actions={actions}
+        canAddPartner={perm.canCreatePartner}
+        campionato={campionato}
+        campAct={campAct}
+      />
     </>
   )
 }

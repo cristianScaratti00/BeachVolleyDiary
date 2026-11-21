@@ -28,6 +28,8 @@
 
   /* -------------------------------------------------------- gruppi */
   .tornei-group { margin-top: var(--section-gap); min-width: 0; }
+  /* La card del Campionato per Società, fra il segmented e i prossimi. */
+  .tornei-campionato { margin-top: var(--stack); }
   /* Titolo a sinistra, contatore a destra, sulla stessa linea di base: tutti
      e due dentro l'h2 (il contatore fa parte del nome annunciato). */
   .tornei-group-title {

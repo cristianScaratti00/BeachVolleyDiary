@@ -23,6 +23,10 @@ import { toast } from '../components/ui/Toast'
 import { __resetRouterForTests } from '../app/router'
 import type { UseDiary } from '../hooks/useDiary'
 import type { UseCheckIn } from '../hooks/useCheckIn'
+import { useCampionatoInMemoria } from '../hooks/useCampionato.memoria'
+import type { MutazioneCampionato } from '../hooks/useCampionato.memoria'
+import { CAMPIONATO_VUOTO } from '../lib/campionato'
+import type { CampionatoData } from '../lib/campionato'
 import type { Session } from '../lib/auth'
 import type { AnyForm, CheckIn, DiaryData, Match, Partner, PresentUser, Tournament } from '../lib/models'
 import { makeData } from './factories'
@@ -112,6 +116,7 @@ export type Mutazione =
   | 'unlinkMe'
   | 'checkIn'
   | 'checkOut'
+  | MutazioneCampionato
 
 export interface AppOptions {
   path?: string
@@ -128,6 +133,10 @@ export interface AppOptions {
   fail?: Mutazione[]
   /** Il proprio check-in di oggi, se c'è. */
   own?: CheckIn | null
+  /** Il Campionato per Società (tabelle a parte): vuoto se non c'è. */
+  campionato?: CampionatoData
+  /** Il primo caricamento del Campionato fallisce. */
+  campionatoFallito?: boolean
   /**
    * Un refresh: l'app riparte sulla voce di history in cui si trova, con il
    * suo `state` (overlay compreso). Smontare prima quella vecchia (`cleanup`).
@@ -139,6 +148,8 @@ export interface AppHandle {
   user: ReturnType<typeof userEvent.setup>
   /** I dati come sono adesso, dopo le mutazioni. */
   data: () => DiaryData
+  /** Il Campionato come è adesso. */
+  campionato: () => CampionatoData
   /** Quante volte è stato chiamato `reload()`. */
   reloads: () => number
   /** Le chiamate alle mutazioni, nell'ordine. */
@@ -193,6 +204,7 @@ export function renderApp(opts: AppOptions = {}): AppHandle {
   const held = new Set<Mutazione>()
   let pending: (() => void)[] = []
   let current: DiaryData = opts.data ?? makeData()
+  let currentCamp: CampionatoData = opts.campionato ?? CAMPIONATO_VUOTO
   let reloadN = 0
   let failReload = !!opts.fallito
   const calls: AppHandle['calls'] = []
@@ -205,6 +217,16 @@ export function renderApp(opts: AppOptions = {}): AppHandle {
     const [session, setSession] = useState<Session | null>({ ...SESSIONE, ...opts.session })
     const [own, setOwn] = useState<CheckIn | null>(opts.own ?? null)
     current = data
+    const campionato = useCampionatoInMemoria(currentCamp, {
+      nuovoId: uuid,
+      fallito: opts.campionatoFallito,
+      prima: async (name, args) => {
+        calls.push({ name, args })
+        if (held.has(name)) await new Promise<void>((r) => pending.push(r))
+        return !fail.has(name)
+      },
+    })
+    currentCamp = campionato.data
 
     // Come useDiary: si monta in caricamento (lo splash) e il primo carico
     // decide, subito dopo il primo commit.
@@ -358,6 +380,7 @@ export function renderApp(opts: AppOptions = {}): AppHandle {
       <AppView
         diary={diary}
         check={check}
+        campionato={campionato}
         auth={{
           session,
           logout: async () => {
@@ -380,6 +403,7 @@ export function renderApp(opts: AppOptions = {}): AppHandle {
   return {
     user,
     data: () => current,
+    campionato: () => currentCamp,
     reloads: () => reloadN,
     calls,
     logout,
