@@ -14,6 +14,7 @@
 // Le quote sono, come per la favicon di /index.html, il lato del riquadro del
 // marchio (le 64 unità del suo viewBox) sul lato dell'icona:
 //   icon.svg                     tessera col raggio 26%, marchio al 72%
+//                                (fuori dal manifest: iOS non mette in Home un SVG)
 //   apple-touch-icon.png  180    inchiostro a tutto campo (il sistema
 //   icon-192.png / -512.png      arrotonda da sé), marchio al 62%
 //   icon-maskable-512.png        a tutto campo, marchio al 56%: dentro la
@@ -75,5 +76,11 @@ try {
   try {
     process.kill(Number(readFileSync(`${SP}/chrome-${PORTA_CDP}.pid`, 'utf8')), 'SIGTERM')
   } catch {}
+}
+// Le copie alla radice: iOS le cerca lì (/apple-touch-icon.png) quando una
+// pagina non dichiara l'icona, e senza file Vercel risponderebbe con l'HTML
+// dell'app (il rewrite), che in Home diventa la lettera su fondo grigio.
+for (const nome of ['apple-touch-icon.png', 'apple-touch-icon-precomposed.png']) {
+  writeFileSync(join(RADICE, 'public', nome), readFileSync(join(OUT, 'apple-touch-icon.png')))
 }
 for (const f of fatte) console.log(`${f.file.padEnd(24)} ${f.lato ? `${f.lato}×${f.lato}` : 'vettoriale'}  ${f.kb} KB`)
