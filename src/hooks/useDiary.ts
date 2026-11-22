@@ -4,8 +4,9 @@ import { NEW_PARTNER_COLOR } from '../lib/theme'
 import { normalizeCity, parseLatLng } from '../lib/derive'
 import type {
   DiaryData, Tournament, Match, Photo, Partner, Venue, AnyForm, GuidedMatch, AppUser,
-  Category, Format, Surface, Phase, Placement, Bracket,
+  Category, Format, Surface, Phase, Placement, Bracket, Gender,
 } from '../lib/models'
+import type { TablesInsert, TablesUpdate } from '../lib/database.types'
 
 export interface UseDiary {
   data: DiaryData
@@ -32,9 +33,64 @@ export interface UseDiary {
   // del primo sul secondo ed elimina il primo. Il backfill sa fondere solo le
   // varianti di maiuscole/spazi, il resto richiede l'occhio di chi c'era.
   mergeVenues: (fromId: string, toId: string) => Promise<boolean>
+  // ---- genere ----
+  // «Riordina i tornei»: il genere di molti tornei in un colpo (null = togli).
+  setGeneri: (scelte: { id: string; gender: Gender | null }[]) => Promise<boolean>
 }
 
 const EMPTY: DiaryData = { tournaments: [], matches: [], partners: [], photos: [], venues: [] }
+
+// ---------------------------------------------------------------------------
+// Il genere del torneo (tournaments.gender) arriva con la migration
+// 20261122120000_tournament_gender.sql. Finché il DB non la conosce il diario
+// non deve rompersi: si legge e si scrive senza la colonna (e il genere non si
+// salva), invece di un caricamento fallito o di un torneo che non si crea.
+// 42703 = colonna inesistente (select), PGRST204 = colonna fuori dallo schema
+// di PostgREST (insert/update).
+// ---------------------------------------------------------------------------
+let colonnaGenere = true
+const CODICI_SENZA_COLONNA = new Set(['42703', 'PGRST204'])
+function senzaColonnaGenere(e: unknown): boolean {
+  if (!e || typeof e !== 'object') return false
+  const { code, message } = e as { code?: string; message?: string }
+  return !!code && CODICI_SENZA_COLONNA.has(code) && /gender/.test(message ?? '')
+}
+function togliGenere<T extends { gender?: unknown }>(row: T): Omit<T, 'gender'> {
+  const { gender: _tolto, ...resto } = row
+  return resto
+}
+
+async function inserisciTorneo(row: TablesInsert<'tournaments'>) {
+  const r = await supabase.from('tournaments').insert(colonnaGenere ? row : togliGenere(row)).select('id').single()
+  if (r.error && colonnaGenere && senzaColonnaGenere(r.error)) {
+    colonnaGenere = false
+    return supabase.from('tournaments').insert(togliGenere(row)).select('id').single()
+  }
+  return r
+}
+
+async function aggiornaTorneo(row: TablesUpdate<'tournaments'>, id: string) {
+  const r = await supabase.from('tournaments').update(colonnaGenere ? row : togliGenere(row)).eq('id', id)
+  if (r.error && colonnaGenere && senzaColonnaGenere(r.error)) {
+    colonnaGenere = false
+    return supabase.from('tournaments').update(togliGenere(row)).eq('id', id)
+  }
+  return r
+}
+
+const COLONNE_TORNEO = 'id, name, date, city, venue_id, category, format, surface, placement, bracket, color, emoji, partner_id, user_id'
+
+/** I tornei, con il genere se il DB lo conosce. */
+async function leggiTornei() {
+  const ordine = { ascending: false }
+  if (colonnaGenere) {
+    const r = await supabase.from('tournaments').select(`${COLONNE_TORNEO}, gender`).order('date', ordine)
+    if (!r.error || !senzaColonnaGenere(r.error)) return r
+    colonnaGenere = false
+  }
+  const r = await supabase.from('tournaments').select(COLONNE_TORNEO).order('date', ordine)
+  return { ...r, data: r.data?.map((t) => ({ ...t, gender: null as string | null })) ?? null }
+}
 
 // Snapshot testuale del luogo, scritto sempre su `tournaments.city` accanto a
 // `venue_id`: i client che non conoscono i venue (e i tornei importati) devono
@@ -144,9 +200,7 @@ async function fetchAll(): Promise<DiaryData> {
     supabase.from('partners')
       .select('id, name, color, user_id, linked_user_id')
       .order('created_at', { ascending: true }),
-    supabase.from('tournaments')
-      .select('id, name, date, city, venue_id, category, format, surface, placement, bracket, color, emoji, partner_id, user_id')
-      .order('date', { ascending: false }),
+    leggiTornei(),
     supabase.from('matches')
       .select('id, tournament_id, partner_id, opponents, phase, note, match_sets(set_number, us, them)')
       .order('created_at', { ascending: true }),
@@ -192,6 +246,7 @@ async function fetchAll(): Promise<DiaryData> {
     surface: t.surface as Surface,
     placement: t.placement as Placement,
     bracket: t.bracket as Bracket | null,
+    gender: (t.gender as Gender | null) ?? null,
     color: t.color,
     emoji: t.emoji,
     partnerId: t.partner_id,
@@ -304,6 +359,7 @@ export function useDiary(): UseDiary {
       surface: f.surface ?? 'Sabbia outdoor',
       placement: f.placement ?? 'Gironi',
       bracket: f.bracket || null,
+      gender: f.gender || null,
       color: f.color ?? '#FF6B35',
       emoji: f.emoji ?? '🏖️',
       partner_id: partnerId,
@@ -311,7 +367,7 @@ export function useDiary(): UseDiary {
 
     if (editId) {
       const prev = data.tournaments.find((t) => t.id === editId)?.partnerId ?? null
-      const { error } = await supabase.from('tournaments').update(row).eq('id', editId)
+      const { error } = await aggiornaTorneo(row, editId)
       if (error) return fail(error)
       // Compagno del torneo cambiato (e valorizzato) → allinea tutte le sue partite.
       if (partnerId && partnerId !== prev) {
@@ -319,7 +375,7 @@ export function useDiary(): UseDiary {
         if (mErr) return fail(mErr)
       }
     } else {
-      const { error } = await supabase.from('tournaments').insert(row)
+      const { error } = await inserisciTorneo(row)
       if (error) return fail(error)
     }
 
@@ -364,11 +420,12 @@ export function useDiary(): UseDiary {
       surface: 'Sabbia outdoor',
       placement: f.placement ?? 'In corso',
       bracket: f.bracket || null,
+      gender: f.gender || null,
       color: '#FF6B35',
       emoji: '🏖️',
       partner_id: partnerId,
     }
-    const { data: ins, error } = await supabase.from('tournaments').insert(row).select('id').single()
+    const { data: ins, error } = await inserisciTorneo(row)
     if (error || !ins) { fail(error); return null }
     await reload()
     return ins.id
@@ -410,11 +467,12 @@ export function useDiary(): UseDiary {
       surface: f.surface ?? 'Sabbia outdoor',
       placement: f.placement ?? 'In corso',
       bracket: f.bracket || null,
+      gender: f.gender || null,
       color: f.color ?? '#FF6B35',
       emoji: f.emoji ?? '🏖️',
       partner_id: partnerId,
     }
-    const { data: tIns, error: tErr } = await supabase.from('tournaments').insert(row).select('id').single()
+    const { data: tIns, error: tErr } = await inserisciTorneo(row)
     if (tErr || !tIns) { fail(tErr); return null }
     const tournamentId: string = tIns.id
 
@@ -630,5 +688,22 @@ export function useDiary(): UseDiary {
     return true
   }, [reload])
 
-  return { data, loading, error, clearError, reload, saveTorneo, quickCreateTorneo, createGuidedTorneo, deleteTorneo, savePartita, deletePartita, saveFoto, deleteFoto, saveCompagno, deleteCompagno, searchUsers, linkPartner, unlinkPartner, unlinkMe, mergeVenues }
+  // «Riordina i tornei»: un update per genere (al massimo tre), poi un reload.
+  const setGeneri = useCallback(async (scelte: { id: string; gender: Gender | null }[]) => {
+    if (!scelte.length) return true
+    if (!colonnaGenere) return fail(new Error('La colonna del genere non c\'è ancora nel database.'))
+    const perGenere = new Map<Gender | null, string[]>()
+    for (const s of scelte) perGenere.set(s.gender, [...(perGenere.get(s.gender) ?? []), s.id])
+    for (const [gender, ids] of perGenere) {
+      const { error } = await supabase.from('tournaments').update({ gender }).in('id', ids)
+      if (error) {
+        if (senzaColonnaGenere(error)) colonnaGenere = false
+        return fail(error)
+      }
+    }
+    await reload()
+    return true
+  }, [reload])
+
+  return { data, loading, error, clearError, reload, saveTorneo, quickCreateTorneo, createGuidedTorneo, deleteTorneo, savePartita, deletePartita, saveFoto, deleteFoto, saveCompagno, deleteCompagno, searchUsers, linkPartner, unlinkPartner, unlinkMe, mergeVenues, setGeneri }
 }

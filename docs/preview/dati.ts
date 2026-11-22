@@ -38,7 +38,7 @@ export function datiDiProva(oggi = oggiVero(), uuid: () => string = uuidVero): D
   const vRiccione: Venue = { id: uuid(), name: 'Beach Arena', city: 'Riccione', lat: null, lng: null, surface: 'Sabbia outdoor', shared: false }
   const t = (o: Partial<Tournament>): Tournament => ({
     id: uuid(), name: 'Torneo', date: oggi, city: 'Rimini', venueId: null, category: 'Open', format: '2vs2',
-    surface: 'Sabbia outdoor', placement: 'Gironi', bracket: null, color: '#FF6B35', emoji: '🏖️', partnerId: pGiulia.id, shared: false, ...o,
+    surface: 'Sabbia outdoor', placement: 'Gironi', bracket: null, gender: null, color: '#FF6B35', emoji: '🏖️', partnerId: pGiulia.id, shared: false, ...o,
   })
   const tornei = [
     t({ name: 'Rimini Open', date: oggi, venueId: vRimini.id, placement: 'In corso', category: 'Open' }),
@@ -84,7 +84,7 @@ export function datiEstremi(oggi = oggiVero(), uuid: () => string = uuidVero): D
   const v2: Venue = { id: uuid(), name: '', city: '', lat: null, lng: null, surface: null, shared: false }
   const base = (o: Partial<Tournament>): Tournament => ({
     id: uuid(), name: 'Torneo', date: oggi, city: 'Castiglione della Pescaia', venueId: null, category: 'Open', format: '2vs2',
-    surface: 'Sabbia outdoor', placement: 'Gironi', bracket: null, color: '#FF6B35', emoji: '🏖️', partnerId: p1.id, shared: false, ...o,
+    surface: 'Sabbia outdoor', placement: 'Gironi', bracket: null, gender: null, color: '#FF6B35', emoji: '🏖️', partnerId: p1.id, shared: false, ...o,
   })
   const posti = ['1° 🏆', '2°', '3°', 'Semifinale', 'Quarti', 'Ottavi', 'Gironi'] as const
   const tornei: Tournament[] = [

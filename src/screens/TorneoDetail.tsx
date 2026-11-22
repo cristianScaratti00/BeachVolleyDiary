@@ -24,6 +24,7 @@ import { AnimatePresence } from 'motion/react'
 import type { TorneoDetailProps, TorneoScheda } from '../app/contracts'
 import type { TorneoDetailData } from '../lib/derive'
 import { MONTHS_FULL } from '../lib/theme'
+import { GENERE_MINUSCOLO } from '../lib/genere'
 import { LazyBoundary, lazyRetry } from '../app/LazyBoundary'
 import { ENTRATA, SVELTO } from '../components/Motion'
 import { LiquidGlass } from '../components/ui/LiquidGlass'
@@ -79,7 +80,7 @@ function intestazione(t: TorneoDetailData, scheda?: TorneoScheda | null) {
   if (!scheda) return { kicker: t.category, sottotitolo: t.meta }
   const con = t.meta.split(' · ').find((s) => s.startsWith('con '))
   return {
-    kicker: [t.category, scheda.format, scheda.surface].filter(Boolean).join(' · '),
+    kicker: [t.category, scheda.gender ? GENERE_MINUSCOLO[scheda.gender] : null, scheda.format, scheda.surface].filter(Boolean).join(' · '),
     sottotitolo: [dataLunga(scheda.date), con].filter(Boolean).join(' · ') || t.meta,
   }
 }

@@ -1,0 +1,71 @@
+/* «Riordina i tornei»: un gruppo per compagno, card bianche col filo, la
+   scelta del genere come tre pulsanti a interruttore (inchiostro pieno sulla
+   scelta, come le chip dei moduli). */
+@layer components {
+  .riordina { display: grid; gap: var(--space-4); }
+  .riordina-intro { margin: 0; font: var(--type-callout); color: var(--ink-label); }
+  .riordina-gruppi,
+  .riordina-tornei { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
+  .riordina-gruppo {
+    display: grid;
+    gap: var(--space-2-5);
+    padding: var(--space-3-5) var(--space-4);
+    background: var(--surface);
+    border: var(--border-w) solid var(--edge);
+    border-radius: var(--radius-card);
+  }
+  .riordina-testa { display: flex; align-items: center; gap: var(--space-3); }
+  .riordina-av {
+    flex: none;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-capsule);
+    display: grid;
+    place-items: center;
+    background: var(--accent-wash);
+    font: 700 1rem/1 var(--font-ui);
+  }
+  .riordina-nome { display: grid; gap: 1px; min-width: 0; }
+  .riordina-titolo { font: var(--type-headline); letter-spacing: var(--track-headline); overflow-wrap: anywhere; }
+  .riordina-sub { font: var(--type-footnote); color: var(--ink-2); overflow-wrap: anywhere; }
+  .riordina-unico { margin: 0; }
+
+  .riordina-scelta {
+    display: flex;
+    gap: 2px;
+    padding: 3px;
+    background: var(--fill);
+    border-radius: var(--radius-capsule);
+  }
+  .riordina-scelta > button {
+    flex: 1;
+    min-width: 0;
+    min-height: 44px;
+    border: 0;
+    border-radius: var(--radius-capsule);
+    background: transparent;
+    padding: 0 var(--space-2);
+    text-align: center;
+    font: var(--type-subhead-strong);
+    color: var(--ink-label);
+    cursor: pointer;
+  }
+  .riordina-scelta > button[aria-pressed="true"] { background: var(--ink); color: var(--ink-inverse); }
+  .riordina-scelta > button:focus-visible { outline: var(--focus-width) solid var(--focus-ring); outline-offset: var(--focus-offset); }
+  .riordina-scelta[data-piccola] > button { min-height: 40px; }
+
+  .riordina-perche { margin: 0; font: var(--type-footnote); color: var(--ink-2); }
+  .riordina-apri {
+    justify-self: start;
+    min-height: 44px;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: var(--type-subhead-strong);
+    color: var(--accent-text);
+    cursor: pointer;
+  }
+  .riordina-tornei { padding-top: var(--space-1); }
+  .riordina-torneo { display: grid; gap: var(--space-2); padding-top: var(--space-2-5); border-top: var(--border-w) solid var(--separator); }
+  .riordina-piede { margin: 0; text-align: center; font: var(--type-footnote); color: var(--ink-2); }
+}

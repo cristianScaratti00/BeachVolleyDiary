@@ -26,7 +26,8 @@ import type { EsitoInvio, NuovaSegnalazione, Segnalazione, StatoSegnalazione } f
 import type { NavBarBack } from '../components/ui/NavBar'
 import type { TorneiVista } from './routes'
 import type { HomeVista } from './selectors'
-import type { Filtri } from './useScreenData'
+import type { Filtri, NumeriGenere } from './useScreenData'
+import type { FiltroGenere, Gender, GruppoRiordino, Proposta, RigaCategoria } from '../lib/genere'
 import type {
   CampionatoIngresso,
   CampionatoVista,
@@ -86,6 +87,8 @@ export interface TorneoSheetProps extends OverlayBase {
   /** «Usa l'assistente guidato»: con il modulo sporco la shell chiede prima. */
   onUseAssistant: (dirty: boolean) => void
   onMergeVenues: (fromId: string, toId: string) => Promise<boolean>
+  /** Il genere da proporre per un compagno e una categoria (null = nessun motivo vero). */
+  proponiGenere?: (partnerId: string, category: string) => Proposta | null
 }
 
 /** Un torneo nella scelta di «Nuova partita»: con il compagno che la partita eredita. */
@@ -180,6 +183,8 @@ export interface HomeProps extends HomeVista {
   /** Stagione e compagno: gli stessi filtri di Statistiche, Mappa e Wrapped (C10). */
   filtri: Filtri
   wrapped: { visibile: boolean; titolo: string }
+  /** Il genere del numero grande e gli altri generi sotto (solo con più generi). */
+  genere?: { attivo: FiltroGenere; altri: NumeriGenere[]; onApri: (g: Gender) => void }
   onNuovoTorneo: () => void
   onAggiungiPartita: (tournamentId: string) => void
   /** «Com'è andata a «X»?» → Modifica torneo. */
@@ -194,6 +199,14 @@ export interface StatisticheProps {
   wrapped: { visibile: boolean; titolo: string }
   /** Il rimando al Campionato per Società, i cui numeri NON entrano qui. null = nessuna iscrizione. */
   campionato?: CampionatoIngresso | null
+  /** Gli altri generi con gli stessi filtri, per il confronto. */
+  altriGeneri?: NumeriGenere[]
+  /** Le categorie nel genere e nei filtri scelti. */
+  categorie?: RigaCategoria[]
+  /** I tornei senza genere: l'invito la prima volta, poi la riga «Sistema». */
+  riordino?: { senza: number; primaVolta: boolean; rimandato: boolean }
+  onRiordina?: () => void
+  onRimandaRiordino?: () => void
 }
 
 export interface TorneiProps {
@@ -213,6 +226,8 @@ export interface TorneiProps {
   traccia?: string
   /** La card del Campionato per Società in cima alla Lista. null = nessuna iscrizione. */
   campionato?: CampionatoIngresso | null
+  /** Il genere di ogni torneo (id → genere, null = non indicato): nella riga e nelle chip. */
+  generi?: Record<string, Gender | null>
 }
 
 export interface DiarioProps {
@@ -281,6 +296,8 @@ export interface TorneoScheda {
   date: string
   format: string
   surface: string
+  /** Maschile, femminile o misto; null = non indicato. */
+  gender?: Gender | null
 }
 
 export interface TorneoDetailProps {
@@ -448,6 +465,12 @@ export interface PartitaTappaSheetProps extends OverlayBase {
   ownClub: string
   onSave: (form: PartitaTappaForm) => Promise<boolean>
   onDelete?: () => void
+}
+
+/** «Riordina i tornei»: il genere dei tornei di prima, un compagno alla volta. */
+export interface RiordinaSheetProps extends OverlayBase {
+  gruppi: GruppoRiordino[]
+  onSave: (scelte: { id: string; gender: Gender }[]) => Promise<boolean>
 }
 
 /** «La tua società»: nome e classifica di un'iscrizione. */

@@ -39,6 +39,11 @@ export const PLACEMENTS = [
 // le coppie in Gold/Silver/Bronze). Facoltativo: a DB è una colonna nullable.
 export const BRACKETS = ["Gold", "Silver", "Bronze", "Girone unico"] as const;
 
+// Il genere del torneo (colonna tournaments.gender, nullable: i tornei di prima
+// del 22/11/2026 e quelli dell'app mobile restano «non indicato»). Separa le
+// statistiche: maschile e misto non si sommano.
+export const GENDERS = ["Maschile", "Femminile", "Misto"] as const;
+
 // Ruoli utente e piani di abbonamento (colonne profiles.role / profiles.plan).
 export const ROLES = ["admin", "user"] as const;
 export const PLANS = ["base", "premium"] as const;
@@ -49,14 +54,16 @@ export type Surface = (typeof SURFACES)[number];
 export type Phase = (typeof PHASES)[number];
 export type Placement = (typeof PLACEMENTS)[number];
 export type Bracket = (typeof BRACKETS)[number];
+export type Gender = (typeof GENDERS)[number];
 export type Role = (typeof ROLES)[number];
 export type Plan = (typeof PLANS)[number];
 
 // Righe con i campi vincolati ristretti alle union (comode nei form).
 export type TournamentTyped = Omit<
   Tables<"tournaments">,
-  "category" | "format" | "surface" | "placement" | "bracket"
+  "category" | "format" | "surface" | "placement" | "bracket" | "gender"
 > & {
+  gender: Gender | null;
   category: Category;
   format: Format;
   surface: Surface;

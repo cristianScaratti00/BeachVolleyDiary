@@ -13,7 +13,8 @@ import { useEffect, useRef } from 'react'
 import { track } from '@vercel/analytics'
 import type { UseDiary } from '../hooks/useDiary'
 import type { UseCheckIn } from '../hooks/useCheckIn'
-import type { AnyForm, CheckInInput, DiaryData, GuidedMatch } from '../lib/models'
+import type { AnyForm, CheckInInput, DiaryData, Gender, GuidedMatch } from '../lib/models'
+import { genereProposto } from '../lib/genere'
 import type { Permissions } from '../lib/permissions'
 import type { Session } from '../lib/auth'
 import { updateDisplayName, updatePassword } from '../lib/auth'
@@ -325,13 +326,32 @@ export function useActions({ diary, data, route, session, perm, check, caricamen
 
   const creaGuidato = async (form: AnyForm, matches: GuidedMatch[]) => {
     const prima = dataRef.current
-    const id = await muta(() => diary.createGuidedTorneo(form, matches))
+    // L'assistente non chiede il genere: vale la proposta, se c'è un motivo vero
+    // (King, Queen, i tornei già segnati con quel compagno, un genere solo).
+    const genere = form.gender || genereProposto(prima, { partnerId: form.partnerId, category: form.category })?.genere || ''
+    const id = await muta(() => diary.createGuidedTorneo({ ...form, gender: genere }, matches))
     if (!id) return null
     track('assistente_ai_usato')
     track('torneo_creato', { via: 'assistente' })
     const dopo = await datiNuovi(prima)
     const salvate = dopo.matches.filter((m) => m.tournamentId === id).length
     return { id, partiteNonSalvate: Math.max(0, matches.length - salvate) }
+  }
+
+  // ============================================================ genere
+  /** «Riordina i tornei»: il genere dei tornei di prima (proposta A + B). */
+  const apriRiordino = () => openOverlay({ kind: 'riordina' })
+
+  const salvaGeneri = async (scelte: { id: string; gender: Gender }[]): Promise<boolean> => {
+    const ok = await muta(() => diary.setGeneri(scelte))
+    if (!ok) {
+      toast.error(erroreSalvataggio())
+      return false
+    }
+    track('generi_riordinati', { tornei: scelte.length })
+    closeAllOverlays()
+    toast.success(scelte.length === 1 ? 'Genere salvato' : `Genere salvato per ${scelte.length} tornei`)
+    return true
   }
 
   // ============================================================ conferme
@@ -608,5 +628,7 @@ export function useActions({ diary, data, route, session, perm, check, caricamen
     aggiornaPassword,
     caricaAvatar,
     condiviso,
+    apriRiordino,
+    salvaGeneri,
   }
 }

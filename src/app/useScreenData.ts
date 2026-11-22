@@ -34,6 +34,8 @@ import type { ServerDashboard } from '../lib/dashboard'
 import { getCompagniList, getCompagnoDetail, getTorneiList, getTorneoDetail } from '../lib/serverviews'
 import type { SvCompagno, SvCompagnoDetail, SvTorneiList, SvTorneoDetail } from '../lib/serverviews'
 import type { DiaryData, Option } from '../lib/models'
+import { TUTTI, filtroGenere, generiGiocati, perCategoria, perGenere } from '../lib/genere'
+import type { FiltroGenere, Gender, RigaCategoria } from '../lib/genere'
 import type { Route } from './routes'
 import { routeKey } from './routes'
 
@@ -48,6 +50,27 @@ export interface Filtri {
   yearOptions: string[]
   /** I filtri sono del piano (dormiente: oggi sempre true). */
   canFilter: boolean
+  /**
+   * Il genere (maschile, femminile, misto): il filtro in vigore. È «Tutti»
+   * finché giochi un genere solo (o non ne hai segnato nessuno): allora il
+   * selettore non c'è.
+   */
+  fGender: FiltroGenere
+  setFGender: (v: FiltroGenere) => void
+  /** I generi che giochi (almeno due perché il selettore compaia). */
+  genderOptions: Gender[]
+}
+
+/** I numeri essenziali di un genere, per il confronto (Statistiche, Home). */
+export interface NumeriGenere {
+  genere: Gender
+  winPct: number
+  won: number
+  lost: number
+  played: number
+  setPct: number
+  tPlayed: number
+  bestPlacement: string
 }
 
 export interface ScreenData {
@@ -61,6 +84,22 @@ export interface ScreenData {
   /** Il dettaglio aperto. `null` = non esiste o non è visibile (non trovato). */
   torneo: TorneoDetailData | null
   compagno: CompagnoDetailData | null
+  /** Gli altri generi, con gli stessi filtri di stagione e compagno (vuoto con un genere solo). */
+  altriGeneri: NumeriGenere[]
+  /** Le categorie (Amatoriale, Open…) nel genere e nei filtri scelti. */
+  categorie: RigaCategoria[]
+  /** Il diario ristretto al genere scelto (Wrapped lo legge da qui). */
+  dataGenere: DiaryData
+}
+
+/** La scelta del genere resta da una visita all'altra (come la ricorda il telefono). */
+const CHIAVE_GENERE = 'bvd_genere'
+function genereSalvato(): string | null {
+  try {
+    return window.localStorage.getItem(CHIAVE_GENERE)
+  } catch {
+    return null
+  }
 }
 
 interface Deps {
@@ -77,6 +116,15 @@ interface Deps {
 export function useScreenData({ data, loading, error, reload, route, canFilter, onOggi }: Deps): ScreenData {
   const [fPartner, setFPartner] = useState('all')
   const [fYear, setFYear] = useState('Sempre')
+  const [genereScelto, setGenereScelto] = useState<string | null>(genereSalvato)
+  const setFGender = (v: FiltroGenere) => {
+    setGenereScelto(v)
+    try {
+      window.localStorage.setItem(CHIAVE_GENERE, v)
+    } catch {
+      /* niente: resta per questa visita */
+    }
+  }
   const [serverDash, setServerDash] = useState<ServerDashboard | null>(null)
   const [srvTornei, setSrvTornei] = useState<SvTorneiList | null>(null)
   const [srvCompagni, setSrvCompagni] = useState<SvCompagno[] | null>(null)
@@ -124,9 +172,19 @@ export function useScreenData({ data, loading, error, reload, route, canFilter, 
     }
   }, [reload])
 
-  // Dashboard aggregata dal server (Home e Statistiche).
+  // Il genere in vigore: un filtro non più valido ricade sul più recente.
+  const generi = canFilter ? generiGiocati(data) : []
+  const genere: FiltroGenere = canFilter ? filtroGenere(data, genereScelto) : TUTTI
+
+  // Dashboard aggregata dal server (Home e Statistiche). La RPC non conosce il
+  // genere: con un genere scelto vale il calcolo client (stessi numeri per
+  // costruzione, sui dati ristretti a quel genere).
   useEffect(() => {
     if (name !== 'home' && name !== 'statistiche') return
+    if (genere !== TUTTI) {
+      setServerDash(null)
+      return
+    }
     let alive = true
     setServerDash(null)
     getDashboardStats(fPartner, fYear).then((s) => {
@@ -135,7 +193,7 @@ export function useScreenData({ data, loading, error, reload, route, canFilter, 
     return () => {
       alive = false
     }
-  }, [name, fPartner, fYear, data])
+  }, [name, fPartner, fYear, data, genere])
 
   useEffect(() => {
     if (name !== 'tornei' && name !== 'torneo') return
@@ -200,18 +258,36 @@ export function useScreenData({ data, loading, error, reload, route, canFilter, 
   const anno = canFilter ? fYear : 'Sempre'
   const compagnoF = canFilter ? fPartner : 'all'
   const hasShared = data.tournaments.some((t) => t.shared)
+  // I dati del genere scelto: Home, Statistiche, Mappa e Wrapped li leggono
+  // da qui. Liste, Diario e dettagli restano su tutto il diario.
+  const dataG = useMemo(() => perGenere(data, genere), [data, genere])
 
   // La mappa è l'unica derivata cara (geocodifica, declustering): memoizzata
   // sui dati e sulla stagione, che sono le sole cose che la cambiano.
-  const mappa = useMemo(() => deriveMappa(data, anno), [data, anno])
+  const mappa = useMemo(() => deriveMappa(dataG, anno), [dataG, anno])
   const entries = useMemo(() => deriveDiary(data), [data])
   const dashboard = useMemo(
     () =>
-      serverDash && !hasShared
+      serverDash && !hasShared && genere === TUTTI
         ? deriveDashboardServer(serverDash, data, compagnoF, anno)
-        : deriveDashboard(data, compagnoF, anno),
-    [serverDash, hasShared, data, compagnoF, anno],
+        : deriveDashboard(dataG, compagnoF, anno),
+    [serverDash, hasShared, genere, data, dataG, compagnoF, anno],
   )
+  // Il confronto: gli altri generi con gli stessi filtri (solo sulle schermate dei numeri).
+  const numeri = name === 'home' || name === 'statistiche'
+  const altriGeneri = useMemo<NumeriGenere[]>(
+    () =>
+      !numeri || generi.length < 2
+        ? []
+        : generi
+            .filter((g) => g !== genere)
+            .map((g) => {
+              const s = deriveDashboard(perGenere(data, g), compagnoF, anno).s
+              return { genere: g, winPct: s.winPct, won: s.won, lost: s.lost, played: s.played, setPct: s.setPct, tPlayed: s.tPlayed, bestPlacement: s.bestPlacement }
+            }),
+    [numeri, generi.join(), genere, data, compagnoF, anno], // eslint-disable-line react-hooks/exhaustive-deps
+  )
+  const categorie = useMemo(() => (name === 'statistiche' ? perCategoria(dataG, compagnoF, anno) : []), [name, dataG, compagnoF, anno])
   // La Lista di Tornei è l'archivio: non è filtrata per stagione (C10).
   const torneiList = srvTornei && !hasShared ? deriveTorneiListServer(srvTornei, data) : deriveTorneiList(data, 'Sempre')
   const compagniList = srvCompagni ? deriveCompagniServer(srvCompagni) : deriveCompagni(data)
@@ -239,6 +315,9 @@ export function useScreenData({ data, loading, error, reload, route, canFilter, 
       partnerOptions: partnerOptions(data),
       yearOptions: yearOptions(data),
       canFilter,
+      fGender: genere,
+      setFGender,
+      genderOptions: generi.length >= 2 ? generi : [],
     },
     dashboard,
     torneiList,
@@ -247,5 +326,8 @@ export function useScreenData({ data, loading, error, reload, route, canFilter, 
     compagniList,
     torneo,
     compagno,
+    altriGeneri,
+    categorie,
+    dataGenere: dataG,
   }
 }

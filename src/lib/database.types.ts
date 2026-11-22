@@ -161,6 +161,7 @@ export type Database = {
           surface: string
           placement: string
           bracket: string | null
+          gender: string | null
           color: string
           emoji: string
           partner_id: string | null
@@ -179,6 +180,7 @@ export type Database = {
           surface?: string
           placement?: string
           bracket?: string | null
+          gender?: string | null
           color?: string
           emoji?: string
           partner_id?: string | null
@@ -197,6 +199,7 @@ export type Database = {
           surface?: string
           placement?: string
           bracket?: string | null
+          gender?: string | null
           color?: string
           emoji?: string
           partner_id?: string | null

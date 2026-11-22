@@ -69,7 +69,7 @@ function useDiarioFinto(): UseDiary {
   const torneoDa = (f: AnyForm, base?: Tournament): Tournament => ({
     id: base?.id ?? uuid(), name: f.name ?? '', date: f.date ?? oggi, city: f.newVenueCity || base?.city || '', venueId: f.venueId && f.venueId !== 'new' ? f.venueId : null,
     category: f.category ?? 'Amatoriale', format: f.format ?? '2vs2', surface: f.surface ?? 'Sabbia outdoor', placement: f.placement ?? 'In corso',
-    bracket: f.bracket || null, color: f.color ?? '#FF6B35', emoji: f.emoji ?? '🏖️', partnerId: f.partnerId && f.partnerId !== 'new' ? f.partnerId : null, shared: false,
+    bracket: f.bracket || null, gender: f.gender || null, color: f.color ?? '#FF6B35', emoji: f.emoji ?? '🏖️', partnerId: f.partnerId && f.partnerId !== 'new' ? f.partnerId : null, shared: false,
   })
   return {
     data,
@@ -118,6 +118,13 @@ function useDiarioFinto(): UseDiary {
     unlinkPartner: (pid) => ok(() => { setData((d) => ({ ...d, partners: d.partners.map((p) => (p.id === pid ? { ...p, linkedUserId: null } : p)) })); return true }),
     unlinkMe: () => ok(() => { setData((d) => ({ ...d, partners: d.partners.filter((p) => !p.shared), tournaments: d.tournaments.filter((t) => !t.shared) })); return 1 }),
     mergeVenues: () => ok(() => true),
+    // «Riordina i tornei»: il genere di molti tornei in un colpo.
+    setGeneri: (scelte) =>
+      ok(() => {
+        const per = new Map(scelte.map((x) => [x.id, x.gender]))
+        setData((d) => ({ ...d, tournaments: d.tournaments.map((t) => (per.has(t.id) ? { ...t, gender: per.get(t.id) ?? null } : t)) }))
+        return true
+      }),
   }
 }
 

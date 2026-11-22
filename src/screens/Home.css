@@ -312,6 +312,29 @@
     color: var(--ink-2);
   }
   .home-rend-piede strong { font-weight: 600; color: var(--ink); }
+  /* Il genere del numero grande, e sotto gli altri generi: un tocco ci passa. */
+  .home-genere { font-weight: 600; color: var(--ink); }
+  .home-altri { list-style: none; margin: var(--space-3) calc(-1 * var(--space-5)) calc(-1 * var(--space-2)); padding: 0; }
+  .home-altro {
+    width: 100%;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: 0 var(--space-5);
+    border: 0;
+    border-top: var(--border-w) solid var(--separator);
+    background: none;
+    font: var(--type-callout);
+    color: var(--ink);
+    text-align: left;
+    cursor: pointer;
+  }
+  .home-altro:focus-visible { outline: var(--focus-width) solid var(--focus-ring); outline-offset: calc(-1 * var(--focus-width)); }
+  .home-altro-num { display: inline-flex; align-items: center; gap: var(--space-2); font-variant-numeric: tabular-nums; }
+  .home-altro-num strong { font-weight: 700; }
+  .home-altro-num > span { color: var(--ink-2); font: var(--type-footnote); }
   .home-vuoto {
     margin-top: var(--space-2);
     font: var(--type-subhead);

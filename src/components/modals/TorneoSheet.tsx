@@ -23,10 +23,10 @@ import { Button } from '../ui/Button'
 import { Icon } from '../ui/Icon'
 import { Disclosure, SwatchPicker, TextField } from '../ui/Field'
 import { placementText } from '../ui/Badge'
-import { BRACKETS, CATEGORIES, FORMATS, PLACEMENTS, SURFACES } from '../../lib/db.enums'
+import { BRACKETS, CATEGORIES, FORMATS, GENDERS, PLACEMENTS, SURFACES } from '../../lib/db.enums'
 import { SWATCH_COLORS } from '../../lib/theme'
 import { LIMITI } from '../../lib/lunghezze'
-import type { AnyForm, Bracket, Category, Format, Placement, SetField, Surface } from '../../lib/models'
+import type { AnyForm, Bracket, Category, Format, Gender, Placement, SetField, Surface } from '../../lib/models'
 import type { TorneoSheetProps } from '../../app/contracts'
 import './TorneoSheet.css'
 
@@ -35,7 +35,7 @@ const NOME_MANCANTE = 'Scrivi il nome del torneo.'
 /** La superficie si legge corta come nel design («Sabbia»); il valore resta quello del DB. */
 const SUPERFICIE: Record<Surface, string> = { 'Sabbia outdoor': 'Sabbia', Indoor: 'Indoor', Erba: 'Erba' }
 
-function formIniziale({ torneo, compagnoDefault, today }: Pick<TorneoSheetProps, 'torneo' | 'compagnoDefault' | 'today'>): AnyForm {
+function formIniziale({ torneo, compagnoDefault, today, proponiGenere }: Pick<TorneoSheetProps, 'torneo' | 'compagnoDefault' | 'today' | 'proponiGenere'>): AnyForm {
   if (torneo) {
     return {
       name: torneo.name,
@@ -50,6 +50,7 @@ function formIniziale({ torneo, compagnoDefault, today }: Pick<TorneoSheetProps,
       surface: torneo.surface,
       placement: torneo.placement,
       bracket: torneo.bracket ?? '',
+      gender: torneo.gender ?? '',
       color: torneo.color,
       emoji: torneo.emoji,
       partnerId: torneo.partnerId ?? '',
@@ -71,6 +72,8 @@ function formIniziale({ torneo, compagnoDefault, today }: Pick<TorneoSheetProps,
     surface: 'Sabbia outdoor',
     placement: 'In corso',
     bracket: '',
+    // Il genere proposto dal compagno di default (o dall'unico genere che giochi).
+    gender: proponiGenere?.(compagnoDefault, 'Amatoriale')?.genere ?? '',
     color: SWATCH_COLORS[0],
     emoji: '🏖️',
     partnerId: compagnoDefault,
@@ -91,6 +94,7 @@ export default function TorneoSheet({
   onDelete,
   onUseAssistant,
   onMergeVenues,
+  proponiGenere,
   onClose,
   top,
   byTouch,
@@ -101,7 +105,7 @@ export default function TorneoSheet({
   const modifica = mode === 'modifica'
   const breve = rapido && !modifica
   // Il valore iniziale si fissa all'apertura: è il riferimento del "sporco".
-  const iniziale = useMemo(() => formIniziale({ torneo, compagnoDefault, today }), [])  // eslint-disable-line react-hooks/exhaustive-deps
+  const iniziale = useMemo(() => formIniziale({ torneo, compagnoDefault, today, proponiGenere }), [])  // eslint-disable-line react-hooks/exhaustive-deps
   const [form, setForm] = useState<AnyForm>(iniziale)
   const [dettagli, setDettagli] = useState(false)
   // Il modulo intero è «completo» da sé; il rapido lo diventa aprendo i dettagli.
@@ -110,9 +114,19 @@ export default function TorneoSheet({
   const [errNome, setErrNome] = useState('')
   const nomeRef = useRef<HTMLInputElement>(null)
 
+  // Il genere segue la proposta (compagno, categoria) finché non lo tocchi tu;
+  // in modifica è già tuo.
+  const [genereTuo, setGenereTuo] = useState(modifica)
+
   const setField: SetField = (k, v) => {
     if (k === 'name' && errNome) setErrNome('')
-    setForm((f) => ({ ...f, [k]: v }))
+    setForm((f) => {
+      const nuovo = { ...f, [k]: v }
+      if (!genereTuo && proponiGenere && (k === 'partnerId' || k === 'category')) {
+        nuovo.gender = proponiGenere(nuovo.partnerId ?? '', nuovo.category ?? '')?.genere ?? ''
+      }
+      return nuovo
+    })
   }
 
   const sporco = JSON.stringify(form) !== JSON.stringify(iniziale)
@@ -146,7 +160,8 @@ export default function TorneoSheet({
 
   const nuovoCompagno = form.partnerId === 'new'
   const compagno = nuovoCompagno ? (form.newPartnerName ?? '').trim() : partners.find((p) => p.id === form.partnerId)?.name
-  const riassunto = [compagno, form.category, form.format, form.surface].filter(Boolean).join(' · ')
+  const riassunto = [compagno, form.gender, form.category, form.format, form.surface].filter(Boolean).join(' · ')
+  const proposta = !genereTuo && form.gender ? proponiGenere?.(form.partnerId ?? '', form.category ?? '') : null
   const titolo = modifica ? 'Modifica torneo' : breve ? 'Torneo rapido' : 'Nuovo torneo'
 
   // ------------------------------------------------------------- i blocchi
@@ -199,6 +214,27 @@ export default function TorneoSheet({
         />
       )}
     </div>
+  )
+
+  const genere = (
+    <SheetChips
+      label="Genere"
+      options={GENDERS.map((g) => ({ value: g, label: g }))}
+      value={form.gender ?? ''}
+      onChange={(v) => {
+        setGenereTuo(true)
+        setField('gender', v as Gender | '')
+      }}
+      // Ritoccare la scelta la toglie: «non indicato».
+      toggle
+      hint={
+        proposta && proposta.genere === form.gender
+          ? `${proposta.motivo} Puoi cambiarlo.`
+          : !form.gender
+            ? 'Serve a separare maschile e misto nelle statistiche.'
+            : undefined
+      }
+    />
   )
 
   const luogo = <VenuePicker form={form} setField={setField} venues={venues} suggestSurface onMerge={onMergeVenues} />
@@ -315,6 +351,7 @@ export default function TorneoSheet({
               >
                 <div className="ui-sheet-stack torneo-sheet-more">
                   {conChi}
+                  {genere}
                   <div className="ui-sheet-stack">{luogo}</div>
                   {categoria}
                   {formatoSuperficie}
@@ -327,6 +364,7 @@ export default function TorneoSheet({
             <>
               {nome}
               {conChi}
+              {genere}
               <div className="ui-sheet-pair">
                 {data}
                 {luogo}

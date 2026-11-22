@@ -39,6 +39,9 @@ function Harness({ data, wrapped = false }: { data: DiaryData; wrapped?: boolean
     partnerOptions: data.partners.map((p) => ({ id: p.id, name: p.name })),
     yearOptions: ['2026', '2025', 'Sempre'],
     canFilter: true,
+    fGender: 'Tutti',
+    setFGender: () => {},
+    genderOptions: [],
   }
   const s = deriveDashboard(data, fPartner, fYear).s
   return <Statistiche s={s} filtri={filtri} back={back} wrapped={{ visibile: wrapped, titolo: 'Beach Wrapped' }} />

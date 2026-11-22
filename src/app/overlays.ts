@@ -67,6 +67,8 @@ export type Overlay =
   | { kind: 'partitaTappa'; mode: 'nuova'; stageId: string }
   | { kind: 'partitaTappa'; mode: 'modifica'; matchId: string }
   | { kind: 'iscrizione'; id: string }
+  // «Riordina i tornei»: il genere dei tornei di prima (proposta A + B).
+  | { kind: 'riordina' }
 
 export type OverlayKind = Overlay['kind']
 

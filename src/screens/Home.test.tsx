@@ -37,6 +37,9 @@ function filtri(data: DiaryData, over: Partial<Filtri> = {}): Filtri {
     partnerOptions: data.partners.map((p) => ({ id: p.id, name: p.name })),
     yearOptions: ['2026', '2025', 'Sempre'],
     canFilter: true,
+    fGender: 'Tutti',
+    setFGender: vi.fn(),
+    genderOptions: [],
     ...over,
   }
 }

@@ -49,7 +49,13 @@ import {
 import { Medal } from '../components/ui/Medal'
 import Mappa from './Mappa'
 import { CampionatoCard } from './CampionatoCard'
+import { GENDERS } from '../lib/db.enums'
+import type { Gender } from '../lib/db.enums'
+import { GENERE_MINUSCOLO } from '../lib/genere'
 import './Tornei.css'
+
+/** La chip dei tornei che non dicono ancora il genere. */
+const SENZA_GENERE = 'senza-genere'
 
 // I risultati della ricerca hanno la forma delle voci del Diario: stanno nel
 // suo chunk, scaricato solo da chi cerca.
@@ -81,7 +87,7 @@ function sottotitoloLista(cards: TorneoCard[]): string {
   return `${base} · miglior piazzamento ${primo(migliore)}`
 }
 
-export default function Tornei({ vista, q, onVista, onQuery, list, entries, mappa, stagione, onNuovoTorneo, onStoria, traccia, campionato }: TorneiProps) {
+export default function Tornei({ vista, q, onVista, onQuery, list, entries, mappa, stagione, onNuovoTorneo, onStoria, traccia, campionato, generi = {} }: TorneiProps) {
   // ------------------------------------------------------------ ricerca
   const [testo, setTesto] = useState(q)
   const inviato = useRef(q)
@@ -126,8 +132,19 @@ export default function Tornei({ vista, q, onVista, onQuery, list, entries, mapp
   // Quando il formato sparisce dai dati il valore salvato si azzera, così non
   // si riattiva da solo se quel formato ritorna (difetto #2).
   const [formato, setFormato] = useState<string>(TORNEI_FILTER_ALL)
+  // Il genere, sull'archivio come il formato: chip solo con almeno due generi.
+  // «Senza genere» è una chip anche lei, finché ce n'è uno da sistemare.
+  const [genereF, setGenereF] = useState<string>(TORNEI_FILTER_ALL)
   const prossimi = deriveTorneiSections(list.tornei).upcoming
-  const archivio = list.tornei.filter((t) => !prossimi.includes(t))
+  const tuttoArchivio = list.tornei.filter((t) => !prossimi.includes(t))
+  const generiArchivio = GENDERS.filter((g) => tuttoArchivio.some((t) => generi[t.id] === g))
+  const senzaGenereArchivio = tuttoArchivio.filter((t) => !generi[t.id]).length
+  const chipGenere = generiArchivio.length >= 2
+  const genereAttivo = chipGenere && (genereF === SENZA_GENERE ? senzaGenereArchivio > 0 : (generiArchivio as string[]).includes(genereF)) ? genereF : TORNEI_FILTER_ALL
+  const archivio =
+    genereAttivo === TORNEI_FILTER_ALL
+      ? tuttoArchivio
+      : tuttoArchivio.filter((t) => (genereAttivo === SENZA_GENERE ? !generi[t.id] : generi[t.id] === genereAttivo))
   const sezioni = deriveTorneiSections(archivio, formato)
   useEffect(() => {
     if (formato !== TORNEI_FILTER_ALL && sezioni.active !== formato) setFormato(TORNEI_FILTER_ALL)
@@ -236,9 +253,23 @@ export default function Tornei({ vista, q, onVista, onQuery, list, entries, mapp
           ) : (
             <>
               {campionato && <CampionatoCard c={campionato} dove="tornei" className="tornei-campionato rise" style={rise(blocco++)} />}
-              <Gruppo titolo="Prossimi tornei" tornei={prossimi} conFormato traccia={traccia} i={blocco++}>
+              <Gruppo titolo="Prossimi tornei" tornei={prossimi} conFormato traccia={traccia} i={blocco++} generi={generi}>
                 {prossimi.length === 0 && <ProssimiVuoto onNuovoTorneo={onNuovoTorneo} />}
               </Gruppo>
+              {chipGenere && (
+                <div className="tornei-chips rise" style={rise(blocco++)}>
+                  <FilterChips
+                    label="Filtra i tornei per genere"
+                    value={genereAttivo}
+                    onChange={setGenereF}
+                    options={[
+                      { value: TORNEI_FILTER_ALL, label: 'Tutti' },
+                      ...generiArchivio.map((g) => ({ value: g, label: `${g} · ${tuttoArchivio.filter((t) => generi[t.id] === g).length}` })),
+                      ...(senzaGenereArchivio ? [{ value: SENZA_GENERE, label: `Senza genere · ${senzaGenereArchivio}` }] : []),
+                    ]}
+                  />
+                </div>
+              )}
               {sezioni.options.length > 0 && (
                 <div className="tornei-chips rise" style={rise(blocco++)}>
                   <FilterChips
@@ -253,7 +284,7 @@ export default function Tornei({ vista, q, onVista, onQuery, list, entries, mapp
                 </div>
               )}
               {sezioni.groups.map((g) => (
-                <Gruppo key={g.key} titolo={g.label} tornei={g.tornei} formato={g.key} traccia={traccia} i={blocco++} />
+                <Gruppo key={g.key} titolo={g.label} tornei={g.tornei} formato={g.key} traccia={traccia} i={blocco++} generi={generi} />
               ))}
             </>
           )}
@@ -291,7 +322,7 @@ function RisultatiSkeleton() {
 // Titolo a sinistra, «3 tornei» a destra: il contatore sta DENTRO l'h2, così
 // finisce nel nome annunciato («2vs2, 3 tornei»). Senza tornei (solo i
 // prossimi) il contatore non c'è: parla il riquadro vuoto.
-function Gruppo({ titolo, tornei, formato, conFormato = false, traccia, i, children }: {
+function Gruppo({ titolo, tornei, formato, conFormato = false, traccia, i, children, generi }: {
   titolo: string
   tornei: TorneoCard[]
   /** Il formato del gruppo: le sue righe non lo ripetono nella meta. */
@@ -301,6 +332,7 @@ function Gruppo({ titolo, tornei, formato, conFormato = false, traccia, i, child
   traccia?: string
   i: number
   children?: ReactNode
+  generi: Record<string, Gender | null>
 }) {
   const id = useId()
   return (
@@ -317,7 +349,7 @@ function Gruppo({ titolo, tornei, formato, conFormato = false, traccia, i, child
       {tornei.length > 0 ? (
         <ul className="tornei-rows">
           {tornei.map((t) => (
-            <RigaTorneo key={t.id} t={t} formato={conFormato ? undefined : formato} traccia={traccia === t.id} />
+            <RigaTorneo key={t.id} t={t} formato={conFormato ? undefined : formato} traccia={traccia === t.id} genere={generi[t.id] ?? null} />
           ))}
         </ul>
       ) : (
@@ -348,7 +380,7 @@ function ProssimiVuoto({ onNuovoTorneo }: { onNuovoTorneo: () => void }) {
 // focus si sente la meta (`aria-describedby`). Il piazzamento lo dice la
 // medaglia (con il nome intero per gli screen reader); il tabellone e
 // «Condiviso» stanno accanto al nome, in piccolo.
-function RigaTorneo({ t, formato, traccia }: { t: TorneoCard; formato?: string; traccia: boolean }) {
+function RigaTorneo({ t, formato, traccia, genere }: { t: TorneoCard; formato?: string; traccia: boolean; genere: Gender | null }) {
   const meta = useId()
   // «28 giu · Cervia · Amatoriale · con Luca» (il redesign): la meta della lib
   // (data · luogo · formato · compagno, condivisa con la Home) più la
@@ -356,7 +388,7 @@ function RigaTorneo({ t, formato, traccia }: { t: TorneoCard; formato?: string; 
   // nell'intestazione del gruppo: lì la riga non lo ripete.
   const parti = t.meta.split(' · ')
   const con = parti.filter((p) => p.startsWith('con '))
-  const testoMeta = [...parti.filter((p) => !p.startsWith('con ') && p !== t.format), t.category, formato ? '' : t.format, ...con]
+  const testoMeta = [...parti.filter((p) => !p.startsWith('con ') && p !== t.format), t.category, genere ? GENERE_MINUSCOLO[genere] : '', formato ? '' : t.format, ...con]
     .filter(Boolean)
     .join(' · ')
   const girone = tabellone(t.badge)

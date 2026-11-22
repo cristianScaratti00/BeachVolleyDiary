@@ -22,4 +22,8 @@
   .stat-key { grid-column: 1 / -1; min-width: 0; }
   /* Il rimando al Campionato per Società, sotto le card: i suoi numeri non sono qui. */
   .stat-campionato { margin-top: var(--section-gap); }
+  /* Il genere: il selettore in cima, l'invito e la riga dei tornei senza genere. */
+  .stat-generi { margin-top: var(--space-3); }
+  .stat-invito { margin-top: var(--stack); }
+  .stat-riordina { margin-top: var(--section-gap); }
 }

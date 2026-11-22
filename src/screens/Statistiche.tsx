@@ -17,7 +17,9 @@
 import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import type { StatisticheProps } from '../app/contracts'
-import { NavBar, Page } from '../components/ui/index'
+import { NavBar, Page, SegmentedControl } from '../components/ui/index'
+import { GENERE_MINUSCOLO, TUTTI } from '../lib/genere'
+import type { FiltroGenere } from '../lib/genere'
 import {
   ChartCard,
   EmptyNote,
@@ -30,22 +32,29 @@ import {
   TrendCard,
   WinLossCard,
   WrappedRow,
+  ConfrontoGeneriCard,
+  CategorieCard,
+  RiordinaCard,
 } from '../components/dashboard'
 import { CampionatoCard } from './CampionatoCard'
 import './Statistiche.css'
 
-function etichettaPeriodo(fYear: string, compagno: string | null): string {
+function etichettaPeriodo(fYear: string, compagno: string | null, genere: FiltroGenere = TUTTI): string {
   const periodo = !fYear || fYear === 'Sempre' ? 'Sempre' : `Stagione ${fYear}`
-  return compagno ? `${periodo} con ${compagno}` : periodo
+  const conChi = compagno ? `${periodo} con ${compagno}` : periodo
+  return genere === TUTTI ? conChi : `${conChi} · ${GENERE_MINUSCOLO[genere]}`
 }
 
 const sale = (i: number) => ({ '--rise-i': i }) as CSSProperties
 const partite = (n: number) => (n === 0 ? 'Nessuna partita' : n === 1 ? '1 partita' : `${n} partite`)
 
-export default function Statistiche({ s, filtri, back, wrapped, campionato }: StatisticheProps) {
-  const { fPartner, fYear, setFPartner, setFYear, partnerOptions, yearOptions, canFilter } = filtri
+export default function Statistiche({ s, filtri, back, wrapped, campionato, altriGeneri = [], categorie = [], riordino, onRiordina, onRimandaRiordino }: StatisticheProps) {
+  const { fPartner, fYear, setFPartner, setFYear, partnerOptions, yearOptions, canFilter, fGender, setFGender, genderOptions } = filtri
   const compagno = fPartner !== 'all' ? partnerOptions.find((p) => p.id === fPartner)?.name ?? null : null
-  const periodo = etichettaPeriodo(fYear, compagno)
+  const periodo = etichettaPeriodo(fYear, compagno, fGender)
+  // L'invito a separare maschile e misto la prima volta; poi la riga piccola in fondo.
+  const invito = !!riordino && riordino.senza > 0 && riordino.primaVolta && !riordino.rimandato
+  const rigaRiordino = !!riordino && riordino.senza > 0 && !invito
 
   // L'annuncio parte solo dopo un cambio dei filtri: la live region c'è da
   // subito (vuota), così il primo annuncio non si perde.
@@ -57,19 +66,30 @@ export default function Statistiche({ s, filtri, back, wrapped, campionato }: St
       return
     }
     setAnnuncio(`Statistiche aggiornate: ${periodo}`)
-  }, [fPartner, fYear]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [fPartner, fYear, fGender]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // «Sempre» per prima, poi le stagioni dalla più recente (yearOptions la
   // mette in fondo).
   const stagioni = ['Sempre', ...yearOptions.filter((y) => y !== 'Sempre')]
   // I blocchi salgono in ordine; con i filtri e Wrapped le card partono dopo.
-  let i = 1 + (canFilter ? 1 : 0) + (wrapped.visibile ? 1 : 0)
+  let i = 1 + (canFilter ? 1 : 0) + (wrapped.visibile ? 1 : 0) + (invito ? 1 : 0)
 
   return (
     <Page>
       {/* Il periodo si legge già sui filtri: il sottotitolo dice quante
           partite ci stanno dentro. */}
       <NavBar title="Statistiche" subtitle={`${partite(s.played)} · ${periodo}`} back={back}>
+        {/* Il genere prima di tutto: maschile e misto non si sommano. Solo
+            con almeno due generi giocati. */}
+        {genderOptions.length >= 2 && (
+          <SegmentedControl
+            className="stat-generi rise"
+            label="Genere"
+            value={fGender}
+            onChange={(v) => setFGender(v as FiltroGenere)}
+            options={[...genderOptions.map((g) => ({ value: g, label: g })), { value: TUTTI, label: 'Tutti' }]}
+          />
+        )}
         {canFilter && (
           <div className="stat-filtri rise" style={sale(1)} role="group" aria-label="Filtri delle statistiche">
             <FiltroSelect
@@ -94,7 +114,10 @@ export default function Statistiche({ s, filtri, back, wrapped, campionato }: St
       </NavBar>
       <p className="sr-only" role="status">{annuncio}</p>
 
-      {wrapped.visibile && <WrappedRow titolo={wrapped.titolo} className="stat-wrapped rise" style={sale(canFilter ? 2 : 1)} />}
+      {invito && onRiordina && (
+        <RiordinaCard senza={riordino!.senza} primaVolta onRiordina={onRiordina} onRimanda={onRimandaRiordino} className="stat-invito rise" style={sale(canFilter ? 2 : 1)} />
+      )}
+      {wrapped.visibile && <WrappedRow titolo={wrapped.titolo} className="stat-wrapped rise" style={sale((canFilter ? 2 : 1) + (invito ? 1 : 0))} />}
 
       <div className="stat-grid">
         {s.played > 0 ? (
@@ -106,13 +129,19 @@ export default function Statistiche({ s, filtri, back, wrapped, campionato }: St
             <EmptyNote>Nessuna partita in questo periodo.</EmptyNote>
           </ChartCard>
         )}
+        {fGender !== TUTTI && altriGeneri.length > 0 && (
+          <ConfrontoGeneriCard attivo={fGender} s={s} altri={altriGeneri} onApri={setFGender} rise={i++} />
+        )}
         <TrendCard s={s} rise={i++} />
         <WinLossCard s={s} rise={i++} />
         <PointsCard s={s} rise={i++} />
         <PhaseCard s={s} rise={i++} />
         <PlacementCard s={s} rise={i++} />
+        {categorie.length > 1 && <CategorieCard righe={categorie} genere={fGender} rise={i++} />}
         <PartnerCard s={s} rise={i++} />
       </div>
+
+      {rigaRiordino && onRiordina && <RiordinaCard senza={riordino!.senza} primaVolta={false} onRiordina={onRiordina} className="stat-riordina rise" style={sale(i++)} />}
 
       {/* Le tappe del Campionato per Società hanno i loro numeri: qui si dice
           che non entrano, e si porta là. */}

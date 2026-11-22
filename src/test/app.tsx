@@ -116,6 +116,7 @@ export type Mutazione =
   | 'unlinkMe'
   | 'checkIn'
   | 'checkOut'
+  | 'setGeneri'
   | MutazioneCampionato
 
 export interface AppOptions {
@@ -264,6 +265,7 @@ export function renderApp(opts: AppOptions = {}): AppHandle {
       surface: f.surface ?? 'Sabbia outdoor',
       placement: f.placement ?? 'In corso',
       bracket: f.bracket || null,
+      gender: f.gender || null,
       color: f.color ?? '#FF6B35',
       emoji: f.emoji ?? '🏖️',
       partnerId: f.partnerId && f.partnerId !== 'new' ? f.partnerId : null,
@@ -354,6 +356,12 @@ export function renderApp(opts: AppOptions = {}): AppHandle {
           return n || 1
         }),
       mergeVenues: async () => true,
+      setGeneri: (scelte) =>
+        muta('setGeneri', [scelte], false, () => {
+          const per = new Map(scelte.map((x) => [x.id, x.gender]))
+          set((d) => ({ ...d, tournaments: d.tournaments.map((t) => (per.has(t.id) ? { ...t, gender: per.get(t.id) ?? null } : t)) }))
+          return true
+        }),
     }
 
     const room: PresentUser[] = own ? [{ id: 'u-luca', name: 'Luca', avatarUrl: null, lookingForPartner: true, note: '' }] : []

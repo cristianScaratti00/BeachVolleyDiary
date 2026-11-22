@@ -112,6 +112,7 @@ export function makeTournament(over: Partial<Tournament> = {}): Tournament {
     surface: "Sabbia outdoor",
     placement: "Gironi",
     bracket: null,
+    gender: null,
     color: "#FF6B35",
     emoji: "🏖️",
     partnerId: null,

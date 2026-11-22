@@ -43,6 +43,7 @@ import { Pallo, usePalloTocco } from '../components/Pallo'
 import type { PalloHandle, PalloUmore } from '../components/Pallo'
 import { FiltroSelect, WrappedRow } from '../components/dashboard'
 import { ENTRATA, SVELTO } from '../components/Motion'
+import { GENERE_MINUSCOLO, TUTTI } from '../lib/genere'
 import './Home.css'
 
 /** Il posto nella salita sfalsata. */
@@ -299,14 +300,18 @@ type NumeriRendimento = Pick<DashboardStats, 'winPct' | 'diffStr' | 'won' | 'los
  * `rise`: la chiave della salita da zero (MOTION.md §10); senza, i numeri
  * stanno fermi (l'esempio della Home vuota non consuma la salita vera).
  */
-function Rendimento({ s, rise = 'home' }: { s: NumeriRendimento; rise?: string | null }) {
+function Rendimento({ s, rise = 'home', genere }: { s: NumeriRendimento; rise?: string | null; genere?: HomeProps['genere'] }) {
   const id = useId()
+  // Con più generi il numero grande dice di quale parla, e sotto ci sono gli altri.
+  const attivo = genere && genere.attivo !== TUTTI ? genere.attivo : null
   return (
     <Card as="section" className="home-rend" aria-labelledby={`${id}-t`}>
       <div className="home-rend-top">
         <div className="home-rend-main">
           <div className="home-label-row">
-            <h2 className="home-label" id={`${id}-t`}>Partite vinte</h2>
+            <h2 className="home-label" id={`${id}-t`}>
+              Partite vinte{attivo && <> · <strong className="home-genere">{GENERE_MINUSCOLO[attivo]}</strong></>}
+            </h2>
             <Link to={{ name: 'statistiche' }} className="ui-card-link home-chev-link" aria-label="Tutte le statistiche">
               <Icon name="chevron-right" size={12} />
             </Link>
@@ -329,6 +334,27 @@ function Rendimento({ s, rise = 'home' }: { s: NumeriRendimento; rise?: string |
         <span><strong>{s.won}</strong> {s.won === 1 ? 'vinta' : 'vinte'}</span>
         <span>{plurale(s.lost, 'persa', 'perse')} · {plurale(s.played, 'giocata', 'giocate')}</span>
       </p>
+      {attivo && genere && genere.altri.length > 0 && (
+        <ul className="home-altri">
+          {genere.altri.map((a) => (
+            <li key={a.genere}>
+              <button
+                type="button"
+                className="home-altro"
+                aria-label={`Passa al ${GENERE_MINUSCOLO[a.genere]}: ${a.played ? `${a.winPct}% di partite vinte` : 'nessuna partita'}, ${plurale(a.played, 'partita', 'partite')}`}
+                onClick={() => genere.onApri(a.genere)}
+              >
+                <span>Nel {GENERE_MINUSCOLO[a.genere]}</span>
+                <span className="home-altro-num">
+                  <strong>{a.played ? `${a.winPct}%` : '—'}</strong>
+                  <span>{plurale(a.played, 'partita', 'partite')}</span>
+                  <Icon name="chevron-right" size={16} className="home-chev" />
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
     </Card>
   )
 }
@@ -499,6 +525,7 @@ export default function Home({
   ultimi,
   filtri,
   wrapped,
+  genere,
   onNuovoTorneo,
   onAggiungiPartita,
   onAggiornaPiazzamento,
@@ -533,7 +560,7 @@ export default function Home({
           <PalloConsiglia consigli={consigli} ultimi={ultimi} on={on} />
           {haPartite && (
             <div className="home-rend-wrap rise" style={sale(3)}>
-              {numeri ? <Rendimento s={numeri} /> : <RendimentoVuoto />}
+              {numeri ? <Rendimento s={numeri} genere={genere} /> : <RendimentoVuoto />}
             </div>
           )}
         </div>

@@ -44,6 +44,8 @@ import PasswordSheet from '../components/modals/PasswordSheet'
 import TappaSheet from '../components/modals/TappaSheet'
 import PartitaTappaSheet from '../components/modals/PartitaTappaSheet'
 import IscrizioneSheet from '../components/modals/IscrizioneSheet'
+import RiordinaSheet from '../components/modals/RiordinaSheet'
+import { genereProposto, gruppiRiordino } from '../lib/genere'
 import './ModalHost.css'
 
 // La Storia trascina `html-to-image`, il visore delle foto è leggero ma fuori
@@ -237,6 +239,7 @@ function Voce({ entry, top, data, route, diary, actions, canAddPartner, campiona
           onDelete={o.mode === 'modifica' ? () => actions.eliminaTorneo(o.id) : undefined}
           onUseAssistant={actions.usaAssistente}
           onMergeVenues={diary.mergeVenues}
+          proponiGenere={(partnerId, category) => genereProposto(data, { partnerId, category })}
         />
       )
     }
@@ -363,6 +366,9 @@ function Voce({ entry, top, data, route, diary, actions, canAddPartner, campiona
         />
       )
     }
+
+    case 'riordina':
+      return <RiordinaSheet {...base} gruppi={gruppiRiordino(data)} onSave={actions.salvaGeneri} />
 
     case 'iscrizione': {
       const isc = campionato.data.iscrizioni.find((i) => i.id === o.id)

@@ -19,6 +19,7 @@ import { useCampionato } from './hooks/useCampionato'
 import type { UseCampionato } from './hooks/useCampionato'
 import { campionatoIngresso, deriveCampionato, deriveTappa } from './lib/campionato'
 import { useCampionatoActions } from './app/useCampionatoActions'
+import { generiGiocati, senzaGenere } from './lib/genere'
 import { permissionsFor } from './lib/permissions'
 import { partnerOptions, venueOptions, todayISO, wrappedRangeForYear, deriveWrapped, WRAPPED_MIN_MATCHES } from './lib/derive'
 import { inviaSegnalazione, elencoSegnalazioni, aggiornaStato } from './lib/segnalazioni'
@@ -135,6 +136,25 @@ export function AppView({ diary, auth, check, campionato }: AppDeps) {
   const campAct = useCampionatoActions({ campionato, diary, route })
   const ingresso = campionatoIngresso(campionato.data)
 
+  // I tornei senza genere: la prima volta l'invito di Solby in Statistiche
+  // (rimandabile, e il rinvio resta), poi la riga «Sistema».
+  const [riordinoRimandato, setRiordinoRimandato] = useState(() => {
+    try {
+      return window.localStorage.getItem('bvd_riordino_rimandato') === '1'
+    } catch {
+      return false
+    }
+  })
+  const rimandaRiordino = () => {
+    setRiordinoRimandato(true)
+    try {
+      window.localStorage.setItem('bvd_riordino_rimandato', '1')
+    } catch {
+      /* resta per questa visita */
+    }
+  }
+  const riordino = { senza: senzaGenere(data), primaVolta: generiGiocati(data).length === 0, rimandato: riordinoRimandato }
+
   // La traccia arriva con la navigazione (state.traccia) e si spegne da sola.
   const [traccia, setTraccia] = useState<string | undefined>(undefined)
   useEffect(() => {
@@ -220,6 +240,7 @@ export function AppView({ diary, auth, check, campionato }: AppDeps) {
             numeri={s.played > 0 ? s : null}
             filtri={screen.filtri}
             wrapped={{ visibile: wrappedPronto, titolo: wrappedTitolo }}
+            genere={{ attivo: screen.filtri.fGender, altri: screen.altriGeneri, onApri: screen.filtri.setFGender }}
             onNuovoTorneo={() => actions.nuovoTorneo()}
             onAggiungiPartita={(id) => actions.nuovaPartita(id)}
             onAggiornaPiazzamento={(id) => actions.modificaTorneo(id)}
@@ -228,10 +249,25 @@ export function AppView({ diary, auth, check, campionato }: AppDeps) {
         )
       }
       case 'statistiche':
-        return <Statistiche s={s} filtri={screen.filtri} back={back} wrapped={{ visibile: wrappedPronto, titolo: wrappedTitolo }} campionato={ingresso} />
+        return (
+          <Statistiche
+            s={s}
+            filtri={screen.filtri}
+            back={back}
+            wrapped={{ visibile: wrappedPronto, titolo: wrappedTitolo }}
+            campionato={ingresso}
+            altriGeneri={screen.altriGeneri}
+            categorie={screen.categorie}
+            riordino={riordino}
+            onRiordina={actions.apriRiordino}
+            onRimandaRiordino={rimandaRiordino}
+          />
+        )
       case 'wrapped': {
         const motivo = !wrappedAOttobre() ? 'stagione' : s.played < WRAPPED_MIN_MATCHES ? 'dati' : null
-        const wrapped = motivo ? null : deriveWrapped(data, wrappedRangeForYear(data, anno), perm.canUseFilters ? screen.filtri.fPartner : 'all')
+        // Wrapped legge il genere scelto, come stagione e compagno.
+        const dg = screen.dataGenere
+        const wrapped = motivo ? null : deriveWrapped(dg, wrappedRangeForYear(dg, anno), perm.canUseFilters ? screen.filtri.fPartner : 'all')
         return (
           <LazyBoundary onReset={Wrapped.reset}>
             <Suspense fallback={<Skeleton label="Preparo il recap…"><Bone className="app-skel-viewer" /></Skeleton>}>
@@ -274,6 +310,7 @@ export function AppView({ diary, auth, check, campionato }: AppDeps) {
             onStoria={actions.apriStoria}
             traccia={traccia}
             campionato={ingresso}
+            generi={Object.fromEntries(data.tournaments.map((t) => [t.id, t.gender]))}
           />
         )
       case 'diario':
@@ -320,7 +357,7 @@ export function AppView({ diary, auth, check, campionato }: AppDeps) {
           <TorneoDetail
             key={route.id}
             t={screen.torneo}
-            scheda={raw ? { date: raw.date, format: raw.format, surface: raw.surface } : null}
+            scheda={raw ? { date: raw.date, format: raw.format, surface: raw.surface, gender: raw.gender } : null}
             back={back}
             traccia={traccia}
             onAddPartita={() => actions.nuovaPartita(route.id)}
